@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+
+<!-- ===================================================================== -->
+<!-- TUER                                                                  -->
+<!-- Ant 1.5 build file                                                    -->
+<!-- ===================================================================== -->
+
+<project name="TUER" default="build" basedir=".">
+
+    <property name="basedir" value="."/>
+    <property name="srcdir" value="."/>
+    <property name="destdir" value="."/>
+	<property name="zipdestdir" value=".."/>
+	<property name="alias" value="xxxxxxxx"/>
+	<property name="keystore" value="xxx"/>
+	<property name="keypass" value="xxxxxxx"/>
+	<property name="storepass" value="xxxxxxx"/>
+	<property name="dname" value="x"/>
+
+    <!-- Allow user to override properties without editing this file -->
+    <property file="${user.home}/.ant.properties" />
+
+
+    <!-- ================================================================= -->
+    <!-- Compile                                                           -->
+    <!-- ================================================================= -->
+    <target name="compile" description="Compiles the source code">
+
+        <javac srcdir="${srcdir}"
+               destdir="${destdir}"
+               debug="on" >
+
+            <include name="**/*.java"/>
+        </javac>
+
+    </target>
+
+
+    <!-- ================================================================= -->
+    <!-- Clean                                                             -->
+    <!-- ================================================================= -->
+    <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
+    	<delete>
+    	    <fileset dir="${destdir}" includes="**/*.class" />
+    		<fileset dir="${destdir}" includes="**/*.data" />  
+    		<fileset dir="${destdir}/xml" includes="**/*.xml" />
+    	</delete>
+    	<delete dir="${destdir}/snap" failonerror="false" />
+    	<delete file="${destdir}/tuer.jar" failonerror="false" />
+    </target>
+
+	<!-- ================================================================= -->
+	<!-- Dist                                                              -->
+	<!-- ================================================================= -->
+	<target name="dist" depends="compile" description="Creates the java archive">
+		<jar destfile="tuer.jar" basedir="${destdir}" 
+			includes="**/*.class" 
+			compress="false">
+			<include name="**/*.png" />
+			<include name="**/*.jpg" />
+			<include name="**/*.gif" />
+			<include name="**/*.data"/>
+			<include name="**/*.txt" />
+			<include name="**/*.ogg" />
+			<include name="**/*.au"  />
+			<include name="**/*.xml"  />
+			<manifest>
+			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- ================================================================= -->
+	<!-- Sign                                                              -->
+	<!-- ================================================================= -->
+	<target name="sign" depends="dist" description="Sign the java archive">
+		<exec dir="${destdir}" executable="keytool" os="Linux" failonerror="true">
+		    <arg value="-genkey "/>
+		    <arg value="-alias ${alias} " />
+		    <arg value="-keystore ${keystore} " />
+		    <arg value="-keypass ${keypass} " />
+		    <arg value="-storepass ${storepass} " />
+			<arg value="-dname ${dname} " /> 
+		</exec> 
+		<signjar jar="tuer.jar" alias="${alias}" storepass="${storepass}" keystore="${keystore}" 
+		    verbose="true"
+		/>
+	</target>
+	
+	<!-- ================================================================= -->
+	<!-- Zip                                                               -->
+	<!-- ================================================================= -->
+	<target name="zip" depends="" description="Creates the zip file containing the source code">
+		<zip destfile="${zipdestdir}/tuer.zip" basedir="${srcdir}" 
+			includes="**/*.java" 
+			excludes="lara/"
+			compress="true">
+			<include name="**/*.au"  />
+			<include name="**/*.cfg" />
+			<include name="**/*.data"/>
+			<include name="**/*.gif" />
+			<include name="**/*.jpg" />
+			<include name="**/*.md3" />
+			<include name="**/*.png" />		
+			<include name="**/*.ogg" />		
+			<include name="**/*.rtf"  />
+			<include name="**/*.shader" />
+			<include name="**/*.skin" />
+			<include name="**/*.txt" />
+			<include name="**/*.xml"  />
+			<include name="**/*.gif" />
+			<include name="**/makefile.deprecated" />
+			<include name="**/manifest" />
+		</zip>
+	</target>
+	
+    <!-- =================================================================== -->
+    <!-- Build                                                               -->
+    <!-- =================================================================== -->
+    <target name="build" depends="clean, compile, run-tilesgenerator, dist"
+        description="Performs a clean build of the source code and create the java archive"/>
+
+
+    <!-- =================================================================== -->
+    <!-- Run Targets                                                         -->
+    <!-- =================================================================== -->  
+    <target name="run-game" description="Runs the game TUER">
+        <java classname="connection.GameServiceProvider"
+              fork="true"
+              dir="${destdir}"
+              failonerror="true"
+              >
+        </java>
+    </target>
+	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
+	        <java classname="tools.TilesGenerator"
+	              fork="true"
+	              dir="${destdir}"
+	              failonerror="true"
+	              >
+	        	<arg value="pic256/worldmap.gif"/>
+	        	<arg value="pic256/worldmap.data"/>
+	        	<arg value="pic256/rocketLauncher.data"/>
+	        	<arg value="pic256/binaryWorldmap.data"/>
+	        	<arg value="pic256/bot.data"/>
+	        	<arg value="pic256/unbreakableObject.data"/>	        	
+	        	<arg value="pic256/vendingMachine.data"/>
+	        	<arg value="pic256/lamp.data"/>
+	        	<arg value="pic256/chair.data"/>
+	        	<arg value="pic256/flower.data"/>
+	        	<arg value="pic256/table.data"/>
+	        	<arg value="pic256/bonsai.data"/>
+	        	<arg value="pic256/rocket.data"/>
+	        	<arg value="pic256/explosion.data"/>
+	        	<arg value="pic256/impact.data"/>
+	        	<arg value="pic256/healthPowerUp.data"/>
+	        	<arg value="xml/itemList.xml"/>
+	        	<arg value="pic256/crosshair.data"/>
+	        	<arg value="pic256/sphericalBeast.data"/>
+	        </java>
+	</target>
+	
+</project>
