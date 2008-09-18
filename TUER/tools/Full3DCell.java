@@ -61,6 +61,12 @@ public final class Full3DCell implements Serializable{
     
 
     public final Object readResolve()throws ObjectStreamException{
+        computeEnclosingRectangle();
+        return(this);
+    }
+    
+
+    final void computeEnclosingRectangle(){
         float minx=Float.MAX_VALUE,minz=Float.MAX_VALUE,maxx=Float.MIN_VALUE,maxz=Float.MIN_VALUE;
         //compute the enclosing rectangle
         //remind: format T2_V3
@@ -162,10 +168,8 @@ public final class Full3DCell implements Serializable{
             }
         enclosingRectangle=new Rectangle();
         enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
-        return(this);
     }
     
-
     public final List<Full3DCell> getNeighboursCellsList(){
         return(neighboursCellsList);
     }

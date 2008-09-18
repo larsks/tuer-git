@@ -12,10 +12,6 @@
   MA 02111-1307, USA.
 */
 
-/*
-
-*/
-
 package tools;
 
 import java.util.ArrayList;
@@ -48,10 +44,10 @@ public final class CellsGenerator{
     	Vector<Cell> cellsList=new Vector<Cell>();
     	Vector<Portal> portalsList=new Vector<Portal>();
     	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList,portalsList);
-    	optimizeRawCellsAndPortals(cellsList,portalsList);   	 
-    	addCeilAndFloorToRawCells(cellsList);
-    	convertFromRawTo3DCellsAndPortals(cellsList,portalsList);
-    	addTexturesToCells(cellsList);
+    	optimizeRawCellsAndPortals(cellsList);  
+    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList);
+    	addCeilAndFloorToFull3DCells(full3DCellsList);   	
+    	addTexturesToCells(full3DCellsList);
     	System.out.println("SIZE : "+cellsList.size());
     	createCellsMap(cellsList);
     	if(testNetworkIntegrity(cellsList,topFullWallList,
@@ -302,7 +298,7 @@ public final class CellsGenerator{
     }
     
     //resize 2D cells and portals so that the average width of the portals decreases 
-    private final static void optimizeRawCellsAndPortals(Vector<Cell> cellsList,Vector<Portal> portalsList){
+    private final static void optimizeRawCellsAndPortals(Vector<Cell> cellsList){
         PointPair leftPortal,rightPortal;
         Cell mergedResultCell=null;
         Vector<Cell> garbageCells=new Vector<Cell>();
@@ -653,7 +649,7 @@ public final class CellsGenerator{
     		 cellsList.removeAll(garbageCells);
     		 garbageCells.clear();
     	     //perform a recursive call
-    		 optimizeRawCellsAndPortals(cellsList,portalsList);
+    		 optimizeRawCellsAndPortals(cellsList);
     	    }
     	else
     	    {//save the portals in a distinct list
@@ -662,18 +658,48 @@ public final class CellsGenerator{
     }
     
     
-    //complete cells by adding them a ceil and a floor
-    private final static void addCeilAndFloorToRawCells(Vector<Cell> cellsList){
-        
+    //complete cells by adding them a ceiling and a floor
+    private final static void addCeilAndFloorToFull3DCells(List<Full3DCell> full3DCellsList){       
+        for(Full3DCell cell:full3DCellsList)
+            {//TODO 
+             //for each left wall
+                 //for each top wall
+                     //build a tile for the ceiling
+                     //build a tile for the floor
+             //for each left portal
+                 //for each top wall
+                     //build a tile for the ceiling
+                     //build a tile for the floor
+             //for each left wall
+                 //for each top portal
+                     //build a tile for the ceiling
+                     //build a tile for the floor
+             //for each left portal
+                 //for each top portal
+                     //build a tile for the ceiling
+                     //build a tile for the floor
+            }
     }
     
     //add the third coordinate to each vertex in the cells and in the portals
-    private final static void convertFromRawTo3DCellsAndPortals(Vector<Cell> cellsList,Vector<Portal> portalsList){
-        
+    private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList){
+        List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
+        for(Cell cell:cellsList)
+            {//TODO
+             //for each kind of wall
+                 //for each wall
+                     //compute atomic walls
+                     //for each atomic walls
+                         //create a new full 3D atomic wall
+                         //compute the enclosing rectangle of this full 3D atomic wall
+                         //fullcell.computeEnclosingRectangle();
+                         //add it into the list of full cells
+            }
+        return(full3DCellsList);
     }
     
     //add the textures coordinates and the textures to the cells
-    private final static void addTexturesToCells(Vector<Cell> cellsList){
+    private final static void addTexturesToCells(List<Full3DCell> full3DCellsList){
         
     }
     
