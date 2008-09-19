@@ -27,9 +27,9 @@ public final class Full3DCell implements Serializable{
 
     private transient List<Full3DCell> neighboursCellsList;
     
-    //TODO: rather use at least an axis-aligned bounding box rather
+    //TODO: rather use at least an axis-aligned bounding box
     private transient Rectangle enclosingRectangle;
-    
+    //each array contains a single vertex
     private List<float[]> topWalls;
     
     private List<float[]> bottomWalls;
@@ -46,6 +46,10 @@ public final class Full3DCell implements Serializable{
     
     private List<float[]> rightPortals;
     
+    private List<float[]> ceilWalls;
+    
+    private List<float[]> floorWalls;
+    
     
     public Full3DCell(){
         neighboursCellsList=new ArrayList<Full3DCell>();       
@@ -57,6 +61,8 @@ public final class Full3DCell implements Serializable{
         rightWalls=new ArrayList<float[]>();
         leftPortals=new ArrayList<float[]>();
         rightPortals=new ArrayList<float[]>();
+        ceilWalls=new ArrayList<float[]>();
+        floorWalls=new ArrayList<float[]>();
     }
     
 
@@ -253,5 +259,25 @@ public final class Full3DCell implements Serializable{
     public final boolean contains(float[] point){
         //ordinate temporarily ignored
         return(this.enclosingRectangle.contains(point[0],point[2]));
+    }
+
+
+    public final List<float[]> getCeilWalls(){
+        return(ceilWalls);
+    }
+
+
+    public final void setCeilWalls(List<float[]> ceilWalls){
+        this.ceilWalls=ceilWalls;
+    }
+
+
+    public final List<float[]> getFloorWalls(){
+        return(floorWalls);
+    }
+
+
+    public final void setFloorWalls(List<float[]> floorWalls){
+        this.floorWalls=floorWalls;
     }
 }

@@ -45,8 +45,7 @@ public final class CellsGenerator{
     	Vector<Portal> portalsList=new Vector<Portal>();
     	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList,portalsList);
     	optimizeRawCellsAndPortals(cellsList);  
-    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList);
-    	addCeilAndFloorToFull3DCells(full3DCellsList);   	
+    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList);   	
     	addTexturesToCells(full3DCellsList);
     	System.out.println("SIZE : "+cellsList.size());
     	createCellsMap(cellsList);
@@ -93,28 +92,8 @@ public final class CellsGenerator{
     }
     
     @SuppressWarnings("unused")
-    private final static Vector<PointPair> ALTERNATIVEmergeAllWallPieces(List<PointPair> wallPiecesList){       
-        Vector<PointPair> atomicWallsList = new Vector<PointPair>();
-        //break all walls into atomic walls
-        for(PointPair currentWallPiece:wallPiecesList)
-            if(currentWallPiece.getFirst().x==currentWallPiece.getLast().x)
-                {int min=Math.min(currentWallPiece.getFirst().y,currentWallPiece.getLast().y);
-                 int max=Math.max(currentWallPiece.getFirst().y,currentWallPiece.getLast().y);
-                 for(int i=min;i<max;i++)
-                     atomicWallsList.add(new PointPair(
-                             new Point(currentWallPiece.getFirst().x,i),
-                             new Point(currentWallPiece.getFirst().x,i+1)));
-                }
-            else
-                if(currentWallPiece.getFirst().y==currentWallPiece.getLast().y)
-                    {int min=Math.min(currentWallPiece.getFirst().x,currentWallPiece.getLast().x);
-                     int max=Math.max(currentWallPiece.getFirst().x,currentWallPiece.getLast().x);
-                     for(int i=min;i<max;i++)
-                         atomicWallsList.add(new PointPair(
-                                new Point(i,currentWallPiece.getFirst().y),
-                                new Point(i+1,currentWallPiece.getFirst().y)));             
-                    }
-        Collections.sort(atomicWallsList,new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT));
+    private final static List<PointPair> ALTERNATIVEmergeAllWallPieces(List<PointPair> wallPiecesList){       
+        List<PointPair> atomicWallsList = getAtomicWallsList(wallPiecesList);
         Vector<PointPair> fullWallsList = new Vector<PointPair>();
         //merge atomic walls together when possible
         if(atomicWallsList.size()>0)
@@ -137,6 +116,31 @@ public final class CellsGenerator{
                  }
             }
         return(fullWallsList);
+    }
+    
+    private final static List<PointPair> getAtomicWallsList(List<PointPair> wallPiecesList){
+        Vector<PointPair> atomicWallsList = new Vector<PointPair>();
+      //break all walls into atomic walls
+        for(PointPair currentWallPiece:wallPiecesList)
+            if(currentWallPiece.getFirst().x==currentWallPiece.getLast().x)
+                {int min=Math.min(currentWallPiece.getFirst().y,currentWallPiece.getLast().y);
+                 int max=Math.max(currentWallPiece.getFirst().y,currentWallPiece.getLast().y);
+                 for(int i=min;i<max;i++)
+                     atomicWallsList.add(new PointPair(
+                             new Point(currentWallPiece.getFirst().x,i),
+                             new Point(currentWallPiece.getFirst().x,i+1)));
+                }
+            else
+                if(currentWallPiece.getFirst().y==currentWallPiece.getLast().y)
+                    {int min=Math.min(currentWallPiece.getFirst().x,currentWallPiece.getLast().x);
+                     int max=Math.max(currentWallPiece.getFirst().x,currentWallPiece.getLast().x);
+                     for(int i=min;i<max;i++)
+                         atomicWallsList.add(new PointPair(
+                                new Point(i,currentWallPiece.getFirst().y),
+                                new Point(i+1,currentWallPiece.getFirst().y)));             
+                    }
+        Collections.sort(atomicWallsList,new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT));
+        return(atomicWallsList);
     }
     
     //create unoptimized 2D cells and portals (cells excessively small and portals excessively wide)
@@ -657,43 +661,72 @@ public final class CellsGenerator{
     	    }
     }
     
-    
-    //complete cells by adding them a ceiling and a floor
-    private final static void addCeilAndFloorToFull3DCells(List<Full3DCell> full3DCellsList){       
-        for(Full3DCell cell:full3DCellsList)
-            {//TODO 
-             //for each left wall
-                 //for each top wall
-                     //build a tile for the ceiling
-                     //build a tile for the floor
-             //for each left portal
-                 //for each top wall
-                     //build a tile for the ceiling
-                     //build a tile for the floor
-             //for each left wall
-                 //for each top portal
-                     //build a tile for the ceiling
-                     //build a tile for the floor
-             //for each left portal
-                 //for each top portal
-                     //build a tile for the ceiling
-                     //build a tile for the floor
-            }
-    }
-    
     //add the third coordinate to each vertex in the cells and in the portals
     private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList){
         List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
+        Full3DCell fullCell;
+        int xmin,xmax,zmin,zmax;
         for(Cell cell:cellsList)
             {//TODO
+             //create a new full 3D cell
+             fullCell=new Full3DCell();
              //for each kind of wall
-                 //for each wall
-                     //compute atomic walls
-                     //for each atomic walls
-                         //create a new full 3D atomic wall
-                         //compute the enclosing rectangle of this full 3D atomic wall
-                         //fullcell.computeEnclosingRectangle();
-                         //add it into the list of full cells
+             //compute atomic walls
+             //for each atomic walls
+             for(PointPair p:getAtomicWallsList(cell.getLeftWalls()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             for(PointPair p:getAtomicWallsList(cell.getLeftPortals()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells                    
+                 }             
+             for(PointPair p:getAtomicWallsList(cell.getRightWalls()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             for(PointPair p:getAtomicWallsList(cell.getRightPortals()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             for(PointPair p:getAtomicWallsList(cell.getTopWalls()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             for(PointPair p:getAtomicWallsList(cell.getTopPortals()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             for(PointPair p:getAtomicWallsList(cell.getBottomWalls()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }                        
+             for(PointPair p:getAtomicWallsList(cell.getBottomPortals()))
+                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                  //add it into the list of full cells
+                 }
+             //compute the enclosing rectangle of this full 3D atomic wall
+             fullCell.computeEnclosingRectangle();
+             xmin=fullCell.getEnclosingRectangle().x;
+             zmin=fullCell.getEnclosingRectangle().y;
+             xmax=xmin+fullCell.getEnclosingRectangle().width-1;
+             zmax=zmin+fullCell.getEnclosingRectangle().height-1;
+             //for each tile of the rectangle 
+             for(int i=xmin;i<=xmax;i++)
+                 for(int j=zmin;j<=zmax;j++)
+                     {//FIXME: one of the tiles has its vertices in the wrong order
+                      //build a tile for the ceiling
+                      fullCell.getCeilWalls().add(new float[]{0,0,i,0.5f,j});
+                      fullCell.getCeilWalls().add(new float[]{0,0,i+1,0.5f,j});
+                      fullCell.getCeilWalls().add(new float[]{0,0,i,0.5f,j+1});
+                      fullCell.getCeilWalls().add(new float[]{0,0,i+1,0.5f,j+1});
+                      //build a tile for the floor
+                      fullCell.getFloorWalls().add(new float[]{0,0,i,-0.5f,j});
+                      fullCell.getFloorWalls().add(new float[]{0,0,i+1,-0.5f,j});
+                      fullCell.getFloorWalls().add(new float[]{0,0,i,-0.5f,j+1});
+                      fullCell.getFloorWalls().add(new float[]{0,0,i+1,-0.5f,j+1});
+                     }                
+             //convert the elements from the base [[0;0;0][255;255;255]] to the base [[0;0;0][255*65536;255*65536;255*65536]] 
             }
         return(full3DCellsList);
     }
