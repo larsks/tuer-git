@@ -46,6 +46,7 @@ public final class Full3DCell implements Serializable{
     
     private List<float[]> rightPortals;
     
+    //TODO: add portal lists for them too
     private List<float[]> ceilWalls;
     
     private List<float[]> floorWalls;
@@ -63,6 +64,7 @@ public final class Full3DCell implements Serializable{
         rightPortals=new ArrayList<float[]>();
         ceilWalls=new ArrayList<float[]>();
         floorWalls=new ArrayList<float[]>();
+        enclosingRectangle=new Rectangle();
     }
     
 
@@ -172,7 +174,6 @@ public final class Full3DCell implements Serializable{
                  if(vertex[4]<maxz) 
                      maxz=vertex[4];
             }
-        enclosingRectangle=new Rectangle();
         enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
     }
     

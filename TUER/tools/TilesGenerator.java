@@ -91,7 +91,7 @@ public final class TilesGenerator{
 
     private static final int artTextureSize=4;
     
-    private static final int factor=65536;    
+    static final int factor=65536;    
     
     private static final int EMPTY=0;
     
@@ -227,7 +227,7 @@ public final class TilesGenerator{
 	    for(int i=0;i<256;i++)
              {tmp=i*256;
 	          for(int j=0;j<256;j++)
-	          /*handle decorated walls as "special" walls here*/
+	          //handle decorated walls as "special" walls here
 	              {r=(worldMap[tmp+j]>>16)&0xFF;
 		           g=(worldMap[tmp+j]>>8)&0xFF;
 		           b=worldMap[tmp+j]&0xFF;		  
@@ -616,10 +616,6 @@ public final class TilesGenerator{
 	         int totalArtVertexCount=(artTopWallsList.size()*4)+(artBottomWallsList.size()*4)
 	         +(artLeftWallsList.size()*4)+(artRightWallsList.size()*4);
 	         int maxArtVertexCountPerTexture=(int)Math.pow(2.0d,Math.floor(Math.log(totalArtVertexCount/2)/Math.log(2.0d)));
-	         /*out.writeInt(artTopWallsList.size()*4);
-	         out.writeInt(artBottomWallsList.size()*4);
-	         out.writeInt(artLeftWallsList.size()*4);
-	         out.writeInt(artRightWallsList.size()*4);*/
 	         out.writeInt(maxArtVertexCountPerTexture);
              out.writeInt((artLeftWallsList.size()*4)+(artRightWallsList.size()*4)-maxArtVertexCountPerTexture);
              out.writeInt(maxArtVertexCountPerTexture);
@@ -780,7 +776,7 @@ public final class TilesGenerator{
 	         //put the initial point
 	         out.writeInt(initialPosition.x);
 	         out.writeInt(initialPosition.y);
-	         //TODO : put the respawn points    	         
+	         //don't  put the respawn points because they are no more used    	         
 	         out.flush();
 	         out.close();
 	         writeUnbreakableObject(unbreakableObjectFilename);            
@@ -802,109 +798,13 @@ public final class TilesGenerator{
              writeSphericalBeast(sphericalBeastFilename);
 	        }
 	     catch(IOException ioe)
-	     {ioe.printStackTrace();}	     	     
-	     /*GLCapabilities capabilities=new GLCapabilities();
-         capabilities.setDoubleBuffered(true);//enables double buffering
-         capabilities.setHardwareAccelerated(true);//enables hardware acceleration
-         final GLCanvas canvas=new GLCanvas(capabilities);
-         //final GeometryGL geometryGL=new GeometryGL(canvas.getGL());
-         //canvas.setGL(geometryGL);
-         final GLU glu=new GLU();
-         canvas.addGLEventListener(new GLEventListener(){
-            
-            //public boolean callOnce=false;
-            GeometryGL geometryGL;
-             
-            @Override
-            public void display(GLAutoDrawable glDrawable){
-                //GL gl=glDrawable.getGL();
-                //FloatBuffer buffer=BufferUtil.newFloatBuffer(100000);
-                //gl.glFeedbackBuffer(buffer.capacity(),GL.GL_3D,buffer);
-                //gl.glRenderMode(GL.GL_FEEDBACK);                
-                //GLUquadric q=glu.gluNewQuadric();
-                //glu.gluCylinder(q,10.0d,10.0d,50.0d,10,10);               
-                //glu.gluDeleteQuadric(q);
-                //System.out.println(""+buffer.position());
-                //buffer.position(0);
-                //System.out.println(""+buffer);                                  
-                     GL mgl=canvas.getGL();
-                     GLUquadric quad=glu.gluNewQuadric();
-                     glu.gluQuadricDrawStyle(quad,GLU.GLU_FILL);
-                     glu.gluQuadricNormals(quad,GLU.GLU_SMOOTH);
-                     glu.gluQuadricOrientation(quad,GLU.GLU_INSIDE);
-                     glu.gluQuadricTexture(quad,false);
-                     glu.gluDeleteQuadric(quad);
-                     System.out.println();
-                     for(int i=0;i<geometryGL.getVertices().size();i++)
-                         System.out.println(geometryGL.getVertices().get(i)[0]+" "+
-                                 geometryGL.getVertices().get(i)[1]+" "+
-                                 geometryGL.getVertices().get(i)[2]);
-                    
-            }
-            @Override
-            public void displayChanged(GLAutoDrawable glDrawable, boolean modeChanged,
-                    boolean deviceChanged){}
-            @Override
-            public void init(GLAutoDrawable glDrawable){
-                GL gl=glDrawable.getGL();
-                gl.glMatrixMode(GL.GL_PROJECTION);
-                gl.glLoadIdentity();
-                //gl.glOrtho(0.0, 100.0, 0.0, 100.0, 0.0, 1.0);
-                gl.glFrustum(-50,50,-50,50,50,5000000);
-                gl.glMatrixMode(GL.GL_MODELVIEW);
-                gl.glLoadIdentity();  
-                GLContext curContext = GLContext.getCurrent();
-                GL current=curContext.getGL();
-                geometryGL=new GeometryGL(current);
-                curContext.setGL(geometryGL);
-            }
-            @Override
-            public void reshape(GLAutoDrawable arg0, int x, int y,
-                    int width,int height){}
-             
-         });
-         Frame frame=new Frame();
-         frame.add(canvas);
-         frame.setSize(800,600);
-         frame.setVisible(true);
-         System.out.println("BEGIN");
-         canvas.display();
-         System.out.println("END");
-         frame.dispose();*/
-	     /*GLU glu=new GLU();
-	     GLUquadric quad=glu.gluNewQuadric();
-         glu.gluQuadricDrawStyle(quad,GLU.GLU_FILL);
-         glu.gluQuadricNormals(quad,GLU.GLU_NONE);
-         glu.gluQuadricOrientation(quad,GLU.GLU_INSIDE);
-         glu.gluQuadricTexture(quad,false);        
-	     FloatBuffer buffer=ExtendedGLU.computeCylinder(quad, 10, 10, 100, 3, 1);
-	     glu.gluDeleteQuadric(quad);
-	     System.out.println();
-	     for(int i=0;i<buffer.capacity();i+=3)
-	         System.out.println("buffer["+i/3+"]="+buffer.get()+" "+buffer.get()+
-	                 " "+buffer.get());*/
-	     
-	     
-	     //handle all kinds of walls together
-	     /*System.out.println("TEST");
-	     int i=0;
-         for(PointPair p:topWallsList)
-             {if(p.getFirst().y==190)
-                  System.out.println("["+i+"]:"+p);
-              i++;
-             }*/
-	     leftWallsList.addAll(artLeftWallsList);
-	     rightWallsList.addAll(artRightWallsList);
-	     topWallsList.addAll(artTopWallsList);
-	     bottomWallsList.addAll(artBottomWallsList);
-	     Collections.sort(topWallsList,new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT));
-	     Collections.sort(bottomWallsList,new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT));
-	     Collections.sort(leftWallsList,new PointPairComparator(PointPairComparator.HORIZONTAL_VERTICAL_SORT));
-         Collections.sort(rightWallsList,new PointPairComparator(PointPairComparator.HORIZONTAL_VERTICAL_SORT));
+	     {ioe.printStackTrace();}
 	     //the cells generator uses a cartesian reference mark
 	     //whereas the tiles generator inverts left and right
 	     //that is why you have to invert it
-	     CellsGenerator.generate(topWallsList,bottomWallsList,rightWallsList,leftWallsList);
+	     CellsGenerator.generate(topWallsList,bottomWallsList,
+	             rightWallsList,leftWallsList,artTopWallsList,
+	             artBottomWallsList,artRightWallsList,artLeftWallsList);
     }      
     
     
