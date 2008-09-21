@@ -85,11 +85,11 @@ public final class TilesGenerator{
     
     static final int tileSize=256;
 
-    private static final int artCount=27;
+    static final int artCount=27;
 
-    private static final int artPerTexture=16;
+    static final int artPerTexture=16;
 
-    private static final int artTextureSize=4;
+    static final int artTextureSize=4;
     
     static final int factor=65536;    
     
@@ -653,34 +653,34 @@ public final class TilesGenerator{
 	         int k=0;
 	         for(Point p:floorTilesList)
 	             {if(k%4==0)
-	                 writeTextureCoord(out,0.0f,0.75f);
-	             else
-	                 if(k%4==1)
-	                     writeTextureCoord(out,0.0f,0.5f);
-	                 else
-	                     if(k%4==2)
-	                         writeTextureCoord(out,0.25f,0.5f);
-	                     else			     
-	                         writeTextureCoord(out,0.25f,0.75f);
-	             k++;
-	             //writeNormal(out,0.0f,1.0f,0.0f);
-	             writePoint(out,factor*p.getX(),-0.5*factor,factor*p.getY());
+	                  writeTextureCoord(out,0.0f,0.75f);
+	              else
+	                  if(k%4==1)
+	                      writeTextureCoord(out,0.0f,0.5f);
+	                  else
+	                      if(k%4==2)
+	                          writeTextureCoord(out,0.25f,0.5f);
+	                      else			     
+	                          writeTextureCoord(out,0.25f,0.75f);
+	              k++;
+	              //writeNormal(out,0.0f,1.0f,0.0f);
+	              writePoint(out,factor*p.getX(),-0.5*factor,factor*p.getY());
 	             }
 	         k=0;
 	         for(Point p:specialFloorTilesList)
 	             {if(k%4==0)
-	                 writeTextureCoord(out,0.0f,0.75f);
-	             else
-	                 if(k%4==1)
-	                     writeTextureCoord(out,0.0f,0.5f);
-	                 else
-	                     if(k%4==2)
-	                         writeTextureCoord(out,0.25f,0.5f);
-	                     else			     
-	                         writeTextureCoord(out,0.25f,0.75f);
-	             k++;
-	             //writeNormal(out,0.0f,1.0f,0.0f);
-	             writePoint(out,factor*p.getX(),-0.5*factor,factor*p.getY());
+	                  writeTextureCoord(out,0.0f,0.75f);
+	              else
+	                  if(k%4==1)
+	                      writeTextureCoord(out,0.0f,0.5f);
+	                  else
+	                      if(k%4==2)
+	                          writeTextureCoord(out,0.25f,0.5f);
+	                      else			     
+	                          writeTextureCoord(out,0.25f,0.75f);
+	              k++;
+	              //writeNormal(out,0.0f,1.0f,0.0f);
+	              writePoint(out,factor*p.getX(),-0.5*factor,factor*p.getY());
 	             }
 	         k=0;
 	         for(Point p:ceilTilesList)
@@ -805,6 +805,7 @@ public final class TilesGenerator{
 	     CellsGenerator.generate(topWallsList,bottomWallsList,
 	             rightWallsList,leftWallsList,artTopWallsList,
 	             artBottomWallsList,artRightWallsList,artLeftWallsList);
+	     //TODO: write the network into a file
     }      
     
     

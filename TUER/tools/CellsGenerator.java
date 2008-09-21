@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
 public final class CellsGenerator{
     
     
-    public final static void generate(List<PointPair> topWallPiecesList,
+    public final static Network generate(List<PointPair> topWallPiecesList,
                                       List<PointPair> bottomWallPiecesList,
                                       List<PointPair> leftWallPiecesList,
 			                          List<PointPair> rightWallPiecesList,
@@ -71,7 +71,8 @@ public final class CellsGenerator{
     	        topWallPiecesList,bottomWallPiecesList,
                 leftWallPiecesList,rightWallPiecesList,artTopWallPiecesList,
                 artBottomWallPiecesList,artLeftWallPiecesList,artRightWallPiecesList,
-                TilesGenerator.factor);
+                TilesGenerator.factor,TilesGenerator.artTextureSize,
+                TilesGenerator.artCount,TilesGenerator.artPerTexture);
     	System.out.println("SIZE : "+cellsList.size());
     	createCellsMap(cellsList);
     	if(testNetworkIntegrity(cellsList,topFullWallList,
@@ -87,6 +88,8 @@ public final class CellsGenerator{
     	    System.out.println("cells integrity preserved");
     	else
     	    System.out.println("cells integrity not preserved!!!");
+    	//build the network from the list of cells
+    	return(new Network(full3DCellsList));
     }
     
     //merge all pieces of wall to build the "temporary" full walls
@@ -185,7 +188,6 @@ public final class CellsGenerator{
     		 //is the "leftmost" point inside the pair
     		 if(topFullWall.getFirst().getX()>topFullWall.getLast().getX())
     			 topFullWall.swap();
-    		 //FIXME: this line might be responsible of the problem
     		 topFullWallPiece.set(topFullWall.getFirst(),new Point((int)(topFullWall.getFirst().getX()+1),
     				(int)topFullWall.getFirst().getY()));
     		 //split the full wall into small pieces
@@ -692,12 +694,18 @@ public final class CellsGenerator{
             List<PointPair> artBottomWallPiecesList,
             List<PointPair> artLeftWallPiecesList,
             List<PointPair> artRightWallPiecesList,
-            float factor){
+            float factor,int artTextureSize,
+            int artCount,int artPerTexture){
         List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
         Full3DCell fullCell;
         int xmin,xmax,zmin,zmax;
+        int artIndex=0;//index of the artworks to display
+        int texturePos=0;//position inside the texture
+        float q=1.0f/((float)artTextureSize);
         float minx,minz,maxx,maxz;
         float[] texCoord=new float[4];
+        final float[] floorTexCoord=new float[]{0.0f,0.75f,0.25f,0.5f};
+        final float[] ceilTexCoord=new float[]{0.0f,1.0f,0.25f,0.75f};
         for(Cell cell:cellsList)
             {//create a new full 3D cell
              fullCell=new Full3DCell();
@@ -705,15 +713,27 @@ public final class CellsGenerator{
              //compute atomic walls
              //for each atomic walls                     
              for(PointPair p:getAtomicWallsList(cell.getLeftWalls()))
-                 {//TODO: get the texture coordinates by comparing the current point pair with the previous list of point pairs                 
+                 {//get the texture coordinates by comparing the current point pair with the previous list of point pairs                 
                   if(leftWallPiecesList.contains(p))  
                       {//use wall texture coordinates
-                       
+                       texCoord[0]=0.0f;
+                       texCoord[1]=0.25f;
+                       texCoord[2]=0.25f;
+                       texCoord[3]=0.5f;
                       }
                   else
                       if(artLeftWallPiecesList.contains(p))
                           {//use art texture coordinates
-                           
+                           texCoord[2]=texturePos%artTextureSize;
+                           texCoord[1]=artTextureSize-(texturePos/artTextureSize);
+                           texCoord[0]=texCoord[2]+1;                          
+                           texCoord[3]=texCoord[1]+1;
+                           texCoord[0]*=q;
+                           texCoord[1]*=q;
+                           texCoord[2]*=q;
+                           texCoord[3]*=q;
+                           artIndex=(artIndex+1)%artCount;
+                           texturePos=artIndex%artPerTexture;
                           }
                       else
                           {//use dummy coordinates
@@ -723,8 +743,8 @@ public final class CellsGenerator{
                   //add it into the list of full cells
                   fullCell.getLeftWalls().add(new float[]{texCoord[0],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                   fullCell.getLeftWalls().add(new float[]{texCoord[0],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getLeftWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getLeftWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
+                  fullCell.getLeftWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
+                  fullCell.getLeftWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                  }
              //use dummy texture coordinates for portals
              Arrays.fill(texCoord,0);
@@ -733,16 +753,41 @@ public final class CellsGenerator{
                   //add it into the list of full cells
                   fullCell.getLeftPortals().add(new float[]{texCoord[0],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                   fullCell.getLeftPortals().add(new float[]{texCoord[0],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getLeftPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getLeftPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
+                  fullCell.getLeftPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
+                  fullCell.getLeftPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                  }
              for(PointPair p:getAtomicWallsList(cell.getRightWalls()))
-                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                 {if(rightWallPiecesList.contains(p))  
+                      {//use wall texture coordinates
+                       texCoord[0]=0.0f;
+                       texCoord[1]=0.25f;
+                       texCoord[2]=0.25f;
+                       texCoord[3]=0.5f;
+                      }
+                  else
+                      if(artRightWallPiecesList.contains(p))
+                          {//use art texture coordinates
+                           texCoord[0]=texturePos%artTextureSize;
+                           texCoord[1]=artTextureSize-(texturePos/artTextureSize);
+                           texCoord[2]=texCoord[0]+1;                          
+                           texCoord[3]=texCoord[1]+1;
+                           texCoord[0]*=q;
+                           texCoord[1]*=q;
+                           texCoord[2]*=q;
+                           texCoord[3]*=q;
+                           artIndex=(artIndex+1)%artCount;
+                           texturePos=artIndex%artPerTexture;
+                          }
+                      else
+                          {//use dummy coordinates
+                           Arrays.fill(texCoord,0);
+                          }
+                  //create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getRightWalls().add(new float[]{texCoord[0],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                   fullCell.getRightWalls().add(new float[]{texCoord[0],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getRightWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getRightWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
+                  fullCell.getRightWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
+                  fullCell.getRightWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                  }
              //use dummy texture coordinates for portals
              Arrays.fill(texCoord,0);
@@ -751,16 +796,41 @@ public final class CellsGenerator{
                   //add it into the list of full cells   
                   fullCell.getRightPortals().add(new float[]{texCoord[0],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                   fullCell.getRightPortals().add(new float[]{texCoord[0],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getRightPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getRightPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
+                  fullCell.getRightPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
+                  fullCell.getRightPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                  } 
              for(PointPair p:getAtomicWallsList(cell.getTopWalls()))
-                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                 {if(topWallPiecesList.contains(p))  
+                      {//use wall texture coordinates
+                       texCoord[0]=0.0f;
+                       texCoord[1]=0.25f;
+                       texCoord[2]=0.25f;
+                       texCoord[3]=0.5f;
+                      }
+                  else
+                      if(artTopWallPiecesList.contains(p))
+                          {//use art texture coordinates
+                           texCoord[2]=texturePos%artTextureSize;
+                           texCoord[1]=artTextureSize-(texturePos/artTextureSize);
+                           texCoord[0]=texCoord[2]+1;                          
+                           texCoord[3]=texCoord[1]+1;
+                           texCoord[0]*=q;
+                           texCoord[1]*=q;
+                           texCoord[2]*=q;
+                           texCoord[3]*=q;
+                           artIndex=(artIndex+1)%artCount;
+                           texturePos=artIndex%artPerTexture;
+                          }
+                      else
+                          {//use dummy coordinates
+                           Arrays.fill(texCoord,0);
+                          }
+                  //create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getTopWalls().add(new float[]{texCoord[0],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                   fullCell.getTopWalls().add(new float[]{texCoord[0],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getTopWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getTopWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
+                  fullCell.getTopWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
+                  fullCell.getTopWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                  }
              //use dummy texture coordinates for portals
              Arrays.fill(texCoord,0);
@@ -769,16 +839,41 @@ public final class CellsGenerator{
                   //add it into the list of full cells
                   fullCell.getTopPortals().add(new float[]{texCoord[0],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                   fullCell.getTopPortals().add(new float[]{texCoord[0],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getTopPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getTopPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
+                  fullCell.getTopPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
+                  fullCell.getTopPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                  }
              for(PointPair p:getAtomicWallsList(cell.getBottomWalls()))
-                 {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
+                 {if(bottomWallPiecesList.contains(p))  
+                      {//use wall texture coordinates
+                       texCoord[0]=0.0f;
+                       texCoord[1]=0.25f;
+                       texCoord[2]=0.25f;
+                       texCoord[3]=0.5f;
+                      }
+                  else
+                      if(artBottomWallPiecesList.contains(p))
+                          {//use art texture coordinates
+                           texCoord[0]=texturePos%artTextureSize;
+                           texCoord[1]=artTextureSize-(texturePos/artTextureSize);
+                           texCoord[2]=texCoord[0]+1;                          
+                           texCoord[3]=texCoord[1]+1;
+                           texCoord[0]*=q;
+                           texCoord[1]*=q;
+                           texCoord[2]*=q;
+                           texCoord[3]*=q;
+                           artIndex=(artIndex+1)%artCount;
+                           texturePos=artIndex%artPerTexture;
+                          }
+                      else
+                          {//use dummy coordinates
+                           Arrays.fill(texCoord,0);
+                          }
+                  //create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getBottomWalls().add(new float[]{texCoord[0],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                   fullCell.getBottomWalls().add(new float[]{texCoord[0],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getBottomWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getBottomWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
+                  fullCell.getBottomWalls().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
+                  fullCell.getBottomWalls().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                  }
              //use dummy texture coordinates for portals
              Arrays.fill(texCoord,0);
@@ -787,29 +882,29 @@ public final class CellsGenerator{
                   //add it into the list of full cells
                   fullCell.getBottomPortals().add(new float[]{texCoord[0],texCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                   fullCell.getBottomPortals().add(new float[]{texCoord[0],texCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getBottomPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getBottomPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
+                  fullCell.getBottomPortals().add(new float[]{texCoord[2],texCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
+                  fullCell.getBottomPortals().add(new float[]{texCoord[2],texCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                  }
              //compute the enclosing rectangle of this full 3D atomic wall
              fullCell.computeEnclosingRectangle();
              xmin=fullCell.getEnclosingRectangle().x;
              zmin=fullCell.getEnclosingRectangle().y;
              xmax=xmin+fullCell.getEnclosingRectangle().width-1;
-             zmax=zmin+fullCell.getEnclosingRectangle().height-1;
+             zmax=zmin+fullCell.getEnclosingRectangle().height-1;                          
              //for each tile of the rectangle 
              for(int i=xmin;i<=xmax;i++)
                  for(int j=zmin;j<=zmax;j++)
                      {//FIXME: one of the tiles has its vertices in the wrong order
                       //build a tile for the ceiling
-                      fullCell.getCeilWalls().add(new float[]{0,0,i,0.5f,j});
-                      fullCell.getCeilWalls().add(new float[]{0,0,i+1,0.5f,j});
-                      fullCell.getCeilWalls().add(new float[]{0,0,i,0.5f,j+1});
-                      fullCell.getCeilWalls().add(new float[]{0,0,i+1,0.5f,j+1});
+                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[0],ceilTexCoord[1],i,0.5f,j});
+                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[0],ceilTexCoord[3],i+1,0.5f,j});
+                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[2],ceilTexCoord[3],i+1,0.5f,j+1});
+                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[2],ceilTexCoord[1],i,0.5f,j+1});
                       //build a tile for the floor
-                      fullCell.getFloorWalls().add(new float[]{0,0,i,-0.5f,j});
-                      fullCell.getFloorWalls().add(new float[]{0,0,i+1,-0.5f,j});
-                      fullCell.getFloorWalls().add(new float[]{0,0,i,-0.5f,j+1});
-                      fullCell.getFloorWalls().add(new float[]{0,0,i+1,-0.5f,j+1});
+                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[1],i,-0.5f,j});
+                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[3],i+1,-0.5f,j});
+                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[2],floorTexCoord[3],i+1,-0.5f,j+1});
+                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[2],floorTexCoord[1],i,-0.5f,j+1});
                      }   
              //convert the elements from the base [[0;0;0][255;255;255]] to the base [[0;0;0][255*65536;255*65536;255*65536]]
              for(float[] wall:fullCell.getLeftWalls())

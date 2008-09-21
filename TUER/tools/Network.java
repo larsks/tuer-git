@@ -28,21 +28,62 @@ public final class Network implements Serializable{
     
     public Network(){}
     
-    public Network(Full3DCell rootCell){
-        this.rootCell=rootCell;
+    public Network(List<Full3DCell> full3DCellsList){
+        buildGraphFromList(full3DCellsList);
     }
     
     
-    private void writeObject(java.io.ObjectOutputStream out)throws IOException{
-        //TODO: use BFS, write a list of cells
+    private final void writeObject(java.io.ObjectOutputStream out)throws IOException{
+        //use BFS, write a list of cells
+        if(rootCell!=null)
+            {Full3DCell c;
+             //First In First Out abstract data type used to store the sons of the current cell
+             List<Full3DCell> fifo=new ArrayList<Full3DCell>();
+             //Each cell that has been seen has to be marked to avoid an infinite loop
+             List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
+             //We use the first traveled cell suggested by the user
+             markedCellsList.add(rootCell);
+             fifo.add(rootCell);
+             while(!fifo.isEmpty())
+                 {//Get the first added element as it is a FIFO (pop operation)
+                  c=fifo.remove(0);
+                  //This is the main treatment, write each cell
+                  out.writeObject(c);
+                  for(Full3DCell son:c.getNeighboursCellsList())
+                      if(!markedCellsList.contains(son))
+                          {//Mark the cell to avoid traveling it more than once
+                           markedCellsList.add(c);
+                           //Add a new cell to travel (push operation)
+                           fifo.add(c);
+                          }
+                 }
+            }
     }
 
-    private void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException{
-        //TODO: read a list of cells
-        //TODO: the first cell becomes the root cell
-        //TODO: compute the neighbors list of each cell
-        //TODO: rebuild the network
+    private final void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException{
+        //read a list of cells
+        List<Full3DCell> full3DCellsList=(List<Full3DCell>)in.readObject();
+        buildGraphFromList(full3DCellsList);       
     }   
+    
+    private final void buildGraphFromList(List<Full3DCell> full3DCellsList){
+        //the first cell becomes the root cell
+        rootCell=full3DCellsList.get(0);
+        //compute the neighbors list of each cell in order to rebuild the network
+        int i=0,j;
+        //for each cell, we look for its sons
+        for(Full3DCell fatherCell:full3DCellsList)
+            {j=0;
+             for(Full3DCell fullCell:full3DCellsList)
+                 {//if the current cell is not the father cell and if it is a son of the father cell
+                  if(i!=j&&Full3DCell.testNeighbourhood(fatherCell,fullCell))
+                      //add the son cell into the neighbors cells list of the father cell
+                      fatherCell.getNeighboursCellsList().add(fullCell);
+                  j++;
+                 }
+             i++;
+            }
+    }
     
     public final Full3DCell locate(float[] point){
         return(locate(point,getRootCell()));

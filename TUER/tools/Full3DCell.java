@@ -18,6 +18,7 @@ import java.awt.Rectangle;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class Full3DCell implements Serializable{
@@ -73,6 +74,37 @@ public final class Full3DCell implements Serializable{
         return(this);
     }
     
+    /**
+     * check if a cell is a neighbor of another one
+     * NB: THIS METHOD IS COSTLY (O(n²)), use it only when you have not yet 
+     * computed the neighbors cells list
+     * @param c1
+     * @param c2
+     * @return
+     */
+    final static boolean testNeighbourhood(Full3DCell c1,Full3DCell c2){
+        //test if a left portal of c1 is a right portal of c2
+        for(float[] c1LeftPortal:c1.leftPortals)
+            for(float[] c2RightPortal:c2.rightPortals)
+                if(Arrays.equals(c1LeftPortal,c2RightPortal))
+                    return(true);
+        //test if a right portal of c1 is a left portal of c2
+        for(float[] c1RightPortal:c1.rightPortals)
+            for(float[] c2LeftPortal:c2.leftPortals)
+                if(Arrays.equals(c1RightPortal,c2LeftPortal))
+                    return(true);
+        //test if a top portal of c1 is a bottom portal of c2
+        for(float[] c1TopPortal:c1.topPortals)
+            for(float[] c2BottomPortal:c2.bottomPortals)
+                if(Arrays.equals(c1TopPortal,c2BottomPortal))
+                    return(true);
+        //test if a bottom portal of c1 is a top portal of c2
+        for(float[] c1BottomPortal:c1.bottomPortals)
+            for(float[] c2TopPortal:c2.topPortals)
+                if(Arrays.equals(c1BottomPortal,c2TopPortal))
+                    return(true);
+        return(false);
+    }
 
     final void computeEnclosingRectangle(){
         float minx=Float.MAX_VALUE,minz=Float.MAX_VALUE,maxx=Float.MIN_VALUE,maxz=Float.MIN_VALUE;
