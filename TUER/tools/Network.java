@@ -52,9 +52,9 @@ public final class Network implements Serializable{
                   for(Full3DCell son:c.getNeighboursCellsList())
                       if(!markedCellsList.contains(son))
                           {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(c);
+                           markedCellsList.add(son);
                            //Add a new cell to travel (push operation)
-                           fifo.add(c);
+                           fifo.add(son);
                           }
                  }
             }
@@ -113,9 +113,9 @@ public final class Network implements Serializable{
                  {for(Full3DCell son:c.getNeighboursCellsList())
                       if(!markedCellsList.contains(son))
                           {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(c);
+                           markedCellsList.add(son);
                            //Add a new cell to travel (push operation)
-                           fifo.add(c);
+                           fifo.add(son);
                           }
                  }
             }
