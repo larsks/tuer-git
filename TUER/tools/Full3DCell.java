@@ -28,6 +28,8 @@ public final class Full3DCell implements Serializable{
 
     private transient List<Full3DCell> neighboursCellsList;
     
+    private transient List<float[]> neighboursPortalsList;
+    
     //TODO: rather use at least an axis-aligned bounding box
     private transient Rectangle enclosingRectangle;
     //each array contains a single vertex
@@ -47,14 +49,18 @@ public final class Full3DCell implements Serializable{
     
     private List<float[]> rightPortals;
     
-    //TODO: add portal lists for them too
     private List<float[]> ceilWalls;
     
     private List<float[]> floorWalls;
     
+    private List<float[]> ceilPortals;
+    
+    private List<float[]> floorPortals;
+    
     
     public Full3DCell(){
-        neighboursCellsList=new ArrayList<Full3DCell>();       
+        neighboursCellsList=new ArrayList<Full3DCell>(); 
+        neighboursPortalsList=new ArrayList<float[]>();
         topWalls=new ArrayList<float[]>();
         bottomWalls=new ArrayList<float[]>();
         topPortals=new ArrayList<float[]>();
@@ -65,6 +71,8 @@ public final class Full3DCell implements Serializable{
         rightPortals=new ArrayList<float[]>();
         ceilWalls=new ArrayList<float[]>();
         floorWalls=new ArrayList<float[]>();
+        ceilPortals=new ArrayList<float[]>();
+        floorPortals=new ArrayList<float[]>();
         enclosingRectangle=new Rectangle();
     }
     
@@ -75,35 +83,36 @@ public final class Full3DCell implements Serializable{
     }
     
     /**
-     * check if a cell is a neighbor of another one
+     * 
      * NB: THIS METHOD IS COSTLY (O(n²)), use it only when you have not yet 
      * computed the neighbors cells list
      * @param c1
      * @param c2
      * @return
      */
-    final static boolean testNeighbourhood(Full3DCell c1,Full3DCell c2){
+    final static List<float[]> getCommonPortalsList(Full3DCell c1,Full3DCell c2){
         //test if a left portal of c1 is a right portal of c2
+        List<float[]> commonPortalsList=new ArrayList<float[]>();
         for(float[] c1LeftPortal:c1.leftPortals)
             for(float[] c2RightPortal:c2.rightPortals)
                 if(Arrays.equals(c1LeftPortal,c2RightPortal))
-                    return(true);
+                    commonPortalsList.add(c1LeftPortal);
         //test if a right portal of c1 is a left portal of c2
         for(float[] c1RightPortal:c1.rightPortals)
             for(float[] c2LeftPortal:c2.leftPortals)
                 if(Arrays.equals(c1RightPortal,c2LeftPortal))
-                    return(true);
+                    commonPortalsList.add(c1RightPortal);
         //test if a top portal of c1 is a bottom portal of c2
         for(float[] c1TopPortal:c1.topPortals)
             for(float[] c2BottomPortal:c2.bottomPortals)
                 if(Arrays.equals(c1TopPortal,c2BottomPortal))
-                    return(true);
+                    commonPortalsList.add(c1TopPortal);
         //test if a bottom portal of c1 is a top portal of c2
         for(float[] c1BottomPortal:c1.bottomPortals)
             for(float[] c2TopPortal:c2.topPortals)
                 if(Arrays.equals(c1BottomPortal,c2TopPortal))
-                    return(true);
-        return(false);
+                    commonPortalsList.add(c1BottomPortal);
+        return(commonPortalsList);
     }
 
     final void computeEnclosingRectangle(){
@@ -312,5 +321,29 @@ public final class Full3DCell implements Serializable{
 
     public final void setFloorWalls(List<float[]> floorWalls){
         this.floorWalls=floorWalls;
+    }
+
+    public final List<float[]> getNeighboursPortalsList(){
+        return(neighboursPortalsList);
+    }
+
+    public final void setNeighboursPortalsList(List<float[]> neighboursPortalsList){
+        this.neighboursPortalsList=neighboursPortalsList;
+    }
+
+    public final List<float[]> getCeilPortals(){
+        return(ceilPortals);
+    }
+
+    public final void setCeilPortals(List<float[]> ceilPortals){
+        this.ceilPortals=ceilPortals;
+    }
+
+    public final List<float[]> getFloorPortals(){
+        return(floorPortals);
+    }
+
+    public final void setFloorPortals(List<float[]> floorPortals){
+        this.floorPortals=floorPortals;
     }
 }

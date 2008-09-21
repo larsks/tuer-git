@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import main.SoftwareViewFrustumCullingPerformer;
 
 public final class Network implements Serializable{
     
@@ -67,6 +68,7 @@ public final class Network implements Serializable{
     }   
     
     private final void buildGraphFromList(List<Full3DCell> full3DCellsList){
+        List<float[]> commonPortalsList;
         //the first cell becomes the root cell
         rootCell=full3DCellsList.get(0);
         //compute the neighbors list of each cell in order to rebuild the network
@@ -76,9 +78,12 @@ public final class Network implements Serializable{
             {j=0;
              for(Full3DCell fullCell:full3DCellsList)
                  {//if the current cell is not the father cell and if it is a son of the father cell
-                  if(i!=j&&Full3DCell.testNeighbourhood(fatherCell,fullCell))
-                      //add the son cell into the neighbors cells list of the father cell
-                      fatherCell.getNeighboursCellsList().add(fullCell);
+                  if(i!=j&&!(commonPortalsList=Full3DCell.getCommonPortalsList(fatherCell,fullCell)).isEmpty())
+                      {//add the son cell into the neighbors cells list of the father cell
+                       fatherCell.getNeighboursCellsList().add(fullCell);
+                       //update the list of neighbors portals
+                       fatherCell.getNeighboursPortalsList().addAll(commonPortalsList);
+                      }
                   j++;
                  }
              i++;
@@ -122,6 +127,50 @@ public final class Network implements Serializable{
         //It should NEVER HAPPEN
         //It means that you are completely outside the network
         return(null);
+    }
+    
+    /*
+     * Breadth First Search to locate the cell in which the point is.
+     * BFS has been chosen because it is faster when we know that the player has gone 
+     * to a close neighbor of the previous occupied cell
+     */
+    public static final List<Full3DCell> getVisibleCellsList(SoftwareViewFrustumCullingPerformer frustum,Full3DCell firstTraveledCell){
+        List<Full3DCell> visibleCellsList=new ArrayList<Full3DCell>();
+        Full3DCell c;
+        //First In First Out abstract data type used to store the sons of the current cell
+        List<Full3DCell> fifo=new ArrayList<Full3DCell>();
+        //Each cell that has been seen has to be marked to avoid an infinite loop
+        List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
+        //We use the first traveled cell suggested by the user
+        markedCellsList.add(firstTraveledCell);
+        fifo.add(firstTraveledCell);
+        int portalIndex;
+        float[] p1,p2,p3,p4;
+        while(!fifo.isEmpty())
+            {//Get the first added element as it is a FIFO (pop operation)
+             c=fifo.remove(0);
+             //Add the cell into the list of visible cells 
+             visibleCellsList.add(c);
+             portalIndex=0;
+             for(Full3DCell son:c.getNeighboursCellsList())
+                 {if(!markedCellsList.contains(son))
+                      {//Mark the cell to avoid traveling it more than once
+                       markedCellsList.add(son);
+                       //check if the portal is visible to know whether to add the 
+                       //cell into the FIFO                      
+                       p1=c.getNeighboursPortalsList().get(portalIndex);
+                       p2=c.getNeighboursPortalsList().get(portalIndex+1);
+                       p3=c.getNeighboursPortalsList().get(portalIndex+2);
+                       p4=c.getNeighboursPortalsList().get(portalIndex+3);
+                       //dataOffset=2 because we use T2_V3
+                       if(frustum.isQuadInViewFrustum(p1, p2, p3, p4,2))
+                           //Add a new cell to travel (push operation)
+                           fifo.add(son);
+                      }
+                  portalIndex+=4;
+                 }
+            }
+        return(visibleCellsList);
     }
 
     public final Full3DCell getRootCell(){

@@ -7,7 +7,7 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
-final class SoftwareViewFrustumCullingPerformer{
+public final class SoftwareViewFrustumCullingPerformer{
     
     
     private FloatBuffer projectionMatrix;
@@ -126,24 +126,25 @@ final class SoftwareViewFrustumCullingPerformer{
      * @param p4
      * @return true if the quad is in the frustum or clipped by it
      */
-    final boolean isQuadInViewFrustum(float[] p1,float[] p2,float[] p3,float[] p4){
+    public final boolean isQuadInViewFrustum(float[] p1,float[] p2,float[] p3,float[] p4,int dataOffset){
         //an out flag per vertex, indicate whether a point is inside the frustum
         int[] outFlag=new int[4];
         //contains the coefficients of the planar surface equation
         float[] frustumPlane=new float[4];
         Arrays.fill(outFlag,0);
         frustumMatrix.rewind();
+        int[] shiftedIndicesTable=new int[]{0+dataOffset,1+dataOffset,2+dataOffset};
         //iterate on each planar surface of the frustum
         for(int i=0; i<6; i++)
             {frustumMatrix.get(frustumPlane);
              //the dot product allows to get the distance from plane
-             if(dot(p1[0],p1[1],p1[2],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
+             if(dot(p1[shiftedIndicesTable[0]],p1[shiftedIndicesTable[1]],p1[shiftedIndicesTable[2]],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
                  outFlag[0]|=(1<<i);
-             if(dot(p2[0],p2[1],p2[2],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
+             if(dot(p2[shiftedIndicesTable[0]],p2[shiftedIndicesTable[1]],p2[shiftedIndicesTable[2]],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
                  outFlag[1]|=(1<<i);
-             if(dot(p3[0],p3[1],p3[2],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
+             if(dot(p3[shiftedIndicesTable[0]],p3[shiftedIndicesTable[1]],p3[shiftedIndicesTable[2]],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
                  outFlag[2]|=(1<<i);
-             if(dot(p4[0],p4[1],p4[2],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
+             if(dot(p4[shiftedIndicesTable[0]],p4[shiftedIndicesTable[1]],p4[shiftedIndicesTable[2]],1,frustumPlane[0],frustumPlane[1],frustumPlane[2],frustumPlane[3])<=0)
                  outFlag[3]|=(1<<i);
             }
         frustumMatrix.rewind();
