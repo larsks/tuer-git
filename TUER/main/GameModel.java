@@ -37,6 +37,7 @@ import java.beans.XMLDecoder;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.FloatBuffer;
 import java.rmi.RemoteException;
 //import java.rmi.server.UnicastRemoteObject;
@@ -47,7 +48,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+
+import tools.Full3DCell;
 import tools.GameIO;
+import tools.Network;
 
 public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
@@ -57,6 +61,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private List<GameInfoMessage> gameInfoMessageList;
     
     private GameController gameController;
+    
+    private Network network;
     
     private List<BotModel> botList;
     
@@ -325,6 +331,13 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	    this.player=new PlayerModel(internalClock);
 	    this.rocketTable=new HashMap<Integer,float[]>();
 	    this.isFalling=false;
+	    //TODO: read the network here
+	    /*ObjectInputStream ois=null;
+	    try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
+	        network=(Network)ois.readObject();
+	       }
+	    catch(Throwable t)
+	    {throw new RuntimeException("Unable to read binary network file",t);}*/
 	    //decode XML items to fill the initial health power up list
 	    BufferedInputStream bis=null;
 	    Vector<HealthPowerUpModelBean> beanList=null;
@@ -333,8 +346,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	        beanList=(Vector<HealthPowerUpModelBean>)decoder.readObject();        
 	        decoder.close();
 	       } 
-	    catch(Exception e)
-        {throw new RuntimeException("Unable to decode XML file",e);}
+	    catch(Throwable t)
+        {throw new RuntimeException("Unable to decode XML file",t);}
 	    this.initialHealthPowerUpModelList=new Vector<HealthPowerUpModel>();	    
 	    try{DataInputStream in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/worldmap.data")));
 	        int i,count=0,artWorksCount1,artWorksCount2,artWorksCount3,artWorksCount4;
@@ -701,6 +714,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     // without holes within this map.
     private final void setBotMap(int ioff, byte igroup) {
         botmap[ioff] = igroup;
+    }
+    
+    public final List<Full3DCell> getVisibleCellsList(SoftwareViewFrustumCullingPerformer frustum,Full3DCell playerLocationCell){
+        return(Network.getVisibleCellsList(frustum,playerLocationCell));
     }
     
     public final void launchNewGame(){       

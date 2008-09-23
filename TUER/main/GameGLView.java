@@ -1091,6 +1091,14 @@ class GameGLView implements GLEventListener{
         this.objectViewList.add(hpuv);
     } 
     
+    /*
+    final List<Full3DCellView> getVisibleCellsList(SoftwareViewFrustumCullingPerformerView frustum,Full3DCellView playerLocationCell){
+        List<Full3DCellController> tmpFull3DCellsList=gameController.getVisibleCellsList(frustum.getController(),playerLocationCell.getController()));
+        List<Full3DCellView> full3DCellsList=new ArrayList<Full3DCellView>();
+        //TODO: get each controller and put it into the list
+        return(full3DCellsList);
+    }*/
+    
     /*private final void removeUselessObjectViews(){
         Vector<Object3DView> removedObjects=new Vector<Object3DView>();
         for(Object3DView o3v:objectViewList)

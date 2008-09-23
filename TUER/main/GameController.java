@@ -27,6 +27,9 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 
+import tools.Full3DCell;
+import tools.Network;
+
 //TODO: move dependencies with Frame into the view
 public final class GameController {
 
@@ -461,8 +464,10 @@ public final class GameController {
               else
                   System.out.println("Java 2 sound startup failed.");
              }
-         catch(Exception e)
-         {System.out.println("Problem : "+e);}
+         catch(Throwable t)
+         {System.out.println("Problem : "+t.getMessage());
+          sif=null;
+         }
      }    
 
      public final void closeSound(){ 
@@ -576,4 +581,12 @@ public final class GameController {
          //add this medikit to the view
          gameView.addNewItem(hpuv);
      }
+     
+     /*
+     final List<Full3DCellController> getVisibleCellsList(SoftwareViewFrustumCullingPerformerController frustum,Full3DCellController playerLocationCell){
+         List<Full3DCell> tmpFull3DCellsList=gameModel.getVisibleCellsList(frustum.getModel(),playerLocationCell.getModel()));
+         List<Full3DCellController> full3DCellsList=new ArrayList<Full3DCellController>();
+         //TODO: get each controller and put it into the list
+         return(full3DCellsList);
+     }*/
 }
