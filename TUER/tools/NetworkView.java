@@ -22,7 +22,7 @@ public final class NetworkView{
         this.cellsViewsList=cellsViewsList;
         for(Full3DCellView cellView:this.cellsViewsList)
             for(Full3DCellController cellController:cellView.getController().getNeighboursCellsControllersList())
-                cellView.getNeighboursCellsViewListsList().add(cellController.getView());               
+                cellView.getNeighboursCellsViewsList().add(cellController.getView());               
     }
     
     public final NetworkController getController(){
@@ -43,7 +43,7 @@ public final class NetworkView{
     }
     
     public final void draw(){
-        Full3DCellView c;
+        /*Full3DCellView c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCellView> fifo=new ArrayList<Full3DCellView>();
         //Each cell that has been seen has to be marked to avoid an infinite loop
@@ -60,7 +60,7 @@ public final class NetworkView{
              else                
                  {c.draw();
                   c.setVisible(false);
-                  for(Full3DCellView son:c.getNeighboursCellsViewListsList())
+                  for(Full3DCellView son:c.getNeighboursCellsViewsList())
                       if(!markedCellsList.contains(son))
                           {//Mark the cell to avoid traveling it more than once
                            markedCellsList.add(son);
@@ -68,6 +68,11 @@ public final class NetworkView{
                            fifo.add(son);
                           }
                  }
-            }       
+            }  */ 
+        for(Full3DCellView cellView:cellsViewsList)
+            if(cellView.getVisible())
+                {cellView.draw();
+                 cellView.setVisible(false);
+                }
     }
 }

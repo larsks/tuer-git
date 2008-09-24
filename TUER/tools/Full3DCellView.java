@@ -17,7 +17,7 @@ public final class Full3DCellView{
     
     private boolean visible;
     
-    private transient List<Full3DCellView> neighboursCellsViewListsList;
+    private transient List<Full3DCellView> neighboursCellsViewsList;
     
     private GL gl;
     
@@ -25,7 +25,7 @@ public final class Full3DCellView{
     public Full3DCellView(GL gl){
         this.visible=false;
         this.gl=gl;
-        this.neighboursCellsViewListsList=new ArrayList<Full3DCellView>();
+        this.neighboursCellsViewsList=new ArrayList<Full3DCellView>();
     }
     
     
@@ -44,12 +44,12 @@ public final class Full3DCellView{
         return(controller);
     }
 
-    public final List<Full3DCellView> getNeighboursCellsViewListsList(){
-        return(neighboursCellsViewListsList);
+    public final List<Full3DCellView> getNeighboursCellsViewsList(){
+        return(neighboursCellsViewsList);
     }
 
-    public final void setNeighboursCellsViewListsList(List<Full3DCellView> neighboursCellsViewListsList){
-        this.neighboursCellsViewListsList=neighboursCellsViewListsList;
+    public final void setNeighboursCellsViewsList(List<Full3DCellView> neighboursCellsViewsList){
+        this.neighboursCellsViewsList=neighboursCellsViewsList;
     }
 
     public final void setVisible(boolean visible){      

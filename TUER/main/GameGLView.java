@@ -161,7 +161,7 @@ class GameGLView implements GLEventListener{
     
     private static final float glPolygonOffsetUnit=-20.0f;
     
-    private static final int loadableItemCount=27+
+    private static final int loadableItemCount=28+
     ExplosionViewFactory.getTexturesCount()+
     ExplosionViewFactory.getVertexSetsCount()+
     HealthPowerUpViewFactory.getTexturesCount()+
@@ -372,9 +372,9 @@ class GameGLView implements GLEventListener{
 	              //draw the levelTextured level	              
 	              this.levelTexture.bind(); 
 	              //TODO: uncomment it to retablish the older behavior
-	              this.levelVertexSet.draw();	
+	              //this.levelVertexSet.draw();	
 	              //TODO: uncomment it to use the experimental scenegraph
-	              //networkView.draw();
+	              networkView.draw();
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
@@ -925,6 +925,12 @@ class GameGLView implements GLEventListener{
 	                 loadProgress+=1;
 	             loadProgress+=HealthPowerUpViewFactory.getInstance(gl,false).getTexturesList().size();
 	             loadProgress+=ExplosionViewFactory.getInstance(gl,false).getTexturesList().size();
+	             if(this.networkView==null)
+	                 {gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
+	                  return; 
+	                 }
+	             else
+	                 loadProgress+=1;	             
 	            }
 	         catch(IOException ioe)
 	         {ioe.printStackTrace();}	         
@@ -949,7 +955,7 @@ class GameGLView implements GLEventListener{
     	/*gl.glViewport(-50,-50,100,100);*/	
     	/*gl.glClearDepth(1.0);
 	    gl.glEnable(GL.GL_DEPTH_TEST);
-	    gl.glDepthFunc(GL.GL_LESS);*/
+	    gl.glDepthFunc(GL.GL_LESS);*/   	
     	gl.glEnable(GL.GL_CULL_FACE);
     	gl.glCullFace(GL.GL_BACK);	
     	gl.glMatrixMode(GL.GL_PROJECTION);
@@ -959,7 +965,7 @@ class GameGLView implements GLEventListener{
     	/*glu.gluPerspective(65.0,4/3,1,1000);*/
     	//FIXME: set a tolerance
     	softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
-    	gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
+    	//gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
     	gl.glMatrixMode(GL.GL_MODELVIEW);
     	gl.glLoadIdentity();
     	//this.lStartPhase=System.currentTimeMillis()+15000;

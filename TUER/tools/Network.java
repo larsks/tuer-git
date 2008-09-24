@@ -13,6 +13,7 @@
 */
 package tools;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public final class Network implements Serializable{
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    private static final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
+    private final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
         Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
@@ -124,7 +125,7 @@ public final class Network implements Serializable{
         while(!fifo.isEmpty())
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
-             //This is the main treatment; if the point is in the cell, the travel ends
+             //This is the main treatment; if the point is in the cell, the travel ends            
              if(c.contains(x,y,z))
                  return(c);
              else
@@ -138,6 +139,10 @@ public final class Network implements Serializable{
                  }
             }
         //FIXME: treat the case of single isolated cells (11 cells are isolated)
+        //it is a bad fix, it falls back on the list
+        /*for(Full3DCell cell:cellsList)
+            if(cell.contains(x,y,z))
+                return(cell);*/
         
         //It should NEVER HAPPEN
         //It means that you are completely outside the network
@@ -147,8 +152,21 @@ public final class Network implements Serializable{
     
     public final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z){
         setRootCell(locate(x,y,z));
-        updateVisibleCellsList(frustum,getRootCell());
+        //updateVisibleCellsList(frustum,getRootCell());
+        TEMPORARYshowOnlyControbutingCells(x,y,z);
     }
+    
+    private final void TEMPORARYshowOnlyControbutingCells(float x,float y,float z){
+        Rectangle cellRect,playerRect=new Rectangle();
+        final float contributionSize=65536*30;
+        playerRect.setFrameFromCenter(x,z,x+contributionSize,z+contributionSize);
+        //System.out.println(playerRect);
+        for(Full3DCell cell:cellsList)
+            {cellRect=cell.getEnclosingRectangle();
+             cell.setVisible(cellRect.contains(x,z)||cellRect.intersects(playerRect));         
+            }
+    }
+    
     /*
      * Breadth First Search to locate the cell in which the point is.
      * BFS has been chosen because it is faster when we know that the player has gone 
@@ -171,7 +189,7 @@ public final class Network implements Serializable{
              c=fifo.remove(0);
              //Add the cell into the list of visible cells 
              //visibleCellsList.add(c);
-             //TODO: update the visibility
+             //update the visibility
              c.setVisible(true);
              portalIndex=0;
              for(Full3DCell son:c.getNeighboursCellsList())
@@ -200,9 +218,11 @@ public final class Network implements Serializable{
     }
 
     public final void setRootCell(Full3DCell rootCell){
-        this.rootCell=rootCell;
-        if(this.controller!=null)
-            this.controller.setRootCell(rootCell.getController());
+        if(rootCell!=null)
+            {this.rootCell=rootCell;
+             if(this.controller!=null)
+                 this.controller.setRootCell(rootCell.getController());               
+            }       
     }
 
     public final NetworkController getController(){

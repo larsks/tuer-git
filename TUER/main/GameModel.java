@@ -334,14 +334,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	    this.player=new PlayerModel(internalClock);
 	    this.rocketTable=new HashMap<Integer,float[]>();
 	    this.isFalling=false;
-	    //read the network here
-	    ObjectInputStream ois=null;
-	    try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
-	        network=(Network)ois.readObject();
-	        ois.close();
-	       }
-	    catch(Throwable t)
-	    {throw new RuntimeException("Unable to read binary network file",t);}
 	    //decode XML items to fill the initial health power up list
 	    BufferedInputStream bis=null;
 	    Vector<HealthPowerUpModelBean> beanList=null;
@@ -476,6 +468,17 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("Unable to read the data files",ioe);}	    
+    }
+    
+    private final void loadNetwork(){
+        //read the network here
+        ObjectInputStream ois=null;
+        try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
+            network=(Network)ois.readObject();
+            ois.close();
+           }
+        catch(Throwable t)
+        {throw new RuntimeException("Unable to read binary network file",t);}
     }
     
     final byte[] getInitialCollisionMap(){
@@ -720,16 +723,22 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         botmap[ioff] = igroup;
     }
     
-    /*final List<Full3DCell> getVisibleCellsList(){
-        return(Network.getVisibleCellsList(svfcpModel,network.locate((float)player.getX(),(float)player.getY(),(float)player.getZ())));
-    }*/
-    
     final List<Full3DCell> getCellsList(){
+        if(network==null)
+            loadNetwork();
         return(network.getListFromGraph());
     }
     
     final Network getNetwork(){
+        if(network==null)
+            loadNetwork();
         return(network);
+    }
+    
+    private final void updateVisibleCellsList(){
+        if(network==null)
+            loadNetwork();
+        network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ());
     }
     
     public final void launchNewGame(){       
@@ -746,6 +755,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         reinitializeExplosions();
         reinitializeItems();
         purgeGameInfoMessageList();
+        if(network!=null)
+            network.hideAllCells();
     }
     
     public final void resumeGame(){
@@ -1239,13 +1250,14 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         rPlayerVoxel.height=playerSize;
         rWallVoxel.width=wallSize;
         rWallVoxel.height=wallSize;
-        //loop until the player tries to exit the game
+        //loop until the player tries to exit the game     
         while(gameRunning)
-            {reinit(hasBeenKilled);     // re-set all positions
+            {reinit(hasBeenKilled);     // re-set all positions            
 	         while(gameController.getCycle()!=GameCycle.GAME && gameRunning)
 	             {//TODO: update a model only used in the menu
 	              gameController.display();
-	             }       
+	             }
+	         updateVisibleCellsList();
 	         if(gameRunning)
 	             {if(hasBeenKilled)
 	                  {player.respawn();
@@ -1264,7 +1276,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	         long cycleDuration;
 	         //loop until the end of a party (even when game paused)
 	         while(innerLoop)
-        	     {network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ());
+        	     {updateVisibleCellsList();
         	      gameController.display();		         	             
                   //update the clock if required
                   cycleDuration=internalClock.getElapsedTime();

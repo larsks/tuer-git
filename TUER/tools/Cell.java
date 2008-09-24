@@ -14,6 +14,7 @@
 
 package tools;
 
+import java.awt.Rectangle;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -36,6 +37,8 @@ public final class Cell{
     private transient List<PointPair> leftPortals;
     
     private transient List<PointPair> rightPortals;
+    
+    private transient Rectangle enclosingRectangle;
     
     
     public Cell(){
@@ -60,6 +63,190 @@ public final class Cell{
         );
     }
     
+    
+    final Rectangle getEnclosingRectangle(){
+        double minx=Double.MAX_VALUE,minz=Double.MAX_VALUE,maxx=Double.MIN_VALUE,maxz=Double.MIN_VALUE;
+        for(PointPair p:topWalls)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:bottomWalls)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:leftWalls)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:rightWalls)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:topPortals)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:bottomPortals)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:leftPortals)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        for(PointPair p:rightPortals)
+            {if(p.getFirst().getX()<minx) 
+                 minx=p.getFirst().getX();
+             else
+                 if(p.getFirst().getX()>maxx) 
+                     maxx=p.getFirst().getX();
+             if(p.getLast().getX()<minx) 
+                 minx=p.getLast().getX();
+             else
+                 if(p.getLast().getX()>maxx) 
+                     maxx=p.getLast().getX();
+             if(p.getFirst().getY()<minz) 
+                 minz=p.getFirst().getY();
+             else
+                 if(p.getFirst().getY()>maxz) 
+                     maxz=p.getFirst().getY();
+             if(p.getLast().getY()<minz) 
+                 minz=p.getLast().getY();
+             else
+                 if(p.getLast().getY()>maxz) 
+                     maxz=p.getLast().getY();
+            }
+        if(enclosingRectangle==null)
+            enclosingRectangle=new Rectangle();
+        enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
+        return(enclosingRectangle);
+    }
     
     public List<PointPair> getTopWalls(){
         return(Collections.unmodifiableList(topWalls));
@@ -306,7 +493,7 @@ public final class Cell{
     }
     
     public String toString(){
-    	final String newLine="\n";//System.getProperty("line.separator");
+    	/*final String newLine="\n";//System.getProperty("line.separator");
     	String tmp="";
     	//tmp+=((Object)this).toString()+newLine;
     	tmp+="top walls :"+newLine;
@@ -334,7 +521,8 @@ public final class Cell{
     	for(PointPair p:rightPortals)
     	    tmp+=p.toString()+newLine;
     	tmp+=newLine;
-    	return(tmp);
+    	return(tmp);*/
+        return(getEnclosingRectangle().toString());
     }
 
 

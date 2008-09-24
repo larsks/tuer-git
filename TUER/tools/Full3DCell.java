@@ -137,7 +137,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:bottomWalls)
@@ -149,7 +149,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:leftWalls)
@@ -161,7 +161,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:rightWalls)
@@ -173,7 +173,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:topPortals)
@@ -185,7 +185,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:bottomPortals)
@@ -197,7 +197,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:leftPortals)
@@ -209,7 +209,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         for(float[] vertex:rightPortals)
@@ -221,7 +221,7 @@ public final class Full3DCell implements Serializable{
              if(vertex[4]<minz) 
                  minz=vertex[4];
              else
-                 if(vertex[4]<maxz) 
+                 if(vertex[4]>maxz) 
                      maxz=vertex[4];
             }
         enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
