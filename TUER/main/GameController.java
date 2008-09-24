@@ -22,13 +22,18 @@ import java.nio.FloatBuffer;
 /*import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.BitSet;*/
+import java.util.ArrayList;
 import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 
 import tools.Full3DCell;
+import tools.Full3DCellController;
+import tools.Full3DCellView;
 import tools.Network;
+import tools.NetworkController;
+import tools.NetworkView;
 
 //TODO: move dependencies with Frame into the view
 public final class GameController {
@@ -582,11 +587,32 @@ public final class GameController {
          gameView.addNewItem(hpuv);
      }
      
-     /*
-     final List<Full3DCellController> getVisibleCellsList(SoftwareViewFrustumCullingPerformerController frustum,Full3DCellController playerLocationCell){
-         List<Full3DCell> tmpFull3DCellsList=gameModel.getVisibleCellsList(frustum.getModel(),playerLocationCell.getModel()));
-         List<Full3DCellController> full3DCellsList=new ArrayList<Full3DCellController>();
-         //TODO: get each controller and put it into the list
+     final void registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(SoftwareViewFrustumCullingPerformer frustumView){
+         new SoftwareViewFrustumCullingPerformerController(gameModel.getSvfcpModel(),frustumView);
+         //bind all full cells models to their controllers and their views
+         List<Full3DCellController> cellsControllersList=new ArrayList<Full3DCellController>();
+         List<Full3DCellView> cellsViewsList=new ArrayList<Full3DCellView>();
+         Full3DCellView cellView;
+         Full3DCellController cellController;
+         for(Full3DCell cellModel:gameModel.getCellsList())
+             {cellView=new Full3DCellView(gl);
+              cellController=new Full3DCellController(cellModel,cellView);
+              cellsControllersList.add(cellController);
+              cellsViewsList.add(cellView);
+             }
+         //build the network view
+         NetworkView networkView=new NetworkView(cellsViewsList);
+         //build the network controller
+         new NetworkController(gameModel.getNetwork(),networkView,cellsControllersList);
+         gameView.setNetworkView(networkView);
+     }
+     
+     
+     /*final List<Full3DCellView> getVisibleCellsList(){
+         List<Full3DCell> tmpFull3DCellsList=gameModel.getVisibleCellsList();
+         List<Full3DCellView> full3DCellsList=new ArrayList<Full3DCellView>();
+         for(Full3DCell cell:tmpFull3DCellsList)
+             full3DCellsList.add(cell.getController().getView());
          return(full3DCellsList);
      }*/
 }

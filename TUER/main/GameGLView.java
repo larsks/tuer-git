@@ -33,6 +33,9 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
+import tools.Full3DCellView;
+import tools.NetworkView;
+
 /**
  * This class has the role of being the GL part of the view
  * (in the meaning of the design pattern "MVC").
@@ -151,6 +154,8 @@ class GameGLView implements GLEventListener{
     private String[] aboutText;
     
     private File snapDirectory;
+    
+    private NetworkView networkView;
     
     private static final float glPolygonOffsetFactor=-20.0f;
     
@@ -362,11 +367,14 @@ class GameGLView implements GLEventListener{
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
-	              softwareViewFrustumCullingPerformer.computeViewFrustum();
+	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
 	              this.levelTexture.bind(); 
-	              this.levelVertexSet.draw();	                                                 
+	              //TODO: uncomment it to retablish the older behavior
+	              this.levelVertexSet.draw();	
+	              //TODO: uncomment it to use the experimental scenegraph
+	              //networkView.draw();
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
@@ -951,6 +959,7 @@ class GameGLView implements GLEventListener{
     	/*glu.gluPerspective(65.0,4/3,1,1000);*/
     	//FIXME: set a tolerance
     	softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
+    	gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
     	gl.glMatrixMode(GL.GL_MODELVIEW);
     	gl.glLoadIdentity();
     	//this.lStartPhase=System.currentTimeMillis()+15000;
@@ -1089,6 +1098,10 @@ class GameGLView implements GLEventListener{
     
     final void addNewItem(HealthPowerUpView hpuv){
         this.objectViewList.add(hpuv);
+    }
+
+    public final void setNetworkView(NetworkView networkView){
+        this.networkView=networkView;
     } 
     
     /*

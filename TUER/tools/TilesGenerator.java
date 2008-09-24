@@ -31,6 +31,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -802,10 +803,18 @@ public final class TilesGenerator{
 	     //the cells generator uses a cartesian reference mark
 	     //whereas the tiles generator inverts left and right
 	     //that is why you have to invert it
-	     CellsGenerator.generate(topWallsList,bottomWallsList,
+	     Network network=CellsGenerator.generate(topWallsList,bottomWallsList,
 	             rightWallsList,leftWallsList,artTopWallsList,
 	             artBottomWallsList,artRightWallsList,artLeftWallsList);
-	     //TODO: write the network into a file
+	     //write the network into a file
+	     ObjectOutputStream oos=null;
+	     //TODO: put the filename somewhere else!!!!!
+	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("pic256/network.data")));
+	         oos.writeObject(network);
+	         oos.close();
+	        }
+	     catch(Throwable t)
+	     {throw new RuntimeException("Unable to write the network",t);}
     }      
     
     

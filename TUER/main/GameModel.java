@@ -64,6 +64,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     private Network network;
     
+    private SoftwareViewFrustumCullingPerformerModel svfcpModel;
+    
     private List<BotModel> botList;
     
     private List<Impact> impactList;
@@ -317,6 +319,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     @SuppressWarnings("unchecked")
     GameModel(GameController gameController)throws RuntimeException,RemoteException{
         //this.dataModificationFlagsBitSet=new BitSet();
+        this.svfcpModel=new SoftwareViewFrustumCullingPerformerModel();
         this.gameInfoMessageList=new ArrayList<GameInfoMessage>();
     	this.gameController=gameController;
 	    this.collisionMap=new byte[mapSize];
@@ -331,13 +334,14 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	    this.player=new PlayerModel(internalClock);
 	    this.rocketTable=new HashMap<Integer,float[]>();
 	    this.isFalling=false;
-	    //TODO: read the network here
-	    /*ObjectInputStream ois=null;
+	    //read the network here
+	    ObjectInputStream ois=null;
 	    try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
 	        network=(Network)ois.readObject();
+	        ois.close();
 	       }
 	    catch(Throwable t)
-	    {throw new RuntimeException("Unable to read binary network file",t);}*/
+	    {throw new RuntimeException("Unable to read binary network file",t);}
 	    //decode XML items to fill the initial health power up list
 	    BufferedInputStream bis=null;
 	    Vector<HealthPowerUpModelBean> beanList=null;
@@ -716,8 +720,16 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         botmap[ioff] = igroup;
     }
     
-    public final List<Full3DCell> getVisibleCellsList(SoftwareViewFrustumCullingPerformer frustum,Full3DCell playerLocationCell){
-        return(Network.getVisibleCellsList(frustum,playerLocationCell));
+    /*final List<Full3DCell> getVisibleCellsList(){
+        return(Network.getVisibleCellsList(svfcpModel,network.locate((float)player.getX(),(float)player.getY(),(float)player.getZ())));
+    }*/
+    
+    final List<Full3DCell> getCellsList(){
+        return(network.getListFromGraph());
+    }
+    
+    final Network getNetwork(){
+        return(network);
     }
     
     public final void launchNewGame(){       
@@ -1252,7 +1264,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	         long cycleDuration;
 	         //loop until the end of a party (even when game paused)
 	         while(innerLoop)
-        	     {gameController.display();		         	             
+        	     {network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ());
+        	      gameController.display();		         	             
                   //update the clock if required
                   cycleDuration=internalClock.getElapsedTime();
                   if(bpause) 
@@ -2289,6 +2302,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                 oldMessagesList.add(gim);
         //remove old messages
         gameInfoMessageList.removeAll(oldMessagesList);
+    }
+
+    final SoftwareViewFrustumCullingPerformerModel getSvfcpModel(){
+        return svfcpModel;
     }
 
     /*@Override

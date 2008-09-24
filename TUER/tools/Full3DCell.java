@@ -30,6 +30,8 @@ public final class Full3DCell implements Serializable{
     
     private transient List<float[]> neighboursPortalsList;
     
+    private transient Full3DCellController controller;
+    
     //TODO: rather use at least an axis-aligned bounding box
     private transient Rectangle enclosingRectangle;
     //each array contains a single vertex
@@ -78,7 +80,14 @@ public final class Full3DCell implements Serializable{
     
 
     public final Object readResolve()throws ObjectStreamException{
+        if(neighboursCellsList==null)
+            neighboursCellsList=new ArrayList<Full3DCell>(); 
+        if(neighboursPortalsList==null)
+            neighboursPortalsList=new ArrayList<float[]>();
+        if(enclosingRectangle==null)    
+            enclosingRectangle=new Rectangle();
         computeEnclosingRectangle();
+        controller=null;
         return(this);
     }
     
@@ -299,25 +308,25 @@ public final class Full3DCell implements Serializable{
     }
     
     public final boolean contains(float[] point){
-        //ordinate temporarily ignored
-        return(this.enclosingRectangle.contains(point[0],point[2]));
+        return(contains(point[0],point[1],point[2]));
     }
-
+    
+    public final boolean contains(float x,float y,float z){
+        //ordinate temporarily ignored
+        return(this.enclosingRectangle.contains(x,z));
+    }
 
     public final List<float[]> getCeilWalls(){
         return(ceilWalls);
     }
 
-
     public final void setCeilWalls(List<float[]> ceilWalls){
         this.ceilWalls=ceilWalls;
     }
 
-
     public final List<float[]> getFloorWalls(){
         return(floorWalls);
     }
-
 
     public final void setFloorWalls(List<float[]> floorWalls){
         this.floorWalls=floorWalls;
@@ -345,5 +354,17 @@ public final class Full3DCell implements Serializable{
 
     public final void setFloorPortals(List<float[]> floorPortals){
         this.floorPortals=floorPortals;
+    }
+
+    public final Full3DCellController getController(){
+        return(controller);
+    }
+
+    public final void setController(Full3DCellController controller){
+        this.controller=controller;
+    }
+
+    public final void setVisible(boolean visible){       
+        this.controller.setVisible(visible);
     }
 }

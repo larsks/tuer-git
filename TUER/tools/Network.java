@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import main.SoftwareViewFrustumCullingPerformer;
+import main.SoftwareViewFrustumCullingPerformerModel;
 
 public final class Network implements Serializable{
     
@@ -25,6 +25,10 @@ public final class Network implements Serializable{
     private static final long serialVersionUID = 1L;
     
     private Full3DCell rootCell;
+    
+    private List<Full3DCell> cellsList;
+    
+    private transient NetworkController controller;
     
     
     public Network(){}
@@ -35,6 +39,7 @@ public final class Network implements Serializable{
     
     
     private final void writeObject(java.io.ObjectOutputStream out)throws IOException{
+        /*List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
         //use BFS, write a list of cells
         if(rootCell!=null)
             {Full3DCell c;
@@ -48,8 +53,8 @@ public final class Network implements Serializable{
              while(!fifo.isEmpty())
                  {//Get the first added element as it is a FIFO (pop operation)
                   c=fifo.remove(0);
-                  //This is the main treatment, write each cell
-                  out.writeObject(c);
+                  //This is the main treatment, save each cell that has to be written                
+                  full3DCellsList.add(c);
                   for(Full3DCell son:c.getNeighboursCellsList())
                       if(!markedCellsList.contains(son))
                           {//Mark the cell to avoid traveling it more than once
@@ -59,6 +64,9 @@ public final class Network implements Serializable{
                           }
                  }
             }
+        out.writeObject(full3DCellsList);*/
+        //write all cells even the unreachable cells
+        out.writeObject(cellsList);
     }
 
     private final void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException{
@@ -68,9 +76,10 @@ public final class Network implements Serializable{
     }   
     
     private final void buildGraphFromList(List<Full3DCell> full3DCellsList){
-        List<float[]> commonPortalsList;
+        cellsList=full3DCellsList;              
         //the first cell becomes the root cell
         rootCell=full3DCellsList.get(0);
+        List<float[]> commonPortalsList;
         //compute the neighbors list of each cell in order to rebuild the network
         int i=0,j;
         //for each cell, we look for its sons
@@ -90,8 +99,12 @@ public final class Network implements Serializable{
             }
     }
     
-    public final Full3DCell locate(float[] point){
-        return(locate(point,getRootCell()));
+    public final List<Full3DCell> getListFromGraph(){
+        return(cellsList);
+    }
+    
+    public final Full3DCell locate(float x,float y,float z){
+        return(locate(x,y,z,getRootCell()));
     }
     
     /*
@@ -99,7 +112,7 @@ public final class Network implements Serializable{
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    public static final Full3DCell locate(float[] point,Full3DCell firstTraveledCell){
+    private static final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
         Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
@@ -112,7 +125,7 @@ public final class Network implements Serializable{
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
              //This is the main treatment; if the point is in the cell, the travel ends
-             if(c.contains(point))
+             if(c.contains(x,y,z))
                  return(c);
              else
                  {for(Full3DCell son:c.getNeighboursCellsList())
@@ -124,18 +137,25 @@ public final class Network implements Serializable{
                           }
                  }
             }
+        //FIXME: treat the case of single isolated cells (11 cells are isolated)
+        
         //It should NEVER HAPPEN
         //It means that you are completely outside the network
         return(null);
     }
     
+    
+    public final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z){
+        setRootCell(locate(x,y,z));
+        updateVisibleCellsList(frustum,getRootCell());
+    }
     /*
      * Breadth First Search to locate the cell in which the point is.
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    public static final List<Full3DCell> getVisibleCellsList(SoftwareViewFrustumCullingPerformer frustum,Full3DCell firstTraveledCell){
-        List<Full3DCell> visibleCellsList=new ArrayList<Full3DCell>();
+    private static final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,Full3DCell firstTraveledCell){
+        //List<Full3DCell> visibleCellsList=new ArrayList<Full3DCell>();
         Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
@@ -150,7 +170,9 @@ public final class Network implements Serializable{
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
              //Add the cell into the list of visible cells 
-             visibleCellsList.add(c);
+             //visibleCellsList.add(c);
+             //TODO: update the visibility
+             c.setVisible(true);
              portalIndex=0;
              for(Full3DCell son:c.getNeighboursCellsList())
                  {if(!markedCellsList.contains(son))
@@ -170,10 +192,30 @@ public final class Network implements Serializable{
                   portalIndex+=4;
                  }
             }
-        return(visibleCellsList);
+        //return(visibleCellsList);
     }
 
     public final Full3DCell getRootCell(){
         return(rootCell);
+    }
+
+    public final void setRootCell(Full3DCell rootCell){
+        this.rootCell=rootCell;
+        if(this.controller!=null)
+            this.controller.setRootCell(rootCell.getController());
+    }
+
+    public final NetworkController getController(){
+        return(controller);
+    }
+
+    public final void setController(NetworkController controller){
+        this.controller=controller;
+        if(this.rootCell!=null)
+            this.controller.setRootCell(rootCell.getController());
     }  
+    
+    public final void hideAllCells(){
+        this.controller.hideAllCells();
+    }
 }
