@@ -14,6 +14,7 @@
 package tools;
 
 import java.awt.Rectangle;
+import java.awt.geom.Arc2D;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public final class Network implements Serializable{
      * to a close neighbor of the previous occupied cell
      */
     private final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
-        Full3DCell c;
+        /*Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
         //Each cell that has been seen has to be marked to avoid an infinite loop
@@ -137,12 +138,12 @@ public final class Network implements Serializable{
                            fifo.add(son);
                           }
                  }
-            }
+            }*/
         //FIXME: treat the case of single isolated cells (11 cells are isolated)
         //it is a bad fix, it falls back on the list
-        /*for(Full3DCell cell:cellsList)
+        for(Full3DCell cell:cellsList)
             if(cell.contains(x,y,z))
-                return(cell);*/
+                return(cell);
         
         //It should NEVER HAPPEN
         //It means that you are completely outside the network
@@ -150,19 +151,20 @@ public final class Network implements Serializable{
     }
     
     
-    public final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z){
+    public final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z,float direction){
         setRootCell(locate(x,y,z));
         //updateVisibleCellsList(frustum,getRootCell());
-        TEMPORARYshowOnlyControbutingCells(x,y,z);
+        TEMPORARYshowOnlyControbutingCells(x,y,z,direction);
     }
     
-    private final void TEMPORARYshowOnlyControbutingCells(float x,float y,float z){
-        Rectangle cellRect,playerRect=new Rectangle();
-        final float contributionSize=65536*30;
-        playerRect.setFrameFromCenter(x,z,x+contributionSize,z+contributionSize);
+    private final void TEMPORARYshowOnlyControbutingCells(float x,float y,float z,float direction){
+        Rectangle cellRect;
+        final float arcContributionSize=65536*20;
+        final Arc2D.Float playerArc=new Arc2D.Float();
+        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+180,180,Arc2D.PIE);
         for(Full3DCell cell:cellsList)
             {cellRect=cell.getEnclosingRectangle();
-             cell.setVisible(cellRect.contains(x,z)||cellRect.intersects(playerRect));         
+             cell.setVisible(cellRect.contains(x,z)||playerArc.intersects(cellRect));         
             }
     }
     

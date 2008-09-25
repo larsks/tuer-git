@@ -738,7 +738,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private final void updateVisibleCellsList(){
         if(network==null)
             loadNetwork();
-        network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ());
+        network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ(),(float)player.getDirection());
     }
     
     public final void launchNewGame(){       
@@ -1134,7 +1134,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
        player.setX((initialPositionX*factor)+(factor/2));
        player.setY(0);
        player.setZ((initialPositionZ*factor)+(factor/2));      
-       player.setDirection(fullCircle/4*2);
+       player.setDirection(fullCircle/2);
        System.out.println("reinit call");
        // by default, all object slots are passive.
        for(int counter=0; counter<numObjects; counter++) 
