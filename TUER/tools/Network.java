@@ -160,7 +160,6 @@ public final class Network implements Serializable{
         Rectangle cellRect,playerRect=new Rectangle();
         final float contributionSize=65536*30;
         playerRect.setFrameFromCenter(x,z,x+contributionSize,z+contributionSize);
-        //System.out.println(playerRect);
         for(Full3DCell cell:cellsList)
             {cellRect=cell.getEnclosingRectangle();
              cell.setVisible(cellRect.contains(x,z)||cellRect.intersects(playerRect));         

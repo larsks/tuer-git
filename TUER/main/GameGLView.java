@@ -378,7 +378,8 @@ class GameGLView implements GLEventListener{
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
-	              //draw the artworks              	                  
+	              //draw the artworks  
+	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
 	              if(!gameController.getPlayerWins())
 	                  {this.artTexture1.bind();	                   
 	                   this.artVertexSet1.draw();
@@ -394,7 +395,8 @@ class GameGLView implements GLEventListener{
 	                   this.artTexture4.bind();	                   
 	                   this.artVertexSet2.draw();
                        this.artVertexSet4.draw();
-	                  }	                
+	                  }	
+	              gl.glDisable(GL.GL_POLYGON_OFFSET_FILL);
 	              //draw the bots
 	              limit=0;      
 	              FloatBuffer translation=BufferUtil.newFloatBuffer(gameController.getBotList().size()*3);
@@ -965,7 +967,6 @@ class GameGLView implements GLEventListener{
     	/*glu.gluPerspective(65.0,4/3,1,1000);*/
     	//FIXME: set a tolerance
     	softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
-    	//gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
     	gl.glMatrixMode(GL.GL_MODELVIEW);
     	gl.glLoadIdentity();
     	//this.lStartPhase=System.currentTimeMillis()+15000;

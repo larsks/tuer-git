@@ -193,7 +193,8 @@ public final class TilesGenerator{
             String healthPowerUpFilename,
             String healthPowerUpListFilename,
             String crosshairFilename,
-            String sphericalBeastFilename){
+            String sphericalBeastFilename,
+            String networkFilename){
         topWallsList=new Vector<PointPair>();   
         bottomWallsList=new Vector<PointPair>();
         leftWallsList=new Vector<PointPair>();
@@ -808,8 +809,7 @@ public final class TilesGenerator{
 	             artBottomWallsList,artRightWallsList,artLeftWallsList);
 	     //write the network into a file
 	     ObjectOutputStream oos=null;
-	     //TODO: put the filename somewhere else!!!!!
-	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("pic256/network.data")));
+	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));
 	         oos.writeObject(network);
 	         oos.close();
 	        }
@@ -1811,7 +1811,7 @@ public final class TilesGenerator{
     }
     
     public static void main(String[] args){
-    	if(args.length!=19)
+    	if(args.length!=20)
     	    {System.out.println("Usage: java TilesGenerator map_filename"+
     	            " tiles_filename rocketlauncher_filename"+
     	            " binary_map_filename bot_filename"+
@@ -1828,12 +1828,13 @@ public final class TilesGenerator{
     	            " healthPowerUpFilename"+
     	            " healthPowerUpListFilename"+
     	            " crosshairFilename"+
-    	            " sphericalBeastFilename");
+    	            " sphericalBeastFilename"+
+    	            " networkFilename");
     	     System.exit(0);
     	    }
 	    new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
 	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],args[13],
-	        args[14],args[15],args[16],args[17],args[18]);
+	        args[14],args[15],args[16],args[17],args[18],args[19]);
     }
     
 }

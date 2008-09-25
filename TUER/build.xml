@@ -157,6 +157,7 @@
 	        	<arg value="xml/itemList.xml"/>
 	        	<arg value="pic256/crosshair.data"/>
 	        	<arg value="pic256/sphericalBeast.data"/>
+	        	<arg value="pic256/network.data"/>
 	        </java>
 	</target>
 	

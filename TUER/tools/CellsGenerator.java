@@ -352,6 +352,7 @@ public final class CellsGenerator{
     }
     
     //resize 2D cells and portals so that the average width of the portals decreases 
+    //FIXME: when merging some cells, they overlap
     private final static void optimizeRawCellsAndPortals(Vector<Cell> cellsList){
         PointPair leftPortal,rightPortal;
         Cell mergedResultCell=null;
@@ -819,7 +820,7 @@ public final class CellsGenerator{
                  }
              //compute the enclosing rectangle of this full 3D atomic wall
              fullCell.computeEnclosingRectangle();
-             System.out.println("Rectangle: "+fullCell.getEnclosingRectangle());
+             //System.out.println("Rectangle: "+fullCell.getEnclosingRectangle());
              xmin=fullCell.getEnclosingRectangle().x;
              zmin=fullCell.getEnclosingRectangle().y;
              xmax=xmin+fullCell.getEnclosingRectangle().width-1;
