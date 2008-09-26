@@ -28,8 +28,6 @@ abstract class VertexSet implements IVertexSet{
     
     protected FloatBuffer buffer;
     
-    protected GL gl;
-    
     protected int mode;
     
     

@@ -1,12 +1,9 @@
 package main;
 
 import java.util.List;
-
-import javax.media.opengl.GL;
-
 import com.sun.opengl.util.texture.Texture;
 
-abstract class ViewFactory {
+abstract class ViewFactory{
 
     
     private List<IVertexSet> vertexSetsList;
@@ -52,5 +49,5 @@ abstract class ViewFactory {
         this.texturesIndicesList=texturesIndicesList;
     }
     
-    abstract void loadProgressively(GL gl);
+    abstract void loadProgressively();
 }

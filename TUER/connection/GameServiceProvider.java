@@ -17,7 +17,6 @@ package connection;
 import drawer.VertexSetFactory;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 import main.GameController;
 import main.IDynamicVertexSet;
 import main.IStaticVertexSet;
@@ -46,33 +45,33 @@ public class GameServiceProvider implements IVertexSetProvider{
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(final GL gl,final float[] array,int mode){
-        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(gl,array,mode)));
+    public IStaticVertexSet getIStaticVertexSetInstance(final float[] array,int mode){
+        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(array,mode)));
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(final GL gl,final IVertexSet vertexSet,int mode){
-        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(gl,new VertexSetConnector(vertexSet),mode)));
+    public IStaticVertexSet getIStaticVertexSetInstance(final IVertexSet vertexSet,int mode){
+        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(new VertexSetConnector(vertexSet),mode)));
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,FloatBuffer floatBuffer, int mode){       
-        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(gl,floatBuffer,mode)));
+    public IStaticVertexSet getIStaticVertexSetInstance(FloatBuffer floatBuffer, int mode){       
+        return(new StaticVertexSetConnector(delegate.getIStaticVertexSetInstance(floatBuffer,mode)));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(final GL gl,final float[] array,int mode){
-        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(gl,array,mode)));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(final float[] array,int mode){
+        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(array,mode)));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(final GL gl,final IVertexSet vertexSet,int mode){
-        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(gl,new VertexSetConnector(vertexSet),mode)));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(final IVertexSet vertexSet,int mode){
+        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(new VertexSetConnector(vertexSet),mode)));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(final GL gl,final FloatBuffer floatBuffer,int mode){
-        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(gl,floatBuffer,mode)));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(final FloatBuffer floatBuffer,int mode){
+        return(new DynamicVertexSetConnector(delegate.getIDynamicVertexSetInstance(floatBuffer,mode)));
     }
     
     

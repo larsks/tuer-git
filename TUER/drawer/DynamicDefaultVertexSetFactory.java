@@ -14,32 +14,26 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 
 class DynamicDefaultVertexSetFactory extends AbstractDynamicVertexSetFactory{
     
     
-    private GL gl;
-    
-    
-    DynamicDefaultVertexSetFactory(GL gl){
-        this.gl=gl;
-    }
+    DynamicDefaultVertexSetFactory(){}
             
     
     @Override
     DynamicVertexSet newVertexSet(float[] array,int mode){
-        return(new DynamicDefaultVertexSet(gl,array,mode));
+        return(new DynamicDefaultVertexSet(array,mode));
     }
     
     @Override
     DynamicVertexSet newVertexSet(FloatBuffer floatBuffer,int mode){
-        return(new DynamicDefaultVertexSet(gl,floatBuffer,mode));
+        return(new DynamicDefaultVertexSet(floatBuffer,mode));
     }
     
     @Override
     DynamicVertexSet newVertexSet(IVertexSet vertexSet,int mode){
-        return(new DynamicDefaultVertexSet(gl,vertexSet,mode));
+        return(new DynamicDefaultVertexSet(vertexSet,mode));
     }
 }

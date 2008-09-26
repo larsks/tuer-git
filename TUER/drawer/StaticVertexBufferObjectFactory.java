@@ -20,26 +20,21 @@ import javax.media.opengl.GL;
 class StaticVertexBufferObjectFactory extends AbstractStaticVertexSetFactory{
     
     
-    private GL gl;
-    
-    
-    StaticVertexBufferObjectFactory(GL gl){
-        this.gl=gl;
-    }
+    StaticVertexBufferObjectFactory(){}
             
     
     @Override
     StaticVertexSet newVertexSet(float[] array,int mode){
-        return(new StaticVertexBufferObject(gl,array,mode));
+        return(new StaticVertexBufferObject(array,mode));
     }
     
     @Override
     StaticVertexSet newVertexSet(FloatBuffer floatBuffer,int mode){       
-        return(new StaticVertexBufferObject(gl,floatBuffer,mode));
+        return(new StaticVertexBufferObject(floatBuffer,mode));
     }
     
     @Override
     StaticVertexSet newVertexSet(IVertexSet vertexSet,int mode){
-        return(new StaticVertexBufferObject(gl,vertexSet,mode));
+        return(new StaticVertexBufferObject(vertexSet,mode));
     }
 }

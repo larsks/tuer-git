@@ -37,12 +37,12 @@ final class HealthPowerUpViewFactory extends ViewFactory{
     private IStaticVertexSet vertexSet;
     
     
-    private HealthPowerUpViewFactory(GL gl,boolean loadFully){
+    private HealthPowerUpViewFactory(boolean loadFully){
         loaded=false;
         //vertex set
         List<IVertexSet> vertexSetsList=new ArrayList<IVertexSet>(vertexSetsCount);
         if(loadFully)
-            {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(gl,
+            {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                      HealthPowerUpControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
                      GL.GL_QUADS);
              vertexSetsList.add(vertexSet);
@@ -74,12 +74,12 @@ final class HealthPowerUpViewFactory extends ViewFactory{
     }
     
     @Override
-    final void loadProgressively(GL gl){
+    final void loadProgressively(){
         List<IVertexSet> vertexSetsList=getVertexSetsList();
         List<Texture> texturesList=getTexturesList();
         if(vertexSetsList.size()<vertexSetsCount)
             {if(vertexSet==null)
-                 {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(gl,
+                 {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                          HealthPowerUpControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
                          GL.GL_QUADS);                
                  }
@@ -113,16 +113,16 @@ final class HealthPowerUpViewFactory extends ViewFactory{
      * completely at the first call or rather progressively
      * @return
      */
-    final static HealthPowerUpViewFactory getInstance(GL gl,boolean loadFully){
+    final static HealthPowerUpViewFactory getInstance(boolean loadFully){
         if(instance==null)
-            instance=new HealthPowerUpViewFactory(gl,loadFully);
+            instance=new HealthPowerUpViewFactory(loadFully);
         if(!loadFully&&!instance.loaded)
-            instance.loadProgressively(gl);
+            instance.loadProgressively();
         return(instance);
     }
     
-    final static HealthPowerUpViewFactory getInstance(GL gl){
-        return(getInstance(gl,true));
+    final static HealthPowerUpViewFactory getInstance(){
+        return(getInstance(true));
     }   
     
     final static int getTexturesCount(){

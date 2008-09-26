@@ -16,31 +16,31 @@ package drawer;
 import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class StaticDefaultVertexSet extends StaticVertexSet{
 
 
-    StaticDefaultVertexSet(GL gl,float[] array,int mode){
+    StaticDefaultVertexSet(float[] array,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.newFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);	
     }
     
-    StaticDefaultVertexSet(GL gl,FloatBuffer floatBuffer,int mode){
+    StaticDefaultVertexSet(FloatBuffer floatBuffer,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);
     }
     
-    StaticDefaultVertexSet(GL gl,IVertexSet vertexSet,int mode){
-        this(gl,vertexSet.getBuffer(),mode);
+    StaticDefaultVertexSet(IVertexSet vertexSet,int mode){
+        this(vertexSet.getBuffer(),mode);
     }    
             
     public void draw(){
+        final GL gl=GLU.getCurrentGL();
         buffer.position(0);
 	    gl.glBegin(mode);
 	    for(int i=0;i<buffer.capacity();i+=VertexSet.primitiveCount)

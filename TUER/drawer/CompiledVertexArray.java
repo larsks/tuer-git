@@ -17,32 +17,32 @@ import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class CompiledVertexArray extends VertexSet{                
     
     
-    CompiledVertexArray(GL gl,float[] array,int mode){
+    CompiledVertexArray(float[] array,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.newFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);		
     }
     
-    CompiledVertexArray(GL gl,FloatBuffer floatBuffer,int mode){
+    CompiledVertexArray(FloatBuffer floatBuffer,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);    
     }
     
-    CompiledVertexArray(GL gl,IVertexSet vertexSet,int mode){
-        this(gl,vertexSet.getBuffer(),mode);
+    CompiledVertexArray(IVertexSet vertexSet,int mode){
+        this(vertexSet.getBuffer(),mode);
     }
             
     
     public void draw(){ 
+        final GL gl=GLU.getCurrentGL();
         /*deprecated as it is a very slow method*/            
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
@@ -59,6 +59,7 @@ class CompiledVertexArray extends VertexSet{
     }
     
     void multiDraw(ArrayList<float[]> translation,boolean relative){
+        final GL gl=GLU.getCurrentGL();
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
         gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);		

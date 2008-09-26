@@ -13,14 +13,12 @@
 */
 package main;
 
-import javax.media.opengl.GL;
-
 public final class ExplosionView extends Object3DView {
     
-    ExplosionView(GL gl){
-        super(ExplosionViewFactory.getInstance(gl).getTexturesList(),
-                ExplosionViewFactory.getInstance(gl).getSecondaryTexturesList(),
-                ExplosionViewFactory.getInstance(gl).getTexturesIndicesList(),
-                ExplosionViewFactory.getInstance(gl).getVertexSetsList());
+    ExplosionView(){
+        super(ExplosionViewFactory.getInstance().getTexturesList(),
+                ExplosionViewFactory.getInstance().getSecondaryTexturesList(),
+                ExplosionViewFactory.getInstance().getTexturesIndicesList(),
+                ExplosionViewFactory.getInstance().getVertexSetsList());
     }  
 }

@@ -14,22 +14,21 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 public interface IVertexSetProvider{
     
         
     public void bindVertexSetProvider(IVertexSetProvider provider);
     
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,float[] array,int mode);
+    public IStaticVertexSet getIStaticVertexSetInstance(float[] array,int mode);
     
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,FloatBuffer floatBuffer,int mode);
+    public IStaticVertexSet getIStaticVertexSetInstance(FloatBuffer floatBuffer,int mode);
     
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,IVertexSet vertexSet,int mode);
+    public IStaticVertexSet getIStaticVertexSetInstance(IVertexSet vertexSet,int mode);
     
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,float[] array,int mode);
+    public IDynamicVertexSet getIDynamicVertexSetInstance(float[] array,int mode);
     
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,FloatBuffer floatBuffer,int mode);
+    public IDynamicVertexSet getIDynamicVertexSetInstance(FloatBuffer floatBuffer,int mode);
     
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,IVertexSet vertexSet,int mode);
+    public IDynamicVertexSet getIDynamicVertexSetInstance(IVertexSet vertexSet,int mode);
 }

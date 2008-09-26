@@ -16,6 +16,7 @@ package drawer;
 import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 /*TODO: use rather GL.GL_T2F_N3F_V3F when precalculating normals*/
@@ -26,31 +27,30 @@ class DisplayList extends StaticVertexSet{
     private int id;
     
     
-    DisplayList(GL gl,float[] array,int mode)throws RuntimeException{
+    DisplayList(float[] array,int mode)throws RuntimeException{
         this.mode=mode;
         this.id=0;
-        this.gl=gl;
         this.buffer=BufferUtil.newFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);
         this.createDisplayList();
     }
     
-    DisplayList(GL gl,FloatBuffer floatBuffer,int mode)throws RuntimeException{
+    DisplayList(FloatBuffer floatBuffer,int mode)throws RuntimeException{
         this.mode=mode;
         this.id=0;
-        this.gl=gl;
         this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);    
         this.createDisplayList();
     }
     
-    DisplayList(GL gl,IVertexSet vertexSet,int mode)throws RuntimeException{
-        this(gl,vertexSet.getBuffer(),mode);
+    DisplayList(IVertexSet vertexSet,int mode)throws RuntimeException{
+        this(vertexSet.getBuffer(),mode);
     }
     
     
     private void createDisplayList()throws RuntimeException{
+        final GL gl=GLU.getCurrentGL();
         if((id=gl.glGenLists(1))==0)
 	        throw new RuntimeException("unable to create a display list");
         gl.glNewList(id,GL.GL_COMPILE);
@@ -71,6 +71,7 @@ class DisplayList extends StaticVertexSet{
     public void setMode(int mode){
         if(this.mode!=mode)
             {this.mode=mode;
+             final GL gl=GLU.getCurrentGL();
              if(id!=0)
                  gl.glDeleteLists(id,1);
              createDisplayList();
@@ -78,10 +79,12 @@ class DisplayList extends StaticVertexSet{
     }
     
     public void draw(){
+        final GL gl=GLU.getCurrentGL();
 	    gl.glCallList(id);
     } 
     
     protected void finalize(){
+        final GL gl=GLU.getCurrentGL();
         if(id>0)
 	        gl.glDeleteLists(id,1);
     }   

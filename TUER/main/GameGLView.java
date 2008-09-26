@@ -32,8 +32,6 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
-
-import tools.Full3DCellView;
 import tools.NetworkView;
 
 /**
@@ -45,8 +43,6 @@ import tools.NetworkView;
 
 class GameGLView implements GLEventListener{
     
-    
-    private GL gl;
     
     private GLU glu;  
     
@@ -260,8 +256,7 @@ class GameGLView implements GLEventListener{
                                       
     
     GameGLView(GameController gameController){
-        this.gameController=gameController;
-        this.gl=gameController.getGL();	
+        this.gameController=gameController;	
     	this.glu=new GLU();
     	this.useAlphaTest=false;
     	this.loadProgress=0;
@@ -341,6 +336,7 @@ class GameGLView implements GLEventListener{
     }
     
     public final void display(GLAutoDrawable drawable){  	
+        final GL gl=drawable.getGL();
         //removeUselessObjectViews();
         //System.out.println(((Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1048576) +"MB");
         gl.glClear(GL.GL_COLOR_BUFFER_BIT|GL.GL_DEPTH_BUFFER_BIT);          
@@ -423,9 +419,7 @@ class GameGLView implements GLEventListener{
 	              //draw the bots without damage here
 	              //bug fix : allows to display objects on SiS 661 FX  
 	              if(this.useAlphaTest)
-	                  {gl.glEnable(GL.GL_ALPHA_TEST);
-	                   //gl.glAlphaFunc(GL.GL_EQUAL,1);
-	                  }	              
+	                  gl.glEnable(GL.GL_ALPHA_TEST);	                  	              
 	              this.botTexture1.bind();	              
 	              this.botVertexSet.multiDraw(translation,rotation,first,count,limit,false);      
 	              translation.position(0);
@@ -540,7 +534,7 @@ class GameGLView implements GLEventListener{
                            uselessObjectsList.add(o3Dv);
                           }
                       else
-                          {o3Dv.draw(gl);
+                          {o3Dv.draw();
                            //System.out.println("explosion [START]");
                           }
                   //remove useless shared 3D object views
@@ -686,7 +680,8 @@ class GameGLView implements GLEventListener{
                  }
             }
         lbefore=lnow;
-        lnow=System.currentTimeMillis();
+        lnow=System.currentTimeMillis();       
+        
         if(messageLine.size()>0)
             {textRenderer.begin3DRendering();
              textRenderer.setColor(0.5f,0.2f,0.4f,1.0f);
@@ -701,8 +696,7 @@ class GameGLView implements GLEventListener{
         //restore the matrices for 3D display                            
         gl.glMatrixMode(GL.GL_PROJECTION);
         gl.glPopMatrix();
-        gl.glMatrixMode(GL.GL_MODELVIEW);     	    	          
-	    gl.glFlush();          
+        gl.glMatrixMode(GL.GL_MODELVIEW);
 	    try{canvas.swapBuffers();}
 	    catch(GLException glex)
 	    {glex.printStackTrace();
@@ -736,109 +730,109 @@ class GameGLView implements GLEventListener{
 	    if(loadProgress < loadableItemCount)
 	        {loadProgress=0;         
 	         if(this.levelVertexSet==null)
-	             {this.levelVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getLevelCoordinatesBuffer(),GL.GL_QUADS);      
+	             {this.levelVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getLevelCoordinatesBuffer(),GL.GL_QUADS);      
 	              return;
 	             }
 	         else
 	             loadProgress+=1;
 	         if(this.artVertexSet1==null)
-	             {this.artVertexSet1=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getArtCoordinatesBuffer1(),GL.GL_QUADS);
+	             {this.artVertexSet1=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer1(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
 	             loadProgress+=1;
 	         if(this.artVertexSet2==null)
-	             {this.artVertexSet2=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getArtCoordinatesBuffer2(),GL.GL_QUADS);
+	             {this.artVertexSet2=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer2(),GL.GL_QUADS);
 	              return; 
 	             }
 	         else
 	             loadProgress+=1;
 	         if(this.artVertexSet3==null)
-                 {this.artVertexSet3=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getArtCoordinatesBuffer3(),GL.GL_QUADS);
+                 {this.artVertexSet3=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer3(),GL.GL_QUADS);
                   return; 
                  }
              else
                  loadProgress+=1;
 	         if(this.artVertexSet4==null)
-                 {this.artVertexSet4=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getArtCoordinatesBuffer4(),GL.GL_QUADS);
+                 {this.artVertexSet4=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer4(),GL.GL_QUADS);
                   return; 
                  }
              else
                  loadProgress+=1;
 	         if(this.botVertexSet==null)
-	             {this.botVertexSet=vertexSetSeeker.getIDynamicVertexSetInstance(gl,gameController.getBotCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.botVertexSet=vertexSetSeeker.getIDynamicVertexSetInstance(gameController.getBotCoordinatesBuffer(),GL.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.unbreakableObjectVertexSet==null)
-	             {this.unbreakableObjectVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getUnbreakableObjectCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.unbreakableObjectVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getUnbreakableObjectCoordinatesBuffer(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.vendingMachineVertexSet==null)
-	             {this.vendingMachineVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getVendingMachineCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.vendingMachineVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getVendingMachineCoordinatesBuffer(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.lampVertexSet==null)
-	             {this.lampVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getLampCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.lampVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getLampCoordinatesBuffer(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.chairVertexSet==null)
-	             {this.chairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getChairCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.chairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getChairCoordinatesBuffer(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.flowerVertexSet==null)
-	             {this.flowerVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getFlowerCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.flowerVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getFlowerCoordinatesBuffer(),GL.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.tableVertexSet==null)
-	             {this.tableVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getTableCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.tableVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getTableCoordinatesBuffer(),GL.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.bonsaiVertexSet==null)
-	             {this.bonsaiVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getBonsaiCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.bonsaiVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getBonsaiCoordinatesBuffer(),GL.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.rocketLauncherVertexSet==null)
-	             {this.rocketLauncherVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getRocketLauncherCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.rocketLauncherVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketLauncherCoordinatesBuffer(),GL.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;	         
 	         if(this.rocketVertexSet==null)
-                 {this.rocketVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getRocketCoordinatesBuffer(),GL.GL_QUADS);
+                 {this.rocketVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketCoordinatesBuffer(),GL.GL_QUADS);
                   return;
                  }
              else
                  loadProgress+=1;
 	         if(this.impactVextexSet==null)
-	             {this.impactVextexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getImpactCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.impactVextexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getImpactCoordinatesBuffer(),GL.GL_QUADS);	              
 	              return;
 	             }
 	         else
 	             loadProgress+=1;	         
 	         if(this.crosshairVertexSet==null)
-	             {this.crosshairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gl,gameController.getCrosshairCoordinatesBuffer(),GL.GL_LINES);	              
+	             {this.crosshairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getCrosshairCoordinatesBuffer(),GL.GL_LINES);	              
 	              return;
 	             }
 	         else
 	             loadProgress+=1;
-	         loadProgress+=HealthPowerUpViewFactory.getInstance(gl,false).getVertexSetsList().size();
-	         loadProgress+=ExplosionViewFactory.getInstance(gl,false).getVertexSetsList().size();	         
+	         loadProgress+=HealthPowerUpViewFactory.getInstance(false).getVertexSetsList().size();
+	         loadProgress+=ExplosionViewFactory.getInstance(false).getVertexSetsList().size();	         
 	         try{if(this.levelTexture==null)
 	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
 	                      this.levelTexture=TextureIO.newTexture(getClass().getResource("/pic1024/wallTexture.png"),false,TextureIO.PNG);	                  
@@ -925,8 +919,8 @@ class GameGLView implements GLEventListener{
 	                 }
 	             else
 	                 loadProgress+=1;
-	             loadProgress+=HealthPowerUpViewFactory.getInstance(gl,false).getTexturesList().size();
-	             loadProgress+=ExplosionViewFactory.getInstance(gl,false).getTexturesList().size();
+	             loadProgress+=HealthPowerUpViewFactory.getInstance(false).getTexturesList().size();
+	             loadProgress+=ExplosionViewFactory.getInstance(false).getTexturesList().size();
 	             if(this.networkView==null)
 	                 {gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
 	                  return; 
@@ -947,6 +941,7 @@ class GameGLView implements GLEventListener{
     public final void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged){}
 
     public final void init(GLAutoDrawable drawable){
+        final GL gl=drawable.getGL();
         configurationDetector=new ConfigurationDetector(gl);
         gl.glClearColor(1.0f,1.0f,1.0f,1.0f);
     	gl.glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
@@ -1030,6 +1025,7 @@ class GameGLView implements GLEventListener{
      * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)
      */
     public final void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
+        final GL gl=drawable.getGL();
         gl.glMatrixMode(GL.GL_PROJECTION);
         gl.glLoadIdentity();
         float aspect=(float)width/(float)height;
@@ -1110,14 +1106,6 @@ class GameGLView implements GLEventListener{
     public final void setNetworkView(NetworkView networkView){
         this.networkView=networkView;
     } 
-    
-    /*
-    final List<Full3DCellView> getVisibleCellsList(SoftwareViewFrustumCullingPerformerView frustum,Full3DCellView playerLocationCell){
-        List<Full3DCellController> tmpFull3DCellsList=gameController.getVisibleCellsList(frustum.getController(),playerLocationCell.getController()));
-        List<Full3DCellView> full3DCellsList=new ArrayList<Full3DCellView>();
-        //TODO: get each controller and put it into the list
-        return(full3DCellsList);
-    }*/
     
     /*private final void removeUselessObjectViews(){
         Vector<Object3DView> removedObjects=new Vector<Object3DView>();

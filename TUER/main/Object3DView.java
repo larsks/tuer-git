@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 class Object3DView{
 
@@ -123,7 +124,8 @@ class Object3DView{
         this.controller=controller;
     }
 
-    void draw(GL gl){
+    void draw(){
+        final GL gl=GLU.getCurrentGL();
         int index=this.controller.getCurrentFrameIndex();
         texturesList.get(texturesIndicesList.get(index).intValue()).bind();
         gl.glPushMatrix();

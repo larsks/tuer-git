@@ -488,7 +488,7 @@ public class SoundSystem implements ISoundSystem{
 
       try {
          // this is done IN CASE sound system fails.
-         // the arrays will be re-alloced in case of success.
+         // the arrays will be re-allocated in case of success.
          asdl  = new SourceDataLine[32];
          aclip = new Clip[32];
          for (int i=0;i<32;i++) {
@@ -564,6 +564,7 @@ public class SoundSystem implements ISoundSystem{
          asdl = new SourceDataLine[nchannels];
          for (int i=0;i<nchannels;i++) {
             asdl[i] = (SourceDataLine)mixer.getLine(infoLine);
+            //FIXME: find a way to detect that the line is unavailable
             if (i >= iMusic)
                asdl[i].open(fmtLine, 500000+64000+4096); // not used
             else

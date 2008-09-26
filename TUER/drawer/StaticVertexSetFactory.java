@@ -15,6 +15,7 @@ package drawer;
 
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class StaticVertexSetFactory extends AbstractStaticVertexSetFactory{
@@ -25,7 +26,8 @@ class StaticVertexSetFactory extends AbstractStaticVertexSetFactory{
     private StaticDefaultVertexSetFactory rescueDelegate;
     
     
-    StaticVertexSetFactory(GL gl){       
+    StaticVertexSetFactory(){   
+        final GL gl=GLU.getCurrentGL();
         if((gl.isExtensionAvailable("GL_ARB_vertex_buffer_object")
                 || gl.isExtensionAvailable("GL_EXT_vertex_buffer_object"))
                 && (gl.isFunctionAvailable("glBindBufferARB")
@@ -36,7 +38,7 @@ class StaticVertexSetFactory extends AbstractStaticVertexSetFactory{
                                         || gl.isFunctionAvailable("glDeleteBuffers"))
                                         && (gl.isFunctionAvailable("glGenBuffersARB")
                                                 || gl.isFunctionAvailable("glGenBuffers")))
-            {delegate=new StaticVertexBufferObjectFactory(gl);
+            {delegate=new StaticVertexBufferObjectFactory();
              rescueDelegate=null;
             }
         else
@@ -53,11 +55,11 @@ class StaticVertexSetFactory extends AbstractStaticVertexSetFactory{
                     && gl.isFunctionAvailable("glGenLists")
                     && gl.isFunctionAvailable("glNewList")
                     && gl.isFunctionAvailable("glEndList"))
-                {delegate=new DisplayListFactory(gl);
-                 rescueDelegate=new StaticDefaultVertexSetFactory(gl);
+                {delegate=new DisplayListFactory();
+                 rescueDelegate=new StaticDefaultVertexSetFactory();
                 }
             else
-                {delegate=new StaticDefaultVertexSetFactory(gl);
+                {delegate=new StaticDefaultVertexSetFactory();
                  rescueDelegate=null;
                 }
     }

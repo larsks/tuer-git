@@ -21,14 +21,14 @@ final class SphericalBeastViewFactory extends ViewFactory {
     
     private boolean loaded;
     
-    private SphericalBeastViewFactory(GL gl,boolean loadFully){
+    private SphericalBeastViewFactory(boolean loadFully){
         loaded=false;       
         //vertex set
         List<IVertexSet> vertexSetsList=new ArrayList<IVertexSet>(vertexSetsCount);
         if(loadFully)
             {IStaticVertexSet vertexSet;
              for(int i=0;i<vertexSetsCount;i++)
-                 {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(gl,
+                 {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                          SphericalBeastControllerFactory.getInstance().getCoordinatesBuffersList().get(i),
                          GL.GL_QUADS);
                   vertexSetsList.add(vertexSet);
@@ -60,13 +60,13 @@ final class SphericalBeastViewFactory extends ViewFactory {
     }
     
     @Override
-    final void loadProgressively(GL gl) {
+    final void loadProgressively() {
         if(!loaded)
             {List<IVertexSet> vertexSetsList=getVertexSetsList();
              List<Texture> texturesList=getTexturesList();            
              if(vertexSetsList.size()<vertexSetsCount)
                  {IStaticVertexSet vertexSet=VertexSetSeeker.getInstance().
-                  getIStaticVertexSetInstance(gl,SphericalBeastControllerFactory.getInstance().
+                  getIStaticVertexSetInstance(SphericalBeastControllerFactory.getInstance().
                           getCoordinatesBuffersList().get(vertexSetsList.size()),
                           GL.GL_QUADS);
                   vertexSetsList.add(vertexSet);
@@ -93,16 +93,16 @@ final class SphericalBeastViewFactory extends ViewFactory {
             }
     }
 
-    final static SphericalBeastViewFactory getInstance(GL gl,boolean loadFully){
+    final static SphericalBeastViewFactory getInstance(boolean loadFully){
         if(instance==null)
-            instance=new SphericalBeastViewFactory(gl,loadFully);
+            instance=new SphericalBeastViewFactory(loadFully);
         if(!loadFully&&!instance.loaded)
-            instance.loadProgressively(gl);
+            instance.loadProgressively();
         return(instance);
     }
     
-    final static SphericalBeastViewFactory getInstance(GL gl){
-        return(getInstance(gl,true));
+    final static SphericalBeastViewFactory getInstance(){
+        return(getInstance(true));
     }   
     
     final static int getTexturesCount(){

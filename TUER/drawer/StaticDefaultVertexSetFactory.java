@@ -14,33 +14,26 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 
 class StaticDefaultVertexSetFactory extends AbstractStaticVertexSetFactory{
     
     
-    private GL gl;
-    
-    
-    StaticDefaultVertexSetFactory(GL gl){
-        this.gl=gl;
-    }
+    StaticDefaultVertexSetFactory(){}
     
     
     @Override
     StaticVertexSet newVertexSet(float[] array,int mode){
-        return(new StaticDefaultVertexSet(gl,array,mode));
+        return(new StaticDefaultVertexSet(array,mode));
     }
     
     @Override    
     StaticVertexSet newVertexSet(FloatBuffer floatBuffer,int mode){
-        //TODO: use a decorator if required
-        return(new StaticDefaultVertexSet(gl,floatBuffer,mode));
+        return(new StaticDefaultVertexSet(floatBuffer,mode));
     }
     
     @Override
     StaticVertexSet newVertexSet(IVertexSet vertexSet,int mode){
-        return(new StaticDefaultVertexSet(gl,vertexSet,mode));
+        return(new StaticDefaultVertexSet(vertexSet,mode));
     }
 }

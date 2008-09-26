@@ -15,6 +15,7 @@ package drawer;
 
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
@@ -25,7 +26,8 @@ class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
     static boolean multiDrawSupported;
     
     
-    DynamicVertexSetFactory(GL gl){
+    DynamicVertexSetFactory(){
+        final GL gl=GLU.getCurrentGL();
         DynamicVertexSetFactory.multiDrawSupported=gl.isFunctionAvailable("glMultiDrawArrays");	
         if((gl.isExtensionAvailable("GL_ARB_vertex_buffer_object")
                 || gl.isExtensionAvailable("GL_EXT_vertex_buffer_object"))
@@ -37,7 +39,7 @@ class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
                  || gl.isFunctionAvailable("glDeleteBuffers"))
                 && (gl.isFunctionAvailable("glGenBuffersARB")
                  || gl.isFunctionAvailable("glGenBuffers")))
-            delegate=new DynamicVertexBufferObjectFactory(gl);
+            delegate=new DynamicVertexBufferObjectFactory();
         else
             if(gl.isExtensionAvailable("GL_EXT_vertex_array")
                     && gl.isFunctionAvailable("glColorPointer")
@@ -48,9 +50,9 @@ class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
                     && gl.isFunctionAvailable("glNormalPointer")
                     && gl.isFunctionAvailable("glTexCoordPointer")
                     && gl.isFunctionAvailable("glVertexPointer"))
-                delegate=new VertexArrayFactory(gl);
+                delegate=new VertexArrayFactory();
             else	        
-                delegate=new DynamicDefaultVertexSetFactory(gl);
+                delegate=new DynamicDefaultVertexSetFactory();
     }
     
     @Override

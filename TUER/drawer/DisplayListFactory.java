@@ -14,34 +14,27 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 
 /*WARNING : the creation of a display list can fail*/
 
 class DisplayListFactory extends AbstractStaticVertexSetFactory{
+      
     
-    
-    private GL gl;        
-    
-    
-    DisplayListFactory(GL gl){
-        this.gl=gl;	
-    }
+    DisplayListFactory(){}
     
     
     @Override
     StaticVertexSet newVertexSet(float[] array,int mode)throws RuntimeException{
-        return(new DisplayList(gl,array,mode));
+        return(new DisplayList(array,mode));
     }
     
     @Override    
     StaticVertexSet newVertexSet(FloatBuffer floatBuffer,int mode)throws RuntimeException{
-        //TODO: use a decorator if required
-        return(new DisplayList(gl,floatBuffer,mode));
+        return(new DisplayList(floatBuffer,mode));
     }
     
     StaticVertexSet newVertexSet(IVertexSet vertexSet,int mode)throws RuntimeException{
-        return(new DisplayList(gl,vertexSet,mode));
+        return(new DisplayList(vertexSet,mode));
     }
 }

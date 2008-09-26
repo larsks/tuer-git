@@ -159,7 +159,7 @@ public final class Network implements Serializable{
     
     private final void TEMPORARYshowOnlyControbutingCells(float x,float y,float z,float direction){
         Rectangle cellRect;
-        final float arcContributionSize=65536*20;
+        final float arcContributionSize=65536*25;
         final Arc2D.Float playerArc=new Arc2D.Float();
         playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+180,180,Arc2D.PIE);
         for(Full3DCell cell:cellsList)

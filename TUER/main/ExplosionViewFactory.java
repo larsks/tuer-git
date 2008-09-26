@@ -37,12 +37,12 @@ public final class ExplosionViewFactory extends ViewFactory{
     private IStaticVertexSet vertexSet;
     
     
-    private ExplosionViewFactory(GL gl,boolean loadFully){
+    private ExplosionViewFactory(boolean loadFully){
         loaded=false;
         //vertex set
         List<IVertexSet> vertexSetsList=new ArrayList<IVertexSet>(vertexSetsCount);
         if(loadFully)
-            {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(gl,
+            {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                      ExplosionControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
                      GL.GL_QUADS);                   
              for(int i=0;i<vertexSetsCount;i++)
@@ -81,12 +81,12 @@ public final class ExplosionViewFactory extends ViewFactory{
     }
     
     @Override
-    final void loadProgressively(GL gl){
+    final void loadProgressively(){
         List<IVertexSet> vertexSetsList=getVertexSetsList();
         List<Texture> texturesList=getTexturesList();
         if(vertexSetsList.size()<vertexSetsCount)
             {if(vertexSet==null)
-                {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(gl,
+                {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                         ExplosionControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
                         GL.GL_QUADS);                                 
                 }
@@ -117,21 +117,21 @@ public final class ExplosionViewFactory extends ViewFactory{
     
     /**
      * 
-     * @param gl
+     *
      * @param loadFully: indicates whether the resources are loaded 
      * completely at the first call or rather progressively
      * @return
      */
-    final static ExplosionViewFactory getInstance(GL gl,boolean loadFully){
+    final static ExplosionViewFactory getInstance(boolean loadFully){
         if(instance==null)
-            instance=new ExplosionViewFactory(gl,loadFully);
+            instance=new ExplosionViewFactory(loadFully);
         if(!loadFully&&!instance.loaded)
-            instance.loadProgressively(gl);
+            instance.loadProgressively();
         return(instance);
     }
     
-    final static ExplosionViewFactory getInstance(GL gl){
-        return(getInstance(gl,true));
+    final static ExplosionViewFactory getInstance(){
+        return(getInstance(true));
     }
     
     final static int getTexturesCount(){

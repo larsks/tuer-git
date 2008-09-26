@@ -15,7 +15,6 @@
 package main;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 public class VertexSetSeeker implements IVertexSetProvider{
 
@@ -37,32 +36,32 @@ public class VertexSetSeeker implements IVertexSetProvider{
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,float[] array,int mode){
-        return(delegate.getIStaticVertexSetInstance(gl,array,mode));
+    public IStaticVertexSet getIStaticVertexSetInstance(float[] array,int mode){
+        return(delegate.getIStaticVertexSetInstance(array,mode));
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,FloatBuffer floatBuffer,int mode){
-        return(delegate.getIStaticVertexSetInstance(gl,floatBuffer,mode));
+    public IStaticVertexSet getIStaticVertexSetInstance(FloatBuffer floatBuffer,int mode){
+        return(delegate.getIStaticVertexSetInstance(floatBuffer,mode));
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,IVertexSet vertexSet,int mode){
-        return(delegate.getIStaticVertexSetInstance(gl,vertexSet,mode));
+    public IStaticVertexSet getIStaticVertexSetInstance(IVertexSet vertexSet,int mode){
+        return(delegate.getIStaticVertexSetInstance(vertexSet,mode));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,float[] array,int mode){
-        return(delegate.getIDynamicVertexSetInstance(gl,array,mode));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(float[] array,int mode){
+        return(delegate.getIDynamicVertexSetInstance(array,mode));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,FloatBuffer floatBuffer,int mode){
-        return(delegate.getIDynamicVertexSetInstance(gl,floatBuffer,mode));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(FloatBuffer floatBuffer,int mode){
+        return(delegate.getIDynamicVertexSetInstance(floatBuffer,mode));
     }
     
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,IVertexSet vertexSet,int mode){
-        return(delegate.getIDynamicVertexSetInstance(gl,vertexSet,mode));
+    public IDynamicVertexSet getIDynamicVertexSetInstance(IVertexSet vertexSet,int mode){
+        return(delegate.getIDynamicVertexSetInstance(vertexSet,mode));
     }
 
 }

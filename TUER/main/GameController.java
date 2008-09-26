@@ -13,8 +13,12 @@
 */
 package main;
 
+import java.awt.DisplayMode;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -27,11 +31,11 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.glu.GLU;
 
 import tools.Full3DCell;
 import tools.Full3DCellController;
 import tools.Full3DCellView;
-import tools.Network;
 import tools.NetworkController;
 import tools.NetworkView;
 
@@ -46,8 +50,6 @@ public final class GameController {
 	private int screenHeight;
 	
     private GLCanvas canvas;//canvas for OpenGL rendering
-    
-    private GL gl;
     
     private transient GameMouseMotionController gameMouseMotionController;//controls the mouse
     
@@ -71,8 +73,11 @@ public final class GameController {
 	
 	public GameController(){
 	    sif = null;
-	    //setRemote(false);//offline game by default	    
-		frame = new Frame();		
+	    //setRemote(false);//offline game by default
+		frame = new Frame(){
+		    public void paint(Graphics g){}
+		    public void update(Graphics g){}
+		};		
 		try{this.gameModel=new GameModel(this);}
 		catch(Throwable t)
 		{throw new RuntimeException("Unable to create the game model",t);}
@@ -94,8 +99,7 @@ public final class GameController {
 	    capabilities.setDoubleBuffered(true);//enables double buffering
 	    capabilities.setHardwareAccelerated(true);//enables hardware acceleration
 	    canvas=new GLCanvas(capabilities);								
-	    canvas.setAutoSwapBufferMode(false);//prevents any auto buffer swapping	
-	    gl=canvas.getGL();
+	    canvas.setAutoSwapBufferMode(false);//prevents any auto buffer swapping
 	    canvas.addGLEventListener(gameView=new GameGLView(this));	
 	    canvas.addMouseMotionListener(gameMouseMotionController=new GameMouseMotionController(gameView));		
 	    canvas.addMouseListener(gameMouseMotionController);	
@@ -107,10 +111,6 @@ public final class GameController {
 	    canvas.requestFocusInWindow();       
 	    attachSound();
         openSound();
-        //FIXME: this animator doesn't work properly
-        //Animator a=new Animator(canvas);
-        //a.setRunAsFastAsPossible(true);
-        //a.start();
 	    /*try{*/this.gameModel.runEngine();/*} 
 	    catch(RemoteException re)
         {throw new RuntimeException("Unable to run the engine",re);}*/
@@ -119,11 +119,7 @@ public final class GameController {
 	
 	GraphicsConfiguration getGraphicsConfiguration(){
 	    return(frame.getGraphicsConfiguration());
-	}
-	
-	GL getGL(){
-        return(gl);
-    }        
+	}      
     
     GLCanvas getCanvas(){
         return(canvas);
@@ -469,8 +465,8 @@ public final class GameController {
               else
                   System.out.println("Java 2 sound startup failed.");
              }
-         catch(Throwable t)
-         {System.out.println("Problem : "+t.getMessage());
+         catch(Exception e)
+         {System.out.println("Problem : "+e);
           sif=null;
          }
      }    
@@ -571,7 +567,7 @@ public final class GameController {
      
      final void addNewExplosion(ExplosionModel em){
          //create an explosion view
-         ExplosionView ev=new ExplosionView(gl);
+         ExplosionView ev=new ExplosionView();
          //create a controller that binds the model and the view
          /*Object3DController ec=*/new Object3DController(em,ev);
          //add this explosion to the view
@@ -580,7 +576,7 @@ public final class GameController {
      
      final void addNewItem(HealthPowerUpModel hpum){
          //create a medikit view
-         HealthPowerUpView hpuv=new HealthPowerUpView(gl);
+         HealthPowerUpView hpuv=new HealthPowerUpView();
          //create a controller that binds the model and the view
          /*Object3DController ec=*/new Object3DController(hpum,hpuv);
          //add this medikit to the view
@@ -588,6 +584,7 @@ public final class GameController {
      }
      
      final void registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(SoftwareViewFrustumCullingPerformer frustumView){
+         final GL gl=GLU.getCurrentGL();
          new SoftwareViewFrustumCullingPerformerController(gameModel.getSvfcpModel(),frustumView);
          //bind all full cells models to their controllers and their views
          List<Full3DCellController> cellsControllersList=new ArrayList<Full3DCellController>();

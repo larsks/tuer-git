@@ -16,6 +16,7 @@ package drawer;
 import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class StaticVertexBufferObject extends StaticVertexSet{
@@ -24,9 +25,9 @@ class StaticVertexBufferObject extends StaticVertexSet{
     private int[] id;
     
     
-    StaticVertexBufferObject(GL gl,float[] array,int mode){
+    StaticVertexBufferObject(float[] array,int mode){
+        final GL gl=GLU.getCurrentGL();
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.newFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);
@@ -37,9 +38,9 @@ class StaticVertexBufferObject extends StaticVertexSet{
         this.buffer.position(0);       
     }
     
-    StaticVertexBufferObject(GL gl,FloatBuffer floatBuffer,int mode){
+    StaticVertexBufferObject(FloatBuffer floatBuffer,int mode){
+        final GL gl=GLU.getCurrentGL();
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);
         this.id=new int[1];
@@ -49,11 +50,12 @@ class StaticVertexBufferObject extends StaticVertexSet{
         this.buffer.position(0);
     }
     
-    StaticVertexBufferObject(GL gl,IVertexSet vertexSet,int mode){
-        this(gl,vertexSet.getBuffer(),mode);
+    StaticVertexBufferObject(IVertexSet vertexSet,int mode){
+        this(vertexSet.getBuffer(),mode);
     }    
             
-    public void draw(){       		
+    public void draw(){    
+        final GL gl=GLU.getCurrentGL();
         //draw the vertex buffer object
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);

@@ -17,32 +17,32 @@ import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class VertexArray extends DynamicVertexSet{
 
 
-    VertexArray(GL gl,float[] array,int mode){
+    VertexArray(float[] array,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.newFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);		
     }
     
-    VertexArray(GL gl,FloatBuffer floatBuffer,int mode){
+    VertexArray(FloatBuffer floatBuffer,int mode){
         this.mode=mode;
-        this.gl=gl;
         this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);    
     }
 
-    VertexArray(GL gl,IVertexSet vertexSet,int mode){
-        this(gl,vertexSet.getBuffer(),mode);
+    VertexArray(IVertexSet vertexSet,int mode){
+        this(vertexSet.getBuffer(),mode);
     }
     
     
-    public void draw(){             
+    public void draw(){    
+        final GL gl=GLU.getCurrentGL();
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
         gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);	
@@ -56,6 +56,7 @@ class VertexArray extends DynamicVertexSet{
     }
     
     public void draw(int start,int count){
+        final GL gl=GLU.getCurrentGL();
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
         gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);	
@@ -69,6 +70,7 @@ class VertexArray extends DynamicVertexSet{
     }      
     
     public void multiDraw(FloatBuffer translation,FloatBuffer rotation,int limit,boolean relative){
+        final GL gl=GLU.getCurrentGL();
         //limit*3 <= translation.capacity()
         translation.position(0);
         rotation.position(0);
@@ -100,7 +102,8 @@ class VertexArray extends DynamicVertexSet{
 	    translation.position(0);
     }
     
-    public void multiDraw(FloatBuffer matrix,int limit,boolean relative){       
+    public void multiDraw(FloatBuffer matrix,int limit,boolean relative){  
+        final GL gl=GLU.getCurrentGL();
         //matrices in column-major order!!!!!!
         float[] m=new float[16];
         matrix.position(0);
@@ -133,6 +136,7 @@ class VertexArray extends DynamicVertexSet{
     }
     
     public void drawByPiece(IntBuffer first,IntBuffer count,int limit){	
+        final GL gl=GLU.getCurrentGL();
         first.position(0);
         count.position(0);
         buffer.position(0);
@@ -157,6 +161,7 @@ class VertexArray extends DynamicVertexSet{
     } 
     
     public void multiDraw(FloatBuffer translation,FloatBuffer rotation,IntBuffer first,IntBuffer count,int limit,boolean relative){
+        final GL gl=GLU.getCurrentGL();
         //limit*3 <= translation.capacity()
         translation.position(0);
         rotation.position(0);

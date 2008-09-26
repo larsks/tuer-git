@@ -15,6 +15,8 @@ package drawer;
 
 import com.sun.opengl.util.BufferUtil;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -25,14 +27,16 @@ public class VertexSetFactory implements IVertexSetProvider{
     
     private AbstractStaticVertexSetFactory staticVertexSetFactory=null;
     
-    private GL gl=null;
+    private boolean maxElementsVerticesKnown;
     
     private final static VertexSetFactory instance=new VertexSetFactory();
     
     static int GL_MAX_ELEMENTS_VERTICES=3000;
     
     
-    private VertexSetFactory(){}
+    private VertexSetFactory(){
+        maxElementsVerticesKnown=false;
+    }
     
     
     public static VertexSetFactory getInstance(){
@@ -44,82 +48,80 @@ public class VertexSetFactory implements IVertexSetProvider{
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,float[] array,int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             staticVertexSetFactory=null;
+    public IStaticVertexSet getIStaticVertexSetInstance(float[] array,int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(staticVertexSetFactory==null)
-            staticVertexSetFactory=new StaticVertexSetFactory(gl);
+            staticVertexSetFactory=new StaticVertexSetFactory();
         return(staticVertexSetFactory.newVertexSet(array,mode));
     }
     
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,IVertexSet vertexSet,int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             staticVertexSetFactory=null;
+    public IStaticVertexSet getIStaticVertexSetInstance(IVertexSet vertexSet,int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(staticVertexSetFactory==null)
-            staticVertexSetFactory=new StaticVertexSetFactory(gl);
+            staticVertexSetFactory=new StaticVertexSetFactory();
         return(staticVertexSetFactory.newVertexSet(vertexSet,mode));
     }
        
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,float[] array,int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             dynamicVertexSetFactory=null;
+    public IDynamicVertexSet getIDynamicVertexSetInstance(float[] array,int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(dynamicVertexSetFactory==null)
-            dynamicVertexSetFactory=new DynamicVertexSetFactory(gl);
+            dynamicVertexSetFactory=new DynamicVertexSetFactory();
         return(dynamicVertexSetFactory.newVertexSet(array,mode));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,FloatBuffer floatBuffer,int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             dynamicVertexSetFactory=null;
+    public IDynamicVertexSet getIDynamicVertexSetInstance(FloatBuffer floatBuffer,int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(dynamicVertexSetFactory==null)
-            dynamicVertexSetFactory=new DynamicVertexSetFactory(gl);
+            dynamicVertexSetFactory=new DynamicVertexSetFactory();
         return(dynamicVertexSetFactory.newVertexSet(floatBuffer,mode));
     }
     
     @Override
-    public IDynamicVertexSet getIDynamicVertexSetInstance(GL gl,IVertexSet vertexSet,int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             dynamicVertexSetFactory=null;
+    public IDynamicVertexSet getIDynamicVertexSetInstance(IVertexSet vertexSet,int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(dynamicVertexSetFactory==null)
-            dynamicVertexSetFactory=new DynamicVertexSetFactory(gl);
+            dynamicVertexSetFactory=new DynamicVertexSetFactory();
         return(dynamicVertexSetFactory.newVertexSet(vertexSet,mode));
     }
     
     private void updateMaxElementsVertices(){
         IntBuffer buffer=BufferUtil.newIntBuffer(1);	
-        this.gl.glGetIntegerv(GL.GL_MAX_ELEMENTS_VERTICES,buffer);
+        GLU.getCurrentGL().glGetIntegerv(GL.GL_MAX_ELEMENTS_VERTICES,buffer);
         buffer.position(0);
-        GL_MAX_ELEMENTS_VERTICES=buffer.get();
+        int internalGlMaxElementsVertices=buffer.get();
+        //the fucking driver for ATI Xpress 200 returns -1 under Linux!!!!
+        //some very old graphic chips return the biggest integer
+        if(internalGlMaxElementsVertices>1 && internalGlMaxElementsVertices<Integer.MAX_VALUE)
+            GL_MAX_ELEMENTS_VERTICES=internalGlMaxElementsVertices;        
     }
 
 
     @Override
-    public IStaticVertexSet getIStaticVertexSetInstance(GL gl,final FloatBuffer floatBuffer,final int mode){
-        if(this.gl!=gl)
-            {this.gl=gl;
-             updateMaxElementsVertices();
-             staticVertexSetFactory=null;
+    public IStaticVertexSet getIStaticVertexSetInstance(final FloatBuffer floatBuffer,final int mode){
+        if(!maxElementsVerticesKnown)
+            {updateMaxElementsVertices();
+             maxElementsVerticesKnown=true;
             }
         if(staticVertexSetFactory==null)
-            staticVertexSetFactory=new StaticVertexSetFactory(gl);      
+            staticVertexSetFactory=new StaticVertexSetFactory();      
         //prevents the program from creating a too big VBO       
         return(VertexSetDecoratorFactory.newVertexSet(staticVertexSetFactory,floatBuffer,mode));
     }
