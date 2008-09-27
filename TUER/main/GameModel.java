@@ -64,8 +64,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     private Network network;
     
-    private SoftwareViewFrustumCullingPerformerModel svfcpModel;
-    
     private List<BotModel> botList;
     
     private List<Impact> impactList;
@@ -319,7 +317,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     @SuppressWarnings("unchecked")
     GameModel(GameController gameController)throws RuntimeException,RemoteException{
         //this.dataModificationFlagsBitSet=new BitSet();
-        this.svfcpModel=new SoftwareViewFrustumCullingPerformerModel();
         this.gameInfoMessageList=new ArrayList<GameInfoMessage>();
     	this.gameController=gameController;
 	    this.collisionMap=new byte[mapSize];
@@ -735,12 +732,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         return(network);
     }
     
-    private final void updateVisibleCellsList(){
-        if(network==null)
-            loadNetwork();
-        network.updateVisibleCellsList(svfcpModel,(float)player.getX(),(float)player.getY(),(float)player.getZ(),(float)player.getDirection());
-    }
-    
     public final void launchNewGame(){       
         //setIClLastClearedArea(-1);
         //reinitialize all the bots
@@ -755,8 +746,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         reinitializeExplosions();
         reinitializeItems();
         purgeGameInfoMessageList();
-        if(network!=null)
-            network.hideAllCells();
     }
     
     public final void resumeGame(){
@@ -1257,7 +1246,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	             {//TODO: update a model only used in the menu
 	              gameController.display();
 	             }
-	         updateVisibleCellsList();
 	         if(gameRunning)
 	             {if(hasBeenKilled)
 	                  {player.respawn();
@@ -1276,8 +1264,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	         long cycleDuration;
 	         //loop until the end of a party (even when game paused)
 	         while(innerLoop)
-        	     {updateVisibleCellsList();
-        	      gameController.display();		         	             
+        	     {gameController.display();		         	             
                   //update the clock if required
                   cycleDuration=internalClock.getElapsedTime();
                   if(bpause) 
@@ -2314,10 +2301,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                 oldMessagesList.add(gim);
         //remove old messages
         gameInfoMessageList.removeAll(oldMessagesList);
-    }
-
-    final SoftwareViewFrustumCullingPerformerModel getSvfcpModel(){
-        return svfcpModel;
     }
 
     /*@Override

@@ -13,13 +13,9 @@
 */
 package tools;
 
-import java.awt.Rectangle;
-import java.awt.geom.Arc2D;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-import main.SoftwareViewFrustumCullingPerformerModel;
 
 public final class Network implements Serializable{
     
@@ -151,29 +147,17 @@ public final class Network implements Serializable{
     }
     
     
-    public final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z,float direction){
+    /*public final void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,float x,float y,float z,float direction){
         setRootCell(locate(x,y,z));
-        //updateVisibleCellsList(frustum,getRootCell());
-        TEMPORARYshowOnlyControbutingCells(x,y,z,direction);
-    }
-    
-    private final void TEMPORARYshowOnlyControbutingCells(float x,float y,float z,float direction){
-        Rectangle cellRect;
-        final float arcContributionSize=65536*25;
-        final Arc2D.Float playerArc=new Arc2D.Float();
-        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+180,180,Arc2D.PIE);
-        for(Full3DCell cell:cellsList)
-            {cellRect=cell.getEnclosingRectangle();
-             cell.setVisible(cellRect.contains(x,z)||playerArc.intersects(cellRect));         
-            }
-    }
+        updateVisibleCellsList(frustum,getRootCell());
+    }*/
     
     /*
      * Breadth First Search to locate the cell in which the point is.
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    private static final /*List<Full3DCell>*/void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,Full3DCell firstTraveledCell){
+    /*private static final void updateVisibleCellsList(SoftwareViewFrustumCullingPerformerModel frustum,Full3DCell firstTraveledCell){
         //List<Full3DCell> visibleCellsList=new ArrayList<Full3DCell>();
         Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
@@ -191,7 +175,7 @@ public final class Network implements Serializable{
              //Add the cell into the list of visible cells 
              //visibleCellsList.add(c);
              //update the visibility
-             c.setVisible(true);
+             //c.setVisible(true);
              portalIndex=0;
              for(Full3DCell son:c.getNeighboursCellsList())
                  {if(!markedCellsList.contains(son))
@@ -212,7 +196,7 @@ public final class Network implements Serializable{
                  }
             }
         //return(visibleCellsList);
-    }
+    }*/
 
     public final Full3DCell getRootCell(){
         return(rootCell);
@@ -235,8 +219,4 @@ public final class Network implements Serializable{
         if(this.rootCell!=null)
             this.controller.setRootCell(rootCell.getController());
     }  
-    
-    public final void hideAllCells(){
-        this.controller.hideAllCells();
-    }
 }

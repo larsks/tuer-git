@@ -1,5 +1,6 @@
 package tools;
 
+import java.awt.Rectangle;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +10,14 @@ import com.sun.opengl.util.BufferUtil;
 public final class Full3DCellController{
     
     
-    private transient FloatBuffer internalBuffer;
+    //TODO: move it in the view
+    private FloatBuffer internalBuffer;
     
-    private transient List<Full3DCellController> neighboursCellsControllersList;
+    private List<Full3DCellController> neighboursCellsControllersList;
     
-    private transient Full3DCell model;
+    private Full3DCell model;
     
-    private transient Full3DCellView view;
+    private Full3DCellView view;
     
     
     public Full3DCellController(Full3DCell full3DCellModel,Full3DCellView full3DCellView){
@@ -60,15 +62,71 @@ public final class Full3DCellController{
         return(neighboursCellsControllersList);
     }
 
-    public final void setNeighboursCellsControllersList(List<Full3DCellController> neighboursCellsControllersList){
-        this.neighboursCellsControllersList=neighboursCellsControllersList;
-    }
-
     public final Full3DCell getModel(){
         return(model);
     }
+    
+    public final Rectangle getEnclosingRectangle(){
+        return(model.getEnclosingRectangle());
+    }
 
-    public final void setVisible(boolean visible){       
-        this.view.setVisible(visible);
+    public final List<float[]> getTopWalls(){
+        return(model.getTopWalls());
+    }
+
+    public final List<float[]> getBottomWalls(){
+        return(model.getBottomWalls());
+    }
+
+    public final List<float[]> getTopPortals(){
+        return(model.getTopPortals());
+    }
+
+    public final List<float[]> getBottomPortals(){
+        return(model.getBottomPortals());
+    }
+
+    public final List<float[]> getLeftWalls(){
+        return(model.getLeftWalls());
+    }
+
+    public final List<float[]> getRightWalls(){
+        return(model.getRightWalls());
+    }
+
+    public final List<float[]> getLeftPortals(){
+        return(model.getLeftPortals());
+    }
+
+    public final List<float[]> getRightPortals() {
+        return(model.getRightPortals());
+    }
+    
+    public final boolean contains(float[] point){
+        return(model.contains(point));
+    }
+    
+    public final boolean contains(float x,float y,float z){
+        return(model.contains(x,y,z));
+    }
+
+    public final List<float[]> getCeilWalls(){
+        return(model.getCeilWalls());
+    }
+
+    public final List<float[]> getFloorWalls(){
+        return(model.getFloorWalls());
+    }
+
+    public final List<float[]> getNeighboursPortalsList(){
+        return(model.getNeighboursPortalsList());
+    }
+
+    public final List<float[]> getCeilPortals(){
+        return(model.getCeilPortals());
+    }
+
+    public final List<float[]> getFloorPortals(){
+        return(model.getFloorPortals());
     }
 }

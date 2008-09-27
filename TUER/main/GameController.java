@@ -13,12 +13,9 @@
 */
 package main;
 
-import java.awt.DisplayMode;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -28,11 +25,8 @@ import java.rmi.RemoteException;
 import java.util.BitSet;*/
 import java.util.ArrayList;
 import java.util.List;
-import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.glu.GLU;
-
 import tools.Full3DCell;
 import tools.Full3DCellController;
 import tools.Full3DCellView;
@@ -75,7 +69,8 @@ public final class GameController {
 	    sif = null;
 	    //setRemote(false);//offline game by default
 		frame = new Frame(){
-		    public void paint(Graphics g){}
+            private static final long serialVersionUID = 1L;
+            public void paint(Graphics g){}
 		    public void update(Graphics g){}
 		};		
 		try{this.gameModel=new GameModel(this);}
@@ -583,16 +578,14 @@ public final class GameController {
          gameView.addNewItem(hpuv);
      }
      
-     final void registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(SoftwareViewFrustumCullingPerformer frustumView){
-         final GL gl=GLU.getCurrentGL();
-         new SoftwareViewFrustumCullingPerformerController(gameModel.getSvfcpModel(),frustumView);
+     final NetworkView prepareNetwork(){
          //bind all full cells models to their controllers and their views
          List<Full3DCellController> cellsControllersList=new ArrayList<Full3DCellController>();
          List<Full3DCellView> cellsViewsList=new ArrayList<Full3DCellView>();
          Full3DCellView cellView;
          Full3DCellController cellController;
          for(Full3DCell cellModel:gameModel.getCellsList())
-             {cellView=new Full3DCellView(gl);
+             {cellView=new Full3DCellView();
               cellController=new Full3DCellController(cellModel,cellView);
               cellsControllersList.add(cellController);
               cellsViewsList.add(cellView);
@@ -601,7 +594,7 @@ public final class GameController {
          NetworkView networkView=new NetworkView(cellsViewsList);
          //build the network controller
          new NetworkController(gameModel.getNetwork(),networkView,cellsControllersList);
-         gameView.setNetworkView(networkView);
+         return(networkView);
      }
      
      

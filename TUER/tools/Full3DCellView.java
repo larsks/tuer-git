@@ -1,5 +1,6 @@
 package tools;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +16,10 @@ public final class Full3DCellView{
     
     private Full3DCellController controller;
     
-    private boolean visible;
-    
     private transient List<Full3DCellView> neighboursCellsViewsList;
     
-    private GL gl;
     
-    
-    public Full3DCellView(GL gl){
-        this.visible=false;
-        this.gl=gl;
+    public Full3DCellView(){
         this.neighboursCellsViewsList=new ArrayList<Full3DCellView>();
     }
     
@@ -52,11 +47,11 @@ public final class Full3DCellView{
         this.neighboursCellsViewsList=neighboursCellsViewsList;
     }
 
-    public final void setVisible(boolean visible){      
-        this.visible=visible;
+    public final List<float[]> getNeighboursPortalsList(){
+        return(controller.getNeighboursPortalsList());
     }
-    
-    public final boolean getVisible(){
-        return(visible);
+
+    public final Rectangle getEnclosingRectangle(){
+        return(controller.getEnclosingRectangle());
     } 
 }

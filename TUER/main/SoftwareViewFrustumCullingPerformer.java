@@ -18,8 +18,6 @@ public final class SoftwareViewFrustumCullingPerformer{
     
     private float tolerance;
     
-    private SoftwareViewFrustumCullingPerformerController controller;
-    
     
     SoftwareViewFrustumCullingPerformer(GL gl,float tolerance){
         this.gl=gl;
@@ -213,9 +211,5 @@ public final class SoftwareViewFrustumCullingPerformer{
     static final float dot(float x1,float y1,float z1,float w1,float x2,float y2,float z2,float w2){
         //NB: avoid using w=0 for vertices because it is not mathematically correct
         return(x1*x2+y1*y2+z1*z2+w1*w2);
-    }
-
-    final void setController(SoftwareViewFrustumCullingPerformerController controller){
-        this.controller=controller;
     }
 }

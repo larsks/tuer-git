@@ -363,8 +363,4 @@ public final class Full3DCell implements Serializable{
     public final void setController(Full3DCellController controller){
         this.controller=controller;
     }
-
-    public final void setVisible(boolean visible){       
-        this.controller.setVisible(visible);
-    }
 }

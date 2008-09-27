@@ -1,7 +1,12 @@
 package tools;
 
+import java.awt.Rectangle;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import main.SoftwareViewFrustumCullingPerformer;
 
 public final class NetworkView{
     
@@ -37,12 +42,7 @@ public final class NetworkView{
         this.rootCell=rootCell;
     }
     
-    public final void hideAllCells(){       
-        for(Full3DCellView cellView:cellsViewsList)
-            cellView.setVisible(false);           
-    }
-    
-    public final void draw(){
+    public final void draw(float x,float y,float z,float direction,SoftwareViewFrustumCullingPerformer frustum){
         /*Full3DCellView c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCellView> fifo=new ArrayList<Full3DCellView>();
@@ -69,10 +69,38 @@ public final class NetworkView{
                           }
                  }
             }  */ 
+        Rectangle cellRect;
+        //TODO: decrease the clipping when the performances are better
+        final float arcContributionSize=65536*25;
+        final Arc2D.Float playerArc=new Arc2D.Float();
+        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+180,180,Arc2D.PIE);
+        Rectangle2D playerRect=playerArc.getBounds2D();
+        int size;
+        float[] p1,p2,p3,p4;
         for(Full3DCellView cellView:cellsViewsList)
-            if(cellView.getVisible())
-                {cellView.draw();
-                 cellView.setVisible(false);
-                }
+            {cellRect=cellView.getEnclosingRectangle();
+             if(cellRect.contains(x,z))
+                 cellView.draw();
+             else
+                 if(playerArc.intersects(cellRect))
+                     {if(cellView.getNeighboursPortalsList().isEmpty())
+                          continue;
+                      size=cellView.getNeighboursPortalsList().size();
+                      for(int portalIndex=0;portalIndex<size;portalIndex+=4)
+                          {p1=cellView.getNeighboursPortalsList().get(portalIndex);
+                           p2=cellView.getNeighboursPortalsList().get(portalIndex+1);
+                           p3=cellView.getNeighboursPortalsList().get(portalIndex+2);
+                           p4=cellView.getNeighboursPortalsList().get(portalIndex+3);
+                           //if(frustum.isQuadInViewFrustum(p1,p2,p3,p4,2))
+                           if(playerRect.intersectsLine(p1[2],p1[4],p2[2],p2[4])||
+                              playerRect.intersectsLine(p2[2],p2[4],p3[2],p3[4])||
+                              playerRect.intersectsLine(p3[2],p3[4],p4[2],p4[4])||
+                              playerRect.intersectsLine(p4[2],p4[4],p1[2],p1[4]))
+                               {cellView.draw();
+                                break;
+                               }
+                          }
+                     }
+            }
     }
 }

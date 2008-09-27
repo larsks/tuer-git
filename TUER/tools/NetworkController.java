@@ -33,8 +33,4 @@ public final class NetworkController{
         this.rootCell=rootCell;
         view.setRootCell(this.rootCell.getView());
     }
-    
-    public final void hideAllCells(){
-        view.hideAllCells();
-    }
 }

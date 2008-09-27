@@ -363,14 +363,14 @@ class GameGLView implements GLEventListener{
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
-	              //softwareViewFrustumCullingPerformer.computeViewFrustum();	              
+	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
 	              this.levelTexture.bind(); 
 	              //TODO: uncomment it to retablish the older behavior
 	              //this.levelVertexSet.draw();	
 	              //TODO: uncomment it to use the experimental scenegraph
-	              networkView.draw();
+	              networkView.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),softwareViewFrustumCullingPerformer);
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
@@ -922,7 +922,7 @@ class GameGLView implements GLEventListener{
 	             loadProgress+=HealthPowerUpViewFactory.getInstance(false).getTexturesList().size();
 	             loadProgress+=ExplosionViewFactory.getInstance(false).getTexturesList().size();
 	             if(this.networkView==null)
-	                 {gameController.registerSoftwareViewFrustumCullingPerformerAndPrepareNetwork(softwareViewFrustumCullingPerformer);
+	                 {this.networkView=gameController.prepareNetwork();
 	                  return; 
 	                 }
 	             else
@@ -1102,10 +1102,6 @@ class GameGLView implements GLEventListener{
     final void addNewItem(HealthPowerUpView hpuv){
         this.objectViewList.add(hpuv);
     }
-
-    public final void setNetworkView(NetworkView networkView){
-        this.networkView=networkView;
-    } 
     
     /*private final void removeUselessObjectViews(){
         Vector<Object3DView> removedObjects=new Vector<Object3DView>();
