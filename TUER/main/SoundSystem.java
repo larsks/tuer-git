@@ -30,6 +30,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
@@ -565,10 +566,13 @@ public class SoundSystem implements ISoundSystem{
          for (int i=0;i<nchannels;i++) {
             asdl[i] = (SourceDataLine)mixer.getLine(infoLine);
             //FIXME: find a way to detect that the line is unavailable
-            if (i >= iMusic)
-               asdl[i].open(fmtLine, 500000+64000+4096); // not used
-            else
-               asdl[i].open(fmtLine, maxSoundLength+4096);
+            try{if(i>=iMusic)
+                    asdl[i].open(fmtLine, 500000+64000+4096); // not used
+                else
+                    asdl[i].open(fmtLine, maxSoundLength+4096);
+               }
+            catch(LineUnavailableException lue)
+            {return(false);}
             asdl[i].start();
          }
 

@@ -42,10 +42,10 @@
     <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
     	<delete>
     	    <fileset dir="${destdir}" includes="**/*.class" />
-    		<fileset dir="${destdir}" includes="**/*.data" />  
-    		<fileset dir="${destdir}/xml" includes="**/*.xml" />
+    		<fileset dir="${destdir}" includes="**/*.data" />
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
+    	<delete dir="${destdir}/xml" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
 
@@ -133,7 +133,8 @@
         </java>
     </target>
 	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
-	        <java classname="tools.TilesGenerator"
+	    <mkdir dir="${destdir}/xml" />
+        <java classname="tools.TilesGenerator"
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
@@ -158,7 +159,7 @@
 	        	<arg value="pic256/crosshair.data"/>
 	        	<arg value="pic256/sphericalBeast.data"/>
 	        	<arg value="pic256/network.data"/>
-	        </java>
+	    </java>
 	</target>
 	
 </project>

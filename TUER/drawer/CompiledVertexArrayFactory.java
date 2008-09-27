@@ -15,33 +15,32 @@ package drawer;
 
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
 
 
 class CompiledVertexArrayFactory{
     
     
-    private GL gl;
-    
-    
-    CompiledVertexArrayFactory(GL gl)throws RuntimeException{
+    CompiledVertexArrayFactory()throws RuntimeException{
+        final GL gl=GLU.getCurrentGL();
         if(gl.isExtensionAvailable("GL_EXT_compiled_vertex_array")
 	    && gl.isFunctionAvailable("glLockArraysEXT")
 	    && gl.isFunctionAvailable("glUnlockArraysEXT"))
-	        this.gl=gl;
+            {}
 	    else
 	        throw new RuntimeException("compiled vertex array not supported");
     }           
     
     CompiledVertexArray newVertexSet(float[] array,int mode){
-        return(new CompiledVertexArray(gl,array,mode));
+        return(new CompiledVertexArray(array,mode));
     }
     
     CompiledVertexArray newVertexSet(FloatBuffer floatBuffer,int mode){
-        return(new CompiledVertexArray(gl,floatBuffer,mode));
+        return(new CompiledVertexArray(floatBuffer,mode));
     }
     
     CompiledVertexArray newVertexSet(IVertexSet vertexSet,int mode){
-        return(new CompiledVertexArray(gl,vertexSet,mode));
+        return(new CompiledVertexArray(vertexSet,mode));
     }
 }
 
