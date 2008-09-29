@@ -351,8 +351,7 @@ public final class CellsGenerator{
 	         }
     }
     
-    //resize 2D cells and portals so that the average width of the portals decreases 
-    //FIXME: when merging some cells, they overlap
+    //resize 2D cells and portals so that the average width of the portals decreases
     private final static void optimizeRawCellsAndPortals(Vector<Cell> cellsList){
         PointPair leftPortal,rightPortal;
         Cell mergedResultCell=null;
@@ -411,11 +410,11 @@ public final class CellsGenerator{
     			            	           if(leftPortal.getSize()>rightPortal.getFirst().x-leftPortal.getFirst().x)
     			            	               {//erase the both portals in the cell that links the two 
     			            	        	    //others and in the other cells
-    			            	        	    c1.removeRightPortal(leftPortal);
-    			            	        	    c2.removeRightPortal(leftPortal);
-    			            	        	    c1.removeLeftPortal(rightPortal);
-    			            	        	    c2.removeLeftPortal(rightPortal);
-    			            	        	    c3.removeLeftPortal(leftPortal);
+    			            	        	    if(!c1.removeRightPortal(leftPortal))            	        	        
+    			            	        	        c2.removeRightPortal(leftPortal);
+    			            	        	    if(!c1.removeLeftPortal(rightPortal))
+    			            	        	        c2.removeLeftPortal(rightPortal);   			          	        	    
+    			            	        	    c3.removeLeftPortal(leftPortal);  			            	        	         
     			            	        	    c3.removeRightPortal(rightPortal);
     			            	        	    //add all the walls and all the portals of the cells that have to be merged
     			            	        	    //in order to make a single new cell replacing the 2 previous cells

@@ -73,7 +73,7 @@ public final class NetworkView{
         //TODO: decrease the clipping when the performances are better
         final float arcContributionSize=65536*25;
         final Arc2D.Float playerArc=new Arc2D.Float();
-        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+180,180,Arc2D.PIE);
+        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+225,90,Arc2D.PIE);
         Rectangle2D playerRect=playerArc.getBounds2D();
         int size;
         float[] p1,p2,p3,p4;

@@ -248,234 +248,274 @@ public final class Cell{
         return(enclosingRectangle);
     }
     
-    public List<PointPair> getTopWalls(){
+    public final List<PointPair> getTopWalls(){
         return(Collections.unmodifiableList(topWalls));
     }
     
-    public List<PointPair> getBottomWalls(){
+    public final List<PointPair> getBottomWalls(){
         return(Collections.unmodifiableList(bottomWalls));
     }
     
-    public PointPair getTopWall(int index){
+    public final PointPair getTopWall(int index){
         return(topWalls.get(index));
     }
     
-    public PointPair getBottomWall(int index){
+    public final PointPair getBottomWall(int index){
         return(bottomWalls.get(index));
     }
          
-    public List<PointPair> getLeftWalls(){
+    public final List<PointPair> getLeftWalls(){
         return(Collections.unmodifiableList(leftWalls));
     }
     
-    public List<PointPair> getRightWalls(){
+    public final List<PointPair> getRightWalls(){
         return(Collections.unmodifiableList(rightWalls));
     }
     
-    public PointPair getLeftWall(int index){
+    public final PointPair getLeftWall(int index){
         return(leftWalls.get(index));
     }
     
-    public PointPair getRightWall(int index){
+    public final PointPair getRightWall(int index){
         return(rightWalls.get(index));
     }   
     
-    public List<PointPair> getTopPortals(){
+    public final List<PointPair> getTopPortals(){
         return(Collections.unmodifiableList(topPortals));
     }
     
-    public List<PointPair> getBottomPortals(){
+    public final List<PointPair> getBottomPortals(){
         return(Collections.unmodifiableList(bottomPortals));
     }
     
-    public PointPair getTopPortal(int index){
+    public final PointPair getTopPortal(int index){
         return(topPortals.get(index));
     }
     
-    public PointPair getBottomPortal(int index){
+    public final PointPair getBottomPortal(int index){
         return(bottomPortals.get(index));
     }
          
-    public List<PointPair> getLeftPortals(){
+    public final List<PointPair> getLeftPortals(){
         return(Collections.unmodifiableList(leftPortals));
     }
     
-    public List<PointPair> getRightPortals(){
+    public final List<PointPair> getRightPortals(){
         return(Collections.unmodifiableList(rightPortals));
     }
     
-    public PointPair getLeftPortal(int index){
+    public final PointPair getLeftPortal(int index){
         return(leftPortals.get(index));
     }
     
-    public PointPair getRightPortal(int index){
+    public final PointPair getRightPortal(int index){
         return(rightPortals.get(index));
     }
     
-    public void addTopWall(PointPair topWall){
+    public final void addTopWall(PointPair topWall){
         topWalls.add(topWall);
     }
     
-    public void addBottomWall(PointPair bottomWall){
+    public final void addBottomWall(PointPair bottomWall){
         bottomWalls.add(bottomWall);
     }
     
-    public void addTopPortal(PointPair topPortal){
+    public final void addTopPortal(PointPair topPortal){
         topPortals.add(topPortal);
     }
     
-    public void addBottomPortal(PointPair bottomPortal){
+    public final void addBottomPortal(PointPair bottomPortal){
         bottomPortals.add(bottomPortal);
     }
     
-    public void addLeftWall(PointPair leftWall){
+    public final void addLeftWall(PointPair leftWall){
         leftWalls.add(leftWall);
     }
     
-    public void addRightWall(PointPair rightWall){
+    public final void addRightWall(PointPair rightWall){
         rightWalls.add(rightWall);
     }
     
-    public void addLeftPortal(PointPair leftPortal){
+    public final void addLeftPortal(PointPair leftPortal){
         leftPortals.add(leftPortal);
     }
     
-    public void addRightPortal(PointPair rightPortal){
+    public final void addRightPortal(PointPair rightPortal){
         rightPortals.add(rightPortal);
     }     
     
-    public void addTopWalls(List<PointPair> topWalls){
+    public final void addTopWalls(List<PointPair> topWalls){
         this.topWalls.addAll(topWalls);
     }
     
-    public void addBottomWalls(List<PointPair> bottomWalls){
+    public final void addBottomWalls(List<PointPair> bottomWalls){
         this.bottomWalls.addAll(bottomWalls);
     }
     
-    public void addTopPortals(List<PointPair> topPortals){
+    public final void addTopPortals(List<PointPair> topPortals){
         this.topPortals.addAll(topPortals);
     }
     
-    public void addBottomPortals(List<PointPair> bottomPortals){
+    public final void addBottomPortals(List<PointPair> bottomPortals){
         this.bottomPortals.addAll(bottomPortals);
     }
     
-    public void addLeftWalls(List<PointPair> leftWalls){
+    public final void addLeftWalls(List<PointPair> leftWalls){
         this.leftWalls.addAll(leftWalls);
     }
     
-    public void addRightWalls(List<PointPair> rightWalls){
+    public final void addRightWalls(List<PointPair> rightWalls){
         this.rightWalls.addAll(rightWalls);
     }
     
-    public void addLeftPortals(List<PointPair> leftPortals){
+    public final void addLeftPortals(List<PointPair> leftPortals){
         this.leftPortals.addAll(leftPortals);
     }
     
-    public void addRightPortals(List<PointPair> rightPortals){
+    public final void addRightPortals(List<PointPair> rightPortals){
         this.rightPortals.addAll(rightPortals);
     }      
     
-    public void removeTopWall(PointPair topWall){
+    public final void removeTopWall(PointPair topWall){
         topWalls.remove(topWall);
     }
     
-    public void removeBottomWall(PointPair bottomWall){
+    public final void removeBottomWall(PointPair bottomWall){
         bottomWalls.remove(bottomWall);
     }
     
-    public void removeTopPortal(PointPair topPortal){
+    public final void removeTopPortal(PointPair topPortal){
         topPortals.remove(topPortal);
     }
     
-    public void removeBottomPortal(PointPair bottomPortal){
+    public final void removeBottomPortal(PointPair bottomPortal){
         bottomPortals.remove(bottomPortal);
     }
     
-    public void removeLeftWall(PointPair leftWall){
+    public final void removeLeftWall(PointPair leftWall){
         leftWalls.remove(leftWall);
     }
     
-    public void removeRightWall(PointPair rightWall){
+    public final void removeRightWall(PointPair rightWall){
         rightWalls.remove(rightWall);
     }
     
-    public void removeLeftPortal(PointPair leftPortal){
-        leftPortals.remove(leftPortal);
+    public final boolean removeLeftPortal(PointPair leftPortal){
+        boolean success;
+        if(leftPortals.isEmpty())
+            success=false;
+        else
+            {if(!leftPortals.remove(leftPortal))
+                 {success=false;
+                  int leftPortalIndex=0;
+                  for(PointPair p:leftPortals)
+                      if(p.equals(leftPortal))
+                          {success=true;                      
+                           break;
+                          }
+                      else
+                          leftPortalIndex++;
+                  if(success)
+                      leftPortals.remove(leftPortalIndex);
+                 }
+             else
+                 success=true;
+            }
+        return(success);
     }
     
-    public void removeRightPortal(PointPair rightPortal){
-        rightPortals.remove(rightPortal);
+    public final boolean removeRightPortal(PointPair rightPortal){       
+        boolean success;
+        if(rightPortals.isEmpty())
+            success=false;
+        else
+            {if(!rightPortals.remove(rightPortal))
+                 {success=false;
+                  int rightPortalIndex=0;
+                  for(PointPair p:rightPortals)
+                      if(p.equals(rightPortal))
+                          {success=true;                      
+                           break;
+                          }
+                      else
+                          rightPortalIndex++;
+                  if(success)
+                      rightPortals.remove(rightPortalIndex);
+                 }
+             else
+                 success=true;
+            }
+        return(success);
     }     
     
-    public void removeTopWalls(List<PointPair> topWalls){
+    public final void removeTopWalls(List<PointPair> topWalls){
         this.topWalls.removeAll(topWalls);
     }
     
-    public void removeBottomWalls(List<PointPair> bottomWalls){
+    public final void removeBottomWalls(List<PointPair> bottomWalls){
         this.bottomWalls.removeAll(bottomWalls);
     }
     
-    public void removeTopPortals(List<PointPair> topPortals){
+    public final void removeTopPortals(List<PointPair> topPortals){
         this.topPortals.removeAll(topPortals);
     }
     
-    public void removeBottomPortals(List<PointPair> bottomPortals){
+    public final void removeBottomPortals(List<PointPair> bottomPortals){
         this.bottomPortals.removeAll(bottomPortals);
     }
     
-    public void removeLeftWalls(List<PointPair> leftWalls){
+    public final void removeLeftWalls(List<PointPair> leftWalls){
         this.leftWalls.removeAll(leftWalls);
     }
     
-    public void removeRightWalls(List<PointPair> rightWalls){
+    public final void removeRightWalls(List<PointPair> rightWalls){
         this.rightWalls.removeAll(rightWalls);
     }
     
-    public void removeLeftPortals(List<PointPair> leftPortals){
+    public final void removeLeftPortals(List<PointPair> leftPortals){
         this.leftPortals.removeAll(leftPortals);
     }
     
-    public void removeRightPortals(List<PointPair> rightPortals){
+    public final void removeRightPortals(List<PointPair> rightPortals){
         this.rightPortals.removeAll(rightPortals);
     }
     
-    public void mergeLeftWalls(){
+    public final void mergeLeftWalls(){
     	Collections.sort(leftWalls, new PointPairComparator(PointPairComparator.VERTICAL_SORT));
     	mergePointPairList(leftWalls);
     } 
     
-    public void mergeRightWalls(){
+    public final void mergeRightWalls(){
     	Collections.sort(rightWalls, new PointPairComparator(PointPairComparator.VERTICAL_SORT));
     	mergePointPairList(rightWalls);
     } 
     
-    public void mergeTopWalls(){
+    public final void mergeTopWalls(){
     	Collections.sort(topWalls, new PointPairComparator(PointPairComparator.HORIZONTAL_SORT));
     	mergePointPairList(topWalls);
     } 
     
-    public void mergeBottomWalls(){
+    public final void mergeBottomWalls(){
     	Collections.sort(bottomWalls, new PointPairComparator(PointPairComparator.HORIZONTAL_SORT));
     	mergePointPairList(bottomWalls);
     }  
     
-    public void mergeLeftPortals(){
+    public final void mergeLeftPortals(){
     	Collections.sort(leftPortals, new PointPairComparator(PointPairComparator.VERTICAL_SORT));
     	mergePointPairList(leftPortals);
     } 
     
-    public void mergeRightPortals(){
+    public final void mergeRightPortals(){
     	Collections.sort(rightPortals, new PointPairComparator(PointPairComparator.VERTICAL_SORT));
     	mergePointPairList(rightPortals);
     } 
     
-    public void mergeTopPortals(){
+    public final void mergeTopPortals(){
     	Collections.sort(topPortals, new PointPairComparator(PointPairComparator.HORIZONTAL_SORT));
     	mergePointPairList(topPortals);
     } 
     
-    public void mergeBottomPortals(){
+    public final void mergeBottomPortals(){
     	Collections.sort(bottomPortals, new PointPairComparator(PointPairComparator.HORIZONTAL_SORT));
     	mergePointPairList(bottomPortals);
     }
@@ -484,7 +524,7 @@ public final class Cell{
      * merge all linked point pairs
      * @param list : list containing SORTED point pairs
      */
-    private static void mergePointPairList(List<PointPair> list){
+    private final static void mergePointPairList(List<PointPair> list){
     	Vector<PointPair> result=new Vector<PointPair>();
     	result.addAll(CellsGenerator.mergeAllWallPieces(list));    	
     	list.clear();
@@ -492,7 +532,7 @@ public final class Cell{
     	
     }
     
-    public String toString(){
+    public final String toString(){
     	/*final String newLine="\n";//System.getProperty("line.separator");
     	String tmp="";
     	//tmp+=((Object)this).toString()+newLine;
@@ -526,7 +566,7 @@ public final class Cell{
     }
 
 
-	public boolean isValid() {
+	public final boolean isValid() {
 		if(!leftWalls.isEmpty())
 		    {int left=leftWalls.get(0).getFirst().x;
 		     for(PointPair p:leftWalls)
