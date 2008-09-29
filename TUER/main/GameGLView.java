@@ -363,7 +363,7 @@ class GameGLView implements GLEventListener{
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
-	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
+	              //softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
 	              this.levelTexture.bind(); 
