@@ -31,6 +31,7 @@ import javax.imageio.ImageIO;
 public final class CellsGenerator{
     
     
+    //TODO: rather return a list of networks
     public final static Network generate(List<PointPair> topWallPiecesList,
                                       List<PointPair> bottomWallPiecesList,
                                       List<PointPair> leftWallPiecesList,
@@ -65,8 +66,7 @@ public final class CellsGenerator{
     	Collections.sort(leftFullWallList,ppc);
     	Collections.sort(rightFullWallList,ppc);
     	Vector<Cell> cellsList=new Vector<Cell>();
-    	Vector<Portal> portalsList=new Vector<Portal>();
-    	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList,portalsList);
+    	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList);
     	optimizeRawCellsAndPortals(cellsList);  
     	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList,
     	        topWallPiecesList,bottomWallPiecesList,
@@ -97,6 +97,7 @@ public final class CellsGenerator{
     	    System.out.println("cells integrity not preserved!!!");
     	//build the network from the list of cells
     	System.out.println("[start] network construction");
+    	//TODO: rather use Network.getNetworksListFromCellsList(full3DCellsList);    	
     	Network network=new Network(full3DCellsList);
     	System.out.println("[end] network construction");
     	return(network);
@@ -199,8 +200,7 @@ public final class CellsGenerator{
                                                          Vector<PointPair> bottomFullWallList,
 							 Vector<PointPair> leftFullWallList,
 							 Vector<PointPair> rightFullWallList,
-							 Vector<Cell> cellsList,
-							 Vector<Portal> portalsList){
+							 Vector<Cell> cellsList){
     	Vector<Cell> fullWallCell=new Vector<Cell>();
     	PointPair topFullWallPiece=new PointPair();	
     	PointPair bottomFullWallPiece;
@@ -354,10 +354,11 @@ public final class CellsGenerator{
     //resize 2D cells and portals so that the average width of the portals decreases
     private final static void optimizeRawCellsAndPortals(Vector<Cell> cellsList){
         PointPair leftPortal,rightPortal;
+        int leftPortalIndex,rightPortalIndex;
         Cell mergedResultCell=null;
         Vector<Cell> garbageCells=new Vector<Cell>();
         Vector<Cell> additionalMergedCells=new Vector<Cell>();
-        boolean found,mustRestart=false,bottomLinkFound,topLinkFound;
+        boolean mustRestart=false,bottomLinkFound,topLinkFound;
     	for(Cell c1:cellsList)
     	    {if(mustRestart)
 	    	     break;
@@ -388,22 +389,10 @@ public final class CellsGenerator{
     			    	        break;
     			    	    //check if it is a single different cell contains the both portals
     			            if(c1!=c3 && c2!=c3)
-    			                {found=false;
-    			                 //check if it contains the left portal
-    			                 for(PointPair currentLeftPortal:c3.getLeftPortals())
-    			        	         if(currentLeftPortal.equals(leftPortal))
-    			        	             {found=true;
-    			        	     	      break;
-    			        	             }
-    			                 if(found)
-    			                     {found=false;
-    			                      //check if it contains the right portal
-        			                  for(PointPair currentRightPortal:c3.getRightPortals())
-        			        	          if(currentRightPortal.equals(rightPortal))
-        			        	              {found=true;
-        			        	    	       break;
-        			        	              }
-    			            	      if(found)
+    			                {//check if it contains the left portal  			      
+    			                 if((leftPortalIndex=c3.getLeftPortals().indexOf(leftPortal))!=-1)
+    			                     {//check if it contains the right portal
+    			            	      if((rightPortalIndex=c3.getRightPortals().indexOf(rightPortal))!=-1)
     			            	          {//check the criteria of decision to merge two cells
     			    			           //we assume that the both portals have the same size
     			            	           //if the size of the portals is bigger than their distance to each other
@@ -414,8 +403,8 @@ public final class CellsGenerator{
     			            	        	        c2.removeRightPortal(leftPortal);
     			            	        	    if(!c1.removeLeftPortal(rightPortal))
     			            	        	        c2.removeLeftPortal(rightPortal);   			          	        	    
-    			            	        	    c3.removeLeftPortal(leftPortal);  			            	        	         
-    			            	        	    c3.removeRightPortal(rightPortal);
+    			            	        	    c3.removeLeftPortal(leftPortalIndex);  			            	        	         
+    			            	        	    c3.removeRightPortal(rightPortalIndex);
     			            	        	    //add all the walls and all the portals of the cells that have to be merged
     			            	        	    //in order to make a single new cell replacing the 2 previous cells
     			            	        	    mergedResultCell=new Cell();
@@ -437,22 +426,14 @@ public final class CellsGenerator{
     			            	        	    Vector<PointPair> bottomLinkWalls = new Vector<PointPair>();
     			            	        	    Vector<PointPair> bottomLinkPortals = new Vector<PointPair>();
     			            	        	    Vector<PointPair> topLinkWalls = new Vector<PointPair>();
-    			            	        	    Vector<PointPair> topLinkPortals = new Vector<PointPair>();
-    			            	        	    bottomLinkFound=false;
-    			            	        	    for(PointPair p:c3.getBottomWalls())
-    			            	        	    	if(p.equals(bottomLink))
-    			            	        	    	    {bottomLinkFound=true;
-    			            	        	    	     bottomLinkWalls.add(p);
-    			            	        	    		 break;
-    			            	        	    	    }   			            	        	    	
-    			            	        	    //look if the bottom link is a portal of c3 
-    			            	        	    if(!bottomLinkFound)
-    			            	        	        for(PointPair p:c3.getBottomPortals())
-    			            	        	    	    if(p.equals(bottomLink))
-    			            	        	    	        {bottomLinkFound=true;
-    			            	        	    	         bottomLinkPortals.add(p);
-    			            	        	    		     break;
-    			            	        	    	        }
+    			            	        	    Vector<PointPair> topLinkPortals = new Vector<PointPair>();	
+    			            	        	    //look if the bottom link is a wall of c3 
+    			            	        	    if(bottomLinkFound=(c3.getBottomWalls().contains(bottomLink)))
+    			            	        	        bottomLinkWalls.add(bottomLink);    			            	        	       			            	        	    
+    			            	        	    else
+    			            	        	        //look if the bottom link is a portal of c3 
+    			            	        	        if(bottomLinkFound=(c3.getBottomPortals().contains(bottomLink)))
+    			            	        	            bottomLinkPortals.add(bottomLink);
     			            	        	    //if required, look for each piece composing the bottom link
     			            	        	    if(!bottomLinkFound && bottomLink.getSize()>1)
     			            	        	        {//check if all walls of c3 are sub-links   
@@ -478,21 +459,12 @@ public final class CellsGenerator{
                                                           bottomLinkPortals.addAll(c3.getBottomPortals());
                                                           bottomLinkFound=true;
                                                          }   
-    			            	        	        }    
-    			            	        	    topLinkFound=false;    	                                        
-    			            	        	    for(PointPair p:c3.getTopWalls())
-    			            	        	    	if(p.equals(topLink))
-    			            	        	    	    {topLinkFound=true;
-    			            	        	    	     topLinkWalls.add(p);
-    			            	        	    		 break;
-    			            	        	    	    }   			            	        	    	
-    			            	        	    if(!topLinkFound)
-    			            	        	        for(PointPair p:c3.getTopPortals())
-    			            	        	    	    if(p.equals(topLink))
-    			            	        	    	        {topLinkFound=true;
-    			            	        	    	         topLinkPortals.add(p);
-    			            	        	    		     break;
-    			            	        	    	        }		            	        	    
+    			            	        	        }    	            	       	      			          	        	    
+    			            	        	    if(topLinkFound=(c3.getTopWalls().contains(topLink)))
+    			            	        	        topLinkWalls.add(topLink);
+    			            	        	    else
+    			            	        	        if(topLinkFound=(c3.getTopPortals().contains(topLink)))
+    			            	        	            topLinkPortals.add(topLink);   			            	        	    	            	        	    
     			            	        	    //if required, look for each piece composing the top link
     			            	        	    if(!topLinkFound && topLink.getSize()>1)
     			            	        	        {//check if all walls of c3 are sub-links   
@@ -560,9 +532,7 @@ public final class CellsGenerator{
     			            	        	        {//if c3 disappears
     			            	        	    	 //nothing changes for the main merged cell			            	        	    	 
     			            	        	    	 if(topLinkFound)
-    			            	        	    	     {//the main merged cell absorbs c3
-    			            	        	    		  //mergedResultCell.addBottomWall(bottomLink);
-    			            	        	    	      //mergedResultCell.addTopWall(topLink);    			                 	    	      
+    			            	        	    	     {//the main merged cell absorbs c3   			          	        	    		    			                 	    	      
     			            	        	    		  mergedResultCell.addTopWalls(topLinkWalls);
  	                                            	      mergedResultCell.addTopPortals(topLinkPortals);
  	                                            	      mergedResultCell.addBottomWalls(bottomLinkWalls);

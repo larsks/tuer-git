@@ -15,6 +15,7 @@ package tools;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class Network implements Serializable{
@@ -31,39 +32,16 @@ public final class Network implements Serializable{
     
     public Network(){}
     
+    /**
+     * Build a connected graph
+     * @param full3DCellsList list of connected cells
+     */
     public Network(List<Full3DCell> full3DCellsList){
         buildGraphFromList(full3DCellsList);
     }
     
     
     private final void writeObject(java.io.ObjectOutputStream out)throws IOException{
-        /*List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
-        //use BFS, write a list of cells
-        if(rootCell!=null)
-            {Full3DCell c;
-             //First In First Out abstract data type used to store the sons of the current cell
-             List<Full3DCell> fifo=new ArrayList<Full3DCell>();
-             //Each cell that has been seen has to be marked to avoid an infinite loop
-             List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
-             //We use the first traveled cell suggested by the user
-             markedCellsList.add(rootCell);
-             fifo.add(rootCell);
-             while(!fifo.isEmpty())
-                 {//Get the first added element as it is a FIFO (pop operation)
-                  c=fifo.remove(0);
-                  //This is the main treatment, save each cell that has to be written                
-                  full3DCellsList.add(c);
-                  for(Full3DCell son:c.getNeighboursCellsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
-                 }
-            }
-        out.writeObject(full3DCellsList);*/
-        //write all cells even the unreachable cells
         out.writeObject(cellsList);
     }
 
@@ -76,7 +54,13 @@ public final class Network implements Serializable{
     private final void buildGraphFromList(List<Full3DCell> full3DCellsList){
         cellsList=full3DCellsList;              
         //the first cell becomes the root cell
-        rootCell=full3DCellsList.get(0);
+        if(!full3DCellsList.isEmpty())
+            {rootCell=full3DCellsList.get(0);
+             connectCellsTogether(full3DCellsList);
+            }
+    }
+    
+    private static final void connectCellsTogether(List<Full3DCell> full3DCellsList){
         List<float[]> commonPortalsList;
         //compute the neighbors list of each cell in order to rebuild the network
         int i=0,j;
@@ -102,7 +86,7 @@ public final class Network implements Serializable{
     }
     
     public final Full3DCell locate(float x,float y,float z){
-        return(locate(x,y,z,getRootCell()));
+        return(locate(x,y,z,rootCell));
     }
     
     /*
@@ -140,8 +124,6 @@ public final class Network implements Serializable{
         for(Full3DCell cell:cellsList)
             if(cell.contains(x,y,z))
                 return(cell);
-        
-        //It should NEVER HAPPEN
         //It means that you are completely outside the network
         return(null);
     }
@@ -203,11 +185,7 @@ public final class Network implements Serializable{
     }
 
     public final void setRootCell(Full3DCell rootCell){
-        if(rootCell!=null)
-            {this.rootCell=rootCell;
-             if(this.controller!=null)
-                 this.controller.setRootCell(rootCell.getController());               
-            }       
+        this.rootCell=rootCell;
     }
 
     public final NetworkController getController(){
@@ -216,7 +194,53 @@ public final class Network implements Serializable{
 
     public final void setController(NetworkController controller){
         this.controller=controller;
-        if(this.rootCell!=null)
-            this.controller.setRootCell(rootCell.getController());
     }  
+    
+    /**
+     * 
+     * @param full3DCellsList
+     * @return a list of connected graphs
+     */
+    public static final List<Network> getNetworksListFromCellsList(List<Full3DCell> full3DCellsList){
+        List<Full3DCell> cellsList=new ArrayList<Full3DCell>();
+        cellsList.addAll(full3DCellsList);
+        //connect each cell to its neighbor
+        connectCellsTogether(cellsList);
+        List<Network> networksList=new ArrayList<Network>();
+        Full3DCell c;
+        List<Full3DCell> subCellsList;
+        Network network;
+        //Each cell that has been seen has to be marked to avoid an infinite loop
+        List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
+        //First In First Out abstract data type used to store the sons of the current cell
+        List<Full3DCell> fifo=new ArrayList<Full3DCell>();
+        while(!cellsList.isEmpty())
+            {network=new Network();
+             network.rootCell=cellsList.get(0);  
+             //now we use the BFS to get all connected cells of a single graph
+             subCellsList=new ArrayList<Full3DCell>();
+             markedCellsList.clear();
+             //We use the first traveled cell suggested by the user
+             markedCellsList.add(network.rootCell);
+             fifo.add(network.rootCell);
+             while(!fifo.isEmpty())
+                 {//Get the first added element as it is a FIFO (pop operation)
+                  c=fifo.remove(0);
+                  //This is the main treatment, save all connected cells of a single graph
+                  subCellsList.add(c);
+                  for(Full3DCell son:c.getNeighboursCellsList())
+                      if(!markedCellsList.contains(son))
+                          {//Mark the cell to avoid traveling it more than once
+                           markedCellsList.add(son);
+                           //Add a new cell to travel (push operation)
+                           fifo.add(son);
+                          }
+                 }
+             network.cellsList=subCellsList;
+             networksList.add(network);
+             //we remove the cells already used by the most recently created network
+             cellsList.removeAll(subCellsList);            
+            }
+        return(networksList);
+    }
 }

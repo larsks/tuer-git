@@ -401,52 +401,20 @@ public final class Cell{
     }
     
     public final boolean removeLeftPortal(PointPair leftPortal){
-        boolean success;
-        if(leftPortals.isEmpty())
-            success=false;
-        else
-            {if(!leftPortals.remove(leftPortal))
-                 {success=false;
-                  int leftPortalIndex=0;
-                  for(PointPair p:leftPortals)
-                      if(p.equals(leftPortal))
-                          {success=true;                      
-                           break;
-                          }
-                      else
-                          leftPortalIndex++;
-                  if(success)
-                      leftPortals.remove(leftPortalIndex);
-                 }
-             else
-                 success=true;
-            }
-        return(success);
+        return(leftPortals.remove(leftPortal));                
+    }
+    
+    public final boolean removeLeftPortal(int leftPortalIndex){
+        return(leftPortals.remove(leftPortalIndex)!=null);                
     }
     
     public final boolean removeRightPortal(PointPair rightPortal){       
-        boolean success;
-        if(rightPortals.isEmpty())
-            success=false;
-        else
-            {if(!rightPortals.remove(rightPortal))
-                 {success=false;
-                  int rightPortalIndex=0;
-                  for(PointPair p:rightPortals)
-                      if(p.equals(rightPortal))
-                          {success=true;                      
-                           break;
-                          }
-                      else
-                          rightPortalIndex++;
-                  if(success)
-                      rightPortals.remove(rightPortalIndex);
-                 }
-             else
-                 success=true;
-            }
-        return(success);
-    }     
+        return(rightPortals.remove(rightPortal));
+    }  
+    
+    public final boolean removeRightPortal(int rightPortalIndex){       
+        return(rightPortals.remove(rightPortalIndex)!=null);
+    }  
     
     public final void removeTopWalls(List<PointPair> topWalls){
         this.topWalls.removeAll(topWalls);

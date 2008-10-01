@@ -807,6 +807,7 @@ public final class TilesGenerator{
 	     Network network=CellsGenerator.generate(topWallsList,bottomWallsList,
 	             rightWallsList,leftWallsList,artTopWallsList,
 	             artBottomWallsList,artRightWallsList,artLeftWallsList);
+	     //TODO: rather write a list of networks
 	     //write the network into a file
 	     ObjectOutputStream oos=null;
 	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));

@@ -91,6 +91,18 @@ public final class Full3DCell implements Serializable{
         return(this);
     }
     
+    public final boolean equals(Object o){
+        if(o==null||!(o instanceof Full3DCell))
+            return(false);
+        else
+            {Full3DCell c=(Full3DCell)o;
+             return(topWalls.equals(c.getTopWalls())&&topPortals.equals(c.getTopPortals())&&
+                    bottomWalls.equals(c.getBottomWalls())&&bottomPortals.equals(c.getBottomPortals())&&
+                    leftWalls.equals(c.getLeftWalls())&&leftPortals.equals(c.getLeftPortals())&&
+                    rightWalls.equals(c.getRightWalls())&&rightPortals.equals(c.getRightPortals()));
+            }
+    }
+    
     /**
      * 
      * NB: THIS METHOD IS COSTLY (O(n²)), use it only when you have not yet 

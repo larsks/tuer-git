@@ -25,9 +25,12 @@ public final class NetworkView{
     
     private final void buildGraphFromList(List<Full3DCellView> cellsViewsList){
         this.cellsViewsList=cellsViewsList;
-        for(Full3DCellView cellView:this.cellsViewsList)
-            for(Full3DCellController cellController:cellView.getController().getNeighboursCellsControllersList())
-                cellView.getNeighboursCellsViewsList().add(cellController.getView());               
+        if(!this.cellsViewsList.isEmpty())
+            {this.rootCell=cellsViewsList.get(0);
+             for(Full3DCellView cellView:this.cellsViewsList)
+                 for(Full3DCellController cellController:cellView.getController().getNeighboursCellsControllersList())
+                     cellView.getNeighboursCellsViewsList().add(cellController.getView()); 
+            }                     
     }
     
     public final NetworkController getController(){

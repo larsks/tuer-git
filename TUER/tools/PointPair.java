@@ -45,10 +45,15 @@ public final class PointPair implements Cloneable{
     public final Point getLast(){
         return(last);
     }
-
-    public boolean equals(PointPair p){
-        return((first.equals(p.getFirst())&&last.equals(p.getLast()))
-                ||(first.equals(p.getLast())&&last.equals(p.getFirst())));
+    
+    public final boolean equals(Object o){
+        if(o==null||!(o instanceof PointPair))
+            return(false);
+        else
+            {PointPair p=(PointPair)o;
+             return((first.equals(p.getFirst())&&last.equals(p.getLast()))
+                    ||(first.equals(p.getLast())&&last.equals(p.getFirst())));
+            }
     }
 
     public final Object clone(){

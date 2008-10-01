@@ -468,6 +468,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
     
     private final void loadNetwork(){
+        //TODO: rather read a list of networks
         //read the network here
         ObjectInputStream ois=null;
         try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
