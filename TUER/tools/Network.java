@@ -60,7 +60,7 @@ public final class Network implements Serializable{
             }
     }
     
-    private static final void connectCellsTogether(List<Full3DCell> full3DCellsList){
+    static final void connectCellsTogether(List<Full3DCell> full3DCellsList){
         List<float[]> commonPortalsList;
         //compute the neighbors list of each cell in order to rebuild the network
         int i=0,j;
@@ -85,7 +85,7 @@ public final class Network implements Serializable{
         return(cellsList);
     }
     
-    public final Full3DCell locate(float x,float y,float z){
+    final Full3DCell locate(float x,float y,float z){
         return(locate(x,y,z,rootCell));
     }
     
@@ -94,7 +94,7 @@ public final class Network implements Serializable{
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    private final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
+    final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
         /*Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
@@ -194,53 +194,9 @@ public final class Network implements Serializable{
 
     public final void setController(NetworkController controller){
         this.controller=controller;
-    }  
-    
-    /**
-     * 
-     * @param full3DCellsList
-     * @return a list of connected graphs
-     */
-    public static final List<Network> getNetworksListFromCellsList(List<Full3DCell> full3DCellsList){
-        List<Full3DCell> cellsList=new ArrayList<Full3DCell>();
-        cellsList.addAll(full3DCellsList);
-        //connect each cell to its neighbor
-        connectCellsTogether(cellsList);
-        List<Network> networksList=new ArrayList<Network>();
-        Full3DCell c;
-        List<Full3DCell> subCellsList;
-        Network network;
-        //Each cell that has been seen has to be marked to avoid an infinite loop
-        List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
-        //First In First Out abstract data type used to store the sons of the current cell
-        List<Full3DCell> fifo=new ArrayList<Full3DCell>();
-        while(!cellsList.isEmpty())
-            {network=new Network();
-             network.rootCell=cellsList.get(0);  
-             //now we use the BFS to get all connected cells of a single graph
-             subCellsList=new ArrayList<Full3DCell>();
-             markedCellsList.clear();
-             //We use the first traveled cell suggested by the user
-             markedCellsList.add(network.rootCell);
-             fifo.add(network.rootCell);
-             while(!fifo.isEmpty())
-                 {//Get the first added element as it is a FIFO (pop operation)
-                  c=fifo.remove(0);
-                  //This is the main treatment, save all connected cells of a single graph
-                  subCellsList.add(c);
-                  for(Full3DCell son:c.getNeighboursCellsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
-                 }
-             network.cellsList=subCellsList;
-             networksList.add(network);
-             //we remove the cells already used by the most recently created network
-             cellsList.removeAll(subCellsList);            
-            }
-        return(networksList);
     }
+
+    public final void setCellsList(List<Full3DCell> cellsList){
+        this.cellsList=cellsList;
+    }  
 }
