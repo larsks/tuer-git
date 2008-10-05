@@ -26,13 +26,15 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Vector;
+import java.util.Map.Entry;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
-import tools.NetworkView;
+import tools.Full3DCellView;
+import tools.NetworkViewSet;
 
 /**
  * This class has the role of being the GL part of the view
@@ -151,7 +153,9 @@ class GameGLView implements GLEventListener{
     
     private File snapDirectory;
     
-    private NetworkView networkView;
+    private NetworkViewSet networkViewSet;
+    
+    private Entry<Full3DCellView,Integer> playerPositioning;
     
     private static final float glPolygonOffsetFactor=-20.0f;
     
@@ -165,7 +169,7 @@ class GameGLView implements GLEventListener{
     
     private static int GL_MAX_TEXTURE_SIZE;
     
-    private SoftwareViewFrustumCullingPerformer softwareViewFrustumCullingPerformer;
+    private ViewFrustumCullingPerformer softwareViewFrustumCullingPerformer;
     
     private static final boolean politicalMessagesEnabled=false;
     
@@ -294,7 +298,8 @@ class GameGLView implements GLEventListener{
     	this.objectsTexture=null;
     	this.startingScreenTexture=null;
     	this.startingMenuTexture=null;
-    	this.impactTexture=null;   	
+    	this.impactTexture=null;   
+    	this.playerPositioning=null;
     	this.recSnapFilm=false;
     	this.recSnapShot=false;   	
     	this.vertexSetSeeker=VertexSetSeeker.getInstance();
@@ -363,14 +368,15 @@ class GameGLView implements GLEventListener{
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
-	              //softwareViewFrustumCullingPerformer.computeViewFrustum();	              
+	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
 	              this.levelTexture.bind(); 
-	              //TODO: uncomment it to retablish the older behavior
+	              //uncomment it to retablish the older behavior
 	              //this.levelVertexSet.draw();	
-	              //TODO: uncomment it to use the experimental scenegraph
-	              networkView.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),softwareViewFrustumCullingPerformer);
+	              //uncomment it to use the experimental scenegraph	              	              
+	              //networkView.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),softwareViewFrustumCullingPerformer);
+	              this.playerPositioning=networkViewSet.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),playerPositioning,softwareViewFrustumCullingPerformer);	              
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
@@ -921,8 +927,8 @@ class GameGLView implements GLEventListener{
 	                 loadProgress+=1;
 	             loadProgress+=HealthPowerUpViewFactory.getInstance(false).getTexturesList().size();
 	             loadProgress+=ExplosionViewFactory.getInstance(false).getTexturesList().size();
-	             if(this.networkView==null)
-	                 {this.networkView=gameController.prepareNetwork();
+	             if(this.networkViewSet==null)
+	                 {this.networkViewSet=gameController.prepareNetworkViewSet();
 	                  return; 
 	                 }
 	             else
@@ -959,9 +965,9 @@ class GameGLView implements GLEventListener{
     	gl.glLoadIdentity();
     	/*modify the projection matrix only when in 3D full mode*/
     	gl.glFrustum(-50,50,-50,50,50,5000000);
-    	/*glu.gluPerspective(65.0,4/3,1,1000);*/
-    	//FIXME: set a tolerance
-    	softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
+    	//glu.gluPerspective(65.0,4/3,1,1000);
+    	//softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
+    	softwareViewFrustumCullingPerformer=new DummyViewFrustumCullingPerformer(gameController);
     	gl.glMatrixMode(GL.GL_MODELVIEW);
     	gl.glLoadIdentity();
     	//this.lStartPhase=System.currentTimeMillis()+15000;

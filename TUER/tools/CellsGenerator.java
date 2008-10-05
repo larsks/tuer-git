@@ -32,7 +32,7 @@ public final class CellsGenerator{
     
     
     //TODO: rather return a list of networks
-    public final static Network generate(List<PointPair> topWallPiecesList,
+    public final static /*Network*/NetworkSet generate(List<PointPair> topWallPiecesList,
                                       List<PointPair> bottomWallPiecesList,
                                       List<PointPair> leftWallPiecesList,
 			                          List<PointPair> rightWallPiecesList,
@@ -98,9 +98,11 @@ public final class CellsGenerator{
     	//build the network from the list of cells
     	System.out.println("[start] network construction");
     	//TODO: rather use Network.getNetworksListFromCellsList(full3DCellsList);    	
-    	Network network=new Network(full3DCellsList);
+    	//Network network=new Network(full3DCellsList);
+    	NetworkSet networkSet=new NetworkSet(full3DCellsList);
     	System.out.println("[end] network construction");
-    	return(network);
+    	//return(network);
+    	return(networkSet);
     }
     
     private static final List<Cell> getOverlappingCellsList(List<Cell> cellsList){

@@ -51,7 +51,12 @@ public final class Full3DCellView{
         return(controller.getNeighboursPortalsList());
     }
 
-    public final Rectangle getEnclosingRectangle(){
+    public final boolean contains(float x,float y,float z){
+        //ordinate temporarily ignored
+        return(controller.getEnclosingRectangle().contains(x,z));
+    }
+    
+    /*public final Rectangle getEnclosingRectangle(){
         return(controller.getEnclosingRectangle());
-    } 
+    } */
 }

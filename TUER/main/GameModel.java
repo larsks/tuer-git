@@ -52,6 +52,7 @@ import java.util.Vector;
 import tools.Full3DCell;
 import tools.GameIO;
 import tools.Network;
+import tools.NetworkSet;
 
 public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
@@ -62,7 +63,8 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     private GameController gameController;
     
-    private Network network;
+    //private Network network;
+    private NetworkSet networkSet;
     
     private List<BotModel> botList;
     
@@ -220,11 +222,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private int[] mapData = null; 
     //private long lClLastPassBy = 0;
     private int nClBotsWalking = 0;
-    
-    //TODO: move all the sound into the client side
-    private boolean aBwShouldPlay[]   = new boolean[3];
-    private boolean aBwIsPlaying[]    = new boolean[3];
-    private long    aBwPlayingSince[] = new long[3];
   
     private long lastBotShotTime;//latency for the bots
     
@@ -467,12 +464,13 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	    {throw new RuntimeException("Unable to read the data files",ioe);}	    
     }
     
-    private final void loadNetwork(){
+    private final void loadNetworkSet(){
         //TODO: rather read a list of networks
         //read the network here
         ObjectInputStream ois=null;
         try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
-            network=(Network)ois.readObject();
+            //network=(Network)ois.readObject();
+            networkSet=(NetworkSet)ois.readObject();
             ois.close();
            }
         catch(Throwable t)
@@ -721,16 +719,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         botmap[ioff] = igroup;
     }
     
-    final List<Full3DCell> getCellsList(){
-        if(network==null)
-            loadNetwork();
-        return(network.getListFromGraph());
-    }
-    
-    final Network getNetwork(){
-        if(network==null)
-            loadNetwork();
-        return(network);
+    final NetworkSet getNetworkSet(){
+        if(networkSet==null)
+            loadNetworkSet();
+        return(networkSet);   
     }
     
     public final void launchNewGame(){       
@@ -1175,7 +1167,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
        runningFast=false;
 
        gameController.stopMovingSound(0xFFFF); // in case it's still playing
-       initBotwalkSound();
+       gameController.initBotwalkSound();
 
        gameController.restartMusic();    // i.e. initial background track
        //FIXME: put a better mechanism to respawn within an area
@@ -1193,7 +1185,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	        }
     }
 
-    private final long currentTime(){
+    public final long currentTime(){
         if(internalClock!=null && !internalClock.hasNotYetStarted())
             return(internalClock.getElapsedTime());
         else
@@ -1286,7 +1278,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                   updateExplosions();
                   updateItems();
                   hasBeenKilled=stepObjects();	 
-                  stepBotwalkSound();               
+                  gameController.stepBotwalkSound();               
 		          if(!player.isAlive()&&!isFalling)
         	          continue;
         	      // step player       	      
@@ -1897,7 +1889,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                   for(int i=0;i<nDiff;i++)
                       {// System.out.println("=> start "+(6+nOldBotsWalking));
         	           // startMovingSound(1<<(6+nOldBotsWalking));
-        	           requestBotwalkSound(nOldBotsWalking);
+        	           gameController.requestBotwalkSound(nOldBotsWalking);
         	           nOldBotsWalking++;
                       }
                   // System.out.println(""+nOldBotsWalking+" walkers");
@@ -1907,9 +1899,9 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
             if(nClBotsWalking < nOldBotsWalking)
                 {if(nClBotsWalking <= 0) 
                      {//just in case we miscounted:
-                      unRequestBotwalkSound(0);
-                      unRequestBotwalkSound(1);
-                      unRequestBotwalkSound(2);
+                      gameController.unRequestBotwalkSound(0);
+                      gameController.unRequestBotwalkSound(1);
+                      gameController.unRequestBotwalkSound(2);
                      }
                  else
                      if(nOldBotsWalking <= 3) 
@@ -1917,7 +1909,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                           for(int i=0;i<nDiff;i++) 
                               {nOldBotsWalking--;                              
                                //stopMovingSound(1<<(6+nOldBotsWalking));
-                               unRequestBotwalkSound(nOldBotsWalking);
+                              gameController.unRequestBotwalkSound(nOldBotsWalking);
                               }                         
                          }
                 }       
@@ -1961,48 +1953,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                  }
             }
         return(hasBeenKilled);
-    }
-    
-    private final void requestBotwalkSound(int inum) {
-        aBwShouldPlay[inum%3] = true;
-    }
-    
-    private final void unRequestBotwalkSound(int inum) {
-        aBwShouldPlay[inum%3] = false;
-    }
-    
-    private final void initBotwalkSound() {
-       for(int i=0;i<3;i++)
-           {aBwShouldPlay[i]     = false;
-            aBwIsPlaying[i]      = false;
-            aBwPlayingSince[i]   = 0;
-           }
-    }
-    
-    // called per frame:
-    private final void stepBotwalkSound() {  
-       int nplaying=0;     
-       for (int i=0;i<3;i++) {
-          // have to start anything?
-          if (aBwShouldPlay[i] && !aBwIsPlaying[i]) {
-              gameController.startMovingSound(1<<(6+i));
-             aBwIsPlaying[i]    = true;
-             aBwPlayingSince[i] = currentTime();            
-          }
-          // have to stop anything? we only stop a sound
-          // if it played for at least 500 msec. this avoids
-          // a sound system overload on quick start/stop changes.
-          if (!aBwShouldPlay[i]
-        	&& aBwIsPlaying[i]
-        	&& ((aBwPlayingSince[i]+800) < currentTime())
-             )
-          {
-              gameController.stopMovingSound(1<<(6+i));
-             aBwIsPlaying[i] = false;            
-          }
-          if (aBwIsPlaying[i])
-             nplaying++;
-       }           
     }
 
     // used by bots, to tell if player can be seen

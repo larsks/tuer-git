@@ -1,12 +1,8 @@
 package tools;
 
-import java.awt.Rectangle;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import main.SoftwareViewFrustumCullingPerformer;
+import main.ViewFrustumCullingPerformer;
 
 public final class NetworkView{
     
@@ -45,35 +41,46 @@ public final class NetworkView{
         this.rootCell=rootCell;
     }
     
-    public final void draw(float x,float y,float z,float direction,SoftwareViewFrustumCullingPerformer frustum){
-        /*Full3DCellView c;
+    public final void draw(float x,float y,float z,Full3DCellView cellView,ViewFrustumCullingPerformer frustum){      
+        Full3DCellView c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCellView> fifo=new ArrayList<Full3DCellView>();
         //Each cell that has been seen has to be marked to avoid an infinite loop
         List<Full3DCellView> markedCellsList=new ArrayList<Full3DCellView>();
         //We use the first traveled cell suggested by the user
-        markedCellsList.add(rootCell);
-        fifo.add(rootCell);
+        markedCellsList.add(cellView);
+        fifo.add(cellView);
+        int portalIndex;
+        float[] p1,p2,p3,p4;
         while(!fifo.isEmpty())
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
-             //This is the main treatment; if the cell is visible, draw it, hide it and watch its neighbors            
-             if(!c.getVisible())
-                 continue;
-             else                
-                 {c.draw();
-                  c.setVisible(false);
-                  for(Full3DCellView son:c.getNeighboursCellsViewsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
+             //This is the main treatment, draw the cell and watch its neighbors               
+             c.draw();
+             portalIndex=0;
+             for(Full3DCellView son:c.getNeighboursCellsViewsList())
+                 {if(!markedCellsList.contains(son))
+                      {//Mark the cell to avoid traveling it more than once
+                       markedCellsList.add(son);
+                       //check if the portal is visible to know whether to add the 
+                       //cell into the FIFO                      
+                       p1=c.getNeighboursPortalsList().get(portalIndex);
+                       p2=c.getNeighboursPortalsList().get(portalIndex+1);
+                       p3=c.getNeighboursPortalsList().get(portalIndex+2);
+                       p4=c.getNeighboursPortalsList().get(portalIndex+3);
+                       //dataOffset=2 because we use T2_V3
+                       if(frustum.isQuadInViewFrustum(p1,p2,p3,p4,2))
+                           {//Add a new cell to travel (push operation)
+                            fifo.add(son);
+                           }
+                      }
+                  portalIndex+=4;
                  }
-            }  */ 
-        Rectangle cellRect;
-        //TODO: decrease the clipping when the performances are better
+            }  
+    }
+    
+    public final void draw(float x,float y,float z,float direction,ViewFrustumCullingPerformer frustum){ 
+        /*Rectangle cellRect;
         final float arcContributionSize=65536*25;
         final Arc2D.Float playerArc=new Arc2D.Float();
         playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+225,90,Arc2D.PIE);
@@ -104,6 +111,44 @@ public final class NetworkView{
                                }
                           }
                      }
-            }
+            }*/
+    }
+
+
+    public final Full3DCellView getRootCell(){
+        return(rootCell);
+    }
+
+    public final Full3DCellView locate(float x,float y,float z,Full3DCellView previousCellView){
+        Full3DCellView initialCellView=(previousCellView!=null)?previousCellView:rootCell;
+        Full3DCellView c;
+        //First In First Out abstract data type used to store the sons of the current cell
+        List<Full3DCellView> fifo=new ArrayList<Full3DCellView>();
+        //Each cell that has been seen has to be marked to avoid an infinite loop
+        List<Full3DCellView> markedCellsList=new ArrayList<Full3DCellView>();
+        //We use the first traveled cell suggested by the user
+        markedCellsList.add(initialCellView);
+        fifo.add(initialCellView);
+        while(!fifo.isEmpty())
+            {//Get the first added element as it is a FIFO (pop operation)
+             c=fifo.remove(0);
+             //This is the main treatment; if the point is in the cell, the travel ends            
+             if(c.contains(x,y,z))
+                 return(c);
+             else
+                 {for(Full3DCellView son:c.getNeighboursCellsViewsList())
+                      if(!markedCellsList.contains(son))
+                          {//Mark the cell to avoid traveling it more than once
+                           markedCellsList.add(son);
+                           //Add a new cell to travel (push operation)
+                           fifo.add(son);
+                          }
+                 }
+            }       
+        return(null);
+    }
+    
+    public final Full3DCellView locate(float x,float y,float z){
+        return(locate(x,y,z,null));
     }
 }

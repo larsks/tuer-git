@@ -30,8 +30,10 @@ import javax.media.opengl.GLCapabilities;
 import tools.Full3DCell;
 import tools.Full3DCellController;
 import tools.Full3DCellView;
+import tools.Network;
 import tools.NetworkController;
 import tools.NetworkView;
+import tools.NetworkViewSet;
 
 //TODO: move dependencies with Frame into the view
 public final class GameController {
@@ -64,9 +66,18 @@ public final class GameController {
     
     private Frame frame;
     
+    private boolean[] aBwShouldPlay;
+    
+    private boolean[] aBwIsPlaying;
+    
+    private long[] aBwPlayingSince;
+    
 	
 	public GameController(){
 	    sif = null;
+	    aBwShouldPlay=new boolean[3];
+	    aBwIsPlaying=new boolean[3];
+	    aBwPlayingSince=new long[3];
 	    //setRemote(false);//offline game by default
 		frame = new Frame(){
             private static final long serialVersionUID = 1L;
@@ -544,6 +555,47 @@ public final class GameController {
              sif.stopAllSounds();
      }
      
+     public final void stepBotwalkSound(){
+         int nplaying=0;     
+         for (int i=0;i<3;i++) {
+            // have to start anything?
+            if (aBwShouldPlay[i] && !aBwIsPlaying[i]) {
+                startMovingSound(1<<(6+i));
+               aBwIsPlaying[i]    = true;
+               aBwPlayingSince[i] = gameModel.currentTime();         
+            }
+            // have to stop anything? we only stop a sound
+            // if it played for at least 500 msec. this avoids
+            // a sound system overload on quick start/stop changes.
+            if (!aBwShouldPlay[i]
+              && aBwIsPlaying[i]
+              && ((aBwPlayingSince[i]+800) < gameModel.currentTime())
+               )
+            {
+                stopMovingSound(1<<(6+i));
+               aBwIsPlaying[i] = false;            
+            }
+            if (aBwIsPlaying[i])
+               nplaying++;
+         }           
+     }
+     
+     public final void requestBotwalkSound(int inum){
+         aBwShouldPlay[inum%3]=true;
+     }
+     
+     public final void unRequestBotwalkSound(int inum) {
+         aBwShouldPlay[inum%3] = false;
+     }
+     
+     public final void initBotwalkSound() {
+        for(int i=0;i<3;i++)
+            {aBwShouldPlay[i]     = false;
+             aBwIsPlaying[i]      = false;
+             aBwPlayingSince[i]   = 0;
+            }
+     }
+     
      /*final void setRemote(boolean remote){
          this.remote=remote;
          if(this.remote)
@@ -578,31 +630,31 @@ public final class GameController {
          gameView.addNewItem(hpuv);
      }
      
-     final NetworkView prepareNetwork(){
+     final NetworkViewSet prepareNetworkViewSet(){
          //bind all full cells models to their controllers and their views
-         List<Full3DCellController> cellsControllersList=new ArrayList<Full3DCellController>();
-         List<Full3DCellView> cellsViewsList=new ArrayList<Full3DCellView>();
+         List<Full3DCellController> cellsControllersList;
+         List<Full3DCellView> cellsViewsList;
          Full3DCellView cellView;
          Full3DCellController cellController;
-         for(Full3DCell cellModel:gameModel.getCellsList())
-             {cellView=new Full3DCellView();
-              cellController=new Full3DCellController(cellModel,cellView);
-              cellsControllersList.add(cellController);
-              cellsViewsList.add(cellView);
-             }
-         //build the network view
-         NetworkView networkView=new NetworkView(cellsViewsList);
-         //build the network controller
-         new NetworkController(gameModel.getNetwork(),networkView,cellsControllersList);
-         return(networkView);
+         NetworkView networkView;
+         NetworkController networkController;
+         List<NetworkView> networkViewsList=new ArrayList<NetworkView>();
+         for(Network network:gameModel.getNetworkSet().getNetworksList())
+             {cellsViewsList=new ArrayList<Full3DCellView>();
+              cellsControllersList=new ArrayList<Full3DCellController>();
+              for(Full3DCell cellModel:network.getCellsList())
+                  {cellView=new Full3DCellView();
+                   cellController=new Full3DCellController(cellModel,cellView);
+                   cellsControllersList.add(cellController);
+                   cellsViewsList.add(cellView);
+                  }            
+              //build the network controller
+              networkController=new NetworkController(network,cellsControllersList);
+              //build the network view
+              networkView=new NetworkView(cellsViewsList);
+              networkController.setView(networkView);
+              networkViewsList.add(networkView);
+             }        
+         return(new NetworkViewSet(networkViewsList));
      }
-     
-     
-     /*final List<Full3DCellView> getVisibleCellsList(){
-         List<Full3DCell> tmpFull3DCellsList=gameModel.getVisibleCellsList();
-         List<Full3DCellView> full3DCellsList=new ArrayList<Full3DCellView>();
-         for(Full3DCell cell:tmpFull3DCellsList)
-             full3DCellsList.add(cell.getController().getView());
-         return(full3DCellsList);
-     }*/
 }

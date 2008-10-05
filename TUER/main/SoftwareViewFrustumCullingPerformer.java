@@ -7,7 +7,7 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
-public final class SoftwareViewFrustumCullingPerformer{
+public final class SoftwareViewFrustumCullingPerformer implements ViewFrustumCullingPerformer{
     
     
     private FloatBuffer projectionMatrix;
@@ -27,7 +27,8 @@ public final class SoftwareViewFrustumCullingPerformer{
         updateProjectionMatrix();
     }
 
-    final void updateProjectionMatrix(){
+    @Override
+    public final void updateProjectionMatrix(){
         gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
         gl.glMatrixMode(GL.GL_PROJECTION);
         gl.glPushMatrix();
@@ -43,7 +44,8 @@ public final class SoftwareViewFrustumCullingPerformer{
      * Cyberboy2054 inspired me. I optimized his method to let OpenGL perform
      * the multiplication for me as I'm lazy. Call this method after gluLookAt
      */
-    final void computeViewFrustum(){
+    @Override
+    public final void computeViewFrustum(){
         FloatBuffer clipMatrix=BufferUtil.newFloatBuffer(16);
         float normalizationFactor;
         //We assume that the model view matrix is selected
@@ -126,6 +128,7 @@ public final class SoftwareViewFrustumCullingPerformer{
      * @param p4
      * @return true if the quad is in the frustum or clipped by it
      */
+    @Override
     public final boolean isQuadInViewFrustum(float[] p1,float[] p2,float[] p3,float[] p4,int dataOffset){
         //an out flag per vertex, indicate whether a point is inside the frustum
         int[] outFlag=new int[4];

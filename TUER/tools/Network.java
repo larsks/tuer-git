@@ -81,7 +81,7 @@ public final class Network implements Serializable{
             }
     }
     
-    public final List<Full3DCell> getListFromGraph(){
+    public final List<Full3DCell> getCellsList(){
         return(cellsList);
     }
     
@@ -95,7 +95,7 @@ public final class Network implements Serializable{
      * to a close neighbor of the previous occupied cell
      */
     final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
-        /*Full3DCell c;
+        Full3DCell c;
         //First In First Out abstract data type used to store the sons of the current cell
         List<Full3DCell> fifo=new ArrayList<Full3DCell>();
         //Each cell that has been seen has to be marked to avoid an infinite loop
@@ -118,12 +118,12 @@ public final class Network implements Serializable{
                            fifo.add(son);
                           }
                  }
-            }*/
+            }
         //FIXME: treat the case of single isolated cells (11 cells are isolated)
         //it is a bad fix, it falls back on the list
-        for(Full3DCell cell:cellsList)
+        /*for(Full3DCell cell:cellsList)
             if(cell.contains(x,y,z))
-                return(cell);
+                return(cell);*/
         //It means that you are completely outside the network
         return(null);
     }
