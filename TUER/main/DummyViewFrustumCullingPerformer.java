@@ -28,11 +28,11 @@ final class DummyViewFrustumCullingPerformer implements ViewFrustumCullingPerfor
     @Override
     public final boolean isQuadInViewFrustum(float[] p1,float[] p2,float[] p3,float[] p4,int dataOffset){
         final int[] indirectionTable=new int[]{0+dataOffset,1+dataOffset,2+dataOffset};
-        /*float minx=Math.min(p1[indirectionTable[0]],Math.min(p2[indirectionTable[0]],Math.min(p3[indirectionTable[0]],p4[indirectionTable[0]])));
+        float minx=Math.min(p1[indirectionTable[0]],Math.min(p2[indirectionTable[0]],Math.min(p3[indirectionTable[0]],p4[indirectionTable[0]])));
         float maxx=Math.max(p1[indirectionTable[0]],Math.max(p2[indirectionTable[0]],Math.max(p3[indirectionTable[0]],p4[indirectionTable[0]])));
         float minz=Math.min(p1[indirectionTable[2]],Math.min(p2[indirectionTable[2]],Math.min(p3[indirectionTable[2]],p4[indirectionTable[2]])));
         float maxz=Math.max(p1[indirectionTable[2]],Math.max(p2[indirectionTable[2]],Math.max(p3[indirectionTable[2]],p4[indirectionTable[2]])));
-        if(minx==maxx)
+        /*if(minx==maxx)
             return(this.circularPart.intersects(minx,minz,1,maxz-minz));
         else
             if(minz==maxz)
@@ -45,10 +45,7 @@ final class DummyViewFrustumCullingPerformer implements ViewFrustumCullingPerfor
                 playerRect.intersectsLine(p2[2],p2[4],p3[2],p3[4])||
                 playerRect.intersectsLine(p3[2],p3[4],p4[2],p4[4])||
                 playerRect.intersectsLine(p4[2],p4[4],p1[2],p1[4]));*/
-        return(rectangle.intersectsLine(p1[indirectionTable[0]],p1[indirectionTable[2]],p2[indirectionTable[0]],p2[indirectionTable[2]])||
-                rectangle.intersectsLine(p2[indirectionTable[0]],p2[indirectionTable[2]],p3[indirectionTable[0]],p3[indirectionTable[2]])||
-                rectangle.intersectsLine(p3[indirectionTable[0]],p3[indirectionTable[2]],p4[indirectionTable[0]],p4[indirectionTable[2]])||
-                rectangle.intersectsLine(p4[indirectionTable[0]],p4[indirectionTable[2]],p1[indirectionTable[0]],p1[indirectionTable[2]]));
+        return(rectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
     }
 
     @Override
