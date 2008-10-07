@@ -20,7 +20,7 @@ public final class NetworkController{
     private final void buildGraphFromList(List<Full3DCellController> cellsControllersList){
         for(Full3DCellController cellController:cellsControllersList)
             for(Full3DCell cellModel:cellController.getModel().getNeighboursCellsList())
-                cellController.getNeighboursCellsControllersList().add(cellModel.getController());
+                cellController.addNeighbourCellController(cellModel.getController());
     }
 
 

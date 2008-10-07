@@ -804,15 +804,12 @@ public final class TilesGenerator{
 	     //the cells generator uses a cartesian reference mark
 	     //whereas the tiles generator inverts left and right
 	     //that is why you have to invert it
-	     /*Network network*/
 	     NetworkSet networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
 	             rightWallsList,leftWallsList,artTopWallsList,
 	             artBottomWallsList,artRightWallsList,artLeftWallsList);
-	     //TODO: rather write a list of networks
-	     //write the network into a file
+	     //write a list of networks
 	     ObjectOutputStream oos=null;
 	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));
-	         //oos.writeObject(network);
 	         oos.writeObject(networkSet);
 	         oos.close();
 	        }

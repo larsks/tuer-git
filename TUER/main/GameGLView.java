@@ -454,10 +454,15 @@ class GameGLView implements GLEventListener{
 	              this.botTexture2.bind();                    
 	              this.botVertexSet.multiDraw(translation,rotation,first,count,limit,false);
 	              //draw the objects
-	              this.objectsTexture.bind();         
+	              this.objectsTexture.bind(); 
+	              int collisionIndex;
 	              for(i=zp-25;i<zp+25;i++)
 	                  for(j=xp-25;j<xp+25;j++)
-	                      switch(gameController.getCollisionMap(i*256+j))
+	                      {collisionIndex=i*256+j;
+	                       //avoid an ArrayOutOfBoundException in some corners of the level
+	                       if(collisionIndex<0||collisionIndex>=65536)
+	                           continue;
+	                       switch(gameController.getCollisionMap(collisionIndex))
 	                          {case AVOIDABLE_AND_UNBREAKABLE:
 	                               {gl.glPushMatrix();
 	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
@@ -508,6 +513,7 @@ class GameGLView implements GLEventListener{
 	                                break;
 	                               }                  
 	                          }
+	                      }
 	              //draw the impacts
 	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);              
 	              impactTexture.bind();

@@ -58,6 +58,10 @@ public final class Full3DCellController{
         return(view);
     }
 
+    public final void addNeighbourCellController(Full3DCellController cellController){
+        neighboursCellsControllersList.add(cellController);
+    }
+    
     public final List<Full3DCellController> getNeighboursCellsControllersList(){
         return(neighboursCellsControllersList);
     }

@@ -16,6 +16,7 @@ package tools;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class Network implements Serializable{
@@ -61,7 +62,7 @@ public final class Network implements Serializable{
     }
     
     static final void connectCellsTogether(List<Full3DCell> full3DCellsList){
-        List<float[]> commonPortalsList;
+        /*List<float[]> commonPortalsList;
         //compute the neighbors list of each cell in order to rebuild the network
         int i=0,j;
         //for each cell, we look for its sons
@@ -71,13 +72,219 @@ public final class Network implements Serializable{
                  {//if the current cell is not the father cell and if it is a son of the father cell
                   if(i!=j&&!(commonPortalsList=Full3DCell.getCommonPortalsList(fatherCell,fullCell)).isEmpty())
                       {//add the son cell into the neighbors cells list of the father cell
-                       fatherCell.getNeighboursCellsList().add(fullCell);
+                       fatherCell.addNeighbourCell(fullCell);
                        //update the list of neighbors portals
-                       fatherCell.getNeighboursPortalsList().addAll(commonPortalsList);
+                       for(float[] portal:commonPortalsList)
+                           fatherCell.addNeighbourPortal(portal);
                       }
                   j++;
                  }
              i++;
+            }*/
+        float[] portal0,portal1,portal2,portal3;
+        float[] c2portal0,c2portal1,c2portal2,c2portal3;
+        Full3DCell neighbourCell;
+        for(Full3DCell cell:full3DCellsList)
+            {//compare its left portals to other right portals
+             for(int i=0;i<cell.getLeftPortals().size();i+=4)
+                {//get each portal
+                 portal0=cell.getLeftPortals().get(i);
+                 portal1=cell.getLeftPortals().get(i+1);
+                 portal2=cell.getLeftPortals().get(i+2);
+                 portal3=cell.getLeftPortals().get(i+3);
+                 //copy it into the list of portals
+                 cell.addNeighbourPortal(portal0);
+                 cell.addNeighbourPortal(portal1);
+                 cell.addNeighbourPortal(portal2);
+                 cell.addNeighbourPortal(portal3);
+                 //look for the neighbor cell
+                 neighbourCell=null;
+                 for(Full3DCell cell2:full3DCellsList)
+                     if(cell!=cell2)
+                         {for(int j=0;j<cell2.getRightPortals().size()&&neighbourCell==null;j+=4)
+                              {//get each portal
+                               c2portal0=cell2.getRightPortals().get(j);
+                               c2portal1=cell2.getRightPortals().get(j+1);
+                               c2portal2=cell2.getRightPortals().get(j+2);
+                               c2portal3=cell2.getRightPortals().get(j+3);
+                               if((Arrays.equals(portal0,c2portal0)||
+                                   Arrays.equals(portal0,c2portal1)||
+                                   Arrays.equals(portal0,c2portal2)||
+                                   Arrays.equals(portal0,c2portal3))&&
+                                  (Arrays.equals(portal1,c2portal0)||
+                                   Arrays.equals(portal1,c2portal1)||
+                                   Arrays.equals(portal1,c2portal2)||
+                                   Arrays.equals(portal1,c2portal3)&&
+                                  (Arrays.equals(portal2,c2portal0)||
+                                   Arrays.equals(portal2,c2portal1)||
+                                   Arrays.equals(portal2,c2portal2)||
+                                   Arrays.equals(portal2,c2portal3)&&
+                                  (Arrays.equals(portal3,c2portal0)||
+                                   Arrays.equals(portal3,c2portal1)||
+                                   Arrays.equals(portal3,c2portal2)||
+                                   Arrays.equals(portal3,c2portal3)))))
+                                   neighbourCell=cell2;                                 
+                              }
+                          if(neighbourCell!=null)
+                              break;
+                         }
+                 if(neighbourCell!=null)
+                     cell.addNeighbourCell(neighbourCell);
+                     //don't apply the reciprocal operation because it would cause
+                     //a problem in the indexing of portals with cells
+                 else
+                     System.out.println("ORPHANED PORTAL");
+                }
+             //compare its right portals to other left portals
+             for(int i=0;i<cell.getRightPortals().size();i+=4)
+                 {//get each portal
+                  portal0=cell.getRightPortals().get(i);
+                  portal1=cell.getRightPortals().get(i+1);
+                  portal2=cell.getRightPortals().get(i+2);
+                  portal3=cell.getRightPortals().get(i+3);
+                  //copy it into the list of portals
+                  cell.addNeighbourPortal(portal0);
+                  cell.addNeighbourPortal(portal1);
+                  cell.addNeighbourPortal(portal2);
+                  cell.addNeighbourPortal(portal3);
+                  //look for the neighbor cell
+                  neighbourCell=null;
+                  for(Full3DCell cell2:full3DCellsList)
+                      if(cell!=cell2)
+                          {for(int j=0;j<cell2.getLeftPortals().size()&&neighbourCell==null;j+=4)
+                               {//get each portal
+                                c2portal0=cell2.getLeftPortals().get(j);
+                                c2portal1=cell2.getLeftPortals().get(j+1);
+                                c2portal2=cell2.getLeftPortals().get(j+2);
+                                c2portal3=cell2.getLeftPortals().get(j+3);
+                                if((Arrays.equals(portal0,c2portal0)||
+                                    Arrays.equals(portal0,c2portal1)||
+                                    Arrays.equals(portal0,c2portal2)||
+                                    Arrays.equals(portal0,c2portal3))&&
+                                   (Arrays.equals(portal1,c2portal0)||
+                                    Arrays.equals(portal1,c2portal1)||
+                                    Arrays.equals(portal1,c2portal2)||
+                                    Arrays.equals(portal1,c2portal3)&&
+                                   (Arrays.equals(portal2,c2portal0)||
+                                    Arrays.equals(portal2,c2portal1)||
+                                    Arrays.equals(portal2,c2portal2)||
+                                    Arrays.equals(portal2,c2portal3)&&
+                                   (Arrays.equals(portal3,c2portal0)||
+                                    Arrays.equals(portal3,c2portal1)||
+                                    Arrays.equals(portal3,c2portal2)||
+                                    Arrays.equals(portal3,c2portal3)))))
+                                    neighbourCell=cell2;                                 
+                               }
+                           if(neighbourCell!=null)
+                               break;
+                          }
+                  if(neighbourCell!=null)
+                      cell.addNeighbourCell(neighbourCell);
+                      //don't apply the reciprocal operation because it would cause
+                      //a problem in the indexing of portals with cells
+                  else
+                      System.out.println("ORPHANED PORTAL");
+                 }
+             //compare its top portals to other bottom portals
+             for(int i=0;i<cell.getTopPortals().size();i+=4)
+                 {//get each portal
+                  portal0=cell.getTopPortals().get(i);
+                  portal1=cell.getTopPortals().get(i+1);
+                  portal2=cell.getTopPortals().get(i+2);
+                  portal3=cell.getTopPortals().get(i+3);
+                  //copy it into the list of portals
+                  cell.addNeighbourPortal(portal0);
+                  cell.addNeighbourPortal(portal1);
+                  cell.addNeighbourPortal(portal2);
+                  cell.addNeighbourPortal(portal3);
+                  //look for the neighbor cell
+                  neighbourCell=null;
+                  for(Full3DCell cell2:full3DCellsList)
+                      if(cell!=cell2)
+                          {for(int j=0;j<cell2.getBottomPortals().size()&&neighbourCell==null;j+=4)
+                               {//get each portal
+                                c2portal0=cell2.getBottomPortals().get(j);
+                                c2portal1=cell2.getBottomPortals().get(j+1);
+                                c2portal2=cell2.getBottomPortals().get(j+2);
+                                c2portal3=cell2.getBottomPortals().get(j+3);
+                                if((Arrays.equals(portal0,c2portal0)||
+                                    Arrays.equals(portal0,c2portal1)||
+                                    Arrays.equals(portal0,c2portal2)||
+                                    Arrays.equals(portal0,c2portal3))&&
+                                   (Arrays.equals(portal1,c2portal0)||
+                                    Arrays.equals(portal1,c2portal1)||
+                                    Arrays.equals(portal1,c2portal2)||
+                                    Arrays.equals(portal1,c2portal3)&&
+                                   (Arrays.equals(portal2,c2portal0)||
+                                    Arrays.equals(portal2,c2portal1)||
+                                    Arrays.equals(portal2,c2portal2)||
+                                    Arrays.equals(portal2,c2portal3)&&
+                                   (Arrays.equals(portal3,c2portal0)||
+                                    Arrays.equals(portal3,c2portal1)||
+                                    Arrays.equals(portal3,c2portal2)||
+                                    Arrays.equals(portal3,c2portal3)))))
+                                    neighbourCell=cell2;                                 
+                               }
+                           if(neighbourCell!=null)
+                               break;
+                          }
+                  if(neighbourCell!=null)
+                      cell.addNeighbourCell(neighbourCell);
+                      //don't apply the reciprocal operation because it would cause
+                      //a problem in the indexing of portals with cells
+                  else
+                      System.out.println("ORPHANED PORTAL");
+                 }
+             //compare its bottom portals to other top portals
+             for(int i=0;i<cell.getBottomPortals().size();i+=4)
+                 {//get each portal
+                  portal0=cell.getBottomPortals().get(i);
+                  portal1=cell.getBottomPortals().get(i+1);
+                  portal2=cell.getBottomPortals().get(i+2);
+                  portal3=cell.getBottomPortals().get(i+3);
+                  //copy it into the list of portals
+                  cell.addNeighbourPortal(portal0);
+                  cell.addNeighbourPortal(portal1);
+                  cell.addNeighbourPortal(portal2);
+                  cell.addNeighbourPortal(portal3);
+                  //look for the neighbor cell
+                  neighbourCell=null;
+                  for(Full3DCell cell2:full3DCellsList)
+                      if(cell!=cell2)
+                          {for(int j=0;j<cell2.getTopPortals().size()&&neighbourCell==null;j+=4)
+                               {//get each portal
+                                c2portal0=cell2.getTopPortals().get(j);
+                                c2portal1=cell2.getTopPortals().get(j+1);
+                                c2portal2=cell2.getTopPortals().get(j+2);
+                                c2portal3=cell2.getTopPortals().get(j+3);
+                                if((Arrays.equals(portal0,c2portal0)||
+                                    Arrays.equals(portal0,c2portal1)||
+                                    Arrays.equals(portal0,c2portal2)||
+                                    Arrays.equals(portal0,c2portal3))&&
+                                   (Arrays.equals(portal1,c2portal0)||
+                                    Arrays.equals(portal1,c2portal1)||
+                                    Arrays.equals(portal1,c2portal2)||
+                                    Arrays.equals(portal1,c2portal3)&&
+                                   (Arrays.equals(portal2,c2portal0)||
+                                    Arrays.equals(portal2,c2portal1)||
+                                    Arrays.equals(portal2,c2portal2)||
+                                    Arrays.equals(portal2,c2portal3)&&
+                                   (Arrays.equals(portal3,c2portal0)||
+                                    Arrays.equals(portal3,c2portal1)||
+                                    Arrays.equals(portal3,c2portal2)||
+                                    Arrays.equals(portal3,c2portal3)))))
+                                    neighbourCell=cell2;                                 
+                               }
+                           if(neighbourCell!=null)
+                               break;
+                          }
+                  if(neighbourCell!=null)
+                      cell.addNeighbourCell(neighbourCell);
+                      //don't apply the reciprocal operation because it would cause
+                      //a problem in the indexing of portals with cells
+                  else
+                      System.out.println("ORPHANED PORTAL");
+                 }
             }
     }
     

@@ -38,6 +38,10 @@ public final class Full3DCellView{
     public final Full3DCellController getController(){
         return(controller);
     }
+    
+    public final void addNeighbourCellView(Full3DCellView cellView){
+        neighboursCellsViewsList.add(cellView);
+    }
 
     public final List<Full3DCellView> getNeighboursCellsViewsList(){
         return(neighboursCellsViewsList);

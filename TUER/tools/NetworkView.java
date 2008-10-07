@@ -25,7 +25,7 @@ public final class NetworkView{
             {this.rootCell=cellsViewsList.get(0);
              for(Full3DCellView cellView:this.cellsViewsList)
                  for(Full3DCellController cellController:cellView.getController().getNeighboursCellsControllersList())
-                     cellView.getNeighboursCellsViewsList().add(cellController.getView()); 
+                     cellView.addNeighbourCellView(cellController.getView()); 
             }                     
     }
     
