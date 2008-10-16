@@ -25,9 +25,6 @@ final class d3object{
    private short  face;     // if multi-image object: which face is shown
    private short  faceskip; // delay counter for animation
    private int    ianim;    // animation counter, for bots
-   private byte   group;    // some kind of area indicator
-   private d3area myarea;
-   private int    flags;    // for bot or rocket
    private int    sleep;    // in frames
    private int    sleep2;   // suspend walking this long
    private int    idamage;  // if >0, bot was hit once
@@ -40,10 +37,7 @@ final class d3object{
    int    getShape(){return(shape);}    
    short  getFace(){return(face);}     
    short  getFaceskip(){return(faceskip);} 
-   int    getIanim(){return(ianim);}    
-   byte   getGroup(){return(group);}    
-   d3area getMyarea(){return(myarea);}
-   int    getFlags(){return(flags);}    
+   int    getIanim(){return(ianim);}
    int    getSleep(){return(sleep);}    
    int    getSleep2(){return(sleep2);}   
    int    getIdamage(){return(idamage);}  
@@ -56,10 +50,7 @@ final class d3object{
    void setShape(int shape){this.shape=shape;}    
    void setFace(short face){this.face=face;}     
    void setFaceskip(short faceskip){this.faceskip=faceskip;} 
-   void setIanim(int ianim){this.ianim=ianim;}    
-   void setGroup(byte group){this.group=group;}    
-   void setMyarea(d3area myarea){this.myarea=myarea;}
-   void setFlags(int flags){this.flags=flags;}    
+   void setIanim(int ianim){this.ianim=ianim;}
    void setSleep(int sleep){this.sleep=sleep;}    
    void setSleep2(int sleep2){this.sleep2=sleep2;}   
    void setIdamage(int idamage){this.idamage=idamage;}  

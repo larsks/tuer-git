@@ -187,7 +187,7 @@ class BotModel implements Serializable{
     
     public void setRunning(boolean running){
         if(running!=this.running)
-	    toggleRunning();
+	        toggleRunning();
     }
     
     private void toggleRunning(){

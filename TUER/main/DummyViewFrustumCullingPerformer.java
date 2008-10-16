@@ -1,40 +1,37 @@
+/*This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation, version 2
+  of the License.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+  MA 02111-1307, USA.
+*/
 package main;
 
-import java.awt.Rectangle;
+import java.awt.geom.Arc2D;
 
 final class DummyViewFrustumCullingPerformer implements ViewFrustumCullingPerformer{
 
     private GameController gameController;
     
-    //private Rectangle rectangle;
+    private Arc2D circularFrustum;
     
-    private Rectangle bottomRectangle;
-    
-    private Rectangle topRectangle;
-    
-    private Rectangle leftRectangle;
-    
-    private Rectangle rightRectangle;
-    
-    private static final float arcContributionSize=GameModel.factor*25;
+    private static final float arcContributionSize=GameController.factor*25;
     
     
     DummyViewFrustumCullingPerformer(GameController gameController){
         this.gameController=gameController;
-        //rectangle=new Rectangle();
-        bottomRectangle=new Rectangle();
-        topRectangle=new Rectangle();
-        leftRectangle=new Rectangle();
-        rightRectangle=new Rectangle();
+        this.circularFrustum=new Arc2D.Float();
     }
     
     @Override
-    public final void computeViewFrustum() {
-        //rectangle.setFrameFromCenter(gameController.getPlayerXpos(),gameController.getPlayerZpos(),gameController.getPlayerXpos()+arcContributionSize,gameController.getPlayerZpos()+arcContributionSize);
-        bottomRectangle.setFrameFromCenter(gameController.getPlayerXpos(),gameController.getPlayerZpos()-(arcContributionSize/2),gameController.getPlayerXpos()+arcContributionSize,gameController.getPlayerZpos());
-        topRectangle.setFrameFromCenter(gameController.getPlayerXpos(),gameController.getPlayerZpos()+(arcContributionSize/2),gameController.getPlayerXpos()+arcContributionSize,gameController.getPlayerZpos()+arcContributionSize);
-        leftRectangle.setFrameFromCenter(gameController.getPlayerXpos()-(arcContributionSize/2),gameController.getPlayerZpos(),gameController.getPlayerXpos(),gameController.getPlayerZpos()+arcContributionSize);
-        rightRectangle.setFrameFromCenter(gameController.getPlayerXpos()+(arcContributionSize/2),gameController.getPlayerZpos(),gameController.getPlayerXpos()+arcContributionSize,gameController.getPlayerZpos()+arcContributionSize);
+    public final void computeViewFrustum(){
+        circularFrustum.setArcByCenter(gameController.getPlayerXpos(),gameController.getPlayerZpos(),arcContributionSize,(gameController.getPlayerDirection()*180/Math.PI)-180,180,Arc2D.PIE);
     }
 
     @Override
@@ -44,21 +41,8 @@ final class DummyViewFrustumCullingPerformer implements ViewFrustumCullingPerfor
         float maxx=Math.max(p1[indirectionTable[0]],Math.max(p2[indirectionTable[0]],Math.max(p3[indirectionTable[0]],p4[indirectionTable[0]])));
         float minz=Math.min(p1[indirectionTable[2]],Math.min(p2[indirectionTable[2]],Math.min(p3[indirectionTable[2]],p4[indirectionTable[2]])));
         float maxz=Math.max(p1[indirectionTable[2]],Math.max(p2[indirectionTable[2]],Math.max(p3[indirectionTable[2]],p4[indirectionTable[2]])));
-        //System.out.println("angle:"+gameController.getPlayerDirection()*180/Math.PI);
-        if(gameController.getPlayerDirection()>=0&&gameController.getPlayerDirection()<Math.PI/2)
-            return(topRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz))||rightRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
-        else
-            if(gameController.getPlayerDirection()>=Math.PI/2&&gameController.getPlayerDirection()<Math.PI)
-                return(bottomRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz))||rightRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
-            else
-                if(gameController.getPlayerDirection()>=Math.PI&&gameController.getPlayerDirection()<1.5*Math.PI)
-                    return(bottomRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz))||leftRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
-                else
-                    if(gameController.getPlayerDirection()>=1.5*Math.PI&&gameController.getPlayerDirection()<2*Math.PI)
-                        return(topRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz))||leftRectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
-                    else
-                        return(false);
-        //return(rectangle.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));
+        //System.out.println("angle:"+gameController.getPlayerDirection()*180/Math.PI);       
+        return(circularFrustum.intersects(minx,minz,Math.max(1,maxx-minx),Math.max(1,maxz-minz)));       
     }
 
     @Override

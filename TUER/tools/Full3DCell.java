@@ -18,7 +18,6 @@ import java.awt.Rectangle;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class Full3DCell implements Serializable{

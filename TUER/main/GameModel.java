@@ -42,19 +42,15 @@ import java.nio.FloatBuffer;
 import java.rmi.RemoteException;
 //import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Arrays;
 //import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
-
-import tools.Full3DCell;
 import tools.GameIO;
-import tools.Network;
 import tools.NetworkSet;
 
-public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
+public class GameModel{
     
     
     private static final long serialVersionUID = 1L;
@@ -63,7 +59,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     private GameController gameController;
     
-    //private Network network;
     private NetworkSet networkSet;
     
     private List<BotModel> botList;
@@ -90,7 +85,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     /**
      * size of a voxel in the coordinate system
      */
-    /*private */static final int factor=65536;
+    static final int factor=65536;
     
     private static final double hitrange=0.3d*factor;
     
@@ -147,8 +142,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private byte[] collisionMap;
     
     private byte[] initialCollisionMap;
-    
-    private List<Integer> clearedArea;
          
     //TODO : put it in a "weapon" class
     private long lastShot;//time of last shot of rocket   
@@ -165,8 +158,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 
     // basic setup
     private static final double fullCircle = Math.PI*2;
-    private static final int numWallPlainText = 10;
-    private static final int numWallPlainNetto= numWallPlainText/2;
     private static final int numLoWallImages  = 27; // 240804: 20
     private static final int numHiWallImages  = numLoWallImages; // MUST be identical
 
@@ -180,8 +171,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private static final int ShapeBush  =3;
     private static final int ShapeDeko  =4;
 
-    private d3object object[];
-    private d3area   area[];
+    private d3object[] object;
 
     private static final int IndexPlayerRockets=0;  // plr rockets are on index 0 to 9
     private static final int IndexBotRockets=10;    // bot rockets are on index 10 to 19
@@ -195,8 +185,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     private boolean innerLoop;
 
-    private byte botmap[];
-
     private boolean bpause;
     
     private boolean isFalling;//when dying
@@ -204,12 +192,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private long fallStart;
     
     private static final int fallTotalDuration=3000;//in millisecond
-
-    // texture storage
-    private int iwallplain, iwallimglo, iwallimghi;
-
-    private int map[];
-    private byte movemap[];   // determines where player can move 
     
     private boolean runningForward;
     private boolean runningBackward;
@@ -219,13 +201,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private boolean turningLeft;
     private boolean turningRight;
     private boolean runningFast;
-    private int[] mapData = null; 
-    //private long lClLastPassBy = 0;
+    private int[] mapData; 
     private int nClBotsWalking = 0;
   
     private long lastBotShotTime;//latency for the bots
-    
-    //private BitSet dataModificationFlagsBitSet;
     
     private static final int EMPTY=0;
     
@@ -313,12 +292,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                
     @SuppressWarnings("unchecked")
     GameModel(GameController gameController)throws RuntimeException,RemoteException{
-        //this.dataModificationFlagsBitSet=new BitSet();
         this.gameInfoMessageList=new ArrayList<GameInfoMessage>();
     	this.gameController=gameController;
 	    this.collisionMap=new byte[mapSize];
 	    this.botList=new Vector<BotModel>();
-	    this.clearedArea=new Vector<Integer>();
 	    this.impactList=new Vector<Impact>();
 	    this.rocketList=new Vector<float[]>();
 	    this.explosionList=new Vector<ExplosionModel>();
@@ -465,11 +442,9 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
     
     private final void loadNetworkSet(){
-        //TODO: rather read a list of networks
-        //read the network here
+        //read a list of networks
         ObjectInputStream ois=null;
         try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
-            //network=(Network)ois.readObject();
             networkSet=(NetworkSet)ois.readObject();
             ois.close();
            }
@@ -510,8 +485,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
     
     final void reinitializeItems(){
-        //TODO: fill the item lists
-        
+        //TODO: fill the item lists       
         for(HealthPowerUpModel hpum:healthPowerUpModelList)
             hpum.dispose();
         //clear the list
@@ -525,14 +499,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     
     public final List<BotModel> getBotList(){
         return(botList);
-    }
-    
-    final List<Integer> getClearedArea(){
-        return(this.clearedArea);
-    }
-    
-    final void reinitializeClearedArea(){
-        this.clearedArea.clear();
     }
     
     final void respawnAllBots(){
@@ -688,10 +654,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         this.bpause=bpause;
     }
     
-    /*final void setIClLastClearedArea(int iClLastClearedArea){
-        this.iClLastClearedArea=iClLastClearedArea;
-    }*/
-    
     final void setInnerLoop(boolean innerLoop){
         this.innerLoop=innerLoop;
     }  
@@ -711,13 +673,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     public final List<float[]> getRocketList(){
         return(rocketList);
     }
-
-    // "botmap" also is a synonym for area map.
-    // every area should have a sector of pixels
-    // without holes within this map.
-    private final void setBotMap(int ioff, byte igroup) {
-        botmap[ioff] = igroup;
-    }
     
     final NetworkSet getNetworkSet(){
         if(networkSet==null)
@@ -725,11 +680,9 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         return(networkSet);   
     }
     
-    public final void launchNewGame(){       
-        //setIClLastClearedArea(-1);
+    public final void launchNewGame(){
         //reinitialize all the bots
         //treat the case of a complete respawn for all (new game)
-        reinitializeClearedArea();
         respawnAllBots();
         setInnerLoop(false);
         resetPlayerPosition();
@@ -742,23 +695,17 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
     
     public final void resumeGame(){
-        setBpause(false);       
-        //if(getPlayerWins())
-        //    setIClLastClearedArea(-1);
+        setBpause(false);
     }
 
     //TODO : do not use this method anymore
     private final void genMap(){
         int cx,cz;
         Random rg=new Random(345641);
-        Arrays.fill(map,-1);
         // analyze world map, build objects from it
-        int ipix,ired,igrn,iblu,ioff,icode,irel,narea;
-        byte igroup;
+        int ipix,ired,igrn,iblu,ioff,icode;
         byte ceilstate=0; // initial default: inside
         d3object obj;
-        int ipix2,igrn2,imgcnt=1;
-
         for(cz=0; cz<mapEdgeSize; cz++)
             for(cx=0; cx<mapEdgeSize; cx++)
                 {ioff = cz*mapEdgeSize+cx;
@@ -772,25 +719,10 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                       ired=igrn=0; iblu=0xFF;
                       // fall through
                      }
-                 if(iblu==0xFF && ired==0xFF && igrn==0)
-                     {movemap[ioff]    = 3; // exit point            
-                      // create a dummy area object
-                      igroup = (byte)(0xFE-235);
-                      if(area[igroup]==null)
-                          area[igroup] = new d3area(igroup);
-                      continue;
-                     }
-                 if (ired==100 && igrn==100 && iblu==00) 
-                     { // inside            
-                      continue;
-                     }
-                 if (ired==0 && igrn==0 && iblu==0) 
-                     { // outside            
-                      continue;
-                     }
+                 if((iblu==0xFF && ired==0xFF && igrn==0)||(ired==100 && igrn==100 && iblu==00)||(ired==0 && igrn==0 && iblu==0))
+                     continue;                                    
                  if(ired<=200 && igrn==0 && iblu<=200 && (ired==iblu))
                      {// deko object handling
-                      movemap[ioff] = 2;
                       // allocate a new deko object
                       for(icode=IndexDeko; icode<IndexDeko+maxDeko; icode++)
                           if(object[icode].getShape()==-1)
@@ -832,28 +764,12 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                                {object[icode].setFace((short)0);
                                 break;
                                }
-                          }
-                      // whatever is standing within an area, must always
-                      // register its location also with the "botmap",
-                      // which tells which position belongs to which area.
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0) 
-                          { // -1 if not
-                           setBotMap(ioff,(byte)narea);
-                           // light emitting objects: only w/in area for performance reasons
-                           if(ired==153) 
-                               {igroup = (byte)narea;
-                                if(area[igroup]==null)
-                                    area[igroup] = new d3area(igroup);
-                                area[igroup].addLight(cx,cz);
-                               }
-                          }
+                          }                        
                       continue;
                      }
                  if(ired==0 && igrn==0) 
                      {if(iblu==0xE0) 
                           {// bush, obstacle
-                           movemap[ioff] = 2;
                            // allocate a new bush
                            for(icode=IndexBushes; icode<IndexBushes+maxBushes; icode++)
                                if (object[icode].getShape()==-1)
@@ -867,105 +783,26 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                            object[icode].setShape(ShapeBush);  // alloc
                            object[icode].setSpeed((short)0);
                            // have to register bush location in "botmap",
-                           // otherwise there would be a hole in the area.
-                           igroup=0;
-                           if((narea=withinAnArea(cx,cz))>=0)
-                               setBotMap(ioff,(byte)narea);
+                           // otherwise there would be a hole in the area.                           
                            continue;
                           }
-                      if(iblu==0xFF) 
-                          {// simple wall
-                           // wall blocks adjacing an area are
-                           // also registered with the area,
-                           // for better dynamic light support.
-                           igroup=0;
-                           if((narea=withinAnArea(cx,cz))>=0)
-                               igroup = (byte)narea;
-                           map[ioff] = (1+(igroup%(numWallPlainNetto-1)))*2;
-                           movemap[ioff] = 1;
-                           continue;
-                          }
-                      if(iblu==100) // switchable image wall
-                          {// this image can be associated with an area.
-                           // it is then switched once the area is cleared.
-                           // to be associated, it is sufficient to be
-                           // adjacent, or next to an area's pixel.
-                           igroup=0;
-                           if((narea=withinAnArea(cx,cz))>=0) 
-                               {igroup = (byte)narea;
-                                if(area[igroup]==null)
-                                    area[igroup] = new d3area(igroup);
-                                area[igroup].addImage(cx,cz);
-                               }
-                           irel = imgcnt;
-                           if((++imgcnt)>=numLoWallImages)
-                               imgcnt = 1; // picture 0 is reserved
-                           map[ioff]      = (iwallimglo-iwallplain)+irel;
-                           movemap[ioff]  = 1;
-                           continue;
-                          }
-                      if(iblu==101) // reserved switchable image wall
-                          {// same as above, only for chief bigbot's pic.
-                           igroup=0;
-                           if((narea=withinAnArea(cx,cz))>=0) 
-                               {igroup = (byte)narea;
-                                if(area[igroup]==null)
-                                    area[igroup] = new d3area(igroup);
-                                    area[igroup].addImage(cx,cz);
-                               }
-                           irel = 0;
-                           map[ioff]      = (iwallimglo-iwallplain)+irel;
-                           movemap[ioff]  = 1;
-                           continue;
-                          }
-                      if(iblu >= 0xA0 && iblu < 0xF0)
-                          {  // high image wall
-                           irel = (iblu-0xA0)%numHiWallImages;
-                           map[ioff]      = (iwallimghi-iwallplain)+irel;
-                           movemap[ioff]  = 1;
-                           continue;
-                          }
+                      if(iblu==0xFF || iblu==100 || iblu==101 || (iblu >= 0xA0 && iblu < 0xF0)) 
+                          continue;                                             
                      }
                  if(ired==0xFF && igrn==0 && iblu==0)
-                     {// player start point
-                      player.setX(cx*factor);
-                      player.setY(0);
-                      player.setZ(cz*factor);
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0)
-                          {igroup = (byte)narea;
-                           if(area[igroup]==null)
-                               area[igroup] = new d3area(igroup);
-                           //playerArea = area[igroup];
-                           setBotMap(ioff,(byte)narea);
-                          }
-                      continue;
-                     }
+                     continue;                     
                  // ----- AREA handling -----
                  if(ired==0 && iblu==0 && (igrn >=0xA0 && igrn <= 0xFE)) 
-                     {  // attack area of bot
-                      igroup = (byte)(0xFE-igrn);
-                      setBotMap(ioff,igroup);
-                      if(area[igroup]==null)
-                          area[igroup]=new d3area(igroup);            
-                      continue;
-                     }
+                     continue;                    
                  if(igrn==0 && iblu==0 && (ired >=0xA0 && ired <= 0xFE)) 
-                     { // area announcement/preload
-                      igroup = (byte)(0xFE-ired);
-                      //areamap[ioff] = igroup;
-                      continue;
-                     }
+                     continue;  
+                 if((ired==50 && igrn==50 && iblu==50)||(ired==100 && igrn==100 && iblu==100)||(ired==150 && igrn==150 && iblu==150)||(ired==255 && igrn==255 && iblu==255))
+                     continue;  
                  if((ired==0 && igrn==0xFF && iblu==0xFF)
                          || (ired==0 && igrn==200  && iblu==200)) 
-                     {// create bot, auto-detect surrounding area
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0) 
-                          {igroup = (byte)narea;
-                           if(area[igroup]==null)
-                               area[igroup] = new d3area(igroup);
-                           // create bot
-                           setBotMap(ioff,igroup);
+                     {// create bot, auto-detect surrounding area                     
+                      if(withinAnArea(cx,cz)>=0) 
+                          {// create bot
                            // allocate a new bot
                            for(icode=IndexBots; icode<IndexBots+maxBots; icode++)
                                if(object[icode].getShape()==-1)
@@ -979,111 +816,35 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                            obj.setZ((cz*factor)+(factor/2));				
                            obj.setShape(ShapeBot);   // alloc
                            obj.setSpeed((short)1);          // pseudo
-                           obj.setGroup(igroup);
                            if(igrn==200)
-                               {obj.setFlags(1);    // distance bot
-                                obj.setSleep((rg.nextInt()&65535)%10);
-                               }
+                               obj.setSleep((rg.nextInt()&65535)%10);                              
                            else 
-                               {obj.setFlags(0);    // standard bot
-                                obj.setSleep(((rg.nextInt()&65535)%6)+3);
-                               }
-                           area[igroup].addMember(obj);
-                           obj.setMyarea(area[igroup]);
+                               obj.setSleep(((rg.nextInt()&65535)%6)+3);                                                      
                            obj.setIdamage(0);
-                           //TODO: optimize the model to drive this loop useless
-                           for(BotModel bot:botList)
-                               if(bot.getRespawnX()==obj.getX() && bot.getRespawnZ()==obj.getZ() && area[igroup]!=null)
-                                   {bot.setAreaIndex(igroup);
-                                    break;
-                                   }
-
                           }
                       else // bot MUST be within an area
                           System.out.println("X1634234A");
                       continue;
-                     }
-                 if(ired==50 && igrn==50 && iblu==50)
-                     {// area light preset
-                      // dark area, target indicated in next pixel
-                      ipix2=mapData[ioff+1]&0xFFFFFF;
-                      igrn2=(ipix2>>8)&0xFF;
-                      igroup = (byte)(0xFE-igrn2);
-                      if(area[igroup]==null)
-                          area[igroup]=new d3area(igroup);
-                      area[igroup].setLight(40);
-                     }
-                 if(ired==100 && igrn==100 && iblu==100) 
-                     {// respawn point
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0) 
-                          {igroup = (byte)narea;
-                           if(area[igroup]==null)
-                               area[igroup] = new d3area(igroup);
-                           setBotMap(ioff,igroup);
-                           if(area[igroup].getSpawnx()==-1)
-                               {area[igroup].setSpawnPoint(cx,cz);
-                                // IF the next pix is same color,
-                                ipix2=mapData[ioff+1]&0xFFFFFF;
-                                if(ipix2==ipix)
-                                    // SWITCH spawn direction to downwards
-                                    area[igroup].setPlayerdir(0.0);
-                               }
-                          }
-                      else // this MUST be within an area
-                          System.out.println("X16342349");
-                      continue;
-                     }
-                 if(ired==150 && igrn==150 && iblu==150)
-                     {// half-dark
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0) 
-                          {igroup = (byte)narea;
-                           if(area[igroup]==null)
-                               area[igroup] = new d3area(igroup);
-                           area[igroup].setLightlevel(150);
-                           setBotMap(ioff,igroup);
-                          }
-                      else // this MUST be within an area
-                          System.out.println("X27341354");
-                      continue;
-                     }
-                 if(ired==255 && igrn==255 && iblu==255)
-                     {// light source
-                      igroup=0;
-                      if((narea=withinAnArea(cx,cz))>=0)
-                          {igroup = (byte)narea;
-                           if(area[igroup]==null)
-                               area[igroup] = new d3area(igroup);
-                           area[igroup].addLight(cx,cz);
-                           setBotMap(ioff,igroup);
-                          }
-                      else // this MUST be within an area
-                          System.out.println("X2912433");
-                      continue;
-                     }
-                }  // endfor scan
+                     }                                                
+                }//endfor scan
     }
 
     // check the 8 pixels around cx,cy if we're standing
     // within or nearby an area. this is used just in genMap(),
     // which is not performance critical.
-    private final int withinAnArea(int cx,int cy)
-    {
+    private final int withinAnArea(int cx,int cy){
         int sx,sy,ipix2,ired2,iblu2,igrn2;
-        if (cx>1 && cx<255 && cy>1 && cy<255)
-            for (sx=-1;sx<=1;sx++)
-                {
-                    for (sy=-1;sy<=1;sy++)
-                        {
-                            ipix2 = mapData[(cy+sy)*mapEdgeSize+(cx+sx)];
-                            ired2 = (ipix2>>16)&0xFF;
-                            igrn2 = (ipix2>> 8)&0xFF;
-                            iblu2 = (ipix2    )&0xFF;
-                            if (   igrn2 >= 0xA0 && igrn2 <= 0xFE
-                                    && ired2 == 0x00 && iblu2 == 0x00)
-                                return 0xFE-igrn2;
-                        }
+        if(cx>1 && cx<255 && cy>1 && cy<255)
+            for(sx=-1;sx<=1;sx++)
+                {for(sy=-1;sy<=1;sy++)
+                    {ipix2 = mapData[(cy+sy)*mapEdgeSize+(cx+sx)];
+                     ired2 = (ipix2>>16)&0xFF;
+                     igrn2 = (ipix2>> 8)&0xFF;
+                     iblu2 = (ipix2    )&0xFF;
+                     if(igrn2 >= 0xA0 && igrn2 <= 0xFE
+                            && ired2 == 0x00 && iblu2 == 0x00)
+                         return 0xFE-igrn2;
+                    }
                 }
         return -1; // not within an area
     }
@@ -1091,32 +852,21 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     private final void initialize(){
         if(numLoWallImages!=numHiWallImages)
             System.out.println("X18341622");             
-        System.out.println("allocating maps");
-        map         = new   int[mapSize];
-        movemap     = new  byte[mapSize];       
-        botmap      = new  byte[mapSize];
-        //areamap     = new  byte[mapSize];
-        Arrays.fill(botmap,(byte)0xFF);     
+        System.out.println("allocating maps");   
         System.out.println("allocating rest");	
         object=new d3object[numObjects];
         for(int counter=0; counter<numObjects; counter++)
-            object[counter] = new d3object();
-        //iClLastClearedArea = -1;	    	  	
+            object[counter] = new d3object();	    	  	
     }
 
     final void reinit(boolean playerHasBeenKilled){
-       //playerHit         = false;
-       //playerWins        = false;
        if(!playerHasBeenKilled)
            player.respawn();
        //respawn him later if he has been killed
        player.setAsLoser();
        bpause=false;
        // however, this is overridden in genMap().
-       player.setX((initialPositionX*factor)+(factor/2));
-       player.setY(0);
-       player.setZ((initialPositionZ*factor)+(factor/2));      
-       player.setDirection(fullCircle/2);
+       resetPlayerPosition();
        System.out.println("reinit call");
        // by default, all object slots are passive.
        for(int counter=0; counter<numObjects; counter++) 
@@ -1125,36 +875,20 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
             object[counter].setDir(0);
             object[counter].setSpeed((short)0);           
             object[counter].setShape(-1);
-            object[counter].setGroup((byte)0xFF);
-            object[counter].setMyarea(null);
-            object[counter].setFlags(0);
             object[counter].setSleep(0);
             object[counter].setSleep2(0);
             object[counter].setSeenPlayer(false);
             object[counter].setFace((short)0);
             object[counter].setFaceskip((short)0);
             object[counter].setIanim(0);
-            object[counter].setIdamage(0);	  
+            object[counter].setIdamage(0);
            }       
        // init the floor texture with large random patches,
-       // to make it look a bit more interesting.
-       area = new d3area[256];
-       Arrays.fill(area,null);      
-       //Arrays.fill(areamap,(byte)0xFF);            
-       genMap(); // may change playerXpos etc...
-       //respawn the bots (except those which are in a clean area)
-       boolean respawn;
+       // to make it look a bit more interesting.         
+       genMap();
+       //respawn the bots
        for(BotModel bot:botList)	   
-           {respawn=true;
-            //check if the bot is inside a cleared area
-            for(Integer index:this.clearedArea)
-                if(index.intValue()==bot.getAreaIndex())
-                    {respawn=false;
-                     break;
-                    }
-            if(respawn)
-                bot.respawn();
-           } 
+           bot.respawn();          
        lookingDown=false;
        lookingUp=false;
        rightStepping=false;
@@ -1171,18 +905,17 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 
        gameController.restartMusic();    // i.e. initial background track
        //FIXME: put a better mechanism to respawn within an area
+       //FIXME: maybe this call is now useless as it is done before
        resetPlayerPosition();       
     }
 
     final void resetPlayerPosition(){
         //if the user wants to start a new game, 
         //it reinitializes the respawn position
-        if(this.clearedArea.isEmpty())
-            {player.setX((initialPositionX*factor)+(factor/2));
-             player.setY(0);
-             player.setZ((initialPositionZ*factor)+(factor/2));
-	         player.setDirection(Math.PI);       
-	        }
+        player.setX((initialPositionX*factor)+(factor/2));
+        player.setY(0);
+        player.setZ((initialPositionZ*factor)+(factor/2));
+	    player.setDirection(fullCircle/2);    
     }
 
     public final long currentTime(){
@@ -1439,27 +1172,21 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 
     // ============= walking bot support =====================    
 
-    private final void stepBotFace(d3object obj)
-    {
-       // animation delay
-       if (obj.getFaceskip() > 0) {
-          obj.setFaceskip((short)(obj.getFaceskip()-1));
-          return;
-       }
+    private final void stepBotFace(d3object obj){
+        // animation delay
+        if(obj.getFaceskip() > 0) 
+            {obj.setFaceskip((short)(obj.getFaceskip()-1));
+             return;
+            }
        // default case: bot standing still
-       if (obj.getSpeed() < 2) {
-          obj.setFaceskip((short)3);
-          obj.setIanim(obj.getIanim()+1);
-	  /*for(BotModel bot:botList)
-	      if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	          {//bot.setFace((short)((bot.getFace()+1)%11));		   
-		   break;
-		  } */
-          if (obj.getIdamage() == 0)
-             obj.setFace((short)(obj.getIanim() % 5));
-          else
-             obj.setFace((short)(11+(obj.getIanim() % 5)));
-       }
+       if(obj.getSpeed() < 2)
+           {obj.setFaceskip((short)3);
+            obj.setIanim(obj.getIanim()+1);
+            if(obj.getIdamage() == 0)
+                obj.setFace((short)(obj.getIanim() % 5));
+            else
+                obj.setFace((short)(11+(obj.getIanim() % 5)));
+           }
     }
 
     private final void tryStepBot(d3object obj,double dxp,double dzp){
@@ -1473,14 +1200,15 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         if (obj.getSleep2() > 0)
             obj.setSleep2(obj.getSleep2()-1);  // suspend walking (after rocket launch)
         else
-            {if(bStepLeft)
-                {xnew+=Math.sin(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
-                 znew+=Math.cos(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
-                }
-             if(bStepRight)
-                 {xnew+=Math.sin(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
-                  znew+=Math.cos(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
+            {//TODO: try dodging if required
+             if(bStepLeft)
+                 {xnew+=Math.sin(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
+                  znew+=Math.cos(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                  }
+             if(bStepRight)
+                  {xnew+=Math.sin(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
+                   znew+=Math.cos(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
+                  }
              if(obj.getSpeed() >= 1)
                  {// no matter if speed 1 or more, we always probe
                   if (obj.getSpeed() >= 2)
@@ -1491,112 +1219,90 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
             }
        if(xnew != obj.getX() || znew != obj.getZ())
            {// how far can the bot walk, if at all?         
-            int xidx1 = ((((int)xnew)/factor)&0xFF);
-            int yidx1 = ((((int)znew)/factor)&0xFF);
+            int xidx1 = ((((int)xnew)/factor)&0xFF);//0<=xidx1<256
+            int zidx1 = ((((int)znew)/factor)&0xFF);
             // about to leave area?
-            boolean bstop = false;
-            double dx, dz;
-            d3object d3o;
-            byte b;
-            if (((b = botmap[(yidx1*mapEdgeSize)+xidx1])&0xFF) == 0xFF)
+            boolean bstop=false;           
+            //force the bot to stop when it is too close to another one and 
+            //when the map is occupied           
+            //TODO: rather the scene graph
+            //if the voxel is not empty
+            if(collisionMap[(zidx1*mapEdgeSize)+xidx1]!=EMPTY)
                 bstop = true;
-            else {
-                d3area d3a = area[b];
-                if (d3a == null)
-                    bstop = true;
-                else
-                    if (d3a != obj.getMyarea())
-                        bstop = true;
-                    else 
-                        {
-                            // research minimum distance to all other bots
-                            // of the same area. make sure bots always
-                            // keep some distance between them.
-                            for (int n=0;n<d3a.getNmembers();n++) {
-                                d3o = d3a.getAmember()[n];
-                                if (d3o != null && d3o.getShape()==2 && d3o != obj) {
-                                    dx = d3o.getX()-xnew;
-                                    dz = d3o.getZ()-znew;
-                                    if ((Math.abs(dx) < (2*factor)) && (Math.abs(dz) < (2*factor))) {
-                                        bstop = true;
-                                        break;
-                                    }  // endif
-                                }
-                            }  // endfor area members
-                        }
-            }  // endelse botmap
+            else
+                {double dx,dz;
+                 for(BotModel bot:botList)
+                     {dx=Math.abs(bot.getX()-xnew);
+                      dz=Math.abs(bot.getZ()-znew);
+                      //if this is another bot and if this bot is too close (at least 2 voxels)
+                      if(Math.abs(bot.getX()-obj.getX())>0&&Math.abs(bot.getZ()-obj.getZ())>0&&dx<(2*factor)&&dz<(2*factor)) 
+                          {bstop=true;
+                           break;
+                          }
+                     }
+                 }
+            // keep minimum distance also to player
+            if(!bstop&& (Math.abs(dxp)<factor) && (Math.abs(dzp)<factor))
+                bstop = true;
+            // check for obstacles and move
+            if(!bstop) 
+                {double oldX=obj.getX();
+                 double oldZ=obj.getZ();
+                 obj.setX(xnew);
+                 obj.setZ(znew);                     
+                 //change the position of the bot using its old and its new coordinates
+                 //TODO: optimize the model to drive this loop useless
+                 for(BotModel bot:botList)
+                     if(bot.getX()==oldX && bot.getZ()==oldZ)
+                         {bot.setX(xnew);
+                          bot.setZ(znew);      	                 
+                          break;			 
+                         }	            
+                 bmoved=true;
+                }
 
-          // keep minimum distance also to player
-          if (!bstop
-        	&& (Math.abs(dxp) < factor)
-        	&& (Math.abs(dzp) < factor)  )
-             bstop = true;
-
-          // check for obstacles and move
-          if (!bstop) 
-              {b = movemap[(yidx1*mapEdgeSize)+xidx1];
-               if (b==0) 
-                   {double oldX=obj.getX();
-		            double oldZ=obj.getZ();
-		            obj.setX(xnew);
-        	        obj.setZ(znew);
-        	        //System.out.println("[slow mode] bot moved");
-        	        //System.out.println("bot moved = "+xnew+" "+znew);
-        	        //change the position of the bot using its old and its new coordinates
-        	        //TODO: optimize the model to drive this loop useless
-        	        for(BotModel bot:botList)
-        	            if(bot.getX()==oldX && bot.getZ()==oldZ)
-        	                {bot.setX(xnew);
-        	                 bot.setZ(znew);
-        	                 //System.out.println("[accelerated mode] bot moved");
-        	                 break;			 
-        	                }	            
-        	        bmoved = true;
-                   }
-              }
-
-       }  // endif position changed
-
-       if (bmoved) {
-          if (obj.getSpeed() < 2) {
-             // this determines the bot speeds. the number
-             // gets divided by 10. so 10==1.0, 5==0.5 etc.
-             obj.setSpeed((short)8);
-             obj.setIanim(0);
-         //TODO: optimize the model to drive this loop useless
-	     for(BotModel bot:botList)
-		     if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	             {bot.setRunning(true);	   
-		          break;
-		         } 
-          }
-          obj.setFaceskip((short)0);
-          obj.setIanim(obj.getIanim()+1);
-        //TODO: optimize the model to drive this loop useless
-	  for(BotModel bot:botList)
-	      if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	          {bot.setRunning(true);		   
-		   break;
-		  } 
-          if (obj.getIdamage()==0)
-             obj.setFace(aBotWalk1[obj.getIanim() % aBotWalk1.length]);
-          else
-             obj.setFace((short)(11+aBotWalk1[obj.getIanim() % aBotWalk1.length]));
-          // count walking bots, for stepObjects()
-          nClBotsWalking++;
-       }  else {
-          if (obj.getSpeed() >= 2) {
-             obj.setSpeed((short)1);
-             obj.setIanim(0);
-        //TODO: optimize the model to drive this loop useless 
-        for(BotModel bot:botList)
-	        if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	            {bot.setRunning(false);		   
-		         break;
-		        } 
-             obj.setFaceskip((short)0);
-          }
-       }  // endif bmoved
+           }  // endif position changed
+       if(bmoved) 
+           {if(obj.getSpeed() < 2)
+                {// this determines the bot speeds. the number
+                 // gets divided by 10. so 10==1.0, 5==0.5 etc.
+                 obj.setSpeed((short)8);
+                 obj.setIanim(0);
+                 //TODO: optimize the model to drive this loop useless
+                 for(BotModel bot:botList)
+                     if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
+                         {bot.setRunning(true);	   
+                          break;
+                         } 
+                }
+            obj.setFaceskip((short)0);
+            obj.setIanim(obj.getIanim()+1);
+            //TODO: optimize the model to drive this loop useless
+            for(BotModel bot:botList)
+                if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
+                    {bot.setRunning(true);		   
+                     break;
+                    } 
+            if(obj.getIdamage()==0)
+                obj.setFace(aBotWalk1[obj.getIanim() % aBotWalk1.length]);
+            else
+                obj.setFace((short)(11+aBotWalk1[obj.getIanim() % aBotWalk1.length]));
+            // count walking bots, for stepObjects()
+            nClBotsWalking++;
+           }  
+       else 
+           {if(obj.getSpeed() >= 2)
+                {obj.setSpeed((short)1);
+                 obj.setIanim(0);
+                 //TODO: optimize the model to drive this loop useless 
+                 for(BotModel bot:botList)
+                     if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
+                         {bot.setRunning(false);		   
+                          break;
+                         } 
+                 obj.setFaceskip((short)0);
+                }
+           }  // endif bmoved
     }
     
     private final boolean stepObjects(){
@@ -1609,8 +1315,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         int xidx1,yidx1;
         double xdiff,ydiff;
         final double rockrange = 0.10d * factor;
-        int ipix;
-        int xplr,yplr;
         d3object obj;
         int nOldBotsWalking = nClBotsWalking;
         nClBotsWalking = 0;
@@ -1639,53 +1343,44 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
              if(obj.getShape()==ShapeBot) // bot
                  {stepBotFace(obj);
                   //check if player is within firing range
-                  xplr = (((int)player.getX())/factor)&0xFF;
-                  yplr = (((int)player.getZ())/factor)&0xFF;
-                  if(botmap[(yplr*mapEdgeSize)+xplr]==obj.getGroup()) 
-                      {double dx = player.getX()-obj.getX(); // x-distance to player
-                       double dz = player.getZ()-obj.getZ(); // y-distance to player
-                       boolean bfire = true;
-                       if((obj.getFlags() & 1) != 0 // a near-bot?
-                               && (Math.abs(dx) > (3*factor) || Math.abs(dz) > (3*factor)) )
-                           {bfire = false;}
-                       if(playerVisibleFrom(obj))
-                           {if(!obj.getSeenPlayer())
-                                {obj.setSeenPlayer(true);
-                                 // "NOW..."
-                                gameController.playSound(6,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
+                  double dx = player.getX()-obj.getX(); // x-distance to player
+                  double dz = player.getZ()-obj.getZ(); // y-distance to player
+                  boolean bfire = true;
+                  if(playerVisibleFrom(obj))
+                      {if(!obj.getSeenPlayer())
+                           {obj.setSeenPlayer(true);
+                            // "NOW..."
+                            gameController.playSound(6,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
+                           }
+                      }
+                  else 
+                      {//player not visible by bot
+                       bfire = false;
+                      }
+                  if(bfire && (obj.getSleep() > 0)) 
+                      {//just for initial sound
+                       obj.setSleep(obj.getSleep()-1);   // bot may hesitate by random
+                       bfire = false;
+                      }
+                  if(bfire)
+                      {// bot wants to fire. calc direction to player.
+                       obj.setDir(reverseDir(dx,dz));
+		               //set bot direction
+                       //TODO: optimize the model to drive this loop useless
+                       for(BotModel bot:botList)
+		                   if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
+	        	               {bot.setDirection(obj.getDir());             
+			                    break;
+			                   }                 
+		               long lTime;
+                       if(player.isAlive() && !player.isWinning() && 
+                           (lTime=currentTime()) > lastBotShotTime+500)
+                           {if(tryLaunchBotRocket(counter, obj.getDir(),counter-IndexBots)) 
+                                {obj.setSleep2(10); // avoid walking into own rocket
+                                 lastBotShotTime=lTime;
                                 }
                            }
-                       else 
-                           {//player not visible by bot
-                            bfire = false;
-                           }
-                       if(bfire && (obj.getSleep() > 0)) 
-                           {//just for initial sound
-                            obj.setSleep(obj.getSleep()-1);   // bot may hesitate by random
-                            bfire = false;
-                           }
-                       if(bfire)
-                           {// bot wants to fire. calc direction to player.
-                            obj.setDir(reverseDir(dx,dz));
-		                    //System.out.println("[slow mode] bot turned"); 
-		                    //set bot direction for the accelerated mode
-                            //TODO: optimize the model to drive this loop useless
-                            for(BotModel bot:botList)
-		                        if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	        	                    {bot.setDirection(obj.getDir());
-			                         //System.out.println("[accelerated mode] bot turned");
-			                         break;
-			                        }                 
-		                    long lTime;
-                            if(player.isAlive() && !player.isWinning() && 
-                                    (lTime=currentTime()) > lastBotShotTime+500)
-                                {if(tryLaunchBotRocket(counter, obj.getDir(),counter-IndexBots,obj.getFlags())) 
-                                     {obj.setSleep2(10); // avoid walking into own rocket
-                                      lastBotShotTime=lTime;
-                                     }
-                                }
-                            tryStepBot(obj,dx,dz);
-                           }
+                       tryStepBot(obj,dx,dz);
                       }
                   continue;
                  }
@@ -1698,9 +1393,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
              yidx1 = ((((int)objectZnew)/factor)&0xFF);
              bhit = false;
              if(obj.getShape()==ShapeRocket)
-                 {// create rocket's light trail
-                  //lightFlash((int)objectXnew,(int)objectZnew,1,20);
-                  // check for rocket<->object collision
+                 {// check for rocket<->object collision
                   for(iobj=0; iobj<numObjects; iobj++) 
                       {if(object[iobj].getShape()==-1
                            || object[iobj].getShape()==ShapeBush
@@ -1732,7 +1425,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                        bhit = true;
                        if(!bcheat)
                            player.decreaseHealth(20);
-                       //lightFlash((int)objectXnew,(int)objectZnew,10,127);
                        gameController.stopMovingSound(1<<1);
                        gameController.playSound(2,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());                      
                        if(!player.isAlive()&&!isFalling)
@@ -1741,27 +1433,15 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
                             fallStart=currentTime();                               
                            }
                       }
-                  else
-                      if(xdiff < player.getBoundingSize()*3 && ydiff < player.getBoundingSize()*3) 
-                          {//rocket just passed the player. make some noise,
-                           //but not too often, and if it's not his own.
-                           /*if(obj.getFlags()==0 && (currentTime() > lClLastPassBy + 1000))
-                               {lClLastPassBy = currentTime();
-                                gameView.playSound(11,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());
-                               }*/
-                          }
                  }
-             if(map[(yidx1*mapEdgeSize)+xidx1] > -1) 
+             if(collisionMap[(yidx1*mapEdgeSize)+xidx1]!=EMPTY && 
+                     collisionMap[(yidx1*mapEdgeSize)+xidx1]>=UNAVOIDABLE_AND_UNBREAKABLE_DOWN && 
+                     collisionMap[(yidx1*mapEdgeSize)+xidx1]<=UNAVOIDABLE_AND_UNBREAKABLE_UP)
                  {// handle a wall impact
                   bhit = true;
-                  ipix = map[(yidx1*mapEdgeSize)+xidx1];
-                  //show impact on plain wall tile. this is done
-                  //by stepping the wall texture one step higher.
-                  if(ipix < numWallPlainText && (ipix&1)==0)
-                      {//I change the state of my wall in the accelerated model
-                       //collisionMap[(yidx1*256)+xidx1]=UNAVOIDABLE_AND_UNBREAKABLE_DIRTY;            
-                       Impact impact=null,impact1=null,impact2=null,impact3=null;
-                       switch(collisionMap[(yidx1*mapEdgeSize)+xidx1])
+                  //show impact on plain wall tile
+                  Impact impact=null,impact1=null,impact2=null,impact3=null;
+                  switch(collisionMap[(yidx1*mapEdgeSize)+xidx1])
 		                   {case UNAVOIDABLE_AND_UNBREAKABLE_UP:
 		                        {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);		                        		                            		                         
 		                         break;
@@ -1843,22 +1523,19 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 		                        {//corner
 		                        }
 		                   }
-		               if(impact!=null)
-		                   {//System.out.println("impact : "+impact);
-		                    //System.out.println("collision map : "+xidx1+" "+yidx1);
-		                    //System.out.println("collision map * factor : "+xidx1*65536+" "+yidx1*65536);
-		                    impactList.add(impact);
-		                   }
-		               if(impact1!=null)
-                           impactList.add(impact1);
-		               if(impact2!=null)
-                           impactList.add(impact2);
-		               if(impact3!=null)
-                           impactList.add(impact3);
-                       //I change the state of my wall in the slow model
-                       //map[(yidx1*256)+xidx1]++;
-		              }           
-                  //lightFlash((int)objectXnew,(int)objectZnew,6,90);           
+                  if(impact!=null)
+                      {//System.out.println("impact : "+impact);
+                       //System.out.println("collision map : "+xidx1+" "+yidx1);
+                       //System.out.println("collision map * factor : "+xidx1*65536+" "+yidx1*65536);
+                       impactList.add(impact);
+                      }
+                  if(impact1!=null)
+                      impactList.add(impact1);
+                  if(impact2!=null)
+                      impactList.add(impact2);
+                  if(impact3!=null)
+                      impactList.add(impact3);
+		                         
                   gameController.playSound(1,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());
                  }
              if(bhit)
@@ -1956,24 +1633,26 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
 
     // used by bots, to tell if player can be seen
-    private final boolean playerVisibleFrom(d3object obj) {
+    private final boolean playerVisibleFrom(d3object obj){
        double x1 = obj.getX();
        double z1 = obj.getZ();
        double x2 = player.getX();
        double z2 = player.getZ();
        double ddx = x2-x1;
        double ddz = z2-z1;
-       int    idx = ((int)ddx)>>(16-3); // i.e. and multiply by 8
-       int    idz = ((int)ddz)>>(16-3); // i.e. and multiply by 8
-       int isteps = Math.max(Math.abs(idx),Math.abs(idz));
-           isteps = Math.max(isteps,1); // FIX/1.0.3: potential division by zero
+       int idx = ((int)ddx)>>(16-3); // i.e. and multiply by 8
+       int idz = ((int)ddz)>>(16-3); // i.e. and multiply by 8
+       int isteps = Math.max(1,Math.max(Math.abs(idx),Math.abs(idz)));// FIX/1.0.3: potential division by zero
        int cx,cz;
-       for (int i=0;i<=isteps;i++) {
-          cx = (((int)(x1+i*ddx/isteps))/factor)&0xFF;
-          cz = (((int)(z1+i*ddz/isteps))/factor)&0xFF;
-          if (map[(cz*mapEdgeSize)+cx] != -1)
-             return false;
-       }
+       for(int i=0;i<=isteps;i++) 
+           {cx=(((int)(x1+i*ddx/isteps))/factor)&0xFF;
+            cz=(((int)(z1+i*ddz/isteps))/factor)&0xFF;
+            if(collisionMap[(cz*mapEdgeSize)+cx]!=EMPTY&&
+                    collisionMap[(cz*mapEdgeSize)+cx]!=AVOIDABLE_AND_UNBREAKABLE&&
+                    collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_LIGHT&&
+                    collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_TABLE)
+                return false;
+           }
        return true;
     }
     
@@ -1987,95 +1666,39 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
             //TODO: optimize the model to drive this loop useless
             for(BotModel bot:botList)
 		        if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-	                {bot.decreaseHealth(20);
-		             if(bot.isAlive())
-			             {//System.out.println("[accelerated mode] bot hurt");
-			             }
-		             else
-			             {//remove the bot in the accelerated model
-		                  //botList.remove(bot);
-		                  //System.out.println("[accelerated mode] bot removed");
-			             }
+	                {if(bot.isAlive())
+		                 bot.decreaseHealth(20);		             
 		             break;
 		            }
             //if everybody is dead, you win!!
             //TODO: handle the other enemies too
             if(botList.isEmpty())
-                player.setAsWinner();
+                {gameController.playAreaCleared();
+                 player.setAsWinner();
+                }
             // first hit on this bot?
             if (obj.getIdamage()==0) 
                 {// then just change shape
                  obj.setIdamage(obj.getIdamage()+1);
-                 //System.out.println("[slow mode] bot hurt");	     
                  return;
                 }
             // bot is terminated
             gameController.playBotHit((int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
-            //remove the bot in the slow model
-            obj.getMyarea().removeMember(obj);
-            //System.out.println("[slow mode] bot removed");	    
-            if (obj.getMyarea().getNmembers()>0) 
-                {// check if only near-bots remain in area
-                 d3area d3a = obj.getMyarea();
-                 boolean btruebots = false;
-                 int i;
-                 for (i=0;i<d3a.getAmember().length;i++)
-                     if(d3a.getAmember()[i]!=null
-                                && d3a.getAmember()[i].getShape()==ShapeBot
-                                && d3a.getAmember()[i].getFlags()==0) 
-                         {btruebots = true;
-                          break;
-                         }
-                 // if so, switch them all to far-bots
-                 if (!btruebots)
-                     for (i=0;i<d3a.getAmember().length;i++)
-                         if (   d3a.getAmember()[i]!=null
-                                 && d3a.getAmember()[i].getShape()==ShapeBot)
-                             d3a.getAmember()[i].setFlags(0);
-                }
-            if (obj.getMyarea().getNmembers()==0) 
-                {// no bots remaining in area
-                 d3area d3a = obj.getMyarea();
-	             //register the area as cleared
-	             for(int a=0;a<area.length;a++)
-	                 if(area[a]!=null && area[a]==d3a)
-		                 {clearedArea.add(Integer.valueOf(a));
-			              break;
-		                 }
-	             //gameController.stopCarpetSound();
-	             gameController.playAreaCleared();
-	             //TODO: display "area cleared, establishing new art." 5000	                               
-                }
-            obj.setMyarea(null);
            }  
        else 
            {// a non-bot was hit. this could be
             // another rocket, or a deko         
-            if (obj.getShape()==ShapeDeko) 
-               {
-               if (obj.getFace()==0 || obj.getFace()>=3)
-        	  gameController.playSound(3,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
-               else // table etc.
-        	  gameController.playSound(4,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
-               // was this a light emitting object?
-               if (obj.getFace()==5) {
-        	  // so, if it' w/in an area, remove light source
-        	  byte igroup =
-                   botmap[ ((((int)obj.getZ())/factor)&0xFF)*mapEdgeSize
-                	  +((((int)obj.getX())/factor)&0xFF)];
-        	  d3area d3a = area[igroup];
-        	  if (d3a != null)
-                     d3a.tryRemoveLight(((int)obj.getX())/factor,((int)obj.getZ())/factor);
-               }
-            }
+            if(obj.getShape()==ShapeDeko) 
+                {if(obj.getFace()==0 || obj.getFace()>=3)
+        	         gameController.playSound(3,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
+                 else // table etc.
+        	         gameController.playSound(4,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
+                }
             else
-               gameController.playSound(1,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
+                gameController.playSound(1,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
            }
        // this spot may have been blocked by the object.
        // re-allow player movement here.
-       //update the slow model
-       movemap[ ((((int)obj.getZ())/factor)&0xFF)*mapEdgeSize
-               +((((int)obj.getX())/factor)&0xFF)] = 0;
        //update the accelerated model
        //TODO: decorellate
        collisionMap[((int)(obj.getZ()/factor))*mapEdgeSize+((int)(obj.getX()/factor))]=EMPTY;
@@ -2088,7 +1711,7 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
     }
 
     public final void tryLaunchPlayerRocket(){
-       /*It prevents the player from shooting 6 rockets together instantaneously*/
+       //It prevents the player from shooting 6 rockets together instantaneously
        if(currentTime()-lastShot<timeBetweenShots)
            return;
        // a maximum of 3 active rockets applies.
@@ -2113,7 +1736,6 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
             obj.setFace((short)0);
             obj.setDir(player.getDirection());
             obj.setSpeed((short)3);
-            obj.setFlags(1); // my own rocket
             blaunched = true;                   
             float[] rocket=new float[]{(float)obj.getX(),-8192.0f,(float)obj.getZ(),
                     (float)(player.getDirection()*(180/Math.PI))};
@@ -2126,23 +1748,13 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 	       }
     }
 
-    private final boolean tryLaunchBotRocket(int ifrom, double ddir, int irocket, int ibotflags){
+    private final boolean tryLaunchBotRocket(int ifrom, double ddir, int irocket){
        d3object obj;
-       // there are two sets of rockets,
-       // one for std, and one for dist bots.
-       // both together shall not exceed 9 active rockets.
-       if((ibotflags&1)!=0) 
-           {// take from dist bot contingent.
-            irocket = IndexBotRockets + 5 + (irocket % 4);         
-           }
-       else
-           {// take from std bot contingent.
-            irocket = IndexBotRockets + (irocket % 5);
-           }
+       irocket = IndexBotRockets + (irocket % 9);
        if(!bcheat && object[irocket].getShape()==-1)
            {obj = object[irocket];
-            obj.setX(object[ifrom].getX() + Math.sin(ddir/*+fullCircle/4*/)*minimalRocketLaunchDistance);
-            obj.setZ(object[ifrom].getZ() + Math.cos(ddir/*+fullCircle/4*/)*minimalRocketLaunchDistance);
+            obj.setX(object[ifrom].getX() + Math.sin(ddir)*minimalRocketLaunchDistance);
+            obj.setZ(object[ifrom].getZ() + Math.cos(ddir)*minimalRocketLaunchDistance);
             obj.setShape(ShapeRocket);
             obj.setFace((short)0);
             obj.setDir(ddir);
@@ -2161,39 +1773,37 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
 
     // reverse calculate a direction from a position delta
     private final double reverseDir(double dx, double dz){
-       int n1;
-
-       final double aquaddelta[] = {
-          0.0, fullCircle/2.0, fullCircle/2.0, fullCircle
-       };
-
-       if (dx>0) {
-          if (dz > 0) n1 = 0;
-          else        n1 = 1;
-       }  else  {
-          if (dz > 0) n1 = 3;
-          else        n1 = 2;
-       }
-
-       final double dthresh = 0.01d * factor;
-       if (Math.abs(dx) < dthresh) {
-          if (dz > 0.0)
-             return 0.0;
-          else
-             return fullCircle/2.0;
-       }
-       if (Math.abs(dz) < dthresh) {
-          if (dx > 0.0)
-             return fullCircle/4.0;
-          else
-             return fullCircle*3.0/4.0;
-       }
-
-       double d = Math.atan(dx/dz) + aquaddelta[n1];
-
-       if (d < 0.0) d += fullCircle;
-
-       return d;
+        int n1;
+        final double aquaddelta[]={0.0,fullCircle/2.0,fullCircle/2.0,fullCircle};
+        if(dx>0) 
+            {if(dz > 0) 
+                 n1 = 0;
+             else
+                 n1 = 1;
+            }  
+        else  
+            {if(dz > 0) 
+                 n1 = 3;
+             else
+                 n1 = 2;
+            }
+        final double dthresh=0.01d*factor;
+        if(Math.abs(dx) < dthresh)
+            {if(dz > 0.0)
+                 return 0.0;
+             else
+                 return fullCircle/2.0;
+            }
+        if(Math.abs(dz) < dthresh)
+            {if(dx > 0.0)
+                 return fullCircle/4.0;
+             else
+                 return fullCircle*3.0/4.0;
+            }
+        double d=Math.atan(dx/dz)+aquaddelta[n1];
+        if(d < 0.0) 
+            d+=fullCircle;
+        return(d);
     }
     
     private final void explode(d3object obj){
@@ -2253,9 +1863,4 @@ public class GameModel /*extends UnicastRemoteObject implements IGameModel*/{
         //remove old messages
         gameInfoMessageList.removeAll(oldMessagesList);
     }
-
-    /*@Override
-    public BitSet getDataModificationFlagsBitSet(){       
-        return(dataModificationFlagsBitSet);
-    }*/
 }
