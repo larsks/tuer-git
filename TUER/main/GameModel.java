@@ -74,8 +74,6 @@ public class GameModel{
     
     //TODO: use a "rocket" class
     private List<float[]> rocketList;
-   
-    private final Runtime rt=Runtime.getRuntime();
     
     private Clock internalClock;
     
@@ -192,14 +190,14 @@ public class GameModel{
     
     private static final int fallTotalDuration=3000;//in millisecond
     
-    private boolean runningForward;
-    private boolean runningBackward;
-    private boolean rightStepping;
-    private boolean leftStepping;
-    private boolean playerMoving;
-    private boolean turningLeft;
-    private boolean turningRight;
-    private boolean runningFast;
+    private volatile boolean runningForward;
+    private volatile boolean runningBackward;
+    private volatile boolean rightStepping;
+    private volatile boolean leftStepping;
+    private volatile boolean playerMoving;
+    private volatile boolean turningLeft;
+    private volatile boolean turningRight;
+    private volatile boolean runningFast;
     private int[] mapData; 
     private int nClBotsWalking = 0;
   
@@ -936,7 +934,6 @@ public class GameModel{
                        hasBeenKilled=false;                        
                       }          
                   innerLoop=true;
-                  tryToForceGarbageCollection(true);
                  }
              boolean bmoved;
              double playerXnew,playerZnew;
@@ -1110,24 +1107,20 @@ public class GameModel{
             }       
         return(bmoved);
     }
-    
-    private final void tryToForceGarbageCollection(boolean forceEvenThoughNoGCCallNeeded){  
-        if(forceEvenThoughNoGCCallNeeded==true || rt.freeMemory()<10485760)
-            {long freedMemory=0;
-             do{freedMemory=rt.freeMemory();
-                rt.runFinalization();
-                rt.gc();
-                freedMemory=rt.freeMemory()-freedMemory;
-               }
-             while(freedMemory>0);
-            }
-    }
  
     public final void performAtExit(){
         innerLoop=false;
         gameRunning=false;
     }
 
+    //TODO: optimize the model to drive this method useless
+    private final BotModel getBotModelFromBotObject(d3object botObj){
+        for(BotModel bot:botList)
+            if(bot.getX()==botObj.getX() && bot.getZ()==botObj.getZ())
+                return(bot);                                           
+        return(null);
+    }
+    
     /**walking bot support*/
     private final void tryStepBot(d3object obj,double dxp,double dzp){
         double  xnew = obj.getX();
@@ -1141,8 +1134,7 @@ public class GameModel{
         if (obj.getSleep2() > 0)
             obj.setSleep2(obj.getSleep2()-1);  // suspend walking (after rocket launch)
         else
-            {//TODO: try dodging if required
-             if(bStepLeft)
+            {if(bStepLeft)
                  {xnew+=Math.sin(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                   znew+=Math.cos(obj.getDir()-(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                  }
@@ -1158,7 +1150,8 @@ public class GameModel{
                   znew+=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed/10;
                  }
             }
-       if(xnew != obj.getX() || znew != obj.getZ())
+        BotModel currentBot=getBotModelFromBotObject(obj);
+        if(xnew != obj.getX() || znew != obj.getZ())
            {// how far can the bot walk, if at all?         
             int xidx1 = ((((int)xnew)/factor)&0xFF);//0<=xidx1<256
             int zidx1 = ((((int)znew)/factor)&0xFF);
@@ -1187,18 +1180,11 @@ public class GameModel{
                 bstop = true;
             // check for obstacles and move
             if(!bstop) 
-                {double oldX=obj.getX();
-                 double oldZ=obj.getZ();
+                {//change the position of the bot in the both systems (Vincent's system and mine)
                  obj.setX(xnew);
-                 obj.setZ(znew);                     
-                 //change the position of the bot using its old and its new coordinates
-                 //TODO: optimize the model to drive this loop useless
-                 for(BotModel bot:botList)
-                     if(bot.getX()==oldX && bot.getZ()==oldZ)
-                         {bot.setX(xnew);
-                          bot.setZ(znew);                        
-                          break;             
-                         }              
+                 obj.setZ(znew); 
+                 currentBot.setX(xnew);
+                 currentBot.setZ(znew);                
                  bmoved=true;
                 }
 
@@ -1207,34 +1193,18 @@ public class GameModel{
            {if(obj.getSpeed() < 2)
                 {// this determines the bot speeds. the number
                  // gets divided by 10. so 10==1.0, 5==0.5 etc.
-                 obj.setSpeed((short)8);
-                 //TODO: optimize the model to drive this loop useless
-                 for(BotModel bot:botList)
-                     if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-                         {bot.setRunning(true);    
-                          break;
-                         } 
+                 obj.setSpeed((short)8);                
                 }
-            //TODO: optimize the model to drive this loop useless
-            for(BotModel bot:botList)
-                if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-                    {bot.setRunning(true);         
-                     break;
-                    }
+            currentBot.setRunning(true); 
             // count walking bots, for stepObjects()
             nClBotsWalking++;
            }  
        else 
            {if(obj.getSpeed() >= 2)
                 {obj.setSpeed((short)1);
-                 //TODO: optimize the model to drive this loop useless 
-                 for(BotModel bot:botList)
-                     if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-                         {bot.setRunning(false);           
-                          break;
-                         }
+                 currentBot.setRunning(false);
                 }
-           }  // endif bmoved
+           }
     }
     
     private final boolean stepObjects(){
@@ -1509,8 +1479,7 @@ public class GameModel{
                      if(nOldBotsWalking <= 3) 
                          {int nDiff = nOldBotsWalking-nClBotsWalking;
                           for(int i=0;i<nDiff;i++) 
-                              {nOldBotsWalking--;                              
-                               //stopMovingSound(1<<(6+nOldBotsWalking));
+                              {nOldBotsWalking--;
                               gameController.unRequestBotwalkSound(nOldBotsWalking);
                               }                         
                          }
@@ -1588,16 +1557,9 @@ public class GameModel{
             //lightFlash((int)obj.getX(),(int)obj.getZ(),40,127);           
             gameController.playSound(2,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
             //increase the damage of the bot
-            //TODO: optimize the model to drive this loop useless
-            boolean botIsAlive=false;
-            for(BotModel bot:botList)
-                if(bot.getX()==obj.getX() && bot.getZ()==obj.getZ())
-                    {if(bot.isAlive())
-                         {bot.decreaseHealth(20);
-                          botIsAlive=bot.isAlive();
-                         }
-                     break;
-                    }
+            BotModel bot=getBotModelFromBotObject(obj);
+            if(bot.isAlive())
+                bot.decreaseHealth(20);                                    
             //if everybody is dead, you win!!
             //TODO: handle the other enemies too
             if(botList.isEmpty())
@@ -1605,7 +1567,7 @@ public class GameModel{
                  player.setAsWinner();
                 }
             // first hit on this bot?                        
-            if(botIsAlive)
+            if(bot.isAlive())
                 return;
             // bot is terminated
             gameController.playBotHit((int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());

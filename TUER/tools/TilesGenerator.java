@@ -24,7 +24,6 @@ import java.awt.Image;
 import java.awt.image.PixelGrabber;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -32,10 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-
 import main.HealthPowerUpModel;
 import main.HealthPowerUpModelBean;
 

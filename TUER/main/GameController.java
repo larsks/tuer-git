@@ -54,13 +54,7 @@ public final class GameController {
     private ISoundSystem sif;
     
     //this game model can be remote
-    private /*I*/GameModel gameModel;
-    
-    /*private IGameModelProxy gameModelProxy;
-    
-    private boolean remote;
-    
-    private BitSet dataModificationFlagsBitSet;*/
+    private GameModel gameModel;
     
     final static int factor=GameModel.factor;
     
@@ -78,7 +72,6 @@ public final class GameController {
 	    aBwShouldPlay=new boolean[3];
 	    aBwIsPlaying=new boolean[3];
 	    aBwPlayingSince=new long[3];
-	    //setRemote(false);//offline game by default
 		frame = new Frame(){
             private static final long serialVersionUID = 1L;
             public void paint(Graphics g){}
@@ -117,9 +110,7 @@ public final class GameController {
 	    canvas.requestFocusInWindow();       
 	    attachSound();
         openSound();
-	    /*try{*/this.gameModel.runEngine();/*} 
-	    catch(RemoteException re)
-        {throw new RuntimeException("Unable to run the engine",re);}*/
+	    this.gameModel.runEngine();
 	    closeSound();
 	}
 	
@@ -140,15 +131,7 @@ public final class GameController {
     }
     
     //helpers to respect MVC and ease caching in the future
-    final void display(){
-        /*if(remote)
-            {dataModificationFlagsBitSet.clear();            
-             try{//get data modification flags (stored in a single BitSet) from the server
-                 dataModificationFlagsBitSet.or(gameModel.getDataModificationFlagsBitSet());
-                } 
-             catch(Throwable t)
-             {throw new RuntimeException("",t);}
-            }    */         
+    final void display(){      
     	gameView.display();
     }
     
@@ -157,87 +140,59 @@ public final class GameController {
     }
     
     final void launchNewGame(){
-        try{gameModel.launchNewGame();}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.launchNewGame();
     }
     
     final void resumeGame(){
-        try{gameModel.resumeGame();}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.resumeGame();
     }
     
     final boolean getPlayerWins(){
-        try{return(gameModel.getPlayerWins());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerWins());
     }
     
     final boolean getPlayerHit(){
-        try{return(gameModel.getPlayerHit());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerHit());
     }
     
     final boolean getBpause(){
-        try{return(gameModel.getBpause());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getBpause());
     }
     
     final void setBpause(boolean bpause){
-        try{gameModel.setBpause(bpause);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setBpause(bpause);
     }
     
     final boolean getBcheat(){
-        try{return(gameModel.getBcheat());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getBcheat());
     }
     
     final void setBcheat(boolean bcheat){
-        try{gameModel.setBcheat(bcheat);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setBcheat(bcheat);
     }
     
     final double getPlayerXpos(){
-        try{return(gameModel.getPlayerXpos());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerXpos());
     }
     
     final double getPlayerYpos(){
-        try{return(gameModel.getPlayerYpos());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerYpos());
     }
     
     final double getPlayerZpos(){
-        try{return(gameModel.getPlayerZpos());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerZpos());
     }
     
     final double getPlayerDirection(){
-        try{return(gameModel.getPlayerDirection());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getPlayerDirection());
     }
     
     final List<BotModel> getBotList(){
-        try{return(gameModel.getBotList());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getBotList());
     }
     
     final List<Impact> getImpactList(){
-        try{return(gameModel.getImpactList());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getImpactList());
     }
     
     final List<float[]> getRocketList(){
@@ -247,147 +202,92 @@ public final class GameController {
     }
     
     final byte getCollisionMap(int index){
-        try{return(gameModel.getCollisionMap(index));}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getCollisionMap(index));
     }
     
     final boolean isGameRunning(){
-        try{return(gameModel.isGameRunning());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.isGameRunning());
     }
     
     final int getHealth(){
-        try{return(gameModel.getHealth());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getHealth());
     }
     
     final void performAtExit(){
-        try{gameModel.performAtExit();}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.performAtExit();
     }
     
-    /*
+    /**
      * This is an example of method showing how the networking works. 
      * The data are fetched only if they really changed in order to 
      * reduce RMI calls
-     * */
+     **/
     final FloatBuffer getArtCoordinatesBuffer1(){    
-        /*try{if(remote)
-                {//if the data are no more valid (if the data has changed)
-                 if(dataModificationFlagsBitSet.get(0))
-                     {//refresh the proxy
-                      gameModelProxy.setArtCoordinatesBuffer1(gameModel.getArtCoordinatesBuffer1());
-                      //update the data modification flag for these data
-                      dataModificationFlagsBitSet.clear(0);
-                     }
-                 //use the proxy
-                 return(gameModelProxy.getArtCoordinatesBuffer1());             
-                }
-            else*/
-                return(gameModel.getArtCoordinatesBuffer1());
-           /*}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}*/
+        return(gameModel.getArtCoordinatesBuffer1());           
     }
     
     final FloatBuffer getArtCoordinatesBuffer2(){
-        try{return(gameModel.getArtCoordinatesBuffer2());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getArtCoordinatesBuffer2());
     }
     
     final FloatBuffer getArtCoordinatesBuffer3(){
-        try{return(gameModel.getArtCoordinatesBuffer3());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getArtCoordinatesBuffer3());
     }
     
     final FloatBuffer getArtCoordinatesBuffer4(){
-        try{return(gameModel.getArtCoordinatesBuffer4());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getArtCoordinatesBuffer4());
     }
     
     final FloatBuffer getBonsaiCoordinatesBuffer(){
-        try{return(gameModel.getBonsaiCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getBonsaiCoordinatesBuffer());
     }
     
     final FloatBuffer getBotCoordinatesBuffer(){
-        try{return(gameModel.getBotCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getBotCoordinatesBuffer());
     }
     
     final FloatBuffer getChairCoordinatesBuffer(){
-        try{return(gameModel.getChairCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getChairCoordinatesBuffer());
     }
     
     final FloatBuffer getFlowerCoordinatesBuffer(){
-        try{return(gameModel.getFlowerCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getFlowerCoordinatesBuffer());
     }
     
     final FloatBuffer getImpactCoordinatesBuffer(){
-        try{return(gameModel.getImpactCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getImpactCoordinatesBuffer());
     }
     
     final FloatBuffer getCrosshairCoordinatesBuffer(){
-        try{return(gameModel.getCrosshairCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getCrosshairCoordinatesBuffer());
     }
     
     final FloatBuffer getLampCoordinatesBuffer(){
-        try{return(gameModel.getLampCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getLampCoordinatesBuffer());
     }
     
     final FloatBuffer getLevelCoordinatesBuffer(){
-        try{return(gameModel.getLevelCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getLevelCoordinatesBuffer());
     }
     
     final FloatBuffer getRocketCoordinatesBuffer(){
-        try{return(gameModel.getRocketCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getRocketCoordinatesBuffer());
     }
     
     final FloatBuffer getRocketLauncherCoordinatesBuffer(){
-        try{return(gameModel.getRocketLauncherCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getRocketLauncherCoordinatesBuffer());
     }
     
     final FloatBuffer getTableCoordinatesBuffer(){
-        try{return(gameModel.getTableCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getTableCoordinatesBuffer());
     }
     
     final FloatBuffer getUnbreakableObjectCoordinatesBuffer(){
-        try{return(gameModel.getUnbreakableObjectCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getUnbreakableObjectCoordinatesBuffer());
     }
     
     final FloatBuffer getVendingMachineCoordinatesBuffer(){
-        try{return(gameModel.getVendingMachineCoordinatesBuffer());}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        return(gameModel.getVendingMachineCoordinatesBuffer());
     }   
     
     final GameCycle getCycle(){
@@ -399,9 +299,7 @@ public final class GameController {
     }
     
     final void tryLaunchPlayerRocket(){
-        try{gameModel.tryLaunchPlayerRocket();}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.tryLaunchPlayerRocket();
     }
     
     final Point getDelta(){
@@ -409,45 +307,31 @@ public final class GameController {
     }
     
     final void setRunningFast(boolean runningFast){
-        try{gameModel.setRunningFast(runningFast);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setRunningFast(runningFast);
     }
     
     final void setRunningForward(boolean runningForward){
-        try{gameModel.setRunningForward(runningForward);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setRunningForward(runningForward);
     }
     
     final void setRunningBackward(boolean runningBackward){
-        try{gameModel.setRunningBackward(runningBackward);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setRunningBackward(runningBackward);
     }
     
     final void setLeftStepping(boolean leftStepping){
-        try{gameModel.setLeftStepping(leftStepping);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setLeftStepping(leftStepping);
     }
     
     final void setRightStepping(boolean rightStepping){
-        try{gameModel.setRightStepping(rightStepping);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setRightStepping(rightStepping);
     }
     
     final void setTurningLeft(boolean turningLeft){
-        try{gameModel.setTurningLeft(turningLeft);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setTurningLeft(turningLeft);
     }
     
     final void setTurningRight(boolean turningRight){
-        try{gameModel.setTurningRight(turningRight);}
-        catch(Throwable t)
-        {throw new RuntimeException("",t);}
+        gameModel.setTurningRight(turningRight);
     }
     
     //SOUND SYSTEM
@@ -595,22 +479,6 @@ public final class GameController {
              aBwPlayingSince[i]   = 0;
             }
      }
-     
-     /*final void setRemote(boolean remote){
-         this.remote=remote;
-         if(this.remote)
-             {if(gameModelProxy==null)
-                  gameModelProxy=new GameModelProxy();
-              //get the remote game model (host:port/object)
-              try{gameModel=(IGameModel)Naming.lookup("rmi://localhost:12345/arena0");} 
-              catch(Throwable t)
-              {throw new RuntimeException("Unable to get the remote game model",t);}
-              //fill the proxy for the first time
-              gameModelProxy.init(gameModel);
-              if(dataModificationFlagsBitSet==null)
-                  dataModificationFlagsBitSet=new BitSet();
-             }
-     }*/
      
      final void addNewExplosion(ExplosionModel em){
          //create an explosion view

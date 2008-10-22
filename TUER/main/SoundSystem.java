@@ -60,13 +60,7 @@ public class SoundSystem implements ISoundSystem{
    // sound lengths. it's used both for the channel's
    // internal buffersize, and for abMix.
    private int maxSoundLength = 250000;
-   
-   /*private int aiPlayList[][] = {
-      { 11, 12, 13, 14 },
-      { 15, 15,16, 16,15 }
-   };*/
-    
-   
+      
    private AudioFormat   fmtLine  = null;
    
    private AudioFormat   fmtClip  = null;

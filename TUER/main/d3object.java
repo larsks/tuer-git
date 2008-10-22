@@ -28,7 +28,7 @@ final class d3object{
    double getX(){return(x);}        
    double getZ(){return(z);}        
    double getDir(){return(dir);}      
-   short  getSpeed(){return(speed);}    
+   short  getSpeed(){return(speed);}
    int    getShape(){return(shape);}
    int    getSleep2(){return(sleep2);} 
    boolean getSeenPlayer(){return(seenPlayer);}
