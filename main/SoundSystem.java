@@ -22,11 +22,8 @@ import com.jcraft.jorbis.Block;
 import com.jcraft.jorbis.Comment;
 import com.jcraft.jorbis.DspState;
 import com.jcraft.jorbis.Info;
-import com.newdawn.easyogg.OggClip;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
 import javax.sound.sampled.AudioFormat;
@@ -36,6 +33,8 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
+
+import sound.Sample;
 
 /**
  * Sound System For JDK 2, providing Art Attack Sounds
@@ -131,19 +130,22 @@ public class SoundSystem implements ISoundSystem{
       "botwalk3",    // 8, 16 bit ditto. NEW/1.1.0
    };
    
-   private OggClip[] clip;
+   //attempt of rewriting the sound system
+   private Sample[] uniqueSample;
    
    SoundSystem(){
-       clip=new OggClip[aSoundFiles.length];
+       uniqueSample=new Sample[aSoundFiles.length];
        int loadedClipCount=0;
        boolean success;
        String clipPath;
-       for(int i=0;i<clip.length;i++)
+       for(int i=0;i<uniqueSample.length;i++)
            {clipPath="/snd/"+aSoundFiles[i]+".ogg";
-            try{clip[i]=new OggClip(getClass().getResourceAsStream(clipPath));
+            try{uniqueSample[i]=new Sample(getClass().getResourceAsStream(clipPath));
+                uniqueSample[i].open();
+                uniqueSample[i].setGain(1.0f);
                 success=true;
                }
-            catch(IOException ioe)
+            catch(IllegalArgumentException ioe)
             {success=false;
              ioe.printStackTrace();
             }
@@ -154,11 +156,10 @@ public class SoundSystem implements ISoundSystem{
             else
                 System.out.println("[WARNING] The sound file "+clipPath+" has not been loaded successfully");
            }
-       if(loadedClipCount!=clip.length)
+       if(loadedClipCount!=uniqueSample.length)
            System.out.println("[WARNING] Some sound files failed to bo loaded");
        else
-           System.out.println("[INFO] All sound files have been loaded successfully");
-       clip[13].setGain(1.0f);
+           System.out.println("[INFO] All sound files have been loaded successfully");       
    }
 
    private void status(String s){
@@ -181,11 +182,9 @@ public class SoundSystem implements ISoundSystem{
          for (int i=0;i<nSounds;i++) 
 	     {status("IMMEDIATE loading sounds ("+(i+1)+"/"+nSounds+")");
               if(i<iClips) 
-	          abSound[i] = loadOgg(aSoundFiles[i], false);
+	              abSound[i] = loadOgg(aSoundFiles[i], false);
               else 
-	          abSound[i] = loadOgg(aSoundFiles[i], true);
-	      /*if(aSoundFiles[i].equals("anno"))
-	          playSound(i,0,0);*/
+	              abSound[i] = loadOgg(aSoundFiles[i], true);	      
              }         
          abMix = new byte[maxSoundLength+100];
          //annoClip=new OggClip("/snd/anno.ogg");
@@ -734,10 +733,12 @@ public class SoundSystem implements ISoundSystem{
                aclip[i].close();
             }
          }
-         bSound = false;
-         for(int i=0;i<clip.length;i++)
-             {clip[i].stop();
-              clip[i].close();
+         bSound = false;        
+         for(int i=0;i<uniqueSample.length;i++)
+             {uniqueSample[i].setGain(0.0f);
+              if(uniqueSample[i].isRunning())
+                 uniqueSample[i].stop();
+              uniqueSample[i].close();
              }
       }
    }
@@ -752,23 +753,23 @@ public class SoundSystem implements ISoundSystem{
    };
    
    public final void playSound(int index){
-       clip[index].play();
+       uniqueSample[index].play();      
    }
    
-   public final void loopSound(int index){
-       clip[index].loop();
+   public final void loopSound(int index){      
+       uniqueSample[index].loop();
    }
    
    public final void stopSound(int index){
-       clip[index].stop();
+       uniqueSample[index].stop();      
    }
    
    public final void resumeSound(int index){
-       clip[index].resume();
+       uniqueSample[index].resume(Clip.LOOP_CONTINUOUSLY);      
    }
    
    public final void pauseSound(int index){
-       clip[index].pause();
+       uniqueSample[index].pause();      
    }
    
    public void playSound(int id,int x,int z) {
