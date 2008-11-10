@@ -1026,20 +1026,21 @@ public class GameModel{
                   if(!playerMoving && bmoved)
                       {playerMoving = true;
                        //gameController.startMovingSound(2);
-                       if(!walkSoundPlayedOnce)
-                           {gameController.loopSound(13);
-                            walkSoundPlayedOnce=true;
+                       /*if(!walkSoundPlayedOnce)
+                           {*/gameController.loopSound(13);
+                            /*walkSoundPlayedOnce=true;
                            }
                        else
-                           gameController.resumeSound(13);
+                           gameController.resumeSound(13);*/
                       }
                   else
                       if(!bmoved && playerMoving)
                           {// player stopped moving:
                            playerMoving = false;
                            //gameController.stopMovingSound(2);
-                           if(walkSoundPlayedOnce)
-                               gameController.pauseSound(13);
+                           /*if(walkSoundPlayedOnce)
+                               gameController.pauseSound(13);*/
+                           gameController.stopSound(13);
                           }               
                  }  // innerloop
              //gameController.stopCarpetSound();      
