@@ -342,7 +342,7 @@ class GameGLView implements GLEventListener{
     
     public final void display(GLAutoDrawable drawable){  	
         final GL gl=drawable.getGL();
-        long levelDrawTime=0;
+        //long levelDrawTime=0;
         //removeUselessObjectViews();
         //System.out.println(((Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1048576) +"MB");
         gl.glClear(GL.GL_COLOR_BUFFER_BIT|GL.GL_DEPTH_BUFFER_BIT);          
@@ -376,11 +376,11 @@ class GameGLView implements GLEventListener{
 	              //uncomment it to retablish the older behavior
 	              //this.levelVertexSet.draw();	
 	              //uncomment it to use the experimental scenegraph
-	              levelDrawTime=System.currentTimeMillis();
+	              //levelDrawTime=System.currentTimeMillis();
 	              this.playerPositioning=networkViewSet.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),playerPositioning,softwareViewFrustumCullingPerformer);	              
 	              //System.out.println("NETWORK VIEW SET DRAW TIME: "+(System.currentTimeMillis()-levelDrawTime));
-	              levelDrawTime=System.currentTimeMillis()-levelDrawTime;	              
-	              pushMessage("NVSD TIME: "+levelDrawTime,(int)(screenWidth*0.85),(int)(screenHeight*0.05));
+	              //levelDrawTime=System.currentTimeMillis()-levelDrawTime;	              
+	              //pushMessage("NVSD TIME: "+levelDrawTime,(int)(screenWidth*0.85),(int)(screenHeight*0.05));
 	              int i,j,limit,xp,zp;         
 	              xp=(int)(gameController.getPlayerXpos()/65536);
 	              zp=(int)(gameController.getPlayerZpos()/65536);
@@ -637,10 +637,10 @@ class GameGLView implements GLEventListener{
                       {//System.out.println((1000L/(System.currentTimeMillis()-lnow))+" FPS");
                        final int FPS=(int)(1000L/(dif));
                        pushMessage(FPS+" FPS",(int)(screenWidth*0.85),(int)(screenHeight*0.15));
-                       if(levelDrawTime>2)
+                       /*if(levelDrawTime>2)
                            {System.out.println(FPS+" FPS");
                             System.out.println("NVSD TIME: "+levelDrawTime);
-                           }
+                           }*/
                       }
                   if(gameController.getPlayerWins())
                       {pushMessage("C O N G R A T U L A T I O N S",(int)(screenWidth*0.45),(int)(screenHeight*0.5));

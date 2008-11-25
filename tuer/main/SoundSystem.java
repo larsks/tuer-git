@@ -143,6 +143,7 @@ public class SoundSystem implements ISoundSystem{
             try{uniqueSample[i]=new Sample(getClass().getResourceAsStream(clipPath));
                 uniqueSample[i].open();
                 uniqueSample[i].setGain(1.0f);
+                uniqueSample[i].setVolume(1.0f);
                 success=true;
                }
             catch(IllegalArgumentException ioe)
@@ -735,7 +736,7 @@ public class SoundSystem implements ISoundSystem{
          }
          bSound = false;        
          for(int i=0;i<uniqueSample.length;i++)
-             {uniqueSample[i].setGain(0.0f);
+             {uniqueSample[i].setVolume(0.0f);
               if(uniqueSample[i].isRunning())
                  uniqueSample[i].stop();
               uniqueSample[i].close();

@@ -97,14 +97,15 @@ public final class GameController {
 	    GLCapabilities capabilities=new GLCapabilities();
 	    capabilities.setDoubleBuffered(true);//enables double buffering
 	    capabilities.setHardwareAccelerated(true);//enables hardware acceleration
-	    canvas=new GLCanvas(capabilities);								
+	    canvas=new GLCanvas(capabilities);
+	    //canvas.setIgnoreRepaint(true);
 	    canvas.setAutoSwapBufferMode(false);//prevents any auto buffer swapping
 	    canvas.addGLEventListener(gameView=new GameGLView(this));	
 	    canvas.addMouseMotionListener(gameMouseMotionController=new GameMouseMotionController(gameView));		
 	    canvas.addMouseListener(gameMouseMotionController);	
 	    canvas.addKeyListener(new GameKeyboardMonitor(gameView));			    
 	    gameView.display();
-	    frame.add(canvas);        		
+	    frame.add(canvas);
 	    frame.setVisible(true);
 	    canvas.requestFocus();
 	    canvas.requestFocusInWindow();       
