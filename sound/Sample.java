@@ -61,6 +61,8 @@ public final class Sample{
     private boolean balanceSupported;
     
     private boolean gainSupported;
+    
+    private boolean volumeSupported;
 
     
     /**
@@ -71,6 +73,7 @@ public final class Sample{
     public Sample(InputStream inputStream)throws IllegalArgumentException{
         balanceSupported=false;
         gainSupported=false;
+        volumeSupported=false;
         Map.Entry<byte[],int[]> result=loadOgg(inputStream);
         int rate=result.getValue()[0];
         int channels=result.getValue()[1];
@@ -94,6 +97,7 @@ public final class Sample{
         clip=null;
         balanceSupported=false;
         gainSupported=false;
+        volumeSupported=false;
     }
     
     /**
@@ -110,6 +114,7 @@ public final class Sample{
             {Mixer mixer=getBestFittedMixer(info);
              balanceSupported=mixer.isControlSupported(FloatControl.Type.BALANCE);
              gainSupported=mixer.isControlSupported(FloatControl.Type.MASTER_GAIN);
+             volumeSupported=mixer.isControlSupported(FloatControl.Type.VOLUME);
              try{clip=(Clip)mixer.getLine(info);
                  clip.open(audioFormat,uncompressedDataArray,0,uncompressedDataArray.length);
                 } 
@@ -121,7 +126,7 @@ public final class Sample{
     }
     
     /**
-     * Attempt to set the global gain (volume) for the play back. 
+     * Attempt to set the maximum gain for the play back. 
      * If the control is not supported, this method has no effect. 
      * 1.0 will set maximum gain, 0.0 minimum gain
      * @param gain The gain value
@@ -142,6 +147,28 @@ public final class Sample{
                   control.setValue(min+(range*gain));
                  }             
             }           
+    }
+    
+    /**
+     * Attempt to set the volume for the play back. 
+     * If the control is not supported, this method has no effect. 
+     * 1.0 will set maximum volume, 0.0 minimum volume
+     * @param volume
+     */
+    public final void setVolume(float volume){
+        if((clip!=null&&!clip.isOpen())||clip==null)
+            throw new UnsupportedOperationException("Impossible to close a closed sample or a never-opened sample");
+        if(volumeSupported)
+            {FloatControl control=(FloatControl)clip.getControl(FloatControl.Type.VOLUME);
+             if(volume==-1)
+                 control.setValue(0);
+             else
+                 {float max = control.getMaximum();
+                  float min = control.getMinimum(); // negative values all seem to be zero?
+                  float range = max - min;
+                  control.setValue(min+(range*volume));
+                 }
+            }
     }
     
     /**
