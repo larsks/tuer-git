@@ -95,17 +95,18 @@ public final class JMEGameServiceProvider {
         transitionGameState.setProgress(0,"Initializing Game ...");
         DisplaySystem disp = DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
-        //disp.getRenderer().getCamera().setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 1f,  );
+        disp.getRenderer().getCamera().setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 1.0F, 10000.0F );
         disp.getRenderer().getCamera().update();
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");
         //GameStateManager.getInstance().attachChild(new IntroState("Intro",trans));
-        transitionGameState.increment("Initializing GameState: Menu ...");       
+        transitionGameState.increment("Initializing GameState: Menu ..."); 
+        transitionGameState.setProgress(1.0f, "Finished Loading"); 
         GameStateManager.getInstance().attachChild(new MenuState("Menu",transitionGameState,this));       
-        transitionGameState.setProgress(1.0f, "Finished Loading");       
+              
         //GameStateManager.getInstance().activateChildNamed("Intro");
         //At the end of the introduction (that might be skipped), display the menu
-        //GameStateManager.getInstance().activateChildNamed("Menu");
+        GameStateManager.getInstance().activateChildNamed("Menu");
     }
     
     public final GameState getLevelGameState(int index){
@@ -119,11 +120,11 @@ public final class JMEGameServiceProvider {
         transitionGameState.setProgress(0,"Initializing Level "+index+" ...");
         //TODO: the level factory loads the common data when used for the first
         //time and the data for a single level at each call
-        //GameState levelGameState=LevelGameState.getInstance(index,transitionGameState);         
+        GameState levelGameState=LevelGameState.getInstance(index,transitionGameState);         
         transitionGameState.setProgress(1.0f, "Finished Loading");
         transitionGameState.setActive(false);
         GameStateManager.getInstance().detachChild(transitionGameState);       
-        return(/*levelGameState*/null);
+        return(levelGameState);
     }
     
     public final StandardGame getGame(){

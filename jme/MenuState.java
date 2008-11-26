@@ -1,9 +1,17 @@
 package jme;
 
+import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import com.jme.scene.state.TextureState;
+import com.jme.image.Texture;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Renderer;
 import com.jme.scene.shape.Box;
-import com.jme.scene.state.TextureState;
+import com.jme.util.GameTaskQueueManager;
+import com.jme.util.TextureManager;
+import com.jme.util.resource.ResourceLocatorTool;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.load.TransitionGameState;
 
@@ -29,17 +37,22 @@ public final class MenuState extends BasicGameState {
     private ExtendedMenuHandler input;
     
     
-    public MenuState(String name,TransitionGameState trans,JMEGameServiceProvider serviceProvider){
+    public MenuState(String name,final TransitionGameState trans,final JMEGameServiceProvider serviceProvider){
         super(name);
         //this.game=game;
-        this.quitGameItem=new Box("Quit Game",new Vector3f(-5,-5,-5),new Vector3f(5,5,5));
+        this.quitGameItem=new Box("Quit Game",new Vector3f(-5,-2,-5),new Vector3f(5,2,5));
         this.quitGameItem.setLocalTranslation(0,0,-10);
         this.quitGameItem.setRenderQueueMode(Renderer.QUEUE_OPAQUE);
-        this.rootNode.attachChild(this.quitGameItem);
-        Renderer renderer=serviceProvider.getGame().getDisplay().getRenderer();   
+        this.rootNode.attachChild(this.quitGameItem);      
+        Renderer renderer=serviceProvider.getGame().getDisplay().getRenderer(); 
+        URL quitItemTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
         TextureState ts=renderer.createTextureState();
         ts.setEnabled(true);
+        ts.setTexture(TextureManager.loadTexture(quitItemTextureURL,
+                Texture.MinificationFilter.BilinearNoMipMaps,
+                Texture.MagnificationFilter.Bilinear));        
         this.rootNode.setRenderState(ts);
+        this.rootNode.updateRenderState();       
         //setup the input handler
         this.input=new ExtendedMenuHandler(serviceProvider,this);
     }

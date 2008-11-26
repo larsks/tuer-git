@@ -25,10 +25,10 @@
     <!-- Compile                                                           -->
     <!-- ================================================================= -->
     <!-- Temporarily, the JME version is ignored -->
+	<!-- excludes="jme/" -->
 	<target name="compile" description="Compiles the source code">
 
-        <javac srcdir="${srcdir}"
-        	   excludes="jme/"
+        <javac srcdir="${srcdir}"       	   
                destdir="${destdir}"
                debug="on" >
 
