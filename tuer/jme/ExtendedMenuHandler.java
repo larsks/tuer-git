@@ -64,6 +64,7 @@ public final class ExtendedMenuHandler extends InputHandler{
             this.game=game;
         }
         
+        @Override
         public final void performAction(InputActionEvent evt){
             this.game.shutdown();
         }

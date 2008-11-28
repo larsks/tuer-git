@@ -1,11 +1,20 @@
 package jme;
 
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import com.jme.scene.state.TextureState;
 import com.jme.image.Texture;
+import com.jme.input.InputHandler;
+import com.jme.input.InputSystem;
+import com.jme.input.KeyInput;
+import com.jme.input.KeyInputListener;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Renderer;
 import com.jme.scene.shape.Box;
@@ -32,14 +41,13 @@ public final class MenuState extends BasicGameState {
     
     private Box quitGameItem;
     
-    //private StandardGame game;
+    private InputHandler input;
     
-    private ExtendedMenuHandler input;
+    private static final Logger logger = Logger.getLogger(MenuState.class.getName());
     
     
     public MenuState(String name,final TransitionGameState trans,final JMEGameServiceProvider serviceProvider){
         super(name);
-        //this.game=game;
         this.quitGameItem=new Box("Quit Game",new Vector3f(-5,-2,-5),new Vector3f(5,2,5));
         this.quitGameItem.setLocalTranslation(0,0,-10);
         this.quitGameItem.setRenderQueueMode(Renderer.QUEUE_OPAQUE);
@@ -52,9 +60,28 @@ public final class MenuState extends BasicGameState {
                 Texture.MinificationFilter.BilinearNoMipMaps,
                 Texture.MagnificationFilter.Bilinear));        
         this.rootNode.setRenderState(ts);
-        this.rootNode.updateRenderState();       
+        this.rootNode.updateRenderState();
         //setup the input handler
         this.input=new ExtendedMenuHandler(serviceProvider,this);
+        KeyAdapter ka=new KeyAdapter(){
+            @Override
+            public void keyPressed(KeyEvent e){
+                logger.info(e.toString());
+            }
+        };
+        for(Frame frame:Frame.getFrames())
+            {frame.addKeyListener(ka);
+             for(Component c:frame.getComponents())
+                 c.addKeyListener(ka);
+            }
+        KeyInput.get().addListener(new KeyInputListener(){
+
+            @Override
+            public void onKey(char character, int keyCode, boolean pressed) {
+                logger.info("[onKey] "+character+" "+keyCode+" "+pressed);
+            }
+            
+        });
     }
     
     /**
@@ -75,7 +102,7 @@ public final class MenuState extends BasicGameState {
     public final void render(final float tpf) {
         super.render(tpf);
         //TODO: use this index to set a different color for the selected menu
-        this.input.getIndex();
+        //this.input.getIndex();
         //TODO: draw the menu
     }
     
@@ -83,5 +110,6 @@ public final class MenuState extends BasicGameState {
     public final void update(final float tpf) {
         super.update(tpf);
         this.input.update(tpf);
+        InputSystem.update();
     }
 }

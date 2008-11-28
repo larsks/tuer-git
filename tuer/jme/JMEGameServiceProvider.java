@@ -61,8 +61,8 @@ public final class JMEGameServiceProvider {
         pgs.setRenderer(JOGLSystemProvider.SYSTEM_IDENTIFIER);
         pgs.setMusic(false);
         pgs.setSFX(false);       
-        pgs.setWidth(1280);
-        pgs.setHeight(1024);
+        /*pgs.setWidth(1280);
+        pgs.setHeight(1024);*/
         pgs.setFullscreen(true);
         this.game=new StandardGame("TUER",GameType.GRAPHICAL,pgs);
         this.game.start();
