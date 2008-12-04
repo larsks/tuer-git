@@ -1,6 +1,7 @@
 package jme;
 
 import java.net.URL;
+import java.nio.FloatBuffer;
 import java.util.logging.Logger;
 import com.jme.scene.TexCoords;
 import com.jme.scene.state.TextureState;
@@ -11,6 +12,7 @@ import com.jme.renderer.Renderer;
 import com.jme.scene.shape.Box;
 import com.jme.system.DisplaySystem;
 import com.jme.util.TextureManager;
+import com.jme.util.geom.BufferUtils;
 import com.jme.util.resource.ResourceLocatorTool;
 import com.jmex.awt.input.AWTMouseInput;
 import com.jmex.game.state.BasicGameState;
@@ -50,19 +52,28 @@ public final class MenuState extends BasicGameState {
         final int faceCount=6;
         menuItemArray=new Box[itemCount];
         float ordinate=(((itemCount*itemHeight)+((itemCount-1)*verticalInterItemGap))/2)-titleHeight-verticalInterSectionGap;
+        FloatBuffer buffer;
         for(int itemIndex=0;itemIndex<itemCount;itemIndex++)
             {menuItemArray[itemIndex]=new Box(itemNameArray[itemIndex]+" Menu Item",new Vector3f(xmin,ordinate-itemHeight,zmin),new Vector3f(xmax,ordinate,zmax));
              ordinate-=itemHeight+verticalInterItemGap;
              menuItemArray[itemIndex].setLocalTranslation(0,0,-10);
              menuItemArray[itemIndex].setRenderQueueMode(Renderer.QUEUE_OPAQUE);
              menuItemArray[itemIndex].setRenderState(ts);
+             buffer=BufferUtils.createFloatBuffer(8*faceCount);
              for(int faceIndex=0;faceIndex<faceCount;faceIndex++)
-                 {menuItemArray[itemIndex].addTextureCoordinates(TexCoords.makeNew(new float[]{faceIndex/(float)faceCount,itemIndex/(float)itemCount}));
-                  menuItemArray[itemIndex].addTextureCoordinates(TexCoords.makeNew(new float[]{(faceIndex+1)/(float)faceCount,itemIndex/(float)itemCount}));
-                  menuItemArray[itemIndex].addTextureCoordinates(TexCoords.makeNew(new float[]{(faceIndex+1)/(float)faceCount,(itemIndex+1)/(float)itemCount}));
-                  menuItemArray[itemIndex].addTextureCoordinates(TexCoords.makeNew(new float[]{faceIndex/(float)faceCount,(itemIndex+1)/(float)itemCount})); 
-                  logger.info("TEXCOORDS: "+faceIndex/(float)faceCount+" "+itemIndex/(float)itemCount);
+                 {buffer.put(faceIndex/(float)faceCount);
+                  buffer.put(itemIndex/(float)itemCount);
+                  buffer.put((faceIndex+1)/(float)faceCount);
+                  buffer.put(itemIndex/(float)itemCount);                 
+                  buffer.put((faceIndex+1)/(float)faceCount);
+                  buffer.put((itemIndex+1)/(float)itemCount);
+                  buffer.put(faceIndex/(float)faceCount);
+                  buffer.put((itemIndex+1)/(float)itemCount);
+                  //logger.info("TEXCOORDS: "+faceIndex/(float)faceCount+" "+itemIndex/(float)itemCount);
                  }
+             buffer.rewind();
+             menuItemArray[itemIndex].setTextureCoords(new TexCoords(buffer,2),0);
+             menuItemArray[itemIndex].updateRenderState();
              rootNode.attachChild(menuItemArray[itemIndex]);
             }   
         rootNode.updateRenderState();
