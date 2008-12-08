@@ -26,13 +26,13 @@ public final class JMEGameServiceProvider {
         this.game=new JOGLMVCGame();       
         logger.info("JOGLMVCGame created, creating states...");
         try{
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getClassLoader().getResource("pic256/")));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getClassLoader().getResource("")));
            } 
         catch(URISyntaxException urise) 
         {urise.printStackTrace();}
 
         //effectively localize the resource
-        URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
+        URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"pic1024/starting_screen_bis.png");
         TransitionGameState transitionGameState = new TransitionGameState(20,startingTextureURL);
         GameStateManager.getInstance().attachChild(transitionGameState);
         transitionGameState.setActive(true);
@@ -46,11 +46,11 @@ public final class JMEGameServiceProvider {
         //GameStateManager.getInstance().attachChild(new IntroState("Intro",trans));
         transitionGameState.increment("Initializing GameState: Menu ..."); 
         transitionGameState.setProgress(1.0f, "Finished Loading"); 
-        GameStateManager.getInstance().attachChild(new MenuState("Menu",transitionGameState,this));       
+        GameStateManager.getInstance().attachChild(new MenuState("Main menu",transitionGameState,this,false));       
 
         //GameStateManager.getInstance().activateChildNamed("Intro");
         //At the end of the introduction (that might be skipped), display the menu
-        GameStateManager.getInstance().activateChildNamed("Menu");
+        GameStateManager.getInstance().activateChildNamed("Main menu");
     }
     
     public static final void main(String[] args){
