@@ -7,12 +7,14 @@ import com.jme.scene.TexCoords;
 import com.jme.scene.state.TextureState;
 import com.jme.image.Texture;
 import com.jme.input.MouseInput;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Renderer;
 import com.jme.scene.shape.Box;
 import com.jme.system.DisplaySystem;
 import com.jme.util.TextureManager;
 import com.jme.util.geom.BufferUtils;
+import com.jme.util.jogl.JOGLUtil;
 import com.jme.util.resource.ResourceLocatorTool;
 import com.jmex.awt.input.AWTMouseInput;
 import com.jmex.game.state.BasicGameState;
@@ -23,18 +25,25 @@ public final class MenuState extends BasicGameState {
 
     private Box[] menuItemArray;
     
-    private static final String[] itemNameArray=new String[]{"New Game","Options","Save Game","Load Game","About","Quit"};
+    private static final String[] unpausedItemNameArray=new String[]{"New game","Options","Load game","Save game","About","Quit"};
+    
+    private static final String[] pausedItemNameArray=new String[]{"Resume game","Options","Load game","Save game","About","Main menu"};
     
     private ExtendedMenuHandler input;
     
-    private static final Logger logger = Logger.getLogger(MenuState.class.getName());
+    private int previousSelectedIndex;
+    
+    private static final Quaternion enabledItemQuaternion=new Quaternion();
+    
+    private static final Quaternion selectedItemQuaternion=new Quaternion(new float[]{0.0f,(float)Math.PI/4.0f,0.0f});
+    
+    private static final Logger logger=Logger.getLogger(MenuState.class.getName());
     
     
-    public MenuState(String name,final TransitionGameState trans,final JMEGameServiceProvider serviceProvider){
+    public MenuState(String name,final TransitionGameState trans,final JMEGameServiceProvider serviceProvider,boolean paused){
         super(name);
         Renderer renderer=DisplaySystem.getDisplaySystem().getRenderer();
-        //TODO: use another texture for the menu
-        URL quitItemTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
+        URL quitItemTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"pic512/menuItems.png");
         TextureState ts=renderer.createTextureState();
         ts.setEnabled(true);
         ts.setTexture(TextureManager.loadTexture(quitItemTextureURL,
@@ -48,28 +57,51 @@ public final class MenuState extends BasicGameState {
         final float zmin=-5.0f;
         final float xmax=5.0f;
         final float zmax=5.0f;
-        final int itemCount=itemNameArray.length;
+        final int itemCount=unpausedItemNameArray.length;
         final int faceCount=6;
         menuItemArray=new Box[itemCount];
         float ordinate=(((itemCount*itemHeight)+((itemCount-1)*verticalInterItemGap))/2)-titleHeight-verticalInterSectionGap;
         FloatBuffer buffer;
+        //final int maxFaceCount=(int)Math.pow(2.0D,Math.floor(Math.log(faceCount/2.0D)/Math.log(2.0D)));
+        final int maxFaceCount=JOGLUtil.nearestPower(faceCount);
+        final int maxItemCount=JOGLUtil.nearestPower(itemCount);
+        logger.info("maxFaceCount = "+maxFaceCount);
+        final String[] itemNameArray;
+        final int initialItemIndex,lastItemIndex;
+        if(paused)
+            {itemNameArray=pausedItemNameArray;
+             initialItemIndex=itemCount;
+             lastItemIndex=itemCount+1;
+            }
+        else
+            {itemNameArray=unpausedItemNameArray;
+             initialItemIndex=0;
+             lastItemIndex=itemCount-1;
+            }               
         for(int itemIndex=0;itemIndex<itemCount;itemIndex++)
             {menuItemArray[itemIndex]=new Box(itemNameArray[itemIndex]+" Menu Item",new Vector3f(xmin,ordinate-itemHeight,zmin),new Vector3f(xmax,ordinate,zmax));
              ordinate-=itemHeight+verticalInterItemGap;
              menuItemArray[itemIndex].setLocalTranslation(0,0,-10);
              menuItemArray[itemIndex].setRenderQueueMode(Renderer.QUEUE_OPAQUE);
              menuItemArray[itemIndex].setRenderState(ts);
-             buffer=BufferUtils.createFloatBuffer(8*faceCount);
+             buffer=BufferUtils.createFloatBuffer(8*faceCount);  
+             final int currentItemIndex;
+             if(itemIndex==0)
+                 currentItemIndex=initialItemIndex;
+             else
+                 if(itemIndex==itemCount-1)
+                     currentItemIndex=lastItemIndex;
+                 else
+                     currentItemIndex=itemIndex;
              for(int faceIndex=0;faceIndex<faceCount;faceIndex++)
-                 {buffer.put(faceIndex/(float)faceCount);
-                  buffer.put(itemIndex/(float)itemCount);
-                  buffer.put((faceIndex+1)/(float)faceCount);
-                  buffer.put(itemIndex/(float)itemCount);                 
-                  buffer.put((faceIndex+1)/(float)faceCount);
-                  buffer.put((itemIndex+1)/(float)itemCount);
-                  buffer.put(faceIndex/(float)faceCount);
-                  buffer.put((itemIndex+1)/(float)itemCount);
-                  //logger.info("TEXCOORDS: "+faceIndex/(float)faceCount+" "+itemIndex/(float)itemCount);
+                 {buffer.put(1.0f-(faceIndex/(float)maxFaceCount));
+                  buffer.put(1.0f-((currentItemIndex+1)/(float)maxItemCount));
+                  buffer.put(1.0f-((faceIndex+1)/(float)maxFaceCount));
+                  buffer.put(1.0f-((currentItemIndex+1)/(float)maxItemCount));                 
+                  buffer.put(1.0f-((faceIndex+1)/(float)maxFaceCount));
+                  buffer.put(1.0f-((currentItemIndex)/(float)maxItemCount));
+                  buffer.put(1.0f-(faceIndex/(float)maxFaceCount));
+                  buffer.put(1.0f-((currentItemIndex)/(float)maxItemCount));
                  }
              buffer.rewind();
              menuItemArray[itemIndex].setTextureCoords(new TexCoords(buffer,2),0);
@@ -78,7 +110,8 @@ public final class MenuState extends BasicGameState {
             }   
         rootNode.updateRenderState();
         //setup the input handler
-        input=new ExtendedMenuHandler(serviceProvider,this);
+        input=new ExtendedMenuHandler(serviceProvider,this,paused);
+        previousSelectedIndex=-1;
     }
     
     /**
@@ -98,15 +131,22 @@ public final class MenuState extends BasicGameState {
      */
     @Override
     public final void render(final float tpf) {
-        super.render(tpf);
-        //TODO: use this index to set a different color for the selected menu
-        input.getIndex();
-        //TODO: draw the menu
+        super.render(tpf);       
     }
     
     @Override
     public final void update(final float tpf) {
         super.update(tpf);
         input.update(tpf);
+        int currentSelectedIndex=input.getIndex();
+        if(currentSelectedIndex!=previousSelectedIndex)
+            {//unselect the previous index if valid
+             if(previousSelectedIndex!=-1)
+                 menuItemArray[previousSelectedIndex].setLocalRotation(enabledItemQuaternion);
+             //select the current index
+             menuItemArray[currentSelectedIndex].setLocalRotation(selectedItemQuaternion);
+             //update the previous index
+             previousSelectedIndex=currentSelectedIndex;
+            }
     }
 }

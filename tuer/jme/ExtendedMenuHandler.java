@@ -23,12 +23,14 @@ public final class ExtendedMenuHandler extends InputHandler{
 
     private static final int menuIndexCount=MenuIndex.values().length;
     
+    private static final long canonicalStateChangeTime=200;
     
-    public ExtendedMenuHandler(JMEGameServiceProvider serviceProvider,GameState menuState){      
-        addAction(new ExitAction(serviceProvider),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_ESCAPE,InputHandler.AXIS_NONE,true);
-        addAction(new EnterAction(serviceProvider),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_RETURN,InputHandler.AXIS_NONE,true);
-        addAction(new UpAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_UP,InputHandler.AXIS_NONE,true);
-        addAction(new DownAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_DOWN,InputHandler.AXIS_NONE,true);
+    
+    public ExtendedMenuHandler(JMEGameServiceProvider serviceProvider,GameState menuState,boolean paused){      
+        addAction(new ExitAction(serviceProvider),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_ESCAPE,InputHandler.AXIS_NONE,false);
+        addAction(new EnterAction(serviceProvider,paused),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_RETURN,InputHandler.AXIS_NONE,false);
+        addAction(new UpAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_UP,InputHandler.AXIS_NONE,false);
+        addAction(new DownAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_DOWN,InputHandler.AXIS_NONE,false);
         this.menuState=menuState;
         this.index=INITIAL_MENU_INDEX;
     }
@@ -39,17 +41,29 @@ public final class ExtendedMenuHandler extends InputHandler{
     
     private final class UpAction extends InputAction{
         
+        private long latestValidUpAction=-1;
+        
         public final void performAction(InputActionEvent evt){
-            index=MenuIndex.values()[(index.ordinal()+(menuIndexCount-1))%menuIndexCount];
-            logger.info("[UP] index "+index.toString());
+            long latestUpAction=System.currentTimeMillis();
+            if(latestUpAction-latestValidUpAction>canonicalStateChangeTime)
+                {index=MenuIndex.values()[(index.ordinal()+(menuIndexCount-1))%menuIndexCount];
+                 latestValidUpAction=latestUpAction;
+                }
+            //logger.info("[UP] index "+index.toString());
         }
     }
     
     private final class DownAction extends InputAction{
         
-        public final void performAction(InputActionEvent evt){           
-            index=MenuIndex.values()[(index.ordinal()+1)%menuIndexCount];
-            logger.info("[DOWN] index "+index.toString());
+        private long latestValidDownAction=-1;
+        
+        public final void performAction(InputActionEvent evt){    
+            long latestDownAction=System.currentTimeMillis();
+            if(latestDownAction-latestValidDownAction>canonicalStateChangeTime)
+                {index=MenuIndex.values()[(index.ordinal()+1)%menuIndexCount];
+                 latestValidDownAction=latestDownAction;
+                }
+            //logger.info("[DOWN] index "+index.toString());
         }
     }
 
@@ -71,18 +85,29 @@ public final class ExtendedMenuHandler extends InputHandler{
         
         private JMEGameServiceProvider serviceProvider;
         
-        private EnterAction(JMEGameServiceProvider serviceProvider){
+        private boolean paused;
+        
+        private EnterAction(JMEGameServiceProvider serviceProvider,boolean paused){
             this.serviceProvider=serviceProvider;
+            this.paused=paused;
         }
         
         public final void performAction(InputActionEvent evt){
             switch(index)
             {
                 case NEW_GAME:
-                {GameState levelGameState=this.serviceProvider.getLevelGameState(0);
-                 GameStateManager.getInstance().attachChild(levelGameState);
-                 //TODO: detach it in the pause menu when going to the main menu
-                 levelGameState.setActive(true);
+                {if(paused)
+                    {/**TODO: disable the level state
+                      *       detach it from the state machine   
+                      */  
+                     //activate the main menu state
+                     GameStateManager.getInstance().activateChildNamed("Main menu");
+                    }
+                 else
+                     {GameState levelGameState=this.serviceProvider.getLevelGameState(0);
+                      GameStateManager.getInstance().attachChild(levelGameState);
+                      levelGameState.setActive(true);
+                     }                
                  menuState.setActive(false);
                  break;
                 }
