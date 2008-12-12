@@ -49,7 +49,6 @@ public final class ExtendedMenuHandler extends InputHandler{
                 {index=MenuIndex.values()[(index.ordinal()+(menuIndexCount-1))%menuIndexCount];
                  latestValidUpAction=latestUpAction;
                 }
-            //logger.info("[UP] index "+index.toString());
         }
     }
     
@@ -63,7 +62,6 @@ public final class ExtendedMenuHandler extends InputHandler{
                 {index=MenuIndex.values()[(index.ordinal()+1)%menuIndexCount];
                  latestValidDownAction=latestDownAction;
                 }
-            //logger.info("[DOWN] index "+index.toString());
         }
     }
 
