@@ -31,11 +31,17 @@ public final class MenuState extends BasicGameState {
     
     private ExtendedMenuHandler input;
     
-    private int previousSelectedIndex;
+    private int previouslySelectedIndex;
+    
+    private int previouslyPressedIndex;
     
     private static final Quaternion enabledItemQuaternion=new Quaternion();
     
-    private static final Quaternion selectedItemQuaternion=new Quaternion(new float[]{0.0f,(float)Math.PI/4.0f,0.0f});
+    private static final Quaternion selectedItemQuaternion=new Quaternion(new float[]{0.0f,(float)(0.5f*Math.PI),0.0f});
+    
+    private static final Quaternion enteredItemQuaternion=new Quaternion(new float[]{0.0f,(float)Math.PI,0.0f});
+    
+    private static final Quaternion disabledItemQuaternion=new Quaternion(new float[]{0.0f,(float)(1.5f*Math.PI),0.0f});
     
     private static final Logger logger=Logger.getLogger(MenuState.class.getName());
     
@@ -111,7 +117,8 @@ public final class MenuState extends BasicGameState {
         rootNode.updateRenderState();
         //setup the input handler
         input=new ExtendedMenuHandler(serviceProvider,this,paused);
-        previousSelectedIndex=-1;
+        previouslySelectedIndex=-1;
+        previouslyPressedIndex=-1;
     }
     
     /**
@@ -138,15 +145,33 @@ public final class MenuState extends BasicGameState {
     public final void update(final float tpf) {
         super.update(tpf);
         input.update(tpf);
-        int currentSelectedIndex=input.getIndex();
-        if(currentSelectedIndex!=previousSelectedIndex)
-            {//unselect the previous index if valid
-             if(previousSelectedIndex!=-1)
-                 menuItemArray[previousSelectedIndex].setLocalRotation(enabledItemQuaternion);
+        int currentlySelectedIndex=input.getIndex();       
+        if(currentlySelectedIndex!=previouslySelectedIndex)
+            {// ( E -> S ) && ( S -> E )
+             //unselect the previous index if valid
+             if(previouslySelectedIndex!=-1)
+                 menuItemArray[previouslySelectedIndex].setLocalRotation(enabledItemQuaternion);
              //select the current index
-             menuItemArray[currentSelectedIndex].setLocalRotation(selectedItemQuaternion);
+             menuItemArray[currentlySelectedIndex].setLocalRotation(selectedItemQuaternion);
              //update the previous index
-             previousSelectedIndex=currentSelectedIndex;
+             previouslySelectedIndex=currentlySelectedIndex;
+            }
+        else
+            {if(input.isEntering())
+                 {// S -> P
+                  if(previouslyPressedIndex==-1)
+                      {previouslyPressedIndex=currentlySelectedIndex;
+                       //"press"
+                       menuItemArray[currentlySelectedIndex].setLocalRotation(enteredItemQuaternion);   
+                      }               
+                 } 
+             else
+                 {// P -> S
+                  if(previouslyPressedIndex!=-1)
+                      {previouslyPressedIndex=-1;
+                       menuItemArray[currentlySelectedIndex].setLocalRotation(selectedItemQuaternion);
+                      }
+                 }
             }
     }
 }
