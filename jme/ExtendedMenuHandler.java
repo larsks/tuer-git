@@ -17,6 +17,8 @@ public final class ExtendedMenuHandler extends InputHandler{
     
     private MenuIndex index;
     
+    private boolean isEntering;
+    
     private static enum MenuIndex{NEW_GAME,OPTIONS,LOAD_GAME,SAVE_GAME,ABOUT,QUIT_GAME};
     
     private static final MenuIndex INITIAL_MENU_INDEX=MenuIndex.NEW_GAME;
@@ -33,10 +35,15 @@ public final class ExtendedMenuHandler extends InputHandler{
         addAction(new DownAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_DOWN,InputHandler.AXIS_NONE,false);
         this.menuState=menuState;
         this.index=INITIAL_MENU_INDEX;
+        this.isEntering=false;
     }
     
     public final int getIndex(){
         return(index.ordinal());
+    }
+    
+    public final boolean isEntering(){
+        return(isEntering);
     }
     
     private final class UpAction extends InputAction{
@@ -47,6 +54,7 @@ public final class ExtendedMenuHandler extends InputHandler{
             long latestUpAction=System.currentTimeMillis();
             if(latestUpAction-latestValidUpAction>canonicalStateChangeTime)
                 {index=MenuIndex.values()[(index.ordinal()+(menuIndexCount-1))%menuIndexCount];
+                 isEntering=false;
                  latestValidUpAction=latestUpAction;
                 }
         }
@@ -60,6 +68,7 @@ public final class ExtendedMenuHandler extends InputHandler{
             long latestDownAction=System.currentTimeMillis();
             if(latestDownAction-latestValidDownAction>canonicalStateChangeTime)
                 {index=MenuIndex.values()[(index.ordinal()+1)%menuIndexCount];
+                 isEntering=false;
                  latestValidDownAction=latestDownAction;
                 }
         }
@@ -91,6 +100,8 @@ public final class ExtendedMenuHandler extends InputHandler{
         }
         
         public final void performAction(InputActionEvent evt){
+            isEntering=true;
+            /*
             switch(index)
             {
                 case NEW_GAME:
@@ -99,7 +110,7 @@ public final class ExtendedMenuHandler extends InputHandler{
                       *       detach it from the state machine   
                       */  
                      //activate the main menu state
-                     GameStateManager.getInstance().activateChildNamed("Main menu");
+                     /*GameStateManager.getInstance().activateChildNamed("Main menu");
                     }
                  else
                      {GameState levelGameState=this.serviceProvider.getLevelGameState(0);
@@ -117,7 +128,8 @@ public final class ExtendedMenuHandler extends InputHandler{
                 {serviceProvider.exit();
                  break;
                 }
-            }           
+            }  
+            */
         }
     }
 }
