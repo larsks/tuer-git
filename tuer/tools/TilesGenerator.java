@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import main.HealthPowerUpModel;
@@ -191,7 +193,9 @@ public final class TilesGenerator{
             String healthPowerUpListFilename,
             String crosshairFilename,
             String sphericalBeastFilename,
-            String networkFilename){
+            String networkFilename,
+            String networkOBJFilename,
+            String wallTextureFilename){
         topWallsList=new Vector<PointPair>();   
         bottomWallsList=new Vector<PointPair>();
         leftWallsList=new Vector<PointPair>();
@@ -809,6 +813,7 @@ public final class TilesGenerator{
 	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));
 	         oos.writeObject(networkSet);
 	         oos.close();
+	         writeObjFilesFromNetworkSet(networkSet,networkOBJFilename,wallTextureFilename,false);
 	        }
 	     catch(Throwable t)
 	     {throw new RuntimeException("Unable to write the network",t);}
@@ -1223,7 +1228,7 @@ public final class TilesGenerator{
     
     private final static void writeSphericalBeast(String path)throws IOException{
         DataOutputStream out=createNewFileFromLocalPathAndGetDataStream(path);
-        //TODO: 7 animations
+        //7 animations
         
         //write the header
         //? bounds * ? primitive groups * ? animation * ? frame * ? elements in a primitive
@@ -1784,11 +1789,159 @@ public final class TilesGenerator{
         encodeObjectInFile(healthPowerUpList,filename);
     }
     
-    private final static void writeEnemyList(String filename){
-        //TODO: create an enemy bean list and add some enemies (models)
-        
-        //encode enemy list
-        //encodeObjectInFile(enemyList,filename);
+    /**
+     * 
+     * @param networkSet
+     * @param filenamepattern
+     * @param textureFilename the path of the texture used for the terrain; 
+     *                        if null, textures coordinates are ignored
+     * @param grouped 
+     */
+    private static final void writeObjFilesFromNetworkSet(NetworkSet networkSet,String filenamepattern,String textureFilename,boolean grouped){
+        final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
+        final int slashIndex=filenamepattern.lastIndexOf("/");
+        final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
+        final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;       
+        final String MTLFilename="terrain.mtl";
+        BufferedOutputStream bos=null;
+        PrintWriter pw=null;
+        if(useTexture)
+            {System.out.println("Starts writing MTL file used for the terrain...");
+             try{bos=createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+MTLFilename);}
+             catch(IOException ioe)
+             {ioe.printStackTrace();return;}
+             pw=new PrintWriter(bos);
+             //write a MTL file
+             pw.println("newmtl terrain");
+             pw.println("Ns 0");
+             pw.println("Ka 0.000000 0.000000 0.000000");
+             pw.println("Kd 0.8 0.8 0.8");
+             pw.println("Ks 0.8 0.8 0.8");
+             pw.println("d 1");
+             pw.println("illum 2");
+             pw.println("map_Kd "+textureFilename.substring(textureFilename.lastIndexOf("/")+1));
+             System.out.println("Ends writing MTL file used for the terrain.");
+             try{pw.close();
+                 bos.close();
+                } 
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
+             finally
+             {bos=null;
+              pw=null;
+             }   
+            }
+        if(grouped)
+            {
+             //TODO: implement it
+            }
+        else
+            {System.out.println("Starts writing OBJ Wavefront files...");
+             int networkID=0,cellID;
+             ArrayList<String> subObjFilenameList=new ArrayList<String>();
+             for(Network network:networkSet.getNetworksList())
+                 {cellID=0;
+                  for(Full3DCell cell:network.getCellsList())
+                      {//create a new file by using the pattern and the identifiers
+                       final String objfilename=filenamePrefix+"NID"+networkID+"CID"+cellID+".obj";
+                       try{bos=createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
+                       catch(IOException ioe)
+                       {ioe.printStackTrace();}
+                       if(bos!=null)
+                           {pw=new PrintWriter(bos);
+                            //declare the MTL file
+                            if(useTexture)
+                                pw.println("mtllib "+MTLFilename);
+                            //write the object name (o objname)
+                            pw.println("o "+objfilename);
+                            //for each list of walls
+                                //for each wall
+                                    //write vertices (v x y z)
+                            for(float[] wall:cell.getBottomWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            for(float[] wall:cell.getCeilWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            for(float[] wall:cell.getFloorWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            for(float[] wall:cell.getLeftWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            for(float[] wall:cell.getRightWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            for(float[] wall:cell.getTopWalls())
+                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                            final int facePrimitiveCount=(cell.getBottomWalls().size()+
+                                    cell.getCeilWalls().size()+
+                                    cell.getFloorWalls().size()+
+                                    cell.getLeftWalls().size()+
+                                    cell.getRightWalls().size()+
+                                    cell.getTopWalls().size())/4;
+                            if(useTexture)
+                                {//for each list of walls
+                                     //for each wall
+                                         //write texture coordinates (vt x y)
+                                 for(float[] wall:cell.getBottomWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 for(float[] wall:cell.getCeilWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 for(float[] wall:cell.getFloorWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 for(float[] wall:cell.getLeftWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 for(float[] wall:cell.getRightWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 for(float[] wall:cell.getTopWalls())
+                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 pw.println("usemtl terrain");
+                                 //smoothing
+                                 pw.println("s 1");
+                                 //for each list of walls
+                                 //for each wall
+                                 //write faces (f v1/vt1)        
+                                 for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                     {tmp=4*i+1;
+                                      pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                                     }
+                                }
+                            else
+                                {//for each list of walls
+                                     //for each wall
+                                         //write faces (f v1)        
+                                 for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                     {tmp=4*i+1;
+                                      pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                                     }                           
+                                }     
+                            System.out.println("Writes Wavefront object "+objfilename);
+                            try{pw.close();
+                                bos.close();
+                               } 
+                            catch(IOException ioe)
+                            {ioe.printStackTrace();}
+                            finally
+                            {pw=null;
+                             bos=null;                       
+                            }
+                            subObjFilenameList.add(objfilename);
+                           }
+                       cellID++;
+                      }
+                  networkID++;         
+                 }
+             //write the main OBJ file that calls the others
+             System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
+             try{bos=createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
+             catch(IOException ioe)
+             {ioe.printStackTrace();return;}
+             pw=new PrintWriter(bos);
+             for(String subObjFilename:subObjFilenameList)
+                 pw.println("call "+subObjFilename);
+             try{pw.close();
+                 bos.close();
+                } 
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
+             System.out.println("Ends writing OBJ Wavefront files.");
+            }
     }
     
     private final static void encodeObjectInFile(Object o,String filename){
@@ -1807,11 +1960,15 @@ public final class TilesGenerator{
         }       
     }
     
+    
     public static void main(String[] args){
-    	if(args.length!=20)
-    	    {System.out.println("Usage: java TilesGenerator map_filename"+
-    	            " tiles_filename rocketlauncher_filename"+
-    	            " binary_map_filename bot_filename"+
+    	if(args.length!=22)
+    	    {System.out.println("Usage: java TilesGenerator"+
+    	            " map_filename"+
+    	            " tiles_filename"+
+    	            " rocketlauncher_filename"+
+    	            " binary_map_filename"+
+    	            " bot_filename"+
     	            " unbreakable_object_filename"+
     	            " vending_machine_filename"+
     	            " lamp_filename"+
@@ -1826,12 +1983,14 @@ public final class TilesGenerator{
     	            " healthPowerUpListFilename"+
     	            " crosshairFilename"+
     	            " sphericalBeastFilename"+
-    	            " networkFilename");
+    	            " networkFilename"+
+    	            " networkOBJFilename"+
+    	            " wallTextureFilename");
     	     System.exit(0);
     	    }
 	    new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
 	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],args[13],
-	        args[14],args[15],args[16],args[17],args[18],args[19]);
+	        args[14],args[15],args[16],args[17],args[18],args[19],args[20],args[21]);
     }
     
 }
