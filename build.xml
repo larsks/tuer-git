@@ -48,6 +48,7 @@
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
+    	<delete dir="${destdir}/obj" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
 
@@ -111,7 +112,6 @@
 			<include name="**/*.txt" />
 			<include name="**/*.xml"  />
 			<include name="**/*.gif" />
-			<include name="**/makefile.deprecated" />
 			<include name="**/manifest" />
 		</zip>
 	</target>
@@ -136,6 +136,7 @@
     </target>
 	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
 	    <mkdir dir="${destdir}/xml" />
+		<mkdir dir="${destdir}/obj" />
         <java classname="tools.TilesGenerator"
 	              fork="true"
 	              dir="${destdir}"
@@ -161,6 +162,8 @@
 	        	<arg value="pic256/crosshair.data"/>
 	        	<arg value="pic256/sphericalBeast.data"/>
 	        	<arg value="pic256/network.data"/>
+        	    <arg value="obj/level0"/>
+        	    <arg value="pic256/wallTexture.png"/>
 	    </java>
 	</target>
 	
