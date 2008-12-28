@@ -1027,7 +1027,7 @@ public class GameModel{
                       {playerMoving = true;
                        //gameController.startMovingSound(2);
                        /*if(!walkSoundPlayedOnce)
-                           {*/gameController.loopSound(13);
+                           {*///gameController.loopSound(13);
                             /*walkSoundPlayedOnce=true;
                            }
                        else
@@ -1040,7 +1040,7 @@ public class GameModel{
                            //gameController.stopMovingSound(2);
                            /*if(walkSoundPlayedOnce)
                                gameController.pauseSound(13);*/
-                           gameController.stopSound(13);
+                           //gameController.stopSound(13);
                           }               
                  }  // innerloop
              //gameController.stopCarpetSound();      

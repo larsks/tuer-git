@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import main.HealthPowerUpModel;
 import main.HealthPowerUpModelBean;
@@ -813,7 +815,14 @@ public final class TilesGenerator{
 	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));
 	         oos.writeObject(networkSet);
 	         oos.close();
-	         writeObjFilesFromNetworkSet(networkSet,networkOBJFilename,wallTextureFilename,false);
+	         /* The textured level is the view (the representation) 
+	          * whereas the untextured level is the model (used for the collisions).
+	          * The ungrouped structure contains a file per cell and a single file that calls the others
+	          * whereas the grouped structure contains a file per network set.
+	          * The redundancy mode allows to modify independently each cell (used for the view)
+	          * whereas the compact mode does not (used for the model).
+	          */
+	         writeObjFilesFromNetworkSet(networkSet,networkOBJFilename,wallTextureFilename,true,true);//test true false too
 	        }
 	     catch(Throwable t)
 	     {throw new RuntimeException("Unable to write the network",t);}
@@ -1797,7 +1806,7 @@ public final class TilesGenerator{
      *                        if null, textures coordinates are ignored
      * @param grouped 
      */
-    private static final void writeObjFilesFromNetworkSet(NetworkSet networkSet,String filenamepattern,String textureFilename,boolean grouped){
+    private static final void writeObjFilesFromNetworkSet(NetworkSet networkSet,String filenamepattern,String textureFilename,boolean grouped,boolean redundant){
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
@@ -1831,9 +1840,246 @@ public final class TilesGenerator{
               pw=null;
              }   
             }
+        int facePrimitiveCount=0;
         if(grouped)
-            {
-             //TODO: implement it
+            {System.out.println("Starts writing the single OBJ Wavefront file...");
+             System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
+             try{bos=createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
+             catch(IOException ioe)
+             {ioe.printStackTrace();return;}
+             pw=new PrintWriter(bos);
+             //declare the MTL file
+             if(useTexture)
+                 pw.println("mtllib "+MTLFilename);            
+             if(redundant)
+                 {for(Network network:networkSet.getNetworksList())
+                      for(Full3DCell cell:network.getCellsList())
+                          {for(float[] wall:cell.getBottomWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           for(float[] wall:cell.getCeilWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           for(float[] wall:cell.getFloorWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           for(float[] wall:cell.getLeftWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           for(float[] wall:cell.getRightWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           for(float[] wall:cell.getTopWalls())
+                               pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                           //count the total amount of face primitives by 
+                           //summing the face primitives per cell
+                           facePrimitiveCount+=(cell.getBottomWalls().size()+
+                                   cell.getCeilWalls().size()+
+                                   cell.getFloorWalls().size()+
+                                   cell.getLeftWalls().size()+
+                                   cell.getRightWalls().size()+
+                                   cell.getTopWalls().size())/4;
+                          }                              
+                  if(useTexture)
+                      {//write the texture coordinates
+                       for(Network network:networkSet.getNetworksList())
+                           for(Full3DCell cell:network.getCellsList())
+                               {for(float[] wall:cell.getBottomWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                                for(float[] wall:cell.getCeilWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                                for(float[] wall:cell.getFloorWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                                for(float[] wall:cell.getLeftWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                                for(float[] wall:cell.getRightWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                                for(float[] wall:cell.getTopWalls())
+                                    pw.println("vt "+wall[0]+" "+wall[1]);
+                               }
+                       pw.println("usemtl terrain");
+                       //smoothing
+                       pw.println("s 1");
+                       //write faces (we already know the count of face primitives)
+                       for(int i=0,tmp;i<facePrimitiveCount;i++)
+                           {tmp=4*i+1;
+                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                           }
+                      }
+                  else
+                      {//write faces (we already know the count of face primitives)
+                       for(int i=0,tmp;i<facePrimitiveCount;i++)
+                           {tmp=4*i+1;
+                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                           }
+                      }
+                 }
+             else
+                 {HashMap<float[],ArrayList<Integer>> verticesIndirectionTable=new HashMap<float[], ArrayList<Integer>>();
+                  Map.Entry<float[],ArrayList<Integer>> foundVertexEntry;
+                  int compactVertexIndex=0;
+                  int uncompactVertexIndex=0;
+                  ArrayList<List<float[]>> wallsListList=new ArrayList<List<float[]>>();
+                  for(Network network:networkSet.getNetworksList())
+                      for(Full3DCell cell:network.getCellsList())
+                          {wallsListList.add(cell.getBottomWalls());
+                           wallsListList.add(cell.getCeilWalls());
+                           wallsListList.add(cell.getFloorWalls());
+                           wallsListList.add(cell.getLeftWalls());
+                           wallsListList.add(cell.getRightWalls());
+                           wallsListList.add(cell.getTopWalls());
+                           for(List<float[]> wallsList:wallsListList)
+                               for(float[] wall:wallsList)
+                                   {foundVertexEntry=null;
+                                    //look sequentially for the vertex
+                                    for(Map.Entry<float[],ArrayList<Integer>> verticesEntry:verticesIndirectionTable.entrySet())
+                                        if(verticesEntry.getKey()[2]==wall[2]&&
+                                           verticesEntry.getKey()[3]==wall[3]&&
+                                           verticesEntry.getKey()[4]==wall[4])
+                                            {foundVertexEntry=verticesEntry;
+                                             break;
+                                            }                                  
+                                    //if unknown
+                                    if(foundVertexEntry==null)
+                                        {//write it
+                                         pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                         ArrayList<Integer> indicesList=new ArrayList<Integer>();
+                                         //This list contains the vertex index 
+                                         //of the order in the file first and 
+                                         //the indices of the redundant vertices
+                                         indicesList.add(Integer.valueOf(compactVertexIndex));
+                                         indicesList.add(Integer.valueOf(uncompactVertexIndex));
+                                         //add it into the table
+                                         verticesIndirectionTable.put(wall,indicesList);
+                                         //update the index of the vertex so 
+                                         //that it matches with the order of 
+                                         //the vertices as they are written 
+                                         //in the file
+                                         compactVertexIndex++;
+                                        }              
+                                    //else
+                                    else
+                                        {//update the value in the table
+                                         foundVertexEntry.getValue().add(Integer.valueOf(uncompactVertexIndex));
+                                        }  
+                                    uncompactVertexIndex++;
+                                   }           
+                           //count the total amount of face primitives by 
+                           //summing the face primitives per cell
+                           facePrimitiveCount+=(cell.getBottomWalls().size()+
+                                      cell.getCeilWalls().size()+
+                                      cell.getFloorWalls().size()+
+                                      cell.getLeftWalls().size()+
+                                      cell.getRightWalls().size()+
+                                      cell.getTopWalls().size())/4;
+                           wallsListList.clear();
+                          }               
+                  if(useTexture)
+                      {//write the texture coordinates
+                       int compactTextureCoordIndex=0;
+                       int uncompactTextureCoordIndex=0;
+                       Map.Entry<float[],ArrayList<Integer>> foundTextureCoordEntry;
+                       HashMap<float[],ArrayList<Integer>> textureCoordIndirectionTable=new HashMap<float[], ArrayList<Integer>>();
+                       for(Network network:networkSet.getNetworksList())
+                           for(Full3DCell cell:network.getCellsList())
+                               {wallsListList.add(cell.getBottomWalls());
+                                wallsListList.add(cell.getCeilWalls());
+                                wallsListList.add(cell.getFloorWalls());
+                                wallsListList.add(cell.getLeftWalls());
+                                wallsListList.add(cell.getRightWalls());
+                                wallsListList.add(cell.getTopWalls());
+                                for(List<float[]> wallsList:wallsListList)
+                                    for(float[] wall:wallsList)
+                                        {foundTextureCoordEntry=null;
+                                         for(Map.Entry<float[],ArrayList<Integer>> textureCoordEntry:textureCoordIndirectionTable.entrySet())
+                                             if(textureCoordEntry.getKey()[0]==wall[0]&&
+                                                textureCoordEntry.getKey()[1]==wall[1])
+                                                 {foundTextureCoordEntry=textureCoordEntry;
+                                                  break;
+                                                 }                                  
+                                         //if unknown
+                                         if(foundTextureCoordEntry==null)
+                                                {//write it
+                                                 pw.println("vt "+wall[0]+" "+wall[1]);
+                                                 ArrayList<Integer> indicesList=new ArrayList<Integer>();
+                                                 indicesList.add(Integer.valueOf(compactTextureCoordIndex));
+                                                 indicesList.add(Integer.valueOf(uncompactTextureCoordIndex));
+                                                 //add it into the table
+                                                 textureCoordIndirectionTable.put(wall,indicesList);
+                                                 compactTextureCoordIndex++;
+                                                }              
+                                         //else
+                                         else
+                                             {//update the value in the table
+                                              foundTextureCoordEntry.getValue().add(Integer.valueOf(uncompactTextureCoordIndex));
+                                             }  
+                                         uncompactTextureCoordIndex++;                           
+                                        }
+                                wallsListList.clear();
+                               }
+                       //write faces (we already know the count of face primitives)
+                       //but use the indirection tables
+                       for(int i=0,tmp;i<facePrimitiveCount;i++)
+                           {tmp=4*i+1;
+                            pw.print("f");
+                            for(int j=tmp;j<tmp+4;j++)
+                                {uncompactVertexIndex=-1;
+                                 for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                     {//look at not compacted indices
+                                      for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                          if(verticesIndicesList.get(k).intValue()==j)
+                                              uncompactVertexIndex=verticesIndicesList.get(0);
+                                      if(uncompactVertexIndex!=-1)
+                                          break;
+                                     }
+                                 if(uncompactVertexIndex!=-1)
+                                     pw.print(" "+uncompactVertexIndex);
+                                 else
+                                     System.out.println("[warning]: no compact vertex index found for "+j);
+                                 uncompactTextureCoordIndex=-1;
+                                 for(ArrayList<Integer> textureCoordIndicesList:textureCoordIndirectionTable.values())
+                                     {//look at not compacted indices
+                                      for(int k=1;k<textureCoordIndicesList.size()&&uncompactTextureCoordIndex==-1;k++)
+                                          if(textureCoordIndicesList.get(k).intValue()==j)
+                                              uncompactTextureCoordIndex=textureCoordIndicesList.get(0);
+                                      if(uncompactTextureCoordIndex!=-1)
+                                          break;
+                                     }
+                                 if(uncompactTextureCoordIndex!=-1)
+                                     pw.print("/"+uncompactTextureCoordIndex);
+                                 else
+                                     System.out.println("[warning]: no compact texture coord index found for "+j);
+                                }
+                            pw.println();
+                           }
+                      }
+                  else
+                      {//write faces (we already know the count of face primitives)
+                       //but use the indirection table
+                       for(int i=0,tmp;i<facePrimitiveCount;i++)
+                           {tmp=4*i+1;
+                            pw.print("f");
+                            for(int j=tmp;j<tmp+4;j++)
+                                {uncompactVertexIndex=-1;
+                                 for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                     {//look at not compacted indices
+                                      for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                          if(verticesIndicesList.get(k).intValue()==j)
+                                              uncompactVertexIndex=verticesIndicesList.get(0);
+                                      if(uncompactVertexIndex!=-1)
+                                          break;
+                                     }
+                                 if(uncompactVertexIndex!=-1)
+                                     pw.print(" "+uncompactVertexIndex);
+                                 else
+                                     System.out.println("[warning]: no compact index found for "+j);
+                                }
+                            pw.println();
+                           }
+                      }
+                 }
+             try{pw.close();
+                 bos.close();
+                } 
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
+             System.out.println("Ends writing OBJ Wavefront files.");
+             System.out.println("Ends writing the single OBJ Wavefront file.");
             }
         else
             {System.out.println("Starts writing OBJ Wavefront files...");
@@ -1869,7 +2115,7 @@ public final class TilesGenerator{
                                 pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
                             for(float[] wall:cell.getTopWalls())
                                 pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            final int facePrimitiveCount=(cell.getBottomWalls().size()+
+                            facePrimitiveCount=(cell.getBottomWalls().size()+
                                     cell.getCeilWalls().size()+
                                     cell.getFloorWalls().size()+
                                     cell.getLeftWalls().size()+
@@ -1895,8 +2141,8 @@ public final class TilesGenerator{
                                  //smoothing
                                  pw.println("s 1");
                                  //for each list of walls
-                                 //for each wall
-                                 //write faces (f v1/vt1)        
+                                     //for each wall
+                                         //write faces (f v1/vt1)        
                                  for(int i=0,tmp;i<facePrimitiveCount;i++)
                                      {tmp=4*i+1;
                                       pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
