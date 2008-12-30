@@ -34,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -822,7 +823,7 @@ public final class TilesGenerator{
 	          * The redundancy mode allows to modify independently each cell (used for the view)
 	          * whereas the compact mode does not (used for the model).
 	          */
-	         writeObjFilesFromNetworkSet(networkSet,networkOBJFilename,wallTextureFilename,true,true);//test true false too
+	         writeObjFilesFromNetworkSet(networkSet,networkOBJFilename,wallTextureFilename,true,false);//test true false too
 	        }
 	     catch(Throwable t)
 	     {throw new RuntimeException("Unable to write the network",t);}
@@ -1910,12 +1911,25 @@ public final class TilesGenerator{
                       }
                  }
              else
-                 {HashMap<float[],ArrayList<Integer>> verticesIndirectionTable=new HashMap<float[], ArrayList<Integer>>();
+                 {LinkedHashMap<float[],ArrayList<Integer>> verticesIndirectionTable=new LinkedHashMap<float[], ArrayList<Integer>>();
                   Map.Entry<float[],ArrayList<Integer>> foundVertexEntry;
                   int compactVertexIndex=0;
                   int uncompactVertexIndex=0;
                   ArrayList<List<float[]>> wallsListList=new ArrayList<List<float[]>>();
                   for(Network network:networkSet.getNetworksList())
+                      //TODO: use the portals to find the redundant vertices
+                      //use the BFS
+                      //for each cell
+                          //for each vertex of wall
+                              //for each vertex of portal
+                                  //if this vertex of wall is a vertex of portal
+                                      //if the neighbor cell is not marked (we never visit it)
+                                          //put it into the indirection table
+                                      //else
+                                          //look for the key in the indirection table from the end to the beginning
+                                          //update the value in the indirection table
+                                  //else
+                                      //put it into the indirection table
                       for(Full3DCell cell:network.getCellsList())
                           {wallsListList.add(cell.getBottomWalls());
                            wallsListList.add(cell.getCeilWalls());
@@ -1925,7 +1939,7 @@ public final class TilesGenerator{
                            wallsListList.add(cell.getTopWalls());
                            for(List<float[]> wallsList:wallsListList)
                                for(float[] wall:wallsList)
-                                   {foundVertexEntry=null;
+                                   {foundVertexEntry=null;                     
                                     //look sequentially for the vertex
                                     for(Map.Entry<float[],ArrayList<Integer>> verticesEntry:verticesIndirectionTable.entrySet())
                                         if(verticesEntry.getKey()[2]==wall[2]&&
@@ -1945,7 +1959,7 @@ public final class TilesGenerator{
                                          indicesList.add(Integer.valueOf(compactVertexIndex));
                                          indicesList.add(Integer.valueOf(uncompactVertexIndex));
                                          //add it into the table
-                                         verticesIndirectionTable.put(wall,indicesList);
+                                         verticesIndirectionTable.put(wall,indicesList);//TODO: put it into the reverse table
                                          //update the index of the vertex so 
                                          //that it matches with the order of 
                                          //the vertices as they are written 
@@ -1974,7 +1988,7 @@ public final class TilesGenerator{
                        int compactTextureCoordIndex=0;
                        int uncompactTextureCoordIndex=0;
                        Map.Entry<float[],ArrayList<Integer>> foundTextureCoordEntry;
-                       HashMap<float[],ArrayList<Integer>> textureCoordIndirectionTable=new HashMap<float[], ArrayList<Integer>>();
+                       LinkedHashMap<float[],ArrayList<Integer>> textureCoordIndirectionTable=new LinkedHashMap<float[], ArrayList<Integer>>();
                        for(Network network:networkSet.getNetworksList())
                            for(Full3DCell cell:network.getCellsList())
                                {wallsListList.add(cell.getBottomWalls());
@@ -2018,7 +2032,7 @@ public final class TilesGenerator{
                            {tmp=4*i+1;
                             pw.print("f");
                             for(int j=tmp;j<tmp+4;j++)
-                                {uncompactVertexIndex=-1;
+                                {uncompactVertexIndex=-1;//TODO: use the reverse table
                                  for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
                                      {//look at not compacted indices
                                       for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
