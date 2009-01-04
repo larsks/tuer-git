@@ -702,7 +702,7 @@ public final class CellsGenerator{
                   fullCell.getLeftWalls().add(new float[]{wallTexCoord[2],wallTexCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
                   fullCell.getLeftWalls().add(new float[]{wallTexCoord[2],wallTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});                                                                     
                  }
-             for(PointPair p:/*getAtomicWallsList(*/cell.getLeftPortals()/*)*/)
+             for(PointPair p:cell.getLeftPortals())
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getLeftPortals().add(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
@@ -718,7 +718,7 @@ public final class CellsGenerator{
                   fullCell.getRightWalls().add(new float[]{wallTexCoord[2],wallTexCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
                   fullCell.getRightWalls().add(new float[]{wallTexCoord[2],wallTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});                 
                  }
-             for(PointPair p:/*getAtomicWallsList(*/cell.getRightPortals()/*)*/)
+             for(PointPair p:cell.getRightPortals())
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells   
                   fullCell.getRightPortals().add(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
@@ -734,7 +734,7 @@ public final class CellsGenerator{
                   fullCell.getTopWalls().add(new float[]{wallTexCoord[2],wallTexCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
                   fullCell.getTopWalls().add(new float[]{wallTexCoord[2],wallTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});                 
                  }
-             for(PointPair p:/*getAtomicWallsList(*/cell.getTopPortals()/*)*/)
+             for(PointPair p:cell.getTopPortals())
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getTopPortals().add(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
@@ -750,7 +750,7 @@ public final class CellsGenerator{
                   fullCell.getBottomWalls().add(new float[]{wallTexCoord[2],wallTexCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
                   fullCell.getBottomWalls().add(new float[]{wallTexCoord[2],wallTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
                  }
-             for(PointPair p:/*getAtomicWallsList(*/cell.getBottomPortals()/*)*/)
+             for(PointPair p:cell.getBottomPortals())
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
                   fullCell.getBottomPortals().add(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
