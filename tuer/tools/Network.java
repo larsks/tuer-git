@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class Network implements Serializable{
@@ -282,34 +283,150 @@ public final class Network implements Serializable{
      * BFS has been chosen because it is faster when we know that the player has gone 
      * to a close neighbor of the previous occupied cell
      */
-    final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
-        Full3DCell c;
-        //First In First Out abstract data type used to store the sons of the current cell
-        List<Full3DCell> fifo=new ArrayList<Full3DCell>();
-        //Each cell that has been seen has to be marked to avoid an infinite loop
-        List<Full3DCell> markedCellsList=new ArrayList<Full3DCell>();
-        //We use the first traveled cell suggested by the user
-        markedCellsList.add(firstTraveledCell);
-        fifo.add(firstTraveledCell);
-        while(!fifo.isEmpty())
-            {//Get the first added element as it is a FIFO (pop operation)
-             c=fifo.remove(0);
-             //This is the main treatment; if the point is in the cell, the travel ends            
-             if(c.contains(x,y,z))
-                 return(c);
-             else
-                 {for(Full3DCell son:c.getNeighboursCellsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
-                 }
-            }
-        //It means that you are completely outside the network
-        return(null);
-    } 
+    static final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
+        return(new LocalizerVisitor(firstTraveledCell,x,y,z).getCurrentlyVisitedCell());
+    }
+    
+    
+    static abstract class Visitor{
+        
+        /**
+         * Cell that is currently visited
+         */
+        private Full3DCell currentlyVisitedCell;
+        /**
+         * abstract data type used to store the sons of the current cell
+         */
+        private List<Full3DCell> cellsList;
+        /**
+         * Each cell that has been seen has to be marked to avoid an infinite loop
+         * (by visiting the same cell more than once)
+         */
+        private List<Full3DCell> markedCellsList;
+        
+        
+        /**
+         * Visits the whole network by beginning with the root cell
+         * @param network: visited network
+         */
+        Visitor(Network network){
+            this(network.rootCell);
+        }
+        
+        /**
+         * Visits the whole network by beginning with the provided cell
+         * @param firstVisitedCell: cell that is visited at first
+         */
+        Visitor(Full3DCell firstVisitedCell){
+            this.currentlyVisitedCell=null;
+            this.cellsList=new ArrayList<Full3DCell>();
+            this.markedCellsList=new ArrayList<Full3DCell>();
+            markedCellsList.add(firstVisitedCell);
+            cellsList.add(firstVisitedCell);
+            while(!cellsList.isEmpty())
+                {//Get the next element (pop operation)
+                 currentlyVisitedCell=cellsList.remove(getNextCellIndex());
+                 //This is the main treatment
+                 if(performTaskOnCurrentlyVisitedCell())
+                     for(Full3DCell son:currentlyVisitedCell.getNeighboursCellsList())
+                         if(!markedCellsList.contains(son))
+                             {//Mark the cell to avoid traveling it more than once
+                              markedCellsList.add(son);
+                              //Add a new cell to travel (push operation)
+                              cellsList.add(son);
+                             }                   
+                }
+        }
+        
+        protected abstract int getNextCellIndex();
+        
+        /**
+         * Allows to perform a task on the currently visited cell
+         * @return true if the visit has to go on, otherwise the visit is stopped
+         */
+        protected abstract boolean performTaskOnCurrentlyVisitedCell();
+
+        protected final Full3DCell getCurrentlyVisitedCell(){
+            return(currentlyVisitedCell);
+        }
+
+        protected final List<Full3DCell> getCellsList(){
+            return(Collections.unmodifiableList(cellsList));
+        }
+
+        protected final List<Full3DCell> getMarkedCellsList(){
+            return(Collections.unmodifiableList(markedCellsList));
+        }      
+    }
+    
+    static abstract class BreadthFirstSearchVisitor extends Visitor{
+        
+        
+        BreadthFirstSearchVisitor(Network network){
+            super(network.rootCell);
+        }
+        
+
+        BreadthFirstSearchVisitor(Full3DCell firstVisitedCell){
+            super(firstVisitedCell);
+        }
+        
+        /**
+         * The internal list is used as a FIFO
+         */
+        @Override
+        protected final int getNextCellIndex(){
+            return(0);
+        }
+    }
+    
+    static abstract class DepthFirstSearchVisitor extends Visitor{
+        
+        
+        DepthFirstSearchVisitor(Network network){
+            super(network.rootCell);
+        }
+        
+
+        DepthFirstSearchVisitor(Full3DCell firstVisitedCell){
+            super(firstVisitedCell);
+        }
+        
+        /**
+         * The internal list is used as a LIFO
+         */
+        @Override
+        protected final int getNextCellIndex(){
+            return(getCellsList().size()-1);
+        }
+    }
+    
+    private static final class LocalizerVisitor extends BreadthFirstSearchVisitor{
+
+        
+        private float x,y,z;
+        
+        
+        LocalizerVisitor(Network network,float x,float y,float z){
+            this(network.rootCell,x,y,z);
+        }
+        
+
+        LocalizerVisitor(Full3DCell firstVisitedCell,float x,float y,float z){
+            super(firstVisitedCell);
+            this.x=x;
+            this.y=y;
+            this.z=z;
+        }
+        
+        
+        @Override
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
+            return(!getCurrentlyVisitedCell().contains(x,y,z));
+        }
+        
+    }
+    
     
     public final Full3DCell getRootCell(){
         return(rootCell);
