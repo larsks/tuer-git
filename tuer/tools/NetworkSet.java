@@ -259,8 +259,13 @@ public final class NetworkSet implements Serializable{
                  {final boolean useNaiveImplementation=true;
                   if(!useNaiveImplementation)
                       {HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable=new HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>>();
+                       int uniqueVerticesIndicesCount=0;                     
+                       int duplicateVerticesIndicesCount=0;
                        for(Network network:networksList)
-                           new NetworkStructuralRedundancyAnalyzer(network,cellularMapsTable);
+                           {NetworkStructuralRedundancyAnalyzer nsra = new NetworkStructuralRedundancyAnalyzer(network,cellularMapsTable,uniqueVerticesIndicesCount,duplicateVerticesIndicesCount);
+                            uniqueVerticesIndicesCount=nsra.uniqueVerticesIndicesCount;
+                            duplicateVerticesIndicesCount=nsra.duplicateVerticesIndicesCount;
+                           }
                        //the network set has been analyzed, we can write the vertex data in the file
                        //use the BFS to write vertex data in the same order than during the analysis
                        for(Network network:networksList)
@@ -613,19 +618,25 @@ public final class NetworkSet implements Serializable{
         
         private HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable;
         
+        private int uniqueVerticesIndicesCount;
         
-        private NetworkStructuralRedundancyAnalyzer(Network network,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable){
-            this(network.getRootCell(),cellularMapsTable);
+        private int duplicateVerticesIndicesCount;
+        
+        
+        private NetworkStructuralRedundancyAnalyzer(Network network,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,int uniqueVerticesIndicesCount,int duplicateVerticesIndicesCount){
+            this(network.getRootCell(),cellularMapsTable,uniqueVerticesIndicesCount,duplicateVerticesIndicesCount);
         }
         
-        private NetworkStructuralRedundancyAnalyzer(Full3DCell firstVisitedCell,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable){
+        private NetworkStructuralRedundancyAnalyzer(Full3DCell firstVisitedCell,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,int uniqueVerticesIndicesCount,int duplicateVerticesIndicesCount){
             super(firstVisitedCell);
             this.cellularMapsTable=cellularMapsTable;
+            this.uniqueVerticesIndicesCount=uniqueVerticesIndicesCount;
+            this.duplicateVerticesIndicesCount=duplicateVerticesIndicesCount;
         }       
         
 
         @Override
-        protected boolean performTaskOnCurrentlyVisitedCell(){
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
             Full3DCell cell=getCurrentlyVisitedCell();
             ArrayList<List<float[]>> wallsVerticesListList=new ArrayList<List<float[]>>();
             wallsVerticesListList.add(cell.getBottomWalls());
@@ -638,9 +649,7 @@ public final class NetworkSet implements Serializable{
             LinkedHashMap<Integer,Integer> duplicateToUniqueIndexationTable=new LinkedHashMap<Integer,Integer>();
             LinkedHashMap<VertexData,Integer> vertexDataToUniqueIndexationTable=new LinkedHashMap<VertexData,Integer>();         
             //local variables used in the loop
-            int portalVertexIndex,currentPortalVertexIndex,uniqueVertexIndex;
-            int uniqueVerticesIndicesCount=0;
-            int duplicateVerticesIndicesCount=0;
+            int portalVertexIndex,currentPortalVertexIndex,uniqueVertexIndex;            
             Integer knownUniqueVertexIndex;
             Full3DCell neighborCell;
             Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>> neighborCellEntry;
@@ -712,8 +721,7 @@ public final class NetworkSet implements Serializable{
             cellularMapsTable.put(cell,new SimpleEntry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>(duplicateToUniqueIndexationTable,vertexDataToUniqueIndexationTable));
             //go on visiting the network
             return(true);
-        }
-        
+        }      
     }
     
     private static final class NetworkTextureCoordRedundancyAnalyzer extends Network.BreadthFirstSearchVisitor{
@@ -758,7 +766,7 @@ public final class NetworkSet implements Serializable{
         
 
         @Override
-        protected boolean performTaskOnCurrentlyVisitedCell(){
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
             //As we use a LinkedHashMap, we can benefit of the insertion order
             for(VertexData vertexData:cellularMapsTable.get(getCurrentlyVisitedCell()).getValue().keySet())
                 pw.println("v "+vertexData.vertexCoord[2]+" "+vertexData.vertexCoord[3]+" "+vertexData.vertexCoord[4]);
@@ -790,7 +798,7 @@ public final class NetworkSet implements Serializable{
 
         
         @Override
-        protected boolean performTaskOnCurrentlyVisitedCell(){
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
             //TODO
             //go on visiting the network
             return(true);
@@ -817,7 +825,7 @@ public final class NetworkSet implements Serializable{
         
 
         @Override
-        protected boolean performTaskOnCurrentlyVisitedCell(){
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
             ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();           
             //As we use a LinkedHashMap, we can benefit of the insertion order
             for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
