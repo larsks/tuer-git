@@ -277,7 +277,7 @@ public final class NetworkSet implements Serializable{
                             for(Network network:networksList)
                                 new NetworkTextureCoordRedundancyAnalyzer(network,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable);
                             for(Network network:networksList)
-                                new NetworkTexturedFaceDataWriter(network,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable,pw);
+                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable,pw);
                            }
                        else
                            for(Network network:networksList)
@@ -741,7 +741,36 @@ public final class NetworkSet implements Serializable{
         
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
-            //TODO: implement it
+            Full3DCell cell=getCurrentlyVisitedCell();
+            ArrayList<List<float[]>> wallsVerticesListList=new ArrayList<List<float[]>>();
+            wallsVerticesListList.add(cell.getBottomWalls());
+            wallsVerticesListList.add(cell.getCeilWalls());
+            wallsVerticesListList.add(cell.getFloorWalls());
+            wallsVerticesListList.add(cell.getLeftWalls());
+            wallsVerticesListList.add(cell.getRightWalls());
+            wallsVerticesListList.add(cell.getTopWalls());
+            Integer knownTextureCoordIndex;
+            TextureCoordData currentTextureCoord;
+            int uniqueIndex;
+            for(List<float[]> wallsVerticesList:wallsVerticesListList)
+                for(float[] wallVertex:wallsVerticesList)
+                    {currentTextureCoord=new TextureCoordData(wallVertex);
+                     //if the texture coordinates are already in the second table
+                     if((knownTextureCoordIndex=textureCoordDataToUniqueIndexationTable.get(currentTextureCoord))!=null)
+                         {//get the unique index
+                          uniqueIndex=knownTextureCoordIndex.intValue();
+                         }
+                     //else
+                     else
+                         {//get the next unique index
+                          uniqueIndex=textureCoordDataToUniqueIndexationTable.size();
+                          //put it into the second table
+                          textureCoordDataToUniqueIndexationTable.put(currentTextureCoord,Integer.valueOf(uniqueIndex));
+                         }                  
+                     //put a couple with the duplicate index and the unique index into the first table
+                     duplicateToUniqueIndexationTable.put(Integer.valueOf(duplicateToUniqueIndexationTable.size()),Integer.valueOf(uniqueIndex));
+                    }    
+            //go on visiting
             return(true);
         }       
     }
@@ -781,25 +810,51 @@ public final class NetworkSet implements Serializable{
 
         private LinkedHashMap<Integer,Integer> duplicateToUniqueIndexationTable;
 
-        private LinkedHashMap<TextureCoordData,Integer> textureCoordDataToUniqueIndexationTable;
+        //private LinkedHashMap<TextureCoordData,Integer> textureCoordDataToUniqueIndexationTable;
+        
+        private HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable;
 
         private PrintWriter pw;
         
         
         public NetworkTexturedFaceDataWriter(Network network,
+                HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,
                 LinkedHashMap<Integer, Integer> duplicateToUniqueIndexationTable,
                 LinkedHashMap<TextureCoordData, Integer> textureCoordDataToUniqueIndexationTable,
                 PrintWriter pw){
             super(network);
+            this.cellularMapsTable=cellularMapsTable;
             this.duplicateToUniqueIndexationTable=duplicateToUniqueIndexationTable;
-            this.textureCoordDataToUniqueIndexationTable=textureCoordDataToUniqueIndexationTable;
+            //this.textureCoordDataToUniqueIndexationTable=textureCoordDataToUniqueIndexationTable;
             this.pw=pw;
         }
 
         
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
-            //TODO
+            ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();
+            ArrayList<Integer> uniqueTextureCoordIndices=new ArrayList<Integer>();
+            //As we use a LinkedHashMap, we can benefit of the insertion order
+            Integer uniqueVertexIndex,duplicateVertexIndex;
+            for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
+                {uniqueVertexIndex=entry.getValue();
+                 duplicateVertexIndex=entry.getKey();
+                 //add the current index
+                 uniqueVertexIndices.add(uniqueVertexIndex);
+                 //get the unique texture coordinate index and add it
+                 uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
+                 //get the unique index by using the first table and the duplicate index
+                 //if the list is full
+                 if(uniqueVertexIndices.size()==4)
+                     {//write the face primitive
+                      pw.print("f "+uniqueVertexIndices.get(0).intValue()+"/"+uniqueTextureCoordIndices.get(0).intValue()+" "+
+                                    uniqueVertexIndices.get(1).intValue()+"/"+uniqueTextureCoordIndices.get(1).intValue()+" "+
+                                    uniqueVertexIndices.get(2).intValue()+"/"+uniqueTextureCoordIndices.get(2).intValue()+" "+
+                                    uniqueVertexIndices.get(3).intValue()+"/"+uniqueTextureCoordIndices.get(3).intValue());
+                      //empty the list
+                      uniqueVertexIndices.clear();
+                     }
+                }
             //go on visiting the network
             return(true);
         }
