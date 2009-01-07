@@ -256,32 +256,43 @@ public final class NetworkSet implements Serializable{
                       }
                  }
              else
-                 {final boolean useNaiveImplementation=true;
+                 {final boolean useNaiveImplementation=false;
                   if(!useNaiveImplementation)
                       {HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable=new HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>>();
                        int uniqueVerticesIndicesCount=0;                     
                        int duplicateVerticesIndicesCount=0;
+                       System.out.println("use NetworkStructuralRedundancyAnalyzer...");
                        for(Network network:networksList)
                            {NetworkStructuralRedundancyAnalyzer nsra = new NetworkStructuralRedundancyAnalyzer(network,cellularMapsTable,uniqueVerticesIndicesCount,duplicateVerticesIndicesCount);
+                            nsra.visit();
                             uniqueVerticesIndicesCount=nsra.uniqueVerticesIndicesCount;
                             duplicateVerticesIndicesCount=nsra.duplicateVerticesIndicesCount;
+                            System.out.println(cellularMapsTable.size()+" entries");
                            }
+                       System.out.println("NetworkStructuralRedundancyAnalyzer used");
                        //the network set has been analyzed, we can write the vertex data in the file
                        //use the BFS to write vertex data in the same order than during the analysis
+                       System.out.println("use NetworkVertexDataWriter...");
                        for(Network network:networksList)
-                           new NetworkVertexDataWriter(network,cellularMapsTable,pw);
+                           new NetworkVertexDataWriter(network,cellularMapsTable,pw).visit();
+                       System.out.println("NetworkVertexDataWriter used");
                        //write the face primitives
                        if(useTexture)
                            {LinkedHashMap<Integer,Integer> duplicateToUniqueIndexationTable=new LinkedHashMap<Integer, Integer>();
                             LinkedHashMap<TextureCoordData,Integer> textureCoordDataToUniqueIndexationTable=new LinkedHashMap<TextureCoordData, Integer>();
+                            System.out.println("use NetworkTextureCoordRedundancyAnalyzer...");
                             for(Network network:networksList)
-                                new NetworkTextureCoordRedundancyAnalyzer(network,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable);
+                                new NetworkTextureCoordRedundancyAnalyzer(network,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable).visit();
+                            System.out.println(duplicateToUniqueIndexationTable.size()+" entries");
+                            System.out.println("NetworkTextureCoordRedundancyAnalyzer used");
+                            System.out.println("use NetworkTexturedFaceDataWriter...");
                             for(Network network:networksList)
-                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable,pw);
+                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable,pw).visit();
+                            System.out.println("NetworkTexturedFaceDataWriter used");
                            }
                        else
                            for(Network network:networksList)
-                               new NetworkUntexturedFaceDataWriter(network,cellularMapsTable,pw);                   
+                               new NetworkUntexturedFaceDataWriter(network,cellularMapsTable,pw).visit();                   
                       }
                   else
                       {LinkedHashMap<float[],ArrayList<Integer>> verticesIndirectionTable=new LinkedHashMap<float[], ArrayList<Integer>>();
@@ -570,7 +581,7 @@ public final class NetworkSet implements Serializable{
         private float[] vertexCoord;
         
         private VertexData(float[] vertexCoord){
-            this.vertexCoord=vertexCoord;
+            this.vertexCoord=new float[]{vertexCoord[2],vertexCoord[3],vertexCoord[4]};
         }
         
         public final boolean equals(Object o){
@@ -579,7 +590,7 @@ public final class NetworkSet implements Serializable{
                 result=false;
             else
                 {VertexData v=(VertexData)o;
-                 result=(vertexCoord==v.vertexCoord)||(vertexCoord[2]==v.vertexCoord[2]&&vertexCoord[3]==v.vertexCoord[3]&&vertexCoord[4]==v.vertexCoord[4]);
+                 result=vertexCoord[0]==v.vertexCoord[0]&&vertexCoord[1]==v.vertexCoord[1]&&vertexCoord[2]==v.vertexCoord[2];
                 }
             return(result);
         }
@@ -594,7 +605,7 @@ public final class NetworkSet implements Serializable{
         private float[] vertexCoord;
         
         private TextureCoordData(float[] vertexCoord){
-            this.vertexCoord=vertexCoord;
+            this.vertexCoord=new float[]{vertexCoord[0],vertexCoord[1]};
         }
         
         public final boolean equals(Object o){
@@ -603,7 +614,7 @@ public final class NetworkSet implements Serializable{
                 result=false;
             else
                 {VertexData v=(VertexData)o;
-                 result=(vertexCoord==v.vertexCoord)||(vertexCoord[0]==v.vertexCoord[0]&&vertexCoord[1]==v.vertexCoord[1]);
+                 result=vertexCoord[0]==v.vertexCoord[0]&&vertexCoord[1]==v.vertexCoord[1];
                 }
             return(result);
         }
@@ -798,7 +809,7 @@ public final class NetworkSet implements Serializable{
         protected final boolean performTaskOnCurrentlyVisitedCell(){
             //As we use a LinkedHashMap, we can benefit of the insertion order
             for(VertexData vertexData:cellularMapsTable.get(getCurrentlyVisitedCell()).getValue().keySet())
-                pw.println("v "+vertexData.vertexCoord[2]+" "+vertexData.vertexCoord[3]+" "+vertexData.vertexCoord[4]);
+                pw.println("v "+vertexData.vertexCoord[0]+" "+vertexData.vertexCoord[1]+" "+vertexData.vertexCoord[2]);
             //go on visiting the network
             return(true);
         }

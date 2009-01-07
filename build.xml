@@ -142,6 +142,8 @@
 	              dir="${destdir}"
 	              failonerror="true"
 	              >
+        	    <jvmarg value="-Xms1024m"/>
+        	    <jvmarg value="-Xmx1536m"/>
 	        	<arg value="pic256/worldmap.gif"/>
 	        	<arg value="pic256/worldmap.data"/>
 	        	<arg value="pic256/rocketLauncher.data"/>

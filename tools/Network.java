@@ -284,12 +284,18 @@ public final class Network implements Serializable{
      * to a close neighbor of the previous occupied cell
      */
     static final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
-        return(new LocalizerVisitor(firstTraveledCell,x,y,z).getCurrentlyVisitedCell());
+        LocalizerVisitor localizer=new LocalizerVisitor(firstTraveledCell,x,y,z);
+        localizer.visit();
+        return(localizer.getCurrentlyVisitedCell());
     }
     
     
     static abstract class Visitor{
         
+        /**
+         * Cell that is visited at first
+         */
+        private Full3DCell firstVisitedCell;
         /**
          * Cell that is currently visited
          */
@@ -306,7 +312,7 @@ public final class Network implements Serializable{
         
         
         /**
-         * Visits the whole network by beginning with the root cell
+         * Prepare the visit of the whole network by beginning with the root cell
          * @param network: visited network
          */
         Visitor(Network network){
@@ -314,13 +320,20 @@ public final class Network implements Serializable{
         }
         
         /**
-         * Visits the whole network by beginning with the provided cell
+         * Prepare the visit of the whole network by beginning with the provided cell
          * @param firstVisitedCell: cell that is visited at first
          */
         Visitor(Full3DCell firstVisitedCell){
+            this.firstVisitedCell=firstVisitedCell;
             this.currentlyVisitedCell=null;
             this.cellsList=new ArrayList<Full3DCell>();
-            this.markedCellsList=new ArrayList<Full3DCell>();
+            this.markedCellsList=new ArrayList<Full3DCell>();           
+        }
+        
+        /**
+         * Starts the visit (call this method only ONCE)
+         */
+        final void visit(){
             markedCellsList.add(firstVisitedCell);
             cellsList.add(firstVisitedCell);
             while(!cellsList.isEmpty())
