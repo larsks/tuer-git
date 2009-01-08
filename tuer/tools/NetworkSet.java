@@ -267,8 +267,8 @@ public final class NetworkSet implements Serializable{
                             nsra.visit();
                             uniqueVerticesIndicesCount=nsra.uniqueVerticesIndicesCount;
                             duplicateVerticesIndicesCount=nsra.duplicateVerticesIndicesCount;
-                            System.out.println(cellularMapsTable.size()+" entries");
-                           }
+                            System.out.println(cellularMapsTable.size()+" cells "+uniqueVerticesIndicesCount+" unique vertices indices");
+                           }             
                        System.out.println("NetworkStructuralRedundancyAnalyzer used");
                        //the network set has been analyzed, we can write the vertex data in the file
                        //use the BFS to write vertex data in the same order than during the analysis
@@ -285,9 +285,17 @@ public final class NetworkSet implements Serializable{
                                 new NetworkTextureCoordRedundancyAnalyzer(network,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable).visit();
                             System.out.println(duplicateToUniqueIndexationTable.size()+" entries");
                             System.out.println("NetworkTextureCoordRedundancyAnalyzer used");
+                            //write texture coordinates
+                            System.out.println("Writes texture coordinates...");
+                            for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
+                                pw.println("vt "+textureCoordData.vertexCoord[0]+" "+textureCoordData.vertexCoord[1]);
+                            System.out.println("Texture coordinates written"); 
+                            pw.println("usemtl terrain");
+                            //smoothing
+                            pw.println("s 1");
                             System.out.println("use NetworkTexturedFaceDataWriter...");
                             for(Network network:networksList)
-                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,textureCoordDataToUniqueIndexationTable,pw).visit();
+                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,pw).visit();
                             System.out.println("NetworkTexturedFaceDataWriter used");
                            }
                        else
@@ -696,18 +704,14 @@ public final class NetworkSet implements Serializable{
                                //store the unique index
                                uniqueVertexIndex=knownUniqueVertexIndex.intValue();
                               }
-                          //else (in this case, the neighbor cell has not yet been visited)
+                          //else the neighbor cell has not yet been visited 
                           else
-                              {//compute and store this new unique index
-                               uniqueVertexIndex=uniqueVerticesIndicesCount;
-                               //increment it in order to ensure the attributed value is really unique 
-                               uniqueVerticesIndicesCount++;
-                               //put it into the second table
-                               vertexDataToUniqueIndexationTable.put(new VertexData(wallVertex),Integer.valueOf(uniqueVertexIndex));
-                              }                            
+                              uniqueVertexIndex=-1;
                          }
-                     //else
+                     //else the vertex is not is a portal
                      else
+                         uniqueVertexIndex=-1;                         
+                     if(uniqueVertexIndex==-1)
                          {//if the second table already contains this vertex
                           if((knownUniqueVertexIndex=vertexDataToUniqueIndexationTable.get(new VertexData(wallVertex)))!=null)
                               {//store the unique index
@@ -822,23 +826,19 @@ public final class NetworkSet implements Serializable{
 
 
         private LinkedHashMap<Integer,Integer> duplicateToUniqueIndexationTable;
-
-        //private LinkedHashMap<TextureCoordData,Integer> textureCoordDataToUniqueIndexationTable;
         
         private HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable;
 
         private PrintWriter pw;
         
         
-        public NetworkTexturedFaceDataWriter(Network network,
+        private NetworkTexturedFaceDataWriter(Network network,
                 HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,
                 LinkedHashMap<Integer, Integer> duplicateToUniqueIndexationTable,
-                LinkedHashMap<TextureCoordData, Integer> textureCoordDataToUniqueIndexationTable,
                 PrintWriter pw){
             super(network);
             this.cellularMapsTable=cellularMapsTable;
             this.duplicateToUniqueIndexationTable=duplicateToUniqueIndexationTable;
-            //this.textureCoordDataToUniqueIndexationTable=textureCoordDataToUniqueIndexationTable;
             this.pw=pw;
         }
 
@@ -860,10 +860,11 @@ public final class NetworkSet implements Serializable{
                  //if the list is full
                  if(uniqueVertexIndices.size()==4)
                      {//write the face primitive
-                      pw.print("f "+uniqueVertexIndices.get(0).intValue()+"/"+uniqueTextureCoordIndices.get(0).intValue()+" "+
-                                    uniqueVertexIndices.get(1).intValue()+"/"+uniqueTextureCoordIndices.get(1).intValue()+" "+
-                                    uniqueVertexIndices.get(2).intValue()+"/"+uniqueTextureCoordIndices.get(2).intValue()+" "+
-                                    uniqueVertexIndices.get(3).intValue()+"/"+uniqueTextureCoordIndices.get(3).intValue());
+                      //The first index is not 0 but 1 in WaveFront OBJ format
+                      pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1));
                       //empty the list
                       uniqueVertexIndices.clear();
                      }
@@ -902,10 +903,11 @@ public final class NetworkSet implements Serializable{
                  //if the list is full
                  if(uniqueVertexIndices.size()==4)
                      {//write the face primitive
-                      pw.print("f "+uniqueVertexIndices.get(0).intValue()+" "+
-                                    uniqueVertexIndices.get(1).intValue()+" "+
-                                    uniqueVertexIndices.get(2).intValue()+" "+
-                                    uniqueVertexIndices.get(3).intValue());
+                      //The first index is not 0 but 1 in WaveFront OBJ format
+                      pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(1).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(2).intValue()+1)+" "+
+                                    (uniqueVertexIndices.get(3).intValue()+1));
                       //empty the list
                       uniqueVertexIndices.clear();
                      }

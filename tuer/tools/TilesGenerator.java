@@ -824,7 +824,7 @@ public final class TilesGenerator{
 	          * The redundancy mode allows to modify independently each cell (used for the view)
 	          * whereas the compact mode does not (used for the model).
 	          */
-	         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false);//FIXME: redundant at false not tested
+	         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false);
 	        }
 	     catch(Throwable t)
 	     {throw new RuntimeException("Unable to write the network",t);}
