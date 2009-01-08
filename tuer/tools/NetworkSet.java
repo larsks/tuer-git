@@ -610,17 +610,17 @@ public final class NetworkSet implements Serializable{
         
         public final boolean equals(Object o){
             boolean result;
-            if(o==null||!(o instanceof VertexData))
+            if(o==null||!(o instanceof TextureCoordData))
                 result=false;
             else
-                {VertexData v=(VertexData)o;
+                {TextureCoordData v=(TextureCoordData)o;
                  result=vertexCoord[0]==v.vertexCoord[0]&&vertexCoord[1]==v.vertexCoord[1];
                 }
             return(result);
         }
         
         public final int hashCode(){
-            return((int)vertexCoord[0]);
+            return(((int)vertexCoord[0])^((int)vertexCoord[1]));
         }
     }
     
@@ -780,6 +780,8 @@ public final class NetworkSet implements Serializable{
                          }                  
                      //put a couple with the duplicate index and the unique index into the first table
                      duplicateToUniqueIndexationTable.put(Integer.valueOf(duplicateToUniqueIndexationTable.size()),Integer.valueOf(uniqueIndex));
+                     //System.out.println(textureCoordDataToUniqueIndexationTable.size()+" unique indices");
+                     //System.out.println(duplicateToUniqueIndexationTable.size()+" duplicate indices "+currentTextureCoord.vertexCoord[0]+" "+currentTextureCoord.vertexCoord[1]);
                     }    
             //go on visiting
             return(true);
