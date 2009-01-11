@@ -146,13 +146,15 @@ public final class NetworkSet implements Serializable{
     
     /**
      * 
-     * @param filenamepattern
-     * @param textureFilename the path of the texture used for the terrain; 
+     * @param filenamepattern: 
+     * @param textureFilename: the path of the texture used for the terrain; 
      *                        if null, textures coordinates are ignored
-     * @param grouped
-     * @param redundant
+     * @param grouped: if true, then it creates a single OBJ file for the 
+     *        whole network set, otherwise it creates a file per cell
+     * @param redundant: if true, then the redundant vertices are kept, otherwise they are removed
+     * @param useTriangles: if true, then the quads are cut into triangles, otherwise the quads are kept
      */
-    final void writeObjFiles(String filenamepattern,String textureFilename,boolean grouped,boolean redundant){
+    final void writeObjFiles(String filenamepattern,String textureFilename,boolean grouped,boolean redundant,boolean useTriangles,boolean useJOGLTextureCoordinatesVerticalOrder){
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
@@ -223,36 +225,69 @@ public final class NetworkSet implements Serializable{
                           }                              
                   if(useTexture)
                       {//write the texture coordinates
-                       for(Network network:networksList)
-                           for(Full3DCell cell:network.getCellsList())
-                               {for(float[] wall:cell.getBottomWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                                for(float[] wall:cell.getCeilWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                                for(float[] wall:cell.getFloorWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                                for(float[] wall:cell.getLeftWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                                for(float[] wall:cell.getRightWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                                for(float[] wall:cell.getTopWalls())
-                                    pw.println("vt "+wall[0]+" "+wall[1]);
-                               }
+                       if(useJOGLTextureCoordinatesVerticalOrder)
+                           {for(Network network:networksList)
+                                for(Full3DCell cell:network.getCellsList())
+                                    {for(float[] wall:cell.getBottomWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                     for(float[] wall:cell.getCeilWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                     for(float[] wall:cell.getFloorWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                     for(float[] wall:cell.getLeftWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                     for(float[] wall:cell.getRightWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                     for(float[] wall:cell.getTopWalls())
+                                         pw.println("vt "+wall[0]+" "+wall[1]);
+                                    }
+                           }
+                       else
+                           {for(Network network:networksList)
+                               for(Full3DCell cell:network.getCellsList())
+                                   {for(float[] wall:cell.getBottomWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                    for(float[] wall:cell.getCeilWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                    for(float[] wall:cell.getFloorWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                    for(float[] wall:cell.getLeftWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                    for(float[] wall:cell.getRightWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                    for(float[] wall:cell.getTopWalls())
+                                        pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                   }
+                           }
                        pw.println("usemtl terrain");
                        //smoothing
-                       pw.println("s 1");
+                       pw.println("s 1");           
                        //write faces (we already know the count of face primitives)
-                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                           {tmp=4*i+1;
-                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
-                           }
+                       if(useTriangles)
+                           for(int i=0,tmp;i<facePrimitiveCount;i++)
+                               {tmp=4*i+1;
+                                pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
+                                pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
+                               }
+                       else
+                           for(int i=0,tmp;i<facePrimitiveCount;i++)
+                               {tmp=4*i+1;
+                                pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                               }
                       }
                   else
-                      {//write faces (we already know the count of face primitives)
-                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                           {tmp=4*i+1;
-                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
-                           }
+                      {//write faces (we already know the count of face primitives)       
+                       if(useTriangles)
+                           for(int i=0,tmp;i<facePrimitiveCount;i++)
+                               {tmp=4*i+1;
+                                pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
+                                pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
+                               }
+                       else
+                           for(int i=0,tmp;i<facePrimitiveCount;i++)
+                               {tmp=4*i+1;
+                                pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                               }
                       }
                  }
              else
@@ -287,20 +322,24 @@ public final class NetworkSet implements Serializable{
                             System.out.println("NetworkTextureCoordRedundancyAnalyzer used");
                             //write texture coordinates
                             System.out.println("Writes texture coordinates...");
-                            for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
-                                pw.println("vt "+textureCoordData.vertexCoord[0]+" "+textureCoordData.vertexCoord[1]);
+                            if(useJOGLTextureCoordinatesVerticalOrder)
+                                for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
+                                    pw.println("vt "+textureCoordData.textureCoord[0]+" "+textureCoordData.textureCoord[1]);
+                            else
+                                for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
+                                    pw.println("vt "+textureCoordData.textureCoord[0]+" "+(1.0f-textureCoordData.textureCoord[1]));
                             System.out.println("Texture coordinates written"); 
                             pw.println("usemtl terrain");
                             //smoothing
                             pw.println("s 1");
                             System.out.println("use NetworkTexturedFaceDataWriter...");
                             for(Network network:networksList)
-                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,pw).visit();
+                                new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,pw,useTriangles).visit();
                             System.out.println("NetworkTexturedFaceDataWriter used");
                            }
                        else
                            for(Network network:networksList)
-                               new NetworkUntexturedFaceDataWriter(network,cellularMapsTable,pw).visit();                   
+                               new NetworkUntexturedFaceDataWriter(network,cellularMapsTable,pw,useTriangles).visit();                   
                       }
                   else
                       {LinkedHashMap<float[],ArrayList<Integer>> verticesIndirectionTable=new LinkedHashMap<float[], ArrayList<Integer>>();
@@ -388,7 +427,10 @@ public final class NetworkSet implements Serializable{
                                               //if unknown
                                               if(foundTextureCoordEntry==null)
                                                   {//write it
-                                                   pw.println("vt "+wall[0]+" "+wall[1]);
+                                                   if(useJOGLTextureCoordinatesVerticalOrder)
+                                                       pw.println("vt "+wall[0]+" "+wall[1]);
+                                                   else
+                                                       pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                                    ArrayList<Integer> indicesList=new ArrayList<Integer>();
                                                    indicesList.add(Integer.valueOf(compactTextureCoordIndex));
                                                    indicesList.add(Integer.valueOf(uncompactTextureCoordIndex));
@@ -407,63 +449,128 @@ public final class NetworkSet implements Serializable{
                                     }
                             //write faces (we already know the count of face primitives)
                             //but use the indirection tables
-                            for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                {tmp=4*i+1;
-                                 pw.print("f");
-                                 for(int j=tmp;j<tmp+4;j++)
-                                     {uncompactVertexIndex=-1;
-                                      for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
-                                          {//look at not compacted indices
-                                           for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
-                                               if(verticesIndicesList.get(k).intValue()==j)
-                                                   uncompactVertexIndex=verticesIndicesList.get(0);
-                                           if(uncompactVertexIndex!=-1)
-                                               break;
+                            if(useTriangles)
+                                {for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                     {tmp=4*i+1;
+                                      pw.print("f");
+                                      for(int l=0;l<4;l+=2)
+                                          {for(int j=l,m;j<3+l;j++)
+                                               {m=tmp+(l%4);
+                                                uncompactVertexIndex=-1;
+                                                for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                                    {//look at not compacted indices
+                                                     for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                                         if(verticesIndicesList.get(k).intValue()==m)
+                                                             uncompactVertexIndex=verticesIndicesList.get(0);
+                                                     if(uncompactVertexIndex!=-1)
+                                                         break;
+                                                    }
+                                                if(uncompactVertexIndex!=-1)
+                                                    pw.print(" "+uncompactVertexIndex);
+                                                else
+                                                    System.out.println("[warning]: no compact vertex index found for "+m);
+                                                uncompactTextureCoordIndex=-1;
+                                                for(ArrayList<Integer> textureCoordIndicesList:textureCoordIndirectionTable.values())
+                                                    {//look at not compacted indices
+                                                     for(int k=1;k<textureCoordIndicesList.size()&&uncompactTextureCoordIndex==-1;k++)
+                                                         if(textureCoordIndicesList.get(k).intValue()==m)
+                                                             uncompactTextureCoordIndex=textureCoordIndicesList.get(0);
+                                                     if(uncompactTextureCoordIndex!=-1)
+                                                         break;
+                                                    }
+                                                if(uncompactTextureCoordIndex!=-1)
+                                                    pw.print("/"+uncompactTextureCoordIndex);
+                                                else
+                                                    System.out.println("[warning]: no compact texture coord index found for "+m);
+                                               }
+                                           pw.println();
                                           }
-                                      if(uncompactVertexIndex!=-1)
-                                          pw.print(" "+uncompactVertexIndex);
-                                      else
-                                          System.out.println("[warning]: no compact vertex index found for "+j);
-                                      uncompactTextureCoordIndex=-1;
-                                      for(ArrayList<Integer> textureCoordIndicesList:textureCoordIndirectionTable.values())
-                                          {//look at not compacted indices
-                                           for(int k=1;k<textureCoordIndicesList.size()&&uncompactTextureCoordIndex==-1;k++)
-                                               if(textureCoordIndicesList.get(k).intValue()==j)
-                                                   uncompactTextureCoordIndex=textureCoordIndicesList.get(0);
-                                           if(uncompactTextureCoordIndex!=-1)
-                                               break;
-                                          }
-                                      if(uncompactTextureCoordIndex!=-1)
-                                          pw.print("/"+uncompactTextureCoordIndex);
-                                      else
-                                          System.out.println("[warning]: no compact texture coord index found for "+j);
                                      }
-                                 pw.println();
                                 }
+                            else
+                                for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                    {tmp=4*i+1;
+                                     pw.print("f");                      
+                                     for(int j=tmp;j<tmp+4;j++)
+                                         {uncompactVertexIndex=-1;
+                                          for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                              {//look at not compacted indices
+                                               for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                                   if(verticesIndicesList.get(k).intValue()==j)
+                                                       uncompactVertexIndex=verticesIndicesList.get(0);
+                                               if(uncompactVertexIndex!=-1)
+                                                   break;
+                                              }
+                                          if(uncompactVertexIndex!=-1)
+                                              pw.print(" "+uncompactVertexIndex);
+                                          else
+                                              System.out.println("[warning]: no compact vertex index found for "+j);
+                                          uncompactTextureCoordIndex=-1;
+                                          for(ArrayList<Integer> textureCoordIndicesList:textureCoordIndirectionTable.values())
+                                              {//look at not compacted indices
+                                               for(int k=1;k<textureCoordIndicesList.size()&&uncompactTextureCoordIndex==-1;k++)
+                                                   if(textureCoordIndicesList.get(k).intValue()==j)
+                                                       uncompactTextureCoordIndex=textureCoordIndicesList.get(0);
+                                               if(uncompactTextureCoordIndex!=-1)
+                                                   break;
+                                              }
+                                          if(uncompactTextureCoordIndex!=-1)
+                                              pw.print("/"+uncompactTextureCoordIndex);
+                                          else
+                                              System.out.println("[warning]: no compact texture coord index found for "+j);
+                                         }
+                                     pw.println();
+                                    }
                            }
                        else
                            {//write faces (we already know the count of face primitives)
                             //but use the indirection table
-                            for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                {tmp=4*i+1;
-                                 pw.print("f");
-                                 for(int j=tmp;j<tmp+4;j++)
-                                     {uncompactVertexIndex=-1;
-                                      for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
-                                          {//look at not compacted indices
-                                           for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
-                                               if(verticesIndicesList.get(k).intValue()==j)
-                                                   uncompactVertexIndex=verticesIndicesList.get(0);
-                                           if(uncompactVertexIndex!=-1)
-                                               break;
+                            if(useTriangles)
+                                {for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                     {tmp=4*i+1;
+                                      pw.print("f");
+                                      for(int l=0;l<4;l+=2)
+                                          {for(int j=l,m;j<3+l;j++)
+                                              {m=tmp+(l%4);
+                                               uncompactVertexIndex=-1;
+                                               for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                                   {//look at not compacted indices
+                                                    for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                                        if(verticesIndicesList.get(k).intValue()==m)
+                                                            uncompactVertexIndex=verticesIndicesList.get(0);
+                                                    if(uncompactVertexIndex!=-1)
+                                                        break;
+                                                   }
+                                               if(uncompactVertexIndex!=-1)
+                                                   pw.print(" "+uncompactVertexIndex);
+                                               else
+                                                   System.out.println("[warning]: no compact index found for "+m);
+                                              }
+                                           pw.println();
                                           }
-                                      if(uncompactVertexIndex!=-1)
-                                          pw.print(" "+uncompactVertexIndex);
-                                      else
-                                          System.out.println("[warning]: no compact index found for "+j);
                                      }
-                                    pw.println();
-                                   }
+                                }
+                            else
+                                for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                    {tmp=4*i+1;
+                                     pw.print("f");
+                                     for(int j=tmp;j<tmp+4;j++)
+                                         {uncompactVertexIndex=-1;
+                                          for(ArrayList<Integer> verticesIndicesList:verticesIndirectionTable.values())
+                                              {//look at not compacted indices
+                                               for(int k=1;k<verticesIndicesList.size()&&uncompactVertexIndex==-1;k++)
+                                                   if(verticesIndicesList.get(k).intValue()==j)
+                                                       uncompactVertexIndex=verticesIndicesList.get(0);
+                                               if(uncompactVertexIndex!=-1)
+                                                   break;
+                                              }
+                                         if(uncompactVertexIndex!=-1)
+                                             pw.print(" "+uncompactVertexIndex);
+                                         else
+                                             System.out.println("[warning]: no compact index found for "+j);
+                                         }
+                                     pw.println();
+                                    }
                            }
                       }
                  }
@@ -519,37 +626,67 @@ public final class NetworkSet implements Serializable{
                                 {//for each list of walls
                                      //for each wall
                                          //write texture coordinates (vt x y)
-                                 for(float[] wall:cell.getBottomWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
-                                 for(float[] wall:cell.getCeilWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
-                                 for(float[] wall:cell.getFloorWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
-                                 for(float[] wall:cell.getLeftWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
-                                 for(float[] wall:cell.getRightWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
-                                 for(float[] wall:cell.getTopWalls())
-                                     pw.println("vt "+wall[0]+" "+wall[1]);
+                                 if(useJOGLTextureCoordinatesVerticalOrder)
+                                     {for(float[] wall:cell.getBottomWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                      for(float[] wall:cell.getCeilWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                      for(float[] wall:cell.getFloorWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                      for(float[] wall:cell.getLeftWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                      for(float[] wall:cell.getRightWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                      for(float[] wall:cell.getTopWalls())
+                                          pw.println("vt "+wall[0]+" "+wall[1]);
+                                     }
+                                 else
+                                     {for(float[] wall:cell.getBottomWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                      for(float[] wall:cell.getCeilWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                      for(float[] wall:cell.getFloorWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                      for(float[] wall:cell.getLeftWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                      for(float[] wall:cell.getRightWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                      for(float[] wall:cell.getTopWalls())
+                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                     }
                                  pw.println("usemtl terrain");
                                  //smoothing
                                  pw.println("s 1");
                                  //for each list of walls
                                      //for each wall
-                                         //write faces (f v1/vt1)        
-                                 for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                     {tmp=4*i+1;
-                                      pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
-                                     }
+                                         //write faces (f v1/vt1)
+                                 if(useTriangles)
+                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                         {tmp=4*i+1;                                
+                                          pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
+                                          pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
+                                         }
+                                 else
+                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                         {tmp=4*i+1;
+                                          pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                                         }
                                 }
                             else
                                 {//for each list of walls
                                      //for each wall
-                                         //write faces (f v1)        
-                                 for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                     {tmp=4*i+1;
-                                      pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
-                                     }                           
+                                         //write faces (f v1)                       
+                                 if(useTriangles)
+                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                         {tmp=4*i+1;
+                                          pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
+                                          pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
+                                         }  
+                                 else
+                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
+                                         {tmp=4*i+1;
+                                          pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                                         }
                                 }     
                             System.out.println("Writes Wavefront object "+objfilename);
                             try{pw.close();
@@ -610,10 +747,10 @@ public final class NetworkSet implements Serializable{
     
     private static final class TextureCoordData{
         
-        private float[] vertexCoord;
+        private float[] textureCoord;
         
         private TextureCoordData(float[] vertexCoord){
-            this.vertexCoord=new float[]{vertexCoord[0],vertexCoord[1]};
+            this.textureCoord=new float[]{vertexCoord[0],vertexCoord[1]};
         }
         
         public final boolean equals(Object o){
@@ -622,13 +759,13 @@ public final class NetworkSet implements Serializable{
                 result=false;
             else
                 {TextureCoordData v=(TextureCoordData)o;
-                 result=vertexCoord[0]==v.vertexCoord[0]&&vertexCoord[1]==v.vertexCoord[1];
+                 result=textureCoord[0]==v.textureCoord[0]&&textureCoord[1]==v.textureCoord[1];
                 }
             return(result);
         }
         
         public final int hashCode(){
-            return(((int)vertexCoord[0])^((int)vertexCoord[1]));
+            return((int)textureCoord[0]);
         }
     }
     
@@ -766,7 +903,7 @@ public final class NetworkSet implements Serializable{
             wallsVerticesListList.add(cell.getTopWalls());
             Integer knownTextureCoordIndex;
             TextureCoordData currentTextureCoord;
-            int uniqueIndex;
+            int uniqueIndex,duplicateIndex=duplicateToUniqueIndexationTable.size();
             for(List<float[]> wallsVerticesList:wallsVerticesListList)
                 for(float[] wallVertex:wallsVerticesList)
                     {currentTextureCoord=new TextureCoordData(wallVertex);
@@ -782,10 +919,9 @@ public final class NetworkSet implements Serializable{
                           //put it into the second table
                           textureCoordDataToUniqueIndexationTable.put(currentTextureCoord,Integer.valueOf(uniqueIndex));
                          }                  
-                     //put a couple with the duplicate index and the unique index into the first table
-                     duplicateToUniqueIndexationTable.put(Integer.valueOf(duplicateToUniqueIndexationTable.size()),Integer.valueOf(uniqueIndex));
-                     //System.out.println(textureCoordDataToUniqueIndexationTable.size()+" unique indices");
-                     //System.out.println(duplicateToUniqueIndexationTable.size()+" duplicate indices "+currentTextureCoord.vertexCoord[0]+" "+currentTextureCoord.vertexCoord[1]);
+                     //put a couple with the duplicate index and the unique index into the first table                     
+                     duplicateToUniqueIndexationTable.put(Integer.valueOf(duplicateIndex),Integer.valueOf(uniqueIndex));
+                     duplicateIndex++;
                     }    
             //go on visiting
             return(true);
@@ -831,15 +967,18 @@ public final class NetworkSet implements Serializable{
 
         private PrintWriter pw;
         
+        private boolean useTriangles;
+        
         
         private NetworkTexturedFaceDataWriter(Network network,
                 HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,
                 LinkedHashMap<Integer, Integer> duplicateToUniqueIndexationTable,
-                PrintWriter pw){
+                PrintWriter pw,boolean useTriangles){
             super(network);
             this.cellularMapsTable=cellularMapsTable;
             this.duplicateToUniqueIndexationTable=duplicateToUniqueIndexationTable;
             this.pw=pw;
+            this.useTriangles=useTriangles;
         }
 
         
@@ -849,26 +988,52 @@ public final class NetworkSet implements Serializable{
             ArrayList<Integer> uniqueTextureCoordIndices=new ArrayList<Integer>();
             //As we use a LinkedHashMap, we can benefit of the insertion order
             Integer uniqueVertexIndex,duplicateVertexIndex;
-            for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
-                {uniqueVertexIndex=entry.getValue();
-                 duplicateVertexIndex=entry.getKey();
-                 //add the current index
-                 uniqueVertexIndices.add(uniqueVertexIndex);
-                 //get the unique texture coordinate index and add it
-                 uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
-                 //get the unique index by using the first table and the duplicate index
-                 //if the list is full
-                 if(uniqueVertexIndices.size()==4)
-                     {//write the face primitive
-                      //The first index is not 0 but 1 in WaveFront OBJ format
-                      pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1));
-                      //empty the list
-                      uniqueVertexIndices.clear();
-                     }
-                }
+            if(useTriangles)
+                for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
+                    {uniqueVertexIndex=entry.getValue();
+                     duplicateVertexIndex=entry.getKey();
+                     //add the current index
+                     uniqueVertexIndices.add(uniqueVertexIndex);
+                     //get the unique texture coordinate index and add it
+                     uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
+                     //get the unique index by using the first table and the duplicate index
+                     //if the list is full
+                     if(uniqueVertexIndices.size()==4)
+                         {//write the face primitive
+                          //The first index is not 0 but 1 in WaveFront OBJ format
+                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1));
+                          pw.println("f "+(uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1));
+                          //empty the list
+                          uniqueVertexIndices.clear();
+                          uniqueTextureCoordIndices.clear();
+                         }
+                    }
+            else
+                for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
+                    {uniqueVertexIndex=entry.getValue();
+                     duplicateVertexIndex=entry.getKey();
+                     //add the current index
+                     uniqueVertexIndices.add(uniqueVertexIndex);
+                     //get the unique texture coordinate index and add it
+                     uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
+                     //get the unique index by using the first table and the duplicate index
+                     //if the list is full
+                     if(uniqueVertexIndices.size()==4)
+                         {//write the face primitive
+                          //The first index is not 0 but 1 in WaveFront OBJ format
+                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1));
+                          //empty the list
+                          uniqueVertexIndices.clear();
+                          uniqueTextureCoordIndices.clear();
+                         }
+                    }
             //go on visiting the network
             return(true);
         }
@@ -881,37 +1046,54 @@ public final class NetworkSet implements Serializable{
         
         private PrintWriter pw;
         
+        private boolean useTriangles;
         
-        private NetworkUntexturedFaceDataWriter(Network network,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,PrintWriter pw){
-            this(network.getRootCell(),cellularMapsTable,pw);
+        
+        private NetworkUntexturedFaceDataWriter(Network network,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,PrintWriter pw,boolean useTriangles){
+            this(network.getRootCell(),cellularMapsTable,pw,useTriangles);
         }
         
-        private NetworkUntexturedFaceDataWriter(Full3DCell firstVisitedCell,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,PrintWriter pw){
+        private NetworkUntexturedFaceDataWriter(Full3DCell firstVisitedCell,HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable,PrintWriter pw,boolean useTriangles){
             super(firstVisitedCell);
             this.cellularMapsTable=cellularMapsTable;
             this.pw=pw;
+            this.useTriangles=useTriangles;
         }       
         
 
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
-            ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();           
-            //As we use a LinkedHashMap, we can benefit of the insertion order
-            for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
-                {//add the current index
-                 uniqueVertexIndices.add(uniqueVertexIndex);
-                 //if the list is full
-                 if(uniqueVertexIndices.size()==4)
-                     {//write the face primitive
-                      //The first index is not 0 but 1 in WaveFront OBJ format
-                      pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(1).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(2).intValue()+1)+" "+
-                                    (uniqueVertexIndices.get(3).intValue()+1));
-                      //empty the list
-                      uniqueVertexIndices.clear();
-                     }
-                }
+            ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();
+            if(useTriangles)
+                for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
+                    {uniqueVertexIndices.add(uniqueVertexIndex);                 
+                     if(uniqueVertexIndices.size()==4)
+                         {pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(1).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(2).intValue()+1));
+                          pw.println("f "+(uniqueVertexIndices.get(2).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(3).intValue()+1)+" "+
+                                          (uniqueVertexIndices.get(0).intValue()+1));
+                          uniqueVertexIndices.clear();
+                         }
+                    }
+            else
+                //As we use a LinkedHashMap, we can benefit of the insertion order
+                for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
+                    {//add the current index
+                     uniqueVertexIndices.add(uniqueVertexIndex);
+                     //if the list is full
+                     if(uniqueVertexIndices.size()==4)
+                         {//write the face primitive
+                          //The first index is not 0 but 1 in WaveFront OBJ format
+                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
+                                  (uniqueVertexIndices.get(1).intValue()+1)+" "+
+                                  (uniqueVertexIndices.get(2).intValue()+1)+" "+
+                                  (uniqueVertexIndices.get(3).intValue()+1));
+                          //empty the list
+                          uniqueVertexIndices.clear();
+                         }
+                    }
             //go on visiting the network
             return(true);
         }
