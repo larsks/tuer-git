@@ -101,17 +101,17 @@ public final class ExtendedMenuHandler extends InputHandler{
         
         public final void performAction(InputActionEvent evt){
             isEntering=true;
-            /*
+            
             switch(index)
             {
                 case NEW_GAME:
                 {if(paused)
-                    {/**TODO: disable the level state
-                      *       detach it from the state machine   
-                      */  
-                     //activate the main menu state
-                     /*GameStateManager.getInstance().activateChildNamed("Main menu");
-                    }
+                     {/**TODO: disable the level state
+                       *       detach it from the state machine   
+                       */  
+                      //activate the main menu state
+                      GameStateManager.getInstance().activateChildNamed("Main menu");
+                     }
                  else
                      {GameState levelGameState=this.serviceProvider.getLevelGameState(0);
                       GameStateManager.getInstance().attachChild(levelGameState);
@@ -129,7 +129,7 @@ public final class ExtendedMenuHandler extends InputHandler{
                  break;
                 }
             }  
-            */
+            
         }
     }
 }
