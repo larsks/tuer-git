@@ -6,6 +6,8 @@ import com.jmex.game.state.load.TransitionGameState;
 
 public final class LevelGameState extends BasicGameState {
 
+    //TODO: add the key handling
+    
     public LevelGameState(String name){
         super(name);       
     }

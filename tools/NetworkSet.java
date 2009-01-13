@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -983,57 +984,42 @@ public final class NetworkSet implements Serializable{
 
         
         @Override
-        protected final boolean performTaskOnCurrentlyVisitedCell(){
-            ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();
-            ArrayList<Integer> uniqueTextureCoordIndices=new ArrayList<Integer>();
-            //As we use a LinkedHashMap, we can benefit of the insertion order
-            Integer uniqueVertexIndex,duplicateVertexIndex;
+        protected final boolean performTaskOnCurrentlyVisitedCell(){     
+            int[] uniqueVerticesIndices=new int[4];
+            int[] uniqueTextureCoordIndices=new int[4];
+            Iterator<Map.Entry<Integer,Integer>> verticesIndicesIterator=cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet().iterator();
+            Map.Entry<Integer,Integer> vertexIndexEntry;
             if(useTriangles)
-                for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
-                    {uniqueVertexIndex=entry.getValue();
-                     duplicateVertexIndex=entry.getKey();
-                     //add the current index
-                     uniqueVertexIndices.add(uniqueVertexIndex);
-                     //get the unique texture coordinate index and add it
-                     uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
-                     //get the unique index by using the first table and the duplicate index
-                     //if the list is full
-                     if(uniqueVertexIndices.size()==4)
-                         {//write the face primitive
-                          //The first index is not 0 but 1 in WaveFront OBJ format
-                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1));
-                          pw.println("f "+(uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1));
-                          //empty the list
-                          uniqueVertexIndices.clear();
-                          uniqueTextureCoordIndices.clear();
-                         }
-                    }
+                {//As we use a LinkedHashMap, we can benefit of the insertion order
+                 while(verticesIndicesIterator.hasNext())
+                     {for(int i=0;i<4;i++)
+                          {vertexIndexEntry=verticesIndicesIterator.next();
+                           //The first index is not 0 but 1 in WaveFront OBJ format
+                           uniqueTextureCoordIndices[i]=duplicateToUniqueIndexationTable.get(vertexIndexEntry.getKey()).intValue()+1;
+                           uniqueVerticesIndices[i]=vertexIndexEntry.getValue().intValue()+1;               
+                          }
+                      //write the face primitive
+                      pw.println("f "+uniqueVerticesIndices[0]+"/"+uniqueTextureCoordIndices[0]+" "+
+                                      uniqueVerticesIndices[1]+"/"+uniqueTextureCoordIndices[1]+" "+
+                                      uniqueVerticesIndices[2]+"/"+uniqueTextureCoordIndices[2]);
+                      pw.println("f "+uniqueVerticesIndices[2]+"/"+uniqueTextureCoordIndices[2]+" "+
+                                      uniqueVerticesIndices[3]+"/"+uniqueTextureCoordIndices[3]+" "+
+                                      uniqueVerticesIndices[0]+"/"+uniqueTextureCoordIndices[0]);
+                     }
+                }
             else
-                for(Map.Entry<Integer,Integer> entry:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().entrySet())
-                    {uniqueVertexIndex=entry.getValue();
-                     duplicateVertexIndex=entry.getKey();
-                     //add the current index
-                     uniqueVertexIndices.add(uniqueVertexIndex);
-                     //get the unique texture coordinate index and add it
-                     uniqueTextureCoordIndices.add(duplicateToUniqueIndexationTable.get(duplicateVertexIndex));
-                     //get the unique index by using the first table and the duplicate index
-                     //if the list is full
-                     if(uniqueVertexIndices.size()==4)
-                         {//write the face primitive
-                          //The first index is not 0 but 1 in WaveFront OBJ format
-                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(0).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(1).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(1).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(2).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(2).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(3).intValue()+1)+"/"+(uniqueTextureCoordIndices.get(3).intValue()+1));
-                          //empty the list
-                          uniqueVertexIndices.clear();
-                          uniqueTextureCoordIndices.clear();
-                         }
-                    }
+                {while(verticesIndicesIterator.hasNext())
+                     {for(int i=0;i<4;i++)
+                          {vertexIndexEntry=verticesIndicesIterator.next();
+                           uniqueTextureCoordIndices[i]=duplicateToUniqueIndexationTable.get(vertexIndexEntry.getKey()).intValue()+1;
+                           uniqueVerticesIndices[i]=vertexIndexEntry.getValue().intValue()+1;
+                          }
+                      pw.println("f "+uniqueVerticesIndices[0]+"/"+uniqueTextureCoordIndices[0]+" "+
+                                      uniqueVerticesIndices[1]+"/"+uniqueTextureCoordIndices[1]+" "+
+                                      uniqueVerticesIndices[2]+"/"+uniqueTextureCoordIndices[2]+" "+
+                                      uniqueVerticesIndices[3]+"/"+uniqueTextureCoordIndices[3]);
+                     }
+                }
             //go on visiting the network
             return(true);
         }
@@ -1063,37 +1049,33 @@ public final class NetworkSet implements Serializable{
 
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
-            ArrayList<Integer> uniqueVertexIndices=new ArrayList<Integer>();
+            int[] uniqueVerticesIndices=new int[4];
+            Iterator<Integer> uniqueVerticesIndicesIterator=cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values().iterator();
             if(useTriangles)
-                for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
-                    {uniqueVertexIndices.add(uniqueVertexIndex);                 
-                     if(uniqueVertexIndices.size()==4)
-                         {pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(1).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(2).intValue()+1));
-                          pw.println("f "+(uniqueVertexIndices.get(2).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(3).intValue()+1)+" "+
-                                          (uniqueVertexIndices.get(0).intValue()+1));
-                          uniqueVertexIndices.clear();
-                         }
-                    }
-            else
-                //As we use a LinkedHashMap, we can benefit of the insertion order
-                for(Integer uniqueVertexIndex:cellularMapsTable.get(getCurrentlyVisitedCell()).getKey().values())
-                    {//add the current index
-                     uniqueVertexIndices.add(uniqueVertexIndex);
-                     //if the list is full
-                     if(uniqueVertexIndices.size()==4)
-                         {//write the face primitive
+                {//As we use a LinkedHashMap, we can benefit of the insertion order
+                 while(uniqueVerticesIndicesIterator.hasNext())
+                     {for(int i=0;i<4;i++)
                           //The first index is not 0 but 1 in WaveFront OBJ format
-                          pw.println("f "+(uniqueVertexIndices.get(0).intValue()+1)+" "+
-                                  (uniqueVertexIndices.get(1).intValue()+1)+" "+
-                                  (uniqueVertexIndices.get(2).intValue()+1)+" "+
-                                  (uniqueVertexIndices.get(3).intValue()+1));
-                          //empty the list
-                          uniqueVertexIndices.clear();
-                         }
-                    }
+                          uniqueVerticesIndices[i]=uniqueVerticesIndicesIterator.next().intValue()+1;               
+                      //write the face primitive
+                      pw.println("f "+uniqueVerticesIndices[0]+" "+
+                                      uniqueVerticesIndices[1]+" "+
+                                      uniqueVerticesIndices[2]);
+                      pw.println("f "+uniqueVerticesIndices[2]+" "+
+                                      uniqueVerticesIndices[3]+" "+
+                                      uniqueVerticesIndices[0]);
+                     }
+                }
+            else
+                {while(uniqueVerticesIndicesIterator.hasNext())
+                     {for(int i=0;i<4;i++)
+                          uniqueVerticesIndices[i]=uniqueVerticesIndicesIterator.next().intValue()+1;               
+                      pw.println("f "+uniqueVerticesIndices[0]+" "+
+                                      uniqueVerticesIndices[1]+" "+
+                                      uniqueVerticesIndices[2]+" "+
+                                      uniqueVerticesIndices[3]);
+                     }
+                }
             //go on visiting the network
             return(true);
         }

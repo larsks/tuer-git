@@ -144,6 +144,7 @@
 	              >
         	    <jvmarg value="-Xms1024m"/>
         	    <jvmarg value="-Xmx1536m"/>
+        	    <!-- The program uses only 512 MB but it might me more on bigger maps -->
 	        	<arg value="pic256/worldmap.gif"/>
 	        	<arg value="pic256/worldmap.data"/>
 	        	<arg value="pic256/rocketLauncher.data"/>
