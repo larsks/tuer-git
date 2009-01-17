@@ -30,14 +30,14 @@ import javax.imageio.ImageIO;
 public final class CellsGenerator{
     
     
-    public final static NetworkSet generate(List<PointPair> topWallPiecesList,
+    public static final NetworkSet generate(List<PointPair> topWallPiecesList,
                                       List<PointPair> bottomWallPiecesList,
                                       List<PointPair> leftWallPiecesList,
 			                          List<PointPair> rightWallPiecesList,
 			                          List<PointPair> artTopWallPiecesList,
                                       List<PointPair> artBottomWallPiecesList,
                                       List<PointPair> artLeftWallPiecesList,
-                                      List<PointPair> artRightWallPiecesList){
+                                      List<PointPair> artRightWallPiecesList,float scaleFactor){
         PointPairComparator ppc=new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT);       
         Vector<PointPair> wholeTopWallPiecesList=new Vector<PointPair>();
         wholeTopWallPiecesList.addAll(topWallPiecesList);
@@ -66,10 +66,7 @@ public final class CellsGenerator{
     	Vector<Cell> cellsList=new Vector<Cell>();
     	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList);
     	optimizeRawCellsAndPortals(cellsList);  
-    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList,
-    	        topWallPiecesList,bottomWallPiecesList,
-                leftWallPiecesList,rightWallPiecesList,
-                TilesGenerator.factor);
+    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList,scaleFactor);
     	System.out.println("SIZE : "+cellsList.size());
     	createCellsMap(cellsList);
     	List<Cell> overlappingCellsList=getOverlappingCellsList(cellsList);
@@ -114,7 +111,7 @@ public final class CellsGenerator{
     }
     
     //merge all pieces of wall to build the "temporary" full walls
-    final static Vector<PointPair> mergeAllWallPieces(List<PointPair> wallPiecesList){
+    static final Vector<PointPair> mergeAllWallPieces(List<PointPair> wallPiecesList){
     	Vector<PointPair> temporaryFullWallsList = new Vector<PointPair>();
     	boolean found;
     	for(PointPair currentWallPiece:wallPiecesList)
@@ -134,14 +131,15 @@ public final class CellsGenerator{
     			 }
     		 if(!found)
     		     {//add this piece as a new temporary full wall
-    			  temporaryFullWallsList.add(currentWallPiece);
+    		      //NB: do not modify the point pairs that are passed, use clone()
+    			  temporaryFullWallsList.add((PointPair)currentWallPiece.clone());
     		     }
     	    }
     	return(temporaryFullWallsList);
     }
     
     @SuppressWarnings("unused")
-    private final static List<PointPair> ALTERNATIVEmergeAllWallPieces(List<PointPair> wallPiecesList){       
+    private static final List<PointPair> ALTERNATIVEmergeAllWallPieces(List<PointPair> wallPiecesList){       
         List<PointPair> atomicWallsList = getAtomicWallsList(wallPiecesList);
         Vector<PointPair> fullWallsList = new Vector<PointPair>();
         //merge atomic walls together when possible
@@ -675,12 +673,7 @@ public final class CellsGenerator{
     }
     
     //add the third coordinate to each vertex in the cells and in the portals
-    private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList,
-            List<PointPair> topWallPiecesList,
-            List<PointPair> bottomWallPiecesList,
-            List<PointPair> leftWallPiecesList,
-            List<PointPair> rightWallPiecesList,
-            float factor){
+    private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList,float scaleFactor){
         List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
         Full3DCell fullCell;
         int xmin,xmax,zmin,zmax;
@@ -779,56 +772,58 @@ public final class CellsGenerator{
                       fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[3],i+1,-0.5f,j});
                       fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[1],i,-0.5f,j});                      
                      }   
-             //convert the elements from the base [[0;0;0][255;255;255]] to the base [[0;0;0][255*65536;255*65536;255*65536]]
-             for(float[] wall:fullCell.getLeftWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;
-                 }
-             for(float[] wall:fullCell.getLeftPortals())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;
-                 }
-             for(float[] wall:fullCell.getRightWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                    
-                 }
-             for(float[] wall:fullCell.getRightPortals())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                   
-                 }             
-             for(float[] wall:fullCell.getTopWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                    
-                 }
-             for(float[] wall:fullCell.getTopPortals())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                    
-                 }
-             for(float[] wall:fullCell.getBottomWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                    
-                 }
-             for(float[] wall:fullCell.getBottomPortals())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;                    
-                 }
-             for(float[] wall:fullCell.getCeilWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor;
-                 }
-             for(float[] wall:fullCell.getFloorWalls())
-                 {wall[2]*=factor;
-                  wall[3]*=factor;
-                  wall[4]*=factor; 
+             //convert the elements from the base [[0;0;0][255;255;255]] to the base [[0;0;0][255*factor;255*factor;255*factor]]
+             if(scaleFactor!=1.0f)
+                 {for(float[] wall:fullCell.getLeftWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;
+                      }
+                  for(float[] wall:fullCell.getLeftPortals())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;
+                      }
+                  for(float[] wall:fullCell.getRightWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                    
+                      }
+                  for(float[] wall:fullCell.getRightPortals())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                   
+                      }             
+                  for(float[] wall:fullCell.getTopWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                    
+                      }
+                  for(float[] wall:fullCell.getTopPortals())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                    
+                      }
+                  for(float[] wall:fullCell.getBottomWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                    
+                      }
+                  for(float[] wall:fullCell.getBottomPortals())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;                    
+                      }
+                  for(float[] wall:fullCell.getCeilWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor;
+                      }
+                  for(float[] wall:fullCell.getFloorWalls())
+                      {wall[2]*=scaleFactor;
+                       wall[3]*=scaleFactor;
+                       wall[4]*=scaleFactor; 
+                      }
                  }
              //compute the enclosing rectangle again as the coordinates have changed
              fullCell.computeEnclosingRectangle();

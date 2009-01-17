@@ -12,12 +12,6 @@
   MA 02111-1307, USA.
 */
 
-/*This class computes the vertex coordinates and texture coordinates
-  of the tiles representing the level by using the map in Stahl's format. 
-  It deletes useless "walls", keeps the useful walls and builds the floor 
-  and the ceil. 
-*/
-
 package tools;
 
 import java.awt.Image;
@@ -31,17 +25,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import main.HealthPowerUpModel;
 import main.HealthPowerUpModelBean;
 
+/**This class computes the vertex coordinates and texture coordinates
+ * of the tiles representing the level by using the map in Stahl's format. 
+ * It deletes useless "walls", keeps the useful walls and builds the floor 
+ * and the ceil. 
+ * 
+ * @author Julien Gouesse
+ */
 public final class TilesGenerator{
 
 
@@ -811,23 +807,28 @@ public final class TilesGenerator{
 	     //that is why you have to invert it
 	     NetworkSet networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
 	             rightWallsList,leftWallsList,artTopWallsList,
-	             artBottomWallsList,artRightWallsList,artLeftWallsList);
+	             artBottomWallsList,artRightWallsList,artLeftWallsList,factor);
 	     //write a list of networks
 	     ObjectOutputStream oos=null;
 	     try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(networkFilename)));
 	         oos.writeObject(networkSet);
-	         oos.close();
-	         /* The textured level is the view (the representation) 
-	          * whereas the untextured level is the model (used for the collisions).
-	          * The ungrouped structure contains a file per cell and a single file that calls the others
-	          * whereas the grouped structure contains a file per network set.
-	          * The redundancy mode allows to modify independently each cell (used for the view)
-	          * whereas the compact mode does not (used for the model).
-	          */
-	         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);
+	         oos.close();         
 	        }
 	     catch(Throwable t)
 	     {throw new RuntimeException("Unable to write the network",t);}
+	     System.out.println("Build an unscaled network");
+	     //This factor becomes useless
+	     networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
+                 rightWallsList,leftWallsList,artTopWallsList,
+                 artBottomWallsList,artRightWallsList,artLeftWallsList,1.0f);
+	     /* The textured level is the view (the representation) 
+          * whereas the untextured level is the model (used for the collisions).
+          * The ungrouped structure contains a file per cell and a single file that calls the others
+          * whereas the grouped structure contains a file per network set.
+          * The redundancy mode allows to modify independently each cell (used for the view)
+          * whereas the compact mode does not (used for the model).
+          */	     
+         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);  
     }      
     
     

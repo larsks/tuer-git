@@ -2,9 +2,15 @@ package jme;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
+import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
+import com.jme.util.GameTaskQueue;
+import com.jme.util.GameTaskQueueManager;
 import com.jme.util.resource.ResourceLocatorTool;
 import com.jme.util.resource.SimpleResourceLocator;
 import com.jmex.game.state.GameState;
@@ -22,6 +28,8 @@ public final class JMEGameServiceProvider {
     
     private JOGLMVCGame game;
     
+    private Camera cam;
+    
     private JMEGameServiceProvider(){
         this.game=new JOGLMVCGame();       
         logger.info("JOGLMVCGame created, creating states...");
@@ -30,17 +38,18 @@ public final class JMEGameServiceProvider {
            } 
         catch(URISyntaxException urise) 
         {urise.printStackTrace();}
-
+        //System.out.println("Classpath ["+System.getProperty("java.class.path")+"]");
         //effectively localize the resource
         URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"pic1024/starting_screen_bis.png");
         TransitionGameState transitionGameState = new TransitionGameState(20,startingTextureURL);
         GameStateManager.getInstance().attachChild(transitionGameState);
         transitionGameState.setActive(true);
         transitionGameState.setProgress(0,"Initializing Game ...");
-        DisplaySystem disp = DisplaySystem.getDisplaySystem(); 
+        DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
-        disp.getRenderer().getCamera().setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 1.0F, 10000.0F );
-        disp.getRenderer().getCamera().update();
+        cam=disp.getRenderer().getCamera();
+        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 1.0F, 10000.0F );
+        cam.update();
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");
         //GameStateManager.getInstance().attachChild(new IntroState("Intro",trans));
@@ -61,18 +70,48 @@ public final class JMEGameServiceProvider {
         //It is better to rebuild the game state for each level
         //each time to avoid filling the whole memory.
         //However, common objects are loaded once.        
-        URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
-        TransitionGameState transitionGameState = new TransitionGameState(10,startingTextureURL);
-        GameStateManager.getInstance().attachChild(transitionGameState);
-        transitionGameState.setActive(true);
-        transitionGameState.setProgress(0,"Initializing Level "+index+" ...");
+        //URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
+        //TransitionGameState transitionGameState=new TransitionGameState(10,startingTextureURL);
+        //GameStateManager.getInstance().attachChild(transitionGameState);
+        //transitionGameState.setActive(true);
+        //transitionGameState.setProgress(0,"Initializing Level "+index+" ...");
         //TODO: the level factory loads the common data when used for the first
         //time and the data for a single level at each call
-        GameState levelGameState=LevelGameState.getInstance(index,transitionGameState);         
-        transitionGameState.setProgress(1.0f, "Finished Loading");
-        transitionGameState.setActive(false);
-        GameStateManager.getInstance().detachChild(transitionGameState);       
+        Future<GameState> task = GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).enqueue(new LevelLoadTask(index,/*transitionGameState,*/cam));
+        //GameState levelGameState=LevelGameState.getInstance(index,transitionGameState,cam);         
+        GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).execute();
+        GameState levelGameState=null;
+        try{levelGameState = task.get();} 
+        catch(InterruptedException e)
+        {e.printStackTrace();} 
+        catch(ExecutionException e)
+        {e.printStackTrace();}
+        //transitionGameState.setProgress(1.0f, "Finished Loading");
+        //transitionGameState.setActive(false);
+        //GameStateManager.getInstance().detachChild(transitionGameState);       
         return(levelGameState);
+    }
+    
+    private static final class LevelLoadTask implements Callable<GameState>{
+        
+        
+        private int index;
+        
+        //private TransitionGameState transitionGameState;
+        
+        private Camera cam;
+        
+        
+        private LevelLoadTask(int index,/*TransitionGameState transitionGameState,*/Camera cam){
+            this.index=index;
+            //this.transitionGameState=transitionGameState;
+            this.cam=cam;
+        }
+        
+        @Override
+        public GameState call()throws Exception{
+            return(LevelGameState.getInstance(index/*,transitionGameState*/,cam));
+        }      
     }
 
     final void exit(){
