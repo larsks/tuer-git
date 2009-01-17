@@ -92,8 +92,8 @@ public final class NetworkView{
             }  
     }
     
-    public final void draw(float x,float y,float z,float direction,ViewFrustumCullingPerformer frustum){ 
-        /*Rectangle cellRect;
+    /*public final void draw(float x,float y,float z,float direction,ViewFrustumCullingPerformer frustum){ 
+        Rectangle cellRect;
         final float arcContributionSize=65536*25;
         final Arc2D.Float playerArc=new Arc2D.Float();
         playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+225,90,Arc2D.PIE);
@@ -124,8 +124,8 @@ public final class NetworkView{
                                }
                           }
                      }
-            }*/
-    }
+            }
+    }*/
 
 
     public final Full3DCellView getRootCell(){

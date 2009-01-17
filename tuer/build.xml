@@ -49,6 +49,7 @@
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<delete dir="${destdir}/obj" failonerror="false" />
+    	<delete dir="${destdir}/jbin" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
 
@@ -64,9 +65,11 @@
 			<include name="**/*.gif" />
 			<include name="**/*.data"/>
 			<include name="**/*.txt" />
-			<include name="**/*.ogg" />
-			<include name="**/*.au"  />
-			<include name="**/*.xml"  />
+			<include name="**/*.ogg" />			
+			<include name="**/*.xml" />
+			<include name="**/*.obj" />
+			<include name="**/*.jbin"/>
+			<include name="**/*.mtl" />
 			<manifest>
 			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
 			</manifest>
@@ -98,7 +101,6 @@
 			includes="**/*.java" 
 			excludes="lara/"
 			compress="true">
-			<include name="**/*.au"  />
 			<include name="**/*.cfg" />
 			<include name="**/*.data"/>
 			<include name="**/*.gif" />
@@ -106,12 +108,15 @@
 			<include name="**/*.md3" />
 			<include name="**/*.png" />		
 			<include name="**/*.ogg" />		
-			<include name="**/*.rtf"  />
-			<include name="**/*.shader" />
-			<include name="**/*.skin" />
+			<include name="**/*.rtf" />
+			<include name="**/*.shader"/>
+			<include name="**/*.skin"/>
 			<include name="**/*.txt" />
-			<include name="**/*.xml"  />
+			<include name="**/*.xml" />
 			<include name="**/*.gif" />
+			<include name="**/*.obj" />
+			<include name="**/*.jbin"/>
+			<include name="**/*.mtl" />
 			<include name="**/manifest" />
 		</zip>
 	</target>
@@ -136,7 +141,7 @@
     </target>
 	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
 	    <mkdir dir="${destdir}/xml" />
-		<mkdir dir="${destdir}/obj" />
+		<mkdir dir="${destdir}/obj" />		
         <java classname="tools.TilesGenerator"
 	              fork="true"
 	              dir="${destdir}"
@@ -169,5 +174,26 @@
         	    <arg value="pic256/wallTexture.png"/>
 	    </java>
 	</target>
-	
+	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
+		<mkdir dir="${destdir}/jbin"/>
+		<java classname="jme.JMEDataPreprocessor"
+			              fork="true"
+			              dir="${destdir}"
+			              failonerror="true"
+			              >
+			<jvmarg value="-Xmx1536m"/>
+			<arg value="obj/level0.obj"/>
+			<arg value="obj/terrain.mtl"/>
+			<arg value="pic256/wallTexture.png"/>
+			<arg value="jbin/level0.jbin"/>
+	    </java>
+	</target>
+	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
+		<java classname="jme.JMEGameServiceProvider"
+					              fork="true"
+					              dir="${destdir}"
+					              failonerror="true"
+					              >
+		</java>
+	</target>
 </project>
