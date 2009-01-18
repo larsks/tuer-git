@@ -5,6 +5,8 @@ import tools.TilesGenerator;
 import com.jme.bounding.BoundingSphere;
 import com.jme.renderer.Camera;
 import com.jme.scene.Spatial;
+import com.jme.scene.TriMesh;
+import com.jme.scene.VBOInfo;
 import com.jme.util.export.binary.BinaryImporter;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.GameState;
@@ -36,6 +38,8 @@ public final class LevelGameState extends BasicGameState {
             model.setModelBound(new BoundingSphere());
             model.updateModelBound();
             model.updateRenderState();
+            ((TriMesh)model).setVBOInfo(new VBOInfo(true));
+            model.lock();
             //attach it to the root node of the state
             levelState.rootNode.attachChild(model);
             System.out.println("vertex count="+model.getVertexCount());

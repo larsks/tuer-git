@@ -37,7 +37,7 @@ public class GameIO{
     private static final int VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX = 1;
     
     
-    public static FloatBuffer readGameFloatDataFile(String path) throws IOException{
+    public static final FloatBuffer readGameFloatDataFile(String path) throws IOException{
         DataInputStream in;
         FloatBuffer coordinatesBuffer;
         in=new DataInputStream(new BufferedInputStream(GameIO.class.getResourceAsStream(path)));
