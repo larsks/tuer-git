@@ -160,39 +160,15 @@ public final class NetworkSet implements Serializable{
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
         final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;       
-        final String MTLFilename="terrain.mtl";
+        final String MTLFilename="terrain.mtl";        
+        if(useTexture)
+            TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,textureFilename);
+        int facePrimitiveCount=0;
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
-        if(useTexture)
-            {System.out.println("Starts writing MTL file used for the terrain...");
-             try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+MTLFilename);}
-             catch(IOException ioe)
-             {ioe.printStackTrace();return;}
-             pw=new PrintWriter(bos);
-             //write a MTL file
-             pw.println("newmtl terrain");
-             pw.println("Ns 0");
-             pw.println("Ka 0.000000 0.000000 0.000000");
-             pw.println("Kd 0.8 0.8 0.8");
-             pw.println("Ks 0.8 0.8 0.8");
-             pw.println("d 1");
-             pw.println("illum 2");
-             pw.println("map_Kd "+textureFilename.substring(textureFilename.lastIndexOf("/")+1));
-             System.out.println("Ends writing MTL file used for the terrain.");
-             try{pw.close();
-                 bos.close();
-                } 
-             catch(IOException ioe)
-             {ioe.printStackTrace();}
-             finally
-             {bos=null;
-              pw=null;
-             }   
-            }
-        int facePrimitiveCount=0;
         if(grouped)
             {System.out.println("Starts writing the single OBJ Wavefront file...");
-             System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
+             System.out.println("Writes Wavefront object "+filenamePrefix+".obj");             
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
              {ioe.printStackTrace();return;}
@@ -580,7 +556,6 @@ public final class NetworkSet implements Serializable{
                 } 
              catch(IOException ioe)
              {ioe.printStackTrace();}
-             System.out.println("Ends writing OBJ Wavefront files.");
              System.out.println("Ends writing the single OBJ Wavefront file.");
             }
         else

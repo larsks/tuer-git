@@ -25,7 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
+import java.io.PrintWriter;
+import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Vector;
 import main.HealthPowerUpModel;
@@ -105,7 +106,7 @@ public final class TilesGenerator{
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE=5;
     
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_DIRTY=6;
+    //private static final int UNAVOIDABLE_AND_UNBREAKABLE_DIRTY=6;
     
     private static final int FIXED_AND_BREAKABLE_BIG=7;
     
@@ -144,37 +145,7 @@ public final class TilesGenerator{
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_LEFT_RIGHT=24;
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP=25;
-    
-    //dirty walls
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_DOWN_DIRTY=26;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_LEFT_DIRTY=27;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_RIGHT_DIRTY=28;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_DIRTY=29;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT_DIRTY=30;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_RIGHT_DIRTY=31;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT_DIRTY=32;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_RIGHT_DIRTY=33;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT_RIGHT_DIRTY=34;
-               
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT_RIGHT_DIRTY=35;
-       
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT_DIRTY=36;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_DOWN_RIGHT_DIRTY=37;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT_RIGHT_DIRTY=38;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_LEFT_RIGHT_DIRTY=39;
-    
-    private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP_DIRTY=40;
+    //dirty walls (from 26 to 40) removed as useless
 
     
     public TilesGenerator(String mapFilename,String tilesFilename,
@@ -195,7 +166,9 @@ public final class TilesGenerator{
             String sphericalBeastFilename,
             String networkFilename,
             String networkOBJFilename,
-            String wallTextureFilename){
+            String wallTextureFilename,
+            String objectTextureFilename,
+            String rocketLauncherOBJFilename){
         topWallsList=new Vector<PointPair>();   
         bottomWallsList=new Vector<PointPair>();
         leftWallsList=new Vector<PointPair>();
@@ -599,7 +572,6 @@ public final class TilesGenerator{
 			  }
 		     }
 	    }
-        /*System.out.println("art count = "+pb);*/
 	//write the correct data in the file
 	    try 
 	        {File file=new File(tilesFilename);
@@ -828,17 +800,23 @@ public final class TilesGenerator{
           * The redundancy mode allows to modify independently each cell (used for the view)
           * whereas the compact mode does not (used for the model).
           */	     
-         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);  
+         networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);        
+         try{//no need of scale for the rocket launcher
+             convertBinaryToOBJFile(rocketLauncherFilename,objectTextureFilename,rocketLauncherOBJFilename,1.0f,1.0f,true,true,false);
+            } 
+         catch(IOException ioe)
+         {ioe.printStackTrace();}
     }      
     
     
-    public final static void writeNormal(DataOutputStream out,float nx,float ny,float nz)throws IOException{
+    @SuppressWarnings("unused")
+    private static final  void writeNormal(DataOutputStream out,float nx,float ny,float nz)throws IOException{
         out.writeFloat(nx);
 	    out.writeFloat(ny);
 	    out.writeFloat(nz);	
     }
     
-    public final static void writePoint(DataOutputStream out,float x,float y,float z)throws IOException{
+    private static final void writePoint(DataOutputStream out,float x,float y,float z)throws IOException{
         out.writeFloat(x);
 	    out.writeFloat(y);
 	    out.writeFloat(z);	
@@ -853,13 +831,13 @@ public final class TilesGenerator{
 	    out.writeFloat(v);		
     }
     
-    public final static void writePrimitive(DataOutputStream out,float u,float v,float nx,float ny,float nz,float x,float y,float z)throws IOException{
+    private final static void writePrimitive(DataOutputStream out,float u,float v,float nx,float ny,float nz,float x,float y,float z)throws IOException{
         writeTextureCoord(out,u,v);
 	    //writeNormal(out,nx,ny,nz);
 	    writePoint(out,x,y,z);
     }
     
-    public final static void writeQuadPrimitive(DataOutputStream out,float u1,float v1,float x1,float y1,float z1,
+    private final static void writeQuadPrimitive(DataOutputStream out,float u1,float v1,float x1,float y1,float z1,
                                                                float u2,float v2,float x2,float y2,float z2,
 							       float u3,float v3,float x3,float y3,float z3,
 							       float u4,float v4,float x4,float y4,float z4)throws IOException{
@@ -870,7 +848,7 @@ public final class TilesGenerator{
 	    writePrimitive(out,u4,v4,n[0],n[1],n[2],x4,y4,z4);
     }
     
-    public static float[] getQuadNormal(float x1,float y1,float z1,float x2,float y2,float z2,float x3,float y3,float z3,float x4,float y4,float z4){
+    private static float[] getQuadNormal(float x1,float y1,float z1,float x2,float y2,float z2,float x3,float y3,float z3,float x4,float y4,float z4){
         float[] normal=new float[3];
 	    //compute the normal
 	
@@ -1225,7 +1203,7 @@ public final class TilesGenerator{
         writeHeader(out,56,5);
         writeRocketData(out);                   
         out.flush();
-        out.close();
+        out.close();  
     }
     
     private final static void writeCrosshair(String path)throws IOException{
@@ -1248,6 +1226,161 @@ public final class TilesGenerator{
         //writeSphericalBeastData(out,,);
         out.flush();
         out.close();
+    }
+    
+    /**
+     * 
+     * @param binaryFilePath
+     * @param textureFilename
+     * @param objFilePath
+     * @param redundant
+     * @param useTriangles
+     * @param useJOGLTextureCoordinatesVerticalOrder
+     * @throws IOException
+     */
+    private static final void convertBinaryToOBJFile(String binaryFilePath,
+            String textureFilename,String objFilePath,float sourceFactor,
+            float destFactor,boolean redundant,boolean useTriangles,
+            boolean useJOGLTextureCoordinatesVerticalOrder)throws IOException{       
+        final int slashIndex=objFilePath.lastIndexOf("/");
+        final String directoryname=slashIndex>0?objFilePath.substring(0,slashIndex):"";
+        final String filenamePrefix=slashIndex>0&&slashIndex+1<objFilePath.length()?objFilePath.substring(slashIndex+1):objFilePath;
+        final String MTLFilename=filenamePrefix+".mtl";
+        boolean useTexture=textureFilename!=null&&!textureFilename.equals("");
+        //write the MTL file first
+        if(useTexture)
+            writeDummyMTLFile(directoryname,MTLFilename,textureFilename);
+        //then, write the OBJ file that uses this MTL file
+        BufferedOutputStream bos=null;
+        try{bos=createNewFileFromLocalPathAndGetBufferedStream(objFilePath+".obj");}
+        catch(IOException ioe)
+        {ioe.printStackTrace();return;}
+        PrintWriter pw=new PrintWriter(bos);
+        FloatBuffer buffer=GameIO.readGameFloatDataFile("/"+binaryFilePath);
+        if(sourceFactor!=destFactor&&sourceFactor!=0.0f)
+            {float rescaleFactor=destFactor/sourceFactor;
+             for(int i=0;i<buffer.capacity();i+=5)
+                 {buffer.put(i+2,buffer.get(i+2)*rescaleFactor);
+                  buffer.put(i+3,buffer.get(i+3)*rescaleFactor);
+                  buffer.put(i+4,buffer.get(i+4)*rescaleFactor);
+                 }
+            }
+        System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
+        if(useTexture)
+            pw.println("mtllib "+MTLFilename);
+        if(redundant)
+            {//divide by 20=5*4 because T2_V3 and quad primitives
+             final int facePrimitiveCount=buffer.capacity()/20;
+             //write vertex coordinates
+             for(int i=0;i<buffer.capacity();i+=5)
+                 pw.println("v "+buffer.get(i+2)+" "+buffer.get(i+3)+" "+buffer.get(i+4));
+             if(useTexture)
+                 {//write texture coordinates
+                  if(useJOGLTextureCoordinatesVerticalOrder)
+                      for(int i=0;i<buffer.capacity();i+=5)
+                          pw.println("vt "+buffer.get(i)+" "+buffer.get(i+1));              
+                  else
+                      for(int i=0;i<buffer.capacity();i+=5)
+                          pw.println("vt "+buffer.get(i)+" "+(1.0f-buffer.get(i+1))); 
+                  pw.println("usemtl "+MTLFilename.substring(0,MTLFilename.lastIndexOf(".")));
+                  //smoothing
+                  pw.println("s 1");
+                  //write face primitives
+                  if(useTriangles)
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;                                
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
+                           pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
+                          }
+                  else
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                          }
+                 }
+             else
+                 {//write face primitives
+                  if(useTriangles)
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
+                           pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
+                          }  
+                  else
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                          }
+                 }
+            }
+        else
+            {//TODO: implement it
+             //write vertex coordinates
+                
+             if(useTexture)
+                 {//write texture coordinates
+                     
+                  
+                  pw.println("usemtl "+MTLFilename.substring(0,MTLFilename.lastIndexOf(".")));
+                  //smoothing
+                  pw.println("s 1");
+                  //write face primitives
+                  if(useTriangles)
+                      {
+
+                      }
+                  else
+                      {
+
+                      }
+                 }
+             else
+                 {//write face primitives
+                  if(useTriangles)
+                      {
+                       
+                      }
+                  else
+                      {
+                       
+                      }
+                 }
+            }
+        try{pw.close();
+            bos.close();
+           }
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        System.out.println("Ends writing Wavefront object "+filenamePrefix+".obj.");
+    }
+    
+    static final void writeDummyMTLFile(String directoryname,String MTLFilename,String textureFilename){
+        BufferedOutputStream bos=null;
+        PrintWriter pw=null;
+        System.out.println("Starts writing MTL file "+MTLFilename+" ...");
+        try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+MTLFilename);}
+        catch(IOException ioe)
+        {ioe.printStackTrace();return;}
+        pw=new PrintWriter(bos);
+        //write a MTL file
+        pw.println("newmtl "+MTLFilename.substring(0,MTLFilename.lastIndexOf(".")));
+        pw.println("Ns 0");
+        pw.println("Ka 0.000000 0.000000 0.000000");
+        pw.println("Kd 0.8 0.8 0.8");
+        pw.println("Ks 0.8 0.8 0.8");
+        pw.println("d 1");
+        pw.println("illum 2");
+        pw.println("map_Kd "+textureFilename.substring(textureFilename.lastIndexOf("/")+1));
+        System.out.println("Ends writing MTL file "+MTLFilename+".");
+        try{pw.close();
+            bos.close();
+           } 
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        finally
+        {bos=null;
+         pw=null;
+        }   
     }
     
     private final static DataOutputStream createNewFileFromLocalPathAndGetDataStream(String path)throws IOException{      
@@ -1782,7 +1915,7 @@ public final class TilesGenerator{
         writePrimitive(out,1.0f,1.0f,0.0f,0.0f,1.0f,1.1f,1.0f,0.0f);
     }
        
-    public static boolean removePointPair(List<PointPair> list,PointPair pair){
+    private static boolean removePointPair(List<PointPair> list,PointPair pair){
     	int index=0;
     	for(PointPair p:list)
     		if(p.equals(pair))	        
@@ -1819,7 +1952,7 @@ public final class TilesGenerator{
     
     
     public static void main(String[] args){
-    	if(args.length!=22)
+    	if(args.length!=24)
     	    {System.out.println("Usage: java TilesGenerator"+
     	            " map_filename"+
     	            " tiles_filename"+
@@ -1836,18 +1969,21 @@ public final class TilesGenerator{
     	            " rocket_filename"+
     	            " explosion_filename"+
     	            " impact_filename"+
-    	            " healthPowerUpFilename"+
-    	            " healthPowerUpListFilename"+
-    	            " crosshairFilename"+
-    	            " sphericalBeastFilename"+
-    	            " networkFilename"+
-    	            " networkOBJFilename"+
-    	            " wallTextureFilename");
+    	            " health_powerup_filename"+
+    	            " health_powerup_list_filename"+
+    	            " crosshair_filename"+
+    	            " spherical_beast_filename"+
+    	            " network_filename"+
+    	            " network_OBJ_filename"+
+    	            " wall_texture_filename"+
+    	            " object_texture_filename"+
+    	            " rocket_launcher_OBJ_filename");
     	     System.exit(0);
     	    }
 	    new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
-	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],args[13],
-	        args[14],args[15],args[16],args[17],args[18],args[19],args[20],args[21]);
+	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],
+	        args[13],args[14],args[15],args[16],args[17],args[18],args[19],
+	        args[20],args[21],args[22],args[23]);
     }
     
 }

@@ -171,10 +171,12 @@
 	        	<arg value="pic256/sphericalBeast.data"/>
 	        	<arg value="pic256/network.data"/>
         	    <arg value="obj/level0"/>
-        	    <arg value="pic256/wallTexture.png"/>
+        	    <arg value="pic1024/wallTexture.png"/>
+        	    <arg value="pic256/rocketLauncher.png"/>
+        	    <arg value="obj/rocketLauncher"/>
 	    </java>
 	</target>
-	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
+	<target name="run-jme-data-preprocessor" depends="run-tilesgenerator" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
 		<mkdir dir="${destdir}/jbin"/>
 		<java classname="jme.JMEDataPreprocessor"
 			              fork="true"
