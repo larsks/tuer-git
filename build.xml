@@ -146,8 +146,7 @@
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
-	              >
-        	    <jvmarg value="-Xms1024m"/>
+	              >       	    
         	    <jvmarg value="-Xmx1536m"/>
         	    <!-- The program uses only 512 MB but it might me more on bigger maps -->
 	        	<arg value="pic256/worldmap.gif"/>
@@ -174,6 +173,7 @@
         	    <arg value="pic1024/wallTexture.png"/>
         	    <arg value="pic256/rocketLauncher.png"/>
         	    <arg value="obj/rocketLauncher"/>
+        	    <arg value="obj/rocket"/>
 	    </java>
 	</target>
 	<target name="run-jme-data-preprocessor" depends="run-tilesgenerator" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">

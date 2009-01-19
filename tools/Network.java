@@ -14,12 +14,19 @@
 package tools;
 
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class represents a non-oriented graph whose
+ * nodes are cells.
+ * @author Julien Gouesse
+ *
+ */
 public final class Network implements Serializable{
     
     
@@ -31,8 +38,12 @@ public final class Network implements Serializable{
     
     private transient NetworkController controller;
     
+    private transient LocalizerVisitor localizer;
     
-    public Network(){}
+    
+    public Network(){
+        this.localizer=new LocalizerVisitor(this,0.0f,0.0f,0.0f);
+    }
     
     /**
      * Build a connected graph
@@ -52,6 +63,11 @@ public final class Network implements Serializable{
         List<Full3DCell> full3DCellsList=(List<Full3DCell>)in.readObject();
         buildGraphFromList(full3DCellsList);       
     }   
+    
+    private final Object readResolve() throws ObjectStreamException{
+        this.localizer=new LocalizerVisitor(this,0.0f,0.0f,0.0f);
+        return(this);
+    }
     
     private final void buildGraphFromList(List<Full3DCell> full3DCellsList){
         cellsList=full3DCellsList;              
@@ -275,18 +291,25 @@ public final class Network implements Serializable{
     }
     
     final Full3DCell locate(float x,float y,float z){
-        return(locate(x,y,z,rootCell));
+        return(locate(rootCell,x,y,z));
     }
     
-    /*
+    /**
      * Breadth First Search to locate the cell in which the point is.
      * BFS has been chosen because it is faster when we know that the player has gone 
-     * to a close neighbor of the previous occupied cell
+     * to a close neighbor of the previous occupied cell.
+     * N.B: this implementation is not thread-safe. Use only
+     * one instance of LocalizerVisitor per thread
+     * @param firstTraveledCell
+     * @param x
+     * @param y
+     * @param z
      */
-    static final Full3DCell locate(float x,float y,float z,Full3DCell firstTraveledCell){
-        LocalizerVisitor localizer=new LocalizerVisitor(firstTraveledCell,x,y,z);
-        localizer.visit();
-        return(localizer.getCurrentlyVisitedCell());
+    final Full3DCell locate(Full3DCell firstTraveledCell,float x,float y,float z){
+        //If the visit has been interrupted, it means that a cell has been found
+        //It is important to check this in order to avoid returning the last 
+        //visited cell that might not be the good cell
+        return(localizer.visit(firstTraveledCell,x,y,z)?null:localizer.getCurrentlyVisitedCell());
     }
     
     
@@ -333,20 +356,26 @@ public final class Network implements Serializable{
         /**
          * Starts the visit (not thread-safe)
          */
-        final void visit(){
-            visit(this.firstVisitedCell);
+        final boolean visit(){
+            return(visit(this.firstVisitedCell));
         }
         
-        final void visit(Full3DCell firstVisitedCell){
+        /**
+         * 
+         * @param firstVisitedCell
+         * @return true if the network has been fully visited, otherwise false
+         */
+        final boolean visit(Full3DCell firstVisitedCell){
             clearInternalStorage();
             this.firstVisitedCell=firstVisitedCell;
             markedCellsList.add(firstVisitedCell);
             cellsList.add(firstVisitedCell);
+            boolean hasToContinue=true;
             while(!cellsList.isEmpty())
                 {//Get the next element (pop operation)
                  currentlyVisitedCell=cellsList.remove(getNextCellIndex());
                  //This is the main treatment
-                 if(performTaskOnCurrentlyVisitedCell())
+                 if(hasToContinue=performTaskOnCurrentlyVisitedCell())
                      for(Full3DCell son:currentlyVisitedCell.getNeighboursCellsList())
                          if(!markedCellsList.contains(son))
                              {//Mark the cell to avoid traveling it more than once
@@ -355,6 +384,7 @@ public final class Network implements Serializable{
                               cellsList.add(son);
                              }                   
                 }
+            return(hasToContinue);
         }
         
         private final void clearInternalStorage(){
@@ -432,18 +462,33 @@ public final class Network implements Serializable{
         private float x,y,z;
         
         
-        LocalizerVisitor(Network network,float x,float y,float z){
+        private LocalizerVisitor(Network network,float x,float y,float z){
             this(network.rootCell,x,y,z);
         }
         
 
-        LocalizerVisitor(Full3DCell firstVisitedCell,float x,float y,float z){
+        private LocalizerVisitor(Full3DCell firstVisitedCell,float x,float y,float z){
             super(firstVisitedCell);
             this.x=x;
             this.y=y;
             this.z=z;
         }
         
+        
+        @SuppressWarnings("unused")
+        private final boolean visit(float x,float y,float z){
+            this.x=x;
+            this.y=y;
+            this.z=z;
+            return(visit());
+        }
+        
+        private final boolean visit(Full3DCell firstVisitedCell,float x,float y,float z){
+            this.x=x;
+            this.y=y;
+            this.z=z;
+            return(visit(firstVisitedCell));
+        }
         
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
