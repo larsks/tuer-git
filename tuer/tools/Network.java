@@ -331,9 +331,15 @@ public final class Network implements Serializable{
         }
         
         /**
-         * Starts the visit (call this method only ONCE)
+         * Starts the visit (not thread-safe)
          */
         final void visit(){
+            visit(this.firstVisitedCell);
+        }
+        
+        final void visit(Full3DCell firstVisitedCell){
+            clearInternalStorage();
+            this.firstVisitedCell=firstVisitedCell;
             markedCellsList.add(firstVisitedCell);
             cellsList.add(firstVisitedCell);
             while(!cellsList.isEmpty())
@@ -349,6 +355,12 @@ public final class Network implements Serializable{
                               cellsList.add(son);
                              }                   
                 }
+        }
+        
+        private final void clearInternalStorage(){
+            this.currentlyVisitedCell=null;
+            this.cellsList.clear();
+            this.markedCellsList.clear();
         }
         
         protected abstract int getNextCellIndex();
