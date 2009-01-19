@@ -123,7 +123,7 @@ public final class NetworkSet implements Serializable{
         for(int networkIndex=previousNetworkIndex,j=0;j<networkCount&&currentPositioningCell==null;j++,networkIndex=(networkIndex+1)%networkCount)
             {network=networksList.get(networkIndex);
              if(networkIndex==previousNetworkIndex)
-                 currentPositioningCell=Network.locate(x,y,z,previousFull3DCell);
+                 currentPositioningCell=network.locate(previousFull3DCell,x,y,z);
              else
                  currentPositioningCell=network.locate(x,y,z);  
              currentNetworkIndex=networkIndex;
