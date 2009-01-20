@@ -169,7 +169,15 @@ public final class TilesGenerator{
             String wallTextureFilename,
             String rocketLauncherTextureFilename,
             String rocketLauncherOBJFilename,
-            String rocketOBJFilename){
+            String rocketOBJFilename,
+            String objectTextureFilename,
+            String unbreakableObjectOBJFilename,
+            String vendingMachineOBJFilename,
+            String lampOBJFilename,
+            String chairOBJFilename,
+            String flowerOBJFilename,
+            String tableOBJFilename,
+            String bonsaiOBJFilename){
         topWallsList=new Vector<PointPair>();   
         bottomWallsList=new Vector<PointPair>();
         leftWallsList=new Vector<PointPair>();
@@ -806,7 +814,14 @@ public final class TilesGenerator{
              convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,1.0f,1.0f,true,true,false);
              //need to scale for other objects
              //The same texture is used by the rockets and the rocket launcher
-             convertBinaryToOBJFile(rocketFilename,rocketLauncherTextureFilename,rocketOBJFilename,1.0f,1.0f,true,true,false);
+             convertBinaryToOBJFile(rocketFilename,rocketLauncherTextureFilename,rocketOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(unbreakableObjectFilename,objectTextureFilename,unbreakableObjectOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(vendingMachineFilename,objectTextureFilename,vendingMachineOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(lampFilename,objectTextureFilename,lampOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(chairFilename,objectTextureFilename,chairOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(flowerFilename,objectTextureFilename,flowerOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(tableFilename,objectTextureFilename,tableOBJFilename,factor,1.0f,true,true,false);
+             convertBinaryToOBJFile(bonsaiFilename,objectTextureFilename,bonsaiOBJFilename,factor,1.0f,true,true,false);
             } 
          catch(IOException ioe)
          {ioe.printStackTrace();}
@@ -1956,7 +1971,7 @@ public final class TilesGenerator{
     
     
     public static void main(String[] args){
-    	if(args.length!=25)
+    	if(args.length!=33)
     	    {System.out.println("Usage: java TilesGenerator"+
     	            " map_filename"+
     	            " tiles_filename"+
@@ -1982,13 +1997,22 @@ public final class TilesGenerator{
     	            " wall_texture_filename"+
     	            " rocket_launcher_texture_filename"+
     	            " rocket_launcher_OBJ_filename"+
-    	            " rocket_OBJ_filename");
+    	            " rocket_OBJ_filename"+
+    	            " object_texture_filename"+
+    	            " unbreakable_object_OBJ_filename"+
+    	            " vending_machine_OBJ_filename"+
+    	            " lamp_OBJ_filename"+
+    	            " chair_OBJ_filename"+
+    	            " flower_OBJ_filename"+
+    	            " table_OBJ_filename"+
+    	            " bonsai_OBJ_filename");    	    
     	     System.exit(0);
     	    }
 	    new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
 	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],
 	        args[13],args[14],args[15],args[16],args[17],args[18],args[19],
-	        args[20],args[21],args[22],args[23],args[24]);
+	        args[20],args[21],args[22],args[23],args[24],args[25],args[26],
+	        args[27],args[28],args[29],args[30],args[31],args[32]);
     }
     
 }
