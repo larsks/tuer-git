@@ -6,7 +6,7 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
-final class ConfigurationDetector {
+public final class ConfigurationDetector {
 
     
     private boolean isAlphaTestSupported;
@@ -26,7 +26,7 @@ final class ConfigurationDetector {
     private int maxTextureSize;
     
     
-    ConfigurationDetector(GL gl){
+    public ConfigurationDetector(GL gl){
         this.isAlphaTestSupported=gl.isFunctionAvailable("glAlphaFunc");
         if(gl.isExtensionAvailable("GL_VERSION_2_1"))
             openglVersion="2.1";
@@ -91,31 +91,31 @@ final class ConfigurationDetector {
     }
     
     
-    boolean isAlphaTestSupported(){
+    public final boolean isAlphaTestSupported(){
         return(isAlphaTestSupported);
     }
     
-    boolean isVBOsupported(){
+    public final boolean isVBOsupported(){
         return(isVBOsupported);
     }
     
-    boolean isVertexArraySupported(){
+    public final boolean isVertexArraySupported(){
         return(isVertexArraySupported);
     }
     
-    boolean isDisplayListSupported(){
+    public final boolean isDisplayListSupported(){
         return(isDisplayListSupported);
     }
     
-    boolean isMultiDrawSupported(){
+    public final boolean isMultiDrawSupported(){
         return(isMultiDrawSupported);
     }
     
-    boolean isShaderSupported(){
+    public final boolean isShaderSupported(){
         return(isShaderSupported);
     }
     
-    String getOpenGLVersion(){
+    public final String getOpenGLVersion(){
         return(openglVersion);
     }
 

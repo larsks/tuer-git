@@ -846,7 +846,7 @@ public final class CellsGenerator{
     		 i++;
     		}
     	try{
-    	    ImageIO.write(buffer,"png",new File("pic256/cellsmap.png"));
+    	    ImageIO.write(buffer,"png",new File("texture/cellsmap.png"));
     	   }
     	catch(IOException ioe)
     	{ioe.printStackTrace();}

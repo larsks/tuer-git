@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-
+import main.ConfigurationDetector;
 import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
 import com.jme.util.GameTaskQueue;
@@ -18,10 +18,10 @@ import com.jmex.game.state.GameStateManager;
 import com.jmex.game.state.load.TransitionGameState;
 
 /**
- *
+ * 
+ * @author Julien Gouesse
  *
  */
-
 public final class JMEGameServiceProvider {
 
     private static final Logger logger = Logger.getLogger(JMEGameServiceProvider.class.getName());
@@ -31,16 +31,13 @@ public final class JMEGameServiceProvider {
     private Camera cam;
     
     private JMEGameServiceProvider(){
-        this.game=new JOGLMVCGame();       
+        this.game=new JOGLMVCGame();
         logger.info("JOGLMVCGame created, creating states...");
-        try{
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getClassLoader().getResource("")));
-           } 
+        try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getResource("/texture/")));} 
         catch(URISyntaxException urise) 
         {urise.printStackTrace();}
-        //System.out.println("Classpath ["+System.getProperty("java.class.path")+"]");
         //effectively localize the resource
-        URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"pic1024/starting_screen_bis.png");
+        URL startingTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"starting_screen_bis.png");
         TransitionGameState transitionGameState = new TransitionGameState(20,startingTextureURL);
         GameStateManager.getInstance().attachChild(transitionGameState);
         transitionGameState.setActive(true);
@@ -48,7 +45,7 @@ public final class JMEGameServiceProvider {
         DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
         cam=disp.getRenderer().getCamera();
-        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 1.0F, 10000.0F );
+        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.5F, 5000.0F );
         cam.update();
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");
@@ -60,6 +57,10 @@ public final class JMEGameServiceProvider {
         //GameStateManager.getInstance().activateChildNamed("Intro");
         //At the end of the introduction (that might be skipped), display the menu
         GameStateManager.getInstance().activateChildNamed("Main menu");
+    }
+    
+    public final ConfigurationDetector getConfigurationDetector(){
+        return(game.getConfigurationDetector());
     }
     
     public static final void main(String[] args){
@@ -77,7 +78,7 @@ public final class JMEGameServiceProvider {
         //transitionGameState.setProgress(0,"Initializing Level "+index+" ...");
         //TODO: the level factory loads the common data when used for the first
         //time and the data for a single level at each call
-        Future<GameState> task = GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).enqueue(new LevelLoadTask(index,/*transitionGameState,*/cam));
+        Future<GameState> task = GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).enqueue(new LevelLoadTask(index,/*transitionGameState,*/cam,this));
         //GameState levelGameState=LevelGameState.getInstance(index,transitionGameState,cam);         
         GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).execute();
         GameState levelGameState=null;
@@ -101,16 +102,20 @@ public final class JMEGameServiceProvider {
         
         private Camera cam;
         
+        private JMEGameServiceProvider gameServiceProvider;
         
-        private LevelLoadTask(int index,/*TransitionGameState transitionGameState,*/Camera cam){
+        
+        private LevelLoadTask(int index,/*TransitionGameState transitionGameState,*/
+                Camera cam,JMEGameServiceProvider gameServiceProvider){
             this.index=index;
             //this.transitionGameState=transitionGameState;
             this.cam=cam;
+            this.gameServiceProvider=gameServiceProvider;
         }
         
         @Override
         public GameState call()throws Exception{
-            return(LevelGameState.getInstance(index/*,transitionGameState*/,cam));
+            return(LevelGameState.getInstance(index/*,transitionGameState*/,cam,gameServiceProvider));
         }      
     }
 

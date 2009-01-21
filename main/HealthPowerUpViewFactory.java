@@ -20,6 +20,8 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
+import tools.GameIO;
+
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -54,8 +56,8 @@ final class HealthPowerUpViewFactory extends ViewFactory{
         List<Texture> texturesList=new ArrayList<Texture>(texturesCount); 
         if(loadFully)
             {try{
-                 texturesList.add(TextureIO.newTexture(
-                        getClass().getResource("/pic256/healthPowerUp.png"),
+                 texturesList.add(GameIO.newTexture(
+                        getClass().getResource("/texture/healthPowerUp.png"),
                         false,TextureIO.PNG));
                 }
              catch(IOException ioe)
@@ -88,8 +90,8 @@ final class HealthPowerUpViewFactory extends ViewFactory{
         else
             if(texturesList.size()<texturesCount)
                 {try{
-                     texturesList.add(TextureIO.newTexture(
-                            getClass().getResource("/pic256/healthPowerUp.png"),
+                     texturesList.add(GameIO.newTexture(
+                            getClass().getResource("/texture/healthPowerUp.png"),
                             false,TextureIO.PNG));
                     }
                  catch(IOException ioe)

@@ -7,6 +7,8 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
+import tools.GameIO;
+
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -41,8 +43,8 @@ final class SphericalBeastViewFactory extends ViewFactory {
         List<Texture> texturesList=new ArrayList<Texture>(texturesCount);
         if(loadFully)
             {try{
-                 texturesList.add(TextureIO.newTexture(
-                        getClass().getResource("/pic256/sphericalBeast.png"),
+                 texturesList.add(GameIO.newTexture(
+                        getClass().getResource("/texture/sphericalBeast.png"),
                         false,TextureIO.PNG));
                 }
              catch(IOException ioe)
@@ -74,8 +76,8 @@ final class SphericalBeastViewFactory extends ViewFactory {
              else
                  if(texturesList.size()<texturesCount)
                      {try{
-                          texturesList.add(TextureIO.newTexture(
-                                 getClass().getResource("/pic256/sphericalBeast.png"),
+                          texturesList.add(GameIO.newTexture(
+                                 getClass().getResource("/texture/sphericalBeast.png"),
                                  false,TextureIO.PNG));
                          }
                       catch(IOException ioe)

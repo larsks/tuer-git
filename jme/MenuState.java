@@ -49,7 +49,7 @@ public final class MenuState extends BasicGameState {
     public MenuState(String name,final TransitionGameState trans,final JMEGameServiceProvider serviceProvider,boolean paused){
         super(name);
         Renderer renderer=DisplaySystem.getDisplaySystem().getRenderer();
-        URL quitItemTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"pic512/menuItems.png");
+        URL quitItemTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"menuItems.png");
         TextureState ts=renderer.createTextureState();
         ts.setEnabled(true);
         ts.setTexture(TextureManager.loadTexture(quitItemTextureURL,

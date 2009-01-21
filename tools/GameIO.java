@@ -21,14 +21,23 @@
 package tools;
 
 import com.sun.opengl.util.BufferUtil;
+import com.sun.opengl.util.texture.Texture;
+import com.sun.opengl.util.texture.TextureIO;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import main.GameGLView;
 
-public class GameIO{
+public final class GameIO{
 
     private static final int HEADER_SIZE = 2;
     
@@ -53,7 +62,7 @@ public class GameIO{
     
     public static final List<FloatBuffer> readGameMultiBufferFloatDataFile(String path) throws IOException{
         List<FloatBuffer> coordinatesBufferList=new ArrayList<FloatBuffer>();
-        //TODO: read several buffers from a single file
+        //read several buffers from a single file
         DataInputStream in=new DataInputStream(new BufferedInputStream(GameIO.class.getResourceAsStream(path)));
         int[] headerData;
         FloatBuffer coordinatesBuffer;
@@ -82,4 +91,71 @@ public class GameIO{
         result[VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX]=in.readInt();
         return(result);
     }
+    
+    public static final Texture newTexture(String path,boolean useMipmap,String format)throws IOException{
+        return(newTexture(GameIO.class.getResource(path),useMipmap,format));
+    }
+    
+    public static final Texture newTexture(URL path,boolean useMipmap,String format)throws IOException{
+        ImageIcon imageIcon=new ImageIcon(path);
+        int sourceWidth=imageIcon.getIconWidth();
+        int sourceHeight=imageIcon.getIconHeight();
+        float xScaleFactor=1.0f,yScaleFactor=1.0f;
+        //TODO: compute the scale factors
+        //square image
+        //TODO: check if we support non power of 2 textures
+        if(sourceWidth==sourceHeight)
+            {if(sourceWidth>GameGLView.getGL_MAX_TEXTURE_SIZE())
+                 {xScaleFactor=GameGLView.getGL_MAX_TEXTURE_SIZE()/(float)sourceWidth;
+                  yScaleFactor=xScaleFactor;
+                 }
+            }
+        else
+            {//TODO: check if we support non square textures
+             //non square image
+             if(sourceWidth>GameGLView.getGL_MAX_TEXTURE_SIZE())
+                {if(sourceHeight>GameGLView.getGL_MAX_TEXTURE_SIZE())
+                    {
+                      
+                    }
+                else
+                    {
+                     
+                    }
+               }
+           else
+               {if(sourceHeight>GameGLView.getGL_MAX_TEXTURE_SIZE())
+                    {
+                    }
+               }            
+            }
+        Texture texture;
+        if(xScaleFactor!=1.0f||yScaleFactor!=1.0f)
+            {BufferedImage bsrc=ImageIO.read(path);
+             BufferedImage bdest=new BufferedImage((int)(bsrc.getWidth()*xScaleFactor),(int)(bsrc.getHeight()*yScaleFactor),BufferedImage.TYPE_INT_ARGB);
+             Graphics2D g=bdest.createGraphics();
+             AffineTransform at=AffineTransform.getScaleInstance((double)xScaleFactor,(double)yScaleFactor);
+             g.drawRenderedImage(bsrc,at);              
+             texture=TextureIO.newTexture(bdest,useMipmap);
+             g.dispose();
+            }
+        else
+            texture=TextureIO.newTexture(path,useMipmap,format);
+        return(texture);
+    }
+    
+    /*private static final int nearestPower(int value){
+        int i=1;
+        if(value==0)
+            return(-1);
+        while(true) 
+            {if(value==1)
+                 return(i);
+             else 
+                 if(value==3)
+                     return(i*4);
+             value>>=1;
+             i*=2;
+            }
+    }*/
 }
