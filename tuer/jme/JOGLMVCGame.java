@@ -6,6 +6,8 @@ import java.awt.Toolkit;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.glu.GLU;
+import main.ConfigurationDetector;
 import com.jme.input.KeyInput;
 import com.jme.input.MouseInput;
 import com.jme.input.joystick.JoystickInput;
@@ -26,6 +28,8 @@ public final class JOGLMVCGame{
     private static final Logger logger = Logger.getLogger(JOGLMVCGame.class.getName());
     
     private Animator animator;
+    
+    private ConfigurationDetector configurationDetector;
     
     public JOGLMVCGame(){
         //initialize game state machine
@@ -59,6 +63,8 @@ public final class JOGLMVCGame{
         try{GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Object>(){
                 @Override
                 public Object call() throws Exception{
+                    //load the configuration
+                    configurationDetector=new ConfigurationDetector(GLU.getCurrentGL());
                     logger.info("JOGLMVCGame ready to be used, context initialized");
                     return(null);
                 }}).get();
@@ -88,6 +94,10 @@ public final class JOGLMVCGame{
         DisplaySystem.getDisplaySystem().close();
         animator.stop();
         System.exit(0);
+    }
+    
+    public final ConfigurationDetector getConfigurationDetector(){
+        return(configurationDetector);
     }
     
     private static final class GenericImplementor extends SimpleCanvasImpl{

@@ -20,6 +20,8 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
+import tools.GameIO;
+
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -60,8 +62,8 @@ public final class ExplosionViewFactory extends ViewFactory{
              for(int i=0;i<texturesCount;i++)
                  {strIndex = (i<10?"0":"") + Integer.toString(i);
                   try{
-                      texturesList.add(TextureIO.newTexture(
-                             getClass().getResource("/pic256/obj01"+strIndex+".png"),
+                      texturesList.add(GameIO.newTexture(
+                             getClass().getResource("/texture/obj01"+strIndex+".png"),
                              false,TextureIO.PNG));
                      }
                   catch(IOException ioe)
@@ -97,8 +99,8 @@ public final class ExplosionViewFactory extends ViewFactory{
                 {String strIndex = (texturesList.size()<10?"0":"")+
                     Integer.toString(texturesList.size());
                  try{
-                     texturesList.add(TextureIO.newTexture(
-                           getClass().getResource("/pic256/obj01"+strIndex+".png"),
+                     texturesList.add(GameIO.newTexture(
+                           getClass().getResource("/texture/obj01"+strIndex+".png"),
                            false,TextureIO.PNG));
                     }
                  catch(IOException ioe)

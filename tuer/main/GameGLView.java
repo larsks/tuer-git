@@ -34,6 +34,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 import tools.Full3DCellView;
+import tools.GameIO;
 import tools.NetworkViewSet;
 
 /**
@@ -43,7 +44,7 @@ import tools.NetworkViewSet;
  * @author Julien Gouesse
  */
 
-class GameGLView implements GLEventListener{
+public class GameGLView implements GLEventListener{
     
     
     private GLU glu;  
@@ -170,8 +171,6 @@ class GameGLView implements GLEventListener{
     private static int GL_MAX_TEXTURE_SIZE;
     
     private ViewFrustumCullingPerformer softwareViewFrustumCullingPerformer;
-    
-    private static final boolean politicalMessagesEnabled=false;
     
     private static final float[] neutralColor = {1.0f,1.0f,1.0f};
     
@@ -850,87 +849,63 @@ class GameGLView implements GLEventListener{
 	         loadProgress+=HealthPowerUpViewFactory.getInstance(false).getVertexSetsList().size();
 	         loadProgress+=ExplosionViewFactory.getInstance(false).getVertexSetsList().size();	         
 	         try{if(this.levelTexture==null)
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.levelTexture=TextureIO.newTexture(getClass().getResource("/pic1024/wallTexture.png"),false,TextureIO.PNG);	                  
-	                  else
-	                      this.levelTexture=TextureIO.newTexture(getClass().getResource("/pic256/wallTexture.png"),false,TextureIO.PNG);
+	                 {this.levelTexture=GameIO.newTexture(getClass().getResource("/texture/wallTexture.png"),false,TextureIO.PNG);
 	                  this.levelTexture.setTexParameteri(GL.GL_TEXTURE_PRIORITY,1);
 	                  return;
 	                 }
 	             else
                      loadProgress+=1;
 	             if(this.artTexture1==null)
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.artTexture1=TextureIO.newTexture(getClass().getResource("/pic1024/wallArt1.png"),false,TextureIO.PNG);
-	                  else
-	                      this.artTexture1=TextureIO.newTexture(getClass().getResource("/pic256/wallArt1.png"),false,TextureIO.PNG);
+	                 {this.artTexture1=GameIO.newTexture(getClass().getResource("/texture/wallArt1.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.artTexture2==null)     
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.artTexture2=TextureIO.newTexture(getClass().getResource("/pic1024/wallArt2.png"),false,TextureIO.PNG);
-	                  else
-	                      this.artTexture2=TextureIO.newTexture(getClass().getResource("/pic256/wallArt2.png"),false,TextureIO.PNG);
+	                 {this.artTexture2=GameIO.newTexture(getClass().getResource("/texture/wallArt2.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.artTexture3==null)     
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.artTexture3=TextureIO.newTexture(getClass().getResource("/pic1024/wallArt3.png"),false,TextureIO.PNG);
-	                  else
-	                      this.artTexture3=TextureIO.newTexture(getClass().getResource("/pic256/wallArt3.png"),false,TextureIO.PNG);
+	                 {this.artTexture3=GameIO.newTexture(getClass().getResource("/texture/wallArt3.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.artTexture4==null)     
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.artTexture4=TextureIO.newTexture(getClass().getResource("/pic1024/wallArt4.png"),false,TextureIO.PNG);   
-	                  else
-	                      this.artTexture4=TextureIO.newTexture(getClass().getResource("/pic256/wallArt4.png"),false,TextureIO.PNG);
+	                 {this.artTexture4=GameIO.newTexture(getClass().getResource("/texture/wallArt4.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.objectsTexture==null)     
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.objectsTexture=TextureIO.newTexture(getClass().getResource("/pic1024/objects.png"),false,TextureIO.PNG);
-	                  else
-	                      this.objectsTexture=TextureIO.newTexture(getClass().getResource("/pic256/objects.png"),false,TextureIO.PNG);
+	                 {this.objectsTexture=GameIO.newTexture(getClass().getResource("/texture/objects.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.botTexture1==null)
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.botTexture1=TextureIO.newTexture(getClass().getResource("/pic1024/bot1.png"),false,TextureIO.PNG);
-	                  else
-	                      this.botTexture1=TextureIO.newTexture(getClass().getResource("/pic256/bot1.png"),false,TextureIO.PNG);
+	                 {this.botTexture1=GameIO.newTexture(getClass().getResource("/texture/bot1.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.botTexture2==null)
-	                 {if(GL_MAX_TEXTURE_SIZE >= 1024)
-	                      this.botTexture2=TextureIO.newTexture(getClass().getResource("/pic1024/bot2.png"),false,TextureIO.PNG);
-	                  else
-	                      this.botTexture2=TextureIO.newTexture(getClass().getResource("/pic256/bot2.png"),false,TextureIO.PNG);
+	                 {this.botTexture2=GameIO.newTexture(getClass().getResource("/texture/bot2.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.rocketLauncherTexture==null)
-	                 {this.rocketLauncherTexture=TextureIO.newTexture(getClass().getResource("/pic256/rocketLauncher.png"),false,TextureIO.PNG);	                  
+	                 {this.rocketLauncherTexture=GameIO.newTexture(getClass().getResource("/texture/rocketLauncher.png"),false,TextureIO.PNG);	                  
                       this.rocketLauncherTexture.setTexParameteri(GL.GL_TEXTURE_PRIORITY,1);
 	                  return;
 	                 }
 	             else
 	                 loadProgress+=1;
 	             if(this.impactTexture==null)
-	                 {this.impactTexture=TextureIO.newTexture(getClass().getResource("/pic256/wallRocketImpact.png"),false,TextureIO.PNG);
+	                 {this.impactTexture=GameIO.newTexture(getClass().getResource("/texture/wallRocketImpact.png"),false,TextureIO.PNG);
 	                  return;
 	                 }
 	             else
@@ -985,20 +960,8 @@ class GameGLView implements GLEventListener{
     	//get max texture size
         GL_MAX_TEXTURE_SIZE=configurationDetector.getMaxTextureSize();	
         this.textRenderer=new TextRenderer(new Font("SansSerif",Font.BOLD,12));
-    	try{
-    	    if(politicalMessagesEnabled)
-    	        {if(GL_MAX_TEXTURE_SIZE >= 1024)
-    	             this.startingScreenTexture=TextureIO.newTexture(getClass().getResource("/pic1024/starting_screen_bis_beijing2008.png"),false,TextureIO.PNG);
-    	         else
-    	             this.startingScreenTexture=TextureIO.newTexture(getClass().getResource("/pic256/starting_screen_bis_beijing2008.png"),false,TextureIO.PNG);
-    	        }    	        
-    	    else
-    	        {if(GL_MAX_TEXTURE_SIZE >= 1024)
-    	             this.startingScreenTexture=TextureIO.newTexture(getClass().getResource("/pic1024/starting_screen_bis.png"),false,TextureIO.PNG);
-    	         else
-    	             this.startingScreenTexture=TextureIO.newTexture(getClass().getResource("/pic256/starting_screen_bis.png"),false,TextureIO.PNG);
-    	        }   	        
-    	    this.startingMenuTexture=TextureIO.newTexture(getClass().getResource("/pic256/starting_menu.png"),false,TextureIO.PNG);   	    
+    	try{this.startingScreenTexture=GameIO.newTexture(getClass().getResource("/texture/starting_screen_bis.png"),false,TextureIO.PNG);          	        
+    	    this.startingMenuTexture=GameIO.newTexture(getClass().getResource("/texture/starting_menu.png"),false,TextureIO.PNG);   	    
     	   }
         catch(IOException ioe){ioe.printStackTrace();}
     	this.useAlphaTest=configurationDetector.isAlphaTestSupported();
@@ -1117,6 +1080,10 @@ class GameGLView implements GLEventListener{
     
     final void addNewItem(HealthPowerUpView hpuv){
         this.objectViewList.add(hpuv);
+    }
+
+    public static final int getGL_MAX_TEXTURE_SIZE(){
+        return GL_MAX_TEXTURE_SIZE;
     }
     
     /*private final void removeUselessObjectViews(){

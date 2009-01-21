@@ -146,9 +146,9 @@
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
-	              >       	    
-        	    <jvmarg value="-Xmx1536m"/>
-        	    <!-- The program uses only 512 MB but it might me more on bigger maps -->
+	              >     
+<!-- The program uses only 512 MB but it might me more on bigger maps -->
+        	    <jvmarg value="-Xmx1536m"/>       	    
 	        	<arg value="pic256/worldmap.gif"/>
 	        	<arg value="pic256/worldmap.data"/>
 	        	<arg value="pic256/rocketLauncher.data"/>
