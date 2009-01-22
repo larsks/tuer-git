@@ -5,7 +5,7 @@
 com         -  Ogg Vorbis sound loader classes
 drawer      -  drawing classes based on OpenGL
 md3         -  test version of my MD3 viewer
-pic256      -  game images
+texture     -  game images
 snd         -  game sound,
                both as .au for JDK1 and .ogg for JDK2.
                Search the web for "OggEnc",

@@ -49,6 +49,7 @@
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<delete dir="${destdir}/obj" failonerror="false" />
+    	<delete dir="${destdir}/data" failonerror="false" />
     	<delete dir="${destdir}/jbin" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
@@ -141,7 +142,8 @@
     </target>
 	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
 	    <mkdir dir="${destdir}/xml" />
-		<mkdir dir="${destdir}/obj" />		
+		<mkdir dir="${destdir}/obj" />
+		<mkdir dir="${destdir}/data" />
         <java classname="tools.TilesGenerator"
 	              fork="true"
 	              dir="${destdir}"
@@ -149,32 +151,32 @@
 	              >     
 <!-- The program uses only 512 MB but it might me more on bigger maps -->
         	    <jvmarg value="-Xmx1536m"/>       	    
-	        	<arg value="pic256/worldmap.gif"/>
-	        	<arg value="pic256/worldmap.data"/>
-	        	<arg value="pic256/rocketLauncher.data"/>
-	        	<arg value="pic256/binaryWorldmap.data"/>
-	        	<arg value="pic256/bot.data"/>
-	        	<arg value="pic256/unbreakableObject.data"/>	        	
-	        	<arg value="pic256/vendingMachine.data"/>
-	        	<arg value="pic256/lamp.data"/>
-	        	<arg value="pic256/chair.data"/>
-	        	<arg value="pic256/flower.data"/>
-	        	<arg value="pic256/table.data"/>
-	        	<arg value="pic256/bonsai.data"/>
-	        	<arg value="pic256/rocket.data"/>
-	        	<arg value="pic256/explosion.data"/>
-	        	<arg value="pic256/impact.data"/>
-	        	<arg value="pic256/healthPowerUp.data"/>
+	        	<arg value="texture/worldmap.gif"/>
+	        	<arg value="data/worldmap.data"/>
+	        	<arg value="data/rocketLauncher.data"/>
+	        	<arg value="data/binaryWorldmap.data"/>
+	        	<arg value="data/bot.data"/>
+	        	<arg value="data/unbreakableObject.data"/>	        	
+	        	<arg value="data/vendingMachine.data"/>
+	        	<arg value="data/lamp.data"/>
+	        	<arg value="data/chair.data"/>
+	        	<arg value="data/flower.data"/>
+	        	<arg value="data/table.data"/>
+	        	<arg value="data/bonsai.data"/>
+	        	<arg value="data/rocket.data"/>
+	        	<arg value="data/explosion.data"/>
+	        	<arg value="data/impact.data"/>
+	        	<arg value="data/healthPowerUp.data"/>
 	        	<arg value="xml/itemList.xml"/>
-	        	<arg value="pic256/crosshair.data"/>
-	        	<arg value="pic256/sphericalBeast.data"/>
-	        	<arg value="pic256/network.data"/>
+	        	<arg value="data/crosshair.data"/>
+	        	<arg value="data/sphericalBeast.data"/>
+	        	<arg value="data/network.data"/>
         	    <arg value="obj/level0"/>
-        	    <arg value="pic1024/wallTexture.png"/>
-        	    <arg value="pic256/rocketLauncher.png"/>
+        	    <arg value="texture/wallTexture.png"/>
+        	    <arg value="texture/rocketLauncher.png"/>
         	    <arg value="obj/rocketLauncher"/>
         	    <arg value="obj/rocket"/>
-        	    <arg value="pic1024/objects.png"/>
+        	    <arg value="texture/objects.png"/>
         	    <arg value="obj/unbreakableObject"/>	        	
         		<arg value="obj/vendingMachine"/>
         		<arg value="obj/lamp"/>
@@ -194,7 +196,7 @@
 			<jvmarg value="-Xmx1536m"/>
 			<arg value="obj/level0.obj"/>
 			<arg value="obj/terrain.mtl"/>
-			<arg value="pic256/wallTexture.png"/>
+			<arg value="texture/wallTexture.png"/>
 			<arg value="jbin/level0.jbin"/>
 	    </java>
 	</target>

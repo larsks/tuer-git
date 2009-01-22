@@ -16,7 +16,7 @@ final class SphericalBeastModelFactory extends ModelFactory{
     private SphericalBeastModelFactory(){
         List<FloatBuffer> coordinatesBuffersList=null;
         try{
-            coordinatesBuffersList=GameIO.readGameMultiBufferFloatDataFile("/pic256/sphericalBeast.data");
+            coordinatesBuffersList=GameIO.readGameMultiBufferFloatDataFile("/data/sphericalBeast.data");
            }
         catch(IOException ioe)
         {ioe.printStackTrace();}

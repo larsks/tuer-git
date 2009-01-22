@@ -313,7 +313,7 @@ public class GameModel{
         catch(Throwable t)
         {throw new RuntimeException("Unable to decode XML file",t);}
         this.initialHealthPowerUpModelList=new Vector<HealthPowerUpModel>();        
-        try{DataInputStream in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/worldmap.data")));
+        try{DataInputStream in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/data/worldmap.data")));
             int i,count=0,artWorksCount1,artWorksCount2,artWorksCount3,artWorksCount4;
             //read the data for the walls of the level
             for(i=0;i<6;i++)
@@ -405,18 +405,18 @@ public class GameModel{
                  this.initialCollisionMap[i]=this.collisionMap[i];
                 }                                   
             in.close();              
-            unbreakableObjectCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/unbreakableObject.data");          
-            vendingMachineCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/vendingMachine.data");
-            lampCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/lamp.data");
-            chairCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/chair.data");
-            flowerCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/flower.data");
-            tableCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/table.data");
-            bonsaiCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/bonsai.data");            
-            botCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/bot.data");
-            rocketLauncherCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/rocketLauncher.data");
-            rocketCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/rocket.data");
-            impactCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/impact.data");
-            crosshairCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/crosshair.data");
+            unbreakableObjectCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/unbreakableObject.data");          
+            vendingMachineCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/vendingMachine.data");
+            lampCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/lamp.data");
+            chairCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/chair.data");
+            flowerCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/flower.data");
+            tableCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/table.data");
+            bonsaiCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/bonsai.data");            
+            botCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/bot.data");
+            rocketLauncherCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/rocketLauncher.data");
+            rocketCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/rocket.data");
+            impactCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/impact.data");
+            crosshairCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/crosshair.data");
             //start the factories
             ExplosionModelFactory.getInstance();
             HealthPowerUpModelFactory.getInstance();
@@ -429,7 +429,7 @@ public class GameModel{
                 }
             //read the binary version of the world map built from the pixmap
             mapData = new int[mapSize];
-            in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/binaryWorldmap.data")));
+            in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/data/binaryWorldmap.data")));
             for(i=0;i<mapData.length;i++)
                 mapData[i]=in.readInt();
             in.close();
@@ -441,7 +441,7 @@ public class GameModel{
     private final void loadNetworkSet(){
         //read a list of networks
         ObjectInputStream ois=null;
-        try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/pic256/network.data")));
+        try{ois=new ObjectInputStream(new BufferedInputStream(getClass().getResourceAsStream("/data/network.data")));
             networkSet=(NetworkSet)ois.readObject();
             ois.close();
            }
