@@ -17,7 +17,7 @@ final class HealthPowerUpModelFactory extends ModelFactory {
         List<FloatBuffer> coordinatesBuffersList=new Vector<FloatBuffer>(1);
         FloatBuffer healthPowerUpCoordinatesBuffer=null;
         try{
-            healthPowerUpCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/healthPowerUp.data");
+            healthPowerUpCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/healthPowerUp.data");
            }
         catch(IOException ioe)
         {ioe.printStackTrace();}                   

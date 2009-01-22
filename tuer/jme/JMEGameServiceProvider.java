@@ -140,7 +140,7 @@ public final class JMEGameServiceProvider {
         this.game=new StandardGame("TUER",GameType.GRAPHICAL,pgs);
         this.game.start();
 //      TODO: prepare resource loading
-        try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getClassLoader().getResource("pic256/")));
+        try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getClassLoader().getResource("/texture/")));
 
         } 
         catch(URISyntaxException urise) 

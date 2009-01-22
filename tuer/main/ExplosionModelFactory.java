@@ -31,7 +31,7 @@ final class ExplosionModelFactory extends ModelFactory {
         List<FloatBuffer> coordinatesBuffersList=new Vector<FloatBuffer>(coordinatesBuffer.length);
         FloatBuffer explosionCoordinatesBuffer=null;
         try{
-            explosionCoordinatesBuffer=GameIO.readGameFloatDataFile("/pic256/explosion.data");
+            explosionCoordinatesBuffer=GameIO.readGameFloatDataFile("/data/explosion.data");
            }
         catch(IOException ioe)
         {ioe.printStackTrace();}
