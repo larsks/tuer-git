@@ -16,6 +16,7 @@
 	<property name="keypass" value="xxxxxxx"/>
 	<property name="storepass" value="xxxxxxx"/>
 	<property name="dname" value="x"/>
+	<property name="jogllibpath" value="/home/julien/Documents/installation/jogl-1.1.1-linux-i586/lib/"/>
 
     <!-- Allow user to override properties without editing this file -->
     <property file="${user.home}/.ant.properties" />
@@ -27,11 +28,9 @@
     <!-- Temporarily, the JME version is ignored -->
 	<!-- excludes="jme/" -->
 	<target name="compile" description="Compiles the source code">
-
         <javac srcdir="${srcdir}"       	   
                destdir="${destdir}"
                debug="on" >
-
             <include name="**/*.java"/>
         </javac>
 
@@ -125,7 +124,7 @@
     <!-- =================================================================== -->
     <!-- Build                                                               -->
     <!-- =================================================================== -->
-    <target name="build" depends="clean, compile, run-tilesgenerator, dist"
+    <target name="build" depends="clean, compile, run-datapreprocessor, dist"
         description="Performs a clean build of the source code and create the java archive"/>
 
 
@@ -140,53 +139,54 @@
               >
         </java>
     </target>
-	<target name="run-tilesgenerator" description="Runs the program that generates the tiles and the cells">
-	    <mkdir dir="${destdir}/xml" />
-		<mkdir dir="${destdir}/obj" />
-		<mkdir dir="${destdir}/data" />
-        <java classname="tools.TilesGenerator"
-	              fork="true"
-	              dir="${destdir}"
-	              failonerror="true"
-	              >     
-<!-- The program uses only 512 MB but it might me more on bigger maps -->
-        	    <jvmarg value="-Xmx1536m"/>       	    
-	        	<arg value="texture/worldmap.gif"/>
-	        	<arg value="data/worldmap.data"/>
-	        	<arg value="data/rocketLauncher.data"/>
-	        	<arg value="data/binaryWorldmap.data"/>
-	        	<arg value="data/bot.data"/>
-	        	<arg value="data/unbreakableObject.data"/>	        	
-	        	<arg value="data/vendingMachine.data"/>
-	        	<arg value="data/lamp.data"/>
-	        	<arg value="data/chair.data"/>
-	        	<arg value="data/flower.data"/>
-	        	<arg value="data/table.data"/>
-	        	<arg value="data/bonsai.data"/>
-	        	<arg value="data/rocket.data"/>
-	        	<arg value="data/explosion.data"/>
-	        	<arg value="data/impact.data"/>
-	        	<arg value="data/healthPowerUp.data"/>
-	        	<arg value="xml/itemList.xml"/>
-	        	<arg value="data/crosshair.data"/>
-	        	<arg value="data/sphericalBeast.data"/>
-	        	<arg value="data/network.data"/>
-        	    <arg value="obj/level0"/>
-        	    <arg value="texture/wallTexture.png"/>
-        	    <arg value="texture/rocketLauncher.png"/>
-        	    <arg value="obj/rocketLauncher"/>
-        	    <arg value="obj/rocket"/>
-        	    <arg value="texture/objects.png"/>
-        	    <arg value="obj/unbreakableObject"/>	        	
-        		<arg value="obj/vendingMachine"/>
-        		<arg value="obj/lamp"/>
-        		<arg value="obj/chair"/>
-        		<arg value="obj/flower"/>
-        		<arg value="obj/table"/>
-        		<arg value="obj/bonsai"/>
-	    </java>
-	</target>
-	<target name="run-jme-data-preprocessor" depends="run-tilesgenerator" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
+	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
+		    <mkdir dir="${destdir}/xml" />
+			<mkdir dir="${destdir}/obj" />
+			<mkdir dir="${destdir}/data" />
+	        <java classname="connection.DataPreprocessor"
+		              fork="true"
+		              dir="${destdir}"
+		              failonerror="true"
+		              >     
+	<!-- The program uses only 512 MB but it might me more on bigger maps -->
+	        	    <jvmarg value="-Xmx1536m"/>       	    
+		        	<arg value="texture/worldmap.gif"/>
+		        	<arg value="data/worldmap.data"/>
+		        	<arg value="data/rocketLauncher.data"/>
+		        	<arg value="data/binaryWorldmap.data"/>
+		        	<arg value="data/bot.data"/>
+		        	<arg value="data/unbreakableObject.data"/>	        	
+		        	<arg value="data/vendingMachine.data"/>
+		        	<arg value="data/lamp.data"/>
+		        	<arg value="data/chair.data"/>
+		        	<arg value="data/flower.data"/>
+		        	<arg value="data/table.data"/>
+		        	<arg value="data/bonsai.data"/>
+		        	<arg value="data/rocket.data"/>
+		        	<arg value="data/explosion.data"/>
+		        	<arg value="data/impact.data"/>
+		        	<arg value="data/healthPowerUp.data"/>
+		        	<arg value="xml/itemList.xml"/>
+		        	<arg value="data/crosshair.data"/>
+		        	<arg value="data/sphericalBeast.data"/>
+		        	<arg value="data/network.data"/>
+	        	    <arg value="obj/level0"/>
+	        	    <arg value="texture/wallTexture.png"/>
+	        	    <arg value="texture/rocketLauncher.png"/>
+	        	    <arg value="obj/rocketLauncher"/>
+	        	    <arg value="obj/rocket"/>
+	        	    <arg value="texture/objects.png"/>
+	        	    <arg value="obj/unbreakableObject"/>	        	
+	        		<arg value="obj/vendingMachine"/>
+	        		<arg value="obj/lamp"/>
+	        		<arg value="obj/chair"/>
+	        		<arg value="obj/flower"/>
+	        		<arg value="obj/table"/>
+	        		<arg value="obj/bonsai"/>
+	        	    <arg value="data/level0.data"/>
+		</java>
+	</target>	
+	<target name="run-jme-data-preprocessor" depends="run-datapreprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
 		<mkdir dir="${destdir}/jbin"/>
 		<java classname="jme.JMEDataPreprocessor"
 			              fork="true"

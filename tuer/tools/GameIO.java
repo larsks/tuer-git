@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import main.GameGLView;
 
 public final class GameIO{
 
@@ -92,57 +91,78 @@ public final class GameIO{
         return(result);
     }
     
-    public static final Texture newTexture(String path,boolean useMipmap,String format)throws IOException{
-        return(newTexture(GameIO.class.getResource(path),useMipmap,format));
-    }
-    
-    public static final Texture newTexture(URL path,boolean useMipmap,String format)throws IOException{
-        ImageIcon imageIcon=new ImageIcon(path);
-        int sourceWidth=imageIcon.getIconWidth();
-        int sourceHeight=imageIcon.getIconHeight();
-        float xScaleFactor=1.0f,yScaleFactor=1.0f;
-        //TODO: compute the scale factors
-        //square image
-        //TODO: check if we support non power of 2 textures
-        if(sourceWidth==sourceHeight)
-            {if(sourceWidth>GameGLView.getGL_MAX_TEXTURE_SIZE())
-                 {xScaleFactor=GameGLView.getGL_MAX_TEXTURE_SIZE()/(float)sourceWidth;
-                  yScaleFactor=xScaleFactor;
-                 }
-            }
-        else
-            {//TODO: check if we support non square textures
-             //non square image
-             if(sourceWidth>GameGLView.getGL_MAX_TEXTURE_SIZE())
-                {if(sourceHeight>GameGLView.getGL_MAX_TEXTURE_SIZE())
-                    {
-                      
-                    }
-                else
-                    {
-                     
-                    }
-               }
-           else
-               {if(sourceHeight>GameGLView.getGL_MAX_TEXTURE_SIZE())
-                    {
-                    }
-               }            
-            }
-        Texture texture;
-        if(xScaleFactor!=1.0f||yScaleFactor!=1.0f)
-            {BufferedImage bsrc=ImageIO.read(path);
-             BufferedImage bdest=new BufferedImage((int)(bsrc.getWidth()*xScaleFactor),(int)(bsrc.getHeight()*yScaleFactor),BufferedImage.TYPE_INT_ARGB);
-             Graphics2D g=bdest.createGraphics();
-             AffineTransform at=AffineTransform.getScaleInstance((double)xScaleFactor,(double)yScaleFactor);
-             g.drawRenderedImage(bsrc,at);              
-             texture=TextureIO.newTexture(bdest,useMipmap);
-             g.dispose();
-            }
-        else
-            texture=TextureIO.newTexture(path,useMipmap,format);
-        return(texture);
-    }
+    public static final class TextureFactory{
+        
+        private int maxTextureSize;
+        
+        private static TextureFactory instance;
+        
+        
+        private TextureFactory(int maxTextureSize){
+            this.maxTextureSize=maxTextureSize;
+        }
+        
+        
+        public static final void createFactory(int maxTextureSize){
+            instance=new TextureFactory(maxTextureSize);
+        }
+        
+        public static final TextureFactory getInstance(){
+            return(instance);
+        }
+        
+        public final Texture newTexture(String path,boolean useMipmap,String format)throws IOException{
+            return(newTexture(GameIO.class.getResource(path),useMipmap,format));
+        }
+        
+        public final Texture newTexture(URL path,boolean useMipmap,String format)throws IOException{
+            ImageIcon imageIcon=new ImageIcon(path);
+            int sourceWidth=imageIcon.getIconWidth();
+            int sourceHeight=imageIcon.getIconHeight();
+            float xScaleFactor=1.0f,yScaleFactor=1.0f;
+            //TODO: compute the scale factors
+            //square image
+            //TODO: check if we support non power of 2 textures
+            if(sourceWidth==sourceHeight)
+                {if(sourceWidth>maxTextureSize)
+                     {xScaleFactor=maxTextureSize/(float)sourceWidth;
+                      yScaleFactor=xScaleFactor;
+                     }
+                }
+            else
+                {//TODO: check if we support non square textures
+                 //non square image
+                 if(sourceWidth>maxTextureSize)
+                    {if(sourceHeight>maxTextureSize)
+                        {
+                          
+                        }
+                    else
+                        {
+                         
+                        }
+                   }
+               else
+                   {if(sourceHeight>maxTextureSize)
+                        {
+                        }
+                   }            
+                }
+            Texture texture;
+            if(xScaleFactor!=1.0f||yScaleFactor!=1.0f)
+                {BufferedImage bsrc=ImageIO.read(path);
+                 BufferedImage bdest=new BufferedImage((int)(bsrc.getWidth()*xScaleFactor),(int)(bsrc.getHeight()*yScaleFactor),BufferedImage.TYPE_INT_ARGB);
+                 Graphics2D g=bdest.createGraphics();
+                 AffineTransform at=AffineTransform.getScaleInstance((double)xScaleFactor,(double)yScaleFactor);
+                 g.drawRenderedImage(bsrc,at);              
+                 texture=TextureIO.newTexture(bdest,useMipmap);
+                 g.dispose();
+                }
+            else
+                texture=TextureIO.newTexture(path,useMipmap,format);
+            return(texture);
+        }
+    }  
     
     /*private static final int nearestPower(int value){
         int i=1;

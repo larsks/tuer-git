@@ -62,7 +62,7 @@ public final class ExplosionViewFactory extends ViewFactory{
              for(int i=0;i<texturesCount;i++)
                  {strIndex = (i<10?"0":"") + Integer.toString(i);
                   try{
-                      texturesList.add(GameIO.newTexture(
+                      texturesList.add(GameIO.TextureFactory.getInstance().newTexture(
                              getClass().getResource("/texture/obj01"+strIndex+".png"),
                              false,TextureIO.PNG));
                      }
@@ -99,7 +99,7 @@ public final class ExplosionViewFactory extends ViewFactory{
                 {String strIndex = (texturesList.size()<10?"0":"")+
                     Integer.toString(texturesList.size());
                  try{
-                     texturesList.add(GameIO.newTexture(
+                     texturesList.add(GameIO.TextureFactory.getInstance().newTexture(
                            getClass().getResource("/texture/obj01"+strIndex+".png"),
                            false,TextureIO.PNG));
                     }
