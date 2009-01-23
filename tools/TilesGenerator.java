@@ -26,9 +26,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+//TODO: remove these dependences
 import main.HealthPowerUpModel;
 import main.HealthPowerUpModelBean;
 
@@ -146,6 +149,7 @@ public final class TilesGenerator{
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP=25;
     //dirty walls (from 26 to 40) removed as useless
+    private static final int parameterCount=34;
 
     
     public TilesGenerator(String mapFilename,String tilesFilename,
@@ -756,7 +760,7 @@ public final class TilesGenerator{
 	              texturePos=artIndex%artPerTexture;	       
 	             }       
 	         //write the collision map
-	         out.write(collisionMap,0,65536);     
+	         out.write(collisionMap,0,65536);
 	         //put the initial point
 	         out.writeInt(initialPosition.x);
 	         out.writeInt(initialPosition.y);
@@ -1944,7 +1948,7 @@ public final class TilesGenerator{
     	return(false);
     }
     
-    private final static void writeHealthPowerUpList(String filename){
+    private static final void writeHealthPowerUpList(String filename){
         List<HealthPowerUpModelBean> healthPowerUpList=new Vector<HealthPowerUpModelBean>();
         HealthPowerUpModel hpum=new HealthPowerUpModel(115*factor,-0.4f*factor,219*factor,0,0,null,"You picked up a medikit",20);
         //fill the list
@@ -1953,10 +1957,10 @@ public final class TilesGenerator{
         encodeObjectInFile(healthPowerUpList,filename);
     }
     
-    private final static void encodeObjectInFile(Object o,String filename){
+    private static final void encodeObjectInFile(Object o,String filename){
         BufferedOutputStream bos=null;
         try{bos=createNewFileFromLocalPathAndGetBufferedStream(filename);
-            XMLEncoder encoder = new XMLEncoder(bos);
+            XMLEncoder encoder=new XMLEncoder(bos);
             encoder.writeObject(o);
             encoder.close();
            }
@@ -1969,50 +1973,77 @@ public final class TilesGenerator{
         }       
     }
     
-    
-    public static void main(String[] args){
-    	if(args.length!=33)
-    	    {System.out.println("Usage: java TilesGenerator"+
-    	            " map_filename"+
-    	            " tiles_filename"+
-    	            " rocketlauncher_filename"+
-    	            " binary_map_filename"+
-    	            " bot_filename"+
-    	            " unbreakable_object_filename"+
-    	            " vending_machine_filename"+
-    	            " lamp_filename"+
-    	            " chair_filename"+
-    	            " flower_filename"+
-    	            " table_filename"+
-    	            " bonsai_filename"+
-    	            " rocket_filename"+
-    	            " explosion_filename"+
-    	            " impact_filename"+
-    	            " health_powerup_filename"+
-    	            " health_powerup_list_filename"+
-    	            " crosshair_filename"+
-    	            " spherical_beast_filename"+
-    	            " network_filename"+
-    	            " network_OBJ_filename"+
-    	            " wall_texture_filename"+
-    	            " rocket_launcher_texture_filename"+
-    	            " rocket_launcher_OBJ_filename"+
-    	            " rocket_OBJ_filename"+
-    	            " object_texture_filename"+
-    	            " unbreakable_object_OBJ_filename"+
-    	            " vending_machine_OBJ_filename"+
-    	            " lamp_OBJ_filename"+
-    	            " chair_OBJ_filename"+
-    	            " flower_OBJ_filename"+
-    	            " table_OBJ_filename"+
-    	            " bonsai_OBJ_filename");    	    
-    	     System.exit(0);
-    	    }
-	    new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
-	        args[6],args[7],args[8],args[9],args[10],args[11],args[12],
-	        args[13],args[14],args[15],args[16],args[17],args[18],args[19],
-	        args[20],args[21],args[22],args[23],args[24],args[25],args[26],
-	        args[27],args[28],args[29],args[30],args[31],args[32]);
+    public static final TilesGenerator getInstance(String[] args){
+        TilesGenerator tg;
+        if(args.length!=parameterCount)
+            {System.out.println("Usage: java TilesGenerator"+
+                    " map_filename"+
+                    " tiles_filename"+
+                    " rocketlauncher_filename"+
+                    " binary_map_filename"+
+                    " bot_filename"+
+                    " unbreakable_object_filename"+
+                    " vending_machine_filename"+
+                    " lamp_filename"+
+                    " chair_filename"+
+                    " flower_filename"+
+                    " table_filename"+
+                    " bonsai_filename"+
+                    " rocket_filename"+
+                    " explosion_filename"+
+                    " impact_filename"+
+                    " health_powerup_filename"+
+                    " health_powerup_list_filename"+
+                    " crosshair_filename"+
+                    " spherical_beast_filename"+
+                    " network_filename"+
+                    " network_OBJ_filename"+
+                    " wall_texture_filename"+
+                    " rocket_launcher_texture_filename"+
+                    " rocket_launcher_OBJ_filename"+
+                    " rocket_OBJ_filename"+
+                    " object_texture_filename"+
+                    " unbreakable_object_OBJ_filename"+
+                    " vending_machine_OBJ_filename"+
+                    " lamp_OBJ_filename"+
+                    " chair_OBJ_filename"+
+                    " flower_OBJ_filename"+
+                    " table_OBJ_filename"+
+                    " bonsai_OBJ_filename"+
+                    " level_model_bean_filename");  
+             tg=null;
+            }
+        else
+            {tg=new TilesGenerator(args[0],args[1],args[2],args[3],args[4],args[5],
+                    args[6],args[7],args[8],args[9],args[10],args[11],args[12],
+                    args[13],args[14],args[15],args[16],args[17],args[18],args[19],
+                    args[20],args[21],args[22],args[23],args[24],args[25],args[26],
+                    args[27],args[28],args[29],args[30],args[31],args[32]);
+             tg.writeLevelModelBean(args[33]);
+            }
+        return(tg);
     }
     
+    private final void writeLevelModelBean(String path){
+        ILevelModelBean ilmb=BeanProvider.getInstance().getILevelModelBean(new float[]{initialPosition.x,0.0f,initialPosition.y});
+        System.out.println("Initial spawn position"+Arrays.toString(ilmb.getInitialSpawnPosition()));
+        System.out.println("Starts writing initial spawn position into "+path);
+        Serializable serializableObject=ilmb.getSerializableBean();
+        if(path.endsWith(".xml")||path.endsWith(".XML"))
+            {System.out.println("XML extension detected, encoding data in XML format...");
+             encodeObjectInFile(serializableObject,path);
+            }
+        else
+            {System.out.println("XML extension not detected, writing raw data in binary format ...");
+             ObjectOutputStream oos=null;
+             try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+                 oos.writeObject(serializableObject);
+                 oos.close();         
+                }
+             catch(Throwable t)
+             {throw new RuntimeException("Unable to write the initial spawn position",t);}
+            }
+        System.out.println("Initial spawn position written");
+        
+    }
 }

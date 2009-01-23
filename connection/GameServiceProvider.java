@@ -27,7 +27,7 @@ import main.VertexSetSeeker;
 public class GameServiceProvider implements IVertexSetProvider{
 
 
-    private drawer.IVertexSetProvider delegate;          
+    private drawer.IVertexSetProvider delegate;
 	  
     
     private GameServiceProvider(final drawer.IVertexSetProvider factory,final IVertexSetProvider seeker){
@@ -40,6 +40,7 @@ public class GameServiceProvider implements IVertexSetProvider{
          delegate=provider;		
     }
     
+    @Override
     public void bindVertexSetProvider(final main.IVertexSetProvider provider){
          provider.bindVertexSetProvider(this);		
     }

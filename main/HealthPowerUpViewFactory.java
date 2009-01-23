@@ -56,7 +56,7 @@ final class HealthPowerUpViewFactory extends ViewFactory{
         List<Texture> texturesList=new ArrayList<Texture>(texturesCount); 
         if(loadFully)
             {try{
-                 texturesList.add(GameIO.newTexture(
+                 texturesList.add(GameIO.TextureFactory.getInstance().newTexture(
                         getClass().getResource("/texture/healthPowerUp.png"),
                         false,TextureIO.PNG));
                 }
@@ -90,7 +90,7 @@ final class HealthPowerUpViewFactory extends ViewFactory{
         else
             if(texturesList.size()<texturesCount)
                 {try{
-                     texturesList.add(GameIO.newTexture(
+                     texturesList.add(GameIO.TextureFactory.getInstance().newTexture(
                             getClass().getResource("/texture/healthPowerUp.png"),
                             false,TextureIO.PNG));
                     }
