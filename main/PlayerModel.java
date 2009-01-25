@@ -26,7 +26,7 @@ class PlayerModel implements Collector{
     
     private static final int maximumHealth=100;
     
-    private static final int defaultBoundingSize=GameModel.factor/4;
+    private static final double defaultBoundingSize=GameModel.factor/4.0d;
     
     private int health;
     
@@ -42,12 +42,13 @@ class PlayerModel implements Collector{
     
     private double direction;//in radians
     
-    private int boundingSize;
+    private double boundingSize;
     
     private Rectangle2D.Double voxel;
     
     private AmmunitionRepository ammoExternalRepository;
     //TODO: get a weapon only by collecting it
+    @SuppressWarnings("unused")
     private RocketLauncherModel rocketLauncherModel;
     
     
@@ -125,7 +126,7 @@ class PlayerModel implements Collector{
         return(direction);
     }
     
-    final int getBoundingSize(){
+    final double getBoundingSize(){
         return(boundingSize);
     }
     
@@ -152,7 +153,7 @@ class PlayerModel implements Collector{
         this.direction=direction;
     }
     
-    final void setBoundingSize(int boundingSize){
+    final void setBoundingSize(double boundingSize){
         this.boundingSize=boundingSize;
         updateVoxel();
     }
