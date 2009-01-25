@@ -36,10 +36,13 @@ public final class DataPreprocessor implements IBeanProvider{
     public static final void main(String[] args){
         DataPreprocessor dp=new DataPreprocessor(bean.BeanProvider.getInstance(),tools.BeanProvider.getInstance());
         if(dp!=null)
-            {System.out.println("Data processing initialized");
+            {System.out.println("[INFO] Data processing initialized");
              TilesGenerator tg=TilesGenerator.getInstance(args);
              if(tg!=null)
-                 System.out.println("Tiles and cells generation finished");
+                 {System.out.println("[INFO] Tiles and cells generator ready");
+                  tg.run();
+                  System.out.println("[INFO] Tiles and cells generation finished");
+                 }
              else
                  System.out.println("[WARNING] Tiles and cells generation failed!");
             }

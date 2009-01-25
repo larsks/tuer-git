@@ -36,7 +36,8 @@ public final class CellsGenerator{
 			                          List<PointPair> artTopWallPiecesList,
                                       List<PointPair> artBottomWallPiecesList,
                                       List<PointPair> artLeftWallPiecesList,
-                                      List<PointPair> artRightWallPiecesList,float scaleFactor){
+                                      List<PointPair> artRightWallPiecesList,
+                                      float scaleFactor,int tileSize){
         PointPairComparator ppc=new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT);       
         Vector<PointPair> wholeTopWallPiecesList=new Vector<PointPair>();
         wholeTopWallPiecesList.addAll(topWallPiecesList);
@@ -67,7 +68,7 @@ public final class CellsGenerator{
     	optimizeRawCellsAndPortals(cellsList);  
     	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList,scaleFactor);
     	System.out.println("SIZE : "+cellsList.size());
-    	createCellsMap(cellsList);
+    	createCellsMap(cellsList,tileSize);
     	List<Cell> overlappingCellsList=getOverlappingCellsList(cellsList);
     	if(!overlappingCellsList.isEmpty())
     	    {System.out.println(overlappingCellsList.size()+" OVERLAPPING CELLS:");
@@ -77,7 +78,7 @@ public final class CellsGenerator{
     	else
     	    System.out.println("NO OVERLAPPING CELLS");
     	if(testNetworkIntegrity(cellsList,topFullWallList,
-    	        bottomFullWallList,leftFullWallList,rightFullWallList))
+    	        bottomFullWallList,leftFullWallList,rightFullWallList,tileSize))
     	    {System.out.println("network integrity preserved");
     	     
     	    }
@@ -833,10 +834,10 @@ public final class CellsGenerator{
     }
     
     //create an image representing the cells on a map
-    private final static void createCellsMap(Vector<Cell> cellsList){
-    	BufferedImage buffer = new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB);
-    	for(int i=0;i<256;i++)
-    		for(int j=0;j<256;j++)
+    private final static void createCellsMap(Vector<Cell> cellsList,int tileSize){
+    	BufferedImage buffer = new BufferedImage(tileSize,tileSize,BufferedImage.TYPE_INT_ARGB);
+    	for(int i=0;i<tileSize;i++)
+    		for(int j=0;j<tileSize;j++)
     	        buffer.setRGB(i, j, Color.WHITE.getRGB());
     	Color[] colorArray=initColorArray(cellsList.size());
     	int i=0;
@@ -884,7 +885,7 @@ public final class CellsGenerator{
 	        Vector<PointPair> topFullWallList,
             Vector<PointPair> bottomFullWallList,
             Vector<PointPair> leftFullWallList,
-            Vector<PointPair> rightFullWallList){
+            Vector<PointPair> rightFullWallList,int tileSize){
         List<PointPair> validWallsList=new ArrayList<PointPair>();
         List<PointPair> missingWallsList=new ArrayList<PointPair>();
         List<PointPair> exceedingWallsList=new ArrayList<PointPair>();
@@ -927,7 +928,7 @@ public final class CellsGenerator{
                                }
                       }
                   if(!found)
-                      {if(p.getFirst().x==TilesGenerator.tileSize)
+                      {if(p.getFirst().x==tileSize)
                            ignoredWallsList.add(p);
                        else
                            missingWallsList.add(p);
@@ -1065,7 +1066,7 @@ public final class CellsGenerator{
                                }
                       }
                   if(!found)
-                      {if(p.getFirst().y==TilesGenerator.tileSize)
+                      {if(p.getFirst().y==tileSize)
                            ignoredWallsList.add(p);
                        else
                            missingWallsList.add(p);

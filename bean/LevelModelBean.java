@@ -2,7 +2,7 @@ package bean;
 
 import java.io.Serializable;
 
-public final class LevelModelBean implements ILevelModelBean,Serializable{
+public final class LevelModelBean implements ILevelModelBean{
     
     
     private static final long serialVersionUID = 1L;

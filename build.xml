@@ -96,6 +96,8 @@
 	<!-- ================================================================= -->
 	<!-- Zip                                                               -->
 	<!-- ================================================================= -->
+	<!-- Temporarily, the JME version is ignored -->
+	<!-- excludes="jme/" -->
 	<target name="zip" depends="" description="Creates the zip file containing the source code">
 		<zip destfile="${zipdestdir}/tuer.zip" basedir="${srcdir}" 
 			includes="**/*.java" 
