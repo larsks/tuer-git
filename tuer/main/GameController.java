@@ -56,7 +56,9 @@ public final class GameController {
     //this game model can be remote
     private GameModel gameModel;
     
-    final static int factor=GameModel.factor;
+    static final int factor=GameModel.factor;
+    
+    static final float legacyFactor=GameModel.legacyFactor;
     
     private Frame frame;
     
@@ -218,11 +220,6 @@ public final class GameController {
         gameModel.performAtExit();
     }
     
-    /**
-     * This is an example of method showing how the networking works. 
-     * The data are fetched only if they really changed in order to 
-     * reduce RMI calls
-     **/
     final FloatBuffer getArtCoordinatesBuffer1(){    
         return(gameModel.getArtCoordinatesBuffer1());           
     }
@@ -265,10 +262,6 @@ public final class GameController {
     
     final FloatBuffer getLampCoordinatesBuffer(){
         return(gameModel.getLampCoordinatesBuffer());
-    }
-    
-    final FloatBuffer getLevelCoordinatesBuffer(){
-        return(gameModel.getLevelCoordinatesBuffer());
     }
     
     final FloatBuffer getRocketCoordinatesBuffer(){

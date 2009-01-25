@@ -45,7 +45,7 @@ public final class JMEGameServiceProvider {
         DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
         cam=disp.getRenderer().getCamera();
-        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.5F, 5000.0F );
+        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.2F, 2000.0F );
         cam.update();
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");

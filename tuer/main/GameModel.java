@@ -84,6 +84,10 @@ public class GameModel{
      */
     static final int factor=65536;
     
+    static final float legacyFactor=65536.0f;
+    
+    static final float factorQuotient=(legacyFactor/factor);
+    
     private static final double hitrange=0.3d*factor;
     
     private static final double minimalRocketLaunchDistance=1.5*hitrange;
@@ -97,8 +101,6 @@ public class GameModel{
      * size of the map: voxel count
      */
     private static final int mapSize = mapEdgeSize * mapEdgeSize;
-    
-    private FloatBuffer levelCoordinatesBuffer;//coordinates of the walls
     
     private FloatBuffer artCoordinatesBuffer1;//coordinates of the works of art
     
@@ -314,30 +316,14 @@ public class GameModel{
         {throw new RuntimeException("Unable to decode XML file",t);}
         this.initialHealthPowerUpModelList=new Vector<HealthPowerUpModel>();        
         try{DataInputStream in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/data/worldmap.data")));
-            int i,count=0,artWorksCount1,artWorksCount2,artWorksCount3,artWorksCount4;
-            //read the data for the walls of the level
-            for(i=0;i<6;i++)
-                count+=in.readInt();                                    
+            int i,artWorksCount1,artWorksCount2,artWorksCount3,artWorksCount4;                                           
             //read the data for the works of art
             artWorksCount1=in.readInt();
             artWorksCount2=in.readInt();
             artWorksCount3=in.readInt();
             artWorksCount4=in.readInt();
             //for each point : 2 levelTexture coordinates + 3 vertex coordinates
-            final int floatPerPrimitive=5;    
-            //update the way of reading to use the normals
-            levelCoordinatesBuffer=BufferUtil.newFloatBuffer(count*floatPerPrimitive);    
-            for(i=0;i<count;i++)
-                {levelCoordinatesBuffer.put(in.readFloat());
-                 levelCoordinatesBuffer.put(in.readFloat());
-                 //levelCoordinatesBuffer.put(in.readFloat());
-                 //levelCoordinatesBuffer.put(in.readFloat());
-                 //levelCoordinatesBuffer.put(in.readFloat());
-                 levelCoordinatesBuffer.put(in.readFloat());
-                 levelCoordinatesBuffer.put(in.readFloat());
-                 levelCoordinatesBuffer.put(in.readFloat());
-                }
-            levelCoordinatesBuffer.rewind();
+            final int floatPerPrimitive=5;
             artCoordinatesBuffer1=BufferUtil.newFloatBuffer(artWorksCount1*floatPerPrimitive);
             for(i=0;i<artWorksCount1;i++)
                 {artCoordinatesBuffer1.put(in.readFloat());
@@ -398,7 +384,6 @@ public class GameModel{
                      {//detect a bot and add it to the bot container
                       //+32768 -> put the bot at the center of the case
                       this.botList.add(new BotModel(((i%mapEdgeSize)*factor)+(factor/2),0,((i/mapEdgeSize)*factor)+(factor/2)));
-                      //System.out.println(((i%256)*65536)+" "+((i/256)*65536));
                       this.collisionMap[i]=EMPTY;
                      }
                  //copy the collision map
@@ -428,7 +413,7 @@ public class GameModel{
                  this.initialHealthPowerUpModelList.add(hpum);      
                 }
             //read the binary version of the world map built from the pixmap
-            mapData = new int[mapSize];
+            mapData=new int[mapSize];
             in=new DataInputStream(new BufferedInputStream(getClass().getResourceAsStream("/data/binaryWorldmap.data")));
             for(i=0;i<mapData.length;i++)
                 mapData[i]=in.readInt();
@@ -505,10 +490,6 @@ public class GameModel{
     
     public final boolean getBcheat(){
         return(bcheat);
-    }        
-                    
-    public final FloatBuffer getLevelCoordinatesBuffer(){
-        return(levelCoordinatesBuffer);
     }
     
     public final FloatBuffer getArtCoordinatesBuffer1(){
@@ -730,7 +711,7 @@ public class GameModel{
                       object[icode].setX((cx*factor)+(factor/2));
                       object[icode].setZ((cz*factor)+(factor/2));
                       object[icode].setShape(ShapeDeko);
-                      object[icode].setSpeed((short)0);                 
+                      object[icode].setSpeed(0);                 
                       continue;
                      }
                  if(ired==0 && igrn==0) 
@@ -747,7 +728,7 @@ public class GameModel{
                            object[icode].setX((cx*factor)+(factor/2));
                            object[icode].setZ((cz*factor)+(factor/2));
                            object[icode].setShape(ShapeBush);  // alloc
-                           object[icode].setSpeed((short)0);
+                           object[icode].setSpeed(0);
                            // have to register bush location in "botmap",
                            // otherwise there would be a hole in the area.                           
                            continue;
@@ -781,7 +762,7 @@ public class GameModel{
                            obj.setX((cx*factor)+(factor/2));
                            obj.setZ((cz*factor)+(factor/2));                
                            obj.setShape(ShapeBot);   // alloc
-                           obj.setSpeed((short)1);          // pseudo                          
+                           obj.setSpeed(1.0f/factorQuotient);       // pseudo                          
                           }
                       else // bot MUST be within an area
                           System.out.println("X1634234A");
@@ -834,7 +815,7 @@ public class GameModel{
            {object[counter].setZ(0);
             object[counter].setX(0);
             object[counter].setDir(0);
-            object[counter].setSpeed((short)0);           
+            object[counter].setSpeed(0);           
             object[counter].setShape(-1);
             object[counter].setSleep2(0);
             object[counter].setSeenPlayer(false);
@@ -943,7 +924,7 @@ public class GameModel{
                  }
              boolean bmoved;
              double playerXnew,playerZnew;
-             int framerateCompensatedSpeed;          
+             float framerateCompensatedSpeed;          
              this.internalClock.start();
              this.lastBotShotTime=currentTime();
              this.lastShot=currentTime();
@@ -968,7 +949,7 @@ public class GameModel{
                   cycleDuration=internalClock.getElapsedTime()-cycleDuration;
                   framerateCompensationFactor = (int)(16*cycleDuration*10);
                   //uses the time spent between 2 frames to adapt the step to the speed of the machine
-                  framerateCompensatedSpeed=framerateCompensationFactor*(runningFast?3:1);
+                  framerateCompensatedSpeed=framerateCompensationFactor*(runningFast?3:1)/factorQuotient;
                   postInfoMessage();
                   updateExplosions();
                   updateItems();
@@ -1140,12 +1121,12 @@ public class GameModel{
     
     /**walking bot support*/
     private final void tryStepBot(d3object obj,double dxp,double dzp){
-        double  xnew = obj.getX();
-        double  znew = obj.getZ();
-        boolean bStepLeft  = false;
-        boolean bStepRight = false;
-        boolean bmoved = false;
-        int     ispeed = 1;
+        double xnew=obj.getX();
+        double znew=obj.getZ();
+        boolean bStepLeft=false;
+        boolean bStepRight=false;
+        boolean bmoved=false;
+        float ispeed=1;
         //TODO: implement a mechanism to prevent the bot from getting closer to the rockets
         //and allow it to dodge them
         if (obj.getSleep2() > 0)
@@ -1159,10 +1140,10 @@ public class GameModel{
                   {xnew+=Math.sin(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                    znew+=Math.cos(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                   }
-             if(obj.getSpeed() >= 1)
+             if(obj.getSpeed() >= 1/factorQuotient)
                  {// no matter if speed 1 or more, we always probe
-                  if (obj.getSpeed() >= 2)
-                      ispeed = obj.getSpeed()-1;
+                  if (obj.getSpeed() >= 2/factorQuotient)
+                      ispeed = obj.getSpeed()-1/factorQuotient;
                   xnew+=Math.sin(obj.getDir())*framerateCompensationFactor*ispeed/10;
                   znew+=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed/10;
                  }
@@ -1207,18 +1188,18 @@ public class GameModel{
 
            }  // endif position changed
        if(bmoved) 
-           {if(obj.getSpeed() < 2)
+           {if(obj.getSpeed() < 2/factorQuotient)
                 {// this determines the bot speeds. the number
                  // gets divided by 10. so 10==1.0, 5==0.5 etc.
-                 obj.setSpeed((short)8);                
+                 obj.setSpeed(8.0f/factorQuotient);                
                 }
             currentBot.setRunning(true); 
             // count walking bots, for stepObjects()
             nClBotsWalking++;
            }  
        else 
-           {if(obj.getSpeed() >= 2)
-                {obj.setSpeed((short)1);
+           {if(obj.getSpeed() >= 2/factorQuotient)
+                {obj.setSpeed(1.0f/factorQuotient);
                  currentBot.setRunning(false);
                 }
            }
@@ -1228,7 +1209,7 @@ public class GameModel{
         boolean hasBeenKilled=false;
         double objectXnew;
         double objectZnew;
-        int ispeed;
+        float ispeed;
         boolean bhit;
         int iobj;
         int xidx1,yidx1;
@@ -1299,12 +1280,12 @@ public class GameModel{
                  }
              //the following is used only for rockets
              //take into account the frame rate or the main timing
-             objectXnew = obj.getX() + Math.sin(obj.getDir())*framerateCompensationFactor*ispeed;
-             objectZnew = obj.getZ() + Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;
+             objectXnew=obj.getX() + Math.sin(obj.getDir())*framerateCompensationFactor*ispeed;
+             objectZnew=obj.getZ() + Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;
              // reached a discrete new map position?
-             xidx1 = ((((int)objectXnew)/factor)&0xFF);
-             yidx1 = ((((int)objectZnew)/factor)&0xFF);
-             bhit = false;
+             xidx1=((((int)objectXnew)/factor)&0xFF);
+             yidx1=((((int)objectZnew)/factor)&0xFF);
+             bhit=false;
              if(obj.getShape()==ShapeRocket)
                  {// check for rocket<->object collision
                   for(iobj=0; iobj<numObjects; iobj++) 
@@ -1437,11 +1418,7 @@ public class GameModel{
                                 }
                            }
                   if(impact!=null)
-                      {//System.out.println("impact : "+impact);
-                       //System.out.println("collision map : "+xidx1+" "+yidx1);
-                       //System.out.println("collision map * factor : "+xidx1*65536+" "+yidx1*65536);
-                       impactList.add(impact);
-                      }
+                      impactList.add(impact);                     
                   if(impact1!=null)
                       impactList.add(impact1);
                   if(impact2!=null)
@@ -1459,7 +1436,7 @@ public class GameModel{
                        
                       }
                   //remove the shape from the previous collision system
-                  obj.setSpeed((short)0);
+                  obj.setSpeed(0);
                   obj.setShape(-1);
                   //instanciate a new Explosion object
                   explode(obj);
@@ -1543,25 +1520,29 @@ public class GameModel{
         return(hasBeenKilled);
     }
 
-    // used by bots, to tell if player can be seen
+    /**
+     * Tells whether the player is visible from the viewpoint
+     * of a bot
+     * @param obj bot
+     */
     private final boolean playerVisibleFrom(d3object obj){
-       double x1 = obj.getX();
-       double z1 = obj.getZ();
-       double x2 = player.getX();
-       double z2 = player.getZ();
-       double ddx = x2-x1;
-       double ddz = z2-z1;
-       int idx = ((int)ddx)>>(16-3); // i.e. and multiply by 8
-       int idz = ((int)ddz)>>(16-3); // i.e. and multiply by 8
-       int isteps = Math.max(1,Math.max(Math.abs(idx),Math.abs(idz)));// FIX/1.0.3: potential division by zero
+       double x1=obj.getX()/factor;
+       double z1=obj.getZ()/factor;
+       double x2=player.getX()/factor;
+       double z2=player.getZ()/factor;
+       double ddx=x2-x1;
+       double ddz=z2-z1;
+       int idx=(int)(ddx*8);
+       int idz=(int)(ddz*8);
+       int isteps=Math.max(1,Math.max(Math.abs(idx),Math.abs(idz)));// FIX/1.0.3: potential division by zero
        int cx,cz;
        for(int i=0;i<=isteps;i++) 
-           {cx=(((int)(x1+i*ddx/isteps))/factor)&0xFF;
-            cz=(((int)(z1+i*ddz/isteps))/factor)&0xFF;
+           {cx=((int)(x1+i*ddx/isteps))&0xFF;
+            cz=((int)(z1+i*ddz/isteps))&0xFF;
             if(collisionMap[(cz*mapEdgeSize)+cx]!=EMPTY&&
-                    collisionMap[(cz*mapEdgeSize)+cx]!=AVOIDABLE_AND_UNBREAKABLE&&
-                    collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_LIGHT&&
-                    collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_TABLE)
+               collisionMap[(cz*mapEdgeSize)+cx]!=AVOIDABLE_AND_UNBREAKABLE&&
+               collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_LIGHT&&
+               collisionMap[(cz*mapEdgeSize)+cx]!=FIXED_AND_BREAKABLE_TABLE)
                 return false;
            }
        return true;
@@ -1635,13 +1616,13 @@ public class GameModel{
             obj.setX(player.getX()+(Math.sin(player.getDirection())*(player.getBoundingSize()*1.5))+Math.sin(player.getDirection()-fullCircle/4)*(player.getBoundingSize()*0.5));
             obj.setZ(player.getZ()+(Math.cos(player.getDirection())*(player.getBoundingSize()*1.5))+Math.cos(player.getDirection()-fullCircle/4)*(player.getBoundingSize()*0.5));
             obj.setShape(ShapeRocket);
-            obj.setDir(player.getDirection());
-            obj.setSpeed((short)3);
+            obj.setDir(player.getDirection());           
+            obj.setSpeed(3.0f/factorQuotient);
             blaunched = true;                   
-            float[] rocket=new float[]{(float)obj.getX(),-8192.0f,(float)obj.getZ(),
+            float[] rocket=new float[]{(float)obj.getX(),-factor/8.0f,(float)obj.getZ(),
                     (float)(player.getDirection()*(180/Math.PI))};
             rocketList.add(rocket);
-            this.rocketTable.put(Integer.valueOf(irocket),rocket);
+            rocketTable.put(Integer.valueOf(irocket),rocket);
            }
        if(blaunched)
            {gameController.playSound(0,(int)player.getX(),(int)player.getZ(),(int)player.getX(),(int)player.getZ());
@@ -1653,17 +1634,17 @@ public class GameModel{
        d3object obj;
        irocket = IndexBotRockets + (irocket % 9);
        if(!bcheat && object[irocket].getShape()==-1)
-           {obj = object[irocket];
+           {obj=object[irocket];
             obj.setX(object[ifrom].getX() + Math.sin(ddir)*minimalRocketLaunchDistance);
             obj.setZ(object[ifrom].getZ() + Math.cos(ddir)*minimalRocketLaunchDistance);
             obj.setShape(ShapeRocket);
             obj.setDir(ddir);
-            obj.setSpeed((short)3);
+            obj.setSpeed(3.0f/factorQuotient);
             float[] rocket=new float[]{(float)obj.getX(),0.0f,(float)obj.getZ(),
                     (float)(ddir*(180/Math.PI))};
             rocketList.add(rocket);
             //FIXME: sometimes, a key can be overwritten
-            this.rocketTable.put(Integer.valueOf(irocket),rocket);
+            rocketTable.put(Integer.valueOf(irocket),rocket);
             gameController.playSound(0,(int)obj.getX(),(int)obj.getZ(),(int)player.getX(),(int)player.getZ());
             return(true);
            }

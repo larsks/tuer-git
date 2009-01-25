@@ -20,7 +20,7 @@ final class d3object{
    private double x;        // multiplied with 65536.0, like a
    private double z;        // virtual 16-bit shift to the left.
    private double dir;      // in radians (in degrees in the past, 0..359)
-   private short  speed;    // if moving, otherwise alive indicator
+   private float speed;    // if moving, otherwise alive indicator
    private int    shape;    // or the type of object
    private int    sleep2;   // suspend walking this long
    private boolean seenPlayer;
@@ -28,7 +28,7 @@ final class d3object{
    double getX(){return(x);}        
    double getZ(){return(z);}        
    double getDir(){return(dir);}      
-   short  getSpeed(){return(speed);}
+   float  getSpeed(){return(speed);}
    int    getShape(){return(shape);}
    int    getSleep2(){return(sleep2);} 
    boolean getSeenPlayer(){return(seenPlayer);}
@@ -36,7 +36,7 @@ final class d3object{
    void setX(double x){this.x=x;}        
    void setZ(double z){this.z=z;}       
    void setDir(double dir){this.dir=dir;}      
-   void setSpeed(short speed){this.speed=speed;} 
+   void setSpeed(float speed){this.speed=speed;} 
    void setShape(int shape){this.shape=shape;}   
    void setSleep2(int sleep2){this.sleep2=sleep2;}  
    void setSeenPlayer(boolean seenPlayer){this.seenPlayer=seenPlayer;}

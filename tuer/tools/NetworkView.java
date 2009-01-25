@@ -91,42 +91,6 @@ public final class NetworkView{
                  }
             }  
     }
-    
-    /*public final void draw(float x,float y,float z,float direction,ViewFrustumCullingPerformer frustum){ 
-        Rectangle cellRect;
-        final float arcContributionSize=65536*25;
-        final Arc2D.Float playerArc=new Arc2D.Float();
-        playerArc.setArcByCenter(x,z,arcContributionSize,(float)(direction*180/Math.PI)+225,90,Arc2D.PIE);
-        Rectangle2D playerRect=playerArc.getBounds2D();
-        int size;
-        float[] p1,p2,p3,p4;
-        for(Full3DCellView cellView:cellsViewsList)
-            {cellRect=cellView.getEnclosingRectangle();
-             if(cellRect.contains(x,z))
-                 cellView.draw();
-             else
-                 if(playerArc.intersects(cellRect))
-                     {if(cellView.getNeighboursPortalsList().isEmpty())
-                          continue;
-                      size=cellView.getNeighboursPortalsList().size();
-                      for(int portalIndex=0;portalIndex<size;portalIndex+=4)
-                          {p1=cellView.getNeighboursPortalsList().get(portalIndex);
-                           p2=cellView.getNeighboursPortalsList().get(portalIndex+1);
-                           p3=cellView.getNeighboursPortalsList().get(portalIndex+2);
-                           p4=cellView.getNeighboursPortalsList().get(portalIndex+3);
-                           //if(frustum.isQuadInViewFrustum(p1,p2,p3,p4,2))
-                           if(playerRect.intersectsLine(p1[2],p1[4],p2[2],p2[4])||
-                              playerRect.intersectsLine(p2[2],p2[4],p3[2],p3[4])||
-                              playerRect.intersectsLine(p3[2],p3[4],p4[2],p4[4])||
-                              playerRect.intersectsLine(p4[2],p4[4],p1[2],p1[4]))
-                               {cellView.draw();
-                                break;
-                               }
-                          }
-                     }
-            }
-    }*/
-
 
     public final Full3DCellView getRootCell(){
         return(rootCell);

@@ -65,9 +65,7 @@ public class GameGLView implements GLEventListener{
     
     private List<Integer> messageWidth; 
     
-    private List<Integer> messageHeight;           
-    
-    private IStaticVertexSet levelVertexSet;
+    private List<Integer> messageHeight;
     
     private IStaticVertexSet artVertexSet1;
     
@@ -162,7 +160,7 @@ public class GameGLView implements GLEventListener{
     
     private static final float glPolygonOffsetUnit=-20.0f;
     
-    private static final int loadableItemCount=28+
+    private static final int loadableItemCount=27+
     ExplosionViewFactory.getTexturesCount()+
     ExplosionViewFactory.getVertexSetsCount()+
     HealthPowerUpViewFactory.getTexturesCount()+
@@ -270,7 +268,6 @@ public class GameGLView implements GLEventListener{
     	this.messageHeight=new Vector<Integer>();
     	this.messageWidth=new Vector<Integer>();
     	this.objectViewList=new Vector<Object3DView>();
-    	this.levelVertexSet=null;
     	this.artVertexSet1=null;
     	this.artVertexSet2=null;
     	this.artVertexSet3=null;
@@ -371,18 +368,15 @@ public class GameGLView implements GLEventListener{
 	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
-	              this.levelTexture.bind(); 
-	              //uncomment it to retablish the older behavior
-	              //this.levelVertexSet.draw();	
-	              //uncomment it to use the experimental scenegraph
+	              this.levelTexture.bind();
 	              //levelDrawTime=System.currentTimeMillis();
 	              this.playerPositioning=networkViewSet.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),playerPositioning,softwareViewFrustumCullingPerformer);	              
 	              //System.out.println("NETWORK VIEW SET DRAW TIME: "+(System.currentTimeMillis()-levelDrawTime));
 	              //levelDrawTime=System.currentTimeMillis()-levelDrawTime;	              
 	              //pushMessage("NVSD TIME: "+levelDrawTime,(int)(screenWidth*0.85),(int)(screenHeight*0.05));
 	              int i,j,limit,xp,zp;         
-	              xp=(int)(gameController.getPlayerXpos()/65536);
-	              zp=(int)(gameController.getPlayerZpos()/65536);
+	              xp=(int)(gameController.getPlayerXpos()/GameController.factor);
+	              zp=(int)(gameController.getPlayerZpos()/GameController.factor);
 	              //draw the artworks  
 	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
 	              if(!gameController.getPlayerWins())
@@ -464,49 +458,49 @@ public class GameGLView implements GLEventListener{
 	                      {switch(gameController.getCollisionMap(i*256+j))
 	                          {case AVOIDABLE_AND_UNBREAKABLE:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.unbreakableObjectVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_BIG:  
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.vendingMachineVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }                        
 	                           case FIXED_AND_BREAKABLE_LIGHT:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.lampVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_CHAIR:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.chairVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_FLOWER:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.flowerVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_TABLE:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.tableVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_BONSAI:
 	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f)*65536,0.0f,(i+0.5f)*65536);
+	                                gl.glTranslatef((j+0.5f)*GameController.factor,0.0f,(i+0.5f)*GameController.factor);
 	                                this.bonsaiVertexSet.draw();
 	                                gl.glPopMatrix();
 	                                break;
@@ -743,13 +737,7 @@ public class GameGLView implements GLEventListener{
 	             pushMessage("The program can not save the screenshot!",(int)(screenWidth*0.45),(int)(screenHeight*0.5));
 	        }
 	    if(loadProgress < loadableItemCount)
-	        {loadProgress=0;         
-	         if(this.levelVertexSet==null)
-	             {this.levelVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getLevelCoordinatesBuffer(),GL.GL_QUADS);      
-	              return;
-	             }
-	         else
-	             loadProgress+=1;
+	        {loadProgress=0;
 	         if(this.artVertexSet1==null)
 	             {this.artVertexSet1=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer1(),GL.GL_QUADS);
 	              return;
@@ -952,7 +940,8 @@ public class GameGLView implements GLEventListener{
     	gl.glMatrixMode(GL.GL_PROJECTION);
     	gl.glLoadIdentity();
     	/*modify the projection matrix only when in 3D full mode*/
-    	gl.glFrustum(-50,50,-50,50,50,5000000);
+    	final float baseSize=50/(GameController.legacyFactor/GameController.factor);
+    	gl.glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
     	//glu.gluPerspective(65.0,4/3,1,1000);
     	//softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
     	softwareViewFrustumCullingPerformer=new DummyViewFrustumCullingPerformer(gameController);
