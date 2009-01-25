@@ -56,7 +56,7 @@ public final class GameController {
     //this game model can be remote
     private GameModel gameModel;
     
-    static final int factor=GameModel.factor;
+    static final float factor=GameModel.factor;
     
     static final float legacyFactor=GameModel.legacyFactor;
     

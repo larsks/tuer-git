@@ -82,7 +82,7 @@ public class GameModel{
     /**
      * size of a voxel in the coordinate system
      */
-    static final int factor=65536;
+    static final float factor=65536.0f;
     
     static final float legacyFactor=65536.0f;
     
@@ -90,7 +90,7 @@ public class GameModel{
     
     private static final double hitrange=0.3d*factor;
     
-    private static final double rockrange = 0.10d*factor;
+    private static final double rockrange=0.1d*factor;
     
     private static final double minimalRocketLaunchDistance=1.5*hitrange;
     
@@ -1153,8 +1153,8 @@ public class GameModel{
         BotModel currentBot=getBotModelFromBotObject(obj);
         if(xnew != obj.getX() || znew != obj.getZ())
            {// how far can the bot walk, if at all?         
-            int xidx1 = ((((int)xnew)/factor)&0xFF);//0<=xidx1<256
-            int zidx1 = ((((int)znew)/factor)&0xFF);
+            int xidx1 = (((int)(xnew/factor))&0xFF);//0<=xidx1<256
+            int zidx1 = (((int)(znew/factor))&0xFF);
             // about to leave area?
             boolean bstop=false;           
             //force the bot to stop when it is too close to another one and 
@@ -1162,7 +1162,7 @@ public class GameModel{
             //TODO: rather the scene graph
             //if the voxel is not empty
             if(collisionMap[(zidx1*mapEdgeSize)+xidx1]!=EMPTY)
-                bstop = true;
+                bstop=true;
             else
                 {double dx,dz;
                  for(BotModel bot:botList)
@@ -1176,8 +1176,8 @@ public class GameModel{
                      }
                  }
             // keep minimum distance also to player
-            if(!bstop&& (Math.abs(dxp)<factor) && (Math.abs(dzp)<factor))
-                bstop = true;
+            if(!bstop&&(Math.abs(dxp)<factor)&&(Math.abs(dzp)<factor))
+                bstop=true;
             // check for obstacles and move
             if(!bstop) 
                 {//change the position of the bot in the both systems (Vincent's system and mine)
@@ -1208,17 +1208,13 @@ public class GameModel{
     }
     
     private final boolean stepObjects(){
-        boolean hasBeenKilled=false;
-        double objectXnew;
-        double objectZnew;
+        boolean hasBeenKilled=false,bhit;
+        double objectXnew,objectZnew,xdiff,zdiff,deltax,deltaz,maxDelta,interpolationStepX,interpolationStepZ;
+        final double minRange=Math.min(hitrange,rockrange);
         float ispeed;
-        boolean bhit;
-        int iobj;
-        int xidx1,yidx1;
-        double xdiff,zdiff;
+        int iobj,xidx1,yidx1,nOldBotsWalking=nClBotsWalking,interpolationCount;
         d3object obj;
-        int nOldBotsWalking = nClBotsWalking;
-        nClBotsWalking = 0;
+        nClBotsWalking=0;
         //between IndexPlayerRockets and IndexBotRockets, get all active rockets
         boolean[] activeRocket=new boolean[20];
         float[] rocket;
@@ -1282,171 +1278,185 @@ public class GameModel{
                   else
                       {//the following is used only for rockets
                        //take into account the frame rate or the main timing
-                       objectXnew=obj.getX() + Math.sin(obj.getDir())*framerateCompensationFactor*ispeed;
-                       objectZnew=obj.getZ() + Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;
-                       //FIXME: interpolate when the step is bigger than the ranges used to check the collisions
-                       // reached a discrete new map position?
-                       xidx1=((((int)objectXnew)/factor)&0xFF);
-                       yidx1=((((int)objectZnew)/factor)&0xFF);
+                       deltax=Math.sin(obj.getDir())*framerateCompensationFactor*ispeed;
+                       deltaz=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;
+                       maxDelta=Math.max(deltax,deltaz);
+                       //we take the biggest movement and the smallest
+                       //range to compute the biggest interpolation count 
+                       //in order to avoid forgetting some collisions 
+                       //(objects might go through each other then :( )
+                       interpolationCount=(int)Math.ceil(maxDelta/minRange);
+                       //overestimate this count to be sure to perform enough interpolations
+                       interpolationCount++;
+                       interpolationStepX=deltax/interpolationCount;
+                       interpolationStepZ=deltaz/interpolationCount;
+                       objectXnew=obj.getX();
+                       objectZnew=obj.getZ();
                        bhit=false;
-                       if(obj.getShape()==ShapeRocket)
-                           {// check for rocket<->object collision
-                            for(iobj=0; iobj<numObjects; iobj++) 
-                                if(object[iobj].getShape()!=-1
-                                 && object[iobj].getShape()!=ShapeBush
-                                 && iobj!=counter) /*ourselves*/
-                                    {xdiff=Math.abs(object[iobj].getX()-objectXnew);
-                                     zdiff=Math.abs(object[iobj].getZ()-objectZnew);
-                                     if(xdiff < hitrange && zdiff < hitrange) 
-                                         {if(object[iobj].getShape()==ShapeRocket)
-                                             {//rocket nearby another rocket. check precise.
-                                              if(xdiff < rockrange && zdiff < rockrange)
-                                                  {blastObject(object[iobj]);
-                                                   //FIXME: use object[iobj], remove it AS IT IS A ROCKET
-                                                   bhit=true;
-                                                  }
-                                             }
-                                         else
-                                             {//rocket hit a non-rocket object.                                
-                                              blastObject(object[iobj]);
-                                              bhit=true;
-                                             }
-                                         }
-                                    }
-                            //check for rocket<->player collision
-                            xdiff = Math.abs(player.getX()-objectXnew);
-                            zdiff = Math.abs(player.getZ()-objectZnew);
-                            if(xdiff < player.getBoundingSize() && zdiff < player.getBoundingSize() && player.isAlive()) 
-                                {// player is hit
-                                 bhit=true;
-                                 if(!bcheat)
-                                     player.decreaseHealth(20);
-                                 gameController.stopMovingSound(1<<1);
-                                 gameController.playSound(2,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());                      
-                                 if(!player.isAlive()&&!isFalling)
-                                     {isFalling=true;
-                                      //start the time measure   
-                                      fallStart=currentTime();
+                       for(int m=0;m<interpolationCount&&!bhit;m++)
+                           {objectXnew+=interpolationStepX;
+                            objectZnew+=interpolationStepZ;
+                            // reached a discrete new map position?
+                            xidx1=(((int)(objectXnew/factor))&0xFF);
+                            yidx1=(((int)(objectZnew/factor))&0xFF);
+                            //bhit=false;
+                            if(obj.getShape()==ShapeRocket)
+                                {// check for rocket<->object collision
+                                 for(iobj=0; iobj<numObjects; iobj++) 
+                                     if(object[iobj].getShape()!=-1
+                                     && object[iobj].getShape()!=ShapeBush
+                                     && iobj!=counter) /*ourselves*/
+                                     {xdiff=Math.abs(object[iobj].getX()-objectXnew);
+                                      zdiff=Math.abs(object[iobj].getZ()-objectZnew);
+                                      if(xdiff<hitrange&&zdiff<hitrange) 
+                                          {if(object[iobj].getShape()==ShapeRocket)
+                                               {//rocket nearby another rocket. check precise.
+                                                if(xdiff<rockrange&&zdiff<rockrange)
+                                                    {blastObject(object[iobj]);
+                                                     //FIXME: use object[iobj], remove it AS IT IS A ROCKET
+                                                     bhit=true;
+                                                    }
+                                               }
+                                           else
+                                               {//rocket hit a non-rocket object
+                                                blastObject(object[iobj]);
+                                                bhit=true;
+                                               }
+                                          }
+                                     }
+                                 //check for rocket<->player collision
+                                 xdiff = Math.abs(player.getX()-objectXnew);
+                                 zdiff = Math.abs(player.getZ()-objectZnew);
+                                 if(xdiff < player.getBoundingSize() && zdiff < player.getBoundingSize() && player.isAlive()) 
+                                     {// player is hit
+                                      bhit=true;
+                                      if(!bcheat)
+                                          player.decreaseHealth(20);
+                                      gameController.stopMovingSound(1<<1);
+                                      gameController.playSound(2,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());                      
+                                      if(!player.isAlive()&&!isFalling)
+                                          {isFalling=true;
+                                           //start the time measure   
+                                           fallStart=currentTime();
+                                          }
                                      }
                                 }
-                           }
-                       if(collisionMap[(yidx1*mapEdgeSize)+xidx1]!=EMPTY && 
-                          collisionMap[(yidx1*mapEdgeSize)+xidx1]>=UNAVOIDABLE_AND_UNBREAKABLE_DOWN && 
-                          collisionMap[(yidx1*mapEdgeSize)+xidx1]<=UNAVOIDABLE_AND_UNBREAKABLE_UP)
-                           {// handle a wall impact
-                            bhit=true;
-                            //show impact on plain wall tile
-                            Impact impact=null,impact1=null,impact2=null,impact3=null;
-                            switch(collisionMap[(yidx1*mapEdgeSize)+xidx1])
-                            {case UNAVOIDABLE_AND_UNBREAKABLE_UP:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                                                                                                    
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_DOWN:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                                 
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_LEFT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);                                
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                                 
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_LEFT_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                     
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                             
-                            break;
-                            }
-                            case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT_RIGHT:
-                            {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                       
-                            impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                            impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                            impact3=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
-                            break;
-                            }
-                            default:
-                            {//corner
-                            }
-                            }
-                            if(impact!=null)
-                                impactList.add(impact);                     
-                            if(impact1!=null)
-                                impactList.add(impact1);
-                            if(impact2!=null)
-                                impactList.add(impact2);
-                            if(impact3!=null)
-                                impactList.add(impact3);
-                                 
-                            gameController.playSound(1,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());
-                           }
-                       if(bhit)
-                           {// no matter what kind of object was hit,
-                            // change its shape now to animated explosion                              
-                            if(obj.getShape()==ShapeRocket)
-                                {//FIXME: use object[counter], remove it AS IT IS A ROCKET (object[counter])
-
+                            if(collisionMap[(yidx1*mapEdgeSize)+xidx1]!=EMPTY && 
+                               collisionMap[(yidx1*mapEdgeSize)+xidx1]>=UNAVOIDABLE_AND_UNBREAKABLE_DOWN && 
+                               collisionMap[(yidx1*mapEdgeSize)+xidx1]<=UNAVOIDABLE_AND_UNBREAKABLE_UP)
+                                {// handle a wall impact
+                                 bhit=true;
+                                 //show impact on plain wall tile
+                                 Impact impact=null,impact1=null,impact2=null,impact3=null;
+                                 switch(collisionMap[(yidx1*mapEdgeSize)+xidx1])
+                                 {case UNAVOIDABLE_AND_UNBREAKABLE_UP:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                                                                                                    
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_DOWN:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                                 
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_LEFT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);                                
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                                 
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_LEFT_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                     
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                             
+                                 break;
+                                 }
+                                 case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT_RIGHT:
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                       
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 impact3=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 break;
+                                 }
+                                 default:
+                                 {//corner
+                                 }
+                                 }
+                                 if(impact!=null)
+                                     impactList.add(impact);                     
+                                 if(impact1!=null)
+                                     impactList.add(impact1);
+                                 if(impact2!=null)
+                                     impactList.add(impact2);
+                                 if(impact3!=null)
+                                     impactList.add(impact3);                                
+                                 gameController.playSound(1,(int)objectXnew,(int)objectZnew,(int)player.getX(),(int)player.getZ());
                                 }
-                            //remove the shape from the previous collision system
-                            obj.setSpeed(0);
-                            obj.setShape(-1);
-                            //instanciate a new Explosion object
-                            explode(obj);
+                            if(bhit)
+                                {// no matter what kind of object was hit,
+                                 // change its shape now to animated explosion                              
+                                 if(obj.getShape()==ShapeRocket)
+                                     {//FIXME: use object[counter], remove it AS IT IS A ROCKET (object[counter])
 
-                           }
-                       else
-                           {obj.setX(objectXnew);
-                           obj.setZ(objectZnew);
+                                     }
+                                 //remove the shape from the previous collision system
+                                 obj.setSpeed(0);
+                                 obj.setShape(-1);
+                                 //instanciate a new Explosion object
+                                 explode(obj);
+                                }
+                            else
+                                {obj.setX(objectXnew);
+                                 obj.setZ(objectZnew);
+                                }
                            }
                       }
                  }
