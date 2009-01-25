@@ -366,7 +366,7 @@ public class GameGLView implements GLEventListener{
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
 	              
-	              
+	              //FIXME: rather draw the rocket launcher after calling gluLookAt
 	              /*//draw the rocket launcher                 
                   this.rocketLauncherTexture.bind();
                   gl.glPushMatrix();
