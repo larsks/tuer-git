@@ -365,6 +365,17 @@ public class GameGLView implements GLEventListener{
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
+	              
+	              
+	              /*//draw the rocket launcher                 
+                  this.rocketLauncherTexture.bind();
+                  gl.glPushMatrix();
+                  gl.glTranslatef(115.0f*GameController.factor,0.0f,223.0f*GameController.factor);
+                  gl.glScalef(0.1f/6.5536f,0.1f/6.5536f,0.1f/6.5536f);
+                  this.rocketLauncherVertexSet.draw();                                                
+                  gl.glPopMatrix();*/
+                  
+                  
 	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
@@ -374,9 +385,10 @@ public class GameGLView implements GLEventListener{
 	              //System.out.println("NETWORK VIEW SET DRAW TIME: "+(System.currentTimeMillis()-levelDrawTime));
 	              //levelDrawTime=System.currentTimeMillis()-levelDrawTime;	              
 	              //pushMessage("NVSD TIME: "+levelDrawTime,(int)(screenWidth*0.85),(int)(screenHeight*0.05));
-	              int i,j,limit,xp,zp;         
+	              int i,j,limit,xp,zp;
 	              xp=(int)(gameController.getPlayerXpos()/GameController.factor);
 	              zp=(int)(gameController.getPlayerZpos()/GameController.factor);
+	              //System.out.println("[INFO] xp="+xp+" x="+gameController.getPlayerXpos());
 	              //draw the artworks  
 	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
 	              if(!gameController.getPlayerWins())
@@ -942,7 +954,7 @@ public class GameGLView implements GLEventListener{
     	/*modify the projection matrix only when in 3D full mode*/
     	final float baseSize=50/(GameController.legacyFactor/GameController.factor);
     	gl.glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
-    	//glu.gluPerspective(65.0,4/3,1,1000);
+    	//glu.gluPerspective(45.0f,4.0f/3.0f,0.2f,2000f);
     	//softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
     	softwareViewFrustumCullingPerformer=new DummyViewFrustumCullingPerformer(gameController);
     	gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -998,7 +1010,10 @@ public class GameGLView implements GLEventListener{
         gl.glMatrixMode(GL.GL_PROJECTION);
         gl.glLoadIdentity();
         float aspect=(float)width/(float)height;
-        gl.glFrustum(-37.5*aspect,37.5*aspect,-50,50,50,5000000);
+        //gl.glFrustum(-37.5*aspect,37.5*aspect,-50,50,50,5000000);
+        //glu.gluPerspective(45.0f,aspect,0.2f,2000f);
+        final float baseSize=37.5f*aspect/(GameController.legacyFactor/GameController.factor);
+        gl.glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
         softwareViewFrustumCullingPerformer.updateProjectionMatrix();
         gl.glMatrixMode(GL.GL_MODELVIEW);
     }
