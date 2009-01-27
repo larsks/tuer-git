@@ -78,21 +78,12 @@ public class GameModel{
     private Clock internalClock;
     
     private float framerateCompensationFactor;
-    
-    /**
-     * size of a voxel in the coordinate system
-     */
-    static final float factor=65536.0f;
-    
-    static final float legacyFactor=65536.0f;
-    
-    static final float factorQuotient=(legacyFactor/factor);
-    
-    private static final double hitrange=0.3d*factor;
-    
-    private static final double rockrange=0.1d*factor;
+
+    private static final double hitrange=0.3d;
     
     private static final double minimalRocketLaunchDistance=1.5*hitrange;
+    
+    private static final double rockrange=0.1d;  
     
     /**
      * size of the edge of the "square" map
@@ -145,7 +136,12 @@ public class GameModel{
     private byte[] initialCollisionMap;
          
     //TODO : put it in a "weapon" class
-    private long lastShot;//time of last shot of rocket   
+    private long lastShot;//time of last shot of rocket
+    //TODO : put it in a "weapon" class
+    /**
+     * DIRTY: position of the rocket launcher
+     */
+    private float[] rocketLauncherPos;
     
     private final static long timeBetweenShots=500;
     
@@ -306,6 +302,7 @@ public class GameModel{
         this.player=new PlayerModel(internalClock);
         this.rocketTable=new HashMap<Integer,float[]>();
         this.isFalling=false;
+        this.rocketLauncherPos=new float[4];
         //decode XML items to fill the initial health power up list
         BufferedInputStream bis=null;
         Vector<HealthPowerUpModelBean> beanList=null;
@@ -385,7 +382,7 @@ public class GameModel{
                 {if(this.collisionMap[i]==MOVING_AND_BREAKABLE)
                      {//detect a bot and add it to the bot container
                       //+32768 -> put the bot at the center of the case
-                      this.botList.add(new BotModel(((i%mapEdgeSize)*factor)+(factor/2),0,((i/mapEdgeSize)*factor)+(factor/2)));
+                      this.botList.add(new BotModel((i%mapEdgeSize)+0.5D,0,(i/mapEdgeSize)+0.5D));
                       this.collisionMap[i]=EMPTY;
                      }
                  //copy the collision map
@@ -710,8 +707,8 @@ public class GameModel{
                           {System.out.println("x25341353");
                            continue;
                           }
-                      object[icode].setX((cx*factor)+(factor/2));
-                      object[icode].setZ((cz*factor)+(factor/2));
+                      object[icode].setX(cx+0.5D);
+                      object[icode].setZ(cz+0.5D);
                       object[icode].setShape(ShapeDeko);
                       object[icode].setSpeed(0);                 
                       continue;
@@ -727,8 +724,8 @@ public class GameModel{
                                {System.out.println("x20342010");
                                 continue;
                                }
-                           object[icode].setX((cx*factor)+(factor/2));
-                           object[icode].setZ((cz*factor)+(factor/2));
+                           object[icode].setX(cx+0.5D);
+                           object[icode].setZ(cz+0.5D);
                            object[icode].setShape(ShapeBush);  // alloc
                            object[icode].setSpeed(0);
                            // have to register bush location in "botmap",
@@ -761,10 +758,10 @@ public class GameModel{
                                 continue;
                                }
                            obj = object[icode];
-                           obj.setX((cx*factor)+(factor/2));
-                           obj.setZ((cz*factor)+(factor/2));                
+                           obj.setX(cx+0.5D);
+                           obj.setZ(cz+0.5D);                
                            obj.setShape(ShapeBot);   // alloc
-                           obj.setSpeed(1.0f/factorQuotient);       // pseudo                          
+                           obj.setSpeed(1.0f/65536.0f);       // pseudo                          
                           }
                       else // bot MUST be within an area
                           System.out.println("X1634234A");
@@ -851,10 +848,19 @@ public class GameModel{
     final void resetPlayerPosition(){
         //if the user wants to start a new game, 
         //it reinitializes the respawn position
-        player.setX((initialPositionX*factor)+(factor/2));
+        player.setX(initialPositionX+0.5D);
         player.setY(0);
-        player.setZ((initialPositionZ*factor)+(factor/2));
-        player.setDirection(fullCircle/2);    
+        player.setZ(initialPositionZ+0.5D);
+        player.setDirection(fullCircle/2);
+        updateRocketLauncherPositionFromPlayerPosition();
+    }
+    
+    private final void updateRocketLauncherPositionFromPlayerPosition(){
+        //TODO: put it closer to the player (0.25,0.5)
+        rocketLauncherPos[0]=(float)(player.getX()+(Math.sin(player.getDirection())*(player.getBoundingSize()*/*0.0625f*/-0.125f))+Math.sin(player.getDirection()-fullCircle/4)*(player.getBoundingSize()*/*0.125f*/0.5f));
+        rocketLauncherPos[1]=-1.0f/8.0f;
+        rocketLauncherPos[2]=(float)(player.getZ()+(Math.cos(player.getDirection())*(player.getBoundingSize()*/*0.0625f*/-0.125f))+Math.cos(player.getDirection()-fullCircle/4)*(player.getBoundingSize()*/*0.125f*/0.5f));
+        rocketLauncherPos[3]=(float)(player.getDirection()*(180/Math.PI));
     }
 
     public final long currentTime(){
@@ -898,8 +904,8 @@ public class GameModel{
         boolean hasBeenKilled=false;
         Rectangle2D.Float rWallVoxel = new Rectangle2D.Float();
         Rectangle2D.Float rPlayerVoxel = new Rectangle2D.Float();
-        final float playerSize=factor/4.0f;
-        final float wallSize=factor;
+        final float playerSize=1.0f/4.0f;
+        final float wallSize=1.0f;
         rPlayerVoxel.width=playerSize;
         rPlayerVoxel.height=playerSize;
         rWallVoxel.width=wallSize;
@@ -951,7 +957,7 @@ public class GameModel{
                   cycleDuration=internalClock.getElapsedTime()-cycleDuration;
                   framerateCompensationFactor = 16*cycleDuration*10;
                   //uses the time spent between 2 frames to adapt the step to the speed of the machine
-                  framerateCompensatedSpeed=framerateCompensationFactor*(runningFast?3:1)/factorQuotient;
+                  framerateCompensatedSpeed=framerateCompensationFactor*(runningFast?3:1)/65536.0f;
                   postInfoMessage();
                   updateExplosions();
                   updateItems();
@@ -967,7 +973,9 @@ public class GameModel{
                       {turnRight(cycleDuration);                   
                       }   
                   if(player.isAlive())
-                      player.setDirection(player.getDirection()-gameController.getDelta().x/1800.0d);
+                      {player.setDirection(player.getDirection()-gameController.getDelta().x/1800.0d);
+                       updateRocketLauncherPositionFromPlayerPosition();
+                      }
                   //System.out.println(player.getDirection()+" "+turningAmount);
                   if(player.getDirection()>=fullCircle)
                       player.setDirection(player.getDirection()-fullCircle);
@@ -1005,6 +1013,7 @@ public class GameModel{
                       bmoved=hasPlayerMoved(player,playerXnew,playerZnew);   
                   else
                       bmoved=false;
+                  //System.out.println("player: "+player.getX()+" "+player.getZ());
                   //started player to move?
                   if(!playerMoving && bmoved)
                       {playerMoving = true;
@@ -1030,6 +1039,13 @@ public class GameModel{
             }  // outerloop      
     }
     
+    /**
+     * 
+     * @param player
+     * @param playerXnew
+     * @param playerZnew
+     * @return
+     */
     private final boolean hasPlayerMoved(PlayerModel player,double playerXnew,
             double playerZnew){
         boolean bmoved,horizontalRecurse,verticalRecurse;       
@@ -1038,20 +1054,22 @@ public class GameModel{
         if(!horizontalRecurse && !verticalRecurse)
             bmoved=false;
         else
-            {int xidx1 = (int)Math.round(playerXnew/(double)factor)-1;
-             int zidx1 = (int)Math.round(playerZnew/(double)factor)-1;
+            {int xidx1 = (int)Math.round(playerXnew)-1;
+             int zidx1 = (int)Math.round(playerZnew)-1;
              Rectangle2D.Double rPlayerVoxel=new Rectangle2D.Double();
              rPlayerVoxel.setRect(player.getVoxel());
              rPlayerVoxel.x=playerXnew-player.getBoundingSize()/2.0d;
-             rPlayerVoxel.y=playerZnew-player.getBoundingSize()/2.0d; 
+             rPlayerVoxel.y=playerZnew-player.getBoundingSize()/2.0d;
              Rectangle2D.Double rWallVoxel=new Rectangle2D.Double();
-             rWallVoxel.width=factor;
-             rWallVoxel.height=factor;                               
+             rWallVoxel.width=1;
+             rWallVoxel.height=1;                               
              boolean isPlayerColliding=false;
              boolean isCellEmpty;
              double cellFactor=1.0D;
-             for(int i=0;!isPlayerColliding && i<4;i++)
-                 {switch(collisionMap[((zidx1+i/2)*mapEdgeSize)+(xidx1+i%2)])
+             for(int i=0,x,z;!isPlayerColliding && i<4;i++)
+                 {x=xidx1+i%2;
+                  z=zidx1+i/2;
+                  switch(collisionMap[(z*mapEdgeSize)+x])
                   {case EMPTY:
                    {isCellEmpty=true;
                     break;
@@ -1082,10 +1100,10 @@ public class GameModel{
                    }
                   }  
                   if(!isCellEmpty)
-                      {rWallVoxel.width=cellFactor*factor;
-                       rWallVoxel.height=cellFactor*factor;
-                       rWallVoxel.x=(xidx1+i%2+(1.0D-cellFactor)/2.0D)*factor;
-                       rWallVoxel.y=(zidx1+i/2+(1.0D-cellFactor)/2.0D)*factor;
+                      {rWallVoxel.width=cellFactor;
+                       rWallVoxel.height=cellFactor;
+                       rWallVoxel.x=x+(1.0D-cellFactor)/2.0D;
+                       rWallVoxel.y=z+(1.0D-cellFactor)/2.0D;
                        if(rPlayerVoxel.intersects(rWallVoxel))
                            isPlayerColliding=true;                      
                       }
@@ -1093,6 +1111,7 @@ public class GameModel{
              if(!isPlayerColliding)
                  {player.setX(playerXnew);
                   player.setZ(playerZnew);
+                  updateRocketLauncherPositionFromPlayerPosition();
                   bmoved=true;                    
                  }
              else
@@ -1128,7 +1147,8 @@ public class GameModel{
         boolean bStepLeft=false;
         boolean bStepRight=false;
         boolean bmoved=false;
-        float ispeed=1.0f/factorQuotient;
+        final float baseSpeed=1.0f/65536.0f;
+        float ispeed=baseSpeed;
         //TODO: implement a mechanism to prevent the bot from getting closer to the rockets
         //and allow it to dodge them
         if (obj.getSleep2() > 0)
@@ -1142,10 +1162,10 @@ public class GameModel{
                   {xnew+=Math.sin(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                    znew+=Math.cos(obj.getDir()+(fullCircle/4))*framerateCompensationFactor*obj.getSpeed();
                   }
-             if(obj.getSpeed() >= 1.0f/factorQuotient)
+             if(obj.getSpeed() >= baseSpeed)
                  {// no matter if speed 1 or more, we always probe
-                  if (obj.getSpeed() >= 2.0f/factorQuotient)
-                      ispeed = obj.getSpeed()-1.0f/factorQuotient;
+                  if (obj.getSpeed() >= 2*baseSpeed)
+                      ispeed = obj.getSpeed()-baseSpeed;
                   xnew+=Math.sin(obj.getDir())*framerateCompensationFactor*ispeed/10;
                   znew+=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed/10;
                  }
@@ -1153,8 +1173,8 @@ public class GameModel{
         BotModel currentBot=getBotModelFromBotObject(obj);
         if(xnew != obj.getX() || znew != obj.getZ())
            {// how far can the bot walk, if at all?         
-            int xidx1 = (((int)(xnew/factor))&0xFF);//0<=xidx1<256
-            int zidx1 = (((int)(znew/factor))&0xFF);
+            int xidx1 = (((int)xnew)&0xFF);//0<=xidx1<256
+            int zidx1 = (((int)znew)&0xFF);
             // about to leave area?
             boolean bstop=false;           
             //force the bot to stop when it is too close to another one and 
@@ -1169,14 +1189,14 @@ public class GameModel{
                      {dx=Math.abs(bot.getX()-xnew);
                       dz=Math.abs(bot.getZ()-znew);
                       //if this is another bot and if this bot is too close (at least 2 voxels)
-                      if(Math.abs(bot.getX()-obj.getX())>0&&Math.abs(bot.getZ()-obj.getZ())>0&&dx<(2*factor)&&dz<(2*factor)) 
+                      if(Math.abs(bot.getX()-obj.getX())>0&&Math.abs(bot.getZ()-obj.getZ())>0&&dx<2.0f&&dz<2.0f) 
                           {bstop=true;
                            break;
                           }
                      }
                  }
             // keep minimum distance also to player
-            if(!bstop&&(Math.abs(dxp)<factor)&&(Math.abs(dzp)<factor))
+            if(!bstop&&(Math.abs(dxp)<1.0f)&&(Math.abs(dzp)<1.0f))
                 bstop=true;
             // check for obstacles and move
             if(!bstop) 
@@ -1190,18 +1210,18 @@ public class GameModel{
 
            }  // endif position changed
        if(bmoved) 
-           {if(obj.getSpeed() < 2/factorQuotient)
+           {if(obj.getSpeed() < 2/65536.0f)
                 {// this determines the bot speeds. the number
                  // gets divided by 10. so 10==1.0, 5==0.5 etc.
-                 obj.setSpeed(8.0f/factorQuotient);                
+                 obj.setSpeed(8.0f/65536.0f);                
                 }
             currentBot.setRunning(true); 
             // count walking bots, for stepObjects()
             nClBotsWalking++;
            }  
        else 
-           {if(obj.getSpeed() >= 2/factorQuotient)
-                {obj.setSpeed(1.0f/factorQuotient);
+           {if(obj.getSpeed() >= 2/65536.0f)
+                {obj.setSpeed(1.0f/65536.0f);
                  currentBot.setRunning(false);
                 }
            }
@@ -1212,7 +1232,7 @@ public class GameModel{
         double objectXnew,objectZnew,xdiff,zdiff,deltax,deltaz,maxDelta,interpolationStepX,interpolationStepZ;
         final double minRange=Math.min(hitrange,rockrange);
         float ispeed;
-        int iobj,xidx1,yidx1,nOldBotsWalking=nClBotsWalking,interpolationCount;
+        int iobj,xidx1,zidx1,nOldBotsWalking=nClBotsWalking,interpolationCount;
         d3object obj;
         nClBotsWalking=0;
         //between IndexPlayerRockets and IndexBotRockets, get all active rockets
@@ -1279,15 +1299,17 @@ public class GameModel{
                       {//the following is used only for rockets
                        //take into account the frame rate or the main timing
                        deltax=Math.sin(obj.getDir())*framerateCompensationFactor*ispeed;
-                       deltaz=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;
+                       deltaz=Math.cos(obj.getDir())*framerateCompensationFactor*ispeed;              
                        maxDelta=Math.max(deltax,deltaz);
                        //we take the biggest movement and the smallest
                        //range to compute the biggest interpolation count 
                        //in order to avoid forgetting some collisions 
                        //(objects might go through each other then :( )
-                       interpolationCount=(int)Math.ceil(maxDelta/minRange);
+                       /*interpolationCount=(int)Math.ceil(maxDelta/minRange);
                        //overestimate this count to be sure to perform enough interpolations
-                       interpolationCount++;
+                       interpolationCount++;*/
+                       //the linear interpolation has been disabled as it was buggy
+                       interpolationCount=1;
                        interpolationStepX=deltax/interpolationCount;
                        interpolationStepZ=deltaz/interpolationCount;
                        objectXnew=obj.getX();
@@ -1296,9 +1318,10 @@ public class GameModel{
                        for(int m=0;m<interpolationCount&&!bhit;m++)
                            {objectXnew+=interpolationStepX;
                             objectZnew+=interpolationStepZ;
+                            //System.out.println("STEP: "+interpolationStepX+" "+interpolationStepZ);
                             // reached a discrete new map position?
-                            xidx1=(((int)(objectXnew/factor))&0xFF);
-                            yidx1=(((int)(objectZnew/factor))&0xFF);
+                            xidx1=(((int)objectXnew)&0xFF);
+                            zidx1=(((int)objectZnew)&0xFF);
                             //bhit=false;
                             if(obj.getShape()==ShapeRocket)
                                 {// check for rocket<->object collision
@@ -1325,9 +1348,9 @@ public class GameModel{
                                           }
                                      }
                                  //check for rocket<->player collision
-                                 xdiff = Math.abs(player.getX()-objectXnew);
-                                 zdiff = Math.abs(player.getZ()-objectZnew);
-                                 if(xdiff < player.getBoundingSize() && zdiff < player.getBoundingSize() && player.isAlive()) 
+                                 xdiff=Math.abs(player.getX()-objectXnew);
+                                 zdiff=Math.abs(player.getZ()-objectZnew);
+                                 if(xdiff<player.getBoundingSize()&&zdiff<player.getBoundingSize()&&player.isAlive()) 
                                      {// player is hit
                                       bhit=true;
                                       if(!bcheat)
@@ -1341,89 +1364,89 @@ public class GameModel{
                                           }
                                      }
                                 }
-                            if(collisionMap[(yidx1*mapEdgeSize)+xidx1]!=EMPTY && 
-                               collisionMap[(yidx1*mapEdgeSize)+xidx1]>=UNAVOIDABLE_AND_UNBREAKABLE_DOWN && 
-                               collisionMap[(yidx1*mapEdgeSize)+xidx1]<=UNAVOIDABLE_AND_UNBREAKABLE_UP)
+                            if(collisionMap[(zidx1*mapEdgeSize)+xidx1]!=EMPTY && 
+                               collisionMap[(zidx1*mapEdgeSize)+xidx1]>=UNAVOIDABLE_AND_UNBREAKABLE_DOWN && 
+                               collisionMap[(zidx1*mapEdgeSize)+xidx1]<=UNAVOIDABLE_AND_UNBREAKABLE_UP)
                                 {// handle a wall impact
                                  bhit=true;
                                  //show impact on plain wall tile
                                  Impact impact=null,impact1=null,impact2=null,impact3=null;
-                                 switch(collisionMap[(yidx1*mapEdgeSize)+xidx1])
+                                 switch(collisionMap[(zidx1*mapEdgeSize)+xidx1])
                                  {case UNAVOIDABLE_AND_UNBREAKABLE_UP:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                                                                                                    
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1),(float)((xidx1+1)),(float)(zidx1),0.0f,-1.0f);                                                                                                    
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_DOWN:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                                 
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1),(float)((zidx1+1)),(float)((xidx1+1)),(float)((zidx1+1)),0.0f,1.0f);                                 
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_LEFT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);                                
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1),(float)(zidx1),(float)(xidx1),(float)(zidx1+1),-1.0f,0.0f);                                
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                                 
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);                                 
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_LEFT_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_LEFT_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_DOWN_LEFT_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);                     
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);                             
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);                     
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);                             
                                  break;
                                  }
                                  case UNAVOIDABLE_AND_UNBREAKABLE_UP_DOWN_LEFT_RIGHT:
-                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)(yidx1*factor),0.0f,-1.0f);                       
-                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)((yidx1+1)*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),0.0f,1.0f);
-                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1*factor),(float)(yidx1*factor),(float)(xidx1*factor),(float)((yidx1+1)*factor),-1.0f,0.0f);
-                                 impact3=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)((xidx1+1)*factor),(float)(yidx1*factor),(float)((xidx1+1)*factor),(float)((yidx1+1)*factor),1.0f,0.0f);
+                                 {impact=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)(xidx1+1),(float)zidx1,0.0f,-1.0f);                       
+                                 impact1=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)(zidx1+1),(float)(xidx1+1),(float)(zidx1+1),0.0f,1.0f);
+                                 impact2=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)xidx1,(float)zidx1,(float)xidx1,(float)(zidx1+1),-1.0f,0.0f);
+                                 impact3=Impact.computeImpactFromTargetoryBipoint((float)obj.getX(),(float)obj.getZ(),(float)objectXnew,(float)objectZnew,(float)(xidx1+1),(float)zidx1,(float)(xidx1+1),(float)(zidx1+1),1.0f,0.0f);
                                  break;
                                  }
                                  default:
@@ -1526,7 +1549,7 @@ public class GameModel{
                  }
              else                      
                  {float coef=fallDuration/(float)fallTotalDuration;
-                  player.setY(-(coef*coef)*(factor/2));         
+                  player.setY(-coef*coef*0.5D);         
                  }
             }
         return(hasBeenKilled);
@@ -1538,10 +1561,10 @@ public class GameModel{
      * @param obj bot
      */
     private final boolean playerVisibleFrom(d3object obj){
-       double x1=obj.getX()/factor;
-       double z1=obj.getZ()/factor;
-       double x2=player.getX()/factor;
-       double z2=player.getZ()/factor;
+       double x1=obj.getX();
+       double z1=obj.getZ();
+       double x2=player.getX();
+       double z2=player.getZ();
        double ddx=x2-x1;
        double ddz=z2-z1;
        int idx=(int)(ddx*8);
@@ -1597,7 +1620,7 @@ public class GameModel{
        // re-allow player movement here.
        //update the accelerated model
        //TODO: decorellate
-       collisionMap[((int)(obj.getZ()/factor))*mapEdgeSize+((int)(obj.getX()/factor))]=EMPTY;
+       collisionMap[((int)obj.getZ())*mapEdgeSize+((int)obj.getX())]=EMPTY;
        //remove the shape from the previous collision system
        obj.setSpeed((short)0);
        obj.setShape(-1);
@@ -1629,10 +1652,9 @@ public class GameModel{
             obj.setZ(player.getZ()+(Math.cos(player.getDirection())*(player.getBoundingSize()*1.5))+Math.cos(player.getDirection()-fullCircle/4)*(player.getBoundingSize()*0.5));
             obj.setShape(ShapeRocket);
             obj.setDir(player.getDirection());           
-            obj.setSpeed(3.0f/factorQuotient);
-            //System.out.println("OBJ SPEED="+obj.getSpeed());
-            blaunched = true;                   
-            float[] rocket=new float[]{(float)obj.getX(),-factor/8.0f,(float)obj.getZ(),
+            obj.setSpeed(3.0f/65536.0f);
+            blaunched=true;                   
+            float[] rocket=new float[]{(float)obj.getX(),-0.125f,(float)obj.getZ(),
                     (float)(player.getDirection()*(180/Math.PI))};
             rocketList.add(rocket);
             rocketTable.put(Integer.valueOf(irocket),rocket);
@@ -1652,7 +1674,7 @@ public class GameModel{
             obj.setZ(object[ifrom].getZ() + Math.cos(ddir)*minimalRocketLaunchDistance);
             obj.setShape(ShapeRocket);
             obj.setDir(ddir);
-            obj.setSpeed(3.0f/factorQuotient);
+            obj.setSpeed(3.0f/65536.0f);
             float[] rocket=new float[]{(float)obj.getX(),0.0f,(float)obj.getZ(),
                     (float)(ddir*(180/Math.PI))};
             rocketList.add(rocket);
@@ -1681,7 +1703,7 @@ public class GameModel{
              else
                  n1 = 2;
             }
-        final double dthresh=0.01d*factor;
+        final double dthresh=0.01d;
         if(Math.abs(dx) < dthresh)
             {if(dz > 0.0)
                  return 0.0;
@@ -1756,5 +1778,9 @@ public class GameModel{
                 oldMessagesList.add(gim);
         //remove old messages
         gameInfoMessageList.removeAll(oldMessagesList);
+    }
+
+    final float[] getRocketLauncherPos(){
+        return(rocketLauncherPos);
     }
 }

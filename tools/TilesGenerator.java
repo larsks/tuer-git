@@ -176,8 +176,6 @@ public final class TilesGenerator implements Runnable{
 
     private static final int artTextureSize=4;
     
-    private final int factor=65536;
-    
     private static final int EMPTY=0;
     
     private static final int FIXED_AND_BREAKABLE_CHAIR=1;
@@ -343,19 +341,13 @@ public final class TilesGenerator implements Runnable{
         writeHealthPowerUpList();
         writeCrosshair();
         writeSphericalBeast();
-        System.out.println("Build an scaled network");
         //the cells generator uses a cartesian reference mark
         //and a lateral meaning based on the position of walls 
         //in their rooms
         networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
                  leftWallsList,rightWallsList,artTopWallsList,
-                 artBottomWallsList,artLeftWallsList,artRightWallsList,factor,tileSize);
+                 artBottomWallsList,artLeftWallsList,artRightWallsList,tileSize);
         writeNetworkSet();
-        System.out.println("Build an unscaled network");
-        //This factor becomes useless
-        networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
-                 leftWallsList,rightWallsList,artTopWallsList,
-                 artBottomWallsList,artLeftWallsList,artRightWallsList,1.0f,tileSize);
         /* The textured level is the view (the representation) 
          * whereas the untextured level is the model (used for the collisions).
          * The ungrouped structure contains a file per cell and a single file that calls the others
@@ -363,19 +355,18 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);        
-        //no need of scale for the rocket launcher
-        convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,1.0f,1.0f,true,true,false);
+        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,true,false,true,false);
+        convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
-        convertBinaryToOBJFile(rocketFilename,rocketLauncherTextureFilename,rocketOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(unbreakableObjectFilename,objectTextureFilename,unbreakableObjectOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(vendingMachineFilename,objectTextureFilename,vendingMachineOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(lampFilename,objectTextureFilename,lampOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(chairFilename,objectTextureFilename,chairOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(flowerFilename,objectTextureFilename,flowerOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(tableFilename,objectTextureFilename,tableOBJFilename,factor,1.0f,true,true,false);
-        convertBinaryToOBJFile(bonsaiFilename,objectTextureFilename,bonsaiOBJFilename,factor,1.0f,true,true,false);
+        convertBinaryToOBJFile(rocketFilename,rocketLauncherTextureFilename,rocketOBJFilename,true,true,false);
+        convertBinaryToOBJFile(unbreakableObjectFilename,objectTextureFilename,unbreakableObjectOBJFilename,true,true,false);
+        convertBinaryToOBJFile(vendingMachineFilename,objectTextureFilename,vendingMachineOBJFilename,true,true,false);
+        convertBinaryToOBJFile(lampFilename,objectTextureFilename,lampOBJFilename,true,true,false);
+        convertBinaryToOBJFile(chairFilename,objectTextureFilename,chairOBJFilename,true,true,false);
+        convertBinaryToOBJFile(flowerFilename,objectTextureFilename,flowerOBJFilename,true,true,false);
+        convertBinaryToOBJFile(tableFilename,objectTextureFilename,tableOBJFilename,true,true,false);
+        convertBinaryToOBJFile(bonsaiFilename,objectTextureFilename,bonsaiOBJFilename,true,true,false);
         writeLevelModelBean();
     }
     
@@ -971,8 +962,8 @@ public final class TilesGenerator implements Runnable{
      * @throws IOException
      */
     private static final void convertBinaryToOBJFile(String binaryFilePath,
-            String textureFilename,String objFilePath,float sourceFactor,
-            float destFactor,boolean redundant,boolean useTriangles,
+            String textureFilename,String objFilePath,/*float sourceFactor,
+            float destFactor,*/boolean redundant,boolean useTriangles,
             boolean useJOGLTextureCoordinatesVerticalOrder){       
         final int slashIndex=objFilePath.lastIndexOf("/");
         final String directoryname=slashIndex>0?objFilePath.substring(0,slashIndex):"";
@@ -992,14 +983,14 @@ public final class TilesGenerator implements Runnable{
         try{buffer=GameIO.readGameFloatDataFile("/"+binaryFilePath);} 
         catch(IOException ioe)
         {throw new RuntimeException("Impossible to read the binary file: "+binaryFilePath,ioe);}
-        if(sourceFactor!=destFactor&&sourceFactor!=0.0f)
+        /*if(sourceFactor!=destFactor&&sourceFactor!=0.0f)
             {float rescaleFactor=destFactor/sourceFactor;
              for(int i=0;i<buffer.capacity();i+=5)
                  {buffer.put(i+2,buffer.get(i+2)*rescaleFactor);
                   buffer.put(i+3,buffer.get(i+3)*rescaleFactor);
                   buffer.put(i+4,buffer.get(i+4)*rescaleFactor);
                  }
-            }
+            }*/
         System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
         if(useTexture)
             pw.println("mtllib "+MTLFilename);
@@ -1140,11 +1131,11 @@ public final class TilesGenerator implements Runnable{
     private final void writeUnbreakableObjectData(DataOutputStream out) throws IOException{       
         final float[] wallTexCoord={0.03f,0.82f,0.22f,0.78f};
         final float[] grassTexCoord={0.08f,0.84f,0.17f,0.83f};
-        final float internalHalfSize=0.4f*factor;
-        final float externalHalfSize=0.5f*factor;
-        final float topHeight=-0.1f*factor;
-        final float intermediaryHeight=-0.20f*factor;
-        final float bottomHeight=-0.5f*factor;       
+        final float internalHalfSize=0.4f;
+        final float externalHalfSize=0.5f;
+        final float topHeight=-0.1f;
+        final float intermediaryHeight=-0.20f;
+        final float bottomHeight=-0.5f;       
         //internal walls
         //animation n 0
         //frame n 0
@@ -1261,116 +1252,116 @@ public final class TilesGenerator implements Runnable{
     private final void writeBotData(DataOutputStream out) throws IOException{
         //animation n 0
         //frame n 0
-        writeQuadPrimitive(out,0.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,1.0f,-0.5f,0.5f,0.0f,
+                0.0f,0.75f,-0.5f,-0.5f,0.0f,
+                0.25f,0.75f,0.5f,-0.5f,0.0f,
+                0.25f,1.0f,0.5f,0.5f,0.0f);
         //frame n 1
-        writeQuadPrimitive(out,0.25f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,1.0f,-0.5f,0.5f,0.0f,
+                0.25f,0.75f,-0.5f,-0.5f,0.0f,
+                0.5f,0.75f,0.5f,-0.5f,0.0f,
+                0.5f,1.0f,0.5f,0.5f,0.0f);
         //frame n 2
-        writeQuadPrimitive(out,0.5f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,1.0f,-0.5f,0.5f,0.0f,
+                0.5f,0.75f,-0.5f,-0.5f,0.0f,
+                0.75f,0.75f,0.5f,-0.5f,0.0f,
+                0.75f,1.0f,0.5f,0.5f,0.0f);
         //frame n 3
-        writeQuadPrimitive(out,0.75f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.75f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.75f,1.0f,-0.5f,0.5f,0.0f,
+                0.75f,0.75f,-0.5f,-0.5f,0.0f,
+                1.0f,0.75f,0.5f,-0.5f,0.0f,
+                1.0f,1.0f,0.5f,0.5f,0.0f);
         //frame n 4
-        writeQuadPrimitive(out,0.0f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,0.75f,-0.5f,0.5f,0.0f,
+                0.0f,0.5f,-0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,-0.5f,0.0f,
+                0.25f,0.75f,0.5f,0.5f,0.0f);
         //frame n 5
-        writeQuadPrimitive(out,0.25f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,0.75f,-0.5f,0.5f,0.0f,
+                0.25f,0.5f,-0.5f,-0.5f,0.0f,
+                0.5f,0.5f,0.5f,-0.5f,0.0f,
+                0.5f,0.75f,0.5f,0.5f,0.0f);
         //frame n 6
-        writeQuadPrimitive(out,0.5f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,0.75f,-0.5f,0.5f,0.0f,
+                0.5f,0.5f,-0.5f,-0.5f,0.0f,
+                0.75f,0.5f,0.5f,-0.5f,0.0f,
+                0.75f,0.75f,0.5f,0.5f,0.0f);
         //frame n 7
-        writeQuadPrimitive(out,0.75f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.75f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.75f,0.75f,-0.5f,0.5f,0.0f,
+                0.75f,0.5f,-0.5f,-0.5f,0.0f,
+                1.0f,0.5f,0.5f,-0.5f,0.0f,
+                1.0f,0.75f,0.5f,0.5f,0.0f);
         //frame n 8
-        writeQuadPrimitive(out,0.0f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,0.5f,-0.5f,0.5f,0.0f,
+                0.0f,0.25f,-0.5f,-0.5f,0.0f,
+                0.25f,0.25f,0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,0.5f,0.0f);
         //frame n 9
-        writeQuadPrimitive(out,0.25f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.5f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,0.5f,-0.5f,0.5f,0.0f,
+                0.25f,0.25f,-0.5f,-0.5f,0.0f,
+                0.5f,0.25f,0.5f,-0.5f,0.0f,
+                0.5f,0.5f,0.5f,0.5f,0.0f);
         //frame n 10
-        writeQuadPrimitive(out,0.5f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.5f,0.5f*factor,0.5f*factor,0.0f);      
+        writeQuadPrimitive(out,0.5f,0.5f,-0.5f,0.5f,0.0f,
+                0.5f,0.25f,-0.5f,-0.5f,0.0f,
+                0.75f,0.25f,0.5f,-0.5f,0.0f,
+                0.75f,0.5f,0.5f,0.5f,0.0f);      
         //animation n 1
         //frame n 0
-        writeQuadPrimitive(out,0.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,1.0f,-0.5f,0.5f,0.0f,
+                0.0f,0.75f,-0.5f,-0.5f,0.0f,
+                0.25f,0.75f,0.5f,-0.5f,0.0f,
+                0.25f,1.0f,0.5f,0.5f,0.0f);
         //frame n 1
-        writeQuadPrimitive(out,0.25f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,1.0f,-0.5f,0.5f,0.0f,
+                0.25f,0.75f,-0.5f,-0.5f,0.0f,
+                0.5f,0.75f,0.5f,-0.5f,0.0f,
+                0.5f,1.0f,0.5f,0.5f,0.0f);
         //frame n 2
-        writeQuadPrimitive(out,0.5f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,1.0f,-0.5f,0.5f,0.0f,
+                0.5f,0.75f,-0.5f,-0.5f,0.0f,
+                0.75f,0.75f,0.5f,-0.5f,0.0f,
+                0.75f,1.0f,0.5f,0.5f,0.0f);
         //frame n 3
-        writeQuadPrimitive(out,0.75f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.75f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.75f,1.0f,-0.5f,0.5f,0.0f,
+                0.75f,0.75f,-0.5f,-0.5f,0.0f,
+                1.0f,0.75f,0.5f,-0.5f,0.0f,
+                1.0f,1.0f,0.5f,0.5f,0.0f);
         //frame n 4
-        writeQuadPrimitive(out,0.0f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,0.75f,-0.5f,0.5f,0.0f,
+                0.0f,0.5f,-0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,-0.5f,0.0f,
+                0.25f,0.75f,0.5f,0.5f,0.0f);
         //frame n 5
-        writeQuadPrimitive(out,0.25f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,0.75f,-0.5f,0.5f,0.0f,
+                0.25f,0.5f,-0.5f,-0.5f,0.0f,
+                0.5f,0.5f,0.5f,-0.5f,0.0f,
+                0.5f,0.75f,0.5f,0.5f,0.0f);
         //frame n 6
-        writeQuadPrimitive(out,0.5f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,0.75f,-0.5f,0.5f,0.0f,
+                0.5f,0.5f,-0.5f,-0.5f,0.0f,
+                0.75f,0.5f,0.5f,-0.5f,0.0f,
+                0.75f,0.75f,0.5f,0.5f,0.0f);
         //frame n 7
-        writeQuadPrimitive(out,0.75f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.75f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.75f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.75f,0.75f,-0.5f,0.5f,0.0f,
+                0.75f,0.5f,-0.5f,-0.5f,0.0f,
+                1.0f,0.5f,0.5f,-0.5f,0.0f,
+                1.0f,0.75f,0.5f,0.5f,0.0f);
         //frame n 8
-        writeQuadPrimitive(out,0.0f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,0.5f,-0.5f,0.5f,0.0f,
+                0.0f,0.25f,-0.5f,-0.5f,0.0f,
+                0.25f,0.25f,0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,0.5f,0.0f);
         //frame n 9
-        writeQuadPrimitive(out,0.25f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.25f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.5f,0.5f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.25f,0.5f,-0.5f,0.5f,0.0f,
+                0.25f,0.25f,-0.5f,-0.5f,0.0f,
+                0.5f,0.25f,0.5f,-0.5f,0.0f,
+                0.5f,0.5f,0.5f,0.5f,0.0f);
         //frame n 10
-        writeQuadPrimitive(out,0.5f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.5f,0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,0.5f,-0.5f,0.5f,0.0f,
+                0.5f,0.25f,-0.5f,-0.5f,0.0f,
+                0.75f,0.25f,0.5f,-0.5f,0.0f,
+                0.75f,0.5f,0.5f,0.5f,0.0f);
     }
            
     private final void writeRocketLauncherData(DataOutputStream out,float inradius)throws IOException{
@@ -1460,60 +1451,60 @@ public final class TilesGenerator implements Runnable{
         //animation n 0
         //frame n 0
         //build upper walls                      
-        writeQuadPrimitive(out,0.58f,0.73f,0.2f*factor,0.5f*factor,-0.2f*factor,
-                0.58f,0.52f,0.2f*factor,-0.5f*factor,-0.2f*factor,
-                0.66f,0.52f,-0.2f*factor,-0.5f*factor,-0.2f*factor,
-                0.66f,0.73f,-0.2f*factor,0.5f*factor,-0.2f*factor);
+        writeQuadPrimitive(out,0.58f,0.73f,0.2f,0.5f,-0.2f,
+                0.58f,0.52f,0.2f,-0.5f,-0.2f,
+                0.66f,0.52f,-0.2f,-0.5f,-0.2f,
+                0.66f,0.73f,-0.2f,0.5f,-0.2f);
         //build lower walls                          
-        writeQuadPrimitive(out,0.58f,0.73f,-0.2f*factor,0.5f*factor,0.2f*factor,
-                0.58f,0.52f,-0.2f*factor,-0.5f*factor,0.2f*factor,
-                0.66f,0.52f,0.2f*factor,-0.5f*factor,0.2f*factor,
-                0.66f,0.73f,0.2f*factor,0.5f*factor,0.2f*factor);
+        writeQuadPrimitive(out,0.58f,0.73f,-0.2f,0.5f,0.2f,
+                0.58f,0.52f,-0.2f,-0.5f,0.2f,
+                0.66f,0.52f,0.2f,-0.5f,0.2f,
+                0.66f,0.73f,0.2f,0.5f,0.2f);
         //build left side walls                                          
-        writeQuadPrimitive(out,0.58f,0.73f,-0.2f*factor,0.5f*factor,-0.2f*factor,
-                0.58f,0.52f,-0.2f*factor,-0.5f*factor,-0.2f*factor,
-                0.66f,0.52f,-0.2f*factor,-0.5f*factor,0.2f*factor,
-                0.66f,0.73f,-0.2f*factor,0.5f*factor,0.2f*factor);        
+        writeQuadPrimitive(out,0.58f,0.73f,-0.2f,0.5f,-0.2f,
+                0.58f,0.52f,-0.2f,-0.5f,-0.2f,
+                0.66f,0.52f,-0.2f,-0.5f,0.2f,
+                0.66f,0.73f,-0.2f,0.5f,0.2f);        
         //build right side walls                                 
-        writeQuadPrimitive(out,0.58f,0.73f,0.2f*factor,0.5f*factor,0.2f*factor,
-                0.58f,0.52f,0.2f*factor,-0.5f*factor,0.2f*factor,
-                0.66f,0.52f,0.2f*factor,-0.5f*factor,-0.2f*factor,
-                0.66f,0.73f,0.2f*factor,0.5f*factor,-0.2f*factor);
+        writeQuadPrimitive(out,0.58f,0.73f,0.2f,0.5f,0.2f,
+                0.58f,0.52f,0.2f,-0.5f,0.2f,
+                0.66f,0.52f,0.2f,-0.5f,-0.2f,
+                0.66f,0.73f,0.2f,0.5f,-0.2f);
     }
     
     private final void writeHealthPowerUpData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0
         //build upper walls                      
-        writeQuadPrimitive(out,0.0f,1.0f,0.1f*factor,0.1f*factor,-0.1f*factor,
-                0.0f,0.0f,0.1f*factor,-0.1f*factor,-0.1f*factor,
-                1.0f,0.0f,-0.1f*factor,-0.1f*factor,-0.1f*factor,
-                1.0f,1.0f,-0.1f*factor,0.1f*factor,-0.1f*factor);
+        writeQuadPrimitive(out,0.0f,1.0f,0.1f,0.1f,-0.1f,
+                0.0f,0.0f,0.1f,-0.1f,-0.1f,
+                1.0f,0.0f,-0.1f,-0.1f,-0.1f,
+                1.0f,1.0f,-0.1f,0.1f,-0.1f);
         //build lower walls                          
-        writeQuadPrimitive(out,0.0f,1.0f,-0.1f*factor,0.1f*factor,0.1f*factor,
-                0.0f,0.0f,-0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,0.0f,0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,1.0f,0.1f*factor,0.1f*factor,0.1f*factor);
+        writeQuadPrimitive(out,0.0f,1.0f,-0.1f,0.1f,0.1f,
+                0.0f,0.0f,-0.1f,-0.1f,0.1f,
+                1.0f,0.0f,0.1f,-0.1f,0.1f,
+                1.0f,1.0f,0.1f,0.1f,0.1f);
         //build left side walls                                          
-        writeQuadPrimitive(out,0.0f,1.0f,-0.1f*factor,0.1f*factor,-0.1f*factor,
-                0.0f,0.0f,-0.1f*factor,-0.1f*factor,-0.1f*factor,
-                1.0f,0.0f,-0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,1.0f,-0.1f*factor,0.1f*factor,0.1f*factor);        
+        writeQuadPrimitive(out,0.0f,1.0f,-0.1f,0.1f,-0.1f,
+                0.0f,0.0f,-0.1f,-0.1f,-0.1f,
+                1.0f,0.0f,-0.1f,-0.1f,0.1f,
+                1.0f,1.0f,-0.1f,0.1f,0.1f);        
         //build right side walls                                 
-        writeQuadPrimitive(out,0.0f,1.0f,0.1f*factor,0.1f*factor,0.1f*factor,
-                0.0f,0.0f,0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,0.0f,0.1f*factor,-0.1f*factor,-0.1f*factor,
-                1.0f,1.0f,0.1f*factor,0.1f*factor,-0.1f*factor);
+        writeQuadPrimitive(out,0.0f,1.0f,0.1f,0.1f,0.1f,
+                0.0f,0.0f,0.1f,-0.1f,0.1f,
+                1.0f,0.0f,0.1f,-0.1f,-0.1f,
+                1.0f,1.0f,0.1f,0.1f,-0.1f);
         //build wall above                      
-        writeQuadPrimitive(out,0.0f,1.0f,0.1f*factor,0.1f*factor,0.1f*factor,
-                0.0f,0.0f,0.1f*factor,0.1f*factor,-0.1f*factor,
-                1.0f,0.0f,-0.1f*factor,0.1f*factor,-0.1f*factor,
-                1.0f,1.0f,-0.1f*factor,0.1f*factor,0.1f*factor);     
+        writeQuadPrimitive(out,0.0f,1.0f,0.1f,0.1f,0.1f,
+                0.0f,0.0f,0.1f,0.1f,-0.1f,
+                1.0f,0.0f,-0.1f,0.1f,-0.1f,
+                1.0f,1.0f,-0.1f,0.1f,0.1f);     
         //build wall below                      
-        writeQuadPrimitive(out,0.0f,1.0f,0.1f*factor,-0.1f*factor,-0.1f*factor,
-                0.0f,0.0f,0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,0.0f,-0.1f*factor,-0.1f*factor,0.1f*factor,
-                1.0f,1.0f,-0.1f*factor,-0.1f*factor,-0.1f*factor);
+        writeQuadPrimitive(out,0.0f,1.0f,0.1f,-0.1f,-0.1f,
+                0.0f,0.0f,0.1f,-0.1f,0.1f,
+                1.0f,0.0f,-0.1f,-0.1f,0.1f,
+                1.0f,1.0f,-0.1f,-0.1f,-0.1f);
     }
     
     private final void writeLampData(DataOutputStream out) throws IOException {
@@ -1521,42 +1512,42 @@ public final class TilesGenerator implements Runnable{
         //frame n 0
         float[][] part1,part2,part3,part4,part5;
         //bottom
-        part1=computeZeroCenteredRegularOctagonAroundY(0.1f*factor,-0.5f*factor);
-        part2=writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f*factor,-0.48f*factor,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
+        part1=computeZeroCenteredRegularOctagonAroundY(0.1f,-0.5f);
+        part2=writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f,-0.48f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part1,part2,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);       
         //middle
-        part3=computeZeroCenteredRegularOctagonAroundY(0.01f*factor,-0.48f*factor);
-        part4=computeZeroCenteredRegularOctagonAroundY(0.01f*factor,0.20f*factor);
+        part3=computeZeroCenteredRegularOctagonAroundY(0.01f,-0.48f);
+        part4=computeZeroCenteredRegularOctagonAroundY(0.01f,0.20f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part3,part4,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);   
         //top
-        part5=computeZeroCenteredRegularOctagonAroundY(0.1f*factor,0.40f*factor);
+        part5=computeZeroCenteredRegularOctagonAroundY(0.1f,0.40f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part4,part5,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f); 
     }
     
     private final void writeFlowerData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0                                
-        writeQuadPrimitive(out,0.0f,0.75f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,0.5f*factor,0.5f*factor,0.0f);  
-        writeQuadPrimitive(out,0.0f,0.75f,0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.5f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.75f,-0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.0f,0.75f,-0.5f,0.5f,0.0f,
+                0.0f,0.5f,-0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,-0.5f,0.0f,
+                0.25f,0.75f,0.5f,0.5f,0.0f);  
+        writeQuadPrimitive(out,0.0f,0.75f,0.5f,0.5f,0.0f,
+                0.0f,0.5f,0.5f,-0.5f,0.0f,
+                0.25f,0.5f,-0.5f,-0.5f,0.0f,
+                0.25f,0.75f,-0.5f,0.5f,0.0f);
     }
     
     private final void writeChairData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0                          
-        writeQuadPrimitive(out,0.5f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,1.0f,0.5f*factor,0.5f*factor,0.0f);  
-        writeQuadPrimitive(out,0.5f,1.0f,0.5f*factor,0.5f*factor,0.0f,
-                0.5f,0.75f,0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,0.75f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.75f,1.0f,-0.5f*factor,0.5f*factor,0.0f);
+        writeQuadPrimitive(out,0.5f,1.0f,-0.5f,0.5f,0.0f,
+                0.5f,0.75f,-0.5f,-0.5f,0.0f,
+                0.75f,0.75f,0.5f,-0.5f,0.0f,
+                0.75f,1.0f,0.5f,0.5f,0.0f);  
+        writeQuadPrimitive(out,0.5f,1.0f,0.5f,0.5f,0.0f,
+                0.5f,0.75f,0.5f,-0.5f,0.0f,
+                0.75f,0.75f,-0.5f,-0.5f,0.0f,
+                0.75f,1.0f,-0.5f,0.5f,0.0f);
     }
     
     private final void writeTableData(DataOutputStream out) throws IOException {
@@ -1565,17 +1556,17 @@ public final class TilesGenerator implements Runnable{
         //from the bottom to the top      
         //bottom
         float[][] part1,part2,part3,part4,part5,part6;
-        part1=computeZeroCenteredRegularOctagonAroundY(0.1f*factor,-0.5f*factor);
-        part2=writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f*factor,-0.48f*factor,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
+        part1=computeZeroCenteredRegularOctagonAroundY(0.1f,-0.5f);
+        part2=writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f,-0.48f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part1,part2,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);       
         //middle
-        part3=computeZeroCenteredRegularOctagonAroundY(0.01f*factor,-0.48f*factor);
-        part4=computeZeroCenteredRegularOctagonAroundY(0.01f*factor,-0.1f*factor);
+        part3=computeZeroCenteredRegularOctagonAroundY(0.01f,-0.48f);
+        part4=computeZeroCenteredRegularOctagonAroundY(0.01f,-0.1f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part3,part4,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);       
         //top
-        part5=writeZeroCenteredRegularOctagonAroundY(out,0.1f*factor,-0.1f*factor,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
-        writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f*factor,-0.08f*factor,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
-        part6=computeZeroCenteredRegularOctagonAroundY(0.1f*factor,-0.08f*factor);
+        part5=writeZeroCenteredRegularOctagonAroundY(out,0.1f,-0.1f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
+        writeZeroCenteredReversedRegularOctagonAroundY(out,0.1f,-0.08f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
+        part6=computeZeroCenteredRegularOctagonAroundY(0.1f,-0.08f);
         writeLinkBetweenTwoZeroCenteredRegularOctagons(out,part5,part6,0.36f,0.52f,0.36f,0.51f,0.39f,0.51f,0.39f,0.52f);
     }
     
@@ -1583,7 +1574,7 @@ public final class TilesGenerator implements Runnable{
         //
         //animation n 0
         //frame n 0
-        final float radius=0.02f*factor,length=0.05f*factor;
+        final float radius=0.02f,length=0.05f;
         final float[] lightGray={0.5f,0.0f,0.75f,0.5f};
         float[][] part1,part2;
         part1=computeZeroCenteredRegularOctagonAroundZ(radius,-length/2.0f);
@@ -1605,40 +1596,40 @@ public final class TilesGenerator implements Runnable{
     private final void writeBonsaiData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0                  
-        writeQuadPrimitive(out,0.0f,0.5f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,0.5f*factor,0.5f*factor,0.0f);  
-        writeQuadPrimitive(out,0.0f,0.5f,0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.25f,0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.25f,-0.5f*factor,-0.5f*factor,0.0f,
-                0.25f,0.5f,-0.5f*factor,0.5f*factor,0.0f); 
+        writeQuadPrimitive(out,0.0f,0.5f,-0.5f,0.5f,0.0f,
+                0.0f,0.25f,-0.5f,-0.5f,0.0f,
+                0.25f,0.25f,0.5f,-0.5f,0.0f,
+                0.25f,0.5f,0.5f,0.5f,0.0f);  
+        writeQuadPrimitive(out,0.0f,0.5f,0.5f,0.5f,0.0f,
+                0.0f,0.25f,0.5f,-0.5f,0.0f,
+                0.25f,0.25f,-0.5f,-0.5f,0.0f,
+                0.25f,0.5f,-0.5f,0.5f,0.0f); 
     }
     
     private final void writeExplosionData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0                  
-        writeQuadPrimitive(out,0.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.0f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.0f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,0.5f*factor,0.5f*factor,0.0f);  
-        writeQuadPrimitive(out,0.0f,1.0f,0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.0f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.0f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f); 
+        writeQuadPrimitive(out,0.0f,1.0f,-0.5f,0.5f,0.0f,
+                0.0f,0.0f,-0.5f,-0.5f,0.0f,
+                1.0f,0.0f,0.5f,-0.5f,0.0f,
+                1.0f,1.0f,0.5f,0.5f,0.0f);  
+        writeQuadPrimitive(out,0.0f,1.0f,0.5f,0.5f,0.0f,
+                0.0f,0.0f,0.5f,-0.5f,0.0f,
+                1.0f,0.0f,-0.5f,-0.5f,0.0f,
+                1.0f,1.0f,-0.5f,0.5f,0.0f); 
     }
     
     private final void writeImpactData(DataOutputStream out) throws IOException {
         //animation n 0
         //frame n 0                  
-        writeQuadPrimitive(out,0.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.0f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.0f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,0.5f*factor,0.5f*factor,0.0f);  
-        writeQuadPrimitive(out,0.0f,1.0f,0.5f*factor,0.5f*factor,0.0f,
-                0.0f,0.0f,0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,0.0f,-0.5f*factor,-0.5f*factor,0.0f,
-                1.0f,1.0f,-0.5f*factor,0.5f*factor,0.0f); 
+        writeQuadPrimitive(out,0.0f,1.0f,-0.5f,0.5f,0.0f,
+                0.0f,0.0f,-0.5f,-0.5f,0.0f,
+                1.0f,0.0f,0.5f,-0.5f,0.0f,
+                1.0f,1.0f,0.5f,0.5f,0.0f);  
+        writeQuadPrimitive(out,0.0f,1.0f,0.5f,0.5f,0.0f,
+                0.0f,0.0f,0.5f,-0.5f,0.0f,
+                1.0f,0.0f,-0.5f,-0.5f,0.0f,
+                1.0f,1.0f,-0.5f,0.5f,0.0f); 
     }
     
     private final void writeCrosshairData(DataOutputStream out) throws IOException {
@@ -1662,7 +1653,7 @@ public final class TilesGenerator implements Runnable{
     
     private final void writeHealthPowerUpList(){
         List<HealthPowerUpModelBean> healthPowerUpList=new Vector<HealthPowerUpModelBean>();
-        HealthPowerUpModel hpum=new HealthPowerUpModel(115*factor,-0.4f*factor,219*factor,0,0,null,"You picked up a medikit",20);
+        HealthPowerUpModel hpum=new HealthPowerUpModel(115,-0.4f,219,0,0,null,"You picked up a medikit",20);
         //fill the list
         healthPowerUpList.add(new HealthPowerUpModelBean(hpum));
         //encode health power up list
@@ -2169,10 +2160,10 @@ public final class TilesGenerator implements Runnable{
                  y2=artTextureSize-(texturePos/artTextureSize);
                  x2=x1+1;
                  y1=y2-1;                                            
-                 writeQuadPrimitive(out,x2*q,y2*q,(float)(factor*p.getLast().getX()),0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x2*q,y1*q,(float)(factor*p.getLast().getX()),-0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x1*q,y1*q,(float)(factor*p.getFirst().getX()),-0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x1*q,y2*q,(float)(factor*p.getFirst().getX()),0.5f*factor,(float)(factor*p.getFirst().getY()));                          
+                 writeQuadPrimitive(out,x2*q,y2*q,(float)(p.getLast().getX()),0.5f,(float)(p.getLast().getY()),
+                         x2*q,y1*q,(float)(p.getLast().getX()),-0.5f,(float)(p.getLast().getY()),
+                         x1*q,y1*q,(float)(p.getFirst().getX()),-0.5f,(float)(p.getFirst().getY()),
+                         x1*q,y2*q,(float)(p.getFirst().getX()),0.5f,(float)(p.getFirst().getY()));                          
                  artIndex=(artIndex+1)%artCount;
                  texturePos=artIndex%artPerTexture;           
                 }
@@ -2182,10 +2173,10 @@ public final class TilesGenerator implements Runnable{
                  y2=artTextureSize-(texturePos/artTextureSize);
                  x2=x1+1;
                  y1=y2-1;
-                 writeQuadPrimitive(out,x1*q,y2*q,(float)(factor*p.getFirst().getX()),0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x1*q,y1*q,(float)(factor*p.getFirst().getX()),-0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x2*q,y1*q,(float)(factor*p.getLast().getX()),-0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x2*q,y2*q,(float)(factor*p.getLast().getX()),0.5f*factor,(float)(factor*p.getLast().getY()));
+                 writeQuadPrimitive(out,x1*q,y2*q,(float)(p.getFirst().getX()),0.5f,(float)(p.getFirst().getY()),
+                         x1*q,y1*q,(float)(p.getFirst().getX()),-0.5f,(float)(p.getFirst().getY()),
+                         x2*q,y1*q,(float)(p.getLast().getX()),-0.5f,(float)(p.getLast().getY()),
+                         x2*q,y2*q,(float)(p.getLast().getX()),0.5f,(float)(p.getLast().getY()));
 
                  artIndex=(artIndex+1)%artCount;
                  texturePos=artIndex%artPerTexture;                               
@@ -2196,10 +2187,10 @@ public final class TilesGenerator implements Runnable{
                  y2=artTextureSize-(texturePos/artTextureSize);
                  x2=x1+1;
                  y1=y2-1;                                             
-                 writeQuadPrimitive(out,x1*q,y2*q,(float)(factor*p.getFirst().getX()),0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x1*q,y1*q,(float)(factor*p.getFirst().getX()),-0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x2*q,y1*q,(float)(factor*p.getLast().getX()),-0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x2*q,y2*q,(float)(factor*p.getLast().getX()),0.5f*factor,(float)(factor*p.getLast().getY()));                           
+                 writeQuadPrimitive(out,x1*q,y2*q,(float)(p.getFirst().getX()),0.5f,(float)(p.getFirst().getY()),
+                         x1*q,y1*q,(float)(p.getFirst().getX()),-0.5f,(float)(p.getFirst().getY()),
+                         x2*q,y1*q,(float)(p.getLast().getX()),-0.5f,(float)(p.getLast().getY()),
+                         x2*q,y2*q,(float)(p.getLast().getX()),0.5f,(float)(p.getLast().getY()));                           
                  artIndex=(artIndex+1)%artCount;
                  texturePos=artIndex%artPerTexture;        
                 }
@@ -2209,10 +2200,10 @@ public final class TilesGenerator implements Runnable{
                  y2=artTextureSize-(texturePos/artTextureSize);
                  x2=x1+1;
                  y1=y2-1;
-                 writeQuadPrimitive(out,x2*q,y2*q,(float)(factor*p.getLast().getX()),0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x2*q,y1*q,(float)(factor*p.getLast().getX()),-0.5f*factor,(float)(factor*p.getLast().getY()),
-                         x1*q,y1*q,(float)(factor*p.getFirst().getX()),-0.5f*factor,(float)(factor*p.getFirst().getY()),
-                         x1*q,y2*q,(float)(factor*p.getFirst().getX()),0.5f*factor,(float)(factor*p.getFirst().getY()));                               
+                 writeQuadPrimitive(out,x2*q,y2*q,(float)(p.getLast().getX()),0.5f,(float)(p.getLast().getY()),
+                         x2*q,y1*q,(float)(p.getLast().getX()),-0.5f,(float)(p.getLast().getY()),
+                         x1*q,y1*q,(float)(p.getFirst().getX()),-0.5f,(float)(p.getFirst().getY()),
+                         x1*q,y2*q,(float)(p.getFirst().getX()),0.5f,(float)(p.getFirst().getY()));                               
                  artIndex=(artIndex+1)%artCount;
                  texturePos=artIndex%artPerTexture;           
                 }       

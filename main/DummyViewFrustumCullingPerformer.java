@@ -21,7 +21,7 @@ final class DummyViewFrustumCullingPerformer implements ViewFrustumCullingPerfor
     
     private Arc2D circularFrustum;
     
-    private static final float arcContributionSize=GameController.factor*25;
+    private static final float arcContributionSize=25;
     
     
     DummyViewFrustumCullingPerformer(GameController gameController){

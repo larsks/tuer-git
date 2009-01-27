@@ -56,10 +56,6 @@ public final class GameController {
     //this game model can be remote
     private GameModel gameModel;
     
-    static final float factor=GameModel.factor;
-    
-    static final float legacyFactor=GameModel.legacyFactor;
-    
     private Frame frame;
     
     private boolean[] aBwShouldPlay;
@@ -218,6 +214,10 @@ public final class GameController {
     
     final void performAtExit(){
         gameModel.performAtExit();
+    }
+    
+    final float[] getRocketLauncherPos(){
+        return(gameModel.getRocketLauncherPos());
     }
     
     final FloatBuffer getArtCoordinatesBuffer1(){    

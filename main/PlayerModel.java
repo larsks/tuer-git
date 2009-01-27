@@ -26,7 +26,7 @@ class PlayerModel implements Collector{
     
     private static final int maximumHealth=100;
     
-    private static final double defaultBoundingSize=GameModel.factor/4.0d;
+    private static final double defaultBoundingSize=0.25D;
     
     private int health;
     
