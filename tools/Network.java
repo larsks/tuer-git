@@ -61,7 +61,7 @@ public final class Network implements Serializable{
     private final void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException{
         //read a list of cells
         List<Full3DCell> full3DCellsList=(List<Full3DCell>)in.readObject();
-        buildGraphFromList(full3DCellsList);       
+        buildGraphFromList(full3DCellsList);
     }   
     
     private final Object readResolve() throws ObjectStreamException{

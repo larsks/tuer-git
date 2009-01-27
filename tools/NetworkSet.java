@@ -90,7 +90,7 @@ public final class NetworkSet implements Serializable{
     }
     
     private final void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException{
-        networksList=(List<Network>)in.readObject();       
+        networksList=(List<Network>)in.readObject();
     }
 
     public final Entry<Full3DCell,Integer> locate(float x,float y,float z){

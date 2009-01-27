@@ -38,10 +38,11 @@ public final class ExtendedFirstPersonHandler extends InputHandler {
      * Creates a first person handler.
      * @param cam The camera to move by this handler.
      */
-    public ExtendedFirstPersonHandler( Camera cam ) {
+    public ExtendedFirstPersonHandler(Camera cam,
+            JMEGameServiceProvider gameServiceProvider){
         mouseLookHandler = new MouseLookHandler( cam, 1 );
         addToAttachedHandlers( mouseLookHandler );
-        keyboardLookHandler = new ExtendedKeyboardLookHandler( cam, 0.5f, 0.01f );
+        keyboardLookHandler = new ExtendedKeyboardLookHandler(cam,0.5f,0.01f,gameServiceProvider);
         addToAttachedHandlers( keyboardLookHandler );
     }
 
@@ -51,10 +52,11 @@ public final class ExtendedFirstPersonHandler extends InputHandler {
      * @param moveSpeed action speed for move actions
      * @param turnSpeed action speed for rotating actions
      */
-    public ExtendedFirstPersonHandler(Camera cam, float moveSpeed, float turnSpeed ) {
+    public ExtendedFirstPersonHandler(Camera cam,float moveSpeed,float turnSpeed,
+            JMEGameServiceProvider gameServiceProvider){
         mouseLookHandler = new MouseLookHandler( cam, turnSpeed );
         addToAttachedHandlers( mouseLookHandler );
-        keyboardLookHandler = new ExtendedKeyboardLookHandler( cam, moveSpeed, turnSpeed );
+        keyboardLookHandler = new ExtendedKeyboardLookHandler(cam,moveSpeed,turnSpeed,gameServiceProvider);
         addToAttachedHandlers( keyboardLookHandler );
     }
 }

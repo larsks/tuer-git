@@ -34,7 +34,8 @@ public final class ExtendedKeyboardLookHandler extends InputHandler{
 
     private float moveSpeed;
     
-    public ExtendedKeyboardLookHandler(Camera cam,float moveSpeed,float rotateSpeed){
+    public ExtendedKeyboardLookHandler(Camera cam,float moveSpeed,float rotateSpeed,
+            JMEGameServiceProvider gameServiceProvider){
         this.moveSpeed=moveSpeed;     
         forward=new KeyForwardAction(cam,moveSpeed);
         addAction(forward,InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_W,InputHandler.AXIS_NONE,true);
@@ -62,16 +63,20 @@ public final class ExtendedKeyboardLookHandler extends InputHandler{
         left.setLockAxis(new Vector3f(cam.getUp()));
         addAction(left,InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_LEFT,InputHandler.AXIS_NONE,true);
         //TODO: rather go to the pause menu
-        addAction(new ExitAction(),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_ESCAPE,InputHandler.AXIS_NONE,false);
+        addAction(new ExitAction(gameServiceProvider),InputHandler.DEVICE_KEYBOARD,KeyInput.KEY_ESCAPE,InputHandler.AXIS_NONE,false);
     }
     
     private static final class ExitAction extends InputAction{
+        
+        private JMEGameServiceProvider gameServiceProvider;
 
-        private ExitAction(){}
+        private ExitAction(JMEGameServiceProvider gameServiceProvider){
+            this.gameServiceProvider=gameServiceProvider;
+        }
 
         @Override
         public final void performAction(InputActionEvent evt){
-            System.exit(0);
+            gameServiceProvider.exit();
         }
     }
     

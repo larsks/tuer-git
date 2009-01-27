@@ -42,7 +42,7 @@ public final class JOGLMVCGame{
         Toolkit toolkit=Toolkit.getDefaultToolkit();
         int width=toolkit.getScreenSize().width;
         int height=toolkit.getScreenSize().height;
-        final JMECanvas jmeCanvas = ds.createCanvas(width, height,"AWT",null);
+        final JMECanvas jmeCanvas=ds.createCanvas(width, height,"AWT",null);
         jmeCanvas.setUpdateInput(true);
         //jmeCanvas.setTargetRate(60);
         final Frame frame = new Frame();
