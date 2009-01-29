@@ -25,9 +25,13 @@ public final class Full3DCell implements Serializable{
     
     private static final long serialVersionUID = 1L;
 
-    private transient List<Full3DCell> neighboursCellsList;
-    
+    //FIXME: create rather a class to handle portals
+    @Deprecated
+    private transient List<Full3DCell> neighboursCellsList;    
+    @Deprecated
     private transient List<float[]> neighboursPortalsList;
+    
+    private transient List<Full3DPortal> portalsList;
     
     private transient Full3DCellController controller;
     
@@ -62,6 +66,7 @@ public final class Full3DCell implements Serializable{
     public Full3DCell(){
         neighboursCellsList=new ArrayList<Full3DCell>(); 
         neighboursPortalsList=new ArrayList<float[]>();
+        portalsList=new ArrayList<Full3DPortal>();
         topWalls=new ArrayList<float[]>();
         bottomWalls=new ArrayList<float[]>();
         topPortals=new ArrayList<float[]>();
@@ -83,6 +88,8 @@ public final class Full3DCell implements Serializable{
             neighboursCellsList=new ArrayList<Full3DCell>(); 
         if(neighboursPortalsList==null)
             neighboursPortalsList=new ArrayList<float[]>();
+        if(portalsList==null)
+            portalsList=new ArrayList<Full3DPortal>();
         if(enclosingRectangle==null)    
             enclosingRectangle=new Rectangle();
         computeEnclosingRectangle();
@@ -204,15 +211,15 @@ public final class Full3DCell implements Serializable{
             }
         enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
     }
-    
+    @Deprecated
     public final void addNeighbourCell(Full3DCell cell){
         neighboursCellsList.add(cell);
     }
-    
+    @Deprecated
     public final List<Full3DCell> getNeighboursCellsList(){
         return(neighboursCellsList);
     }
-
+    @Deprecated
     public final void setNeighboursCellsList(List<Full3DCell> neighboursCellsList){
         this.neighboursCellsList=neighboursCellsList;
     }
@@ -239,6 +246,10 @@ public final class Full3DCell implements Serializable{
 
     public final List<float[]> getTopPortals(){
         return(topPortals);
+    }
+    
+    public final void addTopPortal(float[] topPortal){
+        this.topPortals.add(topPortal);
     }
 
     public final void setTopPortals(List<float[]> topPortals){
@@ -313,19 +324,59 @@ public final class Full3DCell implements Serializable{
     public final void setFloorWalls(List<float[]> floorWalls){
         this.floorWalls=floorWalls;
     }
-
+    @Deprecated
     public final void addNeighbourPortal(float[] portal){
         neighboursPortalsList.add(portal);
     }
-    
+    @Deprecated
     public final List<float[]> getNeighboursPortalsList(){
         return(neighboursPortalsList);
     }
-
+    @Deprecated
     public final void setNeighboursPortalsList(List<float[]> neighboursPortalsList){
         this.neighboursPortalsList=neighboursPortalsList;
     }
+    
+    public final void addPortal(Full3DPortal portal){
+        this.portalsList.add(portal);
+    }
 
+    public final List<Full3DPortal> getPortalsList(){
+        return(portalsList);
+    }
+    
+    /**
+     * 
+     * @param neighbourCell neighbor cell of this cell
+     * @return portal that links this cell to the neighbor cell if any, 
+     *         otherwise null
+     */
+    public final Full3DPortal getPortal(Full3DCell neighbourCell){
+        Full3DPortal portal=null;
+        Full3DCell[] linkedCells;
+        for(Full3DPortal currentPortal:portalsList)
+            {linkedCells=currentPortal.getLinkedCells();
+             if(neighbourCell==linkedCells[0]||neighbourCell==linkedCells[1])           
+                 {portal=currentPortal;
+                  break;
+                 }
+            }
+        return(portal);
+    }
+    
+    public final Full3DPortal getPortal(int index){
+        return(portalsList.get(index));
+    }
+    
+    public final int getNeighboursCount(){
+        return(portalsList.size());
+    }
+    
+    public final Full3DCell getNeighbourCell(int index){
+        Full3DCell[] linkedCells=portalsList.get(index).getLinkedCells();
+        return(linkedCells[0]==this?linkedCells[1]:linkedCells[0]); 
+    }
+    
     public final List<float[]> getCeilPortals(){
         return(ceilPortals);
     }

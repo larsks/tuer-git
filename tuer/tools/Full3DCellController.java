@@ -26,7 +26,7 @@ public final class Full3DCellController{
     //TODO: move it in the view
     private FloatBuffer internalBuffer;
     
-    private List<Full3DCellController> neighboursCellsControllersList;
+    private List<Full3DPortalController> portalsControllersList;
     
     private Full3DCell model;
     
@@ -34,7 +34,7 @@ public final class Full3DCellController{
     
     
     public Full3DCellController(Full3DCell full3DCellModel,Full3DCellView full3DCellView){
-        this.neighboursCellsControllersList=new ArrayList<Full3DCellController>();
+        this.portalsControllersList=new ArrayList<Full3DPortalController>();
         this.model=full3DCellModel;
         this.model.setController(this);       
         this.internalBuffer=BufferUtil.newFloatBuffer(
@@ -57,9 +57,15 @@ public final class Full3DCellController{
         for(float[] wall:model.getFloorWalls())
             this.internalBuffer.put(wall);
         this.internalBuffer.rewind();
-        //the view is bound to its controller here because now, the buffer is ready
-        this.view=full3DCellView;
-        this.view.setController(this);        
+        if(full3DCellView!=null)
+            {//the view is bound to its controller here because now, the buffer is ready
+             this.view=full3DCellView;
+             this.view.setController(this);
+            }               
+    }
+    
+    public Full3DCellController(Full3DCell full3DCellModel){
+        this(full3DCellModel,null);
     }
 
 
@@ -70,13 +76,13 @@ public final class Full3DCellController{
     public final Full3DCellView getView(){
         return(view);
     }
-
-    public final void addNeighbourCellController(Full3DCellController cellController){
-        neighboursCellsControllersList.add(cellController);
+    
+    public final void setView(Full3DCellView view){
+        this.view=view;
     }
     
-    public final List<Full3DCellController> getNeighboursCellsControllersList(){
-        return(neighboursCellsControllersList);
+    public final void addPortalController(Full3DPortalController portalController){
+        portalsControllersList.add(portalController);
     }
 
     public final Full3DCell getModel(){
@@ -135,15 +141,37 @@ public final class Full3DCellController{
         return(model.getFloorWalls());
     }
 
-    public final List<float[]> getNeighboursPortalsList(){
-        return(model.getNeighboursPortalsList());
-    }
-
     public final List<float[]> getCeilPortals(){
         return(model.getCeilPortals());
     }
 
     public final List<float[]> getFloorPortals(){
         return(model.getFloorPortals());
+    }
+    
+    public final Full3DPortalController getPortalController(Full3DCellController neighbourCellController){
+        Full3DPortalController portalController=null;
+        Full3DCellController[] linkedCellsControllers;
+        for(Full3DPortalController currentPortalController:portalsControllersList)
+            {linkedCellsControllers=currentPortalController.getLinkedCellsControllers();
+             if(neighbourCellController==linkedCellsControllers[0]||neighbourCellController==linkedCellsControllers[1])           
+                 {portalController=currentPortalController;
+                  break;
+                 }
+            }
+        return(portalController);
+    }
+    
+    public final Full3DPortalController getPortalController(int index){
+        return(portalsControllersList.get(index));
+    }
+    
+    public final int getNeighboursControllersCount(){
+        return(portalsControllersList.size());
+    }
+    
+    public final Full3DCellController getNeighbourCellController(int index){
+        Full3DCellController[] linkedCellsControllers=portalsControllersList.get(index).getLinkedCellsControllers();
+        return(linkedCellsControllers[0]==this?linkedCellsControllers[1]:linkedCellsControllers[0]); 
     }
 }
