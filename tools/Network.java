@@ -82,6 +82,7 @@ public final class Network implements Serializable{
         float[] portal0,portal1,portal2,portal3;
         float[] c2portal0,c2portal1,c2portal2,c2portal3;
         Full3DCell neighbourCell;
+        Full3DPortal portal;
         for(Full3DCell cell:full3DCellsList)
             {//compare its left portals to other right portals
              for(int i=0;i<cell.getLeftPortals().size();i+=4)
@@ -127,9 +128,18 @@ public final class Network implements Serializable{
                               break;
                          }
                  if(neighbourCell!=null)
-                     cell.addNeighbourCell(neighbourCell);
-                     //don't apply the reciprocal operation because it would cause
-                     //a problem in the indexing of portals with cells
+                     {//if the both cells are not yet linked together with a portal
+                      if(neighbourCell.getPortal(cell)==null)   
+                          {//create a new portal
+                           portal=new Full3DPortal(cell,neighbourCell,portal0,portal1,portal2,portal3);
+                           //add it to each cell
+                           cell.addPortal(portal);
+                           neighbourCell.addPortal(portal);
+                          }
+                      cell.addNeighbourCell(neighbourCell);
+                      //don't apply the reciprocal operation because it would cause
+                      //a problem in the indexing of portals with cells
+                     }
                  else
                      System.out.println("ORPHANED PORTAL");
                 }
@@ -177,9 +187,18 @@ public final class Network implements Serializable{
                                break;
                           }
                   if(neighbourCell!=null)
-                      cell.addNeighbourCell(neighbourCell);
-                      //don't apply the reciprocal operation because it would cause
-                      //a problem in the indexing of portals with cells
+                      {//if the both cells are not yet linked together with a portal
+                       if(neighbourCell.getPortal(cell)==null)   
+                           {//create a new portal
+                            portal=new Full3DPortal(cell,neighbourCell,portal0,portal1,portal2,portal3);
+                            //add it to each cell
+                            cell.addPortal(portal);
+                            neighbourCell.addPortal(portal);
+                           }
+                       cell.addNeighbourCell(neighbourCell);
+                       //don't apply the reciprocal operation because it would cause
+                       //a problem in the indexing of portals with cells
+                      }
                   else
                       System.out.println("ORPHANED PORTAL");
                  }
@@ -227,9 +246,18 @@ public final class Network implements Serializable{
                                break;
                           }
                   if(neighbourCell!=null)
-                      cell.addNeighbourCell(neighbourCell);
-                      //don't apply the reciprocal operation because it would cause
-                      //a problem in the indexing of portals with cells
+                      {//if the both cells are not yet linked together with a portal
+                       if(neighbourCell.getPortal(cell)==null)   
+                           {//create a new portal
+                            portal=new Full3DPortal(cell,neighbourCell,portal0,portal1,portal2,portal3);
+                            //add it to each cell
+                            cell.addPortal(portal);
+                            neighbourCell.addPortal(portal);
+                           }
+                       cell.addNeighbourCell(neighbourCell);
+                       //don't apply the reciprocal operation because it would cause
+                       //a problem in the indexing of portals with cells
+                      }
                   else
                       System.out.println("ORPHANED PORTAL");
                  }
@@ -277,12 +305,22 @@ public final class Network implements Serializable{
                                break;
                           }
                   if(neighbourCell!=null)
-                      cell.addNeighbourCell(neighbourCell);
-                      //don't apply the reciprocal operation because it would cause
-                      //a problem in the indexing of portals with cells
+                      {//if the both cells are not yet linked together with a portal
+                       if(neighbourCell.getPortal(cell)==null)   
+                           {//create a new portal
+                            portal=new Full3DPortal(cell,neighbourCell,portal0,portal1,portal2,portal3);
+                            //add it to each cell
+                            cell.addPortal(portal);
+                            neighbourCell.addPortal(portal);
+                           }
+                       cell.addNeighbourCell(neighbourCell);
+                       //don't apply the reciprocal operation because it would cause
+                       //a problem in the indexing of portals with cells
+                      }
                   else
                       System.out.println("ORPHANED PORTAL");
                  }
+             //FIXME: do the same for ceiling and floor portals
             }
     }
     

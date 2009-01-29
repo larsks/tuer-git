@@ -36,9 +36,12 @@ public final class NetworkView{
         this.cellsViewsList=cellsViewsList;
         if(!this.cellsViewsList.isEmpty())
             {this.rootCell=cellsViewsList.get(0);
+             Full3DCellController cellController;
              for(Full3DCellView cellView:this.cellsViewsList)
-                 for(Full3DCellController cellController:cellView.getController().getNeighboursCellsControllersList())
-                     cellView.addNeighbourCellView(cellController.getView()); 
+                 {cellController=cellView.getController();
+                  for(int i=0;i<cellController.getNeighboursControllersCount();i++)
+                      cellView.addPortalView(new Full3DPortalView(cellController.getPortalController(i)));
+                 }
             }                     
     }
     
@@ -63,31 +66,30 @@ public final class NetworkView{
         //We use the first traveled cell suggested by the user
         markedCellsList.add(cellView);
         fifo.add(cellView);
-        int portalIndex;
-        float[] p1,p2,p3,p4;
+        float[][] portalVertices;
+        Full3DCellView son;
         while(!fifo.isEmpty())
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
              //This is the main treatment, draw the cell and watch its neighbors               
              c.draw();
-             portalIndex=0;
-             for(Full3DCellView son:c.getNeighboursCellsViewsList())
-                 {if(!markedCellsList.contains(son))
+             //for each portal of this cell
+             for(int i=0;i<c.getNeighboursViewsCount();i++)
+                 {portalVertices=c.getPortalView(i).getPortalVertices();
+                  son=c.getNeighbourCellView(i);
+                  if(!markedCellsList.contains(son))
                       {//Mark the cell to avoid traveling it more than once
                        markedCellsList.add(son);
                        //check if the portal is visible to know whether to add the 
-                       //cell into the FIFO                      
-                       p1=c.getNeighboursPortalsList().get(portalIndex);
-                       p2=c.getNeighboursPortalsList().get(portalIndex+1);
-                       p3=c.getNeighboursPortalsList().get(portalIndex+2);
-                       p4=c.getNeighboursPortalsList().get(portalIndex+3);
+                       //cell into the FIFO  
                        //dataOffset=2 because we use T2_V3
-                       if(frustum.isQuadInViewFrustum(p1,p2,p3,p4,2))
+                       if(frustum.isQuadInViewFrustum(portalVertices[0],
+                               portalVertices[1],portalVertices[2],
+                               portalVertices[3],2))
                            {//Add a new cell to travel (push operation)
                             fifo.add(son);
                            }
-                      }
-                  portalIndex+=4;
+                      }                 
                  }
             }  
     }
@@ -106,6 +108,7 @@ public final class NetworkView{
         //We use the first traveled cell suggested by the user
         markedCellsList.add(initialCellView);
         fifo.add(initialCellView);
+        Full3DCellView son;
         while(!fifo.isEmpty())
             {//Get the first added element as it is a FIFO (pop operation)
              c=fifo.remove(0);
@@ -113,13 +116,15 @@ public final class NetworkView{
              if(c.contains(x,y,z))
                  return(c);
              else
-                 {for(Full3DCellView son:c.getNeighboursCellsViewsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
+                 {for(int i=0;i<c.getNeighboursViewsCount();i++)
+                      {son=c.getNeighbourCellView(i);
+                       if(!markedCellsList.contains(son))
+                           {//Mark the cell to avoid traveling it more than once
+                            markedCellsList.add(son);
+                            //Add a new cell to travel (push operation)
+                            fifo.add(son);
+                           }
+                      }
                  }
             }       
         return(null);

@@ -730,10 +730,10 @@ public final class CellsGenerator{
              for(PointPair p:cell.getTopPortals())
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])
                   //add it into the list of full cells
-                  fullCell.getTopPortals().add(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
-                  fullCell.getTopPortals().add(new float[]{portalTexCoord[0],portalTexCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
-                  fullCell.getTopPortals().add(new float[]{portalTexCoord[2],portalTexCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
-                  fullCell.getTopPortals().add(new float[]{portalTexCoord[2],portalTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
+                  fullCell.addTopPortal(new float[]{portalTexCoord[0],portalTexCoord[1],(float)p.getLast().getX(),0.5f,(float)p.getLast().getY()});
+                  fullCell.addTopPortal(new float[]{portalTexCoord[0],portalTexCoord[3],(float)p.getLast().getX(),-0.5f,(float)p.getLast().getY()});
+                  fullCell.addTopPortal(new float[]{portalTexCoord[2],portalTexCoord[3],(float)p.getFirst().getX(),-0.5f,(float)p.getFirst().getY()});
+                  fullCell.addTopPortal(new float[]{portalTexCoord[2],portalTexCoord[1],(float)p.getFirst().getX(),0.5f,(float)p.getFirst().getY()});
                  }
              for(PointPair p:getAtomicWallsList(cell.getBottomWalls()))
                  {//create a new full 3D atomic wall (expressed in the base [[0;0;0][255;255;255]])

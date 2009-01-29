@@ -1,6 +1,5 @@
 package tools;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +15,13 @@ public final class Full3DCellView{
     
     private Full3DCellController controller;
     
-    private transient List<Full3DCellView> neighboursCellsViewsList;
+    private List<Full3DPortalView> portalsViewsList;
     
     
-    public Full3DCellView(){
-        this.neighboursCellsViewsList=new ArrayList<Full3DCellView>();
+    public Full3DCellView(Full3DCellController controller){
+        this.portalsViewsList=new ArrayList<Full3DPortalView>();
+        controller.setView(this);
+        setController(controller);
     }
     
     
@@ -39,28 +40,25 @@ public final class Full3DCellView{
         return(controller);
     }
     
-    public final void addNeighbourCellView(Full3DCellView cellView){
-        neighboursCellsViewsList.add(cellView);
+    public final void addPortalView(Full3DPortalView portalView){
+        portalsViewsList.add(portalView);
     }
-
-    public final List<Full3DCellView> getNeighboursCellsViewsList(){
-        return(neighboursCellsViewsList);
+    
+    public final int getNeighboursViewsCount(){
+        return(portalsViewsList.size());
     }
-
-    public final void setNeighboursCellsViewsList(List<Full3DCellView> neighboursCellsViewsList){
-        this.neighboursCellsViewsList=neighboursCellsViewsList;
+    
+    public final Full3DPortalView getPortalView(int index){
+        return(portalsViewsList.get(index));
     }
-
-    public final List<float[]> getNeighboursPortalsList(){
-        return(controller.getNeighboursPortalsList());
+    
+    public final Full3DCellView getNeighbourCellView(int index){
+        Full3DCellView[] linkedCellsViews=portalsViewsList.get(index).getLinkedCellsViews();
+        return(linkedCellsViews[0]==this?linkedCellsViews[1]:linkedCellsViews[0]);
     }
 
     public final boolean contains(float x,float y,float z){
         //ordinate temporarily ignored
         return(controller.getEnclosingRectangle().contains(x,z));
     }
-    
-    /*public final Rectangle getEnclosingRectangle(){
-        return(controller.getEnclosingRectangle());
-    } */
 }

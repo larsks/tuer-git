@@ -65,18 +65,21 @@ public final class NetworkSet implements Serializable{
              //We use the first traveled cell suggested by the user
              markedCellsList.add(network.getRootCell());
              fifo.add(network.getRootCell());
+             Full3DCell son;
              while(!fifo.isEmpty())
                  {//Get the first added element as it is a FIFO (pop operation)
                   c=fifo.remove(0);
                   //This is the main treatment, save all connected cells of a single graph
                   subCellsList.add(c);
-                  for(Full3DCell son:c.getNeighboursCellsList())
-                      if(!markedCellsList.contains(son))
-                          {//Mark the cell to avoid traveling it more than once
-                           markedCellsList.add(son);
-                           //Add a new cell to travel (push operation)
-                           fifo.add(son);
-                          }
+                  for(int i=0;i<c.getNeighboursCount();i++)
+                      {son=c.getNeighbourCell(i);
+                       if(!markedCellsList.contains(son))
+                           {//Mark the cell to avoid traveling it more than once
+                            markedCellsList.add(son);
+                            //Add a new cell to travel (push operation)
+                            fifo.add(son);
+                           }
+                      }
                  }
              network.setCellsList(subCellsList);
              networksList.add(network);
