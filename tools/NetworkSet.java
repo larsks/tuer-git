@@ -787,6 +787,7 @@ public final class NetworkSet implements Serializable{
             int portalVertexIndex,currentPortalVertexIndex,uniqueVertexIndex;            
             Integer knownUniqueVertexIndex;
             Full3DCell neighborCell;
+            Full3DPortal portal;
             Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>> neighborCellEntry;
             LinkedHashMap<VertexData,Integer> neighBorVertexDataToUniqueIndexationTable;
             //for each vertex
@@ -797,18 +798,20 @@ public final class NetworkSet implements Serializable{
                      //vertex of wall has been found
                      portalVertexIndex=-1;
                      //look for this vertex in the vertices contained in the portals
-                     for(float[] portalVertex:cell.getNeighboursPortalsList())
-                         {//remind: T2_V3 (2 texture coordinates + 3 vertex coordinates)
-                          if(portalVertex[2]==wallVertex[2]&&portalVertex[3]==wallVertex[3]&&portalVertex[4]==wallVertex[4])
-                              {portalVertexIndex=currentPortalVertexIndex;
-                               break;
-                              }
+                     for(int i=0;i<cell.getNeighboursCount()&&portalVertexIndex==-1;i++)
+                         {portal=cell.getPortal(i);
+                          for(float[] portalVertex:portal.getPortalVertices())
+                              //remind: T2_V3 (2 texture coordinates + 3 vertex coordinates)
+                              if(portalVertex[2]==wallVertex[2]&&portalVertex[3]==wallVertex[3]&&portalVertex[4]==wallVertex[4])
+                                  {portalVertexIndex=currentPortalVertexIndex;
+                                   break;
+                                  }
                           currentPortalVertexIndex++;
                          }
                      //if the vertex is in a portal
                      if(portalVertexIndex!=-1)
-                         {//get the cell that is linked to this portal
-                          neighborCell=cell.getNeighboursCellsList().get(portalVertexIndex/4);
+                         {//get the cell that is linked to this portal      
+                          neighborCell=cell.getNeighbourCell(portalVertexIndex);
                           //use the table of cellular maps to get the tables of the neighbor cell if any
                           neighborCellEntry=cellularMapsTable.get(neighborCell);       
                           //if these tables exist

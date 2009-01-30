@@ -91,11 +91,6 @@ public final class Network implements Serializable{
                  portal1=cell.getLeftPortals().get(i+1);
                  portal2=cell.getLeftPortals().get(i+2);
                  portal3=cell.getLeftPortals().get(i+3);
-                 //copy it into the list of portals
-                 cell.addNeighbourPortal(portal0);
-                 cell.addNeighbourPortal(portal1);
-                 cell.addNeighbourPortal(portal2);
-                 cell.addNeighbourPortal(portal3);
                  //look for the neighbor cell
                  neighbourCell=null;
                  for(Full3DCell cell2:full3DCellsList)
@@ -136,9 +131,6 @@ public final class Network implements Serializable{
                            cell.addPortal(portal);
                            neighbourCell.addPortal(portal);
                           }
-                      cell.addNeighbourCell(neighbourCell);
-                      //don't apply the reciprocal operation because it would cause
-                      //a problem in the indexing of portals with cells
                      }
                  else
                      System.out.println("ORPHANED PORTAL");
@@ -150,11 +142,6 @@ public final class Network implements Serializable{
                   portal1=cell.getRightPortals().get(i+1);
                   portal2=cell.getRightPortals().get(i+2);
                   portal3=cell.getRightPortals().get(i+3);
-                  //copy it into the list of portals
-                  cell.addNeighbourPortal(portal0);
-                  cell.addNeighbourPortal(portal1);
-                  cell.addNeighbourPortal(portal2);
-                  cell.addNeighbourPortal(portal3);
                   //look for the neighbor cell
                   neighbourCell=null;
                   for(Full3DCell cell2:full3DCellsList)
@@ -195,9 +182,6 @@ public final class Network implements Serializable{
                             cell.addPortal(portal);
                             neighbourCell.addPortal(portal);
                            }
-                       cell.addNeighbourCell(neighbourCell);
-                       //don't apply the reciprocal operation because it would cause
-                       //a problem in the indexing of portals with cells
                       }
                   else
                       System.out.println("ORPHANED PORTAL");
@@ -209,11 +193,6 @@ public final class Network implements Serializable{
                   portal1=cell.getTopPortals().get(i+1);
                   portal2=cell.getTopPortals().get(i+2);
                   portal3=cell.getTopPortals().get(i+3);
-                  //copy it into the list of portals
-                  cell.addNeighbourPortal(portal0);
-                  cell.addNeighbourPortal(portal1);
-                  cell.addNeighbourPortal(portal2);
-                  cell.addNeighbourPortal(portal3);
                   //look for the neighbor cell
                   neighbourCell=null;
                   for(Full3DCell cell2:full3DCellsList)
@@ -254,9 +233,6 @@ public final class Network implements Serializable{
                             cell.addPortal(portal);
                             neighbourCell.addPortal(portal);
                            }
-                       cell.addNeighbourCell(neighbourCell);
-                       //don't apply the reciprocal operation because it would cause
-                       //a problem in the indexing of portals with cells
                       }
                   else
                       System.out.println("ORPHANED PORTAL");
@@ -268,11 +244,6 @@ public final class Network implements Serializable{
                   portal1=cell.getBottomPortals().get(i+1);
                   portal2=cell.getBottomPortals().get(i+2);
                   portal3=cell.getBottomPortals().get(i+3);
-                  //copy it into the list of portals
-                  cell.addNeighbourPortal(portal0);
-                  cell.addNeighbourPortal(portal1);
-                  cell.addNeighbourPortal(portal2);
-                  cell.addNeighbourPortal(portal3);
                   //look for the neighbor cell
                   neighbourCell=null;
                   for(Full3DCell cell2:full3DCellsList)
@@ -313,9 +284,6 @@ public final class Network implements Serializable{
                             cell.addPortal(portal);
                             neighbourCell.addPortal(portal);
                            }
-                       cell.addNeighbourCell(neighbourCell);
-                       //don't apply the reciprocal operation because it would cause
-                       //a problem in the indexing of portals with cells
                       }
                   else
                       System.out.println("ORPHANED PORTAL");
@@ -409,18 +377,28 @@ public final class Network implements Serializable{
             markedCellsList.add(firstVisitedCell);
             cellsList.add(firstVisitedCell);
             boolean hasToContinue=true;
+            Full3DCell son;
             while(!cellsList.isEmpty())
                 {//Get the next element (pop operation)
                  currentlyVisitedCell=cellsList.remove(getNextCellIndex());
                  //This is the main treatment
                  if(hasToContinue=performTaskOnCurrentlyVisitedCell())
-                     for(Full3DCell son:currentlyVisitedCell.getNeighboursCellsList())
+                     /*for(Full3DCell son:currentlyVisitedCell.getNeighboursCellsList())
                          if(!markedCellsList.contains(son))
                              {//Mark the cell to avoid traveling it more than once
                               markedCellsList.add(son);
                               //Add a new cell to travel (push operation)
                               cellsList.add(son);
-                             }                   
+                             }*/
+                     for(int i=0;i<currentlyVisitedCell.getNeighboursCount();i++)
+                         {son=currentlyVisitedCell.getNeighbourCell(i);
+                          if(!markedCellsList.contains(son))
+                              {//Mark the cell to avoid traveling it more than once
+                               markedCellsList.add(son);
+                               //Add a new cell to travel (push operation)
+                               cellsList.add(son);
+                              }
+                         }
                 }
             return(hasToContinue);
         }

@@ -24,12 +24,6 @@ public final class Full3DCell implements Serializable{
     
     
     private static final long serialVersionUID = 1L;
-
-    //FIXME: create rather a class to handle portals
-    @Deprecated
-    private transient List<Full3DCell> neighboursCellsList;    
-    @Deprecated
-    private transient List<float[]> neighboursPortalsList;
     
     private transient List<Full3DPortal> portalsList;
     
@@ -37,35 +31,34 @@ public final class Full3DCell implements Serializable{
     
     //TODO: rather use at least an axis-aligned bounding box
     private transient Rectangle enclosingRectangle;
+    //TODO: use Full3DWall
     //each array contains a single vertex
     private List<float[]> topWalls;
     
-    private List<float[]> bottomWalls;
-    
-    private List<float[]> topPortals;
-    
-    private List<float[]> bottomPortals;
+    private List<float[]> bottomWalls;   
     
     private List<float[]> leftWalls;
     
-    private List<float[]> rightWalls;
-    
-    private List<float[]> leftPortals;
-    
-    private List<float[]> rightPortals;
+    private List<float[]> rightWalls;   
     
     private List<float[]> ceilWalls;
     
     private List<float[]> floorWalls;
+    //TODO; use Full3DPortal
+    private List<float[]> leftPortals;
     
+    private List<float[]> rightPortals;
+    
+    private List<float[]> topPortals;
+    
+    private List<float[]> bottomPortals;
+    //TODO: handle height maps
     private List<float[]> ceilPortals;
     
     private List<float[]> floorPortals;
     
     
     public Full3DCell(){
-        neighboursCellsList=new ArrayList<Full3DCell>(); 
-        neighboursPortalsList=new ArrayList<float[]>();
         portalsList=new ArrayList<Full3DPortal>();
         topWalls=new ArrayList<float[]>();
         bottomWalls=new ArrayList<float[]>();
@@ -84,10 +77,6 @@ public final class Full3DCell implements Serializable{
     
 
     public final Object readResolve()throws ObjectStreamException{
-        if(neighboursCellsList==null)
-            neighboursCellsList=new ArrayList<Full3DCell>(); 
-        if(neighboursPortalsList==null)
-            neighboursPortalsList=new ArrayList<float[]>();
         if(portalsList==null)
             portalsList=new ArrayList<Full3DPortal>();
         if(enclosingRectangle==null)    
@@ -211,18 +200,6 @@ public final class Full3DCell implements Serializable{
             }
         enclosingRectangle.setFrameFromDiagonal(minx,minz,maxx,maxz);
     }
-    @Deprecated
-    public final void addNeighbourCell(Full3DCell cell){
-        neighboursCellsList.add(cell);
-    }
-    @Deprecated
-    public final List<Full3DCell> getNeighboursCellsList(){
-        return(neighboursCellsList);
-    }
-    @Deprecated
-    public final void setNeighboursCellsList(List<Full3DCell> neighboursCellsList){
-        this.neighboursCellsList=neighboursCellsList;
-    }
 
     public final Rectangle getEnclosingRectangle(){
         return(enclosingRectangle);
@@ -231,6 +208,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getTopWalls(){
         return(topWalls);
     }
+    
+    public final void addTopWall(float[] topWall){
+        topWalls.add(topWall);
+    }
 
     public final void setTopWalls(List<float[]> topWalls){
         this.topWalls=topWalls;
@@ -238,6 +219,10 @@ public final class Full3DCell implements Serializable{
 
     public final List<float[]> getBottomWalls(){
         return(bottomWalls);
+    }
+    
+    public final void addBottomWall(float[] bottomWall){
+        bottomWalls.add(bottomWall);
     }
 
     public final void setBottomWalls(List<float[]> bottomWalls){
@@ -259,6 +244,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getBottomPortals(){
         return(bottomPortals);
     }
+    
+    public final void addBottomPortal(float[] bottomPortal){
+        bottomPortals.add(bottomPortal);
+    }
 
     public final void setBottomPortals(List<float[]> bottomPortals){
         this.bottomPortals=bottomPortals;
@@ -266,6 +255,10 @@ public final class Full3DCell implements Serializable{
 
     public final List<float[]> getLeftWalls(){
         return(leftWalls);
+    }
+    
+    public final void addLeftWall(float[] leftWall){
+        leftWalls.add(leftWall);
     }
 
     public final void setLeftWalls(List<float[]> leftWalls){
@@ -275,6 +268,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getRightWalls(){
         return(rightWalls);
     }
+    
+    public final void addRightWall(float[] rightWall){
+        rightWalls.add(rightWall);
+    }
 
     public final void setRightWalls(List<float[]> rightWalls){
         this.rightWalls = rightWalls;
@@ -283,6 +280,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getLeftPortals(){
         return(leftPortals);
     }
+    
+    public final void addLeftPortal(float[] leftPortal){
+        leftPortals.add(leftPortal);
+    }
 
     public final void setLeftPortals(List<float[]> leftPortals){
         this.leftPortals=leftPortals;
@@ -290,6 +291,10 @@ public final class Full3DCell implements Serializable{
 
     public final List<float[]> getRightPortals() {
         return(rightPortals);
+    }
+    
+    public final void addRightPortal(float[] rightPortal){
+        rightPortals.add(rightPortal);
     }
 
     public final void setRightPortals(List<float[]> rightPortals){
@@ -312,6 +317,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getCeilWalls(){
         return(ceilWalls);
     }
+    
+    public final void addCeilWall(float[] ceilWall){
+        ceilWalls.add(ceilWall);
+    }
 
     public final void setCeilWalls(List<float[]> ceilWalls){
         this.ceilWalls=ceilWalls;
@@ -320,21 +329,13 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getFloorWalls(){
         return(floorWalls);
     }
+    
+    public final void addFloorWall(float[] floorWall){
+        floorWalls.add(floorWall);
+    }
 
     public final void setFloorWalls(List<float[]> floorWalls){
         this.floorWalls=floorWalls;
-    }
-    @Deprecated
-    public final void addNeighbourPortal(float[] portal){
-        neighboursPortalsList.add(portal);
-    }
-    @Deprecated
-    public final List<float[]> getNeighboursPortalsList(){
-        return(neighboursPortalsList);
-    }
-    @Deprecated
-    public final void setNeighboursPortalsList(List<float[]> neighboursPortalsList){
-        this.neighboursPortalsList=neighboursPortalsList;
     }
     
     public final void addPortal(Full3DPortal portal){
@@ -380,6 +381,10 @@ public final class Full3DCell implements Serializable{
     public final List<float[]> getCeilPortals(){
         return(ceilPortals);
     }
+    
+    public final void addCeilPortal(float[] ceilPortal){
+        ceilPortals.add(ceilPortal);
+    }
 
     public final void setCeilPortals(List<float[]> ceilPortals){
         this.ceilPortals=ceilPortals;
@@ -387,6 +392,10 @@ public final class Full3DCell implements Serializable{
 
     public final List<float[]> getFloorPortals(){
         return(floorPortals);
+    }
+    
+    public final void addFloorPortal(float[] floorPortal){
+        floorPortals.add(floorPortal);
     }
 
     public final void setFloorPortals(List<float[]> floorPortals){
