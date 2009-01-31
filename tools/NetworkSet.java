@@ -28,7 +28,8 @@ import java.util.AbstractMap.SimpleEntry;
 
 /**
  * This class is a kind of decorator to use a network set as a network. A network set
- * contains several networks, i.e several connected graphs
+ * contains several networks, i.e several connected graphs.
+ * Rather use this class when you're not sure all cells compose a single network
  * @author Julien Gouesse
  *
  */
@@ -48,7 +49,7 @@ public final class NetworkSet implements Serializable{
         List<Full3DCell> cellsList=new ArrayList<Full3DCell>();
         cellsList.addAll(full3DCellsList);
         //connect each cell to its neighbors
-        Network.connectCellsTogether(cellsList);       
+        Network.connectCellsTogether(cellsList);
         Full3DCell c;
         List<Full3DCell> subCellsList;
         Network network;
@@ -149,16 +150,21 @@ public final class NetworkSet implements Serializable{
     }
     
     /**
-     * 
-     * @param filenamepattern: 
-     * @param textureFilename: the path of the texture used for the terrain; 
+     * writes the data of the network into files
+     * @param filenamepattern 
+     * @param textureFilename the path of the texture used for the terrain; 
      *                        if null, textures coordinates are ignored
-     * @param grouped: if true, then it creates a single OBJ file for the 
+     * @param grouped if true, then it creates a single OBJ file for the 
      *        whole network set, otherwise it creates a file per cell
-     * @param redundant: if true, then the redundant vertices are kept, otherwise they are removed
-     * @param useTriangles: if true, then the quads are cut into triangles, otherwise the quads are kept
+     * @param redundant if true, then the redundant vertices are kept, otherwise they are removed
+     * @param useTriangles if true, then the quads are cut into triangles, otherwise the quads are kept
+     * @param useJOGLTextureCoordinatesVerticalOrder true if the vertical order of texture coordinates is JOGL's one
+     * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
      */
-    final void writeObjFiles(String filenamepattern,String textureFilename,boolean grouped,boolean redundant,boolean useTriangles,boolean useJOGLTextureCoordinatesVerticalOrder){
+    final void writeObjFiles(String filenamepattern,String textureFilename,
+            boolean grouped,boolean redundant,boolean useTriangles,
+            boolean useJOGLTextureCoordinatesVerticalOrder,
+            boolean writePortals){
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
@@ -170,7 +176,9 @@ public final class NetworkSet implements Serializable{
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
         if(grouped)
-            {System.out.println("Starts writing the single OBJ Wavefront file...");
+            {if(writePortals)
+                 System.out.println("[WARNING] \"writePortals\" flag ignored as available only in ungrouped mode");
+             System.out.println("Starts writing the single OBJ Wavefront file...");
              System.out.println("Writes Wavefront object "+filenamePrefix+".obj");             
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
@@ -565,11 +573,13 @@ public final class NetworkSet implements Serializable{
             {System.out.println("Starts writing OBJ Wavefront files...");
              int networkID=0,cellID;
              ArrayList<String> subObjFilenameList=new ArrayList<String>();
+             String objname,objfilename;
              for(Network network:networksList)
                  {cellID=0;
                   for(Full3DCell cell:network.getCellsList())
                       {//create a new file by using the pattern and the identifiers
-                       final String objfilename=filenamePrefix+"NID"+networkID+"CID"+cellID+".obj";
+                       objname=filenamePrefix+"NID"+networkID+"CID"+cellID;
+                       objfilename=objname+".obj";
                        try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
                        catch(IOException ioe)
                        {ioe.printStackTrace();}
@@ -579,7 +589,7 @@ public final class NetworkSet implements Serializable{
                             if(useTexture)
                                 pw.println("mtllib "+MTLFilename);
                             //write the object name (o objname)
-                            pw.println("o "+objfilename);
+                            pw.println("o "+objname);
                             //for each list of walls
                                 //for each wall
                                     //write vertices (v x y z)
@@ -691,6 +701,28 @@ public final class NetworkSet implements Serializable{
              pw=new PrintWriter(bos);
              for(String subObjFilename:subObjFilenameList)
                  pw.println("call "+subObjFilename);
+             if(writePortals)
+                 {//write the portals
+                  /* We cannot get all portals by a single visit (BFS) 
+                   * because it guarantees that all cells are visited
+                   * once but not all portals. All cells can be reached
+                   * by using not all portals. That is why we have to 
+                   * use this dirty and naive algorithm consisting in
+                   * visiting all cells and getting all theirs portals
+                   */
+                  //create a list of portals
+                  //create an hash set of portals
+                  //for each network                     
+                      //for each cell
+                          //get all its portals
+                          //add them into the hash set
+                      //put all portals in the hash set into the list
+                      //empty the hash set
+                  //for each portal
+                      //write its "obj" name
+                      //write its "v" primitives
+                      //write its "f" primitives
+                 }
              try{pw.close();
                  bos.close();
                 } 

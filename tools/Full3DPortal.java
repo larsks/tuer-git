@@ -13,6 +13,8 @@
 */
 package tools;
 
+import java.util.Arrays;
+
 public final class Full3DPortal{
     
     
@@ -34,6 +36,27 @@ public final class Full3DPortal{
             float[] portalVertex3,float[] portalVertex4){
         this(new Full3DCell[]{linkedCell1,linkedCell2},
              new float[][]{portalVertex1,portalVertex2,portalVertex3,portalVertex4});       
+    }
+    
+    public final boolean equals(Object o){
+        boolean result;
+        if(o==null||!(o instanceof Full3DPortal))
+            result=false;
+        else
+            {Full3DPortal portal=(Full3DPortal)o;
+             result=Arrays.equals(linkedCells,portal.linkedCells);
+             if(result)
+                 {if(portalVertices==null)
+                      result=portal.portalVertices==null;
+                  else
+                      {result=portal.portalVertices!=null&&portalVertices.length==portal.portalVertices.length;
+                       for(int i=0;result&&i<portalVertices.length;i++)
+                           if(!Arrays.equals(portalVertices[i],portal.portalVertices[i]))
+                               result=false;
+                      }
+                 }
+            }
+        return(result);
     }
 
     public final Full3DCell[] getLinkedCells(){

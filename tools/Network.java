@@ -383,15 +383,8 @@ public final class Network implements Serializable{
                  currentlyVisitedCell=cellsList.remove(getNextCellIndex());
                  //This is the main treatment
                  if(hasToContinue=performTaskOnCurrentlyVisitedCell())
-                     /*for(Full3DCell son:currentlyVisitedCell.getNeighboursCellsList())
-                         if(!markedCellsList.contains(son))
-                             {//Mark the cell to avoid traveling it more than once
-                              markedCellsList.add(son);
-                              //Add a new cell to travel (push operation)
-                              cellsList.add(son);
-                             }*/
                      for(int i=0;i<currentlyVisitedCell.getNeighboursCount();i++)
-                         {son=currentlyVisitedCell.getNeighbourCell(i);
+                         {son=currentlyVisitedCell.getNeighbourCell(i);      
                           if(!markedCellsList.contains(son))
                               {//Mark the cell to avoid traveling it more than once
                                markedCellsList.add(son);
@@ -412,11 +405,12 @@ public final class Network implements Serializable{
         protected abstract int getNextCellIndex();
         
         /**
-         * Allows to perform a task on the currently visited cell
+         * Allows to perform a task on the currently visited cell.
+         * Each cell is visited at most once per visit.
          * @return true if the visit has to go on, otherwise the visit is stopped
          */
         protected abstract boolean performTaskOnCurrentlyVisitedCell();
-
+        
         protected final Full3DCell getCurrentlyVisitedCell(){
             return(currentlyVisitedCell);
         }
