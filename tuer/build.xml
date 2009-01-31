@@ -196,10 +196,12 @@
 			              failonerror="true"
 			              >
 			<jvmarg value="-Xmx1536m"/>
-			<arg value="obj/level0.obj"/>
+			<!--<arg value="obj/level0.obj"/>-->
+			<arg value="obj/level0"/>
 			<arg value="obj/terrain.mtl"/>
 			<arg value="texture/wallTexture.png"/>
-			<arg value="jbin/level0.jbin"/>
+			<!--<arg value="jbin/level0.jbin"/>-->
+			<arg value="jbin"/>
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
