@@ -722,22 +722,36 @@ public final class NetworkSet implements Serializable{
                   String portalKey;
                   String[] cellsKeys=new String[2];
                   Full3DCell[] linkedCells;
-                  int knownCIDindex;
+                  List<Full3DCell> cellsList;
+                  int knownCIDindex,unknownCIDindex,otherCellID;
                   //for each network
                   for(Network network:networksList)
                       {cellID=0;
+                       cellsList=network.getCellsList();
                        //for each cell
-                       for(Full3DCell cell:network.getCellsList())
+                       for(Full3DCell cell:cellsList)
                            {//get all its portals
                             for(Full3DPortal portal:cell.getPortalsList())
                                 {linkedCells=portal.getLinkedCells();
                                  if(linkedCells[0]==cell)
-                                     knownCIDindex=0;
+                                     {unknownCIDindex=1;
+                                      knownCIDindex=0;
+                                     }
                                  else
-                                     knownCIDindex=1;                                   
+                                     {unknownCIDindex=0;
+                                      knownCIDindex=1;                                   
+                                     }
                                  cellsKeys[knownCIDindex]="CID"+cellID;
-                                 //TODO: find the CID of the other cell
-                                 
+                                 //find the CID of the other cell
+                                 otherCellID=-1;
+                                 for(int cellIndex=0;cellIndex<cellsList.size();cellIndex++)
+                                     if(linkedCells[unknownCIDindex]==cellsList.get(cellIndex))
+                                         {otherCellID=cellIndex;
+                                          break;
+                                         }
+                                 if(otherCellID==-1)
+                                     System.out.println("[WARNING] cells of different networks bound in the same portal!!! unknown CID!");
+                                 cellsKeys[unknownCIDindex]="CID"+otherCellID;
                                  portalKey="NID"+networkID+cellsKeys[0]+cellsKeys[1];
                                  if(!portalsMap.containsKey(portalKey))
                                      portalsMap.put(portalKey,portal);
