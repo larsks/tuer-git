@@ -694,7 +694,7 @@ public final class NetworkSet implements Serializable{
                   networkID++;
                  }
              //write the main OBJ file that calls the others
-             System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
+             System.out.println("Writes Wavefront object "+filenamePrefix);
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
              {ioe.printStackTrace();return;}
@@ -708,6 +708,7 @@ public final class NetworkSet implements Serializable{
              {ioe.printStackTrace();}
              if(writePortals)
                  {//write the portals
+                  System.out.println("Starts writing portals...");
                   /* We cannot get all portals by a single visit (BFS) 
                    * because it guarantees that all cells are visited
                    * once but not all portals. All cells can be reached
@@ -807,6 +808,7 @@ public final class NetworkSet implements Serializable{
                             }
                            }                     
                       }
+                  System.out.println("Ends writing portals.");
                  }
              System.out.println("Ends writing OBJ Wavefront files.");
             }
