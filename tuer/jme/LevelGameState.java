@@ -45,8 +45,8 @@ public final class LevelGameState extends BasicGameState {
         try{//TODO: load the hierarchical data
             URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
-            FileFilter filter=new LevelJBINModelsFileFilter(index);
-            for(File f:levelDataDirectory.listFiles(filter))
+            FileFilter cellsModelsFilter=new LevelJBINModelsFileFilter(index,true,false,false);
+            for(File f:levelDataDirectory.listFiles(cellsModelsFilter))
                 {//System.out.println("model: "+f.getName());
                  //TODO: analyze the name to extract the position in the 
                  //forest of graphs
@@ -98,18 +98,49 @@ public final class LevelGameState extends BasicGameState {
     private static final class LevelJBINModelsFileFilter implements FileFilter{
         
         
-        private int index;
+        private int index;       
+        
+        private boolean includesCells;
+        
+        private boolean includesPortals;
+        
+        private boolean includesNonCellsAndPortals;
         
         
-        private LevelJBINModelsFileFilter(int index){
+        private LevelJBINModelsFileFilter(int index,boolean includesCells,boolean includesPortals,boolean includesNonCellsAndPortals){
             this.index=index;
+            this.includesCells=includesCells;
+            this.includesPortals=includesPortals;
+            this.includesNonCellsAndPortals=includesNonCellsAndPortals;
         }
 
 
         @Override
         public boolean accept(File file){
-            String path=file.getName();
-            return(file.isFile()&&path.endsWith(".jbin")&&path.startsWith("level"+index));
+            String filename=file.getName();
+            boolean result;
+            result=file.isFile()&&filename.endsWith(".jbin")&&filename.startsWith("level"+index);
+            if(result&&(!includesPortals||!includesCells||!includesNonCellsAndPortals))
+                {//Detects the tag used by the cells and the portals
+                 int firstIndexOfCIDTag=filename.indexOf("CID");
+                 //If it is in the filename
+                 if(firstIndexOfCIDTag!=-1)
+                     {//If the tag occurs once, then it is a cell, otherwise it is a portal
+                      if(firstIndexOfCIDTag==filename.lastIndexOf("CID"))
+                          {if(!includesCells)
+                               result=false;
+                          }
+                      else
+                          {if(!includesPortals)
+                               result=false;
+                          }
+                     }
+                 else
+                     {if(!includesNonCellsAndPortals)
+                          result=false;
+                     }
+                }                       
+            return(result);
         }       
     }
 }
