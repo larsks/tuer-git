@@ -677,7 +677,7 @@ public final class NetworkSet implements Serializable{
                                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
                                          }
                                 }     
-                            System.out.println("Writes Wavefront object "+objfilename);
+                            System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
                                } 
@@ -691,7 +691,7 @@ public final class NetworkSet implements Serializable{
                            }
                        cellID++;
                       }
-                  networkID++;         
+                  networkID++;
                  }
              //write the main OBJ file that calls the others
              System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
@@ -700,7 +700,12 @@ public final class NetworkSet implements Serializable{
              {ioe.printStackTrace();return;}
              pw=new PrintWriter(bos);
              for(String subObjFilename:subObjFilenameList)
-                 pw.println("call "+subObjFilename);
+                 pw.println("call "+subObjFilename);            
+             try{pw.close();
+                 bos.close();
+                } 
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
              if(writePortals)
                  {//write the portals
                   /* We cannot get all portals by a single visit (BFS) 
@@ -710,24 +715,85 @@ public final class NetworkSet implements Serializable{
                    * use this dirty and naive algorithm consisting in
                    * visiting all cells and getting all theirs portals
                    */
-                  //create a list of portals
-                  //create an hash set of portals
-                  //for each network                     
-                      //for each cell
-                          //get all its portals
-                          //add them into the hash set
-                      //put all portals in the hash set into the list
-                      //empty the hash set
+                  //The key is built following this rule: NID<nid>CID<cid>CID<cid>
+                  //It allows to identify a portal
+                  HashMap<String,Full3DPortal> portalsMap=new HashMap<String, Full3DPortal>();
+                  networkID=0;
+                  String portalKey;
+                  String[] cellsKeys=new String[2];
+                  Full3DCell[] linkedCells;
+                  int knownCIDindex;
+                  //for each network
+                  for(Network network:networksList)
+                      {cellID=0;
+                       //for each cell
+                       for(Full3DCell cell:network.getCellsList())
+                           {//get all its portals
+                            for(Full3DPortal portal:cell.getPortalsList())
+                                {linkedCells=portal.getLinkedCells();
+                                 if(linkedCells[0]==cell)
+                                     knownCIDindex=0;
+                                 else
+                                     knownCIDindex=1;                                   
+                                 cellsKeys[knownCIDindex]="CID"+cellID;
+                                 //TODO: find the CID of the other cell
+                                 
+                                 portalKey="NID"+networkID+cellsKeys[0]+cellsKeys[1];
+                                 if(!portalsMap.containsKey(portalKey))
+                                     portalsMap.put(portalKey,portal);
+                                }
+                            cellID++;
+                           }                      
+                       networkID++;
+                      }                    
                   //for each portal
-                      //write its "obj" name
-                      //write its "v" primitives
-                      //write its "f" primitives
+                  Full3DPortal portal;
+                  int portalVerticesCount;
+                  for(Map.Entry<String,Full3DPortal> portalEntry:portalsMap.entrySet())
+                      {objname=filenamePrefix+portalEntry.getKey();
+                       objfilename=objname+".obj";
+                       try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
+                       catch(IOException ioe)
+                       {ioe.printStackTrace();}
+                       if(bos!=null)
+                           {pw=new PrintWriter(bos);
+                            //Do not declare any MTL filebecause it is useless for portals.
+                            //A portal contains only vertices but no texture, no light.
+                            //Write the object name (o objname)
+                            pw.println("o "+objname);
+                            portal=portalEntry.getValue();
+                            portalVerticesCount=portal.getPortalVertices().length;
+                            //write its "v" primitives
+                            for(float[] portalVertex:portal.getPortalVertices())
+                                pw.println("v "+portalVertex[2]+" "+portalVertex[3]+" "+portalVertex[4]);
+                            //write its "f" primitives
+                            if(useTriangles)
+                                {pw.println("f 1 2 3");
+                                 if(portalVerticesCount>=4)
+                                     {pw.println("f 3 4 1");
+                                      if(portalVerticesCount>4)
+                                          System.out.println("polygon not yet supported as portal");
+                                     }
+                                }
+                            else
+                                {pw.print("f");
+                                 for(int vertexIndex=1;vertexIndex<=portalVerticesCount;vertexIndex++)
+                                     pw.print(" "+vertexIndex);
+                                 pw.println("");
+                                }
+                            System.out.println("Writes Wavefront object "+objname);
+                            try{pw.close();
+                                bos.close();
+                               } 
+                            catch(IOException ioe)
+                            {ioe.printStackTrace();}
+                            finally
+                            {pw=null;
+                             bos=null;                       
+                            }
+                           }                     
+                      }
                  }
-             try{pw.close();
-                 bos.close();
-                } 
-             catch(IOException ioe)
-             {ioe.printStackTrace();}
              System.out.println("Ends writing OBJ Wavefront files.");
             }
     }
