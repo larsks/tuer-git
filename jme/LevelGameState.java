@@ -5,6 +5,11 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.jme.bounding.BoundingBox;
 import com.jme.bounding.BoundingSphere;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
@@ -25,6 +30,12 @@ public final class LevelGameState extends BasicGameState {
     
     private long previousTime;
     
+    private static final String levelPrefix="level";
+    
+    private static final String networkIDPrefix="NID";
+    
+    private static final String cellIDPrefix="CID";
+    
     
     public LevelGameState(String name,Camera cam,JMEGameServiceProvider gameServiceProvider){
         super(name);
@@ -42,16 +53,12 @@ public final class LevelGameState extends BasicGameState {
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
         Spatial model;
-        try{//TODO: load the hierarchical data
-            URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
+        try{URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
             FileFilter cellsModelsFilter=new LevelJBINModelsFileFilter(index,true,false,false);
             for(File f:levelDataDirectory.listFiles(cellsModelsFilter))
-                {//System.out.println("model: "+f.getName());
-                 //TODO: analyze the name to extract the position in the 
-                 //forest of graphs
-                 model=(Spatial)BinaryImporter.getInstance().load(f);
-                 model.setModelBound(new BoundingSphere());
+                {model=(Spatial)BinaryImporter.getInstance().load(f);
+                 model.setModelBound(new /*BoundingSphere*/BoundingBox());
                  model.updateModelBound();
                  //Activate back face culling
                  model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
@@ -60,21 +67,37 @@ public final class LevelGameState extends BasicGameState {
                  //Use VBO if the required extension is available
                  ((TriMesh)model).setVBOInfo(new VBOInfo(gameServiceProvider.getConfigurationDetector().isVBOsupported()));
                  model.lock();
-                 //TODO: use the position in the forest of graphs to 
-                 //determine the location of insertion the tree of JME 2.0
                  //attach it to the root node of the state
+                 //TODO: rather parse its model name and put it into the good list,
+                 //      one list per network
                  levelState.rootNode.attachChild(model);                
                  levelState.rootNode.updateRenderState();
                 }
-            /*System.out.println("vertex count="+model.getVertexCount());
-            System.out.println("free memory = "+Runtime.getRuntime().freeMemory());
-            System.out.println("total memory = "+Runtime.getRuntime().totalMemory());
-            System.out.println("max memory = "+Runtime.getRuntime().maxMemory());*/
+            //TODO: create a node per network
+            //TODO: for each list of models, add their cells as children of 
+            //      the correct node
+            FileFilter portalsModelsFilter=new LevelJBINModelsFileFilter(index,false,true,false);
+            int[] parsingResult;
+            for(File f:levelDataDirectory.listFiles(portalsModelsFilter))
+                {model=(Spatial)BinaryImporter.getInstance().load(f);
+                 model.setModelBound(new BoundingBox());
+                 model.updateModelBound();
+                 parsingResult=parseModelName(model.getName());
+                 //System.out.println("portal: "+Arrays.toString(parsingResult));
+                 //TODO: sort the portals by using their network ID
+                 //TODO: create a list of tables, one table per network, each table
+                 //      associates a portal with its parsing result
+                }
+            //TODO: for each network, put each portal into the whole scene graph
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
         catch(URISyntaxException urise)
         {urise.printStackTrace();}
+        /*System.out.println("vertex count="+model.getVertexCount());
+        System.out.println("free memory = "+Runtime.getRuntime().freeMemory());
+        System.out.println("total memory = "+Runtime.getRuntime().totalMemory());
+        System.out.println("max memory = "+Runtime.getRuntime().maxMemory());*/
         //return a true level game state
         return(levelState);
     }
@@ -93,6 +116,26 @@ public final class LevelGameState extends BasicGameState {
         float framePerSecond=(period==0)?0:1000f/period;
         System.out.println("frame rate = "+framePerSecond);
         previousTime=currentTime;
+    }
+    
+    private static final int[] parseModelName(String modelname){
+        int indexOfNIDTag=modelname.indexOf(networkIDPrefix);
+        int levelIndex=Integer.parseInt(modelname.substring(levelPrefix.length(),indexOfNIDTag));
+        int indexOfFirstCellIDTag=modelname.indexOf(cellIDPrefix);
+        int indexOflastCellIDTag=modelname.lastIndexOf(cellIDPrefix);
+        int networkIndex=Integer.parseInt(modelname.substring(indexOfNIDTag+networkIDPrefix.length(),indexOfFirstCellIDTag));
+        int firstCellIndex;
+        int[] result;
+        if(indexOfFirstCellIDTag<indexOflastCellIDTag)
+            {firstCellIndex=Integer.parseInt(modelname.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
+             int lastCellIndex=Integer.parseInt(modelname.substring(indexOflastCellIDTag+cellIDPrefix.length(),modelname.length()));
+             result=new int[]{levelIndex,networkIndex,firstCellIndex,lastCellIndex};
+            }
+        else
+            {firstCellIndex=Integer.parseInt(modelname.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),modelname.length()));
+             result=new int[]{levelIndex,networkIndex,firstCellIndex};
+            }
+        return(result);
     }
 
     private static final class LevelJBINModelsFileFilter implements FileFilter{
@@ -119,14 +162,14 @@ public final class LevelGameState extends BasicGameState {
         public boolean accept(File file){
             String filename=file.getName();
             boolean result;
-            result=file.isFile()&&filename.endsWith(".jbin")&&filename.startsWith("level"+index);
+            result=file.isFile()&&filename.endsWith(".jbin")&&filename.startsWith(levelPrefix+index);
             if(result&&(!includesPortals||!includesCells||!includesNonCellsAndPortals))
                 {//Detects the tag used by the cells and the portals
-                 int firstIndexOfCIDTag=filename.indexOf("CID");
+                 int firstIndexOfCIDTag=filename.indexOf(cellIDPrefix);
                  //If it is in the filename
                  if(firstIndexOfCIDTag!=-1)
                      {//If the tag occurs once, then it is a cell, otherwise it is a portal
-                      if(firstIndexOfCIDTag==filename.lastIndexOf("CID"))
+                      if(firstIndexOfCIDTag==filename.lastIndexOf(cellIDPrefix))
                           {if(!includesCells)
                                result=false;
                           }
