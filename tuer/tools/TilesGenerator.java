@@ -983,14 +983,6 @@ public final class TilesGenerator implements Runnable{
         try{buffer=GameIO.readGameFloatDataFile("/"+binaryFilePath);} 
         catch(IOException ioe)
         {throw new RuntimeException("Impossible to read the binary file: "+binaryFilePath,ioe);}
-        /*if(sourceFactor!=destFactor&&sourceFactor!=0.0f)
-            {float rescaleFactor=destFactor/sourceFactor;
-             for(int i=0;i<buffer.capacity();i+=5)
-                 {buffer.put(i+2,buffer.get(i+2)*rescaleFactor);
-                  buffer.put(i+3,buffer.get(i+3)*rescaleFactor);
-                  buffer.put(i+4,buffer.get(i+4)*rescaleFactor);
-                 }
-            }*/
         System.out.println("Writes Wavefront object "+filenamePrefix+".obj");
         if(useTexture)
             pw.println("mtllib "+MTLFilename);

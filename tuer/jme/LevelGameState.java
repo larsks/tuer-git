@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import com.jme.bounding.BoundingBox;
-import com.jme.bounding.BoundingSphere;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
+import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 import com.jme.scene.VBOInfo;
@@ -45,20 +45,23 @@ public final class LevelGameState extends BasicGameState {
         previousTime=System.currentTimeMillis();
     }
 
-    public static GameState getInstance(int index,
+    public static final GameState getInstance(int index,
             /*TransitionGameState transitionGameState,*/Camera cam,
             JMEGameServiceProvider gameServiceProvider){
         LevelGameState levelState=new LevelGameState("",cam,gameServiceProvider);
         //update the transition game state
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
-        Spatial model;
+        Spatial model;       
         try{URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
             FileFilter cellsModelsFilter=new LevelJBINModelsFileFilter(index,true,false,false);
+            HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
+            List<Spatial> cellsList;
+            int[] parsingResult;
             for(File f:levelDataDirectory.listFiles(cellsModelsFilter))
                 {model=(Spatial)BinaryImporter.getInstance().load(f);
-                 model.setModelBound(new /*BoundingSphere*/BoundingBox());
+                 model.setModelBound(new BoundingBox());
                  model.updateModelBound();
                  //Activate back face culling
                  model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
@@ -66,29 +69,70 @@ public final class LevelGameState extends BasicGameState {
                  model.updateRenderState();
                  //Use VBO if the required extension is available
                  ((TriMesh)model).setVBOInfo(new VBOInfo(gameServiceProvider.getConfigurationDetector().isVBOsupported()));
-                 model.lock();
+                 model.lock();               
+                 //parse its model name and put it into the good list,
+                 //one list per network
+                 parsingResult=parseModelName(model.getName());
+                 if((cellsList=cellsListsTable.get(parsingResult[1]))==null)
+                     {cellsList=new ArrayList<Spatial>();
+                      cellsListsTable.put(Integer.valueOf(parsingResult[1]),cellsList);
+                     }
+                 cellsList.add(model);
                  //attach it to the root node of the state
-                 //TODO: rather parse its model name and put it into the good list,
-                 //      one list per network
+                 //FIXME: remove it, it was the naive way of handling the level
                  levelState.rootNode.attachChild(model);                
                  levelState.rootNode.updateRenderState();
-                }
-            //TODO: create a node per network
-            //TODO: for each list of models, add their cells as children of 
-            //      the correct node
-            FileFilter portalsModelsFilter=new LevelJBINModelsFileFilter(index,false,true,false);
-            int[] parsingResult;
+                }           
+            HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
+            List<Spatial> portalsList;
+            FileFilter portalsModelsFilter=new LevelJBINModelsFileFilter(index,false,true,false);            
             for(File f:levelDataDirectory.listFiles(portalsModelsFilter))
                 {model=(Spatial)BinaryImporter.getInstance().load(f);
                  model.setModelBound(new BoundingBox());
                  model.updateModelBound();
                  parsingResult=parseModelName(model.getName());
-                 //System.out.println("portal: "+Arrays.toString(parsingResult));
-                 //TODO: sort the portals by using their network ID
-                 //TODO: create a list of tables, one table per network, each table
-                 //      associates a portal with its parsing result
+                 if((portalsList=portalsListsTable.get(parsingResult[1]))==null)
+                     {portalsList=new ArrayList<Spatial>();
+                      portalsListsTable.put(Integer.valueOf(parsingResult[1]),portalsList);
+                     }
+                 portalsList.add(model);
+                }  
+            //UNCOMMENT IT WHEN IT IS READY
+            /*
+            Node networkNode;
+            Integer networkIndex;
+            //for each network (graph)
+            for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
+                {networkIndex=cellEntry.getKey();
+                 //create a node per network
+                 networkNode=new Node(networkIDPrefix+networkIndex.intValue());
+                 //for each cell (node)
+                 for(Spatial networkModel:cellEntry.getValue())
+                     {parsingResult=parseModelName(networkModel.getName());
+                      //TODO: create a node instance of the class Cell (JME)
+                      //      whose name is CID<cid>
+                      //TODO: add this model into its list of children
+                     }
+                 //add each node that represents the "root" of the graph into
+                 //the list of children of the root node
+                 levelState.rootNode.attachChild(networkNode);
                 }
-            //TODO: for each network, put each portal into the whole scene graph
+            for(Map.Entry<Integer,List<Spatial>> portalEntry:portalsListsTable.entrySet())
+                {networkIndex=portalEntry.getKey();
+                 //look for the network
+                 networkNode=null;
+                 for(Spatial spatial:levelState.rootNode.getChildren())
+                     if(spatial.getName().equals(networkIDPrefix+networkIndex.intValue()))
+                         {networkNode=(Node)spatial;
+                          break;
+                         }
+                 //TODO: parse the model name to get the CIDs of the linked cells
+                 //TODO: create a node instance of the class Portal (JME)
+                 //      whose name is CID<cid>CID<cid>
+                 //TODO: look for those cells
+                 //TODO: add them into this portal
+                 //TODO: add this portal into them
+                }*/
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
@@ -109,7 +153,15 @@ public final class LevelGameState extends BasicGameState {
     }
     
     @Override
-    public final void render(final float tpf) {
+    public final void render(final float tpf){
+        /*TODO
+         * locate the network and the cell containing the player
+         * for each child node (network)
+         *     set the cull hint of all its children at "always"
+         *     if it contains the player
+         *         perform a BFS visit to set the cull hint of 
+         *         all its visible children at "never"
+         */
         super.render(tpf);
         long currentTime=System.currentTimeMillis();
         long period=currentTime-previousTime;
