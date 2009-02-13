@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import bean.NodeIdentifier;
+
 import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
@@ -42,14 +45,6 @@ public final class LevelGameState extends BasicGameState {
     
     private long previousTime;
     
-    private static final String levelIDPrefix="level";
-    
-    private static final String networkIDPrefix="NID";
-    
-    private static final String cellIDPrefix="CID";
-    
-    private static final int unknownID=-1;
-    
     
     public LevelGameState(String name,Camera cam,JMEGameServiceProvider gameServiceProvider){
         super(name);
@@ -67,13 +62,13 @@ public final class LevelGameState extends BasicGameState {
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
         Spatial model;       
-        try{//TODO: create a Level instance and add it into the children of the root
+        try{Level levelNode=new Level(levelIndex);
             URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
             FileFilter cellsModelsFilter=new LevelJBINModelsFileFilter(levelIndex,true,false,false);
             HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
             List<Spatial> cellsList;
-            int[] parsingResult;
+            NodeIdentifier nodeID;
             for(File f:levelDataDirectory.listFiles(cellsModelsFilter))
                 {model=(Spatial)BinaryImporter.getInstance().load(f);
                  model.setModelBound(new BoundingBox());
@@ -87,19 +82,19 @@ public final class LevelGameState extends BasicGameState {
                  model.lock();               
                  //parse its model name and put it into the good list,
                  //one list per network
-                 parsingResult=parseIdentifier(model.getName());
-                 if((cellsList=cellsListsTable.get(parsingResult[1]))==null)
+                 nodeID=NodeIdentifier.getInstance(model.getName());
+                 if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
                      {cellsList=new ArrayList<Spatial>();
-                      cellsListsTable.put(Integer.valueOf(parsingResult[1]),cellsList);
+                      cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
                      }
                  cellsList.add(model);
                  //attach it to the root node of the state
                  //FIXME: remove it, it was the naive way of handling the level
                  levelState.rootNode.attachChild(model);                
-                 levelState.rootNode.updateRenderState();
+                 //levelState.rootNode.updateRenderState();
+                 levelState.rootNode.attachChild(levelNode);
                 }   
-            //UNCOMMENT IT WHEN IT IS READY
-            /*
+            //this part of the source code has not been tested and might be buggy
             HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
             List<Spatial> portalsList;
             FileFilter portalsModelsFilter=new LevelJBINModelsFileFilter(levelIndex,false,true,false);            
@@ -107,51 +102,66 @@ public final class LevelGameState extends BasicGameState {
                 {model=(Spatial)BinaryImporter.getInstance().load(f);
                  model.setModelBound(new BoundingBox());
                  model.updateModelBound();
-                 parsingResult=parseIdentifier(model.getName());
-                 if((portalsList=portalsListsTable.get(parsingResult[1]))==null)
+                 nodeID=NodeIdentifier.getInstance(model.getName());
+                 if((portalsList=portalsListsTable.get(nodeID.getNetworkID()))==null)
                      {portalsList=new ArrayList<Spatial>();
-                      portalsListsTable.put(Integer.valueOf(parsingResult[1]),portalsList);
+                      portalsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),portalsList);
                      }
                  portalsList.add(model);
                 }           
             Network networkNode;
-            Integer networkIndex;
-            int cellIndex;
+            int networkIndex;
             //for each network (graph)
             for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
-                {networkIndex=cellEntry.getKey();
+                {networkIndex=cellEntry.getKey().intValue();
                  //create a node per network
-                 networkNode=new Network(levelIndex,networkIndex.intValue());
+                 networkNode=new Network(levelIndex,networkIndex);
                  //for each cell (node)
                  for(Spatial cellModel:cellEntry.getValue())
-                     {parsingResult=parseIdentifier(cellModel.getName());
+                     {nodeID=NodeIdentifier.getInstance(cellModel.getName());
                       //create a node instance of the class Cell (JME)
                       //add this node into its list of children
-                      cellIndex=parsingResult[2];
-                      networkNode.attachChild(new Cell(levelIndex,networkIndex,cellIndex,cellModel));                     
+                      networkNode.attachChild(new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel));                     
                      }
                  //add each node that represents the "root" of a graph into
-                 //the list of children of the root node
-                 //TODO: add it to the Level instance
-                 levelState.rootNode.attachChild(networkNode);
+                 //the list of children of the level node
+                 levelNode.attachChild(networkNode);
                 }
+            Portal portalNode;
+            Cell c1,c2;
             for(Map.Entry<Integer,List<Spatial>> portalEntry:portalsListsTable.entrySet())
-                {networkIndex=portalEntry.getKey();
+                {networkIndex=portalEntry.getKey().intValue();
                  //look for the network
                  networkNode=null;
-                 //TODO: use the Level instance instead of the root node
-                 for(Spatial spatial:levelState.rootNode.getChildren())
-                     if(((Network)spatial).isIdentifiedBy(levelIndex,networkIndex.intValue()))
+                 for(Spatial spatial:levelNode.getChildren())
+                     if(((Network)spatial).isIdentifiedBy(levelIndex,networkIndex))
                          {networkNode=(Network)spatial;
                           break;
                          }
-                 //TODO: parse the model name to get the CIDs of the linked cells
-                 //TODO: create a node instance of the class Portal (JME)
-                 //      whose name is CID<cid>CID<cid>
-                 //TODO: look for those cells
-                 //TODO: add them into this portal
-                 //TODO: add this portal into them
-                }*/
+                 for(Spatial portalModel:portalEntry.getValue())
+                     {//get the CIDs of the linked cells
+                      nodeID=NodeIdentifier.getInstance(portalModel.getName());
+                      //look for those cells
+                      c1=null;
+                      for(Spatial cell:networkNode.getChildren())
+                          if(((Cell)cell).isIdentifiedBy(levelIndex,networkIndex,nodeID.getCellID()))
+                              {c1=(Cell)cell;
+                               break;
+                              }
+                      c2=null;
+                      for(Spatial cell:networkNode.getChildren())
+                          if(((Cell)cell).isIdentifiedBy(levelIndex,networkIndex,nodeID.getSecondaryCellID()))
+                              {c2=(Cell)cell;
+                               break;
+                              }
+                      //create a node instance of the class Portal (JME) 
+                      portalNode=new Portal(levelIndex,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2);
+                      //add this portal into them
+                      c1.addPortal(portalNode);
+                      c2.addPortal(portalNode);
+                     }
+                 
+                }
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
@@ -189,7 +199,7 @@ public final class LevelGameState extends BasicGameState {
         previousTime=currentTime;
     }
     
-    @Deprecated
+    /*@Deprecated
     @SuppressWarnings("unused")
     private static final int[] parseModelName(String modelname){
         int indexOfNIDTag=modelname.indexOf(networkIDPrefix);
@@ -209,119 +219,12 @@ public final class LevelGameState extends BasicGameState {
              result=new int[]{levelIndex,networkIndex,firstCellIndex};
             }
         return(result);
-    }
-    
-    private static final int[] parseIdentifier(String identifier){
-        int indexOfLevelIDTag=identifier.indexOf(levelIDPrefix);
-        int indexOfNetworkIDTag=identifier.indexOf(networkIDPrefix);
-        int indexOfFirstCellIDTag=identifier.indexOf(cellIDPrefix);
-        int indexOflastCellIDTag=indexOfFirstCellIDTag!=-1?identifier.indexOf(cellIDPrefix,indexOfFirstCellIDTag+cellIDPrefix.length()):-1;
-        int levelIndex,networkIndex,firstCellIndex,lastCellIndex;
-        if(indexOfLevelIDTag==-1)
-            {levelIndex=unknownID;
-             if(indexOfNetworkIDTag==-1)
-                 {networkIndex=unknownID;
-                  if(indexOfFirstCellIDTag==-1)
-                      {firstCellIndex=unknownID;
-                       if(indexOflastCellIDTag==-1)
-                           lastCellIndex=unknownID;
-                       else
-                           lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                      }
-                  else
-                      {if(indexOflastCellIDTag==-1)
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                 }
-             else
-                 {if(indexOfFirstCellIDTag==-1)
-                      {firstCellIndex=unknownID;
-                       if(indexOflastCellIDTag==-1)
-                           {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                  else
-                      {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length(),indexOfFirstCellIDTag));
-                       if(indexOflastCellIDTag==-1)
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                 }
-            }
-        else
-            {if(indexOfNetworkIDTag==-1)
-                 {networkIndex=unknownID;
-                  if(indexOfFirstCellIDTag==-1)
-                      {firstCellIndex=unknownID;
-                       if(indexOflastCellIDTag==-1)
-                           {levelIndex=Integer.parseInt(identifier.substring(indexOfLevelIDTag+levelIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {levelIndex=Integer.parseInt(identifier.substring(indexOfLevelIDTag+levelIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                  else
-                      {levelIndex=Integer.parseInt(identifier.substring(indexOfLevelIDTag+levelIDPrefix.length(),indexOfFirstCellIDTag));
-                       if(indexOflastCellIDTag==-1)
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                 }
-             else
-                 {levelIndex=Integer.parseInt(identifier.substring(indexOfLevelIDTag+levelIDPrefix.length(),indexOfNetworkIDTag));
-                  if(indexOfFirstCellIDTag==-1)
-                      {firstCellIndex=unknownID;
-                       if(indexOflastCellIDTag==-1)
-                           {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                  else
-                      {networkIndex=Integer.parseInt(identifier.substring(indexOfNetworkIDTag+networkIDPrefix.length(),indexOfFirstCellIDTag));
-                       if(indexOflastCellIDTag==-1)
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length()));
-                            lastCellIndex=unknownID;
-                           }
-                       else
-                           {firstCellIndex=Integer.parseInt(identifier.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
-                            lastCellIndex=Integer.parseInt(identifier.substring(indexOflastCellIDTag+cellIDPrefix.length()));
-                           }
-                      }
-                     
-                 }
-            }
-        return(new int[]{levelIndex,networkIndex,firstCellIndex,lastCellIndex});
-    }
+    }*/
 
     private static final class LevelJBINModelsFileFilter implements FileFilter{
         
+        
+        private static final String suffix=".jbin";
         
         private int index;       
         
@@ -344,27 +247,28 @@ public final class LevelGameState extends BasicGameState {
         public boolean accept(File file){
             String filename=file.getName();
             boolean result;
-            result=file.isFile()&&filename.endsWith(".jbin")&&filename.startsWith(levelIDPrefix+index);
-            if(result&&(!includesPortals||!includesCells||!includesNonCellsAndPortals))
-                {//Detects the tag used by the cells and the portals
-                 int firstIndexOfCIDTag=filename.indexOf(cellIDPrefix);
-                 //If it is in the filename
-                 if(firstIndexOfCIDTag!=-1)
-                     {//If the tag occurs once, then it is a cell, otherwise it is a portal
-                      if(firstIndexOfCIDTag==filename.lastIndexOf(cellIDPrefix))
-                          {if(!includesCells)
-                               result=false;
+            if(filename.length()<=suffix.length())
+                result=false;
+            else
+                {NodeIdentifier nodeID=NodeIdentifier.getInstance(filename.substring(0,filename.length()-suffix.length()));
+                 result=file.isFile()&&filename.endsWith(suffix)&&nodeID.getLevelID()==index;
+                 if(result&&(!includesPortals||!includesCells||!includesNonCellsAndPortals))
+                     {if(nodeID.getCellID()!=NodeIdentifier.unknownID)
+                          {if(nodeID.getSecondaryCellID()==NodeIdentifier.unknownID)
+                               {if(!includesCells)
+                                    result=false;
+                               }
+                           else
+                               {if(!includesPortals)
+                                    result=false;
+                               }
                           }
                       else
-                          {if(!includesPortals)
+                          {if(!includesNonCellsAndPortals)
                                result=false;
                           }
-                     }
-                 else
-                     {if(!includesNonCellsAndPortals)
-                          result=false;
-                     }
-                }                       
+                     }   
+                }                    
             return(result);
         }       
     }

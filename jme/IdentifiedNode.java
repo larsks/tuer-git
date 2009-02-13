@@ -13,6 +13,7 @@
 */
 package jme;
 
+import bean.NodeIdentifier;
 import com.jme.scene.Node;
 
 /**
@@ -26,58 +27,43 @@ abstract class IdentifiedNode extends Node{
     
     private static final long serialVersionUID=1L;
     
-    //TODO: create a static class that handles the node identifier
-    //TODO: use an immutable instance as an attribute of an identified node
-    private static final String levelIDPrefix="level";
-    
-    private static final String networkIDPrefix="NID";
-    
-    private static final String cellIDPrefix="CID";
-    
-    protected static final int unknownID=-1;
-    
-    protected int levelID;
-    
-    protected int networkID;
-    
-    protected int cellID;
-
-    protected int secondaryCellID;
+    private NodeIdentifier nodeIdentifier;
     
     
     IdentifiedNode(){
-        this(unknownID,unknownID,unknownID,unknownID);
+        this(NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID);
     }
     
     IdentifiedNode(int levelID){
-        this(levelID,unknownID,unknownID,unknownID);
+        this(levelID,NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID);
     }
     
     IdentifiedNode(int levelID,int networkID){
-        this(levelID,networkID,unknownID,unknownID);
+        this(levelID,networkID,NodeIdentifier.unknownID,NodeIdentifier.unknownID);
     }
     
     IdentifiedNode(int levelID,int networkID,int cellID){
-        this(levelID,networkID,cellID,unknownID);
+        this(levelID,networkID,cellID,NodeIdentifier.unknownID);
     }
     
     IdentifiedNode(int levelID,int networkID,int cellID,int secondaryCellID){
-        super(createNodeIdentifier(levelID,networkID,cellID,secondaryCellID));
-        this.levelID=levelID;
-        this.networkID=networkID;
-        this.cellID=cellID;
+        this.nodeIdentifier=new NodeIdentifier(levelID,networkID,cellID,secondaryCellID);
+        this.name=this.nodeIdentifier.toString();
     }
     
-    /*private static final String createNodeIdentifier(int levelID,int networkID,int cellID){
-        return(createNodeIdentifier(levelID,networkID,cellID,unknownID));
-    }*/
-    
     boolean isIdentifiedBy(int levelID,int networkID){
-        return(isIdentifiedBy(levelID,networkID,unknownID,unknownID));
+        return(isIdentifiedBy(levelID,networkID,NodeIdentifier.unknownID,NodeIdentifier.unknownID));
+    }
+    
+    boolean isIdentifiedBy(int levelID,int networkID,int cellID){
+        return(isIdentifiedBy(levelID,networkID,cellID,NodeIdentifier.unknownID));
     }
     
     boolean isIdentifiedBy(int levelID,int networkID,int cellID,int secondaryCellID){
-        return(this.levelID==levelID&&this.networkID==networkID&&this.cellID==cellID&&this.secondaryCellID==secondaryCellID);
+        return(getLevelID()==levelID&&
+               nodeIdentifier.getNetworkID()==networkID&&
+               nodeIdentifier.getCellID()==cellID&&
+               nodeIdentifier.getSecondaryCellID()==secondaryCellID);
     }
     
     @Override
@@ -87,42 +73,33 @@ abstract class IdentifiedNode extends Node{
             result=false;
         else
             {IdentifiedNode in=(IdentifiedNode)o;
-             result=isIdentifiedBy(in.levelID,in.networkID,in.cellID,in.secondaryCellID);
+             result=this.nodeIdentifier.equals(in.nodeIdentifier);
             }
         return(result);
     }
     
+    final int getLevelID(){
+        return(nodeIdentifier.getLevelID());
+    }
+    
+    final int getNetworkID(){
+        return(nodeIdentifier.getNetworkID());
+    }
+    
+    final int getCellID(){
+        return(nodeIdentifier.getCellID());
+    }
+    
+    final int getSecondaryCellID(){
+        return(nodeIdentifier.getSecondaryCellID());
+    }
+    
     @Override
     public int hashCode(){
-        return(cellID);
+        return(name.hashCode());
     }
     
-    private static final String createNodeIdentifier(int levelID,int networkID,int cellID,int secondaryCellID){
-        StringBuilder identifierBuilder=new StringBuilder();
-        if(levelID!=unknownID)
-            {identifierBuilder.append(levelIDPrefix);
-             identifierBuilder.append(levelID);
-            }
-        if(networkID!=unknownID)
-            {identifierBuilder.append(networkIDPrefix);
-             identifierBuilder.append(networkID);
-            }
-        if(cellID!=unknownID)
-            {identifierBuilder.append(cellIDPrefix);
-             identifierBuilder.append(cellID);
-            }
-        if(secondaryCellID!=unknownID)
-            {identifierBuilder.append(cellIDPrefix);
-             identifierBuilder.append(secondaryCellID);
-            }
-        return(identifierBuilder.toString());
-    }
-    
-    /**
-     * is it really useful???
-     * @return
-     */
-    String getNodeIdentifier(){
+    public final String toString(){
         return(name);
     }
 }

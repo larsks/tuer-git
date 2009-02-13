@@ -1,5 +1,7 @@
 package jme;
 
+import bean.NodeIdentifier;
+
 final class Portal extends IdentifiedNode{
 
     
@@ -9,7 +11,7 @@ final class Portal extends IdentifiedNode{
     
     
     Portal(){
-        this(unknownID,unknownID,unknownID,unknownID,null,null);
+        this(NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID,null,null);
     }
     
     Portal(int levelID,int networkID,int cellID,int secondaryCellID,Cell c1,Cell c2){
