@@ -1,5 +1,7 @@
 package jme;
 
+import bean.NodeIdentifier;
+
 final class Network extends IdentifiedNode{
 
     
@@ -7,7 +9,7 @@ final class Network extends IdentifiedNode{
 
     
     Network(){
-        this(unknownID,unknownID);
+        this(NodeIdentifier.unknownID,NodeIdentifier.unknownID);
     }
 
     Network(int levelID,int networkID){

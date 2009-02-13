@@ -16,6 +16,8 @@ package jme;
 import java.util.ArrayList;
 import java.util.List;
 
+import bean.NodeIdentifier;
+
 import com.jme.scene.Spatial;
 
 /**
@@ -33,7 +35,7 @@ final class Cell extends IdentifiedNode{
      
     
     Cell(){
-        this(unknownID,unknownID,unknownID,null);
+        this(NodeIdentifier.unknownID,NodeIdentifier.unknownID,NodeIdentifier.unknownID,null);
     }
     
     /**
