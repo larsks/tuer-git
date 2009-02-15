@@ -62,13 +62,16 @@ public final class LevelGameState extends BasicGameState {
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
         Spatial model;       
-        try{Level levelNode=new Level(levelIndex);
+        try{//create the node of the level and attach it at the root node
+            Level levelNode=new Level(levelIndex);
+            levelState.rootNode.attachChild(levelNode);
             URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
             FileFilter cellsModelsFilter=new LevelJBINModelsFileFilter(levelIndex,true,false,false);
             HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
             List<Spatial> cellsList;
             NodeIdentifier nodeID;
+            //load the models from the files
             for(File f:levelDataDirectory.listFiles(cellsModelsFilter))
                 {model=(Spatial)BinaryImporter.getInstance().load(f);
                  model.setModelBound(new BoundingBox());
@@ -79,7 +82,7 @@ public final class LevelGameState extends BasicGameState {
                  model.updateRenderState();
                  //Use VBO if the required extension is available
                  ((TriMesh)model).setVBOInfo(new VBOInfo(gameServiceProvider.getConfigurationDetector().isVBOsupported()));
-                 model.lock();               
+                 model.lock();
                  //parse its model name and put it into the good list,
                  //one list per network
                  nodeID=NodeIdentifier.getInstance(model.getName());
@@ -87,14 +90,9 @@ public final class LevelGameState extends BasicGameState {
                      {cellsList=new ArrayList<Spatial>();
                       cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
                      }
-                 cellsList.add(model);
-                 //attach it to the root node of the state
-                 //FIXME: remove it, it was the naive way of handling the level
-                 levelState.rootNode.attachChild(model);                
-                 //levelState.rootNode.updateRenderState();
-                 levelState.rootNode.attachChild(levelNode);
-                }   
-            //this part of the source code has not been tested and might be buggy
+                 cellsList.add(model);         
+                }
+            //load the portals from the files
             HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
             List<Spatial> portalsList;
             FileFilter portalsModelsFilter=new LevelJBINModelsFileFilter(levelIndex,false,true,false);            
@@ -108,9 +106,10 @@ public final class LevelGameState extends BasicGameState {
                       portalsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),portalsList);
                      }
                  portalsList.add(model);
-                }           
+                }
             Network networkNode;
             int networkIndex;
+            //create the nodes that represent the cells and the networks
             //for each network (graph)
             for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
                 {networkIndex=cellEntry.getKey().intValue();
@@ -121,12 +120,13 @@ public final class LevelGameState extends BasicGameState {
                      {nodeID=NodeIdentifier.getInstance(cellModel.getName());
                       //create a node instance of the class Cell (JME)
                       //add this node into its list of children
-                      networkNode.attachChild(new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel));                     
+                      networkNode.attachChild(new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel));
                      }
                  //add each node that represents the "root" of a graph into
                  //the list of children of the level node
                  levelNode.attachChild(networkNode);
                 }
+            //create the nodes that represent the portals
             Portal portalNode;
             Cell c1,c2;
             for(Map.Entry<Integer,List<Spatial>> portalEntry:portalsListsTable.entrySet())
@@ -162,6 +162,7 @@ public final class LevelGameState extends BasicGameState {
                      }
                  
                 }
+            levelState.rootNode.updateRenderState();
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
@@ -198,28 +199,6 @@ public final class LevelGameState extends BasicGameState {
         System.out.println("frame rate = "+framePerSecond);
         previousTime=currentTime;
     }
-    
-    /*@Deprecated
-    @SuppressWarnings("unused")
-    private static final int[] parseModelName(String modelname){
-        int indexOfNIDTag=modelname.indexOf(networkIDPrefix);
-        int levelIndex=Integer.parseInt(modelname.substring(levelIDPrefix.length(),indexOfNIDTag));
-        int indexOfFirstCellIDTag=modelname.indexOf(cellIDPrefix);
-        int indexOflastCellIDTag=modelname.lastIndexOf(cellIDPrefix);
-        int networkIndex=Integer.parseInt(modelname.substring(indexOfNIDTag+networkIDPrefix.length(),indexOfFirstCellIDTag));
-        int firstCellIndex;
-        int[] result;
-        if(indexOfFirstCellIDTag<indexOflastCellIDTag)
-            {firstCellIndex=Integer.parseInt(modelname.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),indexOflastCellIDTag));
-             int lastCellIndex=Integer.parseInt(modelname.substring(indexOflastCellIDTag+cellIDPrefix.length(),modelname.length()));
-             result=new int[]{levelIndex,networkIndex,firstCellIndex,lastCellIndex};
-            }
-        else
-            {firstCellIndex=Integer.parseInt(modelname.substring(indexOfFirstCellIDTag+cellIDPrefix.length(),modelname.length()));
-             result=new int[]{levelIndex,networkIndex,firstCellIndex};
-            }
-        return(result);
-    }*/
 
     private static final class LevelJBINModelsFileFilter implements FileFilter{
         

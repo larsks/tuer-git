@@ -1,9 +1,8 @@
 package connection;
 
-import java.util.Arrays;
-
 import tools.IBeanProvider;
 import tools.ILevelModelBean;
+import tools.INodeIdentifier;
 import tools.TilesGenerator;
 
 public final class DataPreprocessor implements IBeanProvider{
@@ -29,8 +28,13 @@ public final class DataPreprocessor implements IBeanProvider{
 
 
     @Override
-    public ILevelModelBean getILevelModelBean(float[] initialSpawnPosition){
+    public final ILevelModelBean getILevelModelBean(float[] initialSpawnPosition){
         return(new LevelModelBeanConnector(delegate.getILevelModelBean(initialSpawnPosition)));
+    }
+    
+    @Override
+    public final INodeIdentifier getINodeIdentifier(){
+        return(new NodeIdentifierConnector(delegate.getINodeIdentifier()));
     }
     
     public static final void main(String[] args){

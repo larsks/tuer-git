@@ -21,5 +21,10 @@ public final class BeanProvider implements IBeanProvider{
     }
     
     @Override
+    public final INodeIdentifier getINodeIdentifier(){
+        return(new NodeIdentifier());
+    }
+    
+    @Override
     public final void bindBeanProvider(IBeanProvider provider){}
 }

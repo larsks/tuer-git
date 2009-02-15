@@ -16,7 +16,7 @@ package bean;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-public final class NodeIdentifier implements Serializable{
+public final class NodeIdentifier implements INodeIdentifier{
 
     
     private static final long serialVersionUID=1L;
@@ -49,6 +49,7 @@ public final class NodeIdentifier implements Serializable{
         this.networkID=networkID;
         this.cellID=cellID;
         this.secondaryCellID=secondaryCellID;
+        updateName();
     }
 
     
@@ -69,37 +70,45 @@ public final class NodeIdentifier implements Serializable{
         return(name.hashCode());
     }
     
+    @Override
     public final int getLevelID(){
         return(levelID);
     }
 
+    @Override
     public final void setLevelID(int levelID){
         this.levelID=levelID;
         updateName();
     }
 
+    @Override
     public final int getNetworkID(){
         return(networkID);
     }
 
+    @Override
     public final void setNetworkID(int networkID){
         this.networkID=networkID;
         updateName();
     }
 
+    @Override
     public final int getCellID(){
         return(cellID);
     }
 
+    @Override
     public final void setCellID(int cellID){
         this.cellID=cellID;
         updateName();
     }
 
+    @Override
     public final int getSecondaryCellID(){
         return(secondaryCellID);
     }
 
+    @Override
     public final void setSecondaryCellID(int secondaryCellID){
         this.secondaryCellID=secondaryCellID;
         updateName();
@@ -243,5 +252,10 @@ public final class NodeIdentifier implements Serializable{
                  }
             }
         return(new NodeIdentifier(levelIndex,networkIndex,firstCellIndex,lastCellIndex));
+    }
+
+    @Override
+    public final Serializable getSerializableBean(){
+        return(this);
     }
 }
