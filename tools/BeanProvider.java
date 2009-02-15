@@ -25,4 +25,8 @@ public final class BeanProvider implements IBeanProvider{
         return(delegate.getILevelModelBean(initialSpawnPosition));
     }
 
+    @Override
+    public final INodeIdentifier getINodeIdentifier(){
+        return(delegate.getINodeIdentifier());
+    }
 }

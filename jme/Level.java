@@ -34,13 +34,13 @@ final class Level extends IdentifiedNode{
     public final int attachChild(Spatial child){
         if(child!=null&&!(child instanceof Network))
             throw new IllegalArgumentException("this child is not an instance of Network");
-        return(attachChild(child));
+        return(super.attachChild(child));
     }
     
     @Override
     public int attachChildAt(Spatial child, int index){
         if(child!=null&&!(child instanceof Network))
             throw new IllegalArgumentException("this child is not an instance of Network");
-        return(attachChildAt(child,index));
+        return(super.attachChildAt(child,index));
     }
 }
