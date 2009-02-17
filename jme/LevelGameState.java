@@ -31,6 +31,7 @@ import com.jme.renderer.Camera;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 import com.jme.scene.VBOInfo;
+import com.jme.scene.Spatial.CullHint;
 import com.jme.scene.state.CullState;
 import com.jme.scene.state.RenderState;
 import com.jme.system.DisplaySystem;
@@ -45,6 +46,8 @@ public final class LevelGameState extends BasicGameState {
     
     private long previousTime;
     
+    private Cell previousPlayerCellNode;
+    
     
     public LevelGameState(String name,Camera cam,JMEGameServiceProvider gameServiceProvider){
         super(name);
@@ -52,6 +55,7 @@ public final class LevelGameState extends BasicGameState {
         //FIXME: dirty thing to set the first position
         cam.setLocation(new Vector3f(115.0f,0.0f,223.0f));
         previousTime=System.currentTimeMillis();
+        previousPlayerCellNode=null;
     }
 
     public static final GameState getInstance(int levelIndex,
@@ -184,14 +188,58 @@ public final class LevelGameState extends BasicGameState {
     
     @Override
     public final void render(final float tpf){
+        Camera cam=DisplaySystem.getDisplaySystem().getRenderer().getCamera();
+        Vector3f playerLocation=cam.getLocation();
+        Level levelNode;
+        Network networkNode;
+        Cell cellNode,currentPlayerCellNode;
         /*TODO
-         * locate the network and the cell containing the player
-         * for each child node (network)
-         *     set the cull hint of all its children at "always"
-         *     if it contains the player
-         *         perform a BFS visit to set the cull hint of 
-         *         all its visible children at "never"
-         */
+          if(previousPlayerCellNode!=null)
+              force the culling (CullHint.Always) of all nodes that were 
+              visible by starting from this previous node
+              perform a breadth-first search to find the player
+              by starting from this previous node
+          else
+              force the culling (CullHint.Always) of all nodes
+              perform a breadth-first search to find the player
+          if(currentPlayerCellNode!=null)
+              perform a breadth-first search to find the visible cells (CullHint.Never)
+         */     
+        //if the location has not changed, do not search the player again
+        if(previousPlayerCellNode!=null)
+            {if(((TriMesh)previousPlayerCellNode.getChild(0)).getModelBound().contains(playerLocation))                
+                 currentPlayerCellNode=previousPlayerCellNode;
+             else
+                 currentPlayerCellNode=null;
+            }
+        else
+            currentPlayerCellNode=null;
+        if(currentPlayerCellNode==null)
+            {for(Spatial level:rootNode.getChildren())
+                 {levelNode=(Level)level;
+                  for(Spatial network:levelNode.getChildren())
+                      {networkNode=(Network)network;
+                       if(currentPlayerCellNode==null)
+                           for(Spatial cell:networkNode.getChildren())
+                               {cellNode=(Cell)cell;
+                                //locate the player
+                                if(currentPlayerCellNode==null&&((TriMesh)cellNode.getChild(0)).getModelBound().contains(playerLocation))
+                                    {currentPlayerCellNode=cellNode;   
+                                     cellNode.setCullHint(CullHint.Never);
+                                     networkNode.setCullHint(CullHint.Never);
+                                     levelNode.setCullHint(CullHint.Never);
+                                    }
+                                else
+                                    cellNode.setCullHint(CullHint.Always);
+                            }
+                     if(currentPlayerCellNode==null||networkNode.getNetworkID()!=currentPlayerCellNode.getNetworkID())
+                         networkNode.setCullHint(CullHint.Always);
+                    }
+                 if(currentPlayerCellNode==null||levelNode.getLevelID()!=currentPlayerCellNode.getLevelID())
+                     levelNode.setCullHint(CullHint.Always);
+                }
+             previousPlayerCellNode=currentPlayerCellNode;
+            }
         super.render(tpf);
         long currentTime=System.currentTimeMillis();
         long period=currentTime-previousTime;
