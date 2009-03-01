@@ -18,7 +18,9 @@ import java.util.List;
 
 import bean.NodeIdentifier;
 
+import com.jme.math.Vector3f;
 import com.jme.scene.Spatial;
+import com.jme.scene.TriMesh;
 
 /**
  * Set of walls representing a single room and linked to other rooms
@@ -62,5 +64,14 @@ final class Cell extends IdentifiedNode{
     
     Portal getPortalAt(int index){
         return(portalsList.get(index));
+    }
+    
+    boolean contains(Vector3f point){
+        boolean result;
+        if(children!=null&&children.size()>0)
+            result=((TriMesh)getChild(0)).getModelBound().contains(point);
+        else
+            result=false;
+        return(result);
     }
 }
