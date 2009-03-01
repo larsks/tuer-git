@@ -13,6 +13,7 @@
 */
 package jme;
 
+import com.jme.math.Vector3f;
 import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
@@ -38,9 +39,24 @@ final class Level extends IdentifiedNode{
     }
     
     @Override
-    public int attachChildAt(Spatial child, int index){
+    public final int attachChildAt(Spatial child, int index){
         if(child!=null&&!(child instanceof Network))
             throw new IllegalArgumentException("this child is not an instance of Network");
         return(super.attachChildAt(child,index));
+    }
+    
+    final Cell locate(Vector3f position,Cell previousLocation){
+        Cell location=null;
+        int previousNetworkIndex=previousLocation!=null?previousLocation.getNetworkID():0;
+        int networkCount=getChildren()!=null?getChildren().size():0;
+        Network networkNode;
+        for(int networkIndex=previousNetworkIndex,j=0;j<networkCount&&location==null;j++,networkIndex=(networkIndex+1)%networkCount)
+            {networkNode=(Network)getChild(networkIndex);
+             if(networkIndex==previousNetworkIndex)
+                 location=networkNode.locate(position,previousLocation);
+             else
+                 location=networkNode.locate(position);
+            }
+        return(location);
     }
 }

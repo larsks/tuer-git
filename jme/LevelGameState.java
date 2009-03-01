@@ -22,12 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import bean.NodeIdentifier;
-
 import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
+import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 import com.jme.scene.VBOInfo;
@@ -68,6 +67,8 @@ public final class LevelGameState extends BasicGameState {
         Spatial model;       
         try{//create the node of the level and attach it at the root node
             Level levelNode=new Level(levelIndex);
+            //hide it by default
+            levelNode.setCullHint(CullHint.Always);
             levelState.rootNode.attachChild(levelNode);
             URL levelDataDirectoryURL=LevelGameState.class.getResource("/jbin/");
             File levelDataDirectory=new File(levelDataDirectoryURL.toURI());
@@ -113,18 +114,24 @@ public final class LevelGameState extends BasicGameState {
                 }
             Network networkNode;
             int networkIndex;
+            Cell cellNode;
             //create the nodes that represent the cells and the networks
             //for each network (graph)
             for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
                 {networkIndex=cellEntry.getKey().intValue();
                  //create a node per network
                  networkNode=new Network(levelIndex,networkIndex);
+                 //hide it by default
+                 networkNode.setCullHint(CullHint.Always);
                  //for each cell (node)
                  for(Spatial cellModel:cellEntry.getValue())
                      {nodeID=NodeIdentifier.getInstance(cellModel.getName());
-                      //create a node instance of the class Cell (JME)
+                      //create a node instance of the class Cell (JME)                     
+                      cellNode=new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel);
+                      //hide it by default
+                      cellNode.setCullHint(CullHint.Always);
                       //add this node into its list of children
-                      networkNode.attachChild(new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel));
+                      networkNode.attachChild(cellNode);
                      }
                  //add each node that represents the "root" of a graph into
                  //the list of children of the level node
@@ -160,12 +167,14 @@ public final class LevelGameState extends BasicGameState {
                               }
                       //create a node instance of the class Portal (JME) 
                       portalNode=new Portal(levelIndex,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2);
+                      //hide by default
+                      portalNode.setCullHint(CullHint.Always);
                       //add this portal into them
                       c1.addPortal(portalNode);
                       c2.addPortal(portalNode);
-                     }
-                 
+                     }                
                 }
+            levelState.rootNode.updateGeometricState(0.0f,true);
             levelState.rootNode.updateRenderState();
            } 
         catch(IOException ioe)
@@ -203,12 +212,15 @@ public final class LevelGameState extends BasicGameState {
               force the culling (CullHint.Always) of all nodes
               perform a breadth-first search to find the player
           if(currentPlayerCellNode!=null)
-              perform a breadth-first search to find the visible cells (CullHint.Never)
-         */     
+              perform a breadth-first search to find the visible cells (cam.contains(bound) CullHint.Never)
+         */ 
+        List<Node> visibleNodesList=new ArrayList<Node>();
         //if the location has not changed, do not search the player again
         if(previousPlayerCellNode!=null)
             {if(((TriMesh)previousPlayerCellNode.getChild(0)).getModelBound().contains(playerLocation))                
-                 currentPlayerCellNode=previousPlayerCellNode;
+                 {currentPlayerCellNode=previousPlayerCellNode;
+                  
+                 }
              else
                  currentPlayerCellNode=null;
             }
@@ -224,23 +236,31 @@ public final class LevelGameState extends BasicGameState {
                                {cellNode=(Cell)cell;
                                 //locate the player
                                 if(currentPlayerCellNode==null&&((TriMesh)cellNode.getChild(0)).getModelBound().contains(playerLocation))
-                                    {currentPlayerCellNode=cellNode;   
-                                     cellNode.setCullHint(CullHint.Never);
-                                     networkNode.setCullHint(CullHint.Never);
-                                     levelNode.setCullHint(CullHint.Never);
-                                    }
-                                else
-                                    cellNode.setCullHint(CullHint.Always);
-                            }
-                     if(currentPlayerCellNode==null||networkNode.getNetworkID()!=currentPlayerCellNode.getNetworkID())
-                         networkNode.setCullHint(CullHint.Always);
-                    }
-                 if(currentPlayerCellNode==null||levelNode.getLevelID()!=currentPlayerCellNode.getLevelID())
-                     levelNode.setCullHint(CullHint.Always);
-                }
+                                    {currentPlayerCellNode=cellNode;
+                                     break;
+                                    }                       
+                               }
+                       if(currentPlayerCellNode!=null)
+                           break;
+                      }
+                  if(currentPlayerCellNode!=null)
+                      break;
+                 }
              previousPlayerCellNode=currentPlayerCellNode;
             }
+        if(currentPlayerCellNode!=null)
+            {currentPlayerCellNode.setCullHint(CullHint.Never);
+             currentPlayerCellNode.getParent().setCullHint(CullHint.Never);
+             currentPlayerCellNode.getParent().getParent().setCullHint(CullHint.Never);
+             visibleNodesList.add(currentPlayerCellNode);
+             visibleNodesList.add(currentPlayerCellNode.getParent());
+             visibleNodesList.add(currentPlayerCellNode.getParent().getParent());
+            }
         super.render(tpf);
+        //reset the cull hint of all visible nodes
+        for(Node visibleNode:visibleNodesList)
+            visibleNode.setCullHint(CullHint.Always);
+        visibleNodesList.clear();
         long currentTime=System.currentTimeMillis();
         long period=currentTime-previousTime;
         float framePerSecond=(period==0)?0:1000f/period;

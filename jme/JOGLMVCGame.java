@@ -13,11 +13,13 @@ import com.jme.input.MouseInput;
 import com.jme.input.joystick.JoystickInput;
 import com.jme.system.DisplaySystem;
 import com.jme.system.canvas.JMECanvas;
-import com.jme.system.canvas.SimpleCanvasImpl;
+import com.jme.system.canvas.JMECanvasImplementor;
 import com.jme.system.jogl.JOGLSystemProvider;
 import com.jme.util.GameTaskQueue;
 import com.jme.util.GameTaskQueueManager;
+import com.jme.util.NanoTimer;
 import com.jme.util.TextureManager;
+import com.jme.util.Timer;
 import com.jmex.audio.AudioSystem;
 import com.jmex.awt.jogl.JOGLAWTCanvasConstructor;
 import com.jmex.game.state.GameStateManager;
@@ -42,7 +44,7 @@ public final class JOGLMVCGame{
         Toolkit toolkit=Toolkit.getDefaultToolkit();
         int width=toolkit.getScreenSize().width;
         int height=toolkit.getScreenSize().height;
-        final JMECanvas jmeCanvas=ds.createCanvas(width, height,"AWT",null);
+        final JMECanvas jmeCanvas=ds.createCanvas(width, height,"AWT",null);       
         jmeCanvas.setUpdateInput(true);
         //jmeCanvas.setTargetRate(60);
         final Frame frame = new Frame();
@@ -72,6 +74,14 @@ public final class JOGLMVCGame{
         catch(Exception e)
         {e.printStackTrace();}
         GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).execute();
+        /*new Thread(new Runnable(){
+            @Override
+            public void run(){
+                while(true)
+                    InputSystem.update();
+                    ((GLAutoDrawable) jmeCanvas).display();
+            }
+        }).start();   */    
     }
     
     /**
@@ -100,23 +110,36 @@ public final class JOGLMVCGame{
         return(configurationDetector);
     }
     
-    private static final class GenericImplementor extends SimpleCanvasImpl{
+    private static final class GenericImplementor extends JMECanvasImplementor{
 
-        protected GenericImplementor(int width,int height){
-            super(width, height);
+        private Timer timer;
+
+        private float tpf;
+        
+        private GenericImplementor(int width,int height){
+            this.width=width;
+            this.height=height;
         }
         
         @Override
-        public void simpleSetup(){}
+        public final void doSetup(){
+            renderer=DisplaySystem.getDisplaySystem().getRenderer();
+            timer=new NanoTimer();
+            setup=true;
+        }
         
         @Override
-        public void simpleUpdate(){
+        public final void doUpdate(){
+            timer.update();
+            tpf = timer.getTimePerFrame();
             GameStateManager.getInstance().update(tpf);
         }
         
         @Override
-        public void simpleRender(){
+        public final void doRender(){
+            renderer.clearBuffers();
             GameStateManager.getInstance().render(tpf);
+            renderer.displayBackBuffer();
         }
     }
 }
