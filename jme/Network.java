@@ -24,7 +24,12 @@ final class Network extends IdentifiedNode{
     }
     
     Cell locate(Vector3f position){
-        return(locate(position,null));
+        Cell firstVisitedCell;
+        if(getChildren()!=null&&getChildren().size()>0)
+            firstVisitedCell=(Cell)getChild(0);
+        else
+            firstVisitedCell=null;
+        return(locate(position,firstVisitedCell));
     }
 
     Cell locate(Vector3f position,Cell previousLocation){
@@ -108,6 +113,8 @@ final class Network extends IdentifiedNode{
                                cellsList.add(son);
                               }
                          }
+                 else
+                     break;
                 }
             return(hasToContinue);
         }

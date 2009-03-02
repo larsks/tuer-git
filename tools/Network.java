@@ -378,7 +378,7 @@ public final class Network implements Serializable{
             cellsList.add(firstVisitedCell);
             boolean hasToContinue=true;
             Full3DCell son;
-            while(!cellsList.isEmpty())
+            while(!cellsList.isEmpty()&&hasToContinue)
                 {//Get the next element (pop operation)
                  currentlyVisitedCell=cellsList.remove(getNextCellIndex());
                  //This is the main treatment
