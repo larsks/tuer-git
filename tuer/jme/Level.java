@@ -52,7 +52,7 @@ final class Level extends IdentifiedNode{
         Network networkNode;
         for(int networkIndex=previousNetworkIndex,j=0;j<networkCount&&location==null;j++,networkIndex=(networkIndex+1)%networkCount)
             {networkNode=(Network)getChild(networkIndex);
-             if(networkIndex==previousNetworkIndex)
+             if(networkIndex==previousNetworkIndex && previousLocation!=null)
                  location=networkNode.locate(position,previousLocation);
              else
                  location=networkNode.locate(position);

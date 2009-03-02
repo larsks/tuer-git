@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 import main.ConfigurationDetector;
+
+import com.jme.input.InputSystem;
 import com.jme.input.KeyInput;
 import com.jme.input.MouseInput;
 import com.jme.input.joystick.JoystickInput;
@@ -45,7 +47,7 @@ public final class JOGLMVCGame{
         int width=toolkit.getScreenSize().width;
         int height=toolkit.getScreenSize().height;
         final JMECanvas jmeCanvas=ds.createCanvas(width, height,"AWT",null);       
-        jmeCanvas.setUpdateInput(true);
+        jmeCanvas.setUpdateInput(false);
         //jmeCanvas.setTargetRate(60);
         final Frame frame = new Frame();
         frame.setAlwaysOnTop(true);
@@ -132,6 +134,7 @@ public final class JOGLMVCGame{
         public final void doUpdate(){
             timer.update();
             tpf = timer.getTimePerFrame();
+            InputSystem.update();
             GameStateManager.getInstance().update(tpf);
         }
         

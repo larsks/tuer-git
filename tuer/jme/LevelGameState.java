@@ -200,62 +200,22 @@ public final class LevelGameState extends BasicGameState {
         Camera cam=DisplaySystem.getDisplaySystem().getRenderer().getCamera();
         Vector3f playerLocation=cam.getLocation();
         Level levelNode;
-        Network networkNode;
-        Cell cellNode,currentPlayerCellNode;
-        /*TODO
-          if(previousPlayerCellNode!=null)
-              force the culling (CullHint.Always) of all nodes that were 
-              visible by starting from this previous node
-              perform a breadth-first search to find the player
-              by starting from this previous node
-          else
-              force the culling (CullHint.Always) of all nodes
-              perform a breadth-first search to find the player
-          if(currentPlayerCellNode!=null)
-              perform a breadth-first search to find the visible cells (cam.contains(bound) CullHint.Never)
-         */ 
-        List<Node> visibleNodesList=new ArrayList<Node>();
-        //if the location has not changed, do not search the player again
-        if(previousPlayerCellNode!=null)
-            {if(((TriMesh)previousPlayerCellNode.getChild(0)).getModelBound().contains(playerLocation))                
-                 {currentPlayerCellNode=previousPlayerCellNode;
-                  
+        Cell currentPlayerCellNode;
+        List<Node> visibleNodesList=new ArrayList<Node>();       
+        for(Spatial level:rootNode.getChildren())
+            {levelNode=(Level)level;
+             if((currentPlayerCellNode=levelNode.locate(playerLocation,previousPlayerCellNode))!=null)
+                 {previousPlayerCellNode=currentPlayerCellNode;
+                  currentPlayerCellNode.setCullHint(CullHint.Never);
+                  currentPlayerCellNode.getParent().setCullHint(CullHint.Never);
+                  currentPlayerCellNode.getParent().getParent().setCullHint(CullHint.Never);
+                  visibleNodesList.add(currentPlayerCellNode);
+                  visibleNodesList.add(currentPlayerCellNode.getParent());
+                  visibleNodesList.add(currentPlayerCellNode.getParent().getParent());
+                  break;
                  }
-             else
-                 currentPlayerCellNode=null;
-            }
-        else
-            currentPlayerCellNode=null;
-        if(currentPlayerCellNode==null)
-            {for(Spatial level:rootNode.getChildren())
-                 {levelNode=(Level)level;
-                  for(Spatial network:levelNode.getChildren())
-                      {networkNode=(Network)network;
-                       if(currentPlayerCellNode==null)
-                           for(Spatial cell:networkNode.getChildren())
-                               {cellNode=(Cell)cell;
-                                //locate the player
-                                if(currentPlayerCellNode==null&&((TriMesh)cellNode.getChild(0)).getModelBound().contains(playerLocation))
-                                    {currentPlayerCellNode=cellNode;
-                                     break;
-                                    }                       
-                               }
-                       if(currentPlayerCellNode!=null)
-                           break;
-                      }
-                  if(currentPlayerCellNode!=null)
-                      break;
-                 }
-             previousPlayerCellNode=currentPlayerCellNode;
-            }
-        if(currentPlayerCellNode!=null)
-            {currentPlayerCellNode.setCullHint(CullHint.Never);
-             currentPlayerCellNode.getParent().setCullHint(CullHint.Never);
-             currentPlayerCellNode.getParent().getParent().setCullHint(CullHint.Never);
-             visibleNodesList.add(currentPlayerCellNode);
-             visibleNodesList.add(currentPlayerCellNode.getParent());
-             visibleNodesList.add(currentPlayerCellNode.getParent().getParent());
-            }
+            }     
+        
         super.render(tpf);
         //reset the cull hint of all visible nodes
         for(Node visibleNode:visibleNodesList)
