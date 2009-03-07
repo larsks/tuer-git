@@ -13,7 +13,11 @@
 */
 package jme;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jme.math.Vector3f;
+import com.jme.renderer.Camera;
 import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
@@ -58,5 +62,20 @@ final class Level extends IdentifiedNode{
                  location=networkNode.locate(position);
             }
         return(location);
+    }
+    
+    final List<IdentifiedNode> getVisibleNodesList(Cell currentLocation){
+        List<IdentifiedNode> visibleNodesList=new ArrayList<IdentifiedNode>();
+        if(currentLocation!=null)
+            {//FIXME: we should check if the level is in the view frustum
+             //add the level node
+             visibleNodesList.add(this);
+             //add the network node
+             Network networkNode=(Network)currentLocation.getParent();
+             visibleNodesList.add(networkNode);            
+             //look for other visible cells in the network
+             visibleNodesList.addAll(networkNode.getVisibleNodesList(currentLocation));
+            }
+        return(visibleNodesList);
     }
 }
