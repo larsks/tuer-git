@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.jme.math.Vector3f;
+import com.jme.renderer.Camera;
+import com.jme.system.DisplaySystem;
+
 import bean.NodeIdentifier;
 
 final class Network extends IdentifiedNode{
@@ -12,6 +15,8 @@ final class Network extends IdentifiedNode{
     private static final long serialVersionUID=1L;
     
     private LocalizerVisitor localizer;
+    
+    private VisibleCellsLocalizerVisitor visibleCellsLocalizer;
 
     
     Network(){
@@ -21,6 +26,7 @@ final class Network extends IdentifiedNode{
     Network(int levelID,int networkID){
         super(levelID,networkID);
         localizer=new LocalizerVisitor(this,new Vector3f());
+        visibleCellsLocalizer=new VisibleCellsLocalizerVisitor(this,DisplaySystem.getDisplaySystem().getRenderer().getCamera());
     }
     
     Cell locate(Vector3f position){
@@ -36,7 +42,12 @@ final class Network extends IdentifiedNode{
         return(localizer.visit(previousLocation,position)?null:localizer.getCurrentlyVisitedCell());
     }
     
-    static abstract class Visitor{
+    final List<Cell> getVisibleNodesList(Cell currentLocation){
+        visibleCellsLocalizer.visit(currentLocation);      
+        return(visibleCellsLocalizer.visibleCellsList);
+    }
+    
+    private static abstract class Visitor{
         
         /**
          * Cell that is visited at first
@@ -61,7 +72,7 @@ final class Network extends IdentifiedNode{
          * Prepare the visit of the whole network by beginning with the root cell
          * @param network: visited network
          */
-        Visitor(Network network){
+        private Visitor(Network network){
             this(network.children!=null?(Cell)network.children.get(0):null);
         }
         
@@ -69,7 +80,7 @@ final class Network extends IdentifiedNode{
          * Prepare the visit of the whole network by beginning with the provided cell
          * @param firstVisitedCell: cell that is visited at first
          */
-        Visitor(Cell firstVisitedCell){
+        private Visitor(Cell firstVisitedCell){
             this.firstVisitedCell=firstVisitedCell;
             this.currentlyVisitedCell=null;
             this.cellsList=new ArrayList<Cell>();
@@ -96,8 +107,8 @@ final class Network extends IdentifiedNode{
                  cellsList.add(firstVisitedCell);
                 }
             boolean hasToContinue=true;
-            Cell son;
             Portal portal;
+            Cell son;
             while(!cellsList.isEmpty())
                 {//Get the next element (pop operation)
                  currentlyVisitedCell=cellsList.remove(getNextCellIndex());
@@ -108,9 +119,11 @@ final class Network extends IdentifiedNode{
                           son=portal.getCellAt(0).equals(currentlyVisitedCell)?portal.getCellAt(1):portal.getCellAt(0);      
                           if(!markedCellsList.contains(son))
                               {//Mark the cell to avoid traveling it more than once
-                               markedCellsList.add(son);
-                               //Add a new cell to travel (push operation)
-                               cellsList.add(son);
+                               markedCellsList.add(son);                              
+                               if(hasToPush(son,portal))
+                                   {//Add a new cell to travel (push operation)
+                                    cellsList.add(son);
+                                   }                              
                               }
                          }
                  else
@@ -119,7 +132,7 @@ final class Network extends IdentifiedNode{
             return(hasToContinue);
         }
         
-        private final void clearInternalStorage(){
+        protected void clearInternalStorage(){
             this.currentlyVisitedCell=null;
             this.cellsList.clear();
             this.markedCellsList.clear();
@@ -132,12 +145,18 @@ final class Network extends IdentifiedNode{
          * Each cell is visited at most once per visit.
          * @return true if the visit has to go on, otherwise the visit is stopped
          */
-        protected abstract boolean performTaskOnCurrentlyVisitedCell();
+        protected abstract boolean performTaskOnCurrentlyVisitedCell();     
+        /**
+         * Allows to perform a test on the currently visited son of the visited cell
+         * @return true if this son has to be pushed
+         */
+        protected boolean hasToPush(Cell son,Portal portal){
+            return(true);
+        }
         
         protected final Cell getCurrentlyVisitedCell(){
             return(currentlyVisitedCell);
         }
-
         protected final List<Cell> getCellsList(){
             return(Collections.unmodifiableList(cellsList));
         }
@@ -147,15 +166,15 @@ final class Network extends IdentifiedNode{
         }      
     }
     
-    static abstract class BreadthFirstSearchVisitor extends Visitor{
+    private static abstract class BreadthFirstSearchVisitor extends Visitor{
         
         
-        BreadthFirstSearchVisitor(Network network){
+        private BreadthFirstSearchVisitor(Network network){
             super(network.children!=null?(Cell)network.children.get(0):null);
         }
         
 
-        BreadthFirstSearchVisitor(Cell firstVisitedCell){
+        private BreadthFirstSearchVisitor(Cell firstVisitedCell){
             super(firstVisitedCell);
         }
         
@@ -201,5 +220,50 @@ final class Network extends IdentifiedNode{
             return(!getCurrentlyVisitedCell().contains(point));
         }
         
+    }
+    
+    private static final class VisibleCellsLocalizerVisitor extends BreadthFirstSearchVisitor{
+
+        
+        private List<Cell> visibleCellsList;
+        
+        private Camera camera;
+        
+        
+        private VisibleCellsLocalizerVisitor(Cell firstVisitedCell,Camera camera){
+            super(firstVisitedCell);
+            this.visibleCellsList=new ArrayList<Cell>();
+            this.camera=camera;
+            //TODO: currentFreshFrustumsCount = 0;
+        }
+        
+        private VisibleCellsLocalizerVisitor(Network network,Camera camera){
+            this(network.children!=null?(Cell)network.children.get(0):null,camera);
+        }
+        
+        @Override
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
+            //TODO: remove the currentFreshFrustumsCount first frustums
+            //TODO: currentFreshFrustumsCount = frustumsList.size();
+            //TODO: if(currentFreshFrustumsCount==0) return(false);
+            visibleCellsList.add(getCurrentlyVisitedCell());
+            return(true);
+        }
+        
+        @Override
+        protected final boolean hasToPush(Cell son,Portal portal){
+            //TODO: use the fresh frustums (rely on currentFreshFrustumsCount)
+            //TODO: if the portal is inside or intersects with a fresh frustum
+            //          create a new frustum
+            //          add it into the list
+            return(camera.contains(portal.getWorldBound())!=Camera.FrustumIntersect.Outside);
+        }
+        
+        @Override
+        protected final void clearInternalStorage(){
+            super.clearInternalStorage();
+            visibleCellsList.clear();
+            //TODO: add the first fresh frustum in the list (the frustum of the camera)
+        }     
     }
 }

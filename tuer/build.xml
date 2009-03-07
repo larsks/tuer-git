@@ -77,6 +77,26 @@
 	</target>
 	
 	<!-- ================================================================= -->
+	<!-- Dist-jme                                                          -->
+	<!-- ================================================================= -->
+	<target name="dist-jme" depends="compile" description="Creates the java archive of the EXPERIMENTAL VERSION">
+		<jar destfile="tuer.jar" basedir="${destdir}" 
+			includes="**/*.class" 
+			compress="false">
+			<include name="**/*.png" />
+			<include name="**/*.jpg" />
+			<include name="**/*.gif" />
+			<include name="**/*.txt" />
+			<include name="**/*.ogg" />			
+			<include name="**/*.xml" />
+			<include name="**/*.jbin"/>		
+			<manifest>
+			    <attribute name="Main-Class" value="jme.JMEGameServiceProvider"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- ================================================================= -->
 	<!-- Sign                                                              -->
 	<!-- ================================================================= -->
 	<target name="sign" depends="dist" description="Sign the java archive">

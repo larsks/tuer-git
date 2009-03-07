@@ -14,7 +14,6 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
 
 
 class StaticVertexBufferObjectFactory extends AbstractStaticVertexSetFactory{
