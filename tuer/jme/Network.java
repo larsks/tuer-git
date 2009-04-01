@@ -119,7 +119,7 @@ final class Network extends IdentifiedNode{
                           son=portal.getCellAt(0).equals(currentlyVisitedCell)?portal.getCellAt(1):portal.getCellAt(0);      
                           if(!markedCellsList.contains(son))
                               {//Mark the cell to avoid traveling it more than once
-                               markedCellsList.add(son);                              
+                               markedCellsList.add(son);
                                if(hasToPush(son,portal))
                                    {//Add a new cell to travel (push operation)
                                     cellsList.add(son);
@@ -147,7 +147,7 @@ final class Network extends IdentifiedNode{
          */
         protected abstract boolean performTaskOnCurrentlyVisitedCell();     
         /**
-         * Allows to perform a test on the currently visited son of the visited cell
+         * Allows to perform a test on the currently visited son of the visited cell. 
          * @return true if this son has to be pushed
          */
         protected boolean hasToPush(Cell son,Portal portal){
