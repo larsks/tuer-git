@@ -225,16 +225,27 @@ final class Network extends IdentifiedNode{
     private static final class VisibleCellsLocalizerVisitor extends BreadthFirstSearchVisitor{
 
         
-        private List<Cell> visibleCellsList;
+        private List<Cell> visibleCellsList;       
+        /**
+         * initial frustum (the whole view frustum)
+         */
+        private Camera initialCamera;
+        /**
+         * list of frustum (generated subfrustums)
+         */
+        private List<Camera> cameraList;
+        /**
+         * frustum in use 
+         * (subfrustum used for the view frustum culling)
+         */
+        private Camera currentCamera;
         
-        private Camera camera;
         
-        
-        private VisibleCellsLocalizerVisitor(Cell firstVisitedCell,Camera camera){
+        private VisibleCellsLocalizerVisitor(Cell firstVisitedCell,Camera initialCamera){
             super(firstVisitedCell);
             this.visibleCellsList=new ArrayList<Cell>();
-            this.camera=camera;
-            //TODO: currentFreshFrustumsCount = 0;
+            this.initialCamera=initialCamera;
+            this.cameraList=new ArrayList<Camera>();
         }
         
         private VisibleCellsLocalizerVisitor(Network network,Camera camera){
@@ -243,27 +254,43 @@ final class Network extends IdentifiedNode{
         
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
-            //TODO: remove the currentFreshFrustumsCount first frustums
-            //TODO: currentFreshFrustumsCount = frustumsList.size();
-            //TODO: if(currentFreshFrustumsCount==0) return(false);
+            //use the camera that matches with the current cell
+            currentCamera=cameraList.remove(getNextCellIndex());
             visibleCellsList.add(getCurrentlyVisitedCell());
             return(true);
         }
         
         @Override
         protected final boolean hasToPush(Cell son,Portal portal){
-            //TODO: use the fresh frustums (rely on currentFreshFrustumsCount)
-            //TODO: if the portal is inside or intersects with a fresh frustum
-            //          create a new frustum
-            //          add it into the list
-            return(camera.contains(portal.getWorldBound())!=Camera.FrustumIntersect.Outside);
+            Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portal.getWorldBound());
+            boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;
+            //if the portal is in the subfrustum,
+            //compute another subfrustum from it
+            if(isPortalInSubFrustum)
+                cameraList.add(computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum));               
+            return(isPortalInSubFrustum);
         }
         
         @Override
         protected final void clearInternalStorage(){
             super.clearInternalStorage();
             visibleCellsList.clear();
-            //TODO: add the first fresh frustum in the list (the frustum of the camera)
-        }     
+            cameraList.clear();
+            //add the first fresh frustum in the list (the frustum of the camera)
+            cameraList.add(initialCamera);
+        }   
+        
+        /**
+         * 
+         * @param portal
+         * @param intersection status of the intersection between the portal and the current subfrustum
+         * @return
+         */
+        private final Camera computeSubfrustum(Portal portal,
+                                         Camera.FrustumIntersect intersection){
+            //FIXME: compute the subfrustum by projecting
+            //the portal onto the near plane (use getScreenCoordinates() to achieve this)
+            return(initialCamera);
+        }
     }
 }
