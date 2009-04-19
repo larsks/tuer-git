@@ -499,7 +499,7 @@ public final class LevelGameState extends BasicGameState {
                                break;
                               }
                       //create a node instance of the class Portal (JME) 
-                      portalNode=new Portal(levelIndex,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2);
+                      portalNode=new Portal(levelIndex,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2,portalModel);
                       //hide by default
                       portalNode.setCullHint(CullHint.Always);
                       //add this portal into them

@@ -41,11 +41,11 @@ public final class JOGLMVCGame{
         //force JOGL/AWT parameters
         KeyInput.setProvider(KeyInput.INPUT_AWT);
         MouseInput.setProvider(MouseInput.INPUT_AWT);
-        DisplaySystem ds = DisplaySystem.getDisplaySystem(JOGLSystemProvider.SYSTEM_IDENTIFIER);
+        final DisplaySystem ds = DisplaySystem.getDisplaySystem(JOGLSystemProvider.SYSTEM_IDENTIFIER);
         ds.registerCanvasConstructor("AWT", JOGLAWTCanvasConstructor.class);
         Toolkit toolkit=Toolkit.getDefaultToolkit();
-        int width=toolkit.getScreenSize().width;
-        int height=toolkit.getScreenSize().height;
+        final int width=toolkit.getScreenSize().width;
+        final int height=toolkit.getScreenSize().height;
         final JMECanvas jmeCanvas=ds.createCanvas(width, height,"AWT",null);       
         jmeCanvas.setUpdateInput(false);
         //jmeCanvas.setTargetRate(60);
@@ -70,6 +70,7 @@ public final class JOGLMVCGame{
                     //load the configuration
                     configurationDetector=new ConfigurationDetector(GLU.getCurrentGL());
                     logger.info("JOGLMVCGame ready to be used, context initialized");
+                    ds.getRenderer().setCamera(ds.getRenderer().createCamera(width,height));
                     return(null);
                 }}).get();
            } 

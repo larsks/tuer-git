@@ -6,11 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-
-import javax.media.opengl.glu.GLU;
-
 import main.ConfigurationDetector;
-
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
@@ -49,23 +45,14 @@ public final class JMEGameServiceProvider {
         transitionGameState.setProgress(0,"Initializing Game ...");
         final DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
-        cam=disp.getRenderer().createCamera(1280,1024);
+        cam=disp.getRenderer().getCamera();
         cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.2F, 2000.0F );
-        Vector3f loc = new Vector3f(0.0f, 0.0f, 25.0f);
-        Vector3f left = new Vector3f(-1.0f, 0.0f, 0.0f);
-        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
-        Vector3f dir = new Vector3f(0.0f, 0f, -1.0f);
+        Vector3f loc = new Vector3f(0.0f,0.0f,25.0f);
+        Vector3f left = new Vector3f(-1.0f,0.0f,0.0f);
+        Vector3f up = new Vector3f(0.0f,1.0f,0.0f);
+        Vector3f dir = new Vector3f(0.0f,0.0f,-1.0f);
         cam.setFrame(loc,left,up,dir);
-        cam.update();       
-        try{GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Object>(){
-            @Override
-            public Object call() throws Exception{
-                disp.getRenderer().setCamera(cam);
-                return(null);
-            }}).get();
-           } 
-        catch(Exception e)
-        {e.printStackTrace();}
+        cam.update();
         
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");
@@ -77,19 +64,6 @@ public final class JMEGameServiceProvider {
         //GameStateManager.getInstance().activateChildNamed("Intro");
         //At the end of the introduction (that might be skipped), display the menu
         GameStateManager.getInstance().activateChildNamed("Main menu");
-        
-        /*try{GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Object>(){
-            @Override
-            public Object call() throws Exception{
-                GameState levelGameState=getLevelGameState(0);
-                GameStateManager.getInstance().attachChild(levelGameState);
-                levelGameState.setActive(true);
-                return(null);
-            }}).get();
-        } 
-        catch(Exception e)
-        {e.printStackTrace();}
-        GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).execute();*/
     }
     
     public final ConfigurationDetector getConfigurationDetector(){
