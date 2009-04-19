@@ -3,6 +3,7 @@ package jme;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
@@ -262,12 +263,21 @@ final class Network extends IdentifiedNode{
         
         @Override
         protected final boolean hasToPush(Cell son,Portal portal){
-            Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portal.getWorldBound());
+            BoundingBox portalWorldBound=(BoundingBox)portal.getChild(0).getWorldBound();
+            /*if(portalWorldBound.xExtent==0)
+                portalWorldBound.xExtent=0.5f;
+            if(portalWorldBound.zExtent==0)
+                portalWorldBound.zExtent=0.5f;*/
+            Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portalWorldBound);
+            //if(portalWorldBound.getCenter().z>223)
+            //    System.out.println(portalWorldBound);
             boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;
             //if the portal is in the subfrustum,
             //compute another subfrustum from it
             if(isPortalInSubFrustum)
-                cameraList.add(computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum));               
+                cameraList.add(computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum));
+            else
+                System.out.println("OUT");
             return(isPortalInSubFrustum);
         }
         
@@ -281,15 +291,44 @@ final class Network extends IdentifiedNode{
         }   
         
         /**
-         * 
-         * @param portal
-         * @param intersection status of the intersection between the portal and the current subfrustum
+         * Compute a frustum that contains only what is visible
+         * through the portal from the current frustum
+         * @param portal restriction of the computed frustum
+         * @param intersection status of the intersection between the portal and the current frustum
          * @return
          */
         private final Camera computeSubfrustum(Portal portal,
                                          Camera.FrustumIntersect intersection){
-            //FIXME: compute the subfrustum by projecting
-            //the portal onto the near plane (use getScreenCoordinates() to achieve this)
+            /*FIXME: compute the subfrustum by projecting
+             * the portal onto the near plane
+             **/
+            //TODO: store the vertices of the triangles inside the portals
+            //to decrease the memory usage
+            //System.out.println("frustum: "+currentCamera.getFrustumLeft()+" "+currentCamera.getFrustumRight());
+            /*Vector3f[] trianglesVertices = ((TriMesh)portal.getChild(0)).getMeshAsTrianglesVertices(null);      
+            float left=Float.MAX_VALUE;
+            float right=-Float.MAX_VALUE;           
+            /*for(Vector3f triangleVertex:trianglesVertices)
+                {//System.out.print(triangleVertex+" ");
+                 Vector3f vertex=currentCamera.getScreenCoordinates(triangleVertex);
+                 vertex.x/=((AbstractCamera)initialCamera).getWidth()*((currentCamera.getViewPortRight()-currentCamera.getViewPortLeft())/2+currentCamera.getViewPortLeft());
+                 vertex.y/=((AbstractCamera)initialCamera).getHeight();
+                 //System.out.println(vertex);
+                 if(vertex.x<left)
+                     left=vertex.x;
+                 if(vertex.x>right)
+                     right=vertex.x;
+                }*/
+            /*Vector3f vertex=null;
+            for(Vector3f triangleVertex:trianglesVertices)
+                {//vertex=currentCamera.getScreenCoordinates(triangleVertex,vertex);
+                 vertex=currentCamera.getFrustumCoordinates(triangleVertex,vertex);                  
+                 if(vertex.x<left)
+                     left=vertex.x;
+                 if(vertex.x>right)
+                     right=vertex.x;
+                }        
+            System.out.println(intersection.toString()+" "+left+" "+right+" ");*/
             return(initialCamera);
         }
     }
