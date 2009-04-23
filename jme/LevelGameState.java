@@ -390,6 +390,7 @@ public final class LevelGameState extends BasicGameState {
         input=new ExtendedFirstPersonHandler(cam,10,1,gameServiceProvider);
         //FIXME: dirty thing to set the first position
         cam.setLocation(new Vector3f(115.0f,0.0f,223.0f));
+        cam.update();
         previousTime=System.currentTimeMillis();
         previousPlayerCellNode=null;
     }
@@ -550,6 +551,9 @@ public final class LevelGameState extends BasicGameState {
              for(Node visibleNode:visibleNodesList)
                  visibleNode.setCullHint(CullHint.Always);
              visibleNodesList.clear();   
+            }
+        else
+            {System.out.println("no visible node");
             }
         long currentTime=System.currentTimeMillis();
         long period=currentTime-previousTime;
