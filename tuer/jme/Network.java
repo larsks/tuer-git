@@ -3,8 +3,10 @@ package jme;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.jme.bounding.BoundingBox;
+
+import com.jme.bounding.BoundingVolume;
 import com.jme.math.Vector3f;
+import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
 
@@ -263,21 +265,33 @@ final class Network extends IdentifiedNode{
         
         @Override
         protected final boolean hasToPush(Cell son,Portal portal){
-            BoundingBox portalWorldBound=(BoundingBox)portal.getChild(0).getWorldBound();
-            /*if(portalWorldBound.xExtent==0)
-                portalWorldBound.xExtent=0.5f;
-            if(portalWorldBound.zExtent==0)
-                portalWorldBound.zExtent=0.5f;*/
+            BoundingVolume portalWorldBound=portal.getChild(0).getWorldBound();
+            //FIX: reset the plane state to perform the culled test correctly
+            AbstractCamera cam=((AbstractCamera)currentCamera);
+            int previousCamPlaneState=cam.getPlaneState();
+            int previousVolumeCheckPlane=portalWorldBound.getCheckPlane();
+            cam.setPlaneState(0);
+            portalWorldBound.setCheckPlane(0);
             Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portalWorldBound);
-            //if(portalWorldBound.getCenter().z>223)
-            //    System.out.println(portalWorldBound);
-            boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;
+            boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;            
+            //try to detect when the portal is between the near plane and the observer
+            if(!isPortalInSubFrustum)
+                {cam.setPlaneState(0);
+                 portalWorldBound.setCheckPlane(0);
+                 Vector3f currentLocation=cam.getLocation();         
+                 Vector3f previousCamLocation=cam.getLocation().clone();
+                 //move back the frustum to the observer's location
+                 currentLocation.subtractLocal(cam.getDirection().normalize().multLocal(cam.getFrustumNear()));                
+                 isPortalInSubFrustum=currentCamera.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;
+                 //TODO: if true, the sub-frustum is the current frustum
+                 cam.setLocation(previousCamLocation);
+                }
+            cam.setPlaneState(previousCamPlaneState);
+            portalWorldBound.setCheckPlane(previousVolumeCheckPlane);      
             //if the portal is in the subfrustum,
             //compute another subfrustum from it
             if(isPortalInSubFrustum)
                 cameraList.add(computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum));
-            else
-                System.out.println("OUT");
             return(isPortalInSubFrustum);
         }
         

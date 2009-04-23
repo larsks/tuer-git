@@ -15,9 +15,7 @@ package jme;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.jme.math.Vector3f;
-import com.jme.renderer.Camera;
 import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
