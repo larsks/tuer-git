@@ -8,6 +8,7 @@ import com.jme.bounding.BoundingVolume;
 import com.jme.math.Vector3f;
 import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
+import com.jme.renderer.jogl.JOGLCamera;
 import com.jme.system.DisplaySystem;
 
 import bean.NodeIdentifier;
@@ -243,12 +244,16 @@ final class Network extends IdentifiedNode{
          */
         private Camera currentCamera;
         
+        private Camera prefrustum;
+        
         
         private VisibleCellsLocalizerVisitor(Cell firstVisitedCell,Camera initialCamera){
             super(firstVisitedCell);
             this.visibleCellsList=new ArrayList<Cell>();
             this.initialCamera=initialCamera;
             this.cameraList=new ArrayList<Camera>();
+            AbstractCamera cam=(AbstractCamera)initialCamera;
+            this.prefrustum=new JOGLCamera(cam.getWidth(),cam.getHeight(),true);
         }
         
         private VisibleCellsLocalizerVisitor(Network network,Camera camera){
@@ -276,15 +281,16 @@ final class Network extends IdentifiedNode{
             boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;            
             //try to detect when the portal is between the near plane and the observer
             if(!isPortalInSubFrustum)
-                {cam.setPlaneState(0);
-                 portalWorldBound.setCheckPlane(0);
-                 Vector3f currentLocation=cam.getLocation();         
-                 Vector3f previousCamLocation=cam.getLocation().clone();
+                {portalWorldBound.setCheckPlane(0);
+                 prefrustum.setPlaneState(0);
+                 //FIXME: restrict the prefrustum volume
+                 prefrustum.setFrustum(cam.getFrustumNear(),cam.getFrustumFar(),cam.getFrustumLeft(),cam.getFrustumRight(),cam.getFrustumTop(),cam.getFrustumBottom());
+                 prefrustum.setFrame(cam.getLocation().clone(),cam.getLeft(),cam.getUp(),cam.getDirection());
                  //move back the frustum to the observer's location
-                 currentLocation.subtractLocal(cam.getDirection().normalize().multLocal(cam.getFrustumNear()));                
-                 isPortalInSubFrustum=currentCamera.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;
+                 prefrustum.getLocation().subtractLocal(cam.getDirection().normalize().multLocal(cam.getFrustumNear()));
+                 prefrustum.update();
                  //TODO: if true, the sub-frustum is the current frustum
-                 cam.setLocation(previousCamLocation);
+                 isPortalInSubFrustum=prefrustum.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;
                 }
             cam.setPlaneState(previousCamPlaneState);
             portalWorldBound.setCheckPlane(previousVolumeCheckPlane);      
