@@ -46,7 +46,7 @@ public final class JMEGameServiceProvider {
         final DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
         //TODO: use our own parameters
         cam=disp.getRenderer().getCamera();
-        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.05F, 500.0F );
+        cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.2F, 2000.0F );
         Vector3f loc = new Vector3f(0.0f,0.0f,25.0f);
         Vector3f left = new Vector3f(-1.0f,0.0f,0.0f);
         Vector3f up = new Vector3f(0.0f,1.0f,0.0f);
