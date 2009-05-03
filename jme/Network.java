@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.jme.bounding.BoundingVolume;
+import com.jme.math.Matrix4f;
 import com.jme.math.Vector3f;
 import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
 import com.jme.renderer.jogl.JOGLCamera;
+import com.jme.scene.TriMesh;
 import com.jme.system.DisplaySystem;
 
 import bean.NodeIdentifier;
@@ -280,24 +282,40 @@ final class Network extends IdentifiedNode{
             Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portalWorldBound);
             boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;            
             //try to detect when the portal is between the near plane and the observer
+            Camera subfrustum=null;
             if(!isPortalInSubFrustum)
                 {portalWorldBound.setCheckPlane(0);
-                 prefrustum.setPlaneState(0);
-                 //FIXME: restrict the prefrustum volume
+                 prefrustum.setPlaneState(0);             
                  prefrustum.setFrustum(cam.getFrustumNear(),cam.getFrustumFar(),cam.getFrustumLeft(),cam.getFrustumRight(),cam.getFrustumTop(),cam.getFrustumBottom());
-                 prefrustum.setFrame(cam.getLocation().clone(),cam.getLeft(),cam.getUp(),cam.getDirection());
+                 prefrustum.setFrame(cam.getLocation().clone(),cam.getLeft()/*.clone()*/,cam.getUp()/*.clone()*/,cam.getDirection()/*.clone()*/);
                  //move back the frustum to the observer's location
                  prefrustum.getLocation().subtractLocal(cam.getDirection().normalize().multLocal(cam.getFrustumNear()));
+                 //restrict the prefrustum volume
+                 Matrix4f projectionMatrix=cam.getProjectionMatrix();
+                 //it uses the center of projection
+                 float thalesRatio=-projectionMatrix.m22/(cam.getFrustumNear()-projectionMatrix.m22);
+                 prefrustum.setFrustumLeft(thalesRatio*prefrustum.getFrustumLeft());
+                 prefrustum.setFrustumRight(thalesRatio*prefrustum.getFrustumRight());
+                 prefrustum.setFrustumTop(thalesRatio*prefrustum.getFrustumTop());
+                 prefrustum.setFrustumBottom(thalesRatio*prefrustum.getFrustumBottom());    
                  prefrustum.update();
-                 //TODO: if true, the sub-frustum is the current frustum
-                 isPortalInSubFrustum=prefrustum.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;
+                 //if true, the sub-frustum is the current frustum
+                 isPortalInSubFrustum=prefrustum.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;                 
+                 if(isPortalInSubFrustum)
+                     subfrustum=currentCamera;
                 }
             cam.setPlaneState(previousCamPlaneState);
             portalWorldBound.setCheckPlane(previousVolumeCheckPlane);      
             //if the portal is in the subfrustum,
             //compute another subfrustum from it
             if(isPortalInSubFrustum)
-                cameraList.add(computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum));
+                {if(subfrustum==null)
+                     subfrustum=computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum);
+                 if(subfrustum==null)
+                     isPortalInSubFrustum=false;
+                 else
+                     cameraList.add(subfrustum);
+                }
             return(isPortalInSubFrustum);
         }
         
@@ -319,36 +337,45 @@ final class Network extends IdentifiedNode{
          */
         private final Camera computeSubfrustum(Portal portal,
                                          Camera.FrustumIntersect intersection){
-            /*FIXME: compute the subfrustum by projecting
-             * the portal onto the near plane
-             **/
             //TODO: store the vertices of the triangles inside the portals
-            //to decrease the memory usage
-            //System.out.println("frustum: "+currentCamera.getFrustumLeft()+" "+currentCamera.getFrustumRight());
+            //      to decrease the memory usage
             /*Vector3f[] trianglesVertices = ((TriMesh)portal.getChild(0)).getMeshAsTrianglesVertices(null);      
             float left=Float.MAX_VALUE;
-            float right=-Float.MAX_VALUE;           
-            /*for(Vector3f triangleVertex:trianglesVertices)
-                {//System.out.print(triangleVertex+" ");
-                 Vector3f vertex=currentCamera.getScreenCoordinates(triangleVertex);
-                 vertex.x/=((AbstractCamera)initialCamera).getWidth()*((currentCamera.getViewPortRight()-currentCamera.getViewPortLeft())/2+currentCamera.getViewPortLeft());
-                 vertex.y/=((AbstractCamera)initialCamera).getHeight();
-                 //System.out.println(vertex);
-                 if(vertex.x<left)
-                     left=vertex.x;
-                 if(vertex.x>right)
-                     right=vertex.x;
-                }*/
-            /*Vector3f vertex=null;
+            float right=-Float.MAX_VALUE;
+            float top=-Float.MAX_VALUE;
+            float bottom=Float.MAX_VALUE;
+            Vector3f vertex=null;
             for(Vector3f triangleVertex:trianglesVertices)
-                {//vertex=currentCamera.getScreenCoordinates(triangleVertex,vertex);
-                 vertex=currentCamera.getFrustumCoordinates(triangleVertex,vertex);                  
+                {vertex=currentCamera.getFrustumCoordinates(triangleVertex,vertex);                
                  if(vertex.x<left)
                      left=vertex.x;
                  if(vertex.x>right)
                      right=vertex.x;
-                }        
-            System.out.println(intersection.toString()+" "+left+" "+right+" ");*/
+                 if(vertex.y>top)
+                     top=vertex.y;
+                 if(vertex.y<bottom)
+                     bottom=vertex.y;
+                }  
+            Camera subFrustum;
+            //if the portal is outside the current frustum
+            if(bottom>currentCamera.getFrustumTop()||
+               top<currentCamera.getFrustumBottom()||
+               right<currentCamera.getFrustumLeft()||
+               left>currentCamera.getFrustumRight())
+                subFrustum=null;
+            else
+                {left=Math.max(left,currentCamera.getFrustumLeft());
+                 right=Math.min(right,currentCamera.getFrustumRight());
+                 top=Math.min(top,currentCamera.getFrustumTop());
+                 bottom=Math.max(bottom,currentCamera.getFrustumBottom());
+                 AbstractCamera cam=((AbstractCamera)currentCamera);
+                 subFrustum=new JOGLCamera(cam.getWidth(),cam.getHeight(),true);
+                 subFrustum.setFrustum(cam.getFrustumNear(),cam.getFrustumFar(),left,right,top,bottom);
+                 subFrustum.setFrame(cam.getLocation(),cam.getLeft(),cam.getUp(),cam.getDirection());
+                }           
+            //TODO: uncomment this when the code is no more buggy
+            return(subFrustum);*/
+            //System.out.println(intersection.toString()+" "+left+" "+right+" ");
             return(initialCamera);
         }
     }
