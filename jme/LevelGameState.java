@@ -14,14 +14,19 @@
 package jme;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import bean.NodeIdentifier;
 import com.jme.bounding.BoundingBox;
+import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
+import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
+import com.jme.renderer.ColorRGBA;
+import com.jme.scene.Line;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
@@ -31,6 +36,7 @@ import com.jme.scene.state.CullState;
 import com.jme.scene.state.RenderState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.export.binary.BinaryImporter;
+import com.jme.util.geom.BufferUtils;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.GameState;
 
@@ -529,16 +535,19 @@ public final class LevelGameState extends BasicGameState {
     
     @Override
     public final void render(final float tpf){
-        Camera cam=DisplaySystem.getDisplaySystem().getRenderer().getCamera();
+        AbstractCamera cam=(AbstractCamera)DisplaySystem.getDisplaySystem().getRenderer().getCamera();
         Vector3f playerLocation=cam.getLocation();
         Level levelNode;
         Cell currentPlayerCellNode;
-        List<IdentifiedNode> visibleNodesList=null;       
+        List<IdentifiedNode> visibleNodesList=null;
+        List<Network.FrustumParameters> frustumParametersList=null;
         for(Spatial level:rootNode.getChildren())
             {levelNode=(Level)level;
              if((currentPlayerCellNode=levelNode.locate(playerLocation,previousPlayerCellNode))!=null)
                  {previousPlayerCellNode=currentPlayerCellNode;
                   visibleNodesList=levelNode.getVisibleNodesList(currentPlayerCellNode);
+                  //get the frustum parameters for debugging
+                  frustumParametersList=levelNode.getFrustumParametersList(currentPlayerCellNode);                 
                   break;
                  }
             }
@@ -547,6 +556,52 @@ public final class LevelGameState extends BasicGameState {
              for(Node visibleNode:visibleNodesList)
                  visibleNode.setCullHint(CullHint.Never);
              super.render(tpf);
+             if(frustumParametersList!=null)
+                 {Vector3f[] vertices=new Vector3f[8];
+                  Vector3f[] normals=new Vector3f[8];
+                  ColorRGBA[][] colors=new ColorRGBA[][]
+                                               {new ColorRGBA[]{ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black},
+                                                new ColorRGBA[]{ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red},
+                                                new ColorRGBA[]{ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue},
+                                                new ColorRGBA[]{ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green}
+                                               };
+                  
+                  Vector2f screenCoord=new Vector2f();
+                  Line line;
+                  line=new Line("");
+                  float frustumWidth=cam.getFrustumRight()-cam.getFrustumLeft();
+                  float frustumHeight=cam.getFrustumTop()-cam.getFrustumBottom();
+                  int i=0;
+                  for(Network.FrustumParameters frustumParam:frustumParametersList)
+                      {//use getWorldCoordinates                      
+                       screenCoord.x=((frustumParam.getLeft()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                       screenCoord.y=((frustumParam.getBottom()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                       vertices[0]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[0]);
+                       screenCoord.x=((frustumParam.getLeft()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                       screenCoord.y=((frustumParam.getTop()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                       vertices[1]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[1]);
+                       screenCoord.x=((frustumParam.getRight()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                       screenCoord.y=((frustumParam.getTop()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                       vertices[2]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[2]);
+                       screenCoord.x=((frustumParam.getRight()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                       screenCoord.y=((frustumParam.getBottom()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                       vertices[3]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[3]);
+                       vertices[4]=vertices[0];
+                       vertices[5]=vertices[3];
+                       vertices[6]=vertices[1];
+                       vertices[7]=vertices[2];
+                       //draw them
+                       FloatBuffer vertexBuffer=BufferUtils.createFloatBuffer(vertices);
+                       line.setVertexCount(vertexBuffer.limit()/3);
+                       line.setVertexBuffer(vertexBuffer);
+                       line.setNormalBuffer(BufferUtils.createFloatBuffer(normals));
+                       line.setColorBuffer(BufferUtils.createFloatBuffer(colors[i%colors.length]));
+                       line.generateIndices();
+                       line.setLineWidth(5);
+                       DisplaySystem.getDisplaySystem().getRenderer().draw(line);
+                       i++;
+                      }
+                 }
              //reset the cull hint of all visible nodes
              for(Node visibleNode:visibleNodesList)
                  visibleNode.setCullHint(CullHint.Always);

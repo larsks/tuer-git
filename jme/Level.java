@@ -76,4 +76,11 @@ final class Level extends IdentifiedNode{
             }
         return(visibleNodesList);
     }
+    
+    final List<Network.FrustumParameters> getFrustumParametersList(Cell currentLocation){
+        List<Network.FrustumParameters> frustumParametersList=new ArrayList<Network.FrustumParameters>();
+        if(currentLocation!=null)
+            frustumParametersList.addAll(((Network)currentLocation.getParent()).getFrustumParametersList());
+        return(frustumParametersList);
+    }
 }

@@ -52,6 +52,10 @@ final class Network extends IdentifiedNode{
         return(visibleCellsLocalizer.visibleCellsList);
     }
     
+    final List</*VisibleCellsLocalizerVisitor.*/FrustumParameters> getFrustumParametersList(){
+        return(visibleCellsLocalizer.storedFrustumParametersList);
+    }
+    
     private static abstract class Visitor{
         
         /**
@@ -230,6 +234,12 @@ final class Network extends IdentifiedNode{
     private static final class VisibleCellsLocalizerVisitor extends BreadthFirstSearchVisitor{
 
         
+        /**
+         * if true, the portal culling is enabled, otherwise
+         * the view frustum culling is enabled
+         */
+        private static final boolean enablePortalCulling=false;
+        
         private List<Cell> visibleCellsList;       
         /**
          * initial frustum (the whole view frustum)
@@ -241,6 +251,7 @@ final class Network extends IdentifiedNode{
          * (left,right,bottom,top)
          */
         private List<FrustumParameters> frustumParametersList;
+        private List<FrustumParameters> storedFrustumParametersList;
         /**
          * frustum in use 
          * (subfrustum used for the view frustum culling)
@@ -253,11 +264,18 @@ final class Network extends IdentifiedNode{
         private VisibleCellsLocalizerVisitor(Cell firstVisitedCell,Camera initialCamera){
             super(firstVisitedCell);
             this.visibleCellsList=new ArrayList<Cell>();
-            this.initialCamera=initialCamera;
+            this.initialCamera=initialCamera;           
             this.frustumParametersList=new ArrayList<FrustumParameters>();
+            this.storedFrustumParametersList=new ArrayList<FrustumParameters>();
             AbstractCamera cam=(AbstractCamera)initialCamera;
-            this.prefrustum=new JOGLCamera(cam.getWidth(),cam.getHeight(),true);           
+            this.prefrustum=new JOGLCamera(cam.getWidth(),cam.getHeight(),true);                      
             this.currentCamera=new JOGLCamera(cam.getWidth(),cam.getHeight(),true);
+            this.currentCamera.setFrame(initialCamera.getLocation(),initialCamera.getLeft(),
+                                        initialCamera.getUp(),initialCamera.getDirection());
+            this.currentCamera.setFrustum(initialCamera.getFrustumNear(),initialCamera.getFrustumFar(),
+                                          initialCamera.getFrustumLeft(),initialCamera.getFrustumRight(),
+                                          initialCamera.getFrustumTop(),initialCamera.getFrustumBottom());
+            this.currentCamera.update();
         }
         
         private VisibleCellsLocalizerVisitor(Network network,Camera camera){
@@ -267,7 +285,8 @@ final class Network extends IdentifiedNode{
         @Override
         protected final boolean performTaskOnCurrentlyVisitedCell(){
             //use the frustum parameters that match with the current cell            
-            frustumParametersList.remove(getNextCellIndex()).update(currentCamera);           
+            if(enablePortalCulling)
+                frustumParametersList.remove(getNextCellIndex()).update(currentCamera);            
             visibleCellsList.add(getCurrentlyVisitedCell());
             return(true);
         }
@@ -281,10 +300,10 @@ final class Network extends IdentifiedNode{
             int previousVolumeCheckPlane=portalWorldBound.getCheckPlane();
             cam.setPlaneState(0);
             portalWorldBound.setCheckPlane(0);
-            Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=currentCamera.contains(portalWorldBound);
+            Camera.FrustumIntersect intersectionBetweenPortalAndSubfrustum=cam.contains(portalWorldBound);
             boolean isPortalInSubFrustum=intersectionBetweenPortalAndSubfrustum!=Camera.FrustumIntersect.Outside;            
-            //try to detect when the portal is between the near plane and the observer
-            FrustumParameters subFrustumParam=null;
+            boolean isPortalInSubPrefrustum=false;
+            //try to detect when the portal is between the near plane and the observer     
             if(!isPortalInSubFrustum)
                 {portalWorldBound.setCheckPlane(0);
                  prefrustum.setPlaneState(0);             
@@ -303,22 +322,26 @@ final class Network extends IdentifiedNode{
                  prefrustum.update();
                  //if true, the sub-frustum is the current frustum
                  isPortalInSubFrustum=prefrustum.contains(portalWorldBound)!=Camera.FrustumIntersect.Outside;                 
-                 if(isPortalInSubFrustum)                    
-                     subFrustumParam=new FrustumParameters(currentCamera);
+                 if(isPortalInSubFrustum)
+                     isPortalInSubPrefrustum=true;
                 }
             cam.setPlaneState(previousCamPlaneState);
             portalWorldBound.setCheckPlane(previousVolumeCheckPlane);      
             //if the portal is in the subfrustum,
             //compute another subfrustum from it
-            if(isPortalInSubFrustum)
-                {if(subFrustumParam==null)
-                     //TODO: uncomment it when it works
-                     //subFrustumParam=computeSubfrustum(portal,intersectionBetweenPortalAndSubfrustum);
+            if(isPortalInSubFrustum&&enablePortalCulling)
+                {FrustumParameters subFrustumParam=null;
+                 if(isPortalInSubPrefrustum)
                      subFrustumParam=new FrustumParameters(currentCamera);
-                 if(subFrustumParam==null)
-                     isPortalInSubFrustum=false;
                  else
-                     frustumParametersList.add(subFrustumParam);                    
+                     {subFrustumParam=computeSubFrustumParameters(portal,intersectionBetweenPortalAndSubfrustum);
+                      if(subFrustumParam==null)
+                          isPortalInSubFrustum=false;
+                     }
+                 if(isPortalInSubFrustum)
+                     {frustumParametersList.add(subFrustumParam);
+                      storedFrustumParametersList.add(subFrustumParam);
+                     }
                 }
             return(isPortalInSubFrustum);
         }
@@ -326,15 +349,18 @@ final class Network extends IdentifiedNode{
         @Override
         protected final void clearInternalStorage(){
             super.clearInternalStorage();
-            visibleCellsList.clear();
-            frustumParametersList.clear();
-            //configure the current camera with the setup of the initial camera
-            currentCamera.setFrustum(initialCamera.getFrustumNear(),initialCamera.getFrustumFar(),
-                                     initialCamera.getFrustumLeft(),initialCamera.getFrustumRight(),
-                                     initialCamera.getFrustumTop(),initialCamera.getFrustumBottom());
+            visibleCellsList.clear();            
             currentCamera.setFrame(initialCamera.getLocation(),initialCamera.getLeft(),
-                                   initialCamera.getUp(),initialCamera.getDirection());
-            frustumParametersList.add(new FrustumParameters(initialCamera));
+                    initialCamera.getUp(),initialCamera.getDirection());           
+            if(enablePortalCulling)
+                {frustumParametersList.clear();
+                 storedFrustumParametersList.clear();
+                 //configure the current camera with the setup of the initial camera
+                 FrustumParameters fp=new FrustumParameters(initialCamera);
+                 fp.update(currentCamera);
+                 frustumParametersList.add(fp);
+                 storedFrustumParametersList.add(fp);   
+                }
         }   
         
         /**
@@ -381,36 +407,52 @@ final class Network extends IdentifiedNode{
                 }
             return(subFrustumParam);
         }
+    }
+    
+    /*private*/ static final class FrustumParameters{
         
-        private static final class FrustumParameters{
-            
-            
-            private final float left;
-            
-            private final float right;
-            
-            private final float bottom;
-            
-            private final float top;
-            
-            private FrustumParameters(Camera camera){
-                this.left=camera.getFrustumLeft();
-                this.right=camera.getFrustumRight();
-                this.bottom=camera.getFrustumBottom();
-                this.top=camera.getFrustumTop();
-            }
-            
-            private FrustumParameters(float left,float right,float bottom,float top){
-                this.left=left;
-                this.right=right;
-                this.bottom=bottom;
-                this.top=top;
-            }
-            
-            private final void update(Camera camera){
-                camera.setFrustum(camera.getFrustumNear(),camera.getFrustumFar(), left, right, top, bottom);
-                camera.update();
-            }
+        
+        private final float left;
+        
+        private final float right;
+        
+        private final float bottom;
+        
+        private final float top;
+        
+        private FrustumParameters(Camera camera){
+            this.left=camera.getFrustumLeft();
+            this.right=camera.getFrustumRight();
+            this.bottom=camera.getFrustumBottom();
+            this.top=camera.getFrustumTop();
+        }
+        
+        private FrustumParameters(float left,float right,float bottom,float top){
+            this.left=left;
+            this.right=right;
+            this.bottom=bottom;
+            this.top=top;
+        }
+        
+        private final void update(Camera camera){
+            camera.setFrustum(camera.getFrustumNear(),camera.getFrustumFar(), left, right, top, bottom);
+            camera.update();
+        }
+
+        public final float getLeft(){
+            return(left);
+        }
+
+        public final float getRight(){
+            return(right);
+        }
+
+        public final float getBottom(){
+            return(bottom);
+        }
+
+        public final float getTop(){
+            return(top);
         }
     }
 }
