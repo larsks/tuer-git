@@ -160,16 +160,17 @@ public final class NetworkSet implements Serializable{
      * @param useTriangles if true, then the quads are cut into triangles, otherwise the quads are kept
      * @param useJOGLTextureCoordinatesVerticalOrder true if the vertical order of texture coordinates is JOGL's one
      * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
+     * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
      */
     final void writeObjFiles(String filenamepattern,String textureFilename,
             boolean grouped,boolean redundant,boolean useTriangles,
             boolean useJOGLTextureCoordinatesVerticalOrder,
-            boolean writePortals){
+            boolean writePortals,String MTLFilename){
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
         final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;       
-        final String MTLFilename="terrain.mtl";        
+        final String materialName=MTLFilename.substring(0,MTLFilename.lastIndexOf("."));
         if(useTexture)
             TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,textureFilename);
         int facePrimitiveCount=0;
@@ -247,7 +248,7 @@ public final class NetworkSet implements Serializable{
                                         pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                    }
                            }
-                       pw.println("usemtl terrain");
+                       pw.println("usemtl "+materialName);
                        //smoothing
                        pw.println("s 1");           
                        //write faces (we already know the count of face primitives)
@@ -315,7 +316,7 @@ public final class NetworkSet implements Serializable{
                            for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
                                pw.println("vt "+textureCoordData.textureCoord[0]+" "+(1.0f-textureCoordData.textureCoord[1]));
                        System.out.println("Texture coordinates written"); 
-                       pw.println("usemtl terrain");
+                       pw.println("usemtl "+materialName);
                        //smoothing
                        pw.println("s 1");
                        System.out.println("use NetworkTexturedFaceDataWriter...");
@@ -412,7 +413,7 @@ public final class NetworkSet implements Serializable{
                                       for(float[] wall:cell.getTopWalls())
                                           pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                      }
-                                 pw.println("usemtl terrain");
+                                 pw.println("usemtl "+materialName);
                                  //smoothing
                                  pw.println("s 1");
                                  //for each list of walls

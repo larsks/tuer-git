@@ -47,7 +47,19 @@
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
-    	<delete dir="${destdir}/obj" failonerror="false" />
+    	<!-- delete only the generated files, not the artworks -->
+    	<delete>
+    	    <fileset dir="${destdir}/obj" includes="**/level0*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/bonsai*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/chair*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/flower*"/>
+    		<fileset dir="${destdir}/obj" includes="**/lamp*"/>
+    		<fileset dir="${destdir}/obj" includes="**/rocket*"/>
+    		<fileset dir="${destdir}/obj" includes="**/rocketLauncher*"/>
+    		<fileset dir="${destdir}/obj" includes="**/table*"/>
+    		<fileset dir="${destdir}/obj" includes="**/unbreakableObject*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/vendingMachine*"/>   		
+    	</delete>
     	<delete dir="${destdir}/data" failonerror="false" />
     	<delete dir="${destdir}/jbin" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
@@ -163,7 +175,6 @@
     </target>
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
 		    <mkdir dir="${destdir}/xml" />
-			<mkdir dir="${destdir}/obj" />
 			<mkdir dir="${destdir}/data" />
 	        <java classname="connection.DataPreprocessor"
 		              fork="true"
@@ -206,6 +217,7 @@
 	        		<arg value="obj/table"/>
 	        		<arg value="obj/bonsai"/>
 	        	    <arg value="data/level0.data"/>
+	        	    <arg value="level0.mtl"/>
 		</java>
 	</target>	
 	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
@@ -220,6 +232,11 @@
 			<arg value="obj/terrain.mtl"/>
 			<arg value="texture/wallTexture.png"/>
 			<arg value="jbin"/>
+			<!-- convert the weapons -->
+			<arg value="obj/pistol.obj"/>
+			<arg value="obj/pistol.mtl"/>
+			<arg value="texture/pistol.jpg"/>
+			<arg value="jbin/pistol.jbin"/>
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
