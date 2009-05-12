@@ -169,6 +169,8 @@ public final class TilesGenerator implements Runnable{
     private String bonsaiOBJFilename;
     
     private String levelModelBeanFilename;
+    
+    private String MTLFilename;
 
     private static final int artCount=27;
 
@@ -228,7 +230,7 @@ public final class TilesGenerator implements Runnable{
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP=25;
     //dirty walls (from 26 to 40) removed as useless
-    private static final int parameterCount=34;
+    private static final int parameterCount=35;
 
     
     public TilesGenerator(String mapFilename,String tilesFilename,
@@ -261,7 +263,8 @@ public final class TilesGenerator implements Runnable{
             String flowerOBJFilename,
             String tableOBJFilename,
             String bonsaiOBJFilename,
-            String levelModelBeanFilename){
+            String levelModelBeanFilename,
+            String MTLFilename){
         topWallsList=new ArrayList<PointPair>();   
         bottomWallsList=new ArrayList<PointPair>();
         rightWallsList=new ArrayList<PointPair>();
@@ -315,6 +318,7 @@ public final class TilesGenerator implements Runnable{
         this.tableOBJFilename=tableOBJFilename;
         this.bonsaiOBJFilename=bonsaiOBJFilename;
         this.levelModelBeanFilename=levelModelBeanFilename;
+        this.MTLFilename=MTLFilename;
     }      
     
     
@@ -355,7 +359,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true);
+        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
@@ -1706,7 +1710,8 @@ public final class TilesGenerator implements Runnable{
                     " flower_OBJ_filename"+
                     " table_OBJ_filename"+
                     " bonsai_OBJ_filename"+
-                    " level_model_bean_filename");  
+                    " level_model_bean_filename"+
+                    " MTL_filename");  
              tg=null;
             }
         else
@@ -1714,7 +1719,8 @@ public final class TilesGenerator implements Runnable{
                     args[6],args[7],args[8],args[9],args[10],args[11],args[12],
                     args[13],args[14],args[15],args[16],args[17],args[18],args[19],
                     args[20],args[21],args[22],args[23],args[24],args[25],args[26],
-                    args[27],args[28],args[29],args[30],args[31],args[32],args[33]);            
+                    args[27],args[28],args[29],args[30],args[31],args[32],args[33],
+                    args[34]);            
             }
         return(tg);
     }
