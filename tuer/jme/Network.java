@@ -8,7 +8,10 @@ import com.jme.math.Matrix4f;
 import com.jme.math.Vector3f;
 import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
+import com.jme.renderer.Renderer;
 import com.jme.renderer.jogl.JOGLCamera;
+import com.jme.scene.Node;
+import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 import com.jme.system.DisplaySystem;
 
@@ -21,7 +24,7 @@ final class Network extends IdentifiedNode{
     
     private LocalizerVisitor localizer;
     
-    private VisibleCellsLocalizerVisitor visibleCellsLocalizer;
+    private transient VisibleCellsLocalizerVisitor visibleCellsLocalizer;
 
     
     Network(){
@@ -32,6 +35,45 @@ final class Network extends IdentifiedNode{
         super(levelID,networkID);
         localizer=new LocalizerVisitor(this,new Vector3f());
         visibleCellsLocalizer=new VisibleCellsLocalizerVisitor(this,DisplaySystem.getDisplaySystem().getRenderer().getCamera());
+    }
+    
+    @Override
+    public void draw(Renderer r){
+        if(children!=null)
+            {Cell child;
+             List<Spatial> cellChildren;
+             List<Spatial> markedChildren=new ArrayList<Spatial>();
+             List<Spatial> hiddenChildren=new ArrayList<Spatial>();
+             Node target;
+             for(int i=0,cSize=children.size();i<cSize;i++)
+                 {child=(Cell)children.get(i);
+                  if(child!=null&&child.getLocalCullHint().equals(CullHint.Never))
+                      {cellChildren=child.getChildren();
+                       if(cellChildren!=null)
+                           {for(Spatial cellChild:cellChildren)
+                                if(cellChild instanceof ReminderSharedNode)
+                                    {//several shared nodes may have the same target
+                                     target=((ReminderSharedNode)cellChild).getTarget();
+                                     if(markedChildren.contains(target))
+                                         {hiddenChildren.add(cellChild);
+                                          //hide the already drawn object
+                                          cellChild.setCullHint(CullHint.Always);
+                                         }
+                                     else
+                                         //mark this object to avoid further drawing
+                                         markedChildren.add(target);
+                                    }
+                           }
+                       child.onDraw(r);
+                       if(cellChildren!=null)
+                           {//show again hidden children
+                            for(Spatial hiddenChild:hiddenChildren)
+                                hiddenChild.setCullHint(CullHint.Inherit);
+                            hiddenChildren.clear();
+                           }
+                      }
+                 }
+            }       
     }
     
     Cell locate(Vector3f position){
@@ -50,6 +92,17 @@ final class Network extends IdentifiedNode{
     final List<Cell> getVisibleNodesList(Cell currentLocation){
         visibleCellsLocalizer.visit(currentLocation);      
         return(visibleCellsLocalizer.visibleCellsList);
+    }
+    
+    final List<Cell> getContainingNodesList(Spatial spatial){       
+        Cell currentLocation=locate(spatial.getWorldBound().getCenter());
+        List<Cell> containingNodesList=new ArrayList<Cell>();
+        if(currentLocation!=null)
+            {ContainingCellsLocalizerVisitor visitor=new ContainingCellsLocalizerVisitor(currentLocation,spatial);
+             visitor.visit(currentLocation);
+             containingNodesList.addAll(visitor.containingNodesList);
+            }
+        return(containingNodesList);
     }
     
     final List</*VisibleCellsLocalizerVisitor.*/FrustumParameters> getFrustumParametersList(){
@@ -229,6 +282,50 @@ final class Network extends IdentifiedNode{
             return(!getCurrentlyVisitedCell().contains(point));
         }
         
+    }
+    
+    private static final class ContainingCellsLocalizerVisitor extends BreadthFirstSearchVisitor{
+
+        
+        private List<Cell> containingNodesList;
+        
+        private Spatial spatial;
+        
+        private boolean hasToAddTheFirstCell;
+        
+        
+        private ContainingCellsLocalizerVisitor(Cell cellLocation,Spatial spatial){
+            super(cellLocation);
+            this.containingNodesList=new ArrayList<Cell>();
+            this.spatial=spatial;
+            this.hasToAddTheFirstCell=true;
+        }
+        
+        @Override
+        protected final boolean performTaskOnCurrentlyVisitedCell(){
+            if(hasToAddTheFirstCell)
+                {//add the location into the list
+                 containingNodesList.add(getCurrentlyVisitedCell());
+                 hasToAddTheFirstCell=false;
+                }
+            return(true);
+        }
+        
+        @Override
+        protected final boolean hasToPush(Cell son,Portal portal){
+            //check if the spatial intersects with the portal
+            boolean result=spatial.getWorldBound().intersects(portal.getWorldBound());
+            if(result)
+                containingNodesList.add(son);
+            return(result);
+        }
+        
+        @Override
+        protected final void clearInternalStorage(){
+            super.clearInternalStorage();
+            containingNodesList.clear();
+            hasToAddTheFirstCell=true;
+        }
     }
     
     private static final class VisibleCellsLocalizerVisitor extends BreadthFirstSearchVisitor{

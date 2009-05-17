@@ -228,15 +228,17 @@
 			              failonerror="true"
 			              >
 			<jvmarg value="-Xmx1536m"/>
-			<arg value="obj/level0"/>
-			<arg value="obj/terrain.mtl"/>
-			<arg value="texture/wallTexture.png"/>
-			<arg value="jbin"/>
 			<!-- convert the weapons -->
 			<arg value="obj/pistol.obj"/>
 			<arg value="obj/pistol.mtl"/>
 			<arg value="texture/pistol.jpg"/>
 			<arg value="jbin/pistol.jbin"/>
+			<!-- convert the levels -->
+			<arg value="obj/level0"/>
+			<arg value="obj/terrain.mtl"/>
+			<arg value="texture/wallTexture.png"/>
+			<arg value="jbin"/>
+			
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
