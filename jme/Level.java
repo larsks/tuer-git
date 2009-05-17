@@ -83,4 +83,15 @@ final class Level extends IdentifiedNode{
             frustumParametersList.addAll(((Network)currentLocation.getParent()).getFrustumParametersList());
         return(frustumParametersList);
     }
+    
+    final List<Cell> getContainingNodesList(Spatial spatial){
+        List<Cell> containingNodesList=new ArrayList<Cell>();
+        int networkCount=getChildren()!=null?getChildren().size():0;
+        Network networkNode;
+        for(int networkIndex=0;networkIndex<networkCount;networkIndex++)
+            {networkNode=(Network)getChild(networkIndex);
+             containingNodesList.addAll(networkNode.getContainingNodesList(spatial));
+            }
+        return(containingNodesList);
+    }
 }

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import bean.NodeIdentifier;
 import com.jme.bounding.BoundingBox;
+import com.jme.math.FastMath;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
 import com.jme.renderer.AbstractCamera;
@@ -514,6 +516,41 @@ public final class LevelGameState extends BasicGameState {
                       c2.addPortal(portalNode);
                      }                
                 }
+            //load the weapon
+            Spatial weaponModel=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/pistol.jbin"));
+            //the weapon is too big...
+            weaponModel.setLocalScale(1.0f/1000.0f);
+            Quaternion q=new Quaternion();
+            q.fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f);
+            weaponModel.setLocalRotation(q);
+            weaponModel.setModelBound(new BoundingBox());
+            weaponModel.updateModelBound();
+            weaponModel.updateRenderState();
+            final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
+            //create a node with the model and at this location
+            Node pistolNode=new Node("pistol");
+            pistolNode.attachChild(weaponModel);
+            pistolNode.setLocalTranslation(pistolLocation);
+            pistolNode.updateGeometricState(0.0f,true);
+            List<Cell> containingCellsList;
+            for(Spatial level:levelState.rootNode.getChildren())
+                {levelNode=(Level)level;
+                 containingCellsList=levelNode.getContainingNodesList(pistolNode);
+                 if(!containingCellsList.isEmpty())
+                     {ReminderSharedNode sharedNode;
+                      for(Cell containingCell:containingCellsList)
+                          {//create a shared node
+                           sharedNode=new ReminderSharedNode(pistolNode);
+                           //attach it to a cell that contains it
+                           containingCell.attachChild(sharedNode);
+                           sharedNode.setLocalTranslation(sharedNode.worldToLocal(pistolLocation,new Vector3f()));
+                           //set its cull hint at INHERIT by default
+                           //as this node is visible when its parent is visible
+                           sharedNode.setCullHint(CullHint.Inherit);
+                          }
+                      break;
+                     }
+                }      
             levelState.rootNode.updateGeometricState(0.0f,true);
             levelState.rootNode.updateRenderState();
            } 

@@ -52,7 +52,7 @@ public final class JOGLMVCGame{
         final Frame frame = new Frame();
         frame.setAlwaysOnTop(true);
         frame.setIgnoreRepaint(true);
-        frame.setUndecorated(true);
+        //frame.setUndecorated(true);
         frame.add((Component) jmeCanvas);
         frame.pack();
         //the implementor mainly delegates lots of work to the states

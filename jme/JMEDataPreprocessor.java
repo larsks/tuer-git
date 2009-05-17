@@ -68,13 +68,13 @@ class JMEDataPreprocessor{
                      }
                  else
                      {if(isJBINFilePatternUsed)
-                          {System.out.println("[INFO]: "+args[i+3]+" is not a JME binary file.");
+                          {System.out.println("[INFO] "+args[i+3]+" is not a JME binary file.");
                            jbinPath=args[i+3]+".jbin";
-                           System.out.println("[INFO]: "+jbinPath+" is going to be used instead.");
+                           System.out.println("[INFO] "+jbinPath+" is going to be used instead.");
                           }
                       else
                           {jbinPath=args[i+3];
-                           System.out.println("[INFO]: "+jbinPath+" is a JME binary file.");
+                           System.out.println("[INFO] "+jbinPath+" is a JME binary file.");
                           }
                      }
                  if(isFilePatternUsed)
