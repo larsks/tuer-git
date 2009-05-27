@@ -468,7 +468,7 @@ public final class LevelGameState extends BasicGameState {
                  //for each cell (node)
                  for(Spatial cellModel:cellEntry.getValue())
                      {nodeID=NodeIdentifier.getInstance(cellModel.getName());
-                      //create a node instance of the class Cell (JME)                     
+                      //create a node instance of the class Cell (JME)                
                       cellNode=new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel);
                       //hide it by default
                       cellNode.setCullHint(CullHint.Always);
@@ -537,13 +537,12 @@ public final class LevelGameState extends BasicGameState {
                 {levelNode=(Level)level;
                  containingCellsList=levelNode.getContainingNodesList(pistolNode);
                  if(!containingCellsList.isEmpty())
-                     {ReminderSharedNode sharedNode;
+                     {InternalCellElement sharedNode;
                       for(Cell containingCell:containingCellsList)
                           {//create a shared node
-                           sharedNode=new ReminderSharedNode(pistolNode);
+                           sharedNode=new InternalCellElement(pistolNode,true);
                            //attach it to a cell that contains it
                            containingCell.attachChild(sharedNode);
-                           sharedNode.setLocalTranslation(sharedNode.worldToLocal(pistolLocation,new Vector3f()));
                            //set its cull hint at INHERIT by default
                            //as this node is visible when its parent is visible
                            sharedNode.setCullHint(CullHint.Inherit);

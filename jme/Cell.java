@@ -51,6 +51,8 @@ final class Cell extends IdentifiedNode{
         super(levelID,networkID,cellID);
         portalsList=new ArrayList<Portal>();
         if(model!=null)
+            //FIXME: use InternalCellElement instead
+            //attachChild(new InternalCellElement(model,false));
             attachChild(model);
     }
     
@@ -69,6 +71,8 @@ final class Cell extends IdentifiedNode{
     boolean contains(Vector3f point){
         boolean result;
         if(children!=null&&children.size()>0)
+            //FIXME: when it uses a decorator, remove this cast
+            //result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
             result=((TriMesh)getChild(0)).getModelBound().contains(point);
         else
             result=false;
