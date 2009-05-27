@@ -51,17 +51,20 @@ final class Network extends IdentifiedNode{
                       {cellChildren=child.getChildren();
                        if(cellChildren!=null)
                            {for(Spatial cellChild:cellChildren)
-                                if(cellChild instanceof ReminderSharedNode)
-                                    {//several shared nodes may have the same target
-                                     target=((ReminderSharedNode)cellChild).getTarget();
-                                     if(markedChildren.contains(target))
-                                         {hiddenChildren.add(cellChild);
-                                          //hide the already drawn object
-                                          cellChild.setCullHint(CullHint.Always);
-                                         }
-                                     else
-                                         //mark this object to avoid further drawing
-                                         markedChildren.add(target);
+                                //FIXME: use only InternalCellElement instances
+                                if(cellChild instanceof InternalCellElement)
+                                    {//several  cell elements may represent the same node
+                                     target=((InternalCellElement)cellChild).getSharableNode();
+                                     if(target!=null)
+                                         {if(markedChildren.contains(target))
+                                              {hiddenChildren.add(cellChild);
+                                               //hide the already drawn object
+                                               cellChild.setCullHint(CullHint.Always);
+                                              }
+                                          else
+                                              //mark this object to avoid further drawing
+                                              markedChildren.add(target);
+                                         }                                     
                                     }
                            }
                        child.onDraw(r);
