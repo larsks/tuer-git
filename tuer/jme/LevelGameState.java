@@ -540,7 +540,7 @@ public final class LevelGameState extends BasicGameState {
                      {InternalCellElement sharedNode;
                       for(Cell containingCell:containingCellsList)
                           {//create a shared node
-                           sharedNode=new InternalCellElement(pistolNode,true);
+                           sharedNode=new InternalCellElement(pistolNode);
                            //attach it to a cell that contains it
                            containingCell.attachChild(sharedNode);
                            //set its cull hint at INHERIT by default

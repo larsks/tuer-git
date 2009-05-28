@@ -481,7 +481,9 @@ final class Network extends IdentifiedNode{
             float bottom=Float.MAX_VALUE;
             Vector3f vertex=null;
             for(Vector3f triangleVertex:trianglesVertices)
-                {vertex=currentCamera.getFrustumCoordinates(triangleVertex,vertex);
+                {vertex=currentCamera.getScreenCoordinates(triangleVertex,vertex);                
+                 vertex.x=(((vertex.x/((AbstractCamera)currentCamera).getWidth())/(currentCamera.getViewPortRight()-currentCamera.getViewPortLeft()))*(currentCamera.getFrustumRight()-currentCamera.getFrustumLeft()))+currentCamera.getFrustumLeft();
+                 vertex.y=(((vertex.y/((AbstractCamera)currentCamera).getHeight())/(currentCamera.getViewPortTop()-currentCamera.getViewPortBottom()))*(currentCamera.getFrustumTop()-currentCamera.getFrustumBottom()))+currentCamera.getFrustumBottom();                
                  if(vertex.x<left)
                      left=vertex.x;
                  if(vertex.x>right)

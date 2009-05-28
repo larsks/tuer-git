@@ -1,8 +1,8 @@
 package jme;
 
+import com.jme.scene.Geometry;
 import com.jme.scene.Node;
 import com.jme.scene.SharedNode;
-import com.jme.scene.Spatial;
 
 /**
  * Node added into a cell. It is used
@@ -18,7 +18,7 @@ import com.jme.scene.Spatial;
  * @author Julien Gouesse
  *
  */
-final class InternalCellElement extends Node{
+final class InternalCellElement extends SharedNode{
 
     
     private static final long serialVersionUID = 1L;
@@ -29,66 +29,33 @@ final class InternalCellElement extends Node{
      */
     private Node sharableNode;
     
-    
-    /**
-     * 
-     * @param spatial JME spatial that has to be wrapped
-     * @param share   indicates whether this element is only inside a 
-     *                single cell or can be shared (only geometric 
-     *                elements composing the fixed structure of a cell
-     *                should not be shared)
-     */
-    InternalCellElement(Spatial spatial,boolean share){
-        this(spatial.getName(),spatial,share);
+    InternalCellElement(Node node){
+        this(node.getName(),node);
     }
     
-    /**
-     * 
-     * @param name    name of the element
-     * @param spatial JME spatial that has to be wrapped
-     * @param share   indicates whether this element is only inside a 
-     *                single cell or can be shared (only geometric 
-     *                elements composing the fixed structure of a cell
-     *                should not be shared)
-     */
-    InternalCellElement(String name,Spatial spatial,boolean share){
-        super(name);
-        if(share)
-            {if(!(spatial instanceof Node))
-                 {//FIXME: support TriMesh?
-                  throw new IllegalArgumentException("Only a node cannot be shared by an internal cell element");
-                 }
-             else
-                 {Node node=(Node)spatial;
-                  if(node instanceof SharedNode)
-                      throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
-                  else
-                      {sharableNode=node;
-                       attachChild(new SharedNode(name,node));
-                      }
-                 }
-            }
+    InternalCellElement(String name,Node node){
+        super(name,node);
+        if(node instanceof SharedNode)
+            throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
         else
-            {sharableNode=null;
-             attachChild(spatial);
-            }
+            sharableNode=node;
+    }
+    
+    InternalCellElement(String name,Geometry geometry){
+        super(name,getNodeWithSingleGeometry(geometry));
+        sharableNode=geometry.getParent();
+    }
+    
+    
+    private static final Node getNodeWithSingleGeometry(Geometry geometry){
+        Node node=new Node(geometry.getName());
+        node.attachChild(geometry);
+        node.updateGeometricState(0.0f,true);
+        node.updateRenderState();
+        return(node);
     }
     
     final Node getSharableNode(){
         return(sharableNode);
-    }
-    
-    @Override
-    public final int attachChild(Spatial child){
-        if(child!=null&&getChildren()!=null&&getChildren().size()==1)
-            throw new IllegalArgumentException("an internal cell element can contain only one child");
-        return(super.attachChild(child));
-    }
-    
-    @Override
-    public final int attachChildAt(Spatial child, int index){
-        if(child!=null&&((getChildren()!=null&&getChildren().size()==1)||index>0))
-            throw new IllegalArgumentException("an internal cell element can contain only one child");
-        return(super.attachChildAt(child,index));
     }
 }
