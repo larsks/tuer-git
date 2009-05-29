@@ -19,6 +19,7 @@ import java.util.List;
 import bean.NodeIdentifier;
 
 import com.jme.math.Vector3f;
+import com.jme.scene.Geometry;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 
@@ -51,9 +52,7 @@ final class Cell extends IdentifiedNode{
         super(levelID,networkID,cellID);
         portalsList=new ArrayList<Portal>();
         if(model!=null)
-            //FIXME: use InternalCellElement instead
-            //attachChild(new InternalCellElement(model,false));
-            attachChild(model);
+            attachChild(new InternalCellElement((Geometry)model,false));
     }
     
     void addPortal(Portal portal){
@@ -71,9 +70,7 @@ final class Cell extends IdentifiedNode{
     boolean contains(Vector3f point){
         boolean result;
         if(children!=null&&children.size()>0)
-            //FIXME: when it uses a decorator, remove this cast
-            //result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
-            result=((TriMesh)getChild(0)).getModelBound().contains(point);
+            result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
         else
             result=false;
         return(result);

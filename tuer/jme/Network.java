@@ -45,27 +45,27 @@ final class Network extends IdentifiedNode{
              List<Spatial> markedChildren=new ArrayList<Spatial>();
              List<Spatial> hiddenChildren=new ArrayList<Spatial>();
              Node target;
+             InternalCellElement internalCellElement;
              for(int i=0,cSize=children.size();i<cSize;i++)
                  {child=(Cell)children.get(i);
                   if(child!=null&&child.getLocalCullHint().equals(CullHint.Never))
                       {cellChildren=child.getChildren();
                        if(cellChildren!=null)
                            {for(Spatial cellChild:cellChildren)
-                                //FIXME: use only InternalCellElement instances
-                                if(cellChild instanceof InternalCellElement)
-                                    {//several  cell elements may represent the same node
-                                     target=((InternalCellElement)cellChild).getSharableNode();
-                                     if(target!=null)
-                                         {if(markedChildren.contains(target))
-                                              {hiddenChildren.add(cellChild);
-                                               //hide the already drawn object
-                                               cellChild.setCullHint(CullHint.Always);
-                                              }
-                                          else
-                                              //mark this object to avoid further drawing
-                                              markedChildren.add(target);
-                                         }                                     
-                                    }
+                                {//several  cell elements may represent the same node
+                                 internalCellElement=(InternalCellElement)cellChild;
+                                 if(internalCellElement.isShared())
+                                     {target=internalCellElement.getSharableNode();
+                                      if(markedChildren.contains(target))
+                                          {hiddenChildren.add(cellChild);
+                                           //hide the already drawn object
+                                           cellChild.setCullHint(CullHint.Always);
+                                          }
+                                      else
+                                          //mark this object to avoid further drawing
+                                          markedChildren.add(target);
+                                     }                                     
+                                }
                            }
                        child.onDraw(r);
                        if(cellChildren!=null)

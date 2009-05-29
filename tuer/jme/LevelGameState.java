@@ -531,20 +531,22 @@ public final class LevelGameState extends BasicGameState {
             Node pistolNode=new Node("pistol");
             pistolNode.attachChild(weaponModel);
             pistolNode.setLocalTranslation(pistolLocation);
+            //FIXME: rather use a controller
             pistolNode.updateGeometricState(0.0f,true);
             List<Cell> containingCellsList;
             for(Spatial level:levelState.rootNode.getChildren())
                 {levelNode=(Level)level;
-                 containingCellsList=levelNode.getContainingNodesList(pistolNode);
+                 containingCellsList=levelNode.getContainingNodesList(pistolNode,null);
                  if(!containingCellsList.isEmpty())
                      {InternalCellElement sharedNode;
                       for(Cell containingCell:containingCellsList)
                           {//create a shared node
-                           sharedNode=new InternalCellElement(pistolNode);
+                           sharedNode=new InternalCellElement(pistolNode,true);
                            //attach it to a cell that contains it
                            containingCell.attachChild(sharedNode);
                            //set its cull hint at INHERIT by default
                            //as this node is visible when its parent is visible
+                           //FIXME: move it in InternalCellElement
                            sharedNode.setCullHint(CullHint.Inherit);
                           }
                       break;

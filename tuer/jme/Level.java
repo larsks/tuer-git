@@ -84,11 +84,12 @@ final class Level extends IdentifiedNode{
         return(frustumParametersList);
     }
     
-    final List<Cell> getContainingNodesList(Spatial spatial){
+    final List<Cell> getContainingNodesList(Spatial spatial,Cell previousLocation){
         List<Cell> containingNodesList=new ArrayList<Cell>();
+        int previousNetworkIndex=previousLocation!=null?previousLocation.getNetworkID():0;
         int networkCount=getChildren()!=null?getChildren().size():0;
         Network networkNode;
-        for(int networkIndex=0;networkIndex<networkCount;networkIndex++)
+        for(int networkIndex=previousNetworkIndex,j=0;j<networkCount&&containingNodesList.isEmpty();j++,networkIndex=(networkIndex+1)%networkCount)
             {networkNode=(Network)getChild(networkIndex);
              containingNodesList.addAll(networkNode.getContainingNodesList(spatial));
             }
