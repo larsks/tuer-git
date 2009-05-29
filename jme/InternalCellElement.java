@@ -29,20 +29,28 @@ final class InternalCellElement extends SharedNode{
      */
     private Node sharableNode;
     
-    InternalCellElement(Node node){
-        this(node.getName(),node);
+    private boolean shared;
+    
+    InternalCellElement(Node node,boolean shared){
+        this(node.getName(),node,shared);
     }
     
-    InternalCellElement(String name,Node node){
+    InternalCellElement(String name,Node node,boolean shared){
         super(name,node);
+        this.shared=shared;
         if(node instanceof SharedNode)
             throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
         else
             sharableNode=node;
     }
     
-    InternalCellElement(String name,Geometry geometry){
+    InternalCellElement(Geometry geometry,boolean shared){
+        this(geometry.getName(),geometry,shared);
+    }
+    
+    InternalCellElement(String name,Geometry geometry,boolean shared){
         super(name,getNodeWithSingleGeometry(geometry));
+        this.shared=shared;
         sharableNode=geometry.getParent();
     }
     
@@ -53,6 +61,10 @@ final class InternalCellElement extends SharedNode{
         node.updateGeometricState(0.0f,true);
         node.updateRenderState();
         return(node);
+    }
+    
+    final boolean isShared(){
+        return(shared);
     }
     
     final Node getSharableNode(){
