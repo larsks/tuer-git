@@ -58,11 +58,11 @@ public final class JOGLMVCGame{
         //the implementor mainly delegates lots of work to the states
         GenericImplementor impl = new GenericImplementor(width, height);
         jmeCanvas.setImplementor(impl);
+        //The frame is ready to be shown (MHenze: always show the frame before starting the animator, it might freeze otherwise!)
+        frame.setVisible(true);
         //the animator updates the display
         animator=new Animator((GLAutoDrawable) jmeCanvas);
         animator.start();
-        //The frame is ready to be shown
-        frame.setVisible(true);
         //kludge to force the creation of the OpenGL context      
         try{GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Object>(){
                 @Override
