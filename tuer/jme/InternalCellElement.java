@@ -42,6 +42,9 @@ final class InternalCellElement extends SharedNode{
             throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
         else
             sharableNode=node;
+        //set its cull hint at INHERIT by default
+        //as this node is visible when its parent is visible
+        setCullHint(CullHint.Inherit);
     }
     
     InternalCellElement(Geometry geometry,boolean shared){
@@ -52,6 +55,9 @@ final class InternalCellElement extends SharedNode{
         super(name,getNodeWithSingleGeometry(geometry));
         this.shared=shared;
         sharableNode=geometry.getParent();
+        //set its cull hint at INHERIT by default
+        //as this node is visible when its parent is visible
+        setCullHint(CullHint.Inherit);
     }
     
     

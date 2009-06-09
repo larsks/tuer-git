@@ -1,19 +1,26 @@
 package jme;
 
+import java.awt.Toolkit;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
+
 import main.ConfigurationDetector;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
 import com.jme.system.DisplaySystem;
+import com.jme.system.PreferencesGameSettings;
+import com.jme.system.jogl.JOGLSystemProvider;
 import com.jme.util.GameTaskQueue;
 import com.jme.util.GameTaskQueueManager;
 import com.jme.util.resource.ResourceLocatorTool;
 import com.jme.util.resource.SimpleResourceLocator;
+import com.jmex.game.StandardGame;
+import com.jmex.game.StandardGame.GameType;
 import com.jmex.game.state.GameState;
 import com.jmex.game.state.GameStateManager;
 import com.jmex.game.state.load.TransitionGameState;
@@ -27,13 +34,34 @@ public final class JMEGameServiceProvider {
 
     private static final Logger logger = Logger.getLogger(JMEGameServiceProvider.class.getName());
     
+    private final boolean useStandardGame = false;
+    
     private JOGLMVCGame game;
     
     private Camera cam;
     
+    private StandardGame standardGame;
+    
+    
     private JMEGameServiceProvider(){
-        this.game=new JOGLMVCGame();
-        logger.info("JOGLMVCGame created, creating states...");
+        if(useStandardGame)
+            {PreferencesGameSettings pgs=new PreferencesGameSettings(Preferences.userRoot());
+             pgs.setRenderer(JOGLSystemProvider.SYSTEM_IDENTIFIER);
+             Toolkit toolkit=Toolkit.getDefaultToolkit();
+             final int width=toolkit.getScreenSize().width;
+             final int height=toolkit.getScreenSize().height;
+             pgs.setMusic(false);
+             pgs.setSFX(false);       
+             pgs.setWidth(width);
+             pgs.setHeight(height);
+             pgs.setFullscreen(true);
+             this.standardGame=new StandardGame("TUER",GameType.GRAPHICAL,pgs);
+             this.standardGame.start();
+            }
+        else
+            {this.game=new JOGLMVCGame();
+             logger.info("JOGLMVCGame created, creating states...");
+            }
         try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getResource("/texture/")));} 
         catch(URISyntaxException urise) 
         {urise.printStackTrace();}
@@ -44,7 +72,7 @@ public final class JMEGameServiceProvider {
         transitionGameState.setActive(true);
         transitionGameState.setProgress(0,"Initializing Game ...");
         final DisplaySystem disp=DisplaySystem.getDisplaySystem(); 
-        //TODO: use our own parameters
+        //use our own parameters
         cam=disp.getRenderer().getCamera();
         cam.setFrustumPerspective( 45.0f,(float) disp.getWidth() / (float) disp.getHeight(), 0.2F, 2000.0F );
         Vector3f loc = new Vector3f(0.0f,0.0f,25.0f);
@@ -53,17 +81,17 @@ public final class JMEGameServiceProvider {
         Vector3f dir = new Vector3f(0.0f,0.0f,-1.0f);
         cam.setFrame(loc,left,up,dir);
         cam.update();
-        
+            
         //NB: each state is responsible of loading its data and updating the progress
         transitionGameState.increment("Initializing GameState: Intro ...");
         //GameStateManager.getInstance().attachChild(new IntroState("Intro",trans));
         transitionGameState.increment("Initializing GameState: Menu ..."); 
         transitionGameState.setProgress(1.0f, "Finished Loading"); 
         GameStateManager.getInstance().attachChild(new MenuState("Main menu",transitionGameState,this,false));       
-
+             
         //GameStateManager.getInstance().activateChildNamed("Intro");
         //At the end of the introduction (that might be skipped), display the menu
-        GameStateManager.getInstance().activateChildNamed("Main menu");
+        GameStateManager.getInstance().activateChildNamed("Main menu");                  
     }
     
     public final ConfigurationDetector getConfigurationDetector(){
@@ -127,13 +155,15 @@ public final class JMEGameServiceProvider {
     }
 
     final void exit(){
-        game.cleanup();
+        if(game!=null)
+            game.cleanup();
+        else
+            standardGame.shutdown();
     }
     
-    /*private static final Logger logger = Logger.getLogger(JMEGameServiceProvider.class
-            .getName());
+    /*
 
-    private StandardGame game;    
+    private StandardGame game;
 
 
     private JMEGameServiceProvider(){      
