@@ -429,7 +429,8 @@ public final class LevelGameState extends BasicGameState {
                  ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
                  model.updateRenderState();
                  //Use VBO if the required extension is available
-                 ((TriMesh)model).setVBOInfo(new VBOInfo(gameServiceProvider.getConfigurationDetector().isVBOsupported()));
+                 //FIXME
+                 ((TriMesh)model).setVBOInfo(new VBOInfo(true/*gameServiceProvider.getConfigurationDetector().isVBOsupported()*/));
                  model.lock();
                  //parse its model name and put it into the good list,
                  //one list per network
@@ -518,6 +519,7 @@ public final class LevelGameState extends BasicGameState {
                 }
             //load the weapon
             Spatial weaponModel=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/pistol.jbin"));
+            weaponModel.setName("pistol");
             //the weapon is too big...
             weaponModel.setLocalScale(1.0f/1000.0f);
             Quaternion q=new Quaternion();
@@ -525,7 +527,7 @@ public final class LevelGameState extends BasicGameState {
             weaponModel.setLocalRotation(q);
             weaponModel.setModelBound(new BoundingBox());
             weaponModel.updateModelBound();
-            weaponModel.updateRenderState();
+            weaponModel.updateRenderState();   
             final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
             //create a node with the model and at this location
             Node pistolNode=new Node("pistol");
@@ -544,10 +546,6 @@ public final class LevelGameState extends BasicGameState {
                            sharedNode=new InternalCellElement(pistolNode,true);
                            //attach it to a cell that contains it
                            containingCell.attachChild(sharedNode);
-                           //set its cull hint at INHERIT by default
-                           //as this node is visible when its parent is visible
-                           //FIXME: move it in InternalCellElement
-                           sharedNode.setCullHint(CullHint.Inherit);
                           }
                       break;
                      }
