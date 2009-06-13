@@ -60,7 +60,7 @@ public final class NodeIdentifier implements INodeIdentifier{
             result=false;
         else
             {NodeIdentifier ni=(NodeIdentifier)o;
-             result=levelID==ni.levelID&&networkID==ni.networkID&&cellID==ni.cellID&&secondaryCellID==ni.secondaryCellID;
+             result=levelID==ni.levelID&&networkID==ni.networkID&&((cellID==ni.cellID&&secondaryCellID==ni.secondaryCellID)||(cellID==ni.secondaryCellID&&secondaryCellID==ni.cellID));
             }
         return(result);
     }
