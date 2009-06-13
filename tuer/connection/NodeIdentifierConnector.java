@@ -58,7 +58,23 @@ final class NodeIdentifierConnector implements tools.INodeIdentifier{
         delegate.setSecondaryCellID(secondaryCellID);
     }
     
+    @Override
     public final String toString(){
         return(delegate.toString());
+    }
+    
+    @Override
+    public final int hashCode(){
+        return(delegate.hashCode());
+    }
+    
+    @Override
+    public final boolean equals(Object o){
+        boolean result;
+        if(o==null || !(o instanceof NodeIdentifierConnector))
+            result=false;
+        else
+            result=delegate.equals(((NodeIdentifierConnector)o).delegate);
+        return(result);
     }
 }

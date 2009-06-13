@@ -161,11 +161,13 @@ public final class NetworkSet implements Serializable{
      * @param useJOGLTextureCoordinatesVerticalOrder true if the vertical order of texture coordinates is JOGL's one
      * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
      * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
+     * @return list of node identifier (only if grouped is false)
      */
-    final void writeObjFiles(String filenamepattern,String textureFilename,
+    final ArrayList<INodeIdentifier> writeObjFiles(String filenamepattern,String textureFilename,
             boolean grouped,boolean redundant,boolean useTriangles,
             boolean useJOGLTextureCoordinatesVerticalOrder,
             boolean writePortals,String MTLFilename){
+        ArrayList<INodeIdentifier> nodeIDList=new ArrayList<INodeIdentifier>();
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
@@ -183,7 +185,7 @@ public final class NetworkSet implements Serializable{
              System.out.println("Writes Wavefront object "+filenamePrefix+".obj");             
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
-             {ioe.printStackTrace();return;}
+             {ioe.printStackTrace();return(nodeIDList);}
              pw=new PrintWriter(bos);
              //declare the MTL file
              if(useTexture)
@@ -337,18 +339,32 @@ public final class NetworkSet implements Serializable{
             }
         else
             {System.out.println("Starts writing OBJ Wavefront files...");
-             INodeIdentifier nodeID=BeanProvider.getInstance().getINodeIdentifier();
+             INodeIdentifier distinctNodeID;
+             int levelID=-1;
+             int firstDigitIndex=-1;
+             for(int i=filenamePrefix.length()-1;i>=0;i--)
+                 if(Character.isDigit(filenamePrefix.charAt(i)))
+                     firstDigitIndex=i;
+                 else
+                     break;
+             System.out.println("Extracts the level index from \""+filenamePrefix+"\"...");
+             if(firstDigitIndex!=-1)
+                 levelID=Integer.parseInt(filenamePrefix.substring(firstDigitIndex));
+             if(levelID==-1)
+                 System.out.println("level index unknown!");       
              int networkID=0,cellID;
              ArrayList<String> subObjFilenameList=new ArrayList<String>();
              String objname,objfilename;
              for(Network network:networksList)
                  {cellID=0;
                   for(Full3DCell cell:network.getCellsList())
-                      {//create a new file by using the pattern and the identifiers                      
-                       nodeID.setNetworkID(networkID);
-                       nodeID.setCellID(cellID);
-                       objname=filenamePrefix+nodeID.toString();
-                       //objname=filenamePrefix+"NID"+networkID+"CID"+cellID;
+                      {//create a new file by using the pattern and the identifiers            
+                       distinctNodeID=BeanProvider.getInstance().getINodeIdentifier();
+                       distinctNodeID.setLevelID(levelID);
+                       distinctNodeID.setNetworkID(networkID);
+                       distinctNodeID.setCellID(cellID);
+                       nodeIDList.add(distinctNodeID);
+                       objname=distinctNodeID.toString();
                        objfilename=objname+".obj";
                        try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
                        catch(IOException ioe)
@@ -467,7 +483,7 @@ public final class NetworkSet implements Serializable{
              System.out.println("Writes Wavefront object "+filenamePrefix);
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
-             {ioe.printStackTrace();return;}
+             {ioe.printStackTrace();return(nodeIDList);}
              pw=new PrintWriter(bos);
              for(String subObjFilename:subObjFilenameList)
                  pw.println("call "+subObjFilename);            
@@ -491,10 +507,9 @@ public final class NetworkSet implements Serializable{
                   HashMap<String,Full3DPortal> portalsMap=new HashMap<String, Full3DPortal>();
                   networkID=0;
                   String portalKey;
-                  String[] cellsKeys=new String[2];
                   Full3DCell[] linkedCells;
                   List<Full3DCell> cellsList;
-                  int knownCIDindex,unknownCIDindex,otherCellID;
+                  int unknownCIDindex,otherCellID;
                   //for each network
                   for(Network network:networksList)
                       {cellID=0;
@@ -505,14 +520,9 @@ public final class NetworkSet implements Serializable{
                             for(Full3DPortal portal:cell.getPortalsList())
                                 {linkedCells=portal.getLinkedCells();
                                  if(linkedCells[0]==cell)
-                                     {unknownCIDindex=1;
-                                      knownCIDindex=0;
-                                     }
+                                     unknownCIDindex=1;
                                  else
-                                     {unknownCIDindex=0;
-                                      knownCIDindex=1;                                   
-                                     }
-                                 cellsKeys[knownCIDindex]="CID"+cellID;
+                                     unknownCIDindex=0;
                                  //find the CID of the other cell
                                  otherCellID=-1;
                                  for(int cellIndex=0;cellIndex<cellsList.size();cellIndex++)
@@ -522,10 +532,16 @@ public final class NetworkSet implements Serializable{
                                          }
                                  if(otherCellID==-1)
                                      System.out.println("[WARNING] cells of different networks bound in the same portal!!! unknown CID!");
-                                 cellsKeys[unknownCIDindex]="CID"+otherCellID;
-                                 portalKey="NID"+networkID+cellsKeys[0]+cellsKeys[1];
-                                 if(!portalsMap.containsKey(portalKey))
-                                     portalsMap.put(portalKey,portal);
+                                 distinctNodeID=BeanProvider.getInstance().getINodeIdentifier();
+                                 distinctNodeID.setLevelID(levelID);
+                                 distinctNodeID.setNetworkID(networkID);
+                                 distinctNodeID.setCellID(cellID);
+                                 distinctNodeID.setSecondaryCellID(otherCellID);
+                                 portalKey=distinctNodeID.toString();
+                                 if(!nodeIDList.contains(distinctNodeID))
+                                     {portalsMap.put(portalKey,portal);
+                                      nodeIDList.add(distinctNodeID);
+                                     }
                                 }
                             cellID++;
                            }                      
@@ -535,7 +551,7 @@ public final class NetworkSet implements Serializable{
                   Full3DPortal portal;
                   int portalVerticesCount;
                   for(Map.Entry<String,Full3DPortal> portalEntry:portalsMap.entrySet())
-                      {objname=filenamePrefix+portalEntry.getKey();
+                      {objname=portalEntry.getKey();
                        objfilename=objname+".obj";
                        try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
                        catch(IOException ioe)
@@ -582,6 +598,7 @@ public final class NetworkSet implements Serializable{
                  }
              System.out.println("Ends writing OBJ Wavefront files.");
             }
+        return(nodeIDList);
     }
     
     private static final class VertexData{

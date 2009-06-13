@@ -359,7 +359,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename);
+        ArrayList<INodeIdentifier> nodeIDList=networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
@@ -371,7 +371,7 @@ public final class TilesGenerator implements Runnable{
         convertBinaryToOBJFile(flowerFilename,objectTextureFilename,flowerOBJFilename,true,true,false);
         convertBinaryToOBJFile(tableFilename,objectTextureFilename,tableOBJFilename,true,true,false);
         convertBinaryToOBJFile(bonsaiFilename,objectTextureFilename,bonsaiOBJFilename,true,true,false);
-        writeLevelModelBean();
+        writeLevelModelBean(nodeIDList);
     }
     
     @SuppressWarnings("unused")
@@ -2239,8 +2239,14 @@ public final class TilesGenerator implements Runnable{
     /**
      * Writes the data about the model of a level into a file 
      */
-    private final void writeLevelModelBean(){
-        ILevelModelBean ilmb=BeanProvider.getInstance().getILevelModelBean(new float[]{initialPosition.x,0.0f,initialPosition.y});
+    private final void writeLevelModelBean(ArrayList<INodeIdentifier> nodeIDList){
+        String[] literalNodeIDNames=new String[nodeIDList.size()];
+        int index=0;
+        for(INodeIdentifier nodeID:nodeIDList)
+            {literalNodeIDNames[index]=nodeID.toString();
+             index++;
+            }
+        ILevelModelBean ilmb=BeanProvider.getInstance().getILevelModelBean(new float[]{initialPosition.x,0.0f,initialPosition.y},literalNodeIDNames);
         System.out.println("Initial spawn position"+Arrays.toString(ilmb.getInitialSpawnPosition()));
         System.out.println("Starts writing initial spawn position into "+levelModelBeanFilename);
         Serializable serializableObject=ilmb.getSerializableBean();
