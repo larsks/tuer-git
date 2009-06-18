@@ -1,5 +1,6 @@
 package jme;
 
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +23,7 @@ final class Network extends IdentifiedNode{
     
     private static final long serialVersionUID=1L;
     
-    private LocalizerVisitor localizer;
+    private transient LocalizerVisitor localizer;
     
     private transient VisibleCellsLocalizerVisitor visibleCellsLocalizer;
 
@@ -35,6 +36,11 @@ final class Network extends IdentifiedNode{
         super(levelID,networkID);
         localizer=new LocalizerVisitor(this,new Vector3f());
         visibleCellsLocalizer=new VisibleCellsLocalizerVisitor(this,DisplaySystem.getDisplaySystem().getRenderer().getCamera());
+    }
+    
+    public Object readResolve() throws ObjectStreamException{
+        localizer=new LocalizerVisitor(this,new Vector3f());
+        return(this);
     }
     
     @Override

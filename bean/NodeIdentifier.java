@@ -21,7 +21,7 @@ public final class NodeIdentifier implements INodeIdentifier{
     
     private static final long serialVersionUID=1L;
     
-    private static final String levelIDPrefix="level";
+    private static final String levelIDPrefix="LID";
     
     private static final String networkIDPrefix="NID";
     
