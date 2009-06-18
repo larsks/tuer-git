@@ -29,7 +29,7 @@ import com.jme.scene.TriMesh;
  * @author Julien Gouesse
  *
  */
-final class Cell extends IdentifiedNode{
+public final class Cell extends IdentifiedNode{
 
     
     private static final long serialVersionUID=1L;
@@ -48,7 +48,7 @@ final class Cell extends IdentifiedNode{
      * @param cellID identifier of the cell
      * @param model set of walls
      */
-    Cell(int levelID,int networkID,int cellID,Spatial model){
+    public Cell(int levelID,int networkID,int cellID,Spatial model){
         super(levelID,networkID,cellID);
         portalsList=new ArrayList<Portal>();
         if(model!=null)

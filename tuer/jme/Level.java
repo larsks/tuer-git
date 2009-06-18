@@ -20,6 +20,13 @@ import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
 
+/**
+ * 
+ * @author Julien Gouesse
+ * TODO: 
+ *       - move some operations from LevelGameState to Level
+ *       (initialize, render, update)
+ */
 public final class Level extends IdentifiedNode{
 
     
@@ -45,6 +52,15 @@ public final class Level extends IdentifiedNode{
         if(child!=null&&!(child instanceof Network))
             throw new IllegalArgumentException("this child is not an instance of Network");
         return(super.attachChildAt(child,index));
+    }
+    
+    /**
+     * attaches a spatial to this node indirectly by attaching
+     * it to some of its grand-child depending on its location
+     * @param spatial
+     */
+    public final void attachDescendant(Spatial spatial){
+        
     }
     
     final Cell locate(Vector3f position,Cell previousLocation){
