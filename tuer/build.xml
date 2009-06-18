@@ -49,7 +49,7 @@
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<!-- delete only the generated files, not the artworks -->
     	<delete>
-    	    <fileset dir="${destdir}/obj" includes="**/level0*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/LID0*"/>
     	    <fileset dir="${destdir}/obj" includes="**/bonsai*"/>
     	    <fileset dir="${destdir}/obj" includes="**/chair*"/>
     	    <fileset dir="${destdir}/obj" includes="**/flower*"/>
@@ -203,7 +203,7 @@
 		        	<arg value="data/crosshair.data"/>
 		        	<arg value="data/sphericalBeast.data"/>
 		        	<arg value="data/network.data"/>
-	        	    <arg value="obj/level0"/>
+	        	    <arg value="obj/LID0"/>
 	        	    <arg value="texture/wallTexture.png"/>
 	        	    <arg value="texture/rocketLauncher.png"/>
 	        	    <arg value="obj/rocketLauncher"/>
@@ -216,8 +216,9 @@
 	        		<arg value="obj/flower"/>
 	        		<arg value="obj/table"/>
 	        		<arg value="obj/bonsai"/>
-	        	    <arg value="data/level0.data"/>
-	        	    <arg value="level0.mtl"/>
+	        	    <!-- the level model bean file must be composed of the prefix LID followed by its index -->
+	        	    <arg value="data/LID0.data"/>
+	        	    <arg value="LID0.mtl"/>
 		</java>
 	</target>	
 	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
@@ -234,8 +235,8 @@
 			<arg value="texture/pistol.jpg"/>
 			<arg value="jbin/pistol.jbin"/>
 			<!-- convert the levels -->
-			<arg value="obj/level0"/>
-			<arg value="obj/terrain.mtl"/>
+			<arg value="obj/LID0"/>
+			<arg value="obj/LID0.mtl"/>
 			<arg value="texture/wallTexture.png"/>
 			<arg value="jbin"/>
 			

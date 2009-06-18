@@ -56,8 +56,9 @@ public final class LevelGameState extends BasicGameState {
     
     private NodeIdentifier[] nodeIdentifiers;   
     
-    public LevelGameState(String name,Camera cam,JMEGameServiceProvider gameServiceProvider){
-        super(name);
+    public LevelGameState(int levelIndex,Camera cam,JMEGameServiceProvider gameServiceProvider){
+        //naming convention: the level's name is composed of the prefix "LID" followed by its index
+        super("LID"+levelIndex);
         input=new ExtendedFirstPersonHandler(cam,10,1,gameServiceProvider);
         ObjectInputStream ois=null;
         ILevelModelBean ilmb=null;
@@ -80,7 +81,7 @@ public final class LevelGameState extends BasicGameState {
     public static final GameState getInstance(int levelIndex,
             /*TransitionGameState transitionGameState,*/Camera cam,
             JMEGameServiceProvider gameServiceProvider){
-        LevelGameState levelState=new LevelGameState("level"+levelIndex,cam,gameServiceProvider);
+        LevelGameState levelState=new LevelGameState(levelIndex,cam,gameServiceProvider);
         //update the transition game state
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
@@ -232,11 +233,7 @@ public final class LevelGameState extends BasicGameState {
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
-        /*System.out.println("vertex count="+model.getVertexCount());
-        System.out.println("free memory = "+Runtime.getRuntime().freeMemory());
-        System.out.println("total memory = "+Runtime.getRuntime().totalMemory());
-        System.out.println("max memory = "+Runtime.getRuntime().maxMemory());*/
-        //return a true level game state
+        //return a level game state
         return(levelState);
     }
     

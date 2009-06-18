@@ -20,7 +20,7 @@ import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
 
-final class Level extends IdentifiedNode{
+public final class Level extends IdentifiedNode{
 
     
     private static final long serialVersionUID=1L;
@@ -29,7 +29,7 @@ final class Level extends IdentifiedNode{
         this(NodeIdentifier.unknownID);
     }
     
-    Level(int levelID){
+    public Level(int levelID){
         super(levelID);
     }
     
