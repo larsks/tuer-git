@@ -18,7 +18,7 @@ import com.jme.system.DisplaySystem;
 
 import bean.NodeIdentifier;
 
-final class Network extends IdentifiedNode{
+public final class Network extends IdentifiedNode{
 
     
     private static final long serialVersionUID=1L;
@@ -32,7 +32,7 @@ final class Network extends IdentifiedNode{
         this(NodeIdentifier.unknownID,NodeIdentifier.unknownID);
     }
 
-    Network(int levelID,int networkID){
+    public Network(int levelID,int networkID){
         super(levelID,networkID);
         localizer=new LocalizerVisitor(this,new Vector3f());
         visibleCellsLocalizer=new VisibleCellsLocalizerVisitor(this,DisplaySystem.getDisplaySystem().getRenderer().getCamera());

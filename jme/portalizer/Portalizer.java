@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import jme.Level;
+import jme.Network;
+import jme.Cell;
 import com.jme.math.Triangle;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
@@ -33,7 +35,13 @@ import com.jme.scene.TriMesh;
  * be better to use an octal tree to sort the triangles to 
  * find them hugely faster than by using a linear search.
  * @author Julien Gouesse
- *
+ * TODO:
+ *       - use the broadest surface including the edge delimitating 
+ *       2 triangles that don't form a convex polyedron in order to
+ *       make a portal
+ *       - find a good way to check the convexity (use both cos and sin?)
+ *       - instantiate the portals
+ *       - handle other data (textures, normals, ...)
  */
 public final class Portalizer{
 
@@ -64,47 +72,7 @@ public final class Portalizer{
     public final Level portalize(){
         //get the triangles
         initTris();
-        //step 1: put the triangles into different networks                       
-        //NAIVE SILLY IMPLEMENTATION BELOW
-        /*
-        TemporaryNetwork foundNetwork,foundNetworkForMerge=null;
-        ArrayList<TemporaryNetwork> incompleteNetworksList=new ArrayList<TemporaryNetwork>();
-        ArrayList<TemporaryNetwork> completeNetworksList=new ArrayList<TemporaryNetwork>();
-        //for each triangle
-        for(Triangle t1:tris)
-            {foundNetwork=null;
-             //check if an existing network can contain this triangle
-             for(TemporaryNetwork network:incompleteNetworksList)
-                 if(network.add(t1))
-                     {foundNetwork=network;
-                      break;
-                     }
-             //if not, create a new network containing it
-             if(foundNetwork==null)
-                 {foundNetwork=new TemporaryNetwork();
-                  foundNetwork.add(t1);
-                  incompleteNetworksList.add(foundNetwork);
-                 }
-             //if the network is not full, try to merge it with another one
-             if(!foundNetwork.isComplete())
-                 {for(TemporaryNetwork network:incompleteNetworksList)
-                      if(network!=foundNetwork && network.merge(foundNetwork))
-                          {foundNetworkForMerge=network;
-                           break;
-                          }
-                  //if the merge is successful, remove the useless network
-                  if(foundNetworkForMerge!=null)
-                      {incompleteNetworksList.remove(foundNetworkForMerge);
-                       foundNetworkForMerge=null;
-                      }
-                 }
-             //if the network is full, remove it from the list on incomplete networks
-             if(foundNetwork.isComplete())
-                 {incompleteNetworksList.remove(foundNetwork);
-                  completeNetworksList.add(foundNetwork);
-                 }
-            }
-        */
+        //step 1: put the triangles into different networks
         //build the adjacency map to avoid doing these computations several times
         ArrayList<Entry<ArrayList<Triangle>,ArrayList<Boolean>>> adjacencyList=new ArrayList<Entry<ArrayList<Triangle>,ArrayList<Boolean>>>();
         HashMap<Triangle,Integer> indexMap=new HashMap<Triangle,Integer>();
@@ -139,6 +107,7 @@ public final class Portalizer{
                           }
                      }
                 }
+        //build the networks
         boolean isTriAlreadyContained;
         ArrayList<ArrayList<Triangle>> networksList=new ArrayList<ArrayList<Triangle>>();
         ArrayList<ArrayList<Triangle>> triListList=new ArrayList<ArrayList<Triangle>>(); 
@@ -168,12 +137,15 @@ public final class Portalizer{
                       }
                  }            
             }
+        //TODO: fill the portals as the edges that link triangles that cannot compose a convex polyedron
+        //must be linked to some other edges to form complete portals
         //step 2: fetch the data about the triangles (texture coordinates, color, fog...)
         //step 3: put the triangles of each network into cells
         /* for(each network n)
          *     compute convex cells by comparing the normals of adjacent triangles
          *     by using the angles (acos(dot_product(v1,v2)/(norm(v1)*norm(v2))))
          * */
+        //build the cells
         ArrayList<ArrayList<ArrayList<Triangle>>> cellsList=new ArrayList<ArrayList<ArrayList<Triangle>>>();
         ArrayList<ArrayList<Triangle>> cellsForSingleNetworkList;
         ArrayList<Boolean> convexFlagsList;
@@ -198,16 +170,6 @@ public final class Portalizer{
                        triList=new ArrayList<Triangle>();
                        triList.add(tri);
                        triListList.add(triList);
-                       /*cell.add(tri);
-                       index=indexMap.get(tri).intValue();
-                       convexFlagsList=adjacencyList.get(index).getValue();
-                       triList=adjacencyList.get(index).getKey();
-                       convexTrisList=new ArrayList<Triangle>();
-                       //use only triangles that form a convex cell
-                       for(int m=0;m<triList.size();m++)
-                           if(convexFlagsList.get(m).booleanValue())
-                               convexTrisList.add(triList.get(m));
-                       triListList.add(convexTrisList);*/
                        while(!triListList.isEmpty())
                            {triList=triListList.remove(0);
                             for(Triangle tri2:triList)
@@ -222,15 +184,43 @@ public final class Portalizer{
                                      for(int m=0;m<triList2.size();m++)
                                          if(convexFlagsList.get(m).booleanValue())
                                              convexTrisList.add(triList2.get(m));
+                                     //TODO: else
+                                     //          portalTrisList.add(triList2.get(m));
                                      triListList.add(convexTrisList);
+                                     //TODO
+                                     //for(Triangle portalTri:portalTrisList)
+                                     //    if this portal is not in the list of portals of this network
+                                     //        create it
+                                     //        add it into the list of portals of this network
+                                     //    if this cell is not in this portal
+                                     //        add this cell to this portal
+                                     //portalTrisList.clear();
                                     }
                            }
                       }
                  }
             }
+        //TODO: check all portals; if any portal lacks a linked cell, attach a void cell to it
         //step 4: convert the temporary structure into the definitive format
         Level level=new Level(levelIndex);
+        int networkIndex=0,cellIndex;
+        Network network;
+        Cell cell;
+        TriMesh cellMesh=null;
         //convert temporary networks into real networks
+        for(ArrayList<ArrayList<Triangle>> cellsForOneNetworkList:cellsList)
+            {network=new Network(levelIndex,networkIndex);
+             level.attachChild(network);
+             cellIndex=0;
+             for(ArrayList<Triangle> trianglesForOneCellList:cellsForOneNetworkList)
+                 {//TODO: recompose the TriMesh instance
+                  cell=new Cell(levelIndex,networkIndex,cellIndex,cellMesh);
+                  network.attachChild(cell);
+                  //TODO: add the portals
+                  cellIndex++;
+                 }
+             networkIndex++;
+            }
         //convert temporary cells into real cells
         return(level);
     }
@@ -261,96 +251,4 @@ public final class Portalizer{
                 logger.warning("unsupported geometry, only TriMesh instances are supported!");
         return(trisList);
     }
-    /*
-    private static final class TemporaryNetwork{
-        
-        
-        private ArrayList<Triangle> trisList;
-        
-        private ArrayList<Map.Entry<Vector3f,Vector3f>> availableEdgesList;
-        
-        
-        private TemporaryNetwork(){
-            trisList=new ArrayList<Triangle>();
-            availableEdgesList=new ArrayList<Map.Entry<Vector3f,Vector3f>>();
-        }
-        
-        private final boolean add(Triangle triangle){
-            boolean success;
-            if(trisList.isEmpty())
-                {//store its 3 edges in the list
-                 availableEdgesList.add(new AbstractMap.SimpleEntry<Vector3f,Vector3f>(triangle.get(0),triangle.get(1)));
-                 availableEdgesList.add(new AbstractMap.SimpleEntry<Vector3f,Vector3f>(triangle.get(1),triangle.get(2)));
-                 availableEdgesList.add(new AbstractMap.SimpleEntry<Vector3f,Vector3f>(triangle.get(2),triangle.get(0)));
-                 success=true;
-                }
-            else
-                {ArrayList<Map.Entry<Vector3f,Vector3f>> commonEdgesList=new ArrayList<Map.Entry<Vector3f,Vector3f>>();
-                 boolean found;
-                 for(Map.Entry<Vector3f,Vector3f> edge:availableEdgesList)
-                     {//check if the both triangle have a common edge
-                      found=false;
-                      for(int i=0;!found && i<3;i++)
-                          if(edge.getKey().equals(triangle.get(i)))
-                              found=true;
-                      if(found)
-                          {found=false;
-                           for(int i=0;!found && i<3;i++)
-                               if(edge.getValue().equals(triangle.get(i)))
-                                   found=true;
-                           if(found)
-                               commonEdgesList.add(edge);
-                          }
-                     }
-                 if(!commonEdgesList.isEmpty())
-                     {//keep all edges of the triangle that are not in commonEdgesList            
-                      Map.Entry<Vector3f,Vector3f> triangleEdge;
-                      for(int i=0;i<3;i++)
-                          {found=false;
-                           triangleEdge=new AbstractMap.SimpleEntry<Vector3f,Vector3f>(triangle.get(i),triangle.get((i+1)%3));
-                           for(Map.Entry<Vector3f,Vector3f> edge:commonEdgesList)
-                               if((edge.getKey().equals(triangleEdge.getKey()) && edge.getValue().equals(triangleEdge.getValue()))||
-                                  (edge.getKey().equals(triangleEdge.getValue()) && edge.getValue().equals(triangleEdge.getKey())))
-                                   {found=true;
-                                    break;
-                                   }
-                           if(!found)
-                               availableEdgesList.add(triangleEdge);
-                          }
-                      //remove the common edges from the list
-                      availableEdgesList.removeAll(commonEdgesList);
-                      success=true;
-                     }
-                 else
-                     success=false;                
-                }
-            if(success)
-                trisList.add(triangle);
-            return(success);
-        }
-        
-        private final boolean isComplete(){
-            return(!trisList.isEmpty()&&availableEdgesList.isEmpty());
-        }
-        
-        private final boolean merge(TemporaryNetwork network){
-            boolean success=false;
-            ArrayList<Triangle> remainingTris=new ArrayList<Triangle>();
-            for(Triangle t:network.trisList)
-                if(add(t))
-                    {if(!success)
-                        success=true;
-                    }
-                else
-                    remainingTris.add(t);
-            //if a merge is possible, add the remaining triangles 
-            //into the resulting network
-            if(success)
-                for(Triangle t:remainingTris)
-                    if(!add(t))
-                        logger.warning("the addition of a triangle already linked to the network failed!");
-            network.trisList.clear();
-            return(success);
-        }
-    }*/
 }
