@@ -31,7 +31,7 @@ import com.jme.scene.SharedNode;
  * @author Julien Gouesse
  *
  */
-final class InternalCellElement extends SharedNode{
+final class InternalCellElement extends ClonedNode{
 
     
     private static final long serialVersionUID = 1L;
@@ -51,10 +51,10 @@ final class InternalCellElement extends SharedNode{
     InternalCellElement(String name,Node node,boolean shared){
         super(name,node);
         this.shared=shared;
-        if(node instanceof SharedNode)
+        /*if(node instanceof SharedNode)
             throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
-        else
-            sharableNode=node;
+        else*/
+        sharableNode=node;
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);
