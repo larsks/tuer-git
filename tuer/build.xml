@@ -101,7 +101,9 @@
 			<include name="**/*.txt" />
 			<include name="**/*.ogg" />			
 			<include name="**/*.xml" />
-			<include name="**/*.jbin"/>		
+			<include name="**/*.jbin"/>
+			<!-- FIXME: convert it into XML -->
+			<include name="**/LID0.data" />
 			<manifest>
 			    <attribute name="Main-Class" value="jme.JMEGameServiceProvider"/>
 			</manifest>
