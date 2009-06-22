@@ -15,7 +15,6 @@ package jme;
 
 import com.jme.scene.Geometry;
 import com.jme.scene.Node;
-import com.jme.scene.SharedNode;
 
 /**
  * Node added into a cell. It is used
@@ -51,10 +50,7 @@ final class InternalCellElement extends ClonedNode{
     InternalCellElement(String name,Node node,boolean shared){
         super(name,node);
         this.shared=shared;
-        /*if(node instanceof SharedNode)
-            throw new IllegalArgumentException("A shared node cannot be shared by an internal cell element");
-        else*/
-        sharableNode=node;
+        this.sharableNode=node;
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);

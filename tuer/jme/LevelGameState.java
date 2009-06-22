@@ -203,31 +203,24 @@ public final class LevelGameState extends BasicGameState {
             Quaternion q=new Quaternion();
             q.fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f);
             weaponModel.setLocalRotation(q);
+            final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
+            weaponModel.setLocalTranslation(pistolLocation);
             weaponModel.setModelBound(new BoundingBox());
             weaponModel.updateModelBound();
-            weaponModel.updateRenderState();   
+            weaponModel.updateRenderState();
+            weaponModel.updateGeometricState(0.0f,true);
+            levelNode.attachDescendant(weaponModel);
+            //FIXME: InstantiationException because of the JOGLTextureState
+            /*Node pistolNode=NodeFactory.getInstance().getNode("/jbin/pistol.jbin");
+            pistolNode.setName("pistol");
+            //the weapon is too big...
+            pistolNode.setLocalScale(1.0f/1000.0f);
+            Quaternion q=new Quaternion();
+            q.fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f);
+            pistolNode.setLocalRotation(q);
             final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
-            //create a node with the model and at this location
-            Node pistolNode=new Node("pistol");
-            pistolNode.attachChild(weaponModel);
             pistolNode.setLocalTranslation(pistolLocation);
-            //FIXME: rather use a controller
-            pistolNode.updateGeometricState(0.0f,true);
-            List<Cell> containingCellsList;
-            for(Spatial level:levelState.rootNode.getChildren())
-                {levelNode=(Level)level;
-                 containingCellsList=levelNode.getContainingNodesList(pistolNode,null);
-                 if(!containingCellsList.isEmpty())
-                     {InternalCellElement sharedNode;
-                      for(Cell containingCell:containingCellsList)
-                          {//create a shared node
-                           sharedNode=new InternalCellElement(pistolNode,true);
-                           //attach it to a cell that contains it
-                           containingCell.attachChild(sharedNode);
-                          }
-                      break;
-                     }
-                }      
+            levelNode.attachDescendant(pistolNode);*/
             levelState.rootNode.updateGeometricState(0.0f,true);
             levelState.rootNode.updateRenderState();
            } 
@@ -326,57 +319,4 @@ public final class LevelGameState extends BasicGameState {
         System.out.println("frame rate = "+framePerSecond);
         previousTime=currentTime;
     }
-
-    /*
-    private static final class LevelJBINModelsFileFilter implements FileFilter{
-        
-        
-        private static final String suffix=".jbin";
-        
-        private int index;       
-        
-        private boolean includesCells;
-        
-        private boolean includesPortals;
-        
-        private boolean includesNonCellsAndPortals;
-        
-        
-        private LevelJBINModelsFileFilter(int index,boolean includesCells,boolean includesPortals,boolean includesNonCellsAndPortals){
-            this.index=index;
-            this.includesCells=includesCells;
-            this.includesPortals=includesPortals;
-            this.includesNonCellsAndPortals=includesNonCellsAndPortals;
-        }
-
-
-        @Override
-        public boolean accept(File file){
-            String filename=file.getName();
-            boolean result;
-            if(filename.length()<=suffix.length())
-                result=false;
-            else
-                {NodeIdentifier nodeID=NodeIdentifier.getInstance(filename.substring(0,filename.length()-suffix.length()));
-                 result=file.isFile()&&filename.endsWith(suffix)&&nodeID.getLevelID()==index;
-                 if(result&&(!includesPortals||!includesCells||!includesNonCellsAndPortals))
-                     {if(nodeID.getCellID()!=NodeIdentifier.unknownID)
-                          {if(nodeID.getSecondaryCellID()==NodeIdentifier.unknownID)
-                               {if(!includesCells)
-                                    result=false;
-                               }
-                           else
-                               {if(!includesPortals)
-                                    result=false;
-                               }
-                          }
-                      else
-                          {if(!includesNonCellsAndPortals)
-                               result=false;
-                          }
-                     }   
-                }                    
-            return(result);
-        }       
-    }*/
 }

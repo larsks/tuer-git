@@ -250,6 +250,8 @@
 					              dir="${destdir}"
 					              failonerror="true"
 					              >
+			<jvmarg value="-Xmx256m"/>
+			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
 		</java>
 	</target>
 </project>
