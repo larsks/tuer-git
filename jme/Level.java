@@ -14,8 +14,12 @@
 package jme;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import com.jme.math.Vector3f;
+import com.jme.scene.Controller;
+import com.jme.scene.Geometry;
+import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 
 import bean.NodeIdentifier;
@@ -60,7 +64,7 @@ public final class Level extends IdentifiedNode{
      * @param spatial
      */
     public final void attachDescendant(Spatial spatial){
-        
+        addController(new DescendantController(this,spatial));
     }
     
     final Cell locate(Vector3f position,Cell previousLocation){
@@ -110,5 +114,99 @@ public final class Level extends IdentifiedNode{
              containingNodesList.addAll(networkNode.getContainingNodesList(spatial));
             }
         return(containingNodesList);
+    }
+    
+    private static final class DescendantController extends Controller{
+
+        
+        private static final long serialVersionUID=1L;
+        
+        private Level level;
+        
+        private Spatial monitored3DObject;
+        
+        private List<Cell> containingCellsList;
+        
+        private Cell previousLocation;
+        
+        private HashMap<Cell,InternalCellElement> cloneMap;
+        
+        private InternalCellElementPool clonePool;
+
+        
+        private DescendantController(Level level,Spatial spatial){
+            this.monitored3DObject=spatial;
+            this.containingCellsList=new ArrayList<Cell>();
+            this.level=level;
+            this.previousLocation=null;
+            this.cloneMap=new HashMap<Cell, InternalCellElement>();
+            this.clonePool=new InternalCellElementPool(spatial);
+        }
+        
+        @Override
+        public final void update(float time){
+            List<Cell> currentContainingCellsList=level.getContainingNodesList(monitored3DObject,previousLocation);
+            InternalCellElement cellElement;
+            if(!currentContainingCellsList.isEmpty())
+                previousLocation=currentContainingCellsList.get(0);
+            for(Cell cell:containingCellsList)
+                if(!currentContainingCellsList.contains(cell))
+                    {cellElement=cloneMap.remove(cell);
+                     cell.detachChild(cellElement);
+                     clonePool.releaseInstance(cellElement);
+                    }
+            for(Cell cell:currentContainingCellsList)
+                if(!containingCellsList.contains(cell))
+                    {cellElement=clonePool.getFreshInstance();
+                     cloneMap.put(cell,cellElement);
+                     cell.attachChild(cellElement);
+                    }
+            //       add a new InternalCellElement into the table for this cell           
+            //       attach it to the cell
+            //update the list of containing cells
+            containingCellsList.clear();
+            containingCellsList.addAll(currentContainingCellsList);
+        }      
+    }
+    
+    private static final class InternalCellElementPool{
+        
+        
+        private Spatial spatial;
+        
+        private List<InternalCellElement> usedCellElementList;
+        
+        private List<InternalCellElement> unusedCellElementList;
+        
+        
+        private InternalCellElementPool(Spatial spatial){
+            this.spatial=spatial;
+            this.usedCellElementList=new ArrayList<InternalCellElement>();
+            this.unusedCellElementList=new ArrayList<InternalCellElement>();
+        }
+        
+        
+        private void releaseInstance(InternalCellElement cellElement){
+            int index=usedCellElementList.indexOf(cellElement);
+            if(index!=-1)
+                unusedCellElementList.add(usedCellElementList.remove(index));
+            else
+                throw new IllegalArgumentException("cannot release an instance not obtained from this pool");
+        }
+        
+        private InternalCellElement getFreshInstance(){
+            InternalCellElement freshInstance;
+            if(unusedCellElementList.isEmpty())
+                {if(spatial instanceof Geometry)
+                     freshInstance=new InternalCellElement((Geometry)spatial,true);
+                    
+                 else
+                     freshInstance=new InternalCellElement((Node)spatial,true);
+                }
+            else
+                freshInstance=unusedCellElementList.remove(0);
+            usedCellElementList.add(freshInstance);
+            return(freshInstance);
+        }
     }
 }
