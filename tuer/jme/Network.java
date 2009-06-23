@@ -11,7 +11,6 @@ import com.jme.renderer.AbstractCamera;
 import com.jme.renderer.Camera;
 import com.jme.renderer.Renderer;
 import com.jme.renderer.jogl.JOGLCamera;
-import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
 import com.jme.system.DisplaySystem;
@@ -50,7 +49,7 @@ public final class Network extends IdentifiedNode{
              List<Spatial> cellChildren;
              List<Spatial> markedChildren=new ArrayList<Spatial>();
              List<Spatial> hiddenChildren=new ArrayList<Spatial>();
-             Node target;
+             Spatial target;
              InternalCellElement internalCellElement;
              for(int i=0,cSize=children.size();i<cSize;i++)
                  {child=(Cell)children.get(i);
@@ -61,7 +60,7 @@ public final class Network extends IdentifiedNode{
                                 {//several  cell elements may represent the same node
                                  internalCellElement=(InternalCellElement)cellChild;
                                  if(internalCellElement.isShared())
-                                     {target=internalCellElement.getSharableNode();
+                                     {target=internalCellElement.getSharableSpatial();
                                       if(markedChildren.contains(target))
                                           {hiddenChildren.add(cellChild);
                                            //hide the already drawn object
@@ -83,6 +82,44 @@ public final class Network extends IdentifiedNode{
                       }
                  }
             }       
+    }
+    
+    /**
+     * Avoid several calls of the same controller per update
+     * @param time
+     */
+    @Override
+    public final void updateWorldData(float time){
+        //do not call its controllers as it should not have any
+        //handle the controllers of its children        
+        if(children!=null)
+            {Cell child;
+             List<Spatial> cellChildren;
+             List<Spatial> markedChildren=new ArrayList<Spatial>();
+             Spatial target;
+             InternalCellElement internalCellElement;
+             for(int i=0,cSize=children.size();i<cSize;i++)
+                 {child=(Cell)children.get(i);           
+                  child.updateGeometricState(time,false);
+                  cellChildren=child.getChildren();
+                       if(cellChildren!=null)
+                           {for(Spatial cellChild:cellChildren)
+                                {//several  cell elements may represent the same node
+                                 internalCellElement=(InternalCellElement)cellChild;
+                                 if(internalCellElement.isShared())
+                                     {target=internalCellElement.getSharableSpatial();
+                                      if(!markedChildren.contains(target))
+                                          {//mark this object to avoid further updates
+                                           markedChildren.add(target);
+                                           cellChild.updateGeometricState(time,false);
+                                          }
+                                     }
+                                 else
+                                     cellChild.updateGeometricState(time,false);
+                                }
+                           }
+                 }
+            }
     }
     
     Cell locate(Vector3f position){

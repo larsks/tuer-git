@@ -21,7 +21,6 @@ import com.jme.scene.Controller;
 import com.jme.scene.Geometry;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
-
 import bean.NodeIdentifier;
 
 /**
@@ -61,10 +60,10 @@ public final class Level extends IdentifiedNode{
     /**
      * attaches a spatial to this node indirectly by attaching
      * it to some of its grand-child depending on its location
-     * @param spatial
+     * @param spatial object inserted into the scene graph
      */
     public final void attachDescendant(Spatial spatial){
-        addController(new DescendantController(this,spatial));
+        new DescendantController(this,spatial);
     }
     
     final Cell locate(Vector3f position,Cell previousLocation){
@@ -140,7 +139,9 @@ public final class Level extends IdentifiedNode{
             this.level=level;
             this.previousLocation=null;
             this.cloneMap=new HashMap<Cell, InternalCellElement>();
-            this.clonePool=new InternalCellElementPool(spatial);
+            this.clonePool=new InternalCellElementPool(spatial,this);
+            //force an initial update to ensure this spatial has a parent
+            this.update(0.0f);
         }
         
         @Override
@@ -149,6 +150,8 @@ public final class Level extends IdentifiedNode{
             InternalCellElement cellElement;
             if(!currentContainingCellsList.isEmpty())
                 previousLocation=currentContainingCellsList.get(0);
+            else
+                throw new UnsupportedOperationException("an object cannot be updated anymore when it goes outside the scene graph");
             for(Cell cell:containingCellsList)
                 if(!currentContainingCellsList.contains(cell))
                     {cellElement=cloneMap.remove(cell);
@@ -161,11 +164,10 @@ public final class Level extends IdentifiedNode{
                      cloneMap.put(cell,cellElement);
                      cell.attachChild(cellElement);
                     }
-            //       add a new InternalCellElement into the table for this cell           
-            //       attach it to the cell
             //update the list of containing cells
             containingCellsList.clear();
             containingCellsList.addAll(currentContainingCellsList);
+            //System.out.println(monitored3DObject.getName()+": "+monitored3DObject.getLocalTranslation());
         }      
     }
     
@@ -178,11 +180,14 @@ public final class Level extends IdentifiedNode{
         
         private List<InternalCellElement> unusedCellElementList;
         
+        private DescendantController controller;
         
-        private InternalCellElementPool(Spatial spatial){
+        
+        private InternalCellElementPool(Spatial spatial,DescendantController controller){
             this.spatial=spatial;
             this.usedCellElementList=new ArrayList<InternalCellElement>();
             this.unusedCellElementList=new ArrayList<InternalCellElement>();
+            this.controller=controller;
         }
         
         
@@ -202,6 +207,7 @@ public final class Level extends IdentifiedNode{
                     
                  else
                      freshInstance=new InternalCellElement((Node)spatial,true);
+                 freshInstance.addController(controller);
                 }
             else
                 freshInstance=unusedCellElementList.remove(0);
