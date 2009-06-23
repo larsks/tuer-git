@@ -203,8 +203,21 @@ public final class LevelGameState extends BasicGameState {
             Quaternion q=new Quaternion();
             q.fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f);
             weaponModel.setLocalRotation(q);
-            final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
-            weaponModel.setLocalTranslation(pistolLocation);
+            weaponModel.setLocalTranslation(new Vector3f(115.0f,0.0f,220.0f));
+            weaponModel.setModelBound(new BoundingBox());
+            weaponModel.updateModelBound();
+            weaponModel.updateRenderState();
+            weaponModel.updateGeometricState(0.0f,true);
+            levelNode.attachDescendant(weaponModel);
+            
+            weaponModel=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/pistol2.jbin"));
+            weaponModel.setName("pistol2");
+            //the weapon is too big...
+            weaponModel.setLocalScale(0.02f);
+            Quaternion q2=new Quaternion();
+            q2.fromAngles(0.0f,-FastMath.PI/2.0f,0.0f);
+            weaponModel.setLocalRotation(q2);
+            weaponModel.setLocalTranslation(new Vector3f(115.25f,0.0f,220.0f));
             weaponModel.setModelBound(new BoundingBox());
             weaponModel.updateModelBound();
             weaponModel.updateRenderState();

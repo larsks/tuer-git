@@ -14,6 +14,8 @@
 package jme;
 
 import bean.NodeIdentifier;
+
+import com.jme.scene.Controller;
 import com.jme.scene.Node;
 
 /**
@@ -101,5 +103,10 @@ abstract class IdentifiedNode extends Node{
     
     public final String toString(){
         return(name);
+    }
+    
+    @Override
+    public final void addController(Controller controller){
+        throw new UnsupportedOperationException("an identified node cannot use a controller");
     }
 }

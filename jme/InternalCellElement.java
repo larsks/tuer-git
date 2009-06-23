@@ -15,6 +15,7 @@ package jme;
 
 import com.jme.scene.Geometry;
 import com.jme.scene.Node;
+import com.jme.scene.Spatial;
 
 /**
  * Node added into a cell. It is used
@@ -36,10 +37,11 @@ final class InternalCellElement extends ClonedNode{
     private static final long serialVersionUID = 1L;
     
     /**
-     * unique node that be used to build shared
-     * nodes for use in several places in the scenegraph
+     * unique spatial used to detect several
+     * cell elements representing the same object
+     * in the scene when updating and rendering
      */
-    private Node sharableNode;
+    private Spatial sharableSpatial;
     
     private boolean shared;
     
@@ -50,7 +52,7 @@ final class InternalCellElement extends ClonedNode{
     InternalCellElement(String name,Node node,boolean shared){
         super(name,node);
         this.shared=shared;
-        this.sharableNode=node;
+        this.sharableSpatial=node;
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);
@@ -63,7 +65,7 @@ final class InternalCellElement extends ClonedNode{
     InternalCellElement(String name,Geometry geometry,boolean shared){
         super(name,getNodeWithSingleGeometry(geometry));
         this.shared=shared;
-        sharableNode=geometry.getParent();
+        this.sharableSpatial=geometry;
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);
@@ -82,7 +84,14 @@ final class InternalCellElement extends ClonedNode{
         return(shared);
     }
     
-    final Node getSharableNode(){
-        return(sharableNode);
+    final Spatial getSharableSpatial(){
+        return(sharableSpatial);
+    }
+    
+    @Override
+    public final void updateWorldData(float time){
+        super.updateWorldData(time);
+        //calls the controllers that might have been added by the user
+        sharableSpatial.updateGeometricState(time,false);
     }
 }

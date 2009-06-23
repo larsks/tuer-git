@@ -232,10 +232,16 @@
 			              >
 			<jvmarg value="-Xmx1536m"/>
 			<!-- convert the weapons -->
+			<!-- pistol drawn by an anonymous (3DExtras) -->
 			<arg value="obj/pistol.obj"/>
 			<arg value="obj/pistol.mtl"/>
 			<arg value="texture/pistol.jpg"/>
 			<arg value="jbin/pistol.jbin"/>
+			<!-- pistol drawn by Maxime Comte -->
+			<arg value="obj/pistol2.obj"/>
+			<arg value="obj/pistol2.mtl"/>
+			<arg value="texture/pistol2.png"/>
+			<arg value="jbin/pistol2.jbin"/>
 			<!-- convert the levels -->
 			<arg value="obj/LID0"/>
 			<arg value="obj/LID0.mtl"/>

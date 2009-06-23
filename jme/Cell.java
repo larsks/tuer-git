@@ -75,4 +75,13 @@ public final class Cell extends IdentifiedNode{
             result=false;
         return(result);
     }
+    
+    /**
+     * A cell has no controller and does not update 
+     * its children (its parent updates its children), 
+     * this method does nothing 
+     * @param time
+     */
+    @Override
+    public final void updateWorldData(float time){}
 }
