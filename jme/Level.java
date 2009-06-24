@@ -167,7 +167,6 @@ public final class Level extends IdentifiedNode{
             //update the list of containing cells
             containingCellsList.clear();
             containingCellsList.addAll(currentContainingCellsList);
-            //System.out.println(monitored3DObject.getName()+": "+monitored3DObject.getLocalTranslation());
         }      
     }
     
