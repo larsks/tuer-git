@@ -90,8 +90,9 @@ final class InternalCellElement extends ClonedNode{
     
     @Override
     public final void updateWorldData(float time){
-        super.updateWorldData(time);
         //calls the controllers that might have been added by the user
         sharableSpatial.updateGeometricState(time,false);
+        //calls our controller that binds the monitored object to the cells
+        super.updateWorldData(time);
     }
 }
