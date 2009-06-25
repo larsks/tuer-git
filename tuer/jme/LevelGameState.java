@@ -17,10 +17,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import bean.ILevelModelBean;
 import bean.NodeIdentifier;
 import com.jme.bounding.BoundingBox;
@@ -34,11 +31,7 @@ import com.jme.renderer.ColorRGBA;
 import com.jme.scene.Line;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
-import com.jme.scene.TriMesh;
-import com.jme.scene.VBOInfo;
 import com.jme.scene.Spatial.CullHint;
-import com.jme.scene.state.CullState;
-import com.jme.scene.state.RenderState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.export.binary.BinaryImporter;
 import com.jme.util.geom.BufferUtils;
@@ -85,116 +78,7 @@ public final class LevelGameState extends BasicGameState {
         //update the transition game state
         //transitionGameState.setProgress(0.5f,"Loading WaveFront OBJ "+index+" ...");
         //load the data
-        Spatial model;       
-        try{//create the node of the level and attach it at the root node
-            Level levelNode=new Level(levelIndex);
-            //hide it by default
-            levelNode.setCullHint(CullHint.Always);
-            levelState.rootNode.attachChild(levelNode);
-            HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
-            List<Spatial> cellsList;
-            //load the models
-            String cellModelFilename;
-            for(NodeIdentifier nodeID:levelState.nodeIdentifiers)
-                //check if the node is a cell
-                if(nodeID.getSecondaryCellID()==NodeIdentifier.unknownID)
-                {cellModelFilename=nodeID.toString()+".jbin";
-                 model=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/"+cellModelFilename));
-                 model.setModelBound(new BoundingBox());
-                 model.updateModelBound();
-                 //Activate back face culling
-                 model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
-                 ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
-                 model.updateRenderState();
-                 //Use VBO if the required extension is available
-                 ((TriMesh)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
-                 model.lock();
-                 if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
-                     {cellsList=new ArrayList<Spatial>();
-                      cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
-                     }
-                 cellsList.add(model);         
-                }           
-            //load the portals from the files
-            HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
-            List<Spatial> portalsList;
-            String portalModelFilename;
-            for(NodeIdentifier nodeID:levelState.nodeIdentifiers)
-                //check if it is a portal
-                if(nodeID.getSecondaryCellID()!=NodeIdentifier.unknownID)
-                {portalModelFilename=nodeID.toString()+".jbin";
-                 model=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/"+portalModelFilename));
-                 model.setModelBound(new BoundingBox());
-                 model.updateModelBound();
-                 if((portalsList=portalsListsTable.get(nodeID.getNetworkID()))==null)
-                     {portalsList=new ArrayList<Spatial>();
-                      portalsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),portalsList);
-                     }
-                 portalsList.add(model);
-                }
-            NodeIdentifier nodeID;
-            Network networkNode;
-            int networkIndex;
-            Cell cellNode;
-            //create the nodes that represent the cells and the networks
-            //for each network (graph)
-            for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
-                {networkIndex=cellEntry.getKey().intValue();
-                 //create a node per network
-                 networkNode=new Network(levelIndex,networkIndex);
-                 //hide it by default
-                 networkNode.setCullHint(CullHint.Always);
-                 //for each cell (node)
-                 for(Spatial cellModel:cellEntry.getValue())
-                     {nodeID=NodeIdentifier.getInstance(cellModel.getName());
-                      //create a node instance of the class Cell (JME)                
-                      cellNode=new Cell(levelIndex,networkIndex,nodeID.getCellID(),cellModel);
-                      //hide it by default
-                      cellNode.setCullHint(CullHint.Always);
-                      //add this node into its list of children
-                      networkNode.attachChild(cellNode);
-                     }
-                 //add each node that represents the "root" of a graph into
-                 //the list of children of the level node
-                 levelNode.attachChild(networkNode);
-                }
-            //create the nodes that represent the portals
-            Portal portalNode;
-            Cell c1,c2;
-            for(Map.Entry<Integer,List<Spatial>> portalEntry:portalsListsTable.entrySet())
-                {networkIndex=portalEntry.getKey().intValue();
-                 //look for the network
-                 networkNode=null;
-                 for(Spatial spatial:levelNode.getChildren())
-                     if(((Network)spatial).isIdentifiedBy(levelIndex,networkIndex))
-                         {networkNode=(Network)spatial;
-                          break;
-                         }
-                 for(Spatial portalModel:portalEntry.getValue())
-                     {//get the CIDs of the linked cells
-                      nodeID=NodeIdentifier.getInstance(portalModel.getName());
-                      //look for those cells
-                      c1=null;
-                      for(Spatial cell:networkNode.getChildren())
-                          if(((Cell)cell).isIdentifiedBy(levelIndex,networkIndex,nodeID.getCellID()))
-                              {c1=(Cell)cell;
-                               break;
-                              }
-                      c2=null;
-                      for(Spatial cell:networkNode.getChildren())
-                          if(((Cell)cell).isIdentifiedBy(levelIndex,networkIndex,nodeID.getSecondaryCellID()))
-                              {c2=(Cell)cell;
-                               break;
-                              }
-                      //create a node instance of the class Portal (JME) 
-                      portalNode=new Portal(levelIndex,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2,portalModel);
-                      //hide by default
-                      portalNode.setCullHint(CullHint.Always);
-                      //add this portal into them
-                      c1.addPortal(portalNode);
-                      c2.addPortal(portalNode);
-                     }                
-                }
+        try{Level levelNode=new Level(levelIndex,levelState.nodeIdentifiers);
             //load the weapon
             Spatial weaponModel=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/pistol.jbin"));
             weaponModel.setName("pistol");
@@ -208,8 +92,7 @@ public final class LevelGameState extends BasicGameState {
             weaponModel.updateModelBound();
             weaponModel.updateRenderState();
             weaponModel.updateGeometricState(0.0f,true);
-            levelNode.attachDescendant(weaponModel);
-            
+            levelNode.attachDescendant(weaponModel);           
             weaponModel=(Spatial)BinaryImporter.getInstance().load(LevelGameState.class.getResource("/jbin/pistol2.jbin"));
             weaponModel.setName("pistol2");
             //the weapon is too big...
@@ -223,7 +106,7 @@ public final class LevelGameState extends BasicGameState {
             weaponModel.updateRenderState();
             weaponModel.updateGeometricState(0.0f,true);
             levelNode.attachDescendant(weaponModel);
-            //FIXME: InstantiationException because of the JOGLTextureState
+            //TODO: use it
             /*Node pistolNode=NodeFactory.getInstance().getNode("/jbin/pistol.jbin");
             pistolNode.setName("pistol");
             //the weapon is too big...
@@ -234,8 +117,9 @@ public final class LevelGameState extends BasicGameState {
             final Vector3f pistolLocation=new Vector3f(115.0f,0.0f,220.0f);
             pistolNode.setLocalTranslation(pistolLocation);
             levelNode.attachDescendant(pistolNode);*/
-            levelState.rootNode.updateGeometricState(0.0f,true);
+            levelState.rootNode.attachChild(levelNode);
             levelState.rootNode.updateRenderState();
+            levelState.rootNode.updateGeometricState(0.0f,true);            
            } 
         catch(IOException ioe)
         {ioe.printStackTrace();} 
@@ -246,7 +130,10 @@ public final class LevelGameState extends BasicGameState {
     @Override
     public final void update(final float tpf){
         super.update(tpf);
+        //TODO: save the previous location
         input.update(tpf);
+        //TODO: save the next location
+        //TODO: test collisions
     }
     
     @Override
