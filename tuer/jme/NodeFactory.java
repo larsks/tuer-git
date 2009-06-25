@@ -15,7 +15,11 @@ package jme;
 
 import java.io.IOException;
 import java.util.HashMap;
+import com.jme.bounding.BoundingBox;
+import com.jme.math.Quaternion;
+import com.jme.math.Vector3f;
 import com.jme.scene.Node;
+import com.jme.scene.Spatial;
 import com.jme.util.CloneImportExport;
 import com.jme.util.export.binary.BinaryImporter;
 
@@ -36,24 +40,36 @@ final class NodeFactory{
         return(instance);
     }   
     
-    final Node getNode(String path){
+    final Node getNode(String path,Quaternion rotation,Vector3f scale,Vector3f translation){
         CloneImportExport cloner=clonerTable.get(path);
         if(cloner==null)
             {cloner=new CloneImportExport();
              Node node=null;
-             try{node=(Node)BinaryImporter.getInstance().load(NodeFactory.class.getResource(path));} 
+             Spatial spatial=null;
+             try{spatial=(Spatial)BinaryImporter.getInstance().load(NodeFactory.class.getResource(path));} 
              catch(IOException ioe)
              {ioe.printStackTrace();}
+             if(spatial!=null)
+                 {if(spatial instanceof Node)
+                      node=(Node)spatial;
+                  else
+                      {node=new Node(spatial.getName());
+                       node.attachChild(spatial);
+                      }
+                 }
              if(node!=null)
                  {cloner.saveClone(node);
                   clonerTable.put(path,cloner);
                  }
             }
         Node clone=(Node)cloner.loadClone();
-        /*clone.setModelBound(new BoundingBox());
+        clone.setLocalRotation(rotation);
+        clone.setLocalScale(scale);
+        clone.setLocalTranslation(translation);
+        clone.setModelBound(new BoundingBox());
         clone.updateModelBound();
         clone.updateRenderState();
-        clone.updateGeometricState(0.0f,true);*/     
+        clone.updateGeometricState(0.0f,true);   
         return(clone);
     }
 }

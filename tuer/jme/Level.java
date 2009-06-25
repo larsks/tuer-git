@@ -14,14 +14,20 @@
 package jme;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.jme.bounding.BoundingBox;
+import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
+import com.jme.renderer.AbstractCamera;
+import com.jme.renderer.ColorRGBA;
+import com.jme.renderer.Renderer;
 import com.jme.scene.Controller;
 import com.jme.scene.Geometry;
+import com.jme.scene.Line;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
 import com.jme.scene.TriMesh;
@@ -30,20 +36,21 @@ import com.jme.scene.state.CullState;
 import com.jme.scene.state.RenderState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.export.binary.BinaryImporter;
+import com.jme.util.geom.BufferUtils;
 
 import bean.NodeIdentifier;
 
 /**
  * 
  * @author Julien Gouesse
- * TODO: 
- *       - move some operations from LevelGameState to Level
- *       (render, hasCollisions)
  */
 public final class Level extends IdentifiedNode{
 
     
     private static final long serialVersionUID=1L;
+    
+    private transient Cell previousPlayerCellNode;
+    
     
     Level(){
         this(NodeIdentifier.unknownID);
@@ -56,8 +63,7 @@ public final class Level extends IdentifiedNode{
     @Deprecated
     public Level(int levelID,NodeIdentifier[] nodeIdentifiers)throws IOException{
         //hide it by default
-        this.setCullHint(CullHint.Always);
-        //levelState.rootNode.attachChild(levelNode);
+        this.setCullHint(CullHint.Never);
         HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
         List<Spatial> cellsList;
         //load the models
@@ -235,6 +241,86 @@ public final class Level extends IdentifiedNode{
              containingNodesList.addAll(networkNode.getContainingNodesList(spatial));
             }
         return(containingNodesList);
+    }
+    
+    @Override
+    public final void draw(Renderer r){
+        AbstractCamera cam=(AbstractCamera)DisplaySystem.getDisplaySystem().getRenderer().getCamera();
+        Vector3f playerLocation=cam.getLocation();
+        Cell currentPlayerCellNode;
+        List<IdentifiedNode> visibleNodesList=null;
+        List<Network.FrustumParameters> frustumParametersList=null;
+        if((currentPlayerCellNode=locate(playerLocation,previousPlayerCellNode))!=null)
+            {previousPlayerCellNode=currentPlayerCellNode;
+             visibleNodesList=getVisibleNodesList(currentPlayerCellNode);
+             //get the frustum parameters for debugging
+             frustumParametersList=getFrustumParametersList(currentPlayerCellNode);
+            }            
+        if(visibleNodesList!=null)
+            {//explicitly show the visible nodes
+             for(Node visibleNode:visibleNodesList)
+                 visibleNode.setCullHint(CullHint.Never);
+             super.draw(r);
+             showPortalCullingDebugInfo(frustumParametersList,cam);
+             //reset the cull hint of all visible nodes
+             for(Node visibleNode:visibleNodesList)
+                 visibleNode.setCullHint(CullHint.Always);
+             //do not hide the level itself
+             this.setCullHint(CullHint.Never);
+             visibleNodesList.clear();   
+            }
+        else
+            {System.out.println("no visible node");
+            }
+    }
+    
+    private final void showPortalCullingDebugInfo(List<Network.FrustumParameters> frustumParametersList,AbstractCamera cam){
+        if(frustumParametersList!=null)
+            {Vector3f[] vertices=new Vector3f[8];
+             Vector3f[] normals=new Vector3f[8];
+             ColorRGBA[][] colors=new ColorRGBA[][]
+                                          {new ColorRGBA[]{ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black,ColorRGBA.black},
+                                           new ColorRGBA[]{ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red,ColorRGBA.red},
+                                           new ColorRGBA[]{ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue,ColorRGBA.blue},
+                                           new ColorRGBA[]{ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green,ColorRGBA.green}
+                                          };
+             
+             Vector2f screenCoord=new Vector2f();
+             Line line;
+             line=new Line("");
+             float frustumWidth=cam.getFrustumRight()-cam.getFrustumLeft();
+             float frustumHeight=cam.getFrustumTop()-cam.getFrustumBottom();
+             int i=0;
+             for(Network.FrustumParameters frustumParam:frustumParametersList)
+                 {//use getWorldCoordinates                      
+                  screenCoord.x=((frustumParam.getLeft()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                  screenCoord.y=((frustumParam.getBottom()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                  vertices[0]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[0]);
+                  screenCoord.x=((frustumParam.getLeft()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                  screenCoord.y=((frustumParam.getTop()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                  vertices[1]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[1]);
+                  screenCoord.x=((frustumParam.getRight()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                  screenCoord.y=((frustumParam.getTop()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                  vertices[2]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[2]);
+                  screenCoord.x=((frustumParam.getRight()-cam.getFrustumLeft())/frustumWidth)*cam.getWidth();
+                  screenCoord.y=((frustumParam.getBottom()-cam.getFrustumBottom())/frustumHeight)*cam.getHeight();
+                  vertices[3]=cam.getWorldCoordinates(screenCoord,0.0f,vertices[3]);
+                  vertices[4]=vertices[0];
+                  vertices[5]=vertices[3];
+                  vertices[6]=vertices[1];
+                  vertices[7]=vertices[2];
+                  //draw them
+                  FloatBuffer vertexBuffer=BufferUtils.createFloatBuffer(vertices);
+                  line.setVertexCount(vertexBuffer.limit()/3);
+                  line.setVertexBuffer(vertexBuffer);
+                  line.setNormalBuffer(BufferUtils.createFloatBuffer(normals));
+                  line.setColorBuffer(BufferUtils.createFloatBuffer(colors[i%colors.length]));
+                  line.generateIndices();
+                  line.setLineWidth(5);
+                  DisplaySystem.getDisplaySystem().getRenderer().draw(line);
+                  i++;
+                 }
+            }
     }
     
     private static final class DescendantController extends Controller{
