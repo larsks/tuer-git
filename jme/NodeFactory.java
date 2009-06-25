@@ -15,8 +15,6 @@ package jme;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import com.jme.bounding.BoundingBox;
 import com.jme.scene.Node;
 import com.jme.util.CloneImportExport;
 import com.jme.util.export.binary.BinaryImporter;
@@ -52,10 +50,10 @@ final class NodeFactory{
                  }
             }
         Node clone=(Node)cloner.loadClone();
-        clone.setModelBound(new BoundingBox());
+        /*clone.setModelBound(new BoundingBox());
         clone.updateModelBound();
         clone.updateRenderState();
-        clone.updateGeometricState(0.0f,true);       
+        clone.updateGeometricState(0.0f,true);*/     
         return(clone);
     }
 }

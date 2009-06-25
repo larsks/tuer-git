@@ -13,14 +13,24 @@
 */
 package jme;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.scene.Controller;
 import com.jme.scene.Geometry;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
+import com.jme.scene.TriMesh;
+import com.jme.scene.VBOInfo;
+import com.jme.scene.state.CullState;
+import com.jme.scene.state.RenderState;
+import com.jme.system.DisplaySystem;
+import com.jme.util.export.binary.BinaryImporter;
+
 import bean.NodeIdentifier;
 
 /**
@@ -28,7 +38,7 @@ import bean.NodeIdentifier;
  * @author Julien Gouesse
  * TODO: 
  *       - move some operations from LevelGameState to Level
- *       (initialize, render, update)
+ *       (render, hasCollisions)
  */
 public final class Level extends IdentifiedNode{
 
@@ -41,6 +51,118 @@ public final class Level extends IdentifiedNode{
     
     public Level(int levelID){
         super(levelID);
+    }
+    
+    @Deprecated
+    public Level(int levelID,NodeIdentifier[] nodeIdentifiers)throws IOException{
+        //hide it by default
+        this.setCullHint(CullHint.Always);
+        //levelState.rootNode.attachChild(levelNode);
+        HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
+        List<Spatial> cellsList;
+        //load the models
+        String cellModelFilename;
+        Spatial model;
+        for(NodeIdentifier nodeID:nodeIdentifiers)
+            //check if the node is a cell
+            if(nodeID.getSecondaryCellID()==NodeIdentifier.unknownID)
+            {cellModelFilename=nodeID.toString()+".jbin";
+             model=(Spatial)BinaryImporter.getInstance().load(Level.class.getResource("/jbin/"+cellModelFilename));
+             model.setModelBound(new BoundingBox());
+             model.updateModelBound();
+             //Activate back face culling
+             model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
+             ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
+             model.updateRenderState();
+             //Use VBO if the required extension is available
+             ((TriMesh)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
+             model.lock();
+             if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
+                 {cellsList=new ArrayList<Spatial>();
+                  cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
+                 }
+             cellsList.add(model);         
+            }           
+        //load the portals from the files
+        HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
+        List<Spatial> portalsList;
+        String portalModelFilename;
+        for(NodeIdentifier nodeID:nodeIdentifiers)
+            //check if it is a portal
+            if(nodeID.getSecondaryCellID()!=NodeIdentifier.unknownID)
+            {portalModelFilename=nodeID.toString()+".jbin";
+             model=(Spatial)BinaryImporter.getInstance().load(Level.class.getResource("/jbin/"+portalModelFilename));
+             model.setModelBound(new BoundingBox());
+             model.updateModelBound();
+             if((portalsList=portalsListsTable.get(nodeID.getNetworkID()))==null)
+                 {portalsList=new ArrayList<Spatial>();
+                  portalsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),portalsList);
+                 }
+             portalsList.add(model);
+            }
+        NodeIdentifier nodeID;
+        Network networkNode;
+        int networkIndex;
+        Cell cellNode;
+        //create the nodes that represent the cells and the networks
+        //for each network (graph)
+        for(Map.Entry<Integer,List<Spatial>> cellEntry:cellsListsTable.entrySet())
+            {networkIndex=cellEntry.getKey().intValue();
+             //create a node per network
+             networkNode=new Network(levelID,networkIndex);
+             //hide it by default
+             networkNode.setCullHint(CullHint.Always);
+             //for each cell (node)
+             for(Spatial cellModel:cellEntry.getValue())
+                 {nodeID=NodeIdentifier.getInstance(cellModel.getName());
+                  //create a node instance of the class Cell (JME)                
+                  cellNode=new Cell(levelID,networkIndex,nodeID.getCellID(),cellModel);
+                  //hide it by default
+                  cellNode.setCullHint(CullHint.Always);
+                  //add this node into its list of children
+                  networkNode.attachChild(cellNode);
+                 }
+             //add each node that represents the "root" of a graph into
+             //the list of children of the level node
+             this.attachChild(networkNode);
+            }
+        //create the nodes that represent the portals
+        Portal portalNode;
+        Cell c1,c2;
+        for(Map.Entry<Integer,List<Spatial>> portalEntry:portalsListsTable.entrySet())
+            {networkIndex=portalEntry.getKey().intValue();
+             //look for the network
+             networkNode=null;
+             for(Spatial spatial:this.getChildren())
+                 if(((Network)spatial).isIdentifiedBy(levelID,networkIndex))
+                     {networkNode=(Network)spatial;
+                      break;
+                     }
+             for(Spatial portalModel:portalEntry.getValue())
+                 {//get the CIDs of the linked cells
+                  nodeID=NodeIdentifier.getInstance(portalModel.getName());
+                  //look for those cells
+                  c1=null;
+                  for(Spatial cell:networkNode.getChildren())
+                      if(((Cell)cell).isIdentifiedBy(levelID,networkIndex,nodeID.getCellID()))
+                          {c1=(Cell)cell;
+                           break;
+                          }
+                  c2=null;
+                  for(Spatial cell:networkNode.getChildren())
+                      if(((Cell)cell).isIdentifiedBy(levelID,networkIndex,nodeID.getSecondaryCellID()))
+                          {c2=(Cell)cell;
+                           break;
+                          }
+                  //create a node instance of the class Portal (JME) 
+                  portalNode=new Portal(levelID,networkIndex,nodeID.getCellID(),nodeID.getSecondaryCellID(),c1,c2,portalModel);
+                  //hide by default
+                  portalNode.setCullHint(CullHint.Always);
+                  //add this portal into them
+                  c1.addPortal(portalNode);
+                  c2.addPortal(portalNode);
+                 }                
+            }
     }
     
     @Override
