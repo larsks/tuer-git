@@ -77,6 +77,10 @@ public final class LevelGameState extends BasicGameState {
             pistol2Node.setName("pistol2");
             levelNode.attachDescendant(pistol2Node);
             
+            /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature13ds.jbin",new Quaternion(),new Vector3f(),new Vector3f(117f,0.0f,220.0f));
+            creatureNode.setName("creature");
+            levelNode.attachDescendant(creatureNode);*/
+            
             levelState.rootNode.attachChild(levelNode);
             levelState.rootNode.updateRenderState();
             levelState.rootNode.updateGeometricState(0.0f,true);
