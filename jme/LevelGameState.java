@@ -77,9 +77,17 @@ public final class LevelGameState extends BasicGameState {
             pistol2Node.setName("pistol2");
             levelNode.attachDescendant(pistol2Node);
             
-            /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature13ds.jbin",new Quaternion(),new Vector3f(),new Vector3f(117f,0.0f,220.0f));
+            /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature13ds.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(),new Vector3f(117f,0.0f,220.0f));
             creatureNode.setName("creature");
             levelNode.attachDescendant(creatureNode);*/
+            
+            /*Node creatureNode2=NodeFactory.getInstance().getNode("/jbin/giger_alien36.jbin",new Quaternion().fromAngles(-FastMath.PI/2.0f,0.0f,0.0f),new Vector3f(3000.0f,3000.0f,3000.0f),new Vector3f(117f,-0.4f,220.0f));
+            creatureNode2.setName("creature2");
+            levelNode.attachDescendant(creatureNode2);*/
+            
+            Node copNode=NodeFactory.getInstance().getNode("/jbin/cop.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.5f,0.5f,0.5f),new Vector3f(116.0f,0.0f,220.0f));
+            copNode.setName("cop");
+            levelNode.attachDescendant(copNode);
             
             levelState.rootNode.attachChild(levelNode);
             levelState.rootNode.updateRenderState();
