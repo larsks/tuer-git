@@ -248,6 +248,9 @@
 			<arg value="texture/wallTexture.png"/>
 			<arg value="jbin"/>
 			
+			<!--<arg value="obj/creature13ds.3DS"/>
+			<arg value="texture/"/>
+			<arg value="jbin/creature13ds.jbin"/>-->
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
