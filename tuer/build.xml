@@ -251,6 +251,13 @@
 			<!--<arg value="obj/creature13ds.3DS"/>
 			<arg value="texture/"/>
 			<arg value="jbin/creature13ds.jbin"/>-->
+			<!--<arg value="obj/giger_alien36.3ds"/>
+			<arg value="texture/"/>
+			<arg value="jbin/giger_alien36.jbin"/>-->
+			<arg value="obj/cop.obj"/>
+			<arg value="obj/cop.mtl"/>
+			<arg value="texture/lapd1.bmp"/>
+			<arg value="jbin/cop.jbin"/>
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
