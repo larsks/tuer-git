@@ -16,14 +16,22 @@ package jme;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.URL;
+
 import bean.ILevelModelBean;
 import bean.NodeIdentifier;
+
+import com.jme.image.Texture;
 import com.jme.math.FastMath;
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial.CullHint;
+import com.jme.scene.state.TextureState;
+import com.jme.system.DisplaySystem;
+import com.jme.util.TextureManager;
+import com.jme.util.resource.ResourceLocatorTool;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.GameState;
 
@@ -88,6 +96,18 @@ public final class LevelGameState extends BasicGameState {
             Node copNode=NodeFactory.getInstance().getNode("/jbin/cop.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.5f,0.5f,0.5f),new Vector3f(116.0f,0.0f,220.0f));
             copNode.setName("cop");
             levelNode.attachDescendant(copNode);
+            
+            Node agentNode=NodeFactory.getInstance().getNode("/jbin/agent.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.018f,0.018f,0.018f),new Vector3f(118.0f,-0.07f,220.0f));
+            agentNode.setName("agent");
+            System.out.println("world bound: "+agentNode.getWorldBound());
+            URL agentTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"agent.png");
+            TextureState ts=DisplaySystem.getDisplaySystem().getRenderer().createTextureState();
+            ts.setEnabled(true);
+            ts.setTexture(TextureManager.loadTexture(agentTextureURL,
+                    Texture.MinificationFilter.BilinearNoMipMaps,
+                    Texture.MagnificationFilter.Bilinear));
+            agentNode.setRenderState(ts);
+            levelNode.attachDescendant(agentNode);
             
             levelState.rootNode.attachChild(levelNode);
             levelState.rootNode.updateRenderState();
