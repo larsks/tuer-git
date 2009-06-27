@@ -141,6 +141,7 @@
 			<include name="**/*.data"/>
 			<include name="**/*.gif" />
 			<include name="**/*.jpg" />
+			<include name="**/*.md2" />
 			<include name="**/*.md3" />
 			<include name="**/*.png" />		
 			<include name="**/*.ogg" />		
@@ -246,7 +247,7 @@
 			<arg value="obj/LID0"/>
 			<arg value="obj/LID0.mtl"/>
 			<arg value="texture/wallTexture.png"/>
-			<arg value="jbin"/>
+			<arg value="jbin/"/>
 			
 			<!--<arg value="obj/creature13ds.3DS"/>
 			<arg value="texture/"/>
@@ -254,13 +255,17 @@
 			
 			<arg value="obj/cop.obj"/>
 			<arg value="obj/cop.mtl"/>
-			<arg value="texture/lapd1.bmp"/>
+			<arg value="texture/cop.png"/>
 			<arg value="jbin/cop.jbin"/>
 			
 			<arg value="obj/giger_alien.obj"/>
 			<arg value="obj/giger_alien.mtl"/>
 			<arg value="texture/giger_alien.jpg"/>
 			<arg value="jbin/giger_alien.jbin"/>
+			
+			<arg value="md2/agent.md2"/>
+			<arg value="texture/agent.png"/>
+			<arg value="jbin/agent.jbin"/>
 	    </java>
 	</target>
 	<target name="run-jme-game" description="Runs the experimental version of the game TUER">

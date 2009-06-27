@@ -18,10 +18,10 @@ import java.io.FilenameFilter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.jme.system.DisplaySystem;
 import com.jme.system.dummy.DummySystemProvider;
 import com.jmex.model.converters.MaxToJme;
+import com.jmex.model.converters.Md2ToJme;
 import com.jmex.model.converters.ObjToJme;
 
 /**
@@ -36,22 +36,31 @@ import com.jmex.model.converters.ObjToJme;
 class JMEDataPreprocessor{
     
     
+    private enum Format{ASE,MAX,MD2,MD3,MILK,OBJ,X3D};
+    
     private static final ObjToJme objConverter=new ObjToJme();
     
     private static final MaxToJme maxConverter=new MaxToJme();
     
+    private static final Md2ToJme md2Converter=new Md2ToJme();
+    
     public static final void main(String[] args){
         DisplaySystem.getDisplaySystem(DummySystemProvider.DUMMY_SYSTEM_IDENTIFIER);        
+        /*try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getResource("/texture/")));} 
+        catch(URISyntaxException urise) 
+        {urise.printStackTrace();}*/
         //first step: parse the arguments to get the file names
         List<String[]> conversionGroupsFilenamesList=new ArrayList<String[]>();
+        List<Format> formatList=new ArrayList<Format>();
         boolean isFilePatternUsed,isJBINFilePatternUsed,needMtlCheck;
         String jbinPath;
-        boolean isSingleObjFile,isSingle3dsFile;
+        boolean isSingleObjFile,isSingle3dsFile,isSingleMd2File;
         for(int i=0;i<args.length;i+=4)
             if(i+2<args.length)
                 {isSingleObjFile=args[i].endsWith(".obj")||args[i].endsWith(".OBJ");
                  isSingle3dsFile=args[i].endsWith(".3ds")||args[i].endsWith(".3DS");
-                 isFilePatternUsed=!isSingleObjFile&&!isSingle3dsFile;
+                 isSingleMd2File=args[i].endsWith(".md2")||args[i].endsWith(".MD2");
+                 isFilePatternUsed=!isSingleObjFile&&!isSingle3dsFile&&!isSingleMd2File;
                  needMtlCheck=isSingleObjFile||isFilePatternUsed;                 
                  if(needMtlCheck&&i+3<args.length)
                      {if(isFilePatternUsed)
@@ -95,11 +104,14 @@ class JMEDataPreprocessor{
                           for(File OBJfile:OBJfiles)
                              {OBJFilePath=OBJfile.getPath();
                               JBINFilePath=jbinPath+OBJfile.getName().substring(0,Math.max(OBJfile.getName().lastIndexOf(".obj"),OBJfile.getName().lastIndexOf(".OBJ")))+".jbin";
+                              formatList.add(Format.OBJ);
                               conversionGroupsFilenamesList.add(new String[]{OBJFilePath,args[i+1],args[i+2],JBINFilePath});
                              }
                          }
                      else
-                         conversionGroupsFilenamesList.add(new String[]{args[i],args[i+1],args[i+2],jbinPath});
+                         {formatList.add(Format.OBJ);
+                          conversionGroupsFilenamesList.add(new String[]{args[i],args[i+1],args[i+2],jbinPath});
+                         }
                      }
                  else
                      if(!needMtlCheck)
@@ -115,11 +127,27 @@ class JMEDataPreprocessor{
                                    {jbinPath=args[i+2];
                                     System.out.println("[INFO] "+jbinPath+" is a JME binary file.");
                                    }
+                               formatList.add(Format.MAX);
                                conversionGroupsFilenamesList.add(new String[]{args[i],null,args[i+1],jbinPath});                    
                               }
                           else
-                              {System.out.println("file "+args[i]+" ignored: unknown file format");
-                              }
+                              if(isSingleMd2File)
+                                  {System.out.println("[INFO] "+args[i]+" is a MD2 file.");
+                                   isJBINFilePatternUsed=!args[i+2].endsWith(".jbin")&&!args[i+2].endsWith(".JBIN");
+                                   if(isJBINFilePatternUsed)
+                                       {System.out.println("[INFO] "+args[i+2]+" is not a JME binary file.");
+                                        jbinPath=args[i+2]+".jbin";
+                                        System.out.println("[INFO] "+jbinPath+" is going to be used instead.");
+                                       }
+                                   else
+                                       {jbinPath=args[i+2];
+                                        System.out.println("[INFO] "+jbinPath+" is a JME binary file.");
+                                       }
+                                   formatList.add(Format.MD2);
+                                   conversionGroupsFilenamesList.add(new String[]{args[i],null,args[i+1],jbinPath});                                   
+                                  }
+                              else
+                                  System.out.println("file "+args[i]+" ignored: unknown file format");
                          }
                      else
                          {for(int j=i;j<args.length;j++)
@@ -133,13 +161,16 @@ class JMEDataPreprocessor{
                  System.out.println("usage: file_1.obj|file_1.3ds [file_1.mtl] file_1.png file_1.jbin ... file_n.obj file_n.mtl file_n.png file_n.jbin");
                 }
         //second step: perform the conversion
+        int formatIndex=0;
         for(String[] conversionGroupsFilenames:conversionGroupsFilenamesList)
-            convert(conversionGroupsFilenames[0],conversionGroupsFilenames[1],
-                    conversionGroupsFilenames[2],conversionGroupsFilenames[3]);
+            {convert(conversionGroupsFilenames[0],conversionGroupsFilenames[1],
+                    conversionGroupsFilenames[2],conversionGroupsFilenames[3],formatList.get(formatIndex));
+             formatIndex++;
+            }
     }
     
-    private static final void convert(String sourceFilename,String MTLlibFilename,String textureFilename,String destFilename){
-        if(MTLlibFilename!=null)
+    private static final void convert(String sourceFilename,String MTLlibFilename,String textureFilename,String destFilename,Format format){
+        if(format.equals(Format.OBJ))
             {try{objConverter.setProperty("mtllib",new File(MTLlibFilename).toURI().toURL());
                  objConverter.setProperty("texdir",new File(textureFilename).toURI().toURL());
                 } 
@@ -148,11 +179,19 @@ class JMEDataPreprocessor{
              objConverter.attemptFileConvert(new String[]{sourceFilename,destFilename});
             }
         else
-            {try{maxConverter.setProperty("texdir",new File(textureFilename).toURI().toURL());} 
-             catch(MalformedURLException murle)
-             {murle.printStackTrace();}                
-             maxConverter.attemptFileConvert(new String[]{sourceFilename,destFilename});
-            }
+            if(format.equals(Format.MAX))
+                {try{maxConverter.setProperty("texdir",new File(textureFilename).toURI().toURL());} 
+                 catch(MalformedURLException murle)
+                 {murle.printStackTrace();}                
+                 maxConverter.attemptFileConvert(new String[]{sourceFilename,destFilename});
+                }
+            else
+                if(format.equals(Format.MD2))
+                    {try{md2Converter.setProperty("texdir",new File(textureFilename).toURI().toURL());} 
+                     catch(MalformedURLException murle)
+                     {murle.printStackTrace();}                
+                     md2Converter.attemptFileConvert(new String[]{sourceFilename,destFilename});
+                    }
         //the converter nulls all after a conversion
     }
 
