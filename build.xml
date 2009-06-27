@@ -243,15 +243,41 @@
 			<arg value="obj/pistol2.mtl"/>
 			<arg value="texture/pistol2.png"/>
 			<arg value="jbin/pistol2.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/pistol3.obj"/>
+			<arg value="obj/pistol3.mtl"/>
+			<arg value="texture/pistol3.jpg"/>
+			<arg value="jbin/pistol3.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/smach.obj"/>
+			<arg value="obj/smach.mtl"/>
+			<arg value="texture/smach.jpg"/>
+			<arg value="jbin/smach.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/uzi.obj"/>
+			<arg value="obj/uzi.mtl"/>
+			<arg value="texture/uzi.jpg"/>
+			<arg value="jbin/uzi.jbin"/>
+			<!-- ak47 drawn by Whisnu (tigarut@gmail.com) -->
+			<!--<arg value="obj/AK47.obj"/>
+			<arg value="obj/AK47.mtl"/>
+			<arg value="texture/"/>
+			<arg value="jbin/AK47.jbin"/>-->
+			<!-- drawn by psionic -->
+			<arg value="obj/laser.obj"/>
+			<arg value="obj/laser.mtl"/>
+			<arg value="texture/laser.jpg"/>
+			<arg value="jbin/laser.jbin"/>
 			<!-- convert the levels -->
 			<arg value="obj/LID0"/>
 			<arg value="obj/LID0.mtl"/>
 			<arg value="texture/wallTexture.png"/>
 			<arg value="jbin/"/>
 			
-			<!--<arg value="obj/creature13ds.3DS"/>
+			<!--<arg value="obj/creature.obj"/>
+			<arg value="obj/creature.mtl"/>
 			<arg value="texture/"/>
-			<arg value="jbin/creature13ds.jbin"/>-->
+			<arg value="jbin/creature.jbin"/>-->
 			
 			<arg value="obj/cop.obj"/>
 			<arg value="obj/cop.mtl"/>
@@ -263,6 +289,7 @@
 			<arg value="texture/giger_alien.jpg"/>
 			<arg value="jbin/giger_alien.jbin"/>
 			
+			<!-- human drawn by a member of jmonkeyengine's forum -->
 			<arg value="md2/agent.md2"/>
 			<arg value="texture/agent.png"/>
 			<arg value="jbin/agent.jbin"/>

@@ -85,13 +85,34 @@ public final class LevelGameState extends BasicGameState {
             pistol2Node.setName("pistol2");
             levelNode.attachDescendant(pistol2Node);
             
-            /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature13ds.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(),new Vector3f(117f,0.0f,220.0f));
+            Node pistol3Node=NodeFactory.getInstance().getNode("/jbin/pistol3.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.03f,0.03f,0.03f),new Vector3f(114.5f,0.0f,220.0f));
+            pistol3Node.setName("pistol3");
+            levelNode.attachDescendant(pistol3Node);
+            
+            Node smachNode=NodeFactory.getInstance().getNode("/jbin/smach.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.2f,0.2f,0.2f),new Vector3f(114.0f,0.0f,220.0f));
+            smachNode.setName("smach");
+            levelNode.attachDescendant(smachNode);
+            
+            Node uziNode=NodeFactory.getInstance().getNode("/jbin/uzi.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.2f,0.2f,0.2f),new Vector3f(113.5f,0.0f,220.0f));
+            uziNode.setName("uzi");
+            levelNode.attachDescendant(uziNode);
+            
+            /*Node ak47Node=NodeFactory.getInstance().getNode("/jbin/AK47.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(0.1f,0.1f,0.1f),new Vector3f(114.25f,0.0f,220.0f));
+            ak47Node.setName("ak47");
+            System.out.println("world bound: "+ak47Node.getWorldBound());
+            levelNode.attachDescendant(ak47Node);*/
+            
+            Node laserNode=NodeFactory.getInstance().getNode("/jbin/laser.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.03f,0.03f,0.03f),new Vector3f(114.75f,0.0f,220.0f));
+            laserNode.setName("laser");
+            levelNode.attachDescendant(laserNode);
+            //System.out.println("world bound: "+laserNode.getWorldBound());
+            /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(1.0f,1.0f,1.0f),new Vector3f(117f,0.0f,222.0f));
             creatureNode.setName("creature");
             levelNode.attachDescendant(creatureNode);*/
             
-            Node creatureNode2=NodeFactory.getInstance().getNode("/jbin/giger_alien.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(0.3f,0.3f,0.3f),new Vector3f(117f,-0.5f,220.0f));
-            creatureNode2.setName("creature2");
-            levelNode.attachDescendant(creatureNode2);
+            Node gigerAlienNode=NodeFactory.getInstance().getNode("/jbin/giger_alien.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(0.3f,0.3f,0.3f),new Vector3f(117f,-0.5f,220.0f));
+            gigerAlienNode.setName("giger alien");
+            levelNode.attachDescendant(gigerAlienNode);
             
             Node copNode=NodeFactory.getInstance().getNode("/jbin/cop.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.5f,0.5f,0.5f),new Vector3f(116.0f,0.0f,220.0f));
             copNode.setName("cop");
@@ -99,7 +120,7 @@ public final class LevelGameState extends BasicGameState {
             
             Node agentNode=NodeFactory.getInstance().getNode("/jbin/agent.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.018f,0.018f,0.018f),new Vector3f(118.0f,-0.07f,220.0f));
             agentNode.setName("agent");
-            System.out.println("world bound: "+agentNode.getWorldBound());
+            //System.out.println("world bound: "+agentNode.getWorldBound());
             URL agentTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"agent.png");
             TextureState ts=DisplaySystem.getDisplaySystem().getRenderer().createTextureState();
             ts.setEnabled(true);
