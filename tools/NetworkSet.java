@@ -161,9 +161,8 @@ public final class NetworkSet implements Serializable{
      * @param useJOGLTextureCoordinatesVerticalOrder true if the vertical order of texture coordinates is JOGL's one
      * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
      * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
-     * @return list of node identifier (only if grouped is false)
      */
-    final ArrayList<INodeIdentifier> writeObjFiles(String filenamepattern,String textureFilename,
+    final void writeObjFiles(String filenamepattern,String textureFilename,
             boolean grouped,boolean redundant,boolean useTriangles,
             boolean useJOGLTextureCoordinatesVerticalOrder,
             boolean writePortals,String MTLFilename){
@@ -185,7 +184,7 @@ public final class NetworkSet implements Serializable{
              System.out.println("Writes Wavefront object "+filenamePrefix+".obj");             
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
-             {ioe.printStackTrace();return(nodeIDList);}
+             {ioe.printStackTrace();return;}
              pw=new PrintWriter(bos);
              //declare the MTL file
              if(useTexture)
@@ -483,7 +482,7 @@ public final class NetworkSet implements Serializable{
              System.out.println("Writes Wavefront object "+filenamePrefix);
              try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
              catch(IOException ioe)
-             {ioe.printStackTrace();return(nodeIDList);}
+             {ioe.printStackTrace();return;}
              pw=new PrintWriter(bos);
              for(String subObjFilename:subObjFilenameList)
                  pw.println("call "+subObjFilename);            
@@ -598,7 +597,6 @@ public final class NetworkSet implements Serializable{
                  }
              System.out.println("Ends writing OBJ Wavefront files.");
             }
-        return(nodeIDList);
     }
     
     private static final class VertexData{

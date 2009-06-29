@@ -11,14 +11,30 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package tools;
+package jme;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
-public interface ILevelModelBean{
-    public float[] getInitialSpawnPosition();
-    public void setInitialSpawnPosition(float[] initialSpawnPosition);
-    public Serializable getSerializableBean();
-    public String[] getIdentifiedNodeNames();
-    public void setIdentifiedNodeNames(String[] identifiedNodeNames);
+public final class FullWorld implements Serializable{
+    
+    
+    private static final long serialVersionUID=1L;
+
+    static{TransientMarkerForXMLSerialization.updateTransientModifierForXMLSerialization(FullWorld.class);}
+
+    private HashMap<String,EntityParameters> entityParameterTable;
+    
+    
+    public FullWorld(){}
+
+
+    public final HashMap<String,EntityParameters> getEntityParameterTable(){
+        return(entityParameterTable);
+    }
+
+
+    public final void setEntityParameterTable(HashMap<String,EntityParameters> entityParameterTable){
+        this.entityParameterTable=entityParameterTable;
+    }  
 }

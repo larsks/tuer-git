@@ -25,10 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.ImageIcon;
@@ -168,8 +166,6 @@ public final class TilesGenerator implements Runnable{
     
     private String bonsaiOBJFilename;
     
-    private String levelModelBeanFilename;
-    
     private String MTLFilename;
 
     private static final int artCount=27;
@@ -230,7 +226,7 @@ public final class TilesGenerator implements Runnable{
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP=25;
     //dirty walls (from 26 to 40) removed as useless
-    private static final int parameterCount=35;
+    private static final int parameterCount=34;
 
     
     public TilesGenerator(String mapFilename,String tilesFilename,
@@ -263,7 +259,6 @@ public final class TilesGenerator implements Runnable{
             String flowerOBJFilename,
             String tableOBJFilename,
             String bonsaiOBJFilename,
-            String levelModelBeanFilename,
             String MTLFilename){
         topWallsList=new ArrayList<PointPair>();   
         bottomWallsList=new ArrayList<PointPair>();
@@ -317,7 +312,6 @@ public final class TilesGenerator implements Runnable{
         this.flowerOBJFilename=flowerOBJFilename;
         this.tableOBJFilename=tableOBJFilename;
         this.bonsaiOBJFilename=bonsaiOBJFilename;
-        this.levelModelBeanFilename=levelModelBeanFilename;
         this.MTLFilename=MTLFilename;
     }      
     
@@ -352,6 +346,8 @@ public final class TilesGenerator implements Runnable{
                  leftWallsList,rightWallsList,artTopWallsList,
                  artBottomWallsList,artLeftWallsList,artRightWallsList,tileSize);
         writeNetworkSet();
+        //The export of objects to Wavefront OBJ format is only useful for other engines that would like to reuse
+        //these 3D elements
         /* The textured level is the view (the representation) 
          * whereas the untextured level is the model (used for the collisions).
          * The ungrouped structure contains a file per cell and a single file that calls the others
@@ -359,7 +355,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        ArrayList<INodeIdentifier> nodeIDList=networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename);
+        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
@@ -371,7 +367,6 @@ public final class TilesGenerator implements Runnable{
         convertBinaryToOBJFile(flowerFilename,objectTextureFilename,flowerOBJFilename,true,true,false);
         convertBinaryToOBJFile(tableFilename,objectTextureFilename,tableOBJFilename,true,true,false);
         convertBinaryToOBJFile(bonsaiFilename,objectTextureFilename,bonsaiOBJFilename,true,true,false);
-        writeLevelModelBean(nodeIDList);
     }
     
     @SuppressWarnings("unused")
@@ -1120,7 +1115,7 @@ public final class TilesGenerator implements Runnable{
                  parent.mkdirs();
              file.createNewFile();
             }
-        out=new BufferedOutputStream(new FileOutputStream(file));       
+        out=new BufferedOutputStream(new FileOutputStream(file));
         return(out);
     }
     
@@ -1710,7 +1705,6 @@ public final class TilesGenerator implements Runnable{
                     " flower_OBJ_filename"+
                     " table_OBJ_filename"+
                     " bonsai_OBJ_filename"+
-                    " level_model_bean_filename"+
                     " MTL_filename");  
              tg=null;
             }
@@ -1719,8 +1713,7 @@ public final class TilesGenerator implements Runnable{
                     args[6],args[7],args[8],args[9],args[10],args[11],args[12],
                     args[13],args[14],args[15],args[16],args[17],args[18],args[19],
                     args[20],args[21],args[22],args[23],args[24],args[25],args[26],
-                    args[27],args[28],args[29],args[30],args[31],args[32],args[33],
-                    args[34]);            
+                    args[27],args[28],args[29],args[30],args[31],args[32],args[33]);            
             }
         return(tg);
     }
@@ -2234,37 +2227,5 @@ public final class TilesGenerator implements Runnable{
             catch(IOException ioe)
             {throw new RuntimeException("Unable to close the file containing the network set",ioe);}
         }
-    }
-    
-    /**
-     * Writes the data about the model of a level into a file 
-     */
-    private final void writeLevelModelBean(ArrayList<INodeIdentifier> nodeIDList){
-        String[] literalNodeIDNames=new String[nodeIDList.size()];
-        int index=0;
-        for(INodeIdentifier nodeID:nodeIDList)
-            {literalNodeIDNames[index]=nodeID.toString();
-             index++;
-            }
-        ILevelModelBean ilmb=BeanProvider.getInstance().getILevelModelBean(new float[]{initialPosition.x,0.0f,initialPosition.y},literalNodeIDNames);
-        System.out.println("Initial spawn position"+Arrays.toString(ilmb.getInitialSpawnPosition()));
-        System.out.println("Starts writing initial spawn position into "+levelModelBeanFilename);
-        Serializable serializableObject=ilmb.getSerializableBean();
-        if(levelModelBeanFilename.endsWith(".xml")||levelModelBeanFilename.endsWith(".XML"))
-            {System.out.println("XML extension detected, encoding data in XML format...");
-             encodeObjectInFile(serializableObject,levelModelBeanFilename);
-            }
-        else
-            {System.out.println("XML extension not detected, writing raw data in binary format ...");
-             ObjectOutputStream oos=null;
-             try{oos=new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(levelModelBeanFilename)));
-                 oos.writeObject(serializableObject);
-                 oos.close();         
-                }
-             catch(Throwable t)
-             {throw new RuntimeException("Unable to write the initial spawn position",t);}
-            }
-        System.out.println("Initial spawn position written");
-        
     }
 }

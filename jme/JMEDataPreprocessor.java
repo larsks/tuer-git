@@ -13,11 +13,23 @@
 */
 package jme;
 
+import java.beans.XMLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import bean.NodeIdentifier;
+import com.jme.math.FastMath;
+import com.jme.math.Quaternion;
+import com.jme.math.Vector3f;
 import com.jme.system.DisplaySystem;
 import com.jme.system.dummy.DummySystemProvider;
 import com.jmex.model.converters.MaxToJme;
@@ -44,18 +56,26 @@ class JMEDataPreprocessor{
     
     private static final Md2ToJme md2Converter=new Md2ToJme();
     
-    public static final void main(String[] args){
+    private static final int firstConvertibleObjectIndex=3;
+    
+    public static final void main(String[] args)throws IOException{
+        if(args.length<firstConvertibleObjectIndex)
+            {System.out.println();
+             return;
+            }
         DisplaySystem.getDisplaySystem(DummySystemProvider.DUMMY_SYSTEM_IDENTIFIER);        
-        /*try{ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,new SimpleResourceLocator(JMEGameServiceProvider.class.getResource("/texture/")));} 
-        catch(URISyntaxException urise) 
-        {urise.printStackTrace();}*/
         //first step: parse the arguments to get the file names
         List<String[]> conversionGroupsFilenamesList=new ArrayList<String[]>();
         List<Format> formatList=new ArrayList<Format>();
         boolean isFilePatternUsed,isJBINFilePatternUsed,needMtlCheck;
         String jbinPath;
+        String levelName=null;
         boolean isSingleObjFile,isSingle3dsFile,isSingleMd2File;
-        for(int i=0;i<args.length;i+=4)
+        String tilesFilename=args[0];
+        String worldFilename=args[1];
+        String levelFilename=args[2];
+        List<String> identifiedNodeNameList=new ArrayList<String>();
+        for(int i=firstConvertibleObjectIndex;i<args.length;i+=4)
             if(i+2<args.length)
                 {isSingleObjFile=args[i].endsWith(".obj")||args[i].endsWith(".OBJ");
                  isSingle3dsFile=args[i].endsWith(".3ds")||args[i].endsWith(".3DS");
@@ -99,11 +119,17 @@ class JMEDataPreprocessor{
                          {File patternFile=new File(args[i]);
                           if(!jbinPath.substring(jbinPath.length()-1).equals("/"))
                               jbinPath+="/";
+                          int slashIndex=args[i].lastIndexOf("/");
+                          if(slashIndex!=-1&&args[i].length()>slashIndex+1)
+                              levelName=args[i].substring(slashIndex+1);
                           File[] OBJfiles=patternFile.getParentFile().listFiles(new OBJFilenameFilter(patternFile.getName()));
-                          String OBJFilePath,JBINFilePath;
+                          String OBJFilePath,JBINFilePath,levelElementName;
                           for(File OBJfile:OBJfiles)
                              {OBJFilePath=OBJfile.getPath();
-                              JBINFilePath=jbinPath+OBJfile.getName().substring(0,Math.max(OBJfile.getName().lastIndexOf(".obj"),OBJfile.getName().lastIndexOf(".OBJ")))+".jbin";
+                              levelElementName=OBJfile.getName().substring(0,Math.max(OBJfile.getName().lastIndexOf(".obj"),OBJfile.getName().lastIndexOf(".OBJ")));
+                              identifiedNodeNameList.add(levelElementName);
+                              //System.out.println("level element name: "+levelElementName);
+                              JBINFilePath=jbinPath+levelElementName+".jbin";
                               formatList.add(Format.OBJ);
                               conversionGroupsFilenamesList.add(new String[]{OBJFilePath,args[i+1],args[i+2],JBINFilePath});
                              }
@@ -167,6 +193,104 @@ class JMEDataPreprocessor{
                     conversionGroupsFilenames[2],conversionGroupsFilenames[3],formatList.get(formatIndex));
              formatIndex++;
             }
+        //build the full world
+        HashMap<String,EntityParameters> entityParameterTable=new HashMap<String,EntityParameters>();
+        EntityParameters param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f));
+        param.setScale(new Vector3f(0.001f,0.001f,0.001f));
+        entityParameterTable.put("/jbin/pistol.jbin",param);
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.02f,0.02f,0.02f));    
+        entityParameterTable.put("/jbin/pistol2.jbin",param);
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.03f,0.03f,0.03f));
+        entityParameterTable.put("/jbin/pistol3.jbin",param);
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.2f,0.2f,0.2f));
+        entityParameterTable.put("/jbin/smach.jbin",param);
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.2f,0.2f,0.2f));    
+        entityParameterTable.put("/jbin/uzi.jbin",param);
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.03f,0.03f,0.03f));
+        entityParameterTable.put("/jbin/laser.jbin",param);        
+        param=new EntityParameters();
+        param.setScale(new Vector3f(0.3f,0.3f,0.3f));
+        param.setTranslation(new Vector3f(0.0f,-0.5f,-0.0f));
+        entityParameterTable.put("/jbin/giger_alien.jbin",param);        
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.5f,0.5f,0.5f));
+        entityParameterTable.put("/jbin/cop.jbin",param);       
+        param=new EntityParameters();
+        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
+        param.setScale(new Vector3f(0.018f,0.018f,0.018f));
+        param.setTranslation(new Vector3f(0.0f,-0.07f,-0.0f));
+        entityParameterTable.put("/jbin/agent.jbin",param);    
+        FullWorld world=new FullWorld();
+        world.setEntityParameterTable(entityParameterTable);
+        encodeObjectInFile(world,worldFilename);
+        if(levelName!=null)
+            {float[] spawnPos=null;
+             DataInputStream in=new DataInputStream(new BufferedInputStream(JMEDataPreprocessor.class.getResourceAsStream("/"+tilesFilename)));
+             //for each artwork, we skip 5 coordinates of 4 bytes (float)
+             //we skip the collision map too (256*256 bytes)
+             int skipedBytesCount=((in.readInt()+in.readInt()+in.readInt()+in.readInt())*20)+65536;
+             if(in.skipBytes(skipedBytesCount)!=skipedBytesCount)
+                 throw new IOException("malformed file /data/worldmap.data");
+             else
+                 {spawnPos=new float[]{in.readInt(),0.0f,in.readInt()};
+                  System.out.println("spawn position: "+Arrays.toString(spawnPos));
+                 }
+             in.close();
+             NodeIdentifier[] nodeIdentifiers=new NodeIdentifier[identifiedNodeNameList.size()];
+             for(int index=0;index<nodeIdentifiers.length;index++)
+                 nodeIdentifiers[index]=NodeIdentifier.getInstance(identifiedNodeNameList.get(index));
+             HashMap<Vector3f,String> entityLocationTable=new HashMap<Vector3f, String>();
+             //handle the weapons
+             entityLocationTable.put(new Vector3f(115.0f,0.0f,220.0f),"/jbin/pistol.jbin");
+             entityLocationTable.put(new Vector3f(115.25f,0.0f,220.0f),"/jbin/pistol2.jbin");
+             entityLocationTable.put(new Vector3f(114.5f,0.0f,220.0f),"/jbin/pistol3.jbin");
+             entityLocationTable.put(new Vector3f(114.0f,0.0f,220.0f),"/jbin/smach.jbin");
+             entityLocationTable.put(new Vector3f(113.5f,0.0f,220.0f),"/jbin/uzi.jbin");
+             entityLocationTable.put(new Vector3f(114.75f,0.0f,220.0f),"/jbin/laser.jbin");
+             //handle the enemies
+             entityLocationTable.put(new Vector3f(117.0f,0.0f,220.0f),"/jbin/giger_alien.jbin");
+             entityLocationTable.put(new Vector3f(116.0f,0.0f,220.0f),"/jbin/cop.jbin");
+             entityLocationTable.put(new Vector3f(118.0f,0.0f,220.0f),"/jbin/agent.jbin");                         
+             //build the full level model
+             FullLevel level=new FullLevel();
+             level.setNodeIdentifiers(nodeIdentifiers);
+             level.setInitialPlayerPosition(new Vector3f(spawnPos[0],spawnPos[1],spawnPos[2]));
+             level.setEntityLocationTable(entityLocationTable);
+             encodeObjectInFile(level,levelFilename);
+            }       
+    }
+    
+    private static final void encodeObjectInFile(Object o,String filename){
+        BufferedOutputStream bos=null;
+        File file=new File(filename);   
+        try{if(!file.exists())
+                if(!file.createNewFile())
+                    throw new IOException("Unable to create the file "+filename);
+            bos=new BufferedOutputStream(new FileOutputStream(file));
+            XMLEncoder encoder=new XMLEncoder(bos);
+            encoder.writeObject(o);
+            encoder.close();
+           }
+        catch(IOException ioe)
+        {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
+        finally
+        {if(bos!=null)
+             try{bos.close();}
+             catch(IOException ioe)
+             {throw new RuntimeException("Unable to close the file "+filename,ioe);}           
+        }
     }
     
     private static final void convert(String sourceFilename,String MTLlibFilename,String textureFilename,String destFilename,Format format){

@@ -63,9 +63,12 @@ final class NodeFactory{
                  }
             }
         Node clone=(Node)cloner.loadClone();
-        clone.setLocalRotation(rotation);
-        clone.setLocalScale(scale);
-        clone.setLocalTranslation(translation);
+        if(rotation!=null)
+            clone.setLocalRotation(rotation);
+        if(scale!=null)
+            clone.setLocalScale(scale);
+        if(translation!=null)
+            clone.setLocalTranslation(translation);
         clone.setModelBound(new BoundingBox());
         clone.updateModelBound();
         clone.updateRenderState();

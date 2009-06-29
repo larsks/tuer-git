@@ -219,12 +219,11 @@
 	        		<arg value="obj/flower"/>
 	        		<arg value="obj/table"/>
 	        		<arg value="obj/bonsai"/>
-	        	    <!-- the level model bean file must be composed of the prefix LID followed by its index -->
-	        	    <arg value="data/LID0.data"/>
 	        	    <arg value="LID0.mtl"/>
 		</java>
 	</target>	
 	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
+		<mkdir dir="${destdir}/xml"/>
 		<mkdir dir="${destdir}/jbin"/>
 		<java classname="jme.JMEDataPreprocessor"
 			              fork="true"
@@ -232,6 +231,15 @@
 			              failonerror="true"
 			              >
 			<jvmarg value="-Xmx1536m"/>
+			<!-- use the old world map -->
+			<arg value="data/worldmap.data"/>
+			<arg value="xml/WID0.xml"/>
+			<arg value="xml/LID0.xml"/>
+			<!-- convert the levels -->
+			<arg value="obj/LID0"/>
+			<arg value="obj/LID0.mtl"/>
+			<arg value="texture/wallTexture.png"/>
+			<arg value="jbin/"/>
 			<!-- convert the weapons -->
 			<!-- pistol drawn by an anonymous (3DExtras) -->
 			<arg value="obj/pistol.obj"/>
@@ -267,13 +275,7 @@
 			<arg value="obj/laser.obj"/>
 			<arg value="obj/laser.mtl"/>
 			<arg value="texture/laser.jpg"/>
-			<arg value="jbin/laser.jbin"/>
-			<!-- convert the levels -->
-			<arg value="obj/LID0"/>
-			<arg value="obj/LID0.mtl"/>
-			<arg value="texture/wallTexture.png"/>
-			<arg value="jbin/"/>
-			
+			<arg value="jbin/laser.jbin"/>			
 			<!--<arg value="obj/creature.obj"/>
 			<arg value="obj/creature.mtl"/>
 			<arg value="texture/"/>

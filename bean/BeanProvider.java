@@ -27,14 +27,6 @@ public final class BeanProvider implements IBeanProvider{
     }
     
     @Override
-    public final ILevelModelBean getILevelModelBean(float[] initialSpawnPosition,String[] identifiedNodeNames){
-        LevelModelBean lmb=new LevelModelBean();
-        lmb.setInitialSpawnPosition(initialSpawnPosition);
-        lmb.setIdentifiedNodeNames(identifiedNodeNames);
-        return(lmb);
-    }
-    
-    @Override
     public final INodeIdentifier getINodeIdentifier(){
         return(new NodeIdentifier());
     }
