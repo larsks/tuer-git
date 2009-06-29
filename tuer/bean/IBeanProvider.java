@@ -14,7 +14,6 @@
 package bean;
 
 public interface IBeanProvider{
-    public ILevelModelBean getILevelModelBean(float[] initialSpawnPosition,String[] identifiedNodeNames);
     public INodeIdentifier getINodeIdentifier();
     public void bindBeanProvider(IBeanProvider provider);
 }

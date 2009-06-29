@@ -14,7 +14,6 @@
 package connection;
 
 import tools.IBeanProvider;
-import tools.ILevelModelBean;
 import tools.INodeIdentifier;
 import tools.TilesGenerator;
 
@@ -37,12 +36,6 @@ public final class DataPreprocessor implements IBeanProvider{
     @Override
     public final void bindBeanProvider(tools.IBeanProvider provider){
          provider.bindBeanProvider(this);      
-    }
-
-
-    @Override
-    public final ILevelModelBean getILevelModelBean(float[] initialSpawnPosition,String[] identifiedNodeNames){
-        return(new LevelModelBeanConnector(delegate.getILevelModelBean(initialSpawnPosition,identifiedNodeNames)));
     }
     
     @Override

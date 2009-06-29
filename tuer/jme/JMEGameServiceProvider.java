@@ -114,7 +114,7 @@ public final class JMEGameServiceProvider {
         //GameState levelGameState=LevelGameState.getInstance(index,transitionGameState,cam);         
         GameTaskQueueManager.getManager().getQueue(GameTaskQueue.UPDATE).execute();
         GameState levelGameState=null;
-        try{levelGameState = task.get();} 
+        try{levelGameState=task.get();} 
         catch(InterruptedException e)
         {e.printStackTrace();} 
         catch(ExecutionException e)
