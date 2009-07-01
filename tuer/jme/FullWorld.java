@@ -21,7 +21,7 @@ public final class FullWorld implements Serializable{
     
     private static final long serialVersionUID=1L;
 
-    static{TransientMarkerForXMLSerialization.updateTransientModifierForXMLSerialization(FullWorld.class);}
+    static{Utils.forceHandlingOfTransientModifiersForXMLSerialization(FullWorld.class);}
 
     private HashMap<String,EntityParameters> entityParameterTable;
     

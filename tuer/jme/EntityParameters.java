@@ -23,7 +23,7 @@ public final class EntityParameters implements Serializable{
     
     private static final long serialVersionUID = 1L;
 
-    static{TransientMarkerForXMLSerialization.updateTransientModifierForXMLSerialization(EntityParameters.class);}
+    static{Utils.forceHandlingOfTransientModifiersForXMLSerialization(EntityParameters.class);}
     
     private Quaternion rotation;
     

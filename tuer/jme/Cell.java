@@ -18,6 +18,8 @@ import java.util.List;
 
 import bean.NodeIdentifier;
 
+import com.jme.bounding.BoundingBox;
+import com.jme.bounding.BoundingVolume;
 import com.jme.math.Vector3f;
 import com.jme.scene.Geometry;
 import com.jme.scene.Spatial;
@@ -84,4 +86,58 @@ public final class Cell extends IdentifiedNode{
      */
     @Override
     public final void updateWorldData(float time){}
+    
+    @Override
+    public final boolean hasCollision(Spatial spatial, boolean checkTriangles){
+        BoundingVolume wallsBound=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound();
+        boolean result;
+        if(wallsBound.intersects(spatial.getWorldBound()))
+            {result=false;
+             //the spatial is on the limit or inside the cell
+             //perform deeper checks, look at its children
+             //skip the first internal element as it has been checked before
+             InternalCellElement cellElement;
+             for(int childIndex=1;childIndex<children.size();childIndex++)
+                 {cellElement=(InternalCellElement)getChild(childIndex);
+                  if(spatial.hasCollision(cellElement,checkTriangles))
+                      {result=true;
+                       break;
+                      }
+                 }
+             //if the spatial is not completely inside the cell
+             BoundingVolume mergedBoundingVolume=wallsBound.merge(spatial.getWorldBound());
+             if(!result && mergedBoundingVolume.getVolume()>wallsBound.getVolume())
+                 {boolean portalFound=false;
+                  for(Portal portal:portalsList)
+                      if(portal.hasCollision(spatial,checkTriangles))
+                          {portalFound=true;
+                           /*Oriented*/BoundingBox portalBound=(/*Oriented*/BoundingBox)portal.getWorldBound();
+                           Vector3f portalExtent=portalBound.getExtent(null);
+                           float minDimensionValue=Float.MAX_VALUE;
+                           int minValueIndex=-1;
+                           for(int i=0;i<3;i++)
+                               if(portalBound.getExtent(null).get(i)<=minDimensionValue)
+                                   {minDimensionValue=portalExtent.get(i);
+                                    minValueIndex=i;
+                                   }
+                           /*Oriented*/BoundingBox mergedBox=(/*Oriented*/BoundingBox)portalBound.merge(spatial.getWorldBound());                          
+                           Vector3f mergedBoxExtent=mergedBox.getExtent(null);
+                           for(int i=0;i<3;i++)
+                               //if one dimension of the merged bounding volume except 
+                               //the smallest one is bigger than those of the portal
+                               if(i!=minValueIndex && 
+                                  mergedBoxExtent.get(i)>portalExtent.get(i))
+                                   {result=true;
+                                    break;
+                                   }
+                           break;
+                          }
+                  if(!portalFound)
+                      result=true;
+                 }
+            }
+        else
+            result=false;
+        return(result);
+    }
 }

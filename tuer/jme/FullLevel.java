@@ -15,18 +15,25 @@ package jme;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.HashMap;
-
+import java.util.Map.Entry;
 import bean.NodeIdentifier;
-
+import com.jme.image.Texture;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
+import com.jme.scene.Node;
+import com.jme.scene.state.TextureState;
+import com.jme.system.DisplaySystem;
+import com.jme.util.TextureManager;
+import com.jme.util.resource.ResourceLocatorTool;
 
 public final class FullLevel implements Serializable{
 
     
     private static final long serialVersionUID = 1L;
 
-    static{TransientMarkerForXMLSerialization.updateTransientModifierForXMLSerialization(FullLevel.class);}
+    static{Utils.forceHandlingOfTransientModifiersForXMLSerialization(FullLevel.class);}
     
     private Vector3f initialPlayerPosition;
     
@@ -70,7 +77,51 @@ public final class FullLevel implements Serializable{
              try{levelNode=new Level(levelIndex,nodeIdentifiers);} 
              catch(IOException ioe)
              {throw new RuntimeException("The creation of the level has failed!",ioe);}
-             //TODO: use the entity table
+             Node entityNode;
+             EntityParameters entityParam;
+             Vector3f translation,scale;
+             Quaternion rotation;
+             TextureState ts;
+             URL textureURL;
+             for(Entry<Vector3f,String> entry:entityLocationTable.entrySet())
+                 {//reset transform parameters to neutral values
+                  translation=new Vector3f(0.0f,0.0f,0.0f);
+                  scale=new Vector3f(1.0f,1.0f,1.0f);
+                  rotation=new Quaternion().fromAngles(0.0f,0.0f,0.0f);
+                  entityParam=world.getEntityParameterTable().get(entry.getValue());
+                  if(entityParam!=null)
+                      {if(entityParam.getRotation()!=null)
+                           rotation.set(entityParam.getRotation());
+                       if(entityParam.getScale()!=null)
+                           scale.set(entityParam.getScale());
+                       if(entityParam.getTranslation()!=null)
+                           translation.set(entityParam.getTranslation());
+                       if(entityParam.getAlternativeTexturePath()!=null&&!entityParam.getAlternativeTexturePath().equals(""))
+                           {textureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,entityParam.getAlternativeTexturePath());
+                            if(textureURL==null)
+                                textureURL=FullLevel.class.getResource(entityParam.getAlternativeTexturePath());
+                            ts=DisplaySystem.getDisplaySystem().getRenderer().createTextureState();
+                            ts.setEnabled(true);
+                            ts.setTexture(TextureManager.loadTexture(textureURL,
+                                   Texture.MinificationFilter.BilinearNoMipMaps,
+                                   Texture.MagnificationFilter.Bilinear));
+                           }
+                       else
+                           ts=null;       
+                       if(entityParam.getArtificialIntelligenceClassName()!=null)
+                           {//TODO: use the AI
+                            
+                           }
+                      }
+                  else
+                      ts=null;
+                  translation.addLocal(entry.getKey());
+                  entityNode=NodeFactory.getInstance().getNode(entry.getValue(),rotation,scale,translation);
+                  entityNode.setName(entry.getValue());
+                  if(ts!=null)
+                      entityNode.setRenderState(ts);
+                  levelNode.attachDescendant(entityNode);
+                 }
             }       
         return(levelNode);
     }

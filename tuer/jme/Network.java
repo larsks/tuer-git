@@ -43,7 +43,7 @@ public final class Network extends IdentifiedNode{
     }
     
     @Override
-    public void draw(Renderer r){
+    public final void draw(Renderer r){
         if(children!=null)
             {Cell child;
              List<Spatial> cellChildren;
@@ -98,24 +98,38 @@ public final class Network extends IdentifiedNode{
              List<Spatial> markedChildren=new ArrayList<Spatial>();
              Spatial target;
              InternalCellElement internalCellElement;
+             boolean hasToUpdateGeometricState;
              for(int i=0,cSize=children.size();i<cSize;i++)
                  {child=(Cell)children.get(i);           
                   child.updateGeometricState(time,false);
                   cellChildren=child.getChildren();
                        if(cellChildren!=null)
-                           {for(Spatial cellChild:cellChildren)
+                           {int childCount=cellChildren.size();
+                            int childIndex=0;
+                            while(childIndex<childCount)
                                 {//several  cell elements may represent the same node
-                                 internalCellElement=(InternalCellElement)cellChild;
+                                 internalCellElement=(InternalCellElement)cellChildren.get(childIndex);
                                  if(internalCellElement.isShared())
                                      {target=internalCellElement.getSharableSpatial();
                                       if(!markedChildren.contains(target))
                                           {//mark this object to avoid further updates
-                                           markedChildren.add(target);
-                                           cellChild.updateGeometricState(time,false);
+                                           markedChildren.add(target);                               
+                                           hasToUpdateGeometricState=true;
+                                          }
+                                      else
+                                          {hasToUpdateGeometricState=false;
+                                           childIndex++;
                                           }
                                      }
                                  else
-                                     cellChild.updateGeometricState(time,false);
+                                     hasToUpdateGeometricState=true;
+                                 if(hasToUpdateGeometricState)
+                                     {internalCellElement.updateGeometricState(time,false);
+                                      if(internalCellElement.getParent()!=child)
+                                          childCount--;
+                                      else
+                                          childIndex++;                                    
+                                     }
                                 }
                            }
                  }
@@ -141,6 +155,7 @@ public final class Network extends IdentifiedNode{
     }
     
     final List<Cell> getContainingNodesList(Spatial spatial){       
+        //FIXME: use the world bound (build with unshared internal cell elements)
         Cell currentLocation=locate(spatial.getWorldBound().getCenter());
         List<Cell> containingNodesList=new ArrayList<Cell>();
         if(currentLocation!=null)
@@ -149,6 +164,22 @@ public final class Network extends IdentifiedNode{
              containingNodesList.addAll(visitor.containingNodesList);
             }
         return(containingNodesList);
+    }
+    
+    @Override
+    public final boolean hasCollision(Spatial spatial, boolean checkTriangles){
+        boolean result=false;
+        List<Cell> containingNodesList=getContainingNodesList(spatial);
+        if(containingNodesList.isEmpty())
+            result=true;
+        else
+            {for(Cell containingCell:containingNodesList)
+             if(containingCell.hasCollision(spatial, checkTriangles))
+                 {result=true;
+                  break;
+                 }
+            }
+        return(result);
     }
     
     final List</*VisibleCellsLocalizerVisitor.*/FrustumParameters> getFrustumParametersList(){
