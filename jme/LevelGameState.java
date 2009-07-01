@@ -13,21 +13,14 @@
 */
 package jme;
 
-import java.beans.XMLDecoder;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.net.URL;
-import com.jme.image.Texture;
-import com.jme.math.FastMath;
-import com.jme.math.Quaternion;
+import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
-import com.jme.scene.Node;
+import com.jme.scene.CameraNode;
+import com.jme.scene.TriMesh;
 import com.jme.scene.Spatial.CullHint;
-import com.jme.scene.state.TextureState;
+import com.jme.scene.shape.Box;
 import com.jme.system.DisplaySystem;
-import com.jme.util.TextureManager;
-import com.jme.util.resource.ResourceLocatorTool;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.GameState;
 
@@ -37,6 +30,8 @@ public final class LevelGameState extends BasicGameState{
     private ExtendedFirstPersonHandler input;
     
     private long previousTime;
+    
+    private CameraNode playerNode;
 
     
     public LevelGameState(int levelIndex,Camera cam,JMEGameServiceProvider gameServiceProvider){
@@ -44,81 +39,22 @@ public final class LevelGameState extends BasicGameState{
         super("LID"+levelIndex);
         input=new ExtendedFirstPersonHandler(cam,10,1,gameServiceProvider);
         String fullLevelFilename="/xml/"+name+".xml";
-        BufferedInputStream bis=new BufferedInputStream(getClass().getResourceAsStream(fullLevelFilename));
-        XMLDecoder decoder=new XMLDecoder(bis);
-        FullLevel fullLevel=(FullLevel)decoder.readObject();
-        decoder.close();
-        try{bis.close();}
-        catch(IOException ioe)
-        {throw new RuntimeException("Unable to close the file "+fullLevelFilename,ioe);}
-        String fullWorldFilename="/xml/WID0.xml";
-        bis=new BufferedInputStream(getClass().getResourceAsStream(fullWorldFilename));
-        decoder=new XMLDecoder(bis);
-        FullWorld fullWorld=(FullWorld)decoder.readObject();
-        decoder.close();
-        try{bis.close();}
-        catch(IOException ioe)
-        {throw new RuntimeException("Unable to close the file "+fullWorldFilename,ioe);}
+        FullLevel fullLevel=(FullLevel)Utils.decodeObjectInXMLFile(fullLevelFilename);
+        String fullWorldFilename="/xml/WID0.xml";     
+        FullWorld fullWorld=(FullWorld)Utils.decodeObjectInXMLFile(fullWorldFilename);
         Level levelNode=fullLevel.getLevelNode(fullWorld);
         //setup the camera
         cam.setLocation(fullLevel.getInitialPlayerPosition());
-        cam.update();
+        cam.update();       
+        playerNode=new CameraNode("player",cam);
+        playerNode.updateFromCamera();
+        //Box playerBox=new Box("player box",new Vector3f(-0.25f,-0.25f,-0.25f),new Vector3f(0.25f,0.25f,0.25f));
+        Box playerBox=new Box("player box",/*cam.getLocation()*/new Vector3f(),0.25f,0.25f,0.25f);
+        playerNode.attachChild(playerBox);
+        playerNode.setModelBound(new BoundingBox(/*cam.getLocation(),0.25f,0.25f,0.25f*/));
+        playerNode.updateModelBound();          
+        playerNode.updateWorldBound();
         previousTime=System.currentTimeMillis();
-        
-        //load the weapon
-        Node pistolNode=NodeFactory.getInstance().getNode("/jbin/pistol.jbin",new Quaternion().fromAngles(FastMath.PI/2.0f,0.0f,-FastMath.PI/4.0f),new Vector3f(0.001f,0.001f,0.001f),new Vector3f(115.0f,0.0f,220.0f));
-        pistolNode.setName("pistol");
-        levelNode.attachDescendant(pistolNode);
-        
-        Node pistol2Node=NodeFactory.getInstance().getNode("/jbin/pistol2.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.02f,0.02f,0.02f),new Vector3f(115.25f,0.0f,220.0f));
-        pistol2Node.setName("pistol2");
-        levelNode.attachDescendant(pistol2Node);
-        
-        Node pistol3Node=NodeFactory.getInstance().getNode("/jbin/pistol3.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.03f,0.03f,0.03f),new Vector3f(114.5f,0.0f,220.0f));
-        pistol3Node.setName("pistol3");
-        levelNode.attachDescendant(pistol3Node);
-        
-        Node smachNode=NodeFactory.getInstance().getNode("/jbin/smach.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.2f,0.2f,0.2f),new Vector3f(114.0f,0.0f,220.0f));
-        smachNode.setName("smach");
-        levelNode.attachDescendant(smachNode);
-        
-        Node uziNode=NodeFactory.getInstance().getNode("/jbin/uzi.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.2f,0.2f,0.2f),new Vector3f(113.5f,0.0f,220.0f));
-        uziNode.setName("uzi");
-        levelNode.attachDescendant(uziNode);
-        
-        /*Node ak47Node=NodeFactory.getInstance().getNode("/jbin/AK47.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(0.1f,0.1f,0.1f),new Vector3f(114.25f,0.0f,220.0f));
-        ak47Node.setName("ak47");
-        System.out.println("world bound: "+ak47Node.getWorldBound());
-        levelNode.attachDescendant(ak47Node);*/
-        
-        Node laserNode=NodeFactory.getInstance().getNode("/jbin/laser.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.03f,0.03f,0.03f),new Vector3f(114.75f,0.0f,220.0f));
-        laserNode.setName("laser");
-        levelNode.attachDescendant(laserNode);
-        //System.out.println("world bound: "+laserNode.getWorldBound());
-        /*Node creatureNode=NodeFactory.getInstance().getNode("/jbin/creature.jbin",new Quaternion().fromAngles(0.0f,0.0f,0.0f),new Vector3f(1.0f,1.0f,1.0f),new Vector3f(117f,0.0f,222.0f));
-        creatureNode.setName("creature");
-        levelNode.attachDescendant(creatureNode);*/
-        
-        Node gigerAlienNode=NodeFactory.getInstance().getNode("/jbin/giger_alien.jbin",null,new Vector3f(0.3f,0.3f,0.3f),new Vector3f(117f,-0.5f,220.0f));
-        gigerAlienNode.setName("giger alien");
-        levelNode.attachDescendant(gigerAlienNode);
-        
-        Node copNode=NodeFactory.getInstance().getNode("/jbin/cop.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.5f,0.5f,0.5f),new Vector3f(116.0f,0.0f,220.0f));
-        copNode.setName("cop");
-        levelNode.attachDescendant(copNode);
-        
-        Node agentNode=NodeFactory.getInstance().getNode("/jbin/agent.jbin",new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f),new Vector3f(0.018f,0.018f,0.018f),new Vector3f(118.0f,-0.07f,220.0f));
-        agentNode.setName("agent");
-        //System.out.println("world bound: "+agentNode.getWorldBound());
-        URL agentTextureURL=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"agent.png");
-        TextureState ts=DisplaySystem.getDisplaySystem().getRenderer().createTextureState();
-        ts.setEnabled(true);
-        ts.setTexture(TextureManager.loadTexture(agentTextureURL,
-                Texture.MinificationFilter.BilinearNoMipMaps,
-                Texture.MagnificationFilter.Bilinear));
-        agentNode.setRenderState(ts);
-        levelNode.attachDescendant(agentNode);
-        
         rootNode.attachChild(levelNode);
         rootNode.updateRenderState();
         rootNode.updateGeometricState(0.0f,true);
@@ -136,11 +72,16 @@ public final class LevelGameState extends BasicGameState{
     
     @Override
     public final void update(final float tpf){
-        super.update(tpf);
+        super.update(tpf);       
         //TODO: save the previous location
         input.update(tpf);
         //TODO: save the next location
         //TODO: test collisions
+        playerNode.updateFromCamera();
+        playerNode.updateGeometricState(tpf,true);
+        //workaround necessary only for bounding sphere and bounding box
+        //playerNode.getWorldBound().getCenter().set(DisplaySystem.getDisplaySystem().getRenderer().getCamera().getLocation());
+        System.out.println("collision: "+((Level)rootNode.getChild(0)).hasCollision(playerNode,false));
     }
     
     @Override

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
@@ -98,6 +99,17 @@ public final class Level extends IdentifiedNode{
             if(nodeID.getSecondaryCellID()!=NodeIdentifier.unknownID)
             {portalModelFilename=nodeID.toString()+".jbin";
              model=(Spatial)BinaryImporter.getInstance().load(Level.class.getResource("/jbin/"+portalModelFilename));
+             //FIXME: rather use an oriented bounding box, follow these steps
+             //       - get the normal of a triangle composing the portal
+             //       - get 2 vertices of this triangle
+             //       - compute a vector with these vertices
+             //       - use the cross product to compute a third vector
+             //       - normalize the 3 vectors
+             //       - make a matrix with them
+             //       - use the invert of this matrix as a rotation matrix on the portal
+             //       - compute the oriented bounding box
+             //       - use the matrix as a rotation matrix on the portal
+             //       - update the oriented bounding box
              model.setModelBound(new BoundingBox());
              model.updateModelBound();
              if((portalsList=portalsListsTable.get(nodeID.getNetworkID()))==null)
@@ -323,6 +335,23 @@ public final class Level extends IdentifiedNode{
             }
     }
     
+    @Override
+    public final boolean hasCollision(Spatial spatial, boolean checkTriangles){
+        boolean result=false;
+        List<Cell> containingNodesList=getContainingNodesList(spatial,null);
+        if(containingNodesList.isEmpty())
+            result=true;
+        else
+            {result=false;
+             for(Cell containingCell:containingNodesList)
+                 if(containingCell.hasCollision(spatial,checkTriangles))
+                     {result=true;
+                      break;
+                     }
+            }       
+        return(result);
+    }
+    
     private static final class DescendantController extends Controller{
 
         
@@ -334,8 +363,6 @@ public final class Level extends IdentifiedNode{
         
         private List<Cell> containingCellsList;
         
-        private Cell previousLocation;
-        
         private HashMap<Cell,InternalCellElement> cloneMap;
         
         private InternalCellElementPool clonePool;
@@ -345,7 +372,6 @@ public final class Level extends IdentifiedNode{
             this.monitored3DObject=spatial;
             this.containingCellsList=new ArrayList<Cell>();
             this.level=level;
-            this.previousLocation=null;
             this.cloneMap=new HashMap<Cell, InternalCellElement>();
             this.clonePool=new InternalCellElementPool(spatial,this);
             //force an initial update to ensure this spatial has a parent
@@ -354,11 +380,9 @@ public final class Level extends IdentifiedNode{
         
         @Override
         public final void update(float time){
-            List<Cell> currentContainingCellsList=level.getContainingNodesList(monitored3DObject,previousLocation);
+            List<Cell> currentContainingCellsList=level.getContainingNodesList(monitored3DObject,null);
             InternalCellElement cellElement;
-            if(!currentContainingCellsList.isEmpty())
-                previousLocation=currentContainingCellsList.get(0);
-            else
+            if(currentContainingCellsList.isEmpty())
                 throw new UnsupportedOperationException("an object cannot be updated anymore when it goes outside the scene graph");
             for(Cell cell:containingCellsList)
                 if(!currentContainingCellsList.contains(cell))

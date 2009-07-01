@@ -13,12 +13,9 @@
 */
 package jme;
 
-import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -231,10 +228,11 @@ class JMEDataPreprocessor{
         param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
         param.setScale(new Vector3f(0.018f,0.018f,0.018f));
         param.setTranslation(new Vector3f(0.0f,-0.07f,-0.0f));
+        param.setAlternativeTexturePath("agent.png");
         entityParameterTable.put("/jbin/agent.jbin",param);    
         FullWorld world=new FullWorld();
         world.setEntityParameterTable(entityParameterTable);
-        encodeObjectInFile(world,worldFilename);
+        Utils.encodeObjectInFile(world,worldFilename);
         if(levelName!=null)
             {float[] spawnPos=null;
              DataInputStream in=new DataInputStream(new BufferedInputStream(JMEDataPreprocessor.class.getResourceAsStream("/"+tilesFilename)));
@@ -268,29 +266,8 @@ class JMEDataPreprocessor{
              level.setNodeIdentifiers(nodeIdentifiers);
              level.setInitialPlayerPosition(new Vector3f(spawnPos[0],spawnPos[1],spawnPos[2]));
              level.setEntityLocationTable(entityLocationTable);
-             encodeObjectInFile(level,levelFilename);
+             Utils.encodeObjectInFile(level,levelFilename);
             }       
-    }
-    
-    private static final void encodeObjectInFile(Object o,String filename){
-        BufferedOutputStream bos=null;
-        File file=new File(filename);   
-        try{if(!file.exists())
-                if(!file.createNewFile())
-                    throw new IOException("Unable to create the file "+filename);
-            bos=new BufferedOutputStream(new FileOutputStream(file));
-            XMLEncoder encoder=new XMLEncoder(bos);
-            encoder.writeObject(o);
-            encoder.close();
-           }
-        catch(IOException ioe)
-        {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
-        finally
-        {if(bos!=null)
-             try{bos.close();}
-             catch(IOException ioe)
-             {throw new RuntimeException("Unable to close the file "+filename,ioe);}           
-        }
     }
     
     private static final void convert(String sourceFilename,String MTLlibFilename,String textureFilename,String destFilename,Format format){

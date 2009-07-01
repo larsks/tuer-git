@@ -17,13 +17,20 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public final class TransientMarkerForXMLSerialization{
-
+public final class Utils{
     
-    public static final void updateTransientModifierForXMLSerialization(Class<?> myClass){
+    
+    public static final void forceHandlingOfTransientModifiersForXMLSerialization(Class<?> myClass){
         BeanInfo beanInfo = null;
         try{beanInfo=Introspector.getBeanInfo(myClass);} 
         catch(IntrospectionException ie)
@@ -44,5 +51,37 @@ public final class TransientMarkerForXMLSerialization{
                               }
                      }
             }
+    }
+    
+    public static final Object decodeObjectInXMLFile(String path){
+        BufferedInputStream bis=new BufferedInputStream(Utils.class.getResourceAsStream(path));
+        XMLDecoder decoder=new XMLDecoder(bis);
+        Object resultingObject=decoder.readObject();
+        decoder.close();
+        try{bis.close();}
+        catch(IOException ioe)
+        {throw new RuntimeException("Unable to close the file "+path,ioe);}
+        return(resultingObject);
+    }
+
+    public static final void encodeObjectInFile(Object o,String filename){
+        BufferedOutputStream bos=null;
+        File file=new File(filename);   
+        try{if(!file.exists())
+                if(!file.createNewFile())
+                    throw new IOException("Unable to create the file "+filename);
+            bos=new BufferedOutputStream(new FileOutputStream(file));
+            XMLEncoder encoder=new XMLEncoder(bos);
+            encoder.writeObject(o);
+            encoder.close();
+           }
+        catch(IOException ioe)
+        {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
+        finally
+        {if(bos!=null)
+             try{bos.close();}
+             catch(IOException ioe)
+             {throw new RuntimeException("Unable to close the file "+filename,ioe);}           
+        }
     }
 }
