@@ -137,6 +137,8 @@ public final class Level extends IdentifiedNode{
                   cellNode=new Cell(levelID,networkIndex,nodeID.getCellID(),cellModel);
                   //hide it by default
                   cellNode.setCullHint(CullHint.Always);
+                  //FIXME: set a bounding box to the cell
+                  //FIXME: add each wall separately
                   //add this node into its list of children
                   networkNode.attachChild(cellNode);
                  }

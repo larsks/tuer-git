@@ -72,6 +72,7 @@ public final class Cell extends IdentifiedNode{
     boolean contains(Vector3f point){
         boolean result;
         if(children!=null&&children.size()>0)
+            //FIXME use rather its bounding box
             result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
         else
             result=false;
@@ -97,13 +98,15 @@ public final class Cell extends IdentifiedNode{
              //perform deeper checks, look at its children
              //skip the first internal element as it has been checked before
              InternalCellElement cellElement;
-             for(int childIndex=1;childIndex<children.size();childIndex++)
+             for(int childIndex=0;childIndex<children.size();childIndex++)
                  {cellElement=(InternalCellElement)getChild(childIndex);
-                  if(spatial.hasCollision(cellElement,checkTriangles))
+                  //only use shared objects (all objects except walls)
+                  if(cellElement.isShared()&&spatial.hasCollision(cellElement,checkTriangles))
                       {result=true;
                        break;
                       }
                  }
+             //FIXME rather check collisions with each wall
              //if the spatial is not completely inside the cell
              BoundingVolume mergedBoundingVolume=wallsBound.merge(spatial.getWorldBound());
              if(!result && mergedBoundingVolume.getVolume()>wallsBound.getVolume())
