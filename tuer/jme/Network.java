@@ -391,7 +391,7 @@ public final class Network extends IdentifiedNode{
         @Override
         protected final boolean hasToPush(Cell son,Portal portal){
             //check if the spatial intersects with the portal
-            boolean result=spatial.getWorldBound().intersects(portal.getWorldBound());
+            boolean result=spatial.getWorldBound().intersects(portal.getChild(0).getWorldBound());
             if(result)
                 containingNodesList.add(son);
             return(result);

@@ -17,10 +17,8 @@ import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
 import com.jme.scene.CameraNode;
-import com.jme.scene.TriMesh;
 import com.jme.scene.Spatial.CullHint;
 import com.jme.scene.shape.Box;
-import com.jme.system.DisplaySystem;
 import com.jmex.game.state.BasicGameState;
 import com.jmex.game.state.GameState;
 

@@ -161,11 +161,13 @@ public final class NetworkSet implements Serializable{
      * @param useJOGLTextureCoordinatesVerticalOrder true if the vertical order of texture coordinates is JOGL's one
      * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
      * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
+     * @param useOneGroupPerQuad true if one group per quad is created
      */
     final void writeObjFiles(String filenamepattern,String textureFilename,
-            boolean grouped,boolean redundant,boolean useTriangles,
-            boolean useJOGLTextureCoordinatesVerticalOrder,
-            boolean writePortals,String MTLFilename){
+            final boolean grouped,final boolean redundant,final boolean useTriangles,
+            final boolean useJOGLTextureCoordinatesVerticalOrder,
+            final boolean writePortals,String MTLFilename,
+            final boolean useOneGroupPerQuad){
         ArrayList<INodeIdentifier> nodeIDList=new ArrayList<INodeIdentifier>();
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
@@ -177,6 +179,7 @@ public final class NetworkSet implements Serializable{
         int facePrimitiveCount=0;
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
+        String objname,objfilename;
         if(grouped)
             {if(writePortals)
                  System.out.println("[WARNING] \"writePortals\" flag ignored as available only in ungrouped mode");
@@ -188,7 +191,10 @@ public final class NetworkSet implements Serializable{
              pw=new PrintWriter(bos);
              //declare the MTL file
              if(useTexture)
-                 pw.println("mtllib "+MTLFilename);            
+                 pw.println("mtllib "+MTLFilename);
+             objname=filenamePrefix;
+             //write the object name (o objname)
+             pw.println("o "+objname);
              if(redundant)
                  {for(Network network:networksList)
                       for(Full3DCell cell:network.getCellsList())
@@ -251,37 +257,15 @@ public final class NetworkSet implements Serializable{
                            }
                        pw.println("usemtl "+materialName);
                        //smoothing
-                       pw.println("s 1");           
-                       //write faces (we already know the count of face primitives)
-                       if(useTriangles)
-                           for(int i=0,tmp;i<facePrimitiveCount;i++)
-                               {tmp=4*i+1;
-                                pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
-                                pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
-                               }
-                       else
-                           for(int i=0,tmp;i<facePrimitiveCount;i++)
-                               {tmp=4*i+1;
-                                pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
-                               }
+                       pw.println("s 1");
                       }
-                  else
-                      {//write faces (we already know the count of face primitives)       
-                       if(useTriangles)
-                           for(int i=0,tmp;i<facePrimitiveCount;i++)
-                               {tmp=4*i+1;
-                                pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
-                                pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
-                               }
-                       else
-                           for(int i=0,tmp;i<facePrimitiveCount;i++)
-                               {tmp=4*i+1;
-                                pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
-                               }
-                      }
+                  writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad);
                  }
              else
-                 {HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable=new HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>>();
+                 {//FIXME: remove this restriction
+                  if(useOneGroupPerQuad)
+                      System.out.println("[WARNING] \"useOneGroupPerQuad\" flag ignored as available only in redundant mode");
+                  HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable=new HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>>();
                   int uniqueVerticesIndicesCount=0;                     
                   int duplicateVerticesIndicesCount=0;
                   System.out.println("use NetworkStructuralRedundancyAnalyzer...");
@@ -352,8 +336,7 @@ public final class NetworkSet implements Serializable{
              if(levelID==-1)
                  System.out.println("level index unknown!");       
              int networkID=0,cellID;
-             ArrayList<String> subObjFilenameList=new ArrayList<String>();
-             String objname,objfilename;
+             ArrayList<String> subObjFilenameList=new ArrayList<String>();             
              for(Network network:networksList)
                  {cellID=0;
                   for(Full3DCell cell:network.getCellsList())
@@ -431,37 +414,8 @@ public final class NetworkSet implements Serializable{
                                  pw.println("usemtl "+materialName);
                                  //smoothing
                                  pw.println("s 1");
-                                 //for each list of walls
-                                     //for each wall
-                                         //write faces (f v1/vt1)
-                                 if(useTriangles)
-                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                         {tmp=4*i+1;                                
-                                          pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
-                                          pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
-                                         }
-                                 else
-                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                         {tmp=4*i+1;
-                                          pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
-                                         }
                                 }
-                            else
-                                {//for each list of walls
-                                     //for each wall
-                                         //write faces (f v1)                       
-                                 if(useTriangles)
-                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                         {tmp=4*i+1;
-                                          pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
-                                          pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
-                                         }  
-                                 else
-                                     for(int i=0,tmp;i<facePrimitiveCount;i++)
-                                         {tmp=4*i+1;
-                                          pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
-                                         }
-                                }     
+                            writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -549,6 +503,7 @@ public final class NetworkSet implements Serializable{
                   //for each portal
                   Full3DPortal portal;
                   int portalVerticesCount;
+                  facePrimitiveCount=1;
                   for(Map.Entry<String,Full3DPortal> portalEntry:portalsMap.entrySet())
                       {objname=portalEntry.getKey();
                        objfilename=objname+".obj";
@@ -563,24 +518,13 @@ public final class NetworkSet implements Serializable{
                             pw.println("o "+objname);
                             portal=portalEntry.getValue();
                             portalVerticesCount=portal.getPortalVertices().length;
+                            if(portalVerticesCount!=4)
+                                System.out.println("a portal can only be composed of a quad");
                             //write its "v" primitives
                             for(float[] portalVertex:portal.getPortalVertices())
                                 pw.println("v "+portalVertex[2]+" "+portalVertex[3]+" "+portalVertex[4]);
-                            //write its "f" primitives
-                            if(useTriangles)
-                                {pw.println("f 1 2 3");
-                                 if(portalVerticesCount>=4)
-                                     {pw.println("f 3 4 1");
-                                      if(portalVerticesCount>4)
-                                          System.out.println("polygon not yet supported as portal");
-                                     }
-                                }
-                            else
-                                {pw.print("f");
-                                 for(int vertexIndex=1;vertexIndex<=portalVerticesCount;vertexIndex++)
-                                     pw.print(" "+vertexIndex);
-                                 pw.println("");
-                                }
+                            //write its "f" primitives (ignore textures)
+                            writeFaces(pw,objname,facePrimitiveCount,false,useTriangles,useOneGroupPerQuad);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -597,6 +541,72 @@ public final class NetworkSet implements Serializable{
                  }
              System.out.println("Ends writing OBJ Wavefront files.");
             }
+    }
+    
+    private final void writeFaces(PrintWriter pw,final String objname,final int facePrimitiveCount,final boolean useTexture,
+            final boolean useTriangles,final boolean useOneGroupPerQuad){
+        if(useOneGroupPerQuad)
+            {if(useTexture)
+                 {if(useTriangles)
+                      for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
+                          {tmp=4*i+1;
+                           pw.println("g "+objname+"EID"+eid);
+                           eid++;
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
+                           pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
+                          }
+                  else
+                      for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
+                          {tmp=4*i+1;
+                           pw.println("g "+objname+"EID"+eid);
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                          }
+                 }
+             else
+                 {if(useTriangles)
+                      for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
+                          {tmp=4*i+1;
+                           pw.println("g "+objname+"EID"+eid);
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
+                           pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
+                          }
+                  else
+                      for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
+                          {tmp=4*i+1;
+                           pw.println("g "+objname+"EID"+eid);
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                          }
+                 }
+
+            }
+        else
+            {if(useTexture)
+                 {if(useTriangles)
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;                                
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
+                           pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
+                          }
+                  else
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
+                          }
+                 }
+             else
+                 {if(useTriangles)
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
+                           pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
+                          }
+                  else
+                      for(int i=0,tmp;i<facePrimitiveCount;i++)
+                          {tmp=4*i+1;
+                           pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
+                          }
+                 }
+            }       
     }
     
     private static final class VertexData{
