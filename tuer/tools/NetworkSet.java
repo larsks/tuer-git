@@ -162,12 +162,13 @@ public final class NetworkSet implements Serializable{
      * @param writePortals true if the portals have to be written into files too (available only when the parameter "grouped" is at false)
      * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
      * @param useOneGroupPerQuad true if one group per quad is created
+     * @param smoothing smoothing group (see the description of the OBJ format)
      */
     final void writeObjFiles(String filenamepattern,String textureFilename,
             final boolean grouped,final boolean redundant,final boolean useTriangles,
             final boolean useJOGLTextureCoordinatesVerticalOrder,
             final boolean writePortals,String MTLFilename,
-            final boolean useOneGroupPerQuad){
+            final boolean useOneGroupPerQuad,final int smoothing){
         ArrayList<INodeIdentifier> nodeIDList=new ArrayList<INodeIdentifier>();
         final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
         final int slashIndex=filenamepattern.lastIndexOf("/");
@@ -175,7 +176,7 @@ public final class NetworkSet implements Serializable{
         final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;       
         final String materialName=MTLFilename.substring(0,MTLFilename.lastIndexOf("."));
         if(useTexture)
-            TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,textureFilename);
+            TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,new String[]{textureFilename},null);
         int facePrimitiveCount=0;
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
@@ -255,11 +256,8 @@ public final class NetworkSet implements Serializable{
                                         pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                    }
                            }
-                       pw.println("usemtl "+materialName);
-                       //smoothing
-                       pw.println("s 1");
                       }
-                  writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad);
+                  writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad,materialName,smoothing);
                  }
              else
                  {//FIXME: remove this restriction
@@ -301,9 +299,7 @@ public final class NetworkSet implements Serializable{
                            for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
                                pw.println("vt "+textureCoordData.textureCoord[0]+" "+(1.0f-textureCoordData.textureCoord[1]));
                        System.out.println("Texture coordinates written"); 
-                       pw.println("usemtl "+materialName);
-                       //smoothing
-                       pw.println("s 1");
+                       writeUseMaterialAndSmoothing(pw,materialName,smoothing);
                        System.out.println("use NetworkTexturedFaceDataWriter...");
                        for(Network network:networksList)
                            new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,pw,useTriangles).visit();
@@ -411,11 +407,8 @@ public final class NetworkSet implements Serializable{
                                       for(float[] wall:cell.getTopWalls())
                                           pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                      }
-                                 pw.println("usemtl "+materialName);
-                                 //smoothing
-                                 pw.println("s 1");
                                 }
-                            writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad);
+                            writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad,materialName,smoothing);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -524,7 +517,7 @@ public final class NetworkSet implements Serializable{
                             for(float[] portalVertex:portal.getPortalVertices())
                                 pw.println("v "+portalVertex[2]+" "+portalVertex[3]+" "+portalVertex[4]);
                             //write its "f" primitives (ignore textures)
-                            writeFaces(pw,objname,facePrimitiveCount,false,useTriangles,useOneGroupPerQuad);
+                            writeFaces(pw,objname,facePrimitiveCount,false,useTriangles,false,null,smoothing);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -543,15 +536,17 @@ public final class NetworkSet implements Serializable{
             }
     }
     
-    private final void writeFaces(PrintWriter pw,final String objname,final int facePrimitiveCount,final boolean useTexture,
-            final boolean useTriangles,final boolean useOneGroupPerQuad){
+    private final void writeFaces(PrintWriter pw,final String objname,
+            final int facePrimitiveCount,final boolean useTexture,
+            final boolean useTriangles,final boolean useOneGroupPerQuad,
+            final String materialName,final int smoothing){
         if(useOneGroupPerQuad)
             {if(useTexture)
                  {if(useTriangles)
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
                           {tmp=4*i+1;
                            pw.println("g "+objname+"EID"+eid);
-                           eid++;
+                           writeUseMaterialAndSmoothing(pw,materialName,smoothing);
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
                            pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
                           }
@@ -559,6 +554,7 @@ public final class NetworkSet implements Serializable{
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
                           {tmp=4*i+1;
                            pw.println("g "+objname+"EID"+eid);
+                           writeUseMaterialAndSmoothing(pw,materialName,smoothing);
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
                           }
                  }
@@ -581,7 +577,8 @@ public final class NetworkSet implements Serializable{
             }
         else
             {if(useTexture)
-                 {if(useTriangles)
+                 {writeUseMaterialAndSmoothing(pw,materialName,smoothing);
+                  if(useTriangles)
                       for(int i=0,tmp;i<facePrimitiveCount;i++)
                           {tmp=4*i+1;                                
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
@@ -607,6 +604,13 @@ public final class NetworkSet implements Serializable{
                           }
                  }
             }       
+    }
+    
+    private final void writeUseMaterialAndSmoothing(PrintWriter pw,final String materialName,
+            final int smoothing){
+        pw.println("usemtl "+materialName);
+        //smoothing
+        pw.println("s "+smoothing);
     }
     
     private static final class VertexData{
