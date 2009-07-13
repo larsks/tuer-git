@@ -355,7 +355,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename,false);
+        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename,true,1);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
@@ -971,7 +971,7 @@ public final class TilesGenerator implements Runnable{
         boolean useTexture=textureFilename!=null&&!textureFilename.equals("");
         //write the MTL file first
         if(useTexture)
-            writeDummyMTLFile(directoryname,MTLFilename,textureFilename);
+            writeDummyMTLFile(directoryname,MTLFilename,new String[]{textureFilename},null);
         //then, write the OBJ file that uses this MTL file
         BufferedOutputStream bos=null;
         try{bos=createNewFileFromLocalPathAndGetBufferedStream(objFilePath+".obj");}
@@ -1071,7 +1071,10 @@ public final class TilesGenerator implements Runnable{
         System.out.println("Ends writing Wavefront object "+filenamePrefix+".obj.");
     }
     
-    static final void writeDummyMTLFile(String directoryname,String MTLFilename,String textureFilename){
+    static final void writeDummyMTLFile(final String directoryname,
+            final String MTLFilename,
+            final String[] textureFilenames,
+            final String[] materialNames){
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
         System.out.println("Starts writing MTL file "+MTLFilename+" ...");
@@ -1079,15 +1082,30 @@ public final class TilesGenerator implements Runnable{
         catch(IOException ioe)
         {ioe.printStackTrace();return;}
         pw=new PrintWriter(bos);
-        //write a MTL file
-        pw.println("newmtl "+MTLFilename.substring(0,MTLFilename.lastIndexOf(".")));
-        pw.println("Ns 0");
-        pw.println("Ka 0.000000 0.000000 0.000000");
-        pw.println("Kd 0.8 0.8 0.8");
-        pw.println("Ks 0.8 0.8 0.8");
-        pw.println("d 1");
-        pw.println("illum 2");
-        pw.println("map_Kd "+textureFilename.substring(textureFilename.lastIndexOf("/")+1));
+        boolean useCustomMaterialNames=materialNames!=null&&materialNames.length>0;
+        boolean useTextureFilenames=textureFilenames!=null&&textureFilenames.length>0;
+        final int materialCount=useTextureFilenames?textureFilenames.length:1;
+        final String defaultMaterialName=MTLFilename.substring(0,MTLFilename.lastIndexOf("."));
+        String materialName;
+        for(int index=0;index<materialCount;index++)
+            {//use provided material name if any, otherwise use the filename
+             if(useCustomMaterialNames)
+                 if(index<materialNames.length)
+                     materialName=materialNames[index];
+                 else
+                     materialName=defaultMaterialName;
+             else
+                 materialName=defaultMaterialName;
+             pw.println("newmtl "+materialName);
+             pw.println("Ns 0");
+             pw.println("Ka 0.000000 0.000000 0.000000");
+             pw.println("Kd 0.8 0.8 0.8");
+             pw.println("Ks 0.8 0.8 0.8");
+             pw.println("d 1");
+             pw.println("illum 2");
+             if(useTextureFilenames)
+                 pw.println("map_Kd "+textureFilenames[index].substring(textureFilenames[index].lastIndexOf("/")+1));
+            }       
         System.out.println("Ends writing MTL file "+MTLFilename+".");
         try{pw.close();
             bos.close();

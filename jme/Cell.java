@@ -51,10 +51,15 @@ public final class Cell extends IdentifiedNode{
      * @param model set of walls
      */
     public Cell(int levelID,int networkID,int cellID,Spatial model){
-        super(levelID,networkID,cellID);
+        super(levelID,networkID,cellID);       
         portalsList=new ArrayList<Portal>();
         if(model!=null)
+            //FIXME: add each wall separately
             attachChild(new InternalCellElement((Geometry)model,false));
+        //FIXME: set a bounding box to the cell
+        //updateWorldBound();
+        //hide it by default (don't do it earlier because it caused a regression)
+        setCullHint(CullHint.Always);
     }
     
     void addPortal(Portal portal){
@@ -73,6 +78,7 @@ public final class Cell extends IdentifiedNode{
         boolean result;
         if(children!=null&&children.size()>0)
             //FIXME use rather its bounding box
+            //result=getWorldBound().contains(point);
             result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
         else
             result=false;
@@ -100,13 +106,13 @@ public final class Cell extends IdentifiedNode{
              InternalCellElement cellElement;
              for(int childIndex=0;childIndex<children.size();childIndex++)
                  {cellElement=(InternalCellElement)getChild(childIndex);
+                  //FIXME rather check collisions with each wall (remove the first test)
                   //only use shared objects (all objects except walls)
                   if(cellElement.isShared()&&spatial.hasCollision(cellElement,checkTriangles))
                       {result=true;
                        break;
                       }
                  }
-             //FIXME rather check collisions with each wall
              //if the spatial is not completely inside the cell
              BoundingVolume mergedBoundingVolume=wallsBound.merge(spatial.getWorldBound());
              if(!result && mergedBoundingVolume.getVolume()>wallsBound.getVolume())

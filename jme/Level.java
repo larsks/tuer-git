@@ -63,7 +63,7 @@ public final class Level extends IdentifiedNode{
     
     @Deprecated
     public Level(int levelID,NodeIdentifier[] nodeIdentifiers)throws IOException{
-        //hide it by default
+        //show it by default
         this.setCullHint(CullHint.Never);
         HashMap<Integer,List<Spatial>> cellsListsTable=new HashMap<Integer,List<Spatial>>();
         List<Spatial> cellsList;
@@ -73,23 +73,23 @@ public final class Level extends IdentifiedNode{
         for(NodeIdentifier nodeID:nodeIdentifiers)
             //check if the node is a cell
             if(nodeID.getSecondaryCellID()==NodeIdentifier.unknownID)
-            {cellModelFilename=nodeID.toString()+".jbin";
-             model=(Spatial)BinaryImporter.getInstance().load(Level.class.getResource("/jbin/"+cellModelFilename));
-             model.setModelBound(new BoundingBox());
-             model.updateModelBound();
-             //Activate back face culling
-             model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
-             ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
-             model.updateRenderState();
-             //Use VBO if the required extension is available
-             ((TriMesh)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
-             model.lock();
-             if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
-                 {cellsList=new ArrayList<Spatial>();
-                  cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
-                 }
-             cellsList.add(model);         
-            }           
+                {cellModelFilename=nodeID.toString()+".jbin";
+                 model=(Spatial)BinaryImporter.getInstance().load(Level.class.getResource("/jbin/"+cellModelFilename));
+                 model.setModelBound(new BoundingBox());
+                 model.updateModelBound();
+                 //Activate back face culling
+                 model.setRenderState(DisplaySystem.getDisplaySystem().getRenderer().createCullState());
+                 ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
+                 model.updateRenderState();
+                 //Use VBO if the required extension is available
+                 ((TriMesh)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
+                 model.lock();
+                 if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
+                     {cellsList=new ArrayList<Spatial>();
+                     cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
+                     }
+                 cellsList.add(model);         
+                }           
         //load the portals from the files
         HashMap<Integer,List<Spatial>> portalsListsTable=new HashMap<Integer,List<Spatial>>();
         List<Spatial> portalsList;
@@ -135,10 +135,6 @@ public final class Level extends IdentifiedNode{
                  {nodeID=NodeIdentifier.getInstance(cellModel.getName());
                   //create a node instance of the class Cell (JME)                
                   cellNode=new Cell(levelID,networkIndex,nodeID.getCellID(),cellModel);
-                  //hide it by default
-                  cellNode.setCullHint(CullHint.Always);
-                  //FIXME: set a bounding box to the cell
-                  //FIXME: add each wall separately
                   //add this node into its list of children
                   networkNode.attachChild(cellNode);
                  }
