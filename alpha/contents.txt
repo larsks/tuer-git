@@ -1,0 +1,19 @@
+
+      Contents of the compressed archive:
+      =================================
+
+com         -  Ogg Vorbis sound loader classes
+drawer      -  drawing classes based on OpenGL
+md3         -  test version of my MD3 viewer
+texture     -  game images
+snd         -  game sound,
+               both as .au for JDK1 and .ogg for JDK2.
+               Search the web for "OggEnc",
+               or Ogg Vorbis in general,
+               about getting a free .wav to .ogg encoder.
+main        -  game and engine main source and classes
+tools       -  tool source and classes mainly for the future scenegraph (mostly unused)
+tuer.jar    -  game and engine classes again,
+               packed together in one file
+build.xml   -  ANT script to compile and test the game
+
