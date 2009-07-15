@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+
+<!-- ===================================================================== -->
+<!-- TUER                                                                  -->
+<!-- Ant 1.5 build file                                                    -->
+<!-- ===================================================================== -->
+
+<project name="TUER" default="build" basedir=".">
+
+    <property name="basedir" value="."/>
+    <property name="srcdir" value="."/>
+    <property name="destdir" value="."/>
+	<property name="zipdestdir" value=".."/>
+	<property name="alias" value="xxxxxxxx"/>
+	<property name="keystore" value="xxx"/>
+	<property name="keypass" value="xxxxxxx"/>
+	<property name="storepass" value="xxxxxxx"/>
+	<property name="dname" value="x"/>
+	<property name="jogllibpath" value="/home/julien/Documents/installation/jogl-1.1.1-linux-i586/lib/"/>
+
+    <!-- Allow user to override properties without editing this file -->
+    <property file="${user.home}/.ant.properties" />
+
+
+    <!-- ================================================================= -->
+    <!-- Compile                                                           -->
+    <!-- ================================================================= -->
+    <!-- Temporarily, the JME version is ignored -->
+	<!-- excludes="jme/" -->
+	<target name="compile" description="Compiles the source code">
+        <javac srcdir="${srcdir}"       	   
+               destdir="${destdir}"
+               debug="on" >
+            <include name="**/*.java"/>
+        </javac>
+
+    </target>
+
+
+    <!-- ================================================================= -->
+    <!-- Clean                                                             -->
+    <!-- ================================================================= -->
+    <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
+    	<delete>
+    	    <fileset dir="${destdir}" includes="**/*.class" />
+    		<fileset dir="${destdir}" includes="**/*.data" />
+    	</delete>
+    	<delete dir="${destdir}/snap" failonerror="false" />
+    	<delete dir="${destdir}/xml" failonerror="false" />
+    	<!-- delete only the generated files, not the artworks -->
+    	<delete failonerror="false">
+    	    <fileset dir="${destdir}/obj" includes="**/LID0*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/bonsai*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/chair*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/flower*"/>
+    		<fileset dir="${destdir}/obj" includes="**/lamp*"/>
+    		<fileset dir="${destdir}/obj" includes="**/rocket*"/>
+    		<fileset dir="${destdir}/obj" includes="**/rocketLauncher*"/>
+    		<fileset dir="${destdir}/obj" includes="**/table*"/>
+    		<fileset dir="${destdir}/obj" includes="**/unbreakableObject*"/>
+    	    <fileset dir="${destdir}/obj" includes="**/vendingMachine*"/>
+    		<!-- generated textures -->
+    		<fileset file="${destdir}/texture/ceilTexture.png"/>
+    		<fileset file="${destdir}/texture/floorTexture.png"/>	
+    		<fileset file="${destdir}/texture/wallTexture0.png"/>
+    	</delete>
+    	<delete dir="${destdir}/data" failonerror="false" />
+    	<delete dir="${destdir}/jbin" failonerror="false" />
+    	<delete file="${destdir}/tuer.jar" failonerror="false" />
+    </target>
+
+	<!-- ================================================================= -->
+	<!-- Dist                                                              -->
+	<!-- ================================================================= -->
+	<target name="dist" depends="compile" description="Creates the java archive">
+		<jar destfile="tuer.jar" basedir="${destdir}" 
+			includes="**/*.class" 
+			compress="false">
+			<include name="**/*.png" />
+			<include name="**/*.jpg" />
+			<include name="**/*.gif" />
+			<include name="**/*.data"/>
+			<include name="**/*.txt" />
+			<include name="**/*.ogg" />			
+			<include name="**/*.xml" />
+			<include name="**/*.obj" />
+			<include name="**/*.jbin"/>
+			<include name="**/*.mtl" />
+			<manifest>
+			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- ================================================================= -->
+	<!-- Dist-jme                                                          -->
+	<!-- ================================================================= -->
+	<target name="dist-jme" depends="compile" description="Creates the java archive of the EXPERIMENTAL VERSION">
+		<jar destfile="tuer.jar" basedir="${destdir}" 
+			includes="**/*.class" 
+			compress="false">
+			<include name="**/*.png" />
+			<include name="**/*.jpg" />
+			<include name="**/*.gif" />
+			<include name="**/*.txt" />
+			<include name="**/*.ogg" />			
+			<include name="**/*.xml" />
+			<include name="**/*.jbin"/>
+			<!-- FIXME: convert it into XML -->
+			<include name="**/LID0.data" />
+			<manifest>
+			    <attribute name="Main-Class" value="jme.JMEGameServiceProvider"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- ================================================================= -->
+	<!-- Sign                                                              -->
+	<!-- ================================================================= -->
+	<target name="sign" depends="dist" description="Sign the java archive">
+		<exec dir="${destdir}" executable="keytool" os="Linux" failonerror="true">
+		    <arg value="-genkey "/>
+		    <arg value="-alias ${alias} " />
+		    <arg value="-keystore ${keystore} " />
+		    <arg value="-keypass ${keypass} " />
+		    <arg value="-storepass ${storepass} " />
+			<arg value="-dname ${dname} " /> 
+		</exec> 
+		<signjar jar="tuer.jar" alias="${alias}" storepass="${storepass}" keystore="${keystore}" 
+		    verbose="true"
+		/>
+	</target>
+	
+	<!-- ================================================================= -->
+	<!-- Zip                                                               -->
+	<!-- ================================================================= -->
+	<!-- Temporarily, the JME version is ignored -->
+	<!-- excludes="jme/" -->
+	<target name="zip" depends="" description="Creates the zip file containing the source code">
+		<zip destfile="${zipdestdir}/tuer.zip" basedir="${srcdir}" 
+			includes="**/*.java" 
+			excludes="lara/"
+			compress="true">
+			<include name="**/*.cfg" />
+			<include name="**/*.data"/>
+			<include name="**/*.gif" />
+			<include name="**/*.jpg" />
+			<include name="**/*.md2" />
+			<include name="**/*.md3" />
+			<include name="**/*.png" />		
+			<include name="**/*.ogg" />		
+			<include name="**/*.rtf" />
+			<include name="**/*.shader"/>
+			<include name="**/*.skin"/>
+			<include name="**/*.txt" />
+			<include name="**/*.xml" />
+			<include name="**/*.gif" />
+			<include name="**/*.obj" />
+			<include name="**/*.jbin"/>
+			<include name="**/*.mtl" />
+			<include name="**/manifest" />
+		</zip>
+	</target>
+	
+    <!-- =================================================================== -->
+    <!-- Build                                                               -->
+    <!-- =================================================================== -->
+    <target name="build" depends="clean, compile, run-datapreprocessor, dist"
+        description="Performs a clean build of the source code and create the java archive"/>
+
+
+    <!-- =================================================================== -->
+    <!-- Run Targets                                                         -->
+    <!-- =================================================================== -->  
+    <target name="run-game" description="Runs the game TUER">
+        <java classname="connection.GameServiceProvider"
+              fork="true"
+              dir="${destdir}"
+              failonerror="true"
+              >
+        </java>
+    </target>
+	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
+		    <mkdir dir="${destdir}/xml" />
+			<mkdir dir="${destdir}/data" />
+	        <java classname="connection.DataPreprocessor"
+		              fork="true"
+		              dir="${destdir}"
+		              failonerror="true"
+		              >     
+	<!-- The program uses only 512 MB but it might me more on bigger maps -->
+	        	    <jvmarg value="-Xmx1536m"/>       	    
+		        	<arg value="texture/worldmap.gif"/>
+		        	<arg value="data/worldmap.data"/>
+		        	<arg value="data/rocketLauncher.data"/>
+		        	<arg value="data/binaryWorldmap.data"/>
+		        	<arg value="data/bot.data"/>
+		        	<arg value="data/unbreakableObject.data"/>	        	
+		        	<arg value="data/vendingMachine.data"/>
+		        	<arg value="data/lamp.data"/>
+		        	<arg value="data/chair.data"/>
+		        	<arg value="data/flower.data"/>
+		        	<arg value="data/table.data"/>
+		        	<arg value="data/bonsai.data"/>
+		        	<arg value="data/rocket.data"/>
+		        	<arg value="data/explosion.data"/>
+		        	<arg value="data/impact.data"/>
+		        	<arg value="data/healthPowerUp.data"/>
+		        	<arg value="xml/itemList.xml"/>
+		        	<arg value="data/crosshair.data"/>
+		        	<arg value="data/sphericalBeast.data"/>
+		        	<arg value="data/network.data"/>
+	        	    <arg value="obj/LID0"/>
+	        	    <arg value="texture/wallTexture.png"/>
+	        	    <arg value="texture/rocketLauncher.png"/>
+	        	    <arg value="obj/rocketLauncher"/>
+	        	    <arg value="obj/rocket"/>
+	        	    <arg value="texture/objects.png"/>
+	        	    <arg value="obj/unbreakableObject"/>	        	
+	        		<arg value="obj/vendingMachine"/>
+	        		<arg value="obj/lamp"/>
+	        		<arg value="obj/chair"/>
+	        		<arg value="obj/flower"/>
+	        		<arg value="obj/table"/>
+	        		<arg value="obj/bonsai"/>
+	        	    <arg value="LID0.mtl"/>
+	        	    <arg value="texture/ceilTexture.png"/>
+	        	    <arg value="texture/floorTexture.png"/>
+	        	    <arg value="texture/wallTexture0.png"/>
+		</java>
+	</target>	
+	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
+		<mkdir dir="${destdir}/xml"/>
+		<mkdir dir="${destdir}/jbin"/>
+		<java classname="jme.JMEDataPreprocessor"
+			              fork="true"
+			              dir="${destdir}"
+			              failonerror="true"
+			              >
+			<jvmarg value="-Xmx1536m"/>
+			<!-- use the old world map -->
+			<arg value="data/worldmap.data"/>
+			<arg value="xml/WID0.xml"/>
+			<arg value="xml/LID0.xml"/>
+			<!-- convert the levels -->
+			<arg value="obj/LID0"/>
+			<arg value="obj/LID0.mtl"/>
+			<arg value="texture/wallTexture.png"/>
+			<arg value="jbin/"/>
+			<!-- convert the weapons -->
+			<!-- pistol drawn by an anonymous (3DExtras) -->
+			<arg value="obj/pistol.obj"/>
+			<arg value="obj/pistol.mtl"/>
+			<arg value="texture/pistol.jpg"/>
+			<arg value="jbin/pistol.jbin"/>
+			<!-- pistol drawn by Maxime Comte -->
+			<arg value="obj/pistol2.obj"/>
+			<arg value="obj/pistol2.mtl"/>
+			<arg value="texture/pistol2.png"/>
+			<arg value="jbin/pistol2.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/pistol3.obj"/>
+			<arg value="obj/pistol3.mtl"/>
+			<arg value="texture/pistol3.jpg"/>
+			<arg value="jbin/pistol3.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/smach.obj"/>
+			<arg value="obj/smach.mtl"/>
+			<arg value="texture/smach.jpg"/>
+			<arg value="jbin/smach.jbin"/>
+			<!-- drawn by psionic -->
+			<arg value="obj/uzi.obj"/>
+			<arg value="obj/uzi.mtl"/>
+			<arg value="texture/uzi.jpg"/>
+			<arg value="jbin/uzi.jbin"/>
+			<!-- ak47 drawn by Whisnu (tigarut@gmail.com) -->
+			<!--<arg value="obj/AK47.obj"/>
+			<arg value="obj/AK47.mtl"/>
+			<arg value="texture/"/>
+			<arg value="jbin/AK47.jbin"/>-->
+			<!-- drawn by psionic -->
+			<arg value="obj/laser.obj"/>
+			<arg value="obj/laser.mtl"/>
+			<arg value="texture/laser.jpg"/>
+			<arg value="jbin/laser.jbin"/>			
+			<!--<arg value="obj/creature.obj"/>
+			<arg value="obj/creature.mtl"/>
+			<arg value="texture/"/>
+			<arg value="jbin/creature.jbin"/>-->
+			
+			<arg value="obj/cop.obj"/>
+			<arg value="obj/cop.mtl"/>
+			<arg value="texture/cop.png"/>
+			<arg value="jbin/cop.jbin"/>
+			
+			<arg value="obj/giger_alien.obj"/>
+			<arg value="obj/giger_alien.mtl"/>
+			<arg value="texture/giger_alien.jpg"/>
+			<arg value="jbin/giger_alien.jbin"/>
+			
+			<!-- human drawn by a member of jmonkeyengine's forum -->
+			<arg value="md2/agent.md2"/>
+			<arg value="texture/agent.png"/>
+			<arg value="jbin/agent.jbin"/>
+	    </java>
+	</target>
+	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
+		<java classname="jme.JMEGameServiceProvider"
+					              fork="true"
+					              dir="${destdir}"
+					              failonerror="true"
+					              >
+			<jvmarg value="-Xmx256m"/>
+			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
+		</java>
+	</target>
+</project>
