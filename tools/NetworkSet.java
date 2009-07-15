@@ -164,20 +164,20 @@ public final class NetworkSet implements Serializable{
      * @param useOneGroupPerQuad true if one group per quad is created
      * @param smoothing smoothing group (see the description of the OBJ format)
      */
-    final void writeObjFiles(String filenamepattern,String textureFilename,
+    final void writeObjFiles(final String filenamepattern,
+            final String[] textureFilenames,
             final boolean grouped,final boolean redundant,final boolean useTriangles,
             final boolean useJOGLTextureCoordinatesVerticalOrder,
             final boolean writePortals,String MTLFilename,
-            final boolean useOneGroupPerQuad,final int smoothing){
+            final boolean useOneGroupPerQuad,final int smoothing,
+            final String[] materialNames){
         ArrayList<INodeIdentifier> nodeIDList=new ArrayList<INodeIdentifier>();
-        final boolean useTexture=(textureFilename!=null&&!textureFilename.equals(""));
+        final boolean useTexture=textureFilenames!=null&&textureFilenames.length>0;
         final int slashIndex=filenamepattern.lastIndexOf("/");
         final String directoryname=slashIndex>0?filenamepattern.substring(0,slashIndex):"";
-        final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;       
-        final String materialName=MTLFilename.substring(0,MTLFilename.lastIndexOf("."));
+        final String filenamePrefix=slashIndex>0&&slashIndex+1<filenamepattern.length()?filenamepattern.substring(slashIndex+1):filenamepattern;
         if(useTexture)
-            TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,new String[]{textureFilename},null);
-        int facePrimitiveCount=0;
+            TilesGenerator.writeDummyMTLFile(directoryname,MTLFilename,textureFilenames,materialNames);
         BufferedOutputStream bos=null;
         PrintWriter pw=null;
         String objname,objfilename;
@@ -211,14 +211,6 @@ public final class NetworkSet implements Serializable{
                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
                            for(float[] wall:cell.getTopWalls())
                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                           //count the total amount of face primitives by 
-                           //summing the face primitives per cell
-                           facePrimitiveCount+=(cell.getBottomWalls().size()+
-                                   cell.getCeilWalls().size()+
-                                   cell.getFloorWalls().size()+
-                                   cell.getLeftWalls().size()+
-                                   cell.getRightWalls().size()+
-                                   cell.getTopWalls().size())/4;
                           }                              
                   if(useTexture)
                       {//write the texture coordinates
@@ -257,10 +249,13 @@ public final class NetworkSet implements Serializable{
                                    }
                            }
                       }
-                  writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad,materialName,smoothing);
+                  int faceIndexOffset=0;
+                  for(Network network:networksList)
+                      for(Full3DCell cell:network.getCellsList())
+                          faceIndexOffset+=writeCellFaces(pw,objname,faceIndexOffset,useTexture,useTriangles,useOneGroupPerQuad,materialNames,smoothing,cell);
                  }
              else
-                 {//FIXME: remove this restriction
+                 {//remove this restriction???
                   if(useOneGroupPerQuad)
                       System.out.println("[WARNING] \"useOneGroupPerQuad\" flag ignored as available only in redundant mode");
                   HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>> cellularMapsTable=new HashMap<Full3DCell,Map.Entry<LinkedHashMap<Integer,Integer>,LinkedHashMap<VertexData,Integer>>>();
@@ -299,7 +294,7 @@ public final class NetworkSet implements Serializable{
                            for(TextureCoordData textureCoordData:textureCoordDataToUniqueIndexationTable.keySet())
                                pw.println("vt "+textureCoordData.textureCoord[0]+" "+(1.0f-textureCoordData.textureCoord[1]));
                        System.out.println("Texture coordinates written"); 
-                       writeUseMaterialAndSmoothing(pw,materialName,smoothing);
+                       writeUseMaterialAndSmoothing(pw,materialNames[0],smoothing);
                        System.out.println("use NetworkTexturedFaceDataWriter...");
                        for(Network network:networksList)
                            new NetworkTexturedFaceDataWriter(network,cellularMapsTable,duplicateToUniqueIndexationTable,pw,useTriangles).visit();
@@ -369,12 +364,6 @@ public final class NetworkSet implements Serializable{
                                 pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
                             for(float[] wall:cell.getTopWalls())
                                 pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            facePrimitiveCount=(cell.getBottomWalls().size()+
-                                    cell.getCeilWalls().size()+
-                                    cell.getFloorWalls().size()+
-                                    cell.getLeftWalls().size()+
-                                    cell.getRightWalls().size()+
-                                    cell.getTopWalls().size())/4;
                             if(useTexture)
                                 {//for each list of walls
                                      //for each wall
@@ -408,7 +397,7 @@ public final class NetworkSet implements Serializable{
                                           pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
                                      }
                                 }
-                            writeFaces(pw,objname,facePrimitiveCount,useTexture,useTriangles,useOneGroupPerQuad,materialName,smoothing);
+                            writeCellFaces(pw,objname,0,useTexture,useTriangles,useOneGroupPerQuad,materialNames,smoothing,cell);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -496,7 +485,6 @@ public final class NetworkSet implements Serializable{
                   //for each portal
                   Full3DPortal portal;
                   int portalVerticesCount;
-                  facePrimitiveCount=1;
                   for(Map.Entry<String,Full3DPortal> portalEntry:portalsMap.entrySet())
                       {objname=portalEntry.getKey();
                        objfilename=objname+".obj";
@@ -517,7 +505,7 @@ public final class NetworkSet implements Serializable{
                             for(float[] portalVertex:portal.getPortalVertices())
                                 pw.println("v "+portalVertex[2]+" "+portalVertex[3]+" "+portalVertex[4]);
                             //write its "f" primitives (ignore textures)
-                            writeFaces(pw,objname,facePrimitiveCount,false,useTriangles,false,null,smoothing);
+                            writeCellFaces(pw,objname,0,false,useTriangles,false,null,smoothing,null);
                             System.out.println("Writes Wavefront object "+objname);
                             try{pw.close();
                                 bos.close();
@@ -536,39 +524,61 @@ public final class NetworkSet implements Serializable{
             }
     }
     
-    private final void writeFaces(PrintWriter pw,final String objname,
-            final int facePrimitiveCount,final boolean useTexture,
+    private static final int writeCellFaces(PrintWriter pw,final String objname,
+            final int faceIndexOffset,final boolean useTexture,
             final boolean useTriangles,final boolean useOneGroupPerQuad,
-            final String materialName,final int smoothing){
+            final String[] materialNames,final int smoothing,Full3DCell cell){
+        final int facePrimitiveCount,bottomFaceCount,topFaceCount;
+        final int ceilFaceCount,floorFaceCount,leftFaceCount,rightFaceCount;
+        if(cell!=null)
+            {bottomFaceCount=cell.getBottomWalls().size()/4;
+             topFaceCount=cell.getTopWalls().size()/4;
+             ceilFaceCount=cell.getCeilWalls().size()/4;
+             floorFaceCount=cell.getFloorWalls().size()/4;
+             leftFaceCount=cell.getLeftWalls().size()/4;
+             rightFaceCount=cell.getRightWalls().size()/4;
+             facePrimitiveCount=bottomFaceCount+ceilFaceCount+floorFaceCount
+                                  +leftFaceCount+rightFaceCount+topFaceCount;
+            }
+        else
+            {bottomFaceCount=0;
+             topFaceCount=0;
+             ceilFaceCount=0;
+             floorFaceCount=0;
+             leftFaceCount=0;
+             rightFaceCount=0;
+             facePrimitiveCount=1;
+            }
+        final int[] faceCounts=new int[]{bottomFaceCount,ceilFaceCount,floorFaceCount,leftFaceCount,rightFaceCount,topFaceCount};
         if(useOneGroupPerQuad)
             {if(useTexture)
                  {if(useTriangles)
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("g "+objname+"EID"+eid);
-                           writeUseMaterialAndSmoothing(pw,materialName,smoothing);
+                           writeUseMaterialAndSmoothing(pw,getMaterialName(materialNames,i,faceCounts),smoothing);
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
                            pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
                           }
                   else
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("g "+objname+"EID"+eid);
-                           writeUseMaterialAndSmoothing(pw,materialName,smoothing);
+                           writeUseMaterialAndSmoothing(pw,getMaterialName(materialNames,i,faceCounts),smoothing);
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
                           }
                  }
              else
                  {if(useTriangles)
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("g "+objname+"EID"+eid);
                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
                            pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
                           }
                   else
                       for(int i=0,eid=0,tmp;i<facePrimitiveCount;i++,eid++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("g "+objname+"EID"+eid);
                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
                           }
@@ -577,36 +587,58 @@ public final class NetworkSet implements Serializable{
             }
         else
             {if(useTexture)
-                 {writeUseMaterialAndSmoothing(pw,materialName,smoothing);
+                 {writeUseMaterialAndSmoothing(pw,getMaterialName(materialNames,0,faceCounts),smoothing);
                   if(useTriangles)
                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                          {tmp=4*i+1;                                
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2));
                            pw.println("f "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3)+" "+tmp+"/"+tmp);
                           }
                   else
                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("f "+tmp+"/"+tmp+" "+(tmp+1)+"/"+(tmp+1)+" "+(tmp+2)+"/"+(tmp+2)+" "+(tmp+3)+"/"+(tmp+3));
                           }
                  }
              else
                  {if(useTriangles)
                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2));
                            pw.println("f "+(tmp+2)+" "+(tmp+3)+" "+tmp);
                           }
                   else
                       for(int i=0,tmp;i<facePrimitiveCount;i++)
-                          {tmp=4*i+1;
+                          {tmp=4*(i+faceIndexOffset)+1;
                            pw.println("f "+tmp+" "+(tmp+1)+" "+(tmp+2)+" "+(tmp+3));
                           }
                  }
-            }       
+            }
+        return(facePrimitiveCount);
     }
     
-    private final void writeUseMaterialAndSmoothing(PrintWriter pw,final String materialName,
+    private static final String getMaterialName(final String[] materialNames,
+        final int unshiftedFaceIndex,final int[] faceCounts){        
+        int materialIndex=-1;
+        for(int faceCountIndex=0,faceCount=0,nonNullMaterialCount=0;faceCountIndex<faceCounts.length;faceCountIndex++)
+            {faceCount+=faceCounts[faceCountIndex];
+             if(unshiftedFaceIndex<faceCount)
+                 {for(int i=0;i<materialNames.length;i++)
+                      if(materialNames[i]!=null)
+                          if(nonNullMaterialCount==faceCountIndex)
+                              {materialIndex=i;
+                               break;
+                              }
+                          else
+                              nonNullMaterialCount++;
+                  if(materialIndex!=-1)
+                      break;
+                 }
+            }
+        return(materialNames[materialIndex]);
+    }
+    
+    private static final void writeUseMaterialAndSmoothing(PrintWriter pw,final String materialName,
             final int smoothing){
         pw.println("usemtl "+materialName);
         //smoothing

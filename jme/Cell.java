@@ -15,15 +15,12 @@ package jme;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import bean.NodeIdentifier;
-
-import com.jme.bounding.BoundingBox;
 import com.jme.bounding.BoundingVolume;
 import com.jme.math.Vector3f;
 import com.jme.scene.Geometry;
+import com.jme.scene.Node;
 import com.jme.scene.Spatial;
-import com.jme.scene.TriMesh;
 
 /**
  * Set of walls representing a single room and linked to other rooms
@@ -54,32 +51,66 @@ public final class Cell extends IdentifiedNode{
         super(levelID,networkID,cellID);       
         portalsList=new ArrayList<Portal>();
         if(model!=null)
-            //FIXME: add each wall separately
-            attachChild(new InternalCellElement((Geometry)model,false));
-        //FIXME: set a bounding box to the cell
-        //updateWorldBound();
+            if(model instanceof Geometry)
+                attachChild(new InternalCellElement((Geometry)model,false));
+            else
+                {Node modelNode=(Node)model;
+                 if(modelNode.getChildren()!=null)
+                     {List<Spatial> modelChildren=new ArrayList<Spatial>();
+                      modelChildren.addAll(modelNode.getChildren());
+                      //this line below avoids a ConcurrentModificationException
+                      modelNode.detachAllChildren();
+                      for(Spatial modelChild:modelChildren)
+                          attachChild(new InternalCellElement((Geometry)modelChild,false));
+                     }                
+                }
+        //set a bounding box to the cell
+        updateWorldBound();
         //hide it by default (don't do it earlier because it caused a regression)
         setCullHint(CullHint.Always);
     }
     
-    void addPortal(Portal portal){
+    @Override
+    public final void updateWorldBound(){
+        if((lockedMode & Spatial.LOCKED_BOUNDS)==0||children!=null) 
+            {BoundingVolume worldBound = null;
+             InternalCellElement cellElement;
+             for(Spatial child:children)
+                 {if(child!=null)
+                      {cellElement=(InternalCellElement)child;
+                       if(!cellElement.isShared())
+                           {if(worldBound!=null)
+                                {// merge current world bound with child world bound
+                                 worldBound.mergeLocal(child.getWorldBound());
+                                } 
+                            else 
+                                {// set world bound to first non-null child world bound
+                                 if(child.getWorldBound()!=null) 
+                                     worldBound=child.getWorldBound().clone(this.worldBound);                             
+                                }
+                           }
+                      }
+                }
+             this.worldBound = worldBound;
+            }
+    }
+    
+    final void addPortal(Portal portal){
         portalsList.add(portal);
     }
     
-    int getPortalCount(){
+    final int getPortalCount(){
         return(portalsList.size());
     }
     
-    Portal getPortalAt(int index){
+    final Portal getPortalAt(int index){
         return(portalsList.get(index));
     }
     
-    boolean contains(Vector3f point){
+    final boolean contains(Vector3f point){
         boolean result;
         if(children!=null&&children.size()>0)
-            //FIXME use rather its bounding box
-            //result=getWorldBound().contains(point);
-            result=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound().contains(point);
+            result=getWorldBound().contains(point);
         else
             result=false;
         return(result);
@@ -96,7 +127,8 @@ public final class Cell extends IdentifiedNode{
     
     @Override
     public final boolean hasCollision(Spatial spatial, boolean checkTriangles){
-        BoundingVolume wallsBound=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound();
+        //BoundingVolume wallsBound=((TriMesh)((InternalCellElement)getChild(0)).getChild(0)).getModelBound();
+        BoundingVolume wallsBound=getWorldBound();
         boolean result;
         if(wallsBound.intersects(spatial.getWorldBound()))
             {result=false;
@@ -106,21 +138,21 @@ public final class Cell extends IdentifiedNode{
              InternalCellElement cellElement;
              for(int childIndex=0;childIndex<children.size();childIndex++)
                  {cellElement=(InternalCellElement)getChild(childIndex);
-                  //FIXME rather check collisions with each wall (remove the first test)
                   //only use shared objects (all objects except walls)
                   if(cellElement.isShared()&&spatial.hasCollision(cellElement,checkTriangles))
                       {result=true;
                        break;
                       }
                  }
+             //FIXME check collisions with walls
              //if the spatial is not completely inside the cell
-             BoundingVolume mergedBoundingVolume=wallsBound.merge(spatial.getWorldBound());
+             /*BoundingVolume mergedBoundingVolume=wallsBound.merge(spatial.getWorldBound());
              if(!result && mergedBoundingVolume.getVolume()>wallsBound.getVolume())
                  {boolean portalFound=false;
                   for(Portal portal:portalsList)
                       if(portal.hasCollision(spatial,checkTriangles))
                           {portalFound=true;
-                           /*Oriented*/BoundingBox portalBound=(/*Oriented*/BoundingBox)portal.getWorldBound();
+                           BoundingBox portalBound=(BoundingBox)portal.getWorldBound();
                            Vector3f portalExtent=portalBound.getExtent(null);
                            float minDimensionValue=Float.MAX_VALUE;
                            int minValueIndex=-1;
@@ -129,7 +161,7 @@ public final class Cell extends IdentifiedNode{
                                    {minDimensionValue=portalExtent.get(i);
                                     minValueIndex=i;
                                    }
-                           /*Oriented*/BoundingBox mergedBox=(/*Oriented*/BoundingBox)portalBound.merge(spatial.getWorldBound());                          
+                           BoundingBox mergedBox=(BoundingBox)portalBound.merge(spatial.getWorldBound());                          
                            Vector3f mergedBoxExtent=mergedBox.getExtent(null);
                            for(int i=0;i<3;i++)
                                //if one dimension of the merged bounding volume except 
@@ -143,7 +175,7 @@ public final class Cell extends IdentifiedNode{
                           }
                   if(!portalFound)
                       result=true;
-                 }
+                 }*/
             }
         else
             result=false;
