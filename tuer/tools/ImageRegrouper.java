@@ -114,24 +114,24 @@ public class ImageRegrouper{
 
     public static void main(String[] args){
         int size=(int)Math.ceil(Math.sqrt(imageFiles.length));
-	int fullSize=1;
-	while(fullSize<size)
-	    fullSize*=2;
-	Image image=null;
-	BufferedImage buf=new BufferedImage(256*fullSize,256*fullSize,BufferedImage.TYPE_INT_ARGB);
-	Graphics g=buf.getGraphics();
-	System.out.println("size : "+size+" length : "+imageFiles.length);
-	for(int i=0;i<imageFiles.length;i++)
-	    {System.out.println("image n"+i+" start : "+imageFiles[i]+" "+i%size+" "+i/size);
-	     image=new ImageIcon(imageFiles[i]).getImage();
-	     g.drawImage(image,(i%size)*256,(i/size)*256,null);	     
-	     System.out.println("image n"+i+" end");
-	    }	
-	File f=new File("texture/bot2.png");	
-	try{f.createNewFile();
-	    ImageIO.write(buf,"png",f);
-	   }
+        int fullSize=1;
+        while(fullSize<size)
+            fullSize*=2;
+        Image image=null;
+        BufferedImage buf=new BufferedImage(256*fullSize,256*fullSize,BufferedImage.TYPE_INT_ARGB);
+        Graphics g=buf.getGraphics();
+        System.out.println("size : "+size+" length : "+imageFiles.length);
+        for(int i=0;i<imageFiles.length;i++)
+            {System.out.println("image n"+i+" start : "+imageFiles[i]+" "+i%size+" "+i/size);
+             image=new ImageIcon(imageFiles[i]).getImage();
+             g.drawImage(image,(i%size)*256,(i/size)*256,null);	     
+             System.out.println("image n"+i+" end");
+            }	
+        File f=new File("texture/bot2.png");	
+        try{f.createNewFile();
+            ImageIO.write(buf,"png",f);
+           }
         catch(IOException ioe)
-	{ioe.printStackTrace();}
+        {ioe.printStackTrace();}
     }
 }

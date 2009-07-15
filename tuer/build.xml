@@ -48,7 +48,7 @@
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<!-- delete only the generated files, not the artworks -->
-    	<delete>
+    	<delete failonerror="false">
     	    <fileset dir="${destdir}/obj" includes="**/LID0*"/>
     	    <fileset dir="${destdir}/obj" includes="**/bonsai*"/>
     	    <fileset dir="${destdir}/obj" includes="**/chair*"/>
@@ -58,7 +58,11 @@
     		<fileset dir="${destdir}/obj" includes="**/rocketLauncher*"/>
     		<fileset dir="${destdir}/obj" includes="**/table*"/>
     		<fileset dir="${destdir}/obj" includes="**/unbreakableObject*"/>
-    	    <fileset dir="${destdir}/obj" includes="**/vendingMachine*"/>   		
+    	    <fileset dir="${destdir}/obj" includes="**/vendingMachine*"/>
+    		<!-- generated textures -->
+    		<fileset file="${destdir}/texture/ceilTexture.png"/>
+    		<fileset file="${destdir}/texture/floorTexture.png"/>	
+    		<fileset file="${destdir}/texture/wallTexture0.png"/>
     	</delete>
     	<delete dir="${destdir}/data" failonerror="false" />
     	<delete dir="${destdir}/jbin" failonerror="false" />
@@ -220,6 +224,9 @@
 	        		<arg value="obj/table"/>
 	        		<arg value="obj/bonsai"/>
 	        	    <arg value="LID0.mtl"/>
+	        	    <arg value="texture/ceilTexture.png"/>
+	        	    <arg value="texture/floorTexture.png"/>
+	        	    <arg value="texture/wallTexture0.png"/>
 		</java>
 	</target>	
 	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">

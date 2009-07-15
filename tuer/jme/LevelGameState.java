@@ -79,7 +79,7 @@ public final class LevelGameState extends BasicGameState{
         playerNode.updateGeometricState(tpf,true);
         //workaround necessary only for bounding sphere and bounding box
         //playerNode.getWorldBound().getCenter().set(DisplaySystem.getDisplaySystem().getRenderer().getCamera().getLocation());
-        //System.out.println("collision: "+((Level)rootNode.getChild(0)).hasCollision(playerNode,false));
+        System.out.println("collision: "+((Level)rootNode.getChild(0)).hasCollision(playerNode,false));
     }
     
     @Override

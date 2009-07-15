@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
@@ -31,7 +30,6 @@ import com.jme.scene.Geometry;
 import com.jme.scene.Line;
 import com.jme.scene.Node;
 import com.jme.scene.Spatial;
-import com.jme.scene.TriMesh;
 import com.jme.scene.VBOInfo;
 import com.jme.scene.state.CullState;
 import com.jme.scene.state.RenderState;
@@ -82,11 +80,21 @@ public final class Level extends IdentifiedNode{
                  ((CullState)model.getRenderState(RenderState.StateType.Cull)).setCullFace(CullState.Face.Back);
                  model.updateRenderState();
                  //Use VBO if the required extension is available
-                 ((TriMesh)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
+                 if(model instanceof Geometry)
+                     ((Geometry)model).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
+                 else
+                     {Node modelNode=(Node)model;
+                      //the default name is wrong
+                      model.setName(nodeID.toString());
+                      if(modelNode.getChildren()!=null)
+                          for(Spatial modelChild:modelNode.getChildren())
+                              if(modelChild instanceof Geometry)
+                                  ((Geometry)modelChild).setVBOInfo(new VBOInfo(DisplaySystem.getDisplaySystem().getRenderer().supportsVBO()));
+                     }
                  model.lock();
-                 if((cellsList=cellsListsTable.get(nodeID.getNetworkID()))==null)
+                 if((cellsList=cellsListsTable.get(Integer.valueOf(nodeID.getNetworkID())))==null)
                      {cellsList=new ArrayList<Spatial>();
-                     cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
+                      cellsListsTable.put(Integer.valueOf(nodeID.getNetworkID()),cellsList);
                      }
                  cellsList.add(model);         
                 }           

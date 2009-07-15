@@ -53,6 +53,7 @@ final class InternalCellElement extends ClonedNode{
         super(name,node);
         this.shared=shared;
         this.sharableSpatial=node;
+        this.worldBound=node.getWorldBound();
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);
@@ -66,6 +67,7 @@ final class InternalCellElement extends ClonedNode{
         super(name,getNodeWithSingleGeometry(geometry));
         this.shared=shared;
         this.sharableSpatial=geometry;
+        this.worldBound=geometry.getModelBound();
         //set its cull hint at INHERIT by default
         //as this node is visible when its parent is visible
         setCullHint(CullHint.Inherit);

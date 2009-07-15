@@ -167,6 +167,12 @@ public final class TilesGenerator implements Runnable{
     private String bonsaiOBJFilename;
     
     private String MTLFilename;
+    
+    private String ceilTextureFilename;
+    
+    private String floorTextureFilename;
+    
+    private String lateralWallTextureFilename;
 
     private static final int artCount=27;
 
@@ -226,7 +232,7 @@ public final class TilesGenerator implements Runnable{
     
     private static final int UNAVOIDABLE_AND_UNBREAKABLE_UP=25;
     //dirty walls (from 26 to 40) removed as useless
-    private static final int parameterCount=34;
+    private static final int parameterCount=37;
 
     
     public TilesGenerator(String mapFilename,String tilesFilename,
@@ -259,7 +265,10 @@ public final class TilesGenerator implements Runnable{
             String flowerOBJFilename,
             String tableOBJFilename,
             String bonsaiOBJFilename,
-            String MTLFilename){
+            String MTLFilename,
+            String ceilTextureFilename,
+            String floorTextureFilename,
+            String lateralWallTextureFilename){
         topWallsList=new ArrayList<PointPair>();   
         bottomWallsList=new ArrayList<PointPair>();
         rightWallsList=new ArrayList<PointPair>();
@@ -313,6 +322,9 @@ public final class TilesGenerator implements Runnable{
         this.tableOBJFilename=tableOBJFilename;
         this.bonsaiOBJFilename=bonsaiOBJFilename;
         this.MTLFilename=MTLFilename;
+        this.ceilTextureFilename=ceilTextureFilename;
+        this.floorTextureFilename=floorTextureFilename;
+        this.lateralWallTextureFilename=lateralWallTextureFilename;
     }      
     
     
@@ -339,13 +351,26 @@ public final class TilesGenerator implements Runnable{
         writeHealthPowerUpList();
         writeCrosshair();
         writeSphericalBeast();
+        //texture coordinates that match with the single texture
+        //used for the walls
+        final float[] portalTexCoord=new float[]{0.0f,0.0f,0.0f,0.0f};
+        final float[] floorTexCoord=new float[]{0.0f,0.75f,0.25f,0.5f};
+        final float[] wallTexCoord=new float[]{0.0f,0.25f,0.25f,0.5f};
+        final float[] ceilTexCoord=new float[]{0.0f,1.0f,0.25f,0.75f};
         //the cells generator uses a cartesian reference mark
         //and a lateral meaning based on the position of walls 
         //in their rooms
         networkSet=CellsGenerator.generate(topWallsList,bottomWallsList,
                  leftWallsList,rightWallsList,artTopWallsList,
-                 artBottomWallsList,artLeftWallsList,artRightWallsList,tileSize);
+                 artBottomWallsList,artLeftWallsList,artRightWallsList,tileSize,
+                 portalTexCoord,floorTexCoord,wallTexCoord,ceilTexCoord);
         writeNetworkSet();
+        final String[] extractedTextureFilenames=new String[]{null,null,null,null,lateralWallTextureFilename,null,null,null,floorTextureFilename,null,null,null,ceilTextureFilename,null,null,null};
+        TextureSplitter textureSplitter=new TextureSplitter(wallTextureFilename,4,4,extractedTextureFilenames,networkSet);
+        textureSplitter.run();
+        //textures and materials used for the exported version
+        final String[] customTextureFilenames=new String[]{lateralWallTextureFilename,ceilTextureFilename,floorTextureFilename,lateralWallTextureFilename,lateralWallTextureFilename,lateralWallTextureFilename,null,null,null,null,null,null,null,null,null,null};
+        final String[] customMaterialNames=new String[]{"bottom","ceil","floor","left","right","top",null,null,null,null,null,null,null,null,null,null};
         //The export of objects to Wavefront OBJ format is only useful for other engines that would like to reuse
         //these 3D elements
         /* The textured level is the view (the representation) 
@@ -355,7 +380,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,wallTextureFilename,false,false,true,false,true,MTLFilename,true,1);
+        networkSet.writeObjFiles(networkOBJFilename,customTextureFilenames,false,false,true,false,true,MTLFilename,true,1,customMaterialNames);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
@@ -1087,24 +1112,39 @@ public final class TilesGenerator implements Runnable{
         final int materialCount=useTextureFilenames?textureFilenames.length:1;
         final String defaultMaterialName=MTLFilename.substring(0,MTLFilename.lastIndexOf("."));
         String materialName;
+        boolean defaultMaterialNameAlreadyInUse=false;
         for(int index=0;index<materialCount;index++)
             {//use provided material name if any, otherwise use the filename
              if(useCustomMaterialNames)
-                 if(index<materialNames.length)
+                 if(index<materialNames.length&&
+                    materialNames[index]!=null&&
+                    !materialNames[index].equals(""))
                      materialName=materialNames[index];
                  else
-                     materialName=defaultMaterialName;
+                     if(defaultMaterialNameAlreadyInUse)
+                         materialName=null;
+                     else
+                         {materialName=defaultMaterialName;
+                          defaultMaterialNameAlreadyInUse=true;
+                         }
              else
-                 materialName=defaultMaterialName;
-             pw.println("newmtl "+materialName);
-             pw.println("Ns 0");
-             pw.println("Ka 0.000000 0.000000 0.000000");
-             pw.println("Kd 0.8 0.8 0.8");
-             pw.println("Ks 0.8 0.8 0.8");
-             pw.println("d 1");
-             pw.println("illum 2");
-             if(useTextureFilenames)
-                 pw.println("map_Kd "+textureFilenames[index].substring(textureFilenames[index].lastIndexOf("/")+1));
+                 if(defaultMaterialNameAlreadyInUse)
+                     materialName=null;
+                 else
+                     {materialName=defaultMaterialName;
+                      defaultMaterialNameAlreadyInUse=true;
+                     }
+             if(materialName!=null)
+                 {pw.println("newmtl "+materialName);
+                  pw.println("Ns 0");
+                  pw.println("Ka 0.000000 0.000000 0.000000");
+                  pw.println("Kd 0.8 0.8 0.8");
+                  pw.println("Ks 0.8 0.8 0.8");
+                  pw.println("d 1");
+                  pw.println("illum 2");
+                  if(useTextureFilenames&&textureFilenames[index]!=null)
+                      pw.println("map_Kd "+textureFilenames[index].substring(textureFilenames[index].lastIndexOf("/")+1));
+                 }
             }       
         System.out.println("Ends writing MTL file "+MTLFilename+".");
         try{pw.close();
@@ -1723,7 +1763,10 @@ public final class TilesGenerator implements Runnable{
                     " flower_OBJ_filename"+
                     " table_OBJ_filename"+
                     " bonsai_OBJ_filename"+
-                    " MTL_filename");  
+                    " MTL_filename"+
+                    " ceil_filename"+
+                    " floor_filename"+
+                    " lateral_wall_filename");  
              tg=null;
             }
         else
@@ -1731,7 +1774,8 @@ public final class TilesGenerator implements Runnable{
                     args[6],args[7],args[8],args[9],args[10],args[11],args[12],
                     args[13],args[14],args[15],args[16],args[17],args[18],args[19],
                     args[20],args[21],args[22],args[23],args[24],args[25],args[26],
-                    args[27],args[28],args[29],args[30],args[31],args[32],args[33]);            
+                    args[27],args[28],args[29],args[30],args[31],args[32],args[33],
+                    args[34],args[35],args[36]);            
             }
         return(tg);
     }
@@ -1746,7 +1790,7 @@ public final class TilesGenerator implements Runnable{
         if(imageIcon.getIconHeight()!=imageIcon.getIconWidth())
             throw new UnsupportedOperationException("Invalid map size: "+imageIcon.getIconWidth()+"*"+imageIcon.getIconHeight()+". Only square maps are currently supported");
         else
-            tileSize=imageIcon.getIconWidth();       
+            tileSize=imageIcon.getIconWidth();
         worldMap=new int[tileSize*tileSize];      
         try {(new PixelGrabber(worldMapImage,0,0,tileSize,tileSize,worldMap,0,tileSize)).grabPixels();}
         catch(InterruptedException ie) 
@@ -2147,7 +2191,9 @@ public final class TilesGenerator implements Runnable{
     private final void writeWorldMapBinaryData(){
         try{File file=new File(tilesFilename);
             if(!file.exists())
-                file.createNewFile();
+                {file.getParentFile().mkdirs();
+                 file.createNewFile();
+                }
             //for each point, associate the good texture coordinates  
             //use DataOutputStream and writeInt() for the definitive implementation
             DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));

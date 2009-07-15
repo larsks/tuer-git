@@ -30,6 +30,17 @@ public final class CellsGenerator{
     
     
     public static final NetworkSet generate(List<PointPair> topWallPiecesList,
+            List<PointPair> bottomWallPiecesList,
+            List<PointPair> leftWallPiecesList,
+            List<PointPair> rightWallPiecesList,
+            final int tileSize){
+        final float[] dummyInvalidTexCoord=new float[]{0.0f,0.0f,0.0f,0.0f};
+        final float[] dummyValidTexCoord=new float[]{0.0f,0.0f,1.0f,1.0f};
+        List<PointPair> emptyList=Collections.emptyList();
+        return(generate(topWallPiecesList,bottomWallPiecesList,leftWallPiecesList,rightWallPiecesList,emptyList,emptyList,emptyList,emptyList,tileSize,dummyInvalidTexCoord,dummyValidTexCoord,dummyValidTexCoord,dummyValidTexCoord));
+    }
+    
+    public static final NetworkSet generate(List<PointPair> topWallPiecesList,
                                       List<PointPair> bottomWallPiecesList,
                                       List<PointPair> leftWallPiecesList,
 			                          List<PointPair> rightWallPiecesList,
@@ -37,7 +48,11 @@ public final class CellsGenerator{
                                       List<PointPair> artBottomWallPiecesList,
                                       List<PointPair> artLeftWallPiecesList,
                                       List<PointPair> artRightWallPiecesList,
-                                      int tileSize){
+                                      final int tileSize,
+                                      final float[] portalTexCoord,
+                                      final float[] floorTexCoord,
+                                      final float[] wallTexCoord,
+                                      final float[] ceilTexCoord){
         PointPairComparator ppc=new PointPairComparator(PointPairComparator.VERTICAL_HORIZONTAL_SORT);       
         Vector<PointPair> wholeTopWallPiecesList=new Vector<PointPair>();
         wholeTopWallPiecesList.addAll(topWallPiecesList);
@@ -66,7 +81,8 @@ public final class CellsGenerator{
     	Vector<Cell> cellsList=new Vector<Cell>();
     	generateRawCellsAndPortals(topFullWallList,bottomFullWallList,leftFullWallList,rightFullWallList,cellsList);
     	optimizeRawCellsAndPortals(cellsList);  
-    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList);
+    	List<Full3DCell> full3DCellsList=convertFromRawTo3DCellsAndPortals(cellsList,
+    	        portalTexCoord,floorTexCoord,wallTexCoord,ceilTexCoord);
     	System.out.println("SIZE : "+cellsList.size());
     	createCellsMap(cellsList,tileSize);
     	List<Cell> overlappingCellsList=getOverlappingCellsList(cellsList);
@@ -673,14 +689,14 @@ public final class CellsGenerator{
     }
     
     //add the third coordinate to each vertex in the cells and in the portals
-    private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList){
+    private final static List<Full3DCell> convertFromRawTo3DCellsAndPortals(List<Cell> cellsList,
+            final float[] portalTexCoord,
+            final float[] floorTexCoord,
+            final float[] wallTexCoord,
+            final float[] ceilTexCoord){
         List<Full3DCell> full3DCellsList=new ArrayList<Full3DCell>();
         Full3DCell fullCell;
         int xmin,xmax,zmin,zmax;
-        final float[] portalTexCoord=new float[]{0.0f,0.0f,0.0f,0.0f};
-        final float[] floorTexCoord=new float[]{0.0f,0.75f,0.25f,0.5f};
-        final float[] wallTexCoord=new float[]{0.0f,0.25f,0.25f,0.5f};
-        final float[] ceilTexCoord=new float[]{0.0f,1.0f,0.25f,0.75f};
         for(Cell cell:cellsList)
             {//create a new full 3D cell
              fullCell=new Full3DCell();
@@ -753,7 +769,6 @@ public final class CellsGenerator{
                  }
              //compute the enclosing rectangle of this full 3D atomic wall
              fullCell.computeEnclosingRectangle();
-             //System.out.println("Rectangle: "+fullCell.getEnclosingRectangle());
              xmin=fullCell.getEnclosingRectangle().x;
              zmin=fullCell.getEnclosingRectangle().y;
              xmax=xmin+fullCell.getEnclosingRectangle().width-1;
@@ -762,15 +777,15 @@ public final class CellsGenerator{
              for(int i=xmin;i<=xmax;i++)
                  for(int j=zmin;j<=zmax;j++)
                      {//build a tile for the ceiling
-                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[0],ceilTexCoord[1],i,0.5f,j});
-                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[0],ceilTexCoord[3],i+1,0.5f,j});
-                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[2],ceilTexCoord[3],i+1,0.5f,j+1});
-                      fullCell.getCeilWalls().add(new float[]{ceilTexCoord[2],ceilTexCoord[1],i,0.5f,j+1});
+                      fullCell.addCeilWall(new float[]{ceilTexCoord[0],ceilTexCoord[1],i,0.5f,j});
+                      fullCell.addCeilWall(new float[]{ceilTexCoord[0],ceilTexCoord[3],i+1,0.5f,j});
+                      fullCell.addCeilWall(new float[]{ceilTexCoord[2],ceilTexCoord[3],i+1,0.5f,j+1});
+                      fullCell.addCeilWall(new float[]{ceilTexCoord[2],ceilTexCoord[1],i,0.5f,j+1});
                       //build a tile for the floor                     
-                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[2],floorTexCoord[1],i,-0.5f,j+1});
-                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[2],floorTexCoord[3],i+1,-0.5f,j+1});
-                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[3],i+1,-0.5f,j});
-                      fullCell.getFloorWalls().add(new float[]{floorTexCoord[0],floorTexCoord[1],i,-0.5f,j});                      
+                      fullCell.addFloorWall(new float[]{floorTexCoord[2],floorTexCoord[1],i,-0.5f,j+1});
+                      fullCell.addFloorWall(new float[]{floorTexCoord[2],floorTexCoord[3],i+1,-0.5f,j+1});
+                      fullCell.addFloorWall(new float[]{floorTexCoord[0],floorTexCoord[3],i+1,-0.5f,j});
+                      fullCell.addFloorWall(new float[]{floorTexCoord[0],floorTexCoord[1],i,-0.5f,j});                      
                      }            
              //compute the enclosing rectangle again as the coordinates have changed
              fullCell.computeEnclosingRectangle();
