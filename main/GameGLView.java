@@ -979,10 +979,6 @@ public class GameGLView implements GLEventListener{
         GLMenuItem optionsMenuItem=new GLMenuItem("options");
         optionsMenuItem.addActionListener(new OptionsActionListener(this));
         this.menu.addGLMenuItem(optionsMenuItem);
-        GLMenuItem loadMenuItem=new GLMenuItem("load game");      
-        this.menu.addGLMenuItem(loadMenuItem);
-        GLMenuItem saveMenuItem=new GLMenuItem("save game");       
-        this.menu.addGLMenuItem(saveMenuItem);
         GLMenuItem aboutMenuItem=new GLMenuItem("about");
         AboutActionListener aboutActionListener=new AboutActionListener(this);
         this.aboutText=aboutActionListener.getAboutText().split(System.getProperty("line.separator"));
