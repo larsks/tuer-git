@@ -10,7 +10,6 @@
     <property name="basedir" value="."/>
     <property name="srcdir" value="."/>
     <property name="destdir" value="."/>
-	<property name="zipdestdir" value=".."/>
 	<property name="alias" value="xxxxxxxx"/>
 	<property name="keystore" value="xxx"/>
 	<property name="keypass" value="xxxxxxx"/>
@@ -46,6 +45,7 @@
     		<fileset dir="${destdir}" includes="**/*.data" />
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
+    	<delete dir="${destdir}/obj" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<!-- delete only the generated files, not the artworks -->
     	<delete failonerror="false">
@@ -65,7 +65,6 @@
     		<fileset file="${destdir}/texture/wallTexture0.png"/>
     	</delete>
     	<delete dir="${destdir}/data" failonerror="false" />
-    	<delete dir="${destdir}/jbin" failonerror="false" />
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
 
@@ -93,28 +92,6 @@
 	</target>
 	
 	<!-- ================================================================= -->
-	<!-- Dist-jme                                                          -->
-	<!-- ================================================================= -->
-	<target name="dist-jme" depends="compile" description="Creates the java archive of the EXPERIMENTAL VERSION">
-		<jar destfile="tuer.jar" basedir="${destdir}" 
-			includes="**/*.class" 
-			compress="false">
-			<include name="**/*.png" />
-			<include name="**/*.jpg" />
-			<include name="**/*.gif" />
-			<include name="**/*.txt" />
-			<include name="**/*.ogg" />			
-			<include name="**/*.xml" />
-			<include name="**/*.jbin"/>
-			<!-- FIXME: convert it into XML -->
-			<include name="**/LID0.data" />
-			<manifest>
-			    <attribute name="Main-Class" value="jme.JMEGameServiceProvider"/>
-			</manifest>
-		</jar>
-	</target>
-	
-	<!-- ================================================================= -->
 	<!-- Sign                                                              -->
 	<!-- ================================================================= -->
 	<target name="sign" depends="dist" description="Sign the java archive">
@@ -131,37 +108,6 @@
 		/>
 	</target>
 	
-	<!-- ================================================================= -->
-	<!-- Zip                                                               -->
-	<!-- ================================================================= -->
-	<!-- Temporarily, the JME version is ignored -->
-	<!-- excludes="jme/" -->
-	<target name="zip" depends="" description="Creates the zip file containing the source code">
-		<zip destfile="${zipdestdir}/tuer.zip" basedir="${srcdir}" 
-			includes="**/*.java" 
-			excludes="lara/"
-			compress="true">
-			<include name="**/*.cfg" />
-			<include name="**/*.data"/>
-			<include name="**/*.gif" />
-			<include name="**/*.jpg" />
-			<include name="**/*.md2" />
-			<include name="**/*.md3" />
-			<include name="**/*.png" />		
-			<include name="**/*.ogg" />		
-			<include name="**/*.rtf" />
-			<include name="**/*.shader"/>
-			<include name="**/*.skin"/>
-			<include name="**/*.txt" />
-			<include name="**/*.xml" />
-			<include name="**/*.gif" />
-			<include name="**/*.obj" />
-			<include name="**/*.jbin"/>
-			<include name="**/*.mtl" />
-			<include name="**/manifest" />
-		</zip>
-	</target>
-	
     <!-- =================================================================== -->
     <!-- Build                                                               -->
     <!-- =================================================================== -->
@@ -172,15 +118,8 @@
     <!-- =================================================================== -->
     <!-- Run Targets                                                         -->
     <!-- =================================================================== -->  
-    <target name="run-game" description="Runs the game TUER">
-        <java classname="connection.GameServiceProvider"
-              fork="true"
-              dir="${destdir}"
-              failonerror="true"
-              >
-        </java>
-    </target>
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
+		    <mkdir dir="${destdir}/obj" />
 		    <mkdir dir="${destdir}/xml" />
 			<mkdir dir="${destdir}/data" />
 	        <java classname="connection.DataPreprocessor"
@@ -228,90 +167,13 @@
 	        	    <arg value="texture/floorTexture.png"/>
 	        	    <arg value="texture/wallTexture0.png"/>
 		</java>
-	</target>	
-	<target name="run-jme-data-preprocessor" description="Runs the program that converts the data from the custom format(s) into the format of JMonkeyEngine">
-		<mkdir dir="${destdir}/xml"/>
-		<mkdir dir="${destdir}/jbin"/>
-		<java classname="jme.JMEDataPreprocessor"
-			              fork="true"
-			              dir="${destdir}"
-			              failonerror="true"
-			              >
-			<jvmarg value="-Xmx1536m"/>
-			<!-- use the old world map -->
-			<arg value="data/worldmap.data"/>
-			<arg value="xml/WID0.xml"/>
-			<arg value="xml/LID0.xml"/>
-			<!-- convert the levels -->
-			<arg value="obj/LID0"/>
-			<arg value="obj/LID0.mtl"/>
-			<arg value="texture/wallTexture.png"/>
-			<arg value="jbin/"/>
-			<!-- convert the weapons -->
-			<!-- pistol drawn by an anonymous (3DExtras) -->
-			<arg value="obj/pistol.obj"/>
-			<arg value="obj/pistol.mtl"/>
-			<arg value="texture/pistol.jpg"/>
-			<arg value="jbin/pistol.jbin"/>
-			<!-- pistol drawn by Maxime Comte -->
-			<arg value="obj/pistol2.obj"/>
-			<arg value="obj/pistol2.mtl"/>
-			<arg value="texture/pistol2.png"/>
-			<arg value="jbin/pistol2.jbin"/>
-			<!-- drawn by psionic -->
-			<arg value="obj/pistol3.obj"/>
-			<arg value="obj/pistol3.mtl"/>
-			<arg value="texture/pistol3.jpg"/>
-			<arg value="jbin/pistol3.jbin"/>
-			<!-- drawn by psionic -->
-			<arg value="obj/smach.obj"/>
-			<arg value="obj/smach.mtl"/>
-			<arg value="texture/smach.jpg"/>
-			<arg value="jbin/smach.jbin"/>
-			<!-- drawn by psionic -->
-			<arg value="obj/uzi.obj"/>
-			<arg value="obj/uzi.mtl"/>
-			<arg value="texture/uzi.jpg"/>
-			<arg value="jbin/uzi.jbin"/>
-			<!-- ak47 drawn by Whisnu (tigarut@gmail.com) -->
-			<!--<arg value="obj/AK47.obj"/>
-			<arg value="obj/AK47.mtl"/>
-			<arg value="texture/"/>
-			<arg value="jbin/AK47.jbin"/>-->
-			<!-- drawn by psionic -->
-			<arg value="obj/laser.obj"/>
-			<arg value="obj/laser.mtl"/>
-			<arg value="texture/laser.jpg"/>
-			<arg value="jbin/laser.jbin"/>			
-			<!--<arg value="obj/creature.obj"/>
-			<arg value="obj/creature.mtl"/>
-			<arg value="texture/"/>
-			<arg value="jbin/creature.jbin"/>-->
-			
-			<arg value="obj/cop.obj"/>
-			<arg value="obj/cop.mtl"/>
-			<arg value="texture/cop.png"/>
-			<arg value="jbin/cop.jbin"/>
-			
-			<arg value="obj/giger_alien.obj"/>
-			<arg value="obj/giger_alien.mtl"/>
-			<arg value="texture/giger_alien.jpg"/>
-			<arg value="jbin/giger_alien.jbin"/>
-			
-			<!-- human drawn by a member of jmonkeyengine's forum -->
-			<arg value="md2/agent.md2"/>
-			<arg value="texture/agent.png"/>
-			<arg value="jbin/agent.jbin"/>
-	    </java>
 	</target>
-	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
-		<java classname="jme.JMEGameServiceProvider"
-					              fork="true"
-					              dir="${destdir}"
-					              failonerror="true"
-					              >
-			<jvmarg value="-Xmx256m"/>
-			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
-		</java>
+	<target name="run-game" description="Runs the game TUER">
+	    <java classname="connection.GameServiceProvider"
+	              fork="true"
+	              dir="${destdir}"
+	              failonerror="true"
+	              >
+	    </java>
 	</target>
 </project>
