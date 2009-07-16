@@ -723,26 +723,28 @@ public class SoundSystem implements ISoundSystem{
    }
 
    public void closeSound() {
-      if (bSound) {
-         for (int i=0;i<asdl.length;i++) {
-            asdl[i].stop();
-            asdl[i].close();
-         }
-         for (int i=0;i<aclip.length;i++) {
-            if (aclip[i]!=null) {
-               aclip[i].stop();
-               aclip[i].close();
-            }
-         }
-         bSound = false;        
-         for(int i=0;i<uniqueSample.length;i++)
-             {uniqueSample[i].setVolume(0.0f);
-              if(uniqueSample[i].isRunning())
-                 uniqueSample[i].stop();
-              uniqueSample[i].close();
+       if (bSound) {
+          for (int i=0;i<asdl.length;i++) {
+             asdl[i].stop();
+             asdl[i].close();
+          }
+          for (int i=0;i<aclip.length;i++) {
+             if (aclip[i]!=null) {
+                aclip[i].stop();
+                //do not close it, the OS will do it later
+                //aclip[i].close();
              }
-      }
-   }
+          }
+          bSound = false;        
+          for(int i=0;i<uniqueSample.length;i++)
+              {uniqueSample[i].setVolume(0.0f);
+               if(uniqueSample[i].isRunning())
+                  uniqueSample[i].stop();
+               //do not close it, the OS will do it later
+               //uniqueSample[i].close();
+              }
+       }
+    }
 
    public void setSoundOption(String sOpt) {
       if (sOpt.equals("dist-snd:false"))   bDistSnd=false;
