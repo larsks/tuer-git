@@ -16,6 +16,7 @@ Special thanks to:
        
 Vincent Stahl (author of "Art Attack", TUER wouldn't exist without him)
 "Egon Olsen" from www.javagaming.org (occasional tester under Microsoft Windows Vista)
+"Riven" and "Bienator" from www.javagaming.org (they gave me some advices)
 Gurvan Jegou (previous main alpha tester under Ubuntu and Microsoft Windows XP)
 Valerie Berthe (main alpha tester under Microsoft Windows XP for the chipset SiS 661 FX)
 Elodie Briere (alpha tester under Microsoft Windows XP)

@@ -66,9 +66,22 @@
 			<include name="**/*.txt" />
 			<include name="**/*.ogg" />			
 			<include name="**/*.xml" />
-			<include name="**/*.obj" />
-			<include name="**/*.jbin"/>
-			<include name="**/*.mtl" />
+			<!-- generated textures -->
+			<exclude name="**/texture/ceilTexture.png" />
+			<exclude name="**/texture/floorTexture.png" />
+			<exclude name="**/texture/wallTexture0.png" />
+			<!-- generated maps -->
+			<exclude name="**/texture/cellsmap.png" />
+			<exclude name="**/texture/worldmap.gif" />
+			<!-- MD3 loader -->
+			<exclude name="**/md3/*.*" />
+			<exclude name="**/lara/*.*" />
+			<!-- documentation and license-->
+			<exclude name="**/contents.txt" />
+			<exclude name="**/gpl.txt" />
+			<exclude name="**/readme.txt" />
+			<!-- ANT file -->
+			<exclude name="**/build.xml" />
 			<manifest>
 			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
 			</manifest>

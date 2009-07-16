@@ -73,7 +73,7 @@ TUER: Truly Unusual Experience of Revolution: 3D JAVA-POWERED HARDWARE ACCELERAT
       or modulo clippings, in any way, It didn't crash again.
    -  Fixed clipping of floor and ceiling.
    -  read CHANGES.RTF for more.
-   -  go to http://tuer.tuxfamily.org/project.html#bugs
+   -  go to http://tuer.sourceforge.net/project.php#bugs
 
    Technical issues concerning the engine:
    -  in general, avoid that the player walks through
@@ -95,7 +95,7 @@ TUER: Truly Unusual Experience of Revolution: 3D JAVA-POWERED HARDWARE ACCELERAT
       prevent you from doing it but it would be nice not to mix 
       everything.
    -  please, if your game made from mine is no more fully 
-      cross-platform, precise it and precise that it is not the 
+      cross-platform, make it precise that it is not the 
       case of TUER. 
 
 
@@ -136,4 +136,4 @@ TUER: Truly Unusual Experience of Revolution: 3D JAVA-POWERED HARDWARE ACCELERAT
    
    	Julien GOUESSE - THE DEFENDER OF THE FREE ACCESS TO GAMING
 	
-	http://tuer.tuxfamily.org
+	http://tuer.sourceforge.net
