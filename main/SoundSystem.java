@@ -731,7 +731,8 @@ public class SoundSystem implements ISoundSystem{
          for (int i=0;i<aclip.length;i++) {
             if (aclip[i]!=null) {
                aclip[i].stop();
-               aclip[i].close();
+               //do not close it, the OS will do it later
+               //aclip[i].close();
             }
          }
          bSound = false;        
@@ -739,7 +740,8 @@ public class SoundSystem implements ISoundSystem{
              {uniqueSample[i].setVolume(0.0f);
               if(uniqueSample[i].isRunning())
                  uniqueSample[i].stop();
-              uniqueSample[i].close();
+              //do not close it, the OS will do it later
+              //uniqueSample[i].close();
              }
       }
    }
