@@ -16,9 +16,6 @@ package main;
 
 import java.awt.geom.Rectangle2D;
 
-import weapon.AmmunitionRepository;
-import weapon.RocketLauncherModel;
-
 class PlayerModel implements Collector{
     
     
@@ -46,11 +43,6 @@ class PlayerModel implements Collector{
     
     private Rectangle2D.Double voxel;
     
-    private AmmunitionRepository ammoExternalRepository;
-    //TODO: get a weapon only by collecting it
-    @SuppressWarnings("unused")
-    private RocketLauncherModel rocketLauncherModel;
-    
     
     PlayerModel(Clock clock){
         this.health=startingHealth;
@@ -63,8 +55,6 @@ class PlayerModel implements Collector{
         this.boundingSize=defaultBoundingSize;
         this.voxel=new Rectangle2D.Double();
         updateVoxel();
-        this.ammoExternalRepository=new AmmunitionRepository();
-        this.rocketLauncherModel=new RocketLauncherModel(ammoExternalRepository,clock);
     }
     
     private final void updateVoxel(){
