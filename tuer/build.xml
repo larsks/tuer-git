@@ -16,7 +16,6 @@
 	<property name="keypass" value="xxxxxxx"/>
 	<property name="storepass" value="xxxxxxx"/>
 	<property name="dname" value="x"/>
-	<property name="jogllibpath" value="/home/julien/Documents/installation/jogl-1.1.1-linux-i586/lib/"/>
 
     <!-- Allow user to override properties without editing this file -->
     <property file="${user.home}/.ant.properties" />
@@ -25,15 +24,12 @@
     <!-- ================================================================= -->
     <!-- Compile                                                           -->
     <!-- ================================================================= -->
-    <!-- Temporarily, the JME version is ignored -->
-	<!-- excludes="jme/" -->
-	<target name="compile" description="Compiles the source code">
+    <target name="compile" description="Compiles the source code">
         <javac srcdir="${srcdir}"       	   
                destdir="${destdir}"
                debug="on" >
             <include name="**/*.java"/>
         </javac>
-
     </target>
 
 
@@ -43,10 +39,11 @@
     <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
     	<delete>
     	    <fileset dir="${destdir}" includes="**/*.class" />
-    		<fileset dir="${destdir}" includes="**/*.data" />
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
+    	<delete dir="${destdir}/data" failonerror="false" />
+    	<delete dir="${destdir}/jbin" failonerror="false" />
     	<!-- delete only the generated files, not the artworks -->
     	<delete failonerror="false">
     	    <fileset dir="${destdir}/obj" includes="**/LID0*"/>
@@ -63,39 +60,14 @@
     		<fileset file="${destdir}/texture/ceilTexture.png"/>
     		<fileset file="${destdir}/texture/floorTexture.png"/>	
     		<fileset file="${destdir}/texture/wallTexture0.png"/>
-    	</delete>
-    	<delete dir="${destdir}/data" failonerror="false" />
-    	<delete dir="${destdir}/jbin" failonerror="false" />
+    	</delete>   	
     	<delete file="${destdir}/tuer.jar" failonerror="false" />
     </target>
-
+	
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the java archive">
-		<jar destfile="tuer.jar" basedir="${destdir}" 
-			includes="**/*.class" 
-			compress="false">
-			<include name="**/*.png" />
-			<include name="**/*.jpg" />
-			<include name="**/*.gif" />
-			<include name="**/*.data"/>
-			<include name="**/*.txt" />
-			<include name="**/*.ogg" />			
-			<include name="**/*.xml" />
-			<include name="**/*.obj" />
-			<include name="**/*.jbin"/>
-			<include name="**/*.mtl" />
-			<manifest>
-			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
-			</manifest>
-		</jar>
-	</target>
-	
-	<!-- ================================================================= -->
-	<!-- Dist-jme                                                          -->
-	<!-- ================================================================= -->
-	<target name="dist-jme" depends="compile" description="Creates the java archive of the EXPERIMENTAL VERSION">
+	<target name="dist" depends="compile" description="Creates the java archive of the EXPERIMENTAL VERSION">
 		<jar destfile="tuer.jar" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -108,6 +80,15 @@
 			<include name="**/*.jbin"/>
 			<!-- FIXME: convert it into XML -->
 			<include name="**/LID0.data" />
+			<!-- generated maps -->
+			<exclude name="**/texture/cellsmap.png" />
+			<exclude name="**/texture/worldmap.gif" />
+			<!-- documentation and license-->
+			<exclude name="**/contents.txt" />
+			<exclude name="**/gpl.txt" />
+			<exclude name="**/readme.txt" />
+			<!-- ANT file -->
+			<exclude name="**/build.xml" />
 			<manifest>
 			    <attribute name="Main-Class" value="jme.JMEGameServiceProvider"/>
 			</manifest>
@@ -134,12 +115,9 @@
 	<!-- ================================================================= -->
 	<!-- Zip                                                               -->
 	<!-- ================================================================= -->
-	<!-- Temporarily, the JME version is ignored -->
-	<!-- excludes="jme/" -->
 	<target name="zip" depends="" description="Creates the zip file containing the source code">
 		<zip destfile="${zipdestdir}/tuer.zip" basedir="${srcdir}" 
-			includes="**/*.java" 
-			excludes="lara/"
+			includes="**/*.java"
 			compress="true">
 			<include name="**/*.cfg" />
 			<include name="**/*.data"/>

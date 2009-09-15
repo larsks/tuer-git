@@ -163,6 +163,8 @@ public final class NetworkSet implements Serializable{
      * @param MTLFilename MTL filename (an MTL file describes the materials used by an OBJ file)
      * @param useOneGroupPerQuad true if one group per quad is created
      * @param smoothing smoothing group (see the description of the OBJ format)
+     * @param materialNames name of the materials
+     * @param useOneFilePerWall true if it creates one file per wall, otherwise it creates a file per cell
      */
     final void writeObjFiles(final String filenamepattern,
             final String[] textureFilenames,
@@ -170,7 +172,7 @@ public final class NetworkSet implements Serializable{
             final boolean useJOGLTextureCoordinatesVerticalOrder,
             final boolean writePortals,String MTLFilename,
             final boolean useOneGroupPerQuad,final int smoothing,
-            final String[] materialNames){
+            final String[] materialNames,final boolean useOneFilePerWall){
         ArrayList<INodeIdentifier> nodeIDList=new ArrayList<INodeIdentifier>();
         final boolean useTexture=textureFilenames!=null&&textureFilenames.length>0;
         final int slashIndex=filenamepattern.lastIndexOf("/");
@@ -314,7 +316,7 @@ public final class NetworkSet implements Serializable{
         else
             {System.out.println("Starts writing OBJ Wavefront files...");
              INodeIdentifier distinctNodeID;
-             int levelID=-1;
+             int networkID=0,cellID,levelID=-1;
              int firstDigitIndex=-1;
              for(int i=filenamePrefix.length()-1;i>=0;i--)
                  if(Character.isDigit(filenamePrefix.charAt(i)))
@@ -325,108 +327,176 @@ public final class NetworkSet implements Serializable{
              if(firstDigitIndex!=-1)
                  levelID=Integer.parseInt(filenamePrefix.substring(firstDigitIndex));
              if(levelID==-1)
-                 System.out.println("level index unknown!");       
-             int networkID=0,cellID;
-             ArrayList<String> subObjFilenameList=new ArrayList<String>();             
-             for(Network network:networksList)
+                 System.out.println("level index unknown!"); 
+             if(useOneFilePerWall)
                  {cellID=0;
-                  for(Full3DCell cell:network.getCellsList())
-                      {//create a new file by using the pattern and the identifiers            
-                       distinctNodeID=BeanProvider.getInstance().getINodeIdentifier();
-                       distinctNodeID.setLevelID(levelID);
-                       distinctNodeID.setNetworkID(networkID);
-                       distinctNodeID.setCellID(cellID);
-                       nodeIDList.add(distinctNodeID);
-                       objname=distinctNodeID.toString();
-                       objfilename=objname+".obj";
-                       try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
-                       catch(IOException ioe)
-                       {ioe.printStackTrace();}
-                       if(bos!=null)
-                           {pw=new PrintWriter(bos);
-                            //declare the MTL file
-                            if(useTexture)
-                                pw.println("mtllib "+MTLFilename);
-                            //write the object name (o objname)
-                            pw.println("o "+objname);
-                            //for each list of walls
-                                //for each wall
-                                    //write vertices (v x y z)
-                            for(float[] wall:cell.getBottomWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            for(float[] wall:cell.getCeilWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            for(float[] wall:cell.getFloorWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            for(float[] wall:cell.getLeftWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            for(float[] wall:cell.getRightWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            for(float[] wall:cell.getTopWalls())
-                                pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
-                            if(useTexture)
-                                {//for each list of walls
-                                     //for each wall
-                                         //write texture coordinates (vt x y)
-                                 if(useJOGLTextureCoordinatesVerticalOrder)
-                                     {for(float[] wall:cell.getBottomWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                      for(float[] wall:cell.getCeilWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                      for(float[] wall:cell.getFloorWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                      for(float[] wall:cell.getLeftWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                      for(float[] wall:cell.getRightWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                      for(float[] wall:cell.getTopWalls())
-                                          pw.println("vt "+wall[0]+" "+wall[1]);
-                                     }
-                                 else
-                                     {for(float[] wall:cell.getBottomWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                      for(float[] wall:cell.getCeilWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                      for(float[] wall:cell.getFloorWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                      for(float[] wall:cell.getLeftWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                      for(float[] wall:cell.getRightWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                      for(float[] wall:cell.getTopWalls())
-                                          pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
-                                     }
+                  List<float[]> walls;
+                  int elementID;              
+                  for(Network network:networksList)
+                      {for(Full3DCell cell:network.getCellsList())
+                           {elementID=0;
+                            walls=cell.getBottomWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
                                 }
-                            writeCellFaces(pw,objname,0,useTexture,useTriangles,useOneGroupPerQuad,materialNames,smoothing,cell);
-                            System.out.println("Writes Wavefront object "+objname);
-                            try{pw.close();
-                                bos.close();
-                               } 
+                            walls=cell.getCeilWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
+                                }
+                            walls=cell.getFloorWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
+                                }
+                            walls=cell.getLeftWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
+                                }
+                            walls=cell.getRightWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
+                                }
+                            walls=cell.getTopWalls();
+                            for(int coordIndex=0;coordIndex<walls.size();coordIndex+=4)
+                                {writeCellWallFile(levelID,networkID,cellID,elementID,directoryname,
+                                        useTexture,useJOGLTextureCoordinatesVerticalOrder,
+                                        useOneGroupPerQuad,smoothing,
+                                        new float[][]{walls.get(coordIndex),walls.get(coordIndex+1),
+                                                      walls.get(coordIndex+2),walls.get(coordIndex+3)});
+                                 elementID++;
+                                }
+                            cellID++;
+                           }
+                       networkID++;
+                      }
+                 }
+             else
+                 {ArrayList<String> subObjFilenameList=new ArrayList<String>();             
+                  for(Network network:networksList)
+                      {cellID=0;
+                       for(Full3DCell cell:network.getCellsList())
+                           {//create a new file by using the pattern and the identifiers            
+                            distinctNodeID=BeanProvider.getInstance().getINodeIdentifier();
+                            distinctNodeID.setLevelID(levelID);
+                            distinctNodeID.setNetworkID(networkID);
+                            distinctNodeID.setCellID(cellID);
+                            //FIXME: it has become useless
+                            nodeIDList.add(distinctNodeID);
+                            objname=distinctNodeID.toString();
+                            objfilename=objname+".obj";
+                            try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
                             catch(IOException ioe)
                             {ioe.printStackTrace();}
-                            finally
-                            {pw=null;
-                             bos=null;                       
-                            }
-                            subObjFilenameList.add(objfilename);
+                            if(bos!=null)
+                                {pw=new PrintWriter(bos);
+                                 //declare the MTL file
+                                 if(useTexture)
+                                     pw.println("mtllib "+MTLFilename);
+                                 //write the object name (o objname)
+                                 pw.println("o "+objname);
+                                 //for each list of walls
+                                     //for each wall
+                                         //write vertices (v x y z)
+                                 for(float[] wall:cell.getBottomWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 for(float[] wall:cell.getCeilWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 for(float[] wall:cell.getFloorWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 for(float[] wall:cell.getLeftWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 for(float[] wall:cell.getRightWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 for(float[] wall:cell.getTopWalls())
+                                     pw.println("v "+wall[2]+" "+wall[3]+" "+wall[4]);
+                                 if(useTexture)
+                                     {//for each list of walls
+                                          //for each wall
+                                              //write texture coordinates (vt x y)
+                                      if(useJOGLTextureCoordinatesVerticalOrder)
+                                          {for(float[] wall:cell.getBottomWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                           for(float[] wall:cell.getCeilWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                           for(float[] wall:cell.getFloorWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                           for(float[] wall:cell.getLeftWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                           for(float[] wall:cell.getRightWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                           for(float[] wall:cell.getTopWalls())
+                                               pw.println("vt "+wall[0]+" "+wall[1]);
+                                          }
+                                      else
+                                          {for(float[] wall:cell.getBottomWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                           for(float[] wall:cell.getCeilWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                           for(float[] wall:cell.getFloorWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                           for(float[] wall:cell.getLeftWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                           for(float[] wall:cell.getRightWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                           for(float[] wall:cell.getTopWalls())
+                                               pw.println("vt "+wall[0]+" "+(1.0f-wall[1]));
+                                          }
+                                     }
+                                 writeCellFaces(pw,objname,0,useTexture,useTriangles,useOneGroupPerQuad,materialNames,smoothing,cell);
+                                 System.out.println("Writes Wavefront object "+objname);
+                                 try{pw.close();
+                                     bos.close();
+                                    } 
+                                 catch(IOException ioe)
+                                 {ioe.printStackTrace();}
+                                 finally
+                                 {pw=null;
+                                  bos=null;                       
+                                 }
+                                 subObjFilenameList.add(objfilename);
+                                }
+                            cellID++;
                            }
-                       cellID++;
+                       networkID++;
                       }
-                  networkID++;
-                 }
-             //write the main OBJ file that calls the others
-             System.out.println("Writes Wavefront object "+filenamePrefix);
-             try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
-             catch(IOException ioe)
-             {ioe.printStackTrace();return;}
-             pw=new PrintWriter(bos);
-             for(String subObjFilename:subObjFilenameList)
-                 pw.println("call "+subObjFilename);            
-             try{pw.close();
-                 bos.close();
-                } 
-             catch(IOException ioe)
-             {ioe.printStackTrace();}
+                  //write the main OBJ file that calls the others
+                  System.out.println("Writes Wavefront object "+filenamePrefix);
+                  try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(filenamepattern+".obj");}
+                  catch(IOException ioe)
+                  {ioe.printStackTrace();return;}
+                  pw=new PrintWriter(bos);
+                  for(String subObjFilename:subObjFilenameList)
+                      pw.println("call "+subObjFilename);            
+                  try{pw.close();
+                      bos.close();
+                     } 
+                  catch(IOException ioe)
+                  {ioe.printStackTrace();}
+                 }   
              if(writePortals)
                  {//write the portals
                   System.out.println("Starts writing portals...");
@@ -521,6 +591,53 @@ public final class NetworkSet implements Serializable{
                   System.out.println("Ends writing portals.");
                  }
              System.out.println("Ends writing OBJ Wavefront files.");
+            }
+    }
+    
+    private static final void writeCellWallFile(final int levelID,final int networkID,
+                                                final int cellID,final int elementID,
+                                                final String directoryname,boolean useTexture,final boolean useJOGLTextureCoordinatesVerticalOrder,
+                                                final boolean useOneGroupPerQuad,final int smoothing,
+                                                final float[][] cellWall){       
+        INodeIdentifier nodeID = BeanProvider.getInstance().getINodeIdentifier();
+        nodeID.setLevelID(levelID);
+        nodeID.setNetworkID(networkID);
+        nodeID.setCellID(cellID);
+        //FIXME: standardize the handling of element identifiers
+        String objname=nodeID.toString()+"EID"+elementID;
+        String objfilename=objname+".obj";
+        BufferedOutputStream bos = null;
+        try{bos=TilesGenerator.createNewFileFromLocalPathAndGetBufferedStream(directoryname+"/"+objfilename);}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        if(bos!=null)
+            {PrintWriter pw=new PrintWriter(bos);           
+             //write vertex coordinates
+             for(float[] coord:cellWall)
+                 pw.println("v "+coord[2]+" "+coord[3]+" "+coord[4]);
+             //write texture coordinates
+             if(useTexture)
+                 {if(useJOGLTextureCoordinatesVerticalOrder)
+                      {for(float[] coord:cellWall)
+                           pw.println("vt "+coord[0]+" "+coord[1]);
+                      }
+                  else
+                      {for(float[] coord:cellWall)
+                           pw.println("vt "+coord[0]+" "+(1.0f-coord[1]));
+                      }
+                 }
+             //TODO: implement it
+             //write face coordinates
+             //writeCellFaces(pw,objname,0,useTexture,useTriangles,useOneGroupPerQuad,materialNames,smoothing,cell);
+             try{pw.close();
+                 bos.close();
+                } 
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
+             finally
+             {pw=null;
+              bos=null;                       
+             }
             }
     }
     

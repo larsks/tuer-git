@@ -380,7 +380,7 @@ public final class TilesGenerator implements Runnable{
          * The redundancy mode allows to modify independently each cell (used for the view)
          * whereas the compact mode does not (used for the model).
          */      
-        networkSet.writeObjFiles(networkOBJFilename,customTextureFilenames,false,false,true,false,true,MTLFilename,true,1,customMaterialNames);
+        networkSet.writeObjFiles(networkOBJFilename,customTextureFilenames,false,false,true,false,true,MTLFilename,true,1,customMaterialNames,false);
         convertBinaryToOBJFile(rocketLauncherFilename,rocketLauncherTextureFilename,rocketLauncherOBJFilename,true,true,false);
         //need to scale for other objects
         //The same texture is used by the rockets and the rocket launcher
