@@ -46,10 +46,9 @@ public final class LevelGameState extends BasicGameState{
         cam.update();       
         playerNode=new CameraNode("player",cam);
         playerNode.updateFromCamera();
-        //Box playerBox=new Box("player box",new Vector3f(-0.25f,-0.25f,-0.25f),new Vector3f(0.25f,0.25f,0.25f));
-        Box playerBox=new Box("player box",/*cam.getLocation()*/new Vector3f(),0.25f,0.25f,0.25f);
+        Box playerBox=new Box("player box",new Vector3f(),0.25f,0.25f,0.25f);
         playerNode.attachChild(playerBox);
-        playerNode.setModelBound(new BoundingBox(/*cam.getLocation(),0.25f,0.25f,0.25f*/));
+        playerNode.setModelBound(new BoundingBox());
         playerNode.updateModelBound();          
         playerNode.updateWorldBound();
         previousTime=System.currentTimeMillis();

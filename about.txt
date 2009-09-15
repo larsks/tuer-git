@@ -1,5 +1,5 @@
 TUER : Truly Ununsual Experience of Revolution
-alpha version (extremely unstable)
+pre-beta version (unstable)
 
 Single player first person shooter 
 created by Julien Gouesse (alumni of the university of Paris 6)
@@ -15,11 +15,6 @@ please report any bug : gouessej@yahoo.fr
 Special thanks to:
        
 Vincent Stahl (author of "Art Attack", TUER wouldn't exist without him)
-"Egon Olsen" from www.javagaming.org (occasional tester under Microsoft Windows Vista)
-Gurvan Jegou (former main alpha tester under Ubuntu and Microsoft Windows XP)
-Valerie Berthe (main alpha tester under Microsoft Windows XP for the chipset SiS 661 FX)
-Elodie Briere (alpha tester under Microsoft Windows XP)
-Thomas Gouesse (alpha tester under Microsoft Windows XP for an old VIA chipset)
-Elodie Deschanel (occasional tester under Microsoft Windows Vista and XP)
 Yannick Comte (main alpha tester under Linux and Microsoft Windows Vista, author of some videos)
-Maxime Comte (artist, author of the next rocket launcher)
+Maxime Comte (artist who has drawn one of the pistols)
+Psionic3D (artist who has drawn most of the weapons)
