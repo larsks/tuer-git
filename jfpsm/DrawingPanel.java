@@ -16,8 +16,8 @@ package jfpsm;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
@@ -31,65 +31,57 @@ final class DrawingPanel extends JPanel{
 	
 	private static final long serialVersionUID=1L;
 
-	private BufferedImage bufferedImage;
+	private final BufferedImage bufferedImage;
 	
-	private String title;
+	private final String title;
 	
-	private ZoomParameters zoomParams;
+	private final ZoomParameters zoomParams;
 	
-	private Dirtyable entity;
+	private final Graphics graphics;
 	
 	
-	DrawingPanel(Dirtyable entity,String title,BufferedImage bufferedImage){
+	/**
+	 * 
+	 * @param entity displayed entity
+	 * @param title title of the panel
+	 * @param bufferedImage image used to draw
+	 * @param zoomParams zoom parameters (zoom disabled if null)
+	 */
+	DrawingPanel(Dirtyable entity,String title,BufferedImage bufferedImage,ZoomParameters zoomParams){
 		super();
 		this.bufferedImage=bufferedImage;
+		graphics=bufferedImage.createGraphics();
+		graphics.setColor(Color.BLACK);
 		this.title=title;
-		this.zoomParams=null;
-		this.entity=entity;
+		this.zoomParams=zoomParams;
 		final int fontSize=getFontMetrics(getFont()).getHeight();		
 		setPreferredSize(new Dimension(this.bufferedImage.getWidth(),this.bufferedImage.getHeight()+fontSize+2));
-		MouseAdapter mouseAdapter=new MouseAdapter(){
-		    @Override
-            public final void mouseDragged(MouseEvent e){
-                DrawingPanel.this.draw(e.getX(),e.getY());          
-            }
-		    
-		    @Override
-            public final void mouseClicked(MouseEvent e){
-                DrawingPanel.this.draw(e.getX(),e.getY());          
-            }
-		};
+		MouseAdapter mouseAdapter=new DrawingMouseAdapter(this);
 		addMouseMotionListener(mouseAdapter);
 		addMouseListener(mouseAdapter);
 	}
 	
-	private final void draw(final int x,final int y){
-	    if(0<=x&&x<bufferedImage.getWidth()&&0<=y&&y<bufferedImage.getHeight())
-            {if(zoomParams==null)
-                 bufferedImage.setRGB(x,y,Color.BLACK.getRGB());
-             else
-                 bufferedImage.setRGB(zoomParams.getAbsoluteXFromRelativeX(x),zoomParams.getAbsoluteYFromRelativeY(y),Color.BLACK.getRGB());
-             entity.markDirty();
-             repaint();                  
-            }
+	final void draw(int x1,int y1,int x2,int y2){
+	    graphics.drawLine(x1,y1,x2,y2);
+	    repaint();
 	}
 	
-	final void setZoomParameters(ZoomParameters zoomParams){
-	    this.zoomParams=zoomParams;
+	final ZoomParameters getZoomParameters(){
+	    return(zoomParams);
 	}
 	
 	@Override
 	protected final void paintComponent(Graphics g){
 		super.paintComponent(g);
 		if(zoomParams==null)
-		    g.drawImage(bufferedImage,0,0,this);
-		else
-		    {int w=bufferedImage.getWidth(),h=bufferedImage.getHeight();
+            g.drawImage(bufferedImage,0,0,this);
+        else
+            {int w=bufferedImage.getWidth(),h=bufferedImage.getHeight();
 		     int factor=zoomParams.getFactor();
 		     int cx=zoomParams.getCenterx(),cy=zoomParams.getCentery();
 		     int halfDw=(w/factor)/2,halfDh=(h/factor)/2;
 		     g.drawImage(bufferedImage,0,0,w-1,h-1,cx-halfDw,cy-halfDh,cx+halfDw,cy+halfDh,this);
-		    }
+            }
 		g.drawString(title,0,bufferedImage.getHeight()+g.getFontMetrics().getHeight());
 	}
 }

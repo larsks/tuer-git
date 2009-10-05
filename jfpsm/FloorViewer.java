@@ -37,12 +37,12 @@ final class FloorViewer extends JPanel{
     FloorViewer(Floor floor){
         super(new GridLayout(1,1));
         zoomParams=new ZoomParameters(1,floor.getContainerMap().getWidth(),floor.getContainerMap().getHeight());
-        containerDrawingPanel=new DrawingPanel(floor,"container map",floor.getContainerMap());
-        contentDrawingPanel=new DrawingPanel(floor,"content map",floor.getContentMap());
+        containerDrawingPanel=new DrawingPanel(floor,"container map",floor.getContainerMap(),zoomParams);
+        contentDrawingPanel=new DrawingPanel(floor,"content map",floor.getContentMap(),zoomParams);
         JSplitPane leftVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,containerDrawingPanel,contentDrawingPanel);
         leftVerticalSplitPane.setOneTouchExpandable(true);
-        lightDrawingPanel=new DrawingPanel(floor,"light map",floor.getLightMap());
-        pathDrawingPanel=new DrawingPanel(floor,"path map",new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB));
+        lightDrawingPanel=new DrawingPanel(floor,"light map",floor.getLightMap(),zoomParams);
+        pathDrawingPanel=new DrawingPanel(floor,"path map",new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB),zoomParams);
         JSplitPane rightVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,lightDrawingPanel,pathDrawingPanel);
         rightVerticalSplitPane.setOneTouchExpandable(true);
         JSplitPane horizontalSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,leftVerticalSplitPane,rightVerticalSplitPane);
@@ -51,10 +51,10 @@ final class FloorViewer extends JPanel{
         contentDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
         lightDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
         pathDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
-        containerDrawingPanel.setZoomParameters(zoomParams);
+        /*containerDrawingPanel.setZoomParameters(zoomParams);
         contentDrawingPanel.setZoomParameters(zoomParams);
         lightDrawingPanel.setZoomParameters(zoomParams);
-        pathDrawingPanel.setZoomParameters(zoomParams);      
+        pathDrawingPanel.setZoomParameters(zoomParams);  */    
     }
     
     final void updateZoom(int factorIncrement,int x,int y){
