@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<!-- ===================================================================== -->
+<!-- TUER                                                                  -->
+<!-- Ant 1.5 build file                                                    -->
+<!-- ===================================================================== -->
+
+<project name="TUER" default="compile" basedir=".">
+	<property name="destdir" value="."/>
+	<!-- ================================================================= -->
+	<!-- Compile                                                           -->
+	<!-- ================================================================= -->
+	<target name="compile" description="Compiles the source code">
+	    <javac srcdir="${srcdir}"       	   
+	           destdir="${destdir}"
+	           debug="on" >
+	        <include name="**/*.java"/>
+	    </javac>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Clean                                                             -->
+	<!-- ================================================================= -->
+	<target name="clean" description="Deletes the snap directory, the java archive and the .class files">
+	  	<delete>
+	   	    <fileset dir="${destdir}" includes="**/*.class" />
+	   	</delete>
+	</target>
+</project>
