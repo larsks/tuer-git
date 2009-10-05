@@ -5,8 +5,9 @@
 <!-- Ant 1.5 build file                                                    -->
 <!-- ===================================================================== -->
 
-<project name="TUER" default="compile" basedir=".">
+<project name="TUER" default="build" basedir=".">
 	<property name="destdir" value="."/>
+	<property name="srcdir" value="."/>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
@@ -17,6 +18,25 @@
 	        <include name="**/*.java"/>
 	    </javac>
 	</target>
+	<!-- =================================================================== -->
+	<!-- Build                                                               -->
+	<!-- =================================================================== -->
+	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and create the JAR"/>
+	<!-- ================================================================= -->
+	<!-- Dist                                                              -->
+	<!-- ================================================================= -->
+	<target name="dist" depends="compile" description="Creates the java archive">
+		<jar destfile="jfpsm.jar" basedir="${destdir}" 
+			includes="**/*.class" 
+			compress="false">
+			<exclude name="**/gpl.txt" />
+			<!-- ANT file -->
+			<exclude name="**/build.xml" />
+			<manifest>
+				<attribute name="Main-Class" value="jfpsm.MainWindow"/>
+			</manifest>
+		</jar>
+	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
@@ -24,5 +44,16 @@
 	  	<delete>
 	   	    <fileset dir="${destdir}" includes="**/*.class" />
 	   	</delete>
+		<delete file="${destdir}/jfpsm.jar" failonerror="false" />
+	</target>
+	<!-- =================================================================== -->
+	<!-- Run Targets                                                         -->
+	<!-- =================================================================== -->  
+	<target name="run-jfpsm" description="Runs JFPSM">
+		<java classname="jfpsm.MainWindow"
+			  fork="true"
+			  dir="${destdir}"
+			  failonerror="true">
+		</java>
 	</target>
 </project>
