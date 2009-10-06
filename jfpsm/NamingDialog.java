@@ -40,14 +40,14 @@ import javax.swing.text.Document;
  * @author Julien Gouesse
  *
  */
-public final class NamingDialog extends JDialog implements ActionListener,PropertyChangeListener{
+public class NamingDialog extends JDialog implements ActionListener,PropertyChangeListener{
     
     
     private static final long serialVersionUID = 1L;
     
     private String typedText;
     
-    private final ArrayList<String> availableNames;
+    private final ArrayList<String> names;
     
     private final JTextField textField;
     
@@ -57,19 +57,19 @@ public final class NamingDialog extends JDialog implements ActionListener,Proper
         
 
     /** Creates the reusable naming dialog. */
-    public NamingDialog(JFrame aFrame,final ArrayList<String> availableNames,String namedEntity){
+    public NamingDialog(JFrame aFrame,final ArrayList<String> names,String namedEntity){
         super(aFrame, true);
-        this.availableNames=availableNames;
+        this.names=names;
         typedText=null;
         setTitle("New "+namedEntity);
         textField=new JTextField(10);           
         //Create the JOptionPane with an array of the text and components to be displayed.
-        optionPane = new JOptionPane(new Object[]{"Enter a "+namedEntity+" name",textField},JOptionPane.QUESTION_MESSAGE,JOptionPane.OK_CANCEL_OPTION);
+        optionPane=new JOptionPane(new Object[]{"Enter a "+namedEntity+" name",textField},JOptionPane.QUESTION_MESSAGE,JOptionPane.OK_CANCEL_OPTION);
         //Make this dialog display it.
         setContentPane(optionPane);
         //Handle window closing correctly.
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
+        addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent we) {
                 /*
                  * Instead of directly closing the window,
@@ -94,17 +94,17 @@ public final class NamingDialog extends JDialog implements ActionListener,Proper
 
             @Override
             public final void changedUpdate(DocumentEvent e){
-                checkNameAvailabilityAndValidity(e.getDocument());
+                updateConfirmationAbility();
             }
 
             @Override
             public final void insertUpdate(DocumentEvent e){
-                checkNameAvailabilityAndValidity(e.getDocument());
+                updateConfirmationAbility();
             }
 
             @Override
             public final void removeUpdate(DocumentEvent e){
-                checkNameAvailabilityAndValidity(e.getDocument());
+                updateConfirmationAbility();
             }           
         });
         pack();
@@ -117,25 +117,34 @@ public final class NamingDialog extends JDialog implements ActionListener,Proper
     private static final String REGEXP_INVALID_FILENAME_CHARS = "(\\[|#|/|\\\\|\\:|\\*|\\?|\"|<|>|\\||\\]|\\s)+";
 
     
-    private final boolean checkNameAvailabilityAndValidity(Document doc){
+    private final boolean checkNameAvailabilityAndValidity(){
         boolean confirmationEnabled=false;
+        Document doc=textField.getDocument();
         try{String text=doc.getText(0,doc.getLength());
             //check if the name is not empty, not used and valid
-            confirmationEnabled=text!=null&&!text.equals("")&&!availableNames.contains(text)&&
+            confirmationEnabled=text!=null&&!text.equals("")&&!names.contains(text)&&
                                 text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS,"").equals(text)&& 
                                 text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS_LINUX,"").equals(text)&&
                                 text.replaceAll(REGEXP_INVALID_FILENAME_CHARS,"").equals(text);
            } 
         catch(BadLocationException ble)
         {confirmationEnabled=false;}
-        finally
-        {confirmButton.setEnabled(confirmationEnabled);}
+        return(confirmationEnabled);
+    }
+    
+    protected boolean checkDataValidity(){
+        return(checkNameAvailabilityAndValidity());
+    }
+    
+    protected final boolean updateConfirmationAbility(){
+        boolean confirmationEnabled=checkDataValidity();
+        confirmButton.setEnabled(confirmationEnabled);
         return(confirmationEnabled);
     }
     
     @Override
     public final void setVisible(boolean visible){
-        checkNameAvailabilityAndValidity(textField.getDocument());
+        updateConfirmationAbility();
         super.setVisible(visible);
     }
     
@@ -149,12 +158,12 @@ public final class NamingDialog extends JDialog implements ActionListener,Proper
     
     /** This method handles events for the text field. */
     public final void actionPerformed(ActionEvent e){
-        if(checkNameAvailabilityAndValidity(textField.getDocument()))
+        if(updateConfirmationAbility())
             optionPane.setValue(Integer.valueOf(JOptionPane.OK_OPTION));
     }
 
     /** This method reacts to state changes in the option pane. */
-    public final void propertyChange(PropertyChangeEvent e) {
+    public final void propertyChange(PropertyChangeEvent e){
         String prop = e.getPropertyName();
         if(isVisible()&&(e.getSource()==optionPane) && (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop)))
             {Object value = optionPane.getValue();
@@ -167,17 +176,20 @@ public final class NamingDialog extends JDialog implements ActionListener,Proper
              //presses the same button next time, no
              //property change event will be fired.
              optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
-             if(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)))
-                 typedText=textField.getText();
-             else 
-                 //user closed dialog or clicked cancel
-                 typedText=null;
+             updateValidationData(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)));            
              clearAndHide();
            }
     }
+    
+    protected void updateValidationData(boolean validate){
+        if(validate)
+            typedText=textField.getText();
+        else
+            typedText=null;
+    }
 
     /** This method clears the dialog and hides it. */
-    public final void clearAndHide() {
+    public void clearAndHide(){
         textField.setText(null);
         setVisible(false);
     }

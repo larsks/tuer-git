@@ -16,7 +16,6 @@ package jfpsm;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
@@ -51,6 +50,7 @@ final class DrawingPanel extends JPanel{
 		super();
 		this.bufferedImage=bufferedImage;
 		graphics=bufferedImage.createGraphics();
+		//FIXME: use the color of the tile
 		graphics.setColor(Color.BLACK);
 		this.title=title;
 		this.zoomParams=zoomParams;

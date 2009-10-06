@@ -27,6 +27,9 @@ final class ZoomParameters{
      */
     private int centerx;
     
+    /**
+     * center ordinate in the absolute reference
+     */
     private int centery;
 
     
@@ -79,6 +82,10 @@ final class ZoomParameters{
         return(centery);
     }
 
+    /**
+     * Set the center ordinate in the absolute reference
+     * @param centerx center ordinate in the absolute reference
+     */
     final void setCentery(int centery){
         this.centery=Math.max(((height/factor)/2),Math.min(centery,height-1-((height/factor)/2)));
     }

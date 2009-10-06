@@ -13,6 +13,7 @@
 */
 package jfpsm;
 
+import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
@@ -333,7 +334,13 @@ public final class ProjectManager extends JPanel{
                 enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"floor");
     		else
     			if(userObject instanceof TileSet)
-                    enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"tile");
+                    {final ArrayList<Color> colors=new ArrayList<Color>();
+                     //white is used for void
+                     colors.add(Color.WHITE);
+                     for(Tile tile:((TileSet)userObject).getTilesList())
+                         colors.add(tile.getColor());
+                     enterNameDialog=new TileCreationDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),colors);                   
+                    }
     	if(enterNameDialog!=null)
     	    {enterNameDialog.setVisible(true);
              String name=enterNameDialog.getValidatedText();
@@ -356,6 +363,7 @@ public final class ProjectManager extends JPanel{
     		    	  else
     		    		  if(userObject instanceof TileSet)
     		    		      {Tile tile=new Tile(name);
+    		    		       tile.setColor(((TileCreationDialog)enterNameDialog).getValidatedColor());
                                ((TileSet)selectedNode.getUserObject()).addTile(tile);  
                                DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
                                ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(tileNode,selectedNode,selectedNode.getChildCount());
