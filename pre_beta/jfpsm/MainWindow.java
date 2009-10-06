@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 /**
@@ -55,6 +56,28 @@ public final class MainWindow{
     	applicativeFrame.setTitle("JFPSM: Java First Person Shooter Maker");
         //force the use of English in the whole application
         JComponent.setDefaultLocale(Locale.ENGLISH);
+        UIManager.getDefaults().setDefaultLocale(Locale.ENGLISH);
+        //this is the only solution to have the good localization for color choosers
+        UIManager.getDefaults().put("ColorChooser.cancelText","Cancel");
+        UIManager.getDefaults().put("ColorChooser.resetText","Reset");
+        UIManager.getDefaults().put("ColorChooser.previewText","Preview");
+        UIManager.getDefaults().put("ColorChooser.sampleText","Sample");
+        UIManager.getDefaults().put("ColorChooser.swatchesNameText","Swatches");
+        UIManager.getDefaults().put("ColorChooser.swatchesRecentText","Recent:");
+        UIManager.getDefaults().put("ColorChooser.hsbNameText","HSB");
+        UIManager.getDefaults().put("ColorChooser.hsbHueText","H");
+        UIManager.getDefaults().put("ColorChooser.hsbSaturationText","S");
+        UIManager.getDefaults().put("ColorChooser.hsbBrightnessText","B");
+        UIManager.getDefaults().put("ColorChooser.hsbRedText","R");
+        UIManager.getDefaults().put("ColorChooser.hsbGreenText","G");
+        UIManager.getDefaults().put("ColorChooser.hsbBlueText","B");
+        UIManager.getDefaults().put("ColorChooser.rgbNameText","RGB");
+        UIManager.getDefaults().put("ColorChooser.rgbRedText","Red");
+        UIManager.getDefaults().put("ColorChooser.rgbGreenText","Green");
+        UIManager.getDefaults().put("ColorChooser.rgbBlueText","Blue");
+        UIManager.getDefaults().put("ColorChooser.rgbRedMnemonic",Integer.valueOf(KeyEvent.VK_R));
+        UIManager.getDefaults().put("ColorChooser.rgbGreenMnemonic",Integer.valueOf(KeyEvent.VK_G));
+        UIManager.getDefaults().put("ColorChooser.rgbBlueMnemonic",Integer.valueOf(KeyEvent.VK_B));
         //the application occupies the whole screen
         applicativeFrame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         //do not dispose or exit, it is handled if the user confirms
