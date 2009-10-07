@@ -15,34 +15,34 @@ package jfpsm;
 
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
-import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-final class FloorViewer extends JPanel{
+final class FloorViewer extends Viewer{
 
     
     private static final long serialVersionUID = 1L;
     
-    private DrawingPanel containerDrawingPanel;
+    private final DrawingPanel containerDrawingPanel;
     
-    private DrawingPanel contentDrawingPanel;
+    private final DrawingPanel contentDrawingPanel;
     
-    private DrawingPanel lightDrawingPanel;
+    private final DrawingPanel lightDrawingPanel;
     
-    private DrawingPanel pathDrawingPanel;
+    private final DrawingPanel pathDrawingPanel;
     
-    private ZoomParameters zoomParams;
+    private final ZoomParameters zoomParams;
     
-
-    FloorViewer(Floor floor){
-        super(new GridLayout(1,1));
+    
+    FloorViewer(final Floor floor,final Project project,final ProjectManager projectManager){
+        super(floor,project,projectManager);
+        setLayout(new GridLayout(1,1));
         zoomParams=new ZoomParameters(1,floor.getContainerMap().getWidth(),floor.getContainerMap().getHeight());
-        containerDrawingPanel=new DrawingPanel(floor,"container map",floor.getContainerMap(),zoomParams);
-        contentDrawingPanel=new DrawingPanel(floor,"content map",floor.getContentMap(),zoomParams);
+        containerDrawingPanel=new DrawingPanel("container map",floor.getContainerMap(),zoomParams,this);
+        contentDrawingPanel=new DrawingPanel("content map",floor.getContentMap(),zoomParams,this);
         JSplitPane leftVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,containerDrawingPanel,contentDrawingPanel);
         leftVerticalSplitPane.setOneTouchExpandable(true);
-        lightDrawingPanel=new DrawingPanel(floor,"light map",floor.getLightMap(),zoomParams);
-        pathDrawingPanel=new DrawingPanel(floor,"path map",new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB),zoomParams);
+        lightDrawingPanel=new DrawingPanel("light map",floor.getLightMap(),zoomParams,this);
+        pathDrawingPanel=new DrawingPanel("path map",new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB),zoomParams,this);
         JSplitPane rightVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,lightDrawingPanel,pathDrawingPanel);
         rightVerticalSplitPane.setOneTouchExpandable(true);
         JSplitPane horizontalSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,leftVerticalSplitPane,rightVerticalSplitPane);
@@ -50,24 +50,26 @@ final class FloorViewer extends JPanel{
         containerDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
         contentDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
         lightDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
-        pathDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));
-        /*containerDrawingPanel.setZoomParameters(zoomParams);
-        contentDrawingPanel.setZoomParameters(zoomParams);
-        lightDrawingPanel.setZoomParameters(zoomParams);
-        pathDrawingPanel.setZoomParameters(zoomParams);  */    
+        pathDrawingPanel.addMouseWheelListener(new ZoomMouseWheelListener(this));   
     }
     
+    //FIXME: something is wrong
     final void updateZoom(int factorIncrement,int x,int y){
-        int previousFactor=zoomParams.getFactor();
+        int previousFactor=zoomParams.getFactor(),nextFactor;
         if(factorIncrement>=1)
-            zoomParams.setFactor(Math.min(zoomParams.getFactor()+1,32));
+            nextFactor=Math.min(zoomParams.getFactor()*2,32);
         else
             if(factorIncrement<=-1)
-                zoomParams.setFactor(Math.max(zoomParams.getFactor()-1,1));
-        if(previousFactor!=zoomParams.getFactor())
-            {//convert it into the correct base
-             zoomParams.setCenterx(zoomParams.getAbsoluteXFromRelativeX(x));
-             zoomParams.setCentery(zoomParams.getAbsoluteYFromRelativeY(y));
+                nextFactor=Math.max(zoomParams.getFactor()/2,1);
+            else
+                nextFactor=previousFactor;
+        if(previousFactor!=nextFactor)
+            {//the conversion has to be done before updating the factor
+             int nextX=zoomParams.getAbsoluteXFromRelativeX(x);
+             int nextY=zoomParams.getAbsoluteYFromRelativeY(y);
+             zoomParams.setFactor(nextFactor);
+             zoomParams.setCenterx(nextX);
+             zoomParams.setCentery(nextY);
              containerDrawingPanel.repaint();
              contentDrawingPanel.repaint();
              lightDrawingPanel.repaint();

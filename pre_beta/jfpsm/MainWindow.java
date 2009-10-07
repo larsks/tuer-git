@@ -132,7 +132,7 @@ public final class MainWindow{
     	//build the projects manager
     	projectManager=new ProjectManager(this);
     	//build the viewer
-        entityViewer=new EntityViewer();
+        entityViewer=new EntityViewer(projectManager);
         JSplitPane mainSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,projectManager,entityViewer);        
     	applicativeFrame.add(mainSplitPane,BorderLayout.CENTER);
         //some components of this container has been modified

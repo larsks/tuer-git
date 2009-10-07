@@ -75,7 +75,7 @@ final class ZoomParameters{
      * @param centerx center abscissa in the absolute reference
      */
     final void setCenterx(int centerx){
-        this.centerx=Math.max(((width/factor)/2),Math.min(centerx,width-1-((width/factor)/2)));
+        this.centerx=Math.max(((width/factor)/2),Math.min(centerx,width-((width/factor)/2)));
     }
 
     final int getCentery(){
@@ -87,6 +87,6 @@ final class ZoomParameters{
      * @param centerx center ordinate in the absolute reference
      */
     final void setCentery(int centery){
-        this.centery=Math.max(((height/factor)/2),Math.min(centery,height-1-((height/factor)/2)));
+        this.centery=Math.max(((height/factor)/2),Math.min(centery,height-((height/factor)/2)));
     }
 }

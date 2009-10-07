@@ -14,8 +14,10 @@
 package jfpsm;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -24,6 +26,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -35,6 +39,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
@@ -107,7 +112,46 @@ public final class ProjectManager extends JPanel{
         openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
         deleteMenuItem.addActionListener(new DeleteSelectedEntitiesAction(this));
-        saveMenuItem.addActionListener(new SaveSelectedEntitiesAction(this));       
+        saveMenuItem.addActionListener(new SaveSelectedEntitiesAction(this));
+        projectsTree.setCellRenderer(new DefaultTreeCellRenderer(){
+			
+			private static final long serialVersionUID=1L;
+			
+			private ImageIcon coloredTileLeafIcon=null;
+			
+			private Icon defaultLeafIcon=null;
+
+			@Override
+			public final Component getTreeCellRendererComponent(JTree tree, Object value,
+					boolean selected, boolean expanded, boolean leaf, int row,
+					boolean hasFocus) {
+				if(leaf)
+				    {DefaultMutableTreeNode node=(DefaultMutableTreeNode)value;
+					 Object userObject=node.getUserObject();
+					 if(defaultLeafIcon==null)
+						 //get the default icon stored in the super class
+						 defaultLeafIcon=super.getLeafIcon();
+				     if(userObject instanceof Tile)
+				    	 {int w=super.getLeafIcon().getIconWidth(),h=super.getLeafIcon().getIconHeight();
+				    	  if(coloredTileLeafIcon==null)
+				    		  {//build the image icon used to render the icon of the tile in the tree				    		   
+				    		   BufferedImage coloredTileImage=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);				    		  
+				    		   coloredTileLeafIcon=new ImageIcon(coloredTileImage);				    		   
+				    		  }
+				    	  //set the color
+				    	  Tile tile=(Tile)userObject;
+				    	  for(int x=0;x<w;x++)
+				    		  for(int y=0;y<h;y++)
+				    	          ((BufferedImage)coloredTileLeafIcon.getImage()).setRGB(x,y,tile.getColor().getRGB());
+				    	  //set the colored icon
+				    	  setLeafIcon(coloredTileLeafIcon);
+				    	 }
+				     else
+				    	 setLeafIcon(defaultLeafIcon);
+				    }
+				return(super.getTreeCellRendererComponent(tree,value,selected,expanded,leaf,row,hasFocus));
+			}
+		});
         projectsTree.addMouseListener(new MouseAdapter(){   
             
             @Override
@@ -196,7 +240,9 @@ public final class ProjectManager extends JPanel{
                          final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
                          final Object userObject=selectedNode.getUserObject();
                          if(userObject instanceof Floor||userObject instanceof Tile)
-                             ProjectManager.this.mainWindow.getEntityViewer().openEntityView((Namable)userObject);                		 
+                             {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
+                              ProjectManager.this.mainWindow.getEntityViewer().openEntityView((Namable)userObject,project);                		 
+                             }
                 	    }
             }           
         });       
@@ -499,8 +545,10 @@ public final class ProjectManager extends JPanel{
                  projectsTree.expandPath(path);
              else
             	 if(userObject instanceof Floor||userObject instanceof Tile)
-            		 //open a tab view for this entity
-            		 mainWindow.getEntityViewer().openEntityView((Namable)userObject);
+            	     {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();
+            	      //open a tab view for this entity
+            		  mainWindow.getEntityViewer().openEntityView((Namable)userObject,project);
+            	     }
             }
     }
     
@@ -559,6 +607,23 @@ public final class ProjectManager extends JPanel{
                     }
     }
     
+    final Color getSelectedTileColor(final Project project){
+    	Color color=null;
+    	TreePath[] paths=projectsTree.getSelectionPaths();
+    	DefaultMutableTreeNode selectedNode;
+        Object userObject;
+        for(TreePath path:paths)
+            {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+             userObject=selectedNode.getUserObject();
+             //check if the node is a tile and if this tile comes from the project
+             if(userObject instanceof Tile&&((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject()==project)
+            	 {color=((Tile)userObject).getColor();
+            	  break;
+            	 }
+            }
+    	return(color);
+    }
+    
     final void deleteSelectedEntities(){
         TreePath[] paths=projectsTree.getSelectionPaths();
         DefaultMutableTreeNode selectedNode;
@@ -606,7 +671,8 @@ public final class ProjectManager extends JPanel{
                  questionStart+="s";
              String windowTitle="Confirm "+questionStart.toLowerCase();             
              if(JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),questionStart+" "+entitiesBuffer.toString()+"?",windowTitle,JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION)
-                 {for(DefaultMutableTreeNode node:tilesTrashList)
+                 {final DefaultTreeModel treeModel=(DefaultTreeModel)projectsTree.getModel();
+            	  for(DefaultMutableTreeNode node:tilesTrashList)
                       {TileSet tileSet=(TileSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();   
                        Tile tile=(Tile)node.getUserObject();
                        //remove the tile from the entity viewer by closing its tab view
@@ -614,15 +680,14 @@ public final class ProjectManager extends JPanel{
                        //remove the tile from the workspace and from the file if any
                        tileSet.removeTile(tile);
                        //remove the tile from the tree
-                       ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(node);
-                       
+                       treeModel.removeNodeFromParent(node);                       
                       }
                   for(DefaultMutableTreeNode node:floorsTrashList)
                       {FloorSet floorSet=(FloorSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();
                        Floor floor=(Floor)node.getUserObject();
                        mainWindow.getEntityViewer().closeEntityView(floor);
                        floorSet.removeFloor(floor);
-                       ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(node);    
+                       treeModel.removeNodeFromParent(node);    
                       }
                   for(DefaultMutableTreeNode node:projectsTrashList)
                       {Project project=(Project)node.getUserObject();
@@ -633,7 +698,7 @@ public final class ProjectManager extends JPanel{
                        for(Tile tile:project.getTileSet().getTilesList())
                            mainWindow.getEntityViewer().closeEntityView(tile);
                        projectSet.removeProject(project);
-                       ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(node);
+                       treeModel.removeNodeFromParent(node);
                       }
                  }
             }   

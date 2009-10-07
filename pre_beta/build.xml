@@ -26,6 +26,7 @@
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
 	<target name="dist" depends="compile" description="Creates the java archive">
+		<!-- TODO: include only the jfpsm package -->
 		<jar destfile="jfpsm.jar" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
