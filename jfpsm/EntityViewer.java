@@ -36,25 +36,28 @@ final class EntityViewer extends JPanel{
     
     private static final long serialVersionUID=1L;
     
-    private JTabbedPane entityTabbedPane;
+    private final JTabbedPane entityTabbedPane;
     
-    private HashMap<Namable,JPanel> entityToTabComponentMap;
+    private final HashMap<Namable,JPanel> entityToTabComponentMap;
+    
+    private final ProjectManager projectManager;
 
     
-    EntityViewer(){
+    EntityViewer(ProjectManager projectManager){
+    	this.projectManager=projectManager;
     	entityToTabComponentMap=new HashMap<Namable,JPanel>();
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         entityTabbedPane=new JTabbedPane();
         add(entityTabbedPane);
     }
     
-    final boolean openEntityView(final Namable entity){
+    final boolean openEntityView(final Namable entity,final Project project){
     	final boolean success;
     	JPanel tabComponent;
     	if(success=(tabComponent=entityToTabComponentMap.get(entity))==null)
     	    {JPanel entityView=new JPanel(new GridLayout(1,1));
     	     if(entity instanceof Floor)
-    	         entityView=new FloorViewer((Floor)entity);   	         
+    	    	 entityView=new FloorViewer((Floor)entity,project,projectManager);
     	     else
     	    	 if(entity instanceof Tile)
     	    	     entityView=new JPanel(new GridLayout(1,1));

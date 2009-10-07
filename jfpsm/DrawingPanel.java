@@ -38,20 +38,21 @@ final class DrawingPanel extends JPanel{
 	
 	private final Graphics graphics;
 	
+	private final Viewer viewer;
+	
 	
 	/**
 	 * 
-	 * @param entity displayed entity
 	 * @param title title of the panel
 	 * @param bufferedImage image used to draw
 	 * @param zoomParams zoom parameters (zoom disabled if null)
+	 * @param viewer viewer that displays this panel
 	 */
-	DrawingPanel(Dirtyable entity,String title,BufferedImage bufferedImage,ZoomParameters zoomParams){
+	DrawingPanel(String title,BufferedImage bufferedImage,ZoomParameters zoomParams,Viewer viewer){
 		super();
+		this.viewer=viewer;
 		this.bufferedImage=bufferedImage;
 		graphics=bufferedImage.createGraphics();
-		//FIXME: use the color of the tile
-		graphics.setColor(Color.BLACK);
 		this.title=title;
 		this.zoomParams=zoomParams;
 		final int fontSize=getFontMetrics(getFont()).getHeight();		
@@ -62,8 +63,15 @@ final class DrawingPanel extends JPanel{
 	}
 	
 	final void draw(int x1,int y1,int x2,int y2){
-	    graphics.drawLine(x1,y1,x2,y2);
-	    repaint();
+		//get the color of the selected tile
+	    Color color=viewer.getSelectedTileColor();
+	    if(color!=null)
+	        {graphics.setColor(color);
+	         graphics.drawLine(x1,y1,x2,y2);
+	         //the enclosed entity has changed
+	         viewer.markEntityDirty();
+	         repaint();
+	        }
 	}
 	
 	final ZoomParameters getZoomParameters(){
@@ -80,6 +88,7 @@ final class DrawingPanel extends JPanel{
 		     int factor=zoomParams.getFactor();
 		     int cx=zoomParams.getCenterx(),cy=zoomParams.getCentery();
 		     int halfDw=(w/factor)/2,halfDh=(h/factor)/2;
+		     //System.out.println("cx="+cx+" halfDw="+halfDw);
 		     g.drawImage(bufferedImage,0,0,w-1,h-1,cx-halfDw,cy-halfDh,cx+halfDw,cy+halfDh,this);
             }
 		g.drawString(title,0,bufferedImage.getHeight()+g.getFontMetrics().getHeight());
