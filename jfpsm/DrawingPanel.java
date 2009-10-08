@@ -18,27 +18,33 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
+import javax.swing.Box;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 /**
  * Panel that allows the drawing. The current color is the color of the selected tile.
  * @author Julien Gouesse
  *
  */
-final class DrawingPanel extends JPanel{
+class DrawingPanel extends JPanel{
 
 	
 	private static final long serialVersionUID=1L;
 
-	private final BufferedImage bufferedImage;
+	private BufferedImage bufferedImage;
 	
 	private final String title;
 	
 	private final ZoomParameters zoomParams;
 	
-	private final Graphics graphics;
+	private Graphics graphics;
 	
 	private final Viewer viewer;
+	
+	private final int fontSize;
+	
+	private final Box.Filler filler;
 	
 	
 	/**
@@ -51,16 +57,18 @@ final class DrawingPanel extends JPanel{
 	DrawingPanel(String title,BufferedImage bufferedImage,ZoomParameters zoomParams,Viewer viewer){
 		super();
 		this.viewer=viewer;
-		this.bufferedImage=bufferedImage;
-		graphics=bufferedImage.createGraphics();
 		this.title=title;
-		this.zoomParams=zoomParams;
-		final int fontSize=getFontMetrics(getFont()).getHeight();		
-		setPreferredSize(new Dimension(this.bufferedImage.getWidth(),this.bufferedImage.getHeight()+fontSize+2));
+		this.zoomParams=zoomParams;		
+		fontSize=getFontMetrics(getFont()).getHeight();
+		Dimension prefDim=new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight());
+		filler=new Box.Filler(prefDim,prefDim,prefDim);
+		setBufferedImage(bufferedImage);
+		add(filler);
 		MouseAdapter mouseAdapter=new DrawingMouseAdapter(this);
 		addMouseMotionListener(mouseAdapter);
 		addMouseListener(mouseAdapter);
 	}
+	
 	
 	final void draw(int x1,int y1,int x2,int y2){
 		//get the color of the selected tile
@@ -74,8 +82,22 @@ final class DrawingPanel extends JPanel{
 	        }
 	}
 	
+	protected JPopupMenu getPopupMenu(){
+	    return(null);
+	}
+	
 	final ZoomParameters getZoomParameters(){
 	    return(zoomParams);
+	}
+	
+	final void setBufferedImage(BufferedImage bufferedImage){
+		this.bufferedImage=bufferedImage;
+		graphics=bufferedImage.createGraphics();
+		Dimension prefSize=new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight()+fontSize+2);
+		setPreferredSize(prefSize);
+		filler.setMinimumSize(prefSize);
+		filler.setPreferredSize(prefSize);
+		filler.setMaximumSize(prefSize);
 	}
 	
 	@Override
@@ -88,7 +110,6 @@ final class DrawingPanel extends JPanel{
 		     int factor=zoomParams.getFactor();
 		     int cx=zoomParams.getCenterx(),cy=zoomParams.getCentery();
 		     int halfDw=(w/factor)/2,halfDh=(h/factor)/2;
-		     //System.out.println("cx="+cx+" halfDw="+halfDw);
 		     g.drawImage(bufferedImage,0,0,w-1,h-1,cx-halfDw,cy-halfDh,cx+halfDw,cy+halfDh,this);
             }
 		g.drawString(title,0,bufferedImage.getHeight()+g.getFontMetrics().getHeight());

@@ -120,6 +120,7 @@ public final class MainWindow{
                     projectManager.loadExistingProjects();
             }
         });
+        //TODO: implement undo (CTRL+Z) & redo (CTRL+Y)
         //the frame has to be visible in order to allow to display
         //option panes if there is a problem
         applicativeFrame.setVisible(true);
@@ -134,7 +135,8 @@ public final class MainWindow{
     	//build the viewer
         entityViewer=new EntityViewer(projectManager);
         JSplitPane mainSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,projectManager,entityViewer);        
-    	applicativeFrame.add(mainSplitPane,BorderLayout.CENTER);
+        mainSplitPane.setOneTouchExpandable(true);
+        applicativeFrame.add(mainSplitPane,BorderLayout.CENTER);
         //some components of this container has been modified
         //we have to force the layout to be rebuilt
         applicativeFrame.invalidate();

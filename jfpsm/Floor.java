@@ -28,19 +28,13 @@ public final class Floor extends Namable implements Dirtyable,Resolvable{
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Floor.class);}
 	
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
     
-    private static final int size=256;
-    
-    private static final String containerMapFilename="containermap.png";
-    
-    private static final String lightMapFilename="lightmap.png";
-    
-    private static final String contentMapFilename="contentmap.png";
+    private static final int defaultSize=256;
     
     private transient boolean dirty;
     
-    private transient BufferedImage containerMap,lightMap,contentMap;
+    private transient BufferedImage[] maps;
     
 
 	public Floor(){
@@ -54,19 +48,22 @@ public final class Floor extends Namable implements Dirtyable,Resolvable{
     }
     
     
-    private final void initializeMaps(){
-    	containerMap=new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);
-    	lightMap=new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);
-    	contentMap=new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);
-    	for(int x=0;x<containerMap.getWidth();x++)
-            for(int y=0;y<containerMap.getHeight();y++)
-                containerMap.setRGB(x,y,Color.WHITE.getRGB());
-    	for(int x=0;x<lightMap.getWidth();x++)
-            for(int y=0;y<lightMap.getHeight();y++)
-                lightMap.setRGB(x,y,Color.WHITE.getRGB());
-    	for(int x=0;x<contentMap.getWidth();x++)
-            for(int y=0;y<contentMap.getHeight();y++)
-                contentMap.setRGB(x,y,Color.WHITE.getRGB());
+    private final void initializeMaps(){  	
+    	maps=new BufferedImage[MapType.values().length];
+    	for(int i=0;i<maps.length;i++)
+    	    {maps[i]=new BufferedImage(defaultSize,defaultSize,BufferedImage.TYPE_INT_ARGB);
+    	     for(int x=0;x<maps[i].getWidth();x++)
+                 for(int y=0;y<maps[i].getHeight();y++)
+                	 maps[i].setRGB(x,y,Color.WHITE.getRGB());
+    	    }
+    }
+    
+    final BufferedImage getMap(MapType type){
+    	return(maps[type.ordinal()]);
+    }
+    
+    final void setMap(MapType type,BufferedImage map){
+    	maps[type.ordinal()]=map;
     }
     
     @Override
@@ -88,44 +85,4 @@ public final class Floor extends Namable implements Dirtyable,Resolvable{
     public final void resolve(){
     	initializeMaps();
     }
-    
-    public final String getContainerMapFilename(){
-    	return(containerMapFilename);
-    }
-    
-    public final String getLightMapFilename(){
-    	return(lightMapFilename);
-    }
-    
-    public final String getContentMapFilename(){
-    	return(contentMapFilename);
-    }  
-    
-    final BufferedImage getContainerMap(){
-		return(containerMap);
-	}
-
-	final void setContainerMap(BufferedImage containerMap){
-		this.containerMap=containerMap;
-	}
-
-	final BufferedImage getLightMap(){
-		return(lightMap);
-	}
-
-	final void setLightMap(BufferedImage lightMap){
-		this.lightMap=lightMap;
-	}
-
-	final BufferedImage getContentMap(){
-		return(contentMap);
-	}
-
-	final void setContentMap(BufferedImage contentMap){
-		this.contentMap=contentMap;
-	}
-	
-	final int getSize(){
-		return(size);
-	}
 }
