@@ -58,8 +58,16 @@ final class ZoomParameters{
         return(width);
     }
     
+    final void setWidth(final int width){
+    	this.width=width;
+    }
+    
     final int getHeight(){
         return(height);
+    }
+    
+    final void setHeight(final int height){
+    	this.height=height;
     }
     
     final int getAbsoluteXFromRelativeX(int relativeX){

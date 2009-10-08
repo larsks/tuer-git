@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -164,8 +165,7 @@ public final class ProjectManager extends JPanel{
                 handleMouseEvent(e);
             }
             
-            private final void handleMouseEvent(MouseEvent e){
-            	
+            private final void handleMouseEvent(MouseEvent e){           	
                 if(e.isPopupTrigger())
                     {//get all selected paths
                      TreePath[] paths=projectsTree.getSelectionPaths();
@@ -512,26 +512,20 @@ public final class ProjectManager extends JPanel{
                       }
                  }  
             }
-        /*else
-        if(userObject instanceof FloorSet)
-            {JFileChooser fileChooser=new JFileChooser();
-             fileChooser.setMultiSelectionEnabled(false);
-             fileChooser.setFileFilter(new FileNameExtensionFilter("Images","bmp","gif","jpg","jpeg","png"));
-             int result=fileChooser.showOpenDialog(mainWindow.getApplicativeFrame());
-             if(result==JFileChooser.APPROVE_OPTION)
-                 {try{BufferedImage containerMap=ImageIO.read(fileChooser.getSelectedFile());
-                      Floor floor=(Floor)createNewEntityFromSelectedEntity();
-                      floor.setContainerMap(containerMap);                     
-                     } 
-                  catch(Throwable throwable)
-                  {mainWindow.displayErrorMessage(throwable,false);}                  
-                 }
+    }
+    
+    final BufferedImage openFileAndLoadImage(){
+        JFileChooser fileChooser=new JFileChooser();
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Images","bmp","gif","jpg","jpeg","png"));
+        int result=fileChooser.showOpenDialog(mainWindow.getApplicativeFrame());
+        BufferedImage image=null;
+        if(result==JFileChooser.APPROVE_OPTION)
+            {try{image=ImageIO.read(fileChooser.getSelectedFile());}
+             catch(Throwable throwable)
+             {mainWindow.displayErrorMessage(throwable,false);}                  
             }
-        else
-            if(userObject instanceof TileSet)
-                {
-                 
-                }*/
+        return(image);
     }
     
     final void openSelectedEntities(){

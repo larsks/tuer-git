@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
@@ -42,5 +43,13 @@ abstract class Viewer extends JPanel {
     
     final void markEntityDirty(){
         entity.markDirty();
+    }
+    
+    final BufferedImage openFileAndLoadImage(){
+        return(projectManager.openFileAndLoadImage());
+    }
+    
+    final Dirtyable getEntity(){
+    	return(entity);
     }
 }

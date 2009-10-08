@@ -115,27 +115,16 @@ public final class ProjectSet extends Namable implements Dirtyable{
           	              zoStream.write(readBuffer,0,bytesIn);         	          
           	          fis.close();    
           	          ZipEntry floorEntry;
-          	          floorEntry=new ZipEntry("floorset/");
-          	          floorEntry.setMethod(ZipEntry.DEFLATED);
-          	          zoStream.putNextEntry(floorEntry);
           	          String floorDirectory;
           	          for(Floor floor:project.getFloorSet().getFloorsList())
           	              {floorDirectory="floorset/"+floor.getName()+"/";
-          	               floorEntry=new ZipEntry(floorDirectory);
-                           floorEntry.setMethod(ZipEntry.DEFLATED);
-                           zoStream.putNextEntry(floorEntry);
-          	               floorEntry=new ZipEntry(floorDirectory+floor.getContainerMapFilename());
-          	               floorEntry.setMethod(ZipEntry.DEFLATED);
-          	               zoStream.putNextEntry(floorEntry);
-          	               ImageIO.write(floor.getContainerMap(),"png",zoStream);         	               
-          	               floorEntry=new ZipEntry(floorDirectory+floor.getContentMapFilename());
-        	               floorEntry.setMethod(ZipEntry.DEFLATED);
-        	               zoStream.putNextEntry(floorEntry);
-        	               ImageIO.write(floor.getContentMap(),"png",zoStream);       	               
-        	               floorEntry=new ZipEntry(floorDirectory+floor.getLightMapFilename());
-          	               floorEntry.setMethod(ZipEntry.DEFLATED);
-          	               zoStream.putNextEntry(floorEntry);
-          	               ImageIO.write(floor.getLightMap(),"png",zoStream);
+          	               //save each map         	               
+          	               for(MapType type:MapType.values())
+          	                   {floorEntry=new ZipEntry(floorDirectory+type.getFilename());
+              	                floorEntry.setMethod(ZipEntry.DEFLATED);
+              	                zoStream.putNextEntry(floorEntry);
+              	                ImageIO.write(floor.getMap(type),"png",zoStream);          	            	    
+          	                   }
           	              }         	          
           	          //close the ZipOutputStream
           	          zoStream.close();
@@ -244,14 +233,11 @@ public final class ProjectSet extends Namable implements Dirtyable{
                                      for(Floor floor:project.getFloorSet().getFloorsList())
                                          if(path[1].equals(floor.getName()))
                                              {map=ImageIO.read(zipFile.getInputStream(entry));
-                                              if(path[2].equals(floor.getContainerMapFilename()))
-                                                  floor.setContainerMap(map);
-                                              else
-                                                  if(path[2].equals(floor.getLightMapFilename()))
-                                                      floor.setLightMap(map);
-                                                  else
-                                                      if(path[2].equals(floor.getContentMapFilename()))
-                                                          floor.setContentMap(map);
+                                              for(MapType type:MapType.values())
+                                                  if(path[2].equals(type.getFilename()))
+                                                      {floor.setMap(type,map);
+                                                       break;
+                                                      }                                              
                                               break;
                                              }
                                     }
