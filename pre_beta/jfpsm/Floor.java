@@ -13,9 +13,6 @@
 */
 package jfpsm;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-
 /**
  * A floor is a subsection in a level (downstairs, upstairs, ...). 
  * It uses several images (containers, lights, contents) to contain the 
@@ -23,18 +20,14 @@ import java.awt.image.BufferedImage;
  * @author Julien Gouesse
  *
  */
-public final class Floor extends Namable implements Dirtyable,Resolvable{
+public final class Floor extends JFPSMUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Floor.class);}
 	
     private static final long serialVersionUID=1L;
     
-    private static final int defaultSize=256;
-    
-    private transient boolean dirty;
-    
-    private transient BufferedImage[] maps;
+    private Map[] maps;
     
 
 	public Floor(){
@@ -44,45 +37,64 @@ public final class Floor extends Namable implements Dirtyable,Resolvable{
     public Floor(String name){
         super(name);
         initializeMaps();
-        dirty=true;
+        markDirty();
     }
     
     
-    private final void initializeMaps(){  	
-    	maps=new BufferedImage[MapType.values().length];
-    	for(int i=0;i<maps.length;i++)
-    	    {maps[i]=new BufferedImage(defaultSize,defaultSize,BufferedImage.TYPE_INT_ARGB);
-    	     for(int x=0;x<maps[i].getWidth();x++)
-                 for(int y=0;y<maps[i].getHeight();y++)
-                	 maps[i].setRGB(x,y,Color.WHITE.getRGB());
-    	    }
+    private final void initializeMaps(){
+    	maps=new Map[MapType.values().length];
+    	for(MapType type:MapType.values())
+    		maps[type.ordinal()]=new Map(type.getLabel());
     }
     
-    final BufferedImage getMap(MapType type){
+    final Map getMap(MapType type){
     	return(maps[type.ordinal()]);
-    }
-    
-    final void setMap(MapType type,BufferedImage map){
-    	maps[type.ordinal()]=map;
     }
     
     @Override
     public final boolean isDirty(){
+        boolean dirty=false;
+        for(MapType type:MapType.values())
+            if(maps[type.ordinal()].isDirty())
+                {dirty=true;
+                 break;
+                }
         return(dirty);
     }
     
     @Override
-    public final void unmarkDirty(){
-        dirty=false;
-    }
+    public final void unmarkDirty(){}
     
     @Override
-    public final void markDirty(){
-        dirty=true;
-    }
+    public final void markDirty(){}
     
     @Override
     public final void resolve(){
     	initializeMaps();
+    	unmarkDirty();
+    }
+
+    public final Map[] getMaps(){
+        return(maps);
+    }
+
+    public final void setMaps(Map[] maps){
+        this.maps=maps;
+        markDirty();
+    }
+    
+    @Override
+    final boolean canInstantiateChildren(){
+        return(false);
+    }
+
+    @Override
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(true);
     }
 }

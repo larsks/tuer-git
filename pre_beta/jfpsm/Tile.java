@@ -21,7 +21,7 @@ import java.awt.Color;
  * @author Julien Gouesse
  *
  */
-public final class Tile extends Namable implements Dirtyable,Resolvable{   
+public final class Tile extends JFPSMUserObject{   
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Tile.class);}
@@ -53,6 +53,7 @@ public final class Tile extends Namable implements Dirtyable,Resolvable{
 
     public final void setColor(Color color){
         this.color=color;
+        dirty=true;
     }
     
     @Override
@@ -73,5 +74,20 @@ public final class Tile extends Namable implements Dirtyable,Resolvable{
     @Override
     public final void resolve(){
         color=Color.WHITE;
+    }
+    
+    @Override
+    final boolean canInstantiateChildren(){
+        return(false);
+    }
+
+    @Override
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(true);
     }
 }

@@ -41,10 +41,6 @@ abstract class Viewer extends JPanel {
         return(projectManager.getSelectedTileColor(project));
     }
     
-    final void markEntityDirty(){
-        entity.markDirty();
-    }
-    
     final BufferedImage openFileAndLoadImage(){
         return(projectManager.openFileAndLoadImage());
     }

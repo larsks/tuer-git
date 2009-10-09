@@ -16,6 +16,7 @@ package jfpsm;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import javax.swing.Box;
@@ -70,16 +71,16 @@ class DrawingPanel extends JPanel{
 	}
 	
 	
-	final void draw(int x1,int y1,int x2,int y2){
+	protected boolean draw(int x1,int y1,int x2,int y2){
 		//get the color of the selected tile
 	    Color color=viewer.getSelectedTileColor();
-	    if(color!=null)
+	    final boolean success;
+	    if(success=color!=null)
 	        {graphics.setColor(color);
 	         graphics.drawLine(x1,y1,x2,y2);
-	         //the enclosed entity has changed
-	         viewer.markEntityDirty();
 	         repaint();
 	        }
+	    return(success);
 	}
 	
 	protected JPopupMenu getPopupMenu(){
@@ -93,9 +94,10 @@ class DrawingPanel extends JPanel{
 	final void setBufferedImage(BufferedImage bufferedImage){
 		this.bufferedImage=bufferedImage;
 		graphics=bufferedImage.createGraphics();
+		int min=Integer.highestOneBit(Toolkit.getDefaultToolkit().getScreenSize().height/2);
 		Dimension prefSize=new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight()+fontSize+2);
 		setPreferredSize(prefSize);
-		filler.setMinimumSize(prefSize);
+		filler.setMinimumSize(new Dimension(min,min));
 		filler.setPreferredSize(prefSize);
 		filler.setMaximumSize(prefSize);
 	}

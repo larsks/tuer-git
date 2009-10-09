@@ -29,6 +29,6 @@ final class LoadSelectedEntityAction implements ActionListener {
     
     @Override
     public final void actionPerformed(ActionEvent e){
-        this.projectManager.loadSelectedEntity();
+        this.projectManager.importSelectedEntity();
     }
 }

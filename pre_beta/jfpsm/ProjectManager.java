@@ -86,12 +86,12 @@ public final class ProjectManager extends JPanel{
             public final void treeWillExpand(TreeExpansionEvent event)throws ExpandVetoException{}
         });
         projectsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-        loadExistingProjects(); 
+        loadExistingProjects();
         //build the popup menu
         final JPopupMenu treePopupMenu=new JPopupMenu();
         final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
-        final JMenuItem loadMenuItem=new JMenuItem("Load");        
+        final JMenuItem importMenuItem=new JMenuItem("Load");        
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
         final JMenuItem openMenuItem=new JMenuItem("Open");        
         final JMenuItem closeMenuItem=new JMenuItem("Close");       
@@ -99,7 +99,7 @@ public final class ProjectManager extends JPanel{
         final JMenuItem saveMenuItem=new JMenuItem("Save");
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(renameMenuItem);
-        treePopupMenu.add(loadMenuItem);
+        treePopupMenu.add(importMenuItem);
         treePopupMenu.add(refreshMenuItem);
         treePopupMenu.add(openMenuItem);
         treePopupMenu.add(closeMenuItem);
@@ -108,7 +108,7 @@ public final class ProjectManager extends JPanel{
         //build action listeners
         newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
-        loadMenuItem.addActionListener(new LoadSelectedEntityAction(this));
+        importMenuItem.addActionListener(new LoadSelectedEntityAction(this));
         refreshMenuItem.addActionListener(new RefreshSelectedEntitiesAction(this));
         openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
@@ -191,45 +191,43 @@ public final class ProjectManager extends JPanel{
                           //get the first selected tree node
                           final TreePath path=projectsTree.getSelectionPath();
                           final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                          final Object userObject=selectedNode.getUserObject();
-                          final boolean showNew=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof FloorSet||userObject instanceof TileSet);
-                          final boolean showLoad=singleSelection&&userObject instanceof ProjectSet;
+                          final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+                          final boolean showNew=singleSelection&&userObject.canInstantiateChildren();
+                          final boolean showImport=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof Map);
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof Project||userObject instanceof Floor||userObject instanceof Tile);
+                          final boolean showSave=singleSelection&&userObject instanceof Project;
                           boolean showOpenAndClose;
-                          if(showRefresh)
-                        	  showOpenAndClose=false;
-                          else
-                              {showOpenAndClose=false;
-                               for(TreePath currentPath:paths)
-                            	   if(!(((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject() instanceof ProjectSet))
-                            	       {showOpenAndClose=true;
-                            		    break;
-                            	       }
-                              }
-                          boolean showDeleteAndSave;
+                          showOpenAndClose=false;
+                          JFPSMUserObject currentUserObject;
+                          for(TreePath currentPath:paths)
+                              {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
+                               if(currentUserObject.isOpenable())
+                            	   {showOpenAndClose=true;
+                            		break;
+                            	   }
+                              }            
+                          boolean showDelete;
                           if(showNew)
-                        	  showDeleteAndSave=false;
+                        	  showDelete=false;
                           else
-                              {showDeleteAndSave=false;
-                               Object currentUserObject;
+                              {showDelete=false;
                                for(TreePath currentPath:paths)
-                            	   {currentUserObject=((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
-                            	    if(!(currentUserObject instanceof ProjectSet)&&!(currentUserObject instanceof FloorSet)&&
-                            		   !(currentUserObject instanceof TileSet))
-                            	        {showDeleteAndSave=true;
+                            	   {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
+                            	    if(currentUserObject.isRemovable())
+                            	        {showDelete=true;
                             		     break;
                             	        }
                             	   }
-                              }
+                              }                         
                     	  newMenuItem.setVisible(showNew);
                     	  renameMenuItem.setVisible(showRename);
-                          loadMenuItem.setVisible(showLoad);
+                          importMenuItem.setVisible(showImport);
                           refreshMenuItem.setVisible(showRefresh);
                           openMenuItem.setVisible(showOpenAndClose);
                           closeMenuItem.setVisible(showOpenAndClose);
-                          deleteMenuItem.setVisible(showDeleteAndSave);
-                          saveMenuItem.setVisible(showDeleteAndSave);
+                          deleteMenuItem.setVisible(showDelete);
+                          saveMenuItem.setVisible(showSave);
                           treePopupMenu.show(mainWindow.getApplicativeFrame(),e.getXOnScreen(),e.getYOnScreen());
                          }
                     }
@@ -238,10 +236,10 @@ public final class ProjectManager extends JPanel{
                 	if(e.getClickCount()==2)
                 	    {final TreePath path=projectsTree.getSelectionPath();
                          final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                         final Object userObject=selectedNode.getUserObject();
+                         final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
                          if(userObject instanceof Floor||userObject instanceof Tile)
                              {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
-                              ProjectManager.this.mainWindow.getEntityViewer().openEntityView((Namable)userObject,project);                		 
+                              ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                		 
                              }
                 	    }
             }           
@@ -339,11 +337,19 @@ public final class ProjectManager extends JPanel{
              for(Floor floor:floorSet.getFloorsList())
                  {DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
                   treeModel.insertNodeInto(floorNode,floorsRootNode,floorsRootNode.getChildCount());
-                  TreePath floorSetPath=new TreePath(treeModel.getPathToRoot(floorsRootNode));
-                  if(!projectsTree.isExpanded(floorSetPath))
-                      projectsTree.expandPath(floorSetPath);
-                  
+                  //add each node of a map
+                  DefaultMutableTreeNode mapNode;
+                  for(MapType type:MapType.values())
+                      {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
+                       ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(mapNode,floorNode,floorNode.getChildCount());
+                      }
+                  TreePath floorPath=new TreePath(((DefaultTreeModel)projectsTree.getModel()).getPathToRoot(floorNode));
+                  if(!projectsTree.isExpanded(floorPath))
+                      projectsTree.expandPath(floorPath);             
                  }
+             TreePath floorSetPath=new TreePath(treeModel.getPathToRoot(floorsRootNode));
+             if(!projectsTree.isExpanded(floorSetPath))
+                 projectsTree.expandPath(floorSetPath);
              //add the tile set
              TileSet tileSet=project.getTileSet();
              DefaultMutableTreeNode tilesRootNode=new DefaultMutableTreeNode(tileSet);
@@ -351,12 +357,11 @@ public final class ProjectManager extends JPanel{
              //add the tiles
              for(Tile tile:tileSet.getTilesList())
                  {DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
-                  treeModel.insertNodeInto(tileNode,tilesRootNode,tilesRootNode.getChildCount());
-                  TreePath tileSetPath=new TreePath(treeModel.getPathToRoot(tilesRootNode));
-                  if(!projectsTree.isExpanded(tileSetPath))
-                      projectsTree.expandPath(tileSetPath);
+                  treeModel.insertNodeInto(tileNode,tilesRootNode,tilesRootNode.getChildCount());                 
                  }
-                     
+             TreePath tileSetPath=new TreePath(treeModel.getPathToRoot(tilesRootNode));
+             if(!projectsTree.isExpanded(tileSetPath))
+                 projectsTree.expandPath(tileSetPath);
              TreePath rootPath=new TreePath(projectsRoot);
              //expand the root path if it is not already expanded
              if(!projectsTree.isExpanded(rootPath))
@@ -398,19 +403,28 @@ public final class ProjectManager extends JPanel{
     		      else
     		    	  if(userObject instanceof FloorSet)
     		    	      {Floor floor=new Floor(name);
-                           ((FloorSet)selectedNode.getUserObject()).addFloor(floor);
+                           ((FloorSet)userObject).addFloor(floor);
                            DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
                            ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(floorNode,selectedNode,selectedNode.getChildCount());
+                           //add each node of a map
+                           DefaultMutableTreeNode mapNode;
+                           for(MapType type:MapType.values())
+                               {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
+                                ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(mapNode,floorNode,floorNode.getChildCount());
+                               }
                            TreePath floorSetPath=new TreePath(((DefaultTreeModel)projectsTree.getModel()).getPathToRoot(selectedNode));
                            if(!projectsTree.isExpanded(floorSetPath))
                     	       projectsTree.expandPath(floorSetPath);
+                           TreePath floorPath=new TreePath(((DefaultTreeModel)projectsTree.getModel()).getPathToRoot(floorNode));
+                           if(!projectsTree.isExpanded(floorPath))
+                    	       projectsTree.expandPath(floorPath);
                            newlyCreatedEntity=floor;
     		    	      }
     		    	  else
     		    		  if(userObject instanceof TileSet)
     		    		      {Tile tile=new Tile(name);
     		    		       tile.setColor(((TileCreationDialog)enterNameDialog).getValidatedColor());
-                               ((TileSet)selectedNode.getUserObject()).addTile(tile);  
+                               ((TileSet)userObject).addTile(tile);  
                                DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
                                ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(tileNode,selectedNode,selectedNode.getChildCount());
                                TreePath tileSetPath=new TreePath(((DefaultTreeModel)projectsTree.getModel()).getPathToRoot(selectedNode));
@@ -449,7 +463,7 @@ public final class ProjectManager extends JPanel{
             }
     }
     
-    final void loadSelectedEntity(){
+    final void importSelectedEntity(){
         TreePath path=projectsTree.getSelectionPath();
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
         Object userObject=selectedNode.getUserObject();
@@ -512,6 +526,19 @@ public final class ProjectManager extends JPanel{
                       }
                  }  
             }
+        else
+            if(userObject instanceof Map)
+                {/*Map map=(Map)userObject;
+                 Floor floor=(Floor)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
+                 MapType type=null;
+                 for(MapType currentType:MapType.values())
+                     if(floor.getMap(currentType)==map)
+                         {type=currentType;
+                          break;
+                         }
+                 //TODO: load an image map
+                 */
+                }
     }
     
     final BufferedImage openFileAndLoadImage(){
@@ -528,21 +555,28 @@ public final class ProjectManager extends JPanel{
         return(image);
     }
     
+    private final void expandPathDeeplyFromPath(TreePath path){
+        projectsTree.expandPath(path);
+        DefaultMutableTreeNode node=(DefaultMutableTreeNode)path.getLastPathComponent();
+        DefaultTreeModel treeModel=(DefaultTreeModel)projectsTree.getModel();
+        for(int i=0;i<node.getChildCount();i++)
+            expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
+    }
+    
     final void openSelectedEntities(){
         TreePath[] paths=projectsTree.getSelectionPaths();
         DefaultMutableTreeNode selectedNode;
-        Object userObject;
+        JFPSMUserObject userObject;
         for(TreePath path:paths)
             {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             userObject=selectedNode.getUserObject();
-             if(userObject instanceof Project||userObject instanceof FloorSet||userObject instanceof TileSet)
-                 projectsTree.expandPath(path);
-             else
-            	 if(userObject instanceof Floor||userObject instanceof Tile)
-            	     {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();
-            	      //open a tab view for this entity
-            		  mainWindow.getEntityViewer().openEntityView((Namable)userObject,project);
-            	     }
+             userObject=(JFPSMUserObject)selectedNode.getUserObject();
+             if(userObject instanceof Project||userObject instanceof FloorSet||userObject instanceof TileSet||userObject instanceof Floor)
+                 expandPathDeeplyFromPath(path);
+             if(userObject instanceof Floor||userObject instanceof Tile)
+            	 {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();
+            	  //open a tab view for this entity
+                  mainWindow.getEntityViewer().openEntityView((Namable)userObject,project);
+            	 }
             }
     }
     
@@ -553,7 +587,7 @@ public final class ProjectManager extends JPanel{
         for(TreePath path:paths)
             {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              userObject=selectedNode.getUserObject();
-             if(userObject instanceof Project||userObject instanceof FloorSet||userObject instanceof TileSet)
+             if(userObject instanceof Project||userObject instanceof FloorSet||userObject instanceof TileSet||userObject instanceof Floor)
                  {projectsTree.collapsePath(path);
                   //close the tab views of their children
                   if(userObject instanceof FloorSet)
@@ -573,11 +607,10 @@ public final class ProjectManager extends JPanel{
                 		       for(Tile tile:project.getTileSet().getTilesList())
                        	           mainWindow.getEntityViewer().closeEntityView(tile);
                 		      }
-                 }
-             else
-            	 if(userObject instanceof Floor||userObject instanceof Tile)
-            		 //close the tab view of this entity
-            		 mainWindow.getEntityViewer().closeEntityView((Namable)userObject);
+                 }             
+             if(userObject instanceof Floor||userObject instanceof Tile)
+            	 //close the tab view of this entity
+                 mainWindow.getEntityViewer().closeEntityView((Namable)userObject);
             }
     }
     
