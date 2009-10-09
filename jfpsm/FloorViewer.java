@@ -78,16 +78,17 @@ final class FloorViewer extends Viewer{
     }
     
     final void openFileAndLoadMap(final MapType type){
-    	BufferedImage map=openFileAndLoadImage();
-    	if(map!=null)
+    	BufferedImage imageMap=openFileAndLoadImage();
+    	if(imageMap!=null)
     	    {Floor floor=((Floor)getEntity());
-    	     //put the map into the floor
-   		     floor.setMap(type,map);
+    	     //put the image map into the floor
+    	     floor.getMap(type).setImage(imageMap);
    		     //update the underlying map in the drawing panel
-   		     drawingPanels[type.ordinal()].setBufferedImage(map);
+   		     drawingPanels[type.ordinal()].setBufferedImage(imageMap);
     		 //compute the max size
     		 int maxWidth=0,maxHeight=0,rgb;
-    		 BufferedImage currentMap,nextMap;
+    		 Map currentMap;
+    		 BufferedImage nextImageMap;
     		 for(MapType currentType:MapType.values())
     			 {currentMap=floor.getMap(currentType);
     			  maxWidth=Math.max(currentMap.getWidth(),maxWidth);
@@ -97,19 +98,19 @@ final class FloorViewer extends Viewer{
     		 for(MapType currentType:MapType.values())
         	     {currentMap=floor.getMap(currentType);
         		  if(currentMap.getWidth()!=maxWidth||maxHeight!=currentMap.getHeight())
-        			  {nextMap=new BufferedImage(maxWidth,maxHeight,BufferedImage.TYPE_INT_ARGB);
-        		       for(int x=0;x<nextMap.getWidth();x++)
-        		    	   for(int y=0;y<nextMap.getHeight();y++)
+        			  {nextImageMap=new BufferedImage(maxWidth,maxHeight,BufferedImage.TYPE_INT_ARGB);
+        		       for(int x=0;x<nextImageMap.getWidth();x++)
+        		    	   for(int y=0;y<nextImageMap.getHeight();y++)
         		    	       {if(x<currentMap.getWidth()&&y<currentMap.getHeight())
-        		    	            rgb=currentMap.getRGB(x,y);
+        		    	            rgb=currentMap.getImage().getRGB(x,y);
         		    	        else
         		    	            rgb=Color.WHITE.getRGB();
-        		    	        nextMap.setRGB(x,y,rgb);
+        		    	        nextImageMap.setRGB(x,y,rgb);
         		    	       }
-        			   floor.setMap(currentType,nextMap);
-        			   drawingPanels[currentType.ordinal()].setBufferedImage(nextMap);
+        		       floor.getMap(currentType).setImage(nextImageMap);
+        			   drawingPanels[currentType.ordinal()].setBufferedImage(nextImageMap);
         			  }
-        	     } 		 
+        	     }
     		 //reset the zoom
     		 zoomParams.setFactor(1);
     		 zoomParams.setWidth(maxWidth);

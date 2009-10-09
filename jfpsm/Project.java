@@ -19,7 +19,7 @@ package jfpsm;
  * @author Julien Gouesse
  *
  */
-public final class Project extends Namable implements Dirtyable{
+public final class Project extends JFPSMUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Project.class);}
@@ -88,5 +88,23 @@ public final class Project extends Namable implements Dirtyable{
     
     public static final String getFileExtension(){
     	return(fileExtension);
+    }
+
+    @Override
+    public final void resolve(){}
+    
+    @Override
+    final boolean canInstantiateChildren(){
+        return(false);
+    }
+
+    @Override
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(true);
     }
 }

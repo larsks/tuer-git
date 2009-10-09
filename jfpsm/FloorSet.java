@@ -13,7 +13,6 @@
 */
 package jfpsm;
 
-import java.io.ObjectStreamException;
 import java.util.ArrayList;
 
 /**
@@ -21,7 +20,7 @@ import java.util.ArrayList;
  * @author Julien Gouesse
  *
  */
-public final class FloorSet extends Namable implements Dirtyable{
+public final class FloorSet extends JFPSMUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(FloorSet.class);}
@@ -83,18 +82,25 @@ public final class FloorSet extends Namable implements Dirtyable{
         this.floorsList=floorsList;
         dirty=true;
     }
-    
-    public final Object readResolve() throws ObjectStreamException{
-        //the floor has just been loaded, there is not yet any change
+
+    @Override
+    public final void resolve(){
         unmarkDirty();
-        return(this);
     }
     
-    public final Object writeReplace() throws ObjectStreamException{
-        //the floor is being saved, there is no more pending change
-        unmarkDirty();
-        return(this);
+    @Override
+    final boolean canInstantiateChildren(){
+        return(true);
     }
-    
-    
+
+    @Override
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        //TODO: set to true when the level nodes is ready
+        return(false);
+    }
 }

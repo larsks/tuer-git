@@ -32,7 +32,7 @@ import javax.imageio.ImageIO;
  * @author Julien Gouesse
  *
  */
-public final class ProjectSet extends Namable implements Dirtyable{
+public final class ProjectSet extends JFPSMUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(ProjectSet.class);}
@@ -116,14 +116,15 @@ public final class ProjectSet extends Namable implements Dirtyable{
           	          fis.close();    
           	          ZipEntry floorEntry;
           	          String floorDirectory;
+          	          String floorSetName=project.getFloorSet().getName();
           	          for(Floor floor:project.getFloorSet().getFloorsList())
-          	              {floorDirectory="floorset/"+floor.getName()+"/";
-          	               //save each map         	               
+          	              {floorDirectory="levelset/"+floorSetName+"/"+floor.getName()+"/";
+          	               //save each map
           	               for(MapType type:MapType.values())
           	                   {floorEntry=new ZipEntry(floorDirectory+type.getFilename());
               	                floorEntry.setMethod(ZipEntry.DEFLATED);
               	                zoStream.putNextEntry(floorEntry);
-              	                ImageIO.write(floor.getMap(type),"png",zoStream);          	            	    
+              	                ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);          	            	    
           	                   }
           	              }         	          
           	          //close the ZipOutputStream
@@ -178,6 +179,11 @@ public final class ProjectSet extends Namable implements Dirtyable{
         	throw new RuntimeException("The workspace directory "+workspaceDirectory.getAbsolutePath()+" cannot be used!");
     }
     
+    @Override
+    public final void resolve(){
+        initializeWorkspaceDirectory();
+    }
+    
     /**
      * 
      * @return files of the projects in the file system
@@ -216,7 +222,7 @@ public final class ProjectSet extends Namable implements Dirtyable{
              try{ZipFile zipFile=new ZipFile(projectFile);
                  Enumeration<? extends ZipEntry> entries = zipFile.entries();
                  ZipEntry entry;
-                 BufferedImage map;
+                 BufferedImage imageMap;
                  String[] path;
                  while(entries.hasMoreElements())
                      {entry=entries.nextElement();
@@ -228,14 +234,15 @@ public final class ProjectSet extends Namable implements Dirtyable{
                       else
                           {if(!entry.isDirectory())
                                {path=entry.getName().split("/");
-                                if(path.length==3&&path[0].equals("floorset"))
+                                if(path.length==4&&path[0].equals("levelset"))
                                     {//find the floor that should contain this map
+                                     String floorSetName=project.getFloorSet().getName();
                                      for(Floor floor:project.getFloorSet().getFloorsList())
-                                         if(path[1].equals(floor.getName()))
-                                             {map=ImageIO.read(zipFile.getInputStream(entry));
+                                         if(path[1].equals(floorSetName)&&path[2].equals(floor.getName()))
+                                             {imageMap=ImageIO.read(zipFile.getInputStream(entry));
                                               for(MapType type:MapType.values())
-                                                  if(path[2].equals(type.getFilename()))
-                                                      {floor.setMap(type,map);
+                                                  if(path[3].equals(type.getFilename()))
+                                                      {floor.getMap(type).setImage(imageMap);
                                                        break;
                                                       }                                              
                                               break;
@@ -274,5 +281,21 @@ public final class ProjectSet extends Namable implements Dirtyable{
         else
             throw new IllegalArgumentException("The file "+fullname+" is not a JFPSM project file!");
         return(project);
-    } 
+    }
+    
+    @Override
+    final boolean canInstantiateChildren(){
+        return(true);
+    }
+
+    @Override
+    final boolean isOpenable(){
+        //it is always open and it cannot be closed
+        return(false);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(false);
+    }
 }

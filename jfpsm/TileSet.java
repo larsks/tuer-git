@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * @author Julien Gouesse
  *
  */
-public final class TileSet extends Namable implements Dirtyable{
+public final class TileSet extends JFPSMUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(TileSet.class);}
@@ -81,5 +81,25 @@ public final class TileSet extends Namable implements Dirtyable{
     public final void setTilesList(ArrayList<Tile> tilesList){
         this.tilesList=tilesList;
         dirty=true;
+    }
+    
+    @Override
+    public final void resolve(){
+        unmarkDirty();
+    }
+    
+    @Override
+    final boolean canInstantiateChildren(){
+        return(true);
+    }
+
+    @Override
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(false);
     }
 }
