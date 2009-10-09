@@ -16,13 +16,13 @@ package jfpsm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-final class LoadSelectedEntityAction implements ActionListener {
+final class ImportSelectedEntityAction implements ActionListener {
 
     
     private final ProjectManager projectManager;
     
     
-    LoadSelectedEntityAction(ProjectManager projectManager){
+    ImportSelectedEntityAction(ProjectManager projectManager){
         this.projectManager=projectManager;
     }
     
