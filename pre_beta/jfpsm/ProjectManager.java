@@ -108,7 +108,7 @@ public final class ProjectManager extends JPanel{
         //build action listeners
         newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
-        importMenuItem.addActionListener(new LoadSelectedEntityAction(this));
+        importMenuItem.addActionListener(new ImportSelectedEntityAction(this));
         refreshMenuItem.addActionListener(new RefreshSelectedEntitiesAction(this));
         openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
