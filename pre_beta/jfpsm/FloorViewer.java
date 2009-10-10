@@ -13,7 +13,6 @@
 */
 package jfpsm;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import javax.swing.JSplitPane;
@@ -75,53 +74,5 @@ final class FloorViewer extends Viewer{
                  }             
             }
         
-    }
-    
-    final void openFileAndLoadMap(final MapType type){
-    	BufferedImage imageMap=openFileAndLoadImage();
-    	if(imageMap!=null)
-    	    {Floor floor=((Floor)getEntity());
-    	     //put the image map into the floor
-    	     floor.getMap(type).setImage(imageMap);
-   		     //update the underlying map in the drawing panel
-   		     drawingPanels[type.ordinal()].setBufferedImage(imageMap);
-    		 //compute the max size
-    		 int maxWidth=0,maxHeight=0,rgb;
-    		 Map currentMap;
-    		 BufferedImage nextImageMap;
-    		 for(MapType currentType:MapType.values())
-    			 {currentMap=floor.getMap(currentType);
-    			  maxWidth=Math.max(currentMap.getWidth(),maxWidth);
-    			  maxHeight=Math.max(currentMap.getHeight(),maxHeight);
-    			 }
-    		 //resize each map that is too small
-    		 for(MapType currentType:MapType.values())
-        	     {currentMap=floor.getMap(currentType);
-        		  if(currentMap.getWidth()!=maxWidth||maxHeight!=currentMap.getHeight())
-        			  {nextImageMap=new BufferedImage(maxWidth,maxHeight,BufferedImage.TYPE_INT_ARGB);
-        		       for(int x=0;x<nextImageMap.getWidth();x++)
-        		    	   for(int y=0;y<nextImageMap.getHeight();y++)
-        		    	       {if(x<currentMap.getWidth()&&y<currentMap.getHeight())
-        		    	            rgb=currentMap.getImage().getRGB(x,y);
-        		    	        else
-        		    	            rgb=Color.WHITE.getRGB();
-        		    	        nextImageMap.setRGB(x,y,rgb);
-        		    	       }
-        		       floor.getMap(currentType).setImage(nextImageMap);
-        			   drawingPanels[currentType.ordinal()].setBufferedImage(nextImageMap);
-        			  }
-        	     }
-    		 //reset the zoom
-    		 zoomParams.setFactor(1);
-    		 zoomParams.setWidth(maxWidth);
-    		 zoomParams.setHeight(maxHeight);
-    		 zoomParams.setCenterx(maxWidth/2);
-    		 zoomParams.setCentery(maxHeight/2);
-    	     //update the container
-    		 invalidate();
-    		 validate();
-    		 //update the display
-    		 repaint();
-    	    }
     }
 }
