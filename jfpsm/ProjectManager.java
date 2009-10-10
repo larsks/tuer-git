@@ -91,7 +91,7 @@ public final class ProjectManager extends JPanel{
         final JPopupMenu treePopupMenu=new JPopupMenu();
         final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
-        final JMenuItem importMenuItem=new JMenuItem("Load");        
+        final JMenuItem importMenuItem=new JMenuItem("Import");        
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
         final JMenuItem openMenuItem=new JMenuItem("Open");        
         final JMenuItem closeMenuItem=new JMenuItem("Close");       
@@ -236,7 +236,7 @@ public final class ProjectManager extends JPanel{
                 	if(e.getClickCount()==2)
                 	    {final TreePath path=projectsTree.getSelectionPath();
                          final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                         final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+                         final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();                 
                          if(userObject instanceof Floor||userObject instanceof Tile)
                              {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
                               ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                		 
@@ -528,20 +528,13 @@ public final class ProjectManager extends JPanel{
             }
         else
             if(userObject instanceof Map)
-                {/*Map map=(Map)userObject;
+                {Map map=(Map)userObject;
                  Floor floor=(Floor)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
-                 MapType type=null;
-                 for(MapType currentType:MapType.values())
-                     if(floor.getMap(currentType)==map)
-                         {type=currentType;
-                          break;
-                         }
-                 //TODO: load an image map
-                 */
+                 importImageForSelectedMap(floor,map);
                 }
     }
     
-    final BufferedImage openFileAndLoadImage(){
+    private final BufferedImage openFileAndLoadImage(){
         JFileChooser fileChooser=new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Images","bmp","gif","jpg","jpeg","png"));
@@ -553,6 +546,41 @@ public final class ProjectManager extends JPanel{
              {mainWindow.displayErrorMessage(throwable,false);}                  
             }
         return(image);
+    }
+    
+    private final void importImageForSelectedMap(Floor floor,Map map){
+        BufferedImage imageMap=openFileAndLoadImage();
+        if(imageMap!=null)
+            {//put the image map into the floor
+             map.setImage(imageMap);
+             //compute the max size
+             int maxWidth=0,maxHeight=0,rgb;
+             Map currentMap;
+             BufferedImage nextImageMap;
+             for(MapType currentType:MapType.values())
+                 {currentMap=floor.getMap(currentType);
+                  maxWidth=Math.max(currentMap.getWidth(),maxWidth);
+                  maxHeight=Math.max(currentMap.getHeight(),maxHeight);
+                 }
+             //resize each map that is too small
+             for(MapType currentType:MapType.values())
+                 {currentMap=floor.getMap(currentType);
+                  if(currentMap.getWidth()!=maxWidth||maxHeight!=currentMap.getHeight())
+                      {nextImageMap=new BufferedImage(maxWidth,maxHeight,BufferedImage.TYPE_INT_ARGB);
+                       for(int x=0;x<nextImageMap.getWidth();x++)
+                           for(int y=0;y<nextImageMap.getHeight();y++)
+                               {if(x<currentMap.getWidth()&&y<currentMap.getHeight())
+                                    rgb=currentMap.getImage().getRGB(x,y);
+                                else
+                                    rgb=Color.WHITE.getRGB();
+                                nextImageMap.setRGB(x,y,rgb);
+                               }
+                       floor.getMap(currentType).setImage(nextImageMap);
+                      }
+                 }
+             //update the display
+             mainWindow.getEntityViewer(). repaint();
+            }
     }
     
     private final void expandPathDeeplyFromPath(TreePath path){

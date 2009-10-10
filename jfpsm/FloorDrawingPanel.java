@@ -13,17 +13,13 @@
 */
 package jfpsm;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 final class FloorDrawingPanel extends DrawingPanel {
 
 
     private static final long serialVersionUID=1L;
-    
-    private final JPopupMenu popupMenu;
     
     private final Map map;
 
@@ -31,30 +27,23 @@ final class FloorDrawingPanel extends DrawingPanel {
 	FloorDrawingPanel(final Floor floor,final MapType type,final ZoomParameters zoomParams,final FloorViewer floorViewer){
 		super(type.getLabel(),floor.getMap(type).getImage(),zoomParams,floorViewer);
 		map=floor.getMap(type);
-		popupMenu=new JPopupMenu();
-		final JMenuItem loadMapMenuItem=new JMenuItem("Load");
-		loadMapMenuItem.addActionListener(new ActionListener(){       
-            @Override
-            public void actionPerformed(ActionEvent e){
-                floorViewer.openFileAndLoadMap(type);
-            }
-        });
-		popupMenu.add(loadMapMenuItem);
 	}
 	
 	
-	protected final JPopupMenu getPopupMenu(){
-        return(popupMenu);
-    }
-	
-	protected boolean draw(int x1,int y1,int x2,int y2){
+	@Override
+	protected final boolean draw(int x1,int y1,int x2,int y2){
 	    final boolean success;
 	    if(success=super.draw(x1,y1,x2,y2))
 	        map.markDirty();
 	    return(success);
 	}
 	
-	final Map getMap(){
-	    return(map);
-	}
+	@Override
+    protected void paintComponent(Graphics g){
+        BufferedImage mapImage=map.getImage();
+        //check if the underlying image has been changed (during import)
+        if(mapImage!=getImage())
+            setImage(mapImage);
+        super.paintComponent(g);
+    }
 }

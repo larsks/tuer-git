@@ -15,7 +15,6 @@ package jfpsm;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 class DrawingMouseAdapter extends MouseAdapter{
@@ -46,21 +45,6 @@ class DrawingMouseAdapter extends MouseAdapter{
                   previousY=zoomParams.getAbsoluteYFromRelativeY(previousY);
                  }
             }
-        else
-            if(e.isPopupTrigger())
-                onRightClick(e.getX(),e.getY());
-    }
-    
-    @Override
-    public final void mouseReleased(MouseEvent e){
-        if(e.isPopupTrigger())
-            onRightClick(e.getX(),e.getY());
-    }
-    
-    private final void onRightClick(final int x,final int y){
-        JPopupMenu popupMenu=drawingPanel.getPopupMenu();
-        if(popupMenu!=null)
-            popupMenu.show(drawingPanel,x,y);
     }
     
     @Override

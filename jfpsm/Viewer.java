@@ -14,8 +14,6 @@
 package jfpsm;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-
 import javax.swing.JPanel;
 
 abstract class Viewer extends JPanel {
@@ -41,9 +39,9 @@ abstract class Viewer extends JPanel {
         return(projectManager.getSelectedTileColor(project));
     }
     
-    final BufferedImage openFileAndLoadImage(){
+    /*final BufferedImage openFileAndLoadImage(){
         return(projectManager.openFileAndLoadImage());
-    }
+    }*/
     
     final Dirtyable getEntity(){
     	return(entity);

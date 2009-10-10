@@ -21,7 +21,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import javax.swing.Box;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 
 /**
  * Panel that allows the drawing. The current color is the color of the selected tile.
@@ -63,7 +62,7 @@ class DrawingPanel extends JPanel{
 		fontSize=getFontMetrics(getFont()).getHeight();
 		Dimension prefDim=new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight());
 		filler=new Box.Filler(prefDim,prefDim,prefDim);
-		setBufferedImage(bufferedImage);
+		setImage(bufferedImage);
 		add(filler);
 		MouseAdapter mouseAdapter=new DrawingMouseAdapter(this);
 		addMouseMotionListener(mouseAdapter);
@@ -83,27 +82,35 @@ class DrawingPanel extends JPanel{
 	    return(success);
 	}
 	
-	protected JPopupMenu getPopupMenu(){
-	    return(null);
-	}
-	
 	final ZoomParameters getZoomParameters(){
 	    return(zoomParams);
 	}
 	
-	final void setBufferedImage(BufferedImage bufferedImage){
+	final void setImage(BufferedImage bufferedImage){
 		this.bufferedImage=bufferedImage;
 		graphics=bufferedImage.createGraphics();
-		int min=Integer.highestOneBit(Toolkit.getDefaultToolkit().getScreenSize().height/2);
-		Dimension prefSize=new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight()+fontSize+2);
+		final int min=Integer.highestOneBit(Toolkit.getDefaultToolkit().getScreenSize().height/2);
+		final int width=bufferedImage.getWidth();
+		final int height=bufferedImage.getHeight();
+		Dimension prefSize=new Dimension(width,height+fontSize+2);
 		setPreferredSize(prefSize);
 		filler.setMinimumSize(new Dimension(min,min));
 		filler.setPreferredSize(prefSize);
 		filler.setMaximumSize(prefSize);
+		//reset the zoom
+        zoomParams.setFactor(1);
+        zoomParams.setWidth(width);
+        zoomParams.setHeight(height);
+        zoomParams.setCenterx(width/2);
+        zoomParams.setCentery(height/2);
+	}
+	
+	final BufferedImage getImage(){
+	    return(bufferedImage);
 	}
 	
 	@Override
-	protected final void paintComponent(Graphics g){
+	protected void paintComponent(Graphics g){
 		super.paintComponent(g);
 		if(zoomParams==null)
             g.drawImage(bufferedImage,0,0,this);
