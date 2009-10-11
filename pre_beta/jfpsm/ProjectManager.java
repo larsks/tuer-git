@@ -92,6 +92,7 @@ public final class ProjectManager extends JPanel{
         final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
+        final JMenuItem exportMenuItem=new JMenuItem("Export");
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
         final JMenuItem openMenuItem=new JMenuItem("Open");        
         final JMenuItem closeMenuItem=new JMenuItem("Close");       
@@ -100,6 +101,7 @@ public final class ProjectManager extends JPanel{
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(renameMenuItem);
         treePopupMenu.add(importMenuItem);
+        treePopupMenu.add(exportMenuItem);
         treePopupMenu.add(refreshMenuItem);
         treePopupMenu.add(openMenuItem);
         treePopupMenu.add(closeMenuItem);
@@ -109,6 +111,7 @@ public final class ProjectManager extends JPanel{
         newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
         importMenuItem.addActionListener(new ImportSelectedEntityAction(this));
+        exportMenuItem.addActionListener(new ExportSelectedEntityAction(this));
         refreshMenuItem.addActionListener(new RefreshSelectedEntitiesAction(this));
         openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
@@ -194,6 +197,7 @@ public final class ProjectManager extends JPanel{
                           final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
                           final boolean showNew=singleSelection&&userObject.canInstantiateChildren();
                           final boolean showImport=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof Map);
+                          final boolean showExport=singleSelection&&userObject instanceof Project||userObject instanceof Map;
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof Project||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
@@ -223,6 +227,7 @@ public final class ProjectManager extends JPanel{
                     	  newMenuItem.setVisible(showNew);
                     	  renameMenuItem.setVisible(showRename);
                           importMenuItem.setVisible(showImport);
+                          exportMenuItem.setVisible(showExport);
                           refreshMenuItem.setVisible(showRefresh);
                           openMenuItem.setVisible(showOpenAndClose);
                           closeMenuItem.setVisible(showOpenAndClose);
@@ -461,6 +466,45 @@ public final class ProjectManager extends JPanel{
                   {mainWindow.displayErrorMessage(throwable,false);}           	  
                  }
             }
+    }
+    
+    final void exportSelectedEntity(){
+        TreePath path=projectsTree.getSelectionPath();
+        DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+        JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+        if(userObject instanceof Project)
+            {Project project=(Project)userObject;
+             ProjectSet projectSet=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
+             JFileChooser fileChooser=new JFileChooser();
+             fileChooser.setMultiSelectionEnabled(false);
+             fileChooser.setFileFilter(new FileNameExtensionFilter("JFPSM Projects","jfpsm.zip"));
+             int result=fileChooser.showSaveDialog(mainWindow.getApplicativeFrame());
+             if(result==JFileChooser.APPROVE_OPTION)
+                 {try{projectSet.saveProject(project,fileChooser.getSelectedFile());}
+                  catch(Throwable throwable)
+                  {mainWindow.displayErrorMessage(throwable,false);}
+                 }
+            }
+        else
+            if(userObject instanceof Map)
+                {Map map=(Map)userObject;
+                 JFileChooser fileChooser=new JFileChooser();
+                 fileChooser.setMultiSelectionEnabled(false);
+                 fileChooser.setFileFilter(new FileNameExtensionFilter("Images","bmp","gif","jpg","jpeg","png"));
+                 int result=fileChooser.showSaveDialog(mainWindow.getApplicativeFrame());
+                 if(result==JFileChooser.APPROVE_OPTION)
+                     {File imageFile=fileChooser.getSelectedFile();
+                      int lastIndexOfDot=imageFile.getName().lastIndexOf(".");
+                      String formatName=lastIndexOfDot>=0?imageFile.getName().substring(lastIndexOfDot+1):"";
+                      try{if(formatName.equals(""))
+                              throw new UnsupportedOperationException("Cannot export an image into a file without extension");
+                          else
+                              ImageIO.write(map.getImage(),formatName,imageFile);
+                         }
+                      catch(Throwable throwable)
+                      {mainWindow.displayErrorMessage(throwable,false);}                  
+                     }
+                }
     }
     
     final void importSelectedEntity(){
