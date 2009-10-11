@@ -84,19 +84,25 @@ public final class ProjectSet extends JFPSMUserObject{
     }
     
     final void saveProject(Project project){
-    	if(projectsList.contains(project))
+        final String projectPath=createProjectPath(project.getName());
+        final File projectFile=new File(projectPath);
+        saveProject(project,projectFile);
+    }
+    
+    final void saveProject(Project project,final File file){
+        if(projectsList.contains(project))
     	    {//this should be tested rather in the GUI
-    		 if(project.isDirty())
-    	         {final String projectPath=createProjectPath(project.getName());
-          	      final File projectFile=new File(projectPath);
-          	      //save the project (project.xml and image files have to be put into a ZIP file)
-          	      try{if(!projectFile.exists())
-          	              {if(!projectFile.createNewFile())
-          	                   throw new IOException("cannot create file "+projectPath);
+    	     //check if the internal project has unsaved modifications or 
+    	     //if it is an external (exported) project
+    		 if(project.isDirty()||!file.getParentFile().equals(workspaceDirectory))
+    	         {//save the project (project.xml and image files have to be put into a ZIP file)
+          	      try{if(!file.exists())
+          	              {if(!file.createNewFile())
+          	                   throw new IOException("cannot create file "+file.getAbsolutePath());
           	              }
           	          //create a temporary file used as a buffer before putting the data into the archive
           	          File tmpFile=File.createTempFile("JFPSM",".tmp");
-          	          ZipOutputStream zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(projectFile)));
+          	          ZipOutputStream zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
           	          zoStream.setMethod(ZipOutputStream.DEFLATED);
           	          //create a ZipEntry for the XML file
           	          ZipEntry projectXMLEntry=new ZipEntry("project.xml");
