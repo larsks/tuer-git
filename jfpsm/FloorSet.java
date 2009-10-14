@@ -16,7 +16,7 @@ package jfpsm;
 import java.util.ArrayList;
 
 /**
- * Container of floors
+ * Container of floors => level
  * @author Julien Gouesse
  *
  */
@@ -39,7 +39,7 @@ public final class FloorSet extends JFPSMUserObject{
     public FloorSet(String name){
         super(name);
         floorsList=new ArrayList<Floor>();
-        dirty=true;
+        markDirty();
     }
     
     @Override
@@ -66,12 +66,12 @@ public final class FloorSet extends JFPSMUserObject{
     
     public final void addFloor(Floor floor){
         floorsList.add(floor);
-        dirty=true;
+        markDirty();
     }
     
     public final void removeFloor(Floor floor){
         floorsList.remove(floor);
-        dirty=true;
+        markDirty();
     }
 
     public final ArrayList<Floor> getFloorsList(){
@@ -80,7 +80,7 @@ public final class FloorSet extends JFPSMUserObject{
 
     public final void setFloorsList(ArrayList<Floor> floorsList){
         this.floorsList=floorsList;
-        dirty=true;
+        markDirty();
     }
 
     @Override
