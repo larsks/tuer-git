@@ -38,7 +38,7 @@ public abstract class Namable implements Serializable{
         return(name);
     }
 
-    public final void setName(String name){
+    public void setName(String name){
         this.name=name;
     }
 }
