@@ -1,16 +1,16 @@
 package jfpsm;
 
-abstract class JFPSMUserObject extends Namable implements Dirtyable,Resolvable{
+public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resolvable{
 
     
     private static final long serialVersionUID=1L;
 
     
-    JFPSMUserObject(){
+    public JFPSMUserObject(){
         super("");
     }
     
-    JFPSMUserObject(String name){
+    public JFPSMUserObject(String name){
         super(name);
     }
 
@@ -19,4 +19,11 @@ abstract class JFPSMUserObject extends Namable implements Dirtyable,Resolvable{
     abstract boolean isOpenable();
     
     abstract boolean canInstantiateChildren();
+    
+    @Override
+    public final void setName(String name){
+        super.setName(name);
+        //mark the entity as dirty when the user renames it
+        markDirty();
+    }
 }

@@ -27,6 +27,11 @@ public final class Floor extends JFPSMUserObject{
 	
     private static final long serialVersionUID=1L;
     
+    /**
+     * This flag is necessary as a floor can be renamed
+     */
+    private transient boolean dirty;
+    
     private Map[] maps;
     
 
@@ -53,20 +58,25 @@ public final class Floor extends JFPSMUserObject{
     
     @Override
     public final boolean isDirty(){
-        boolean dirty=false;
-        for(MapType type:MapType.values())
-            if(maps[type.ordinal()].isDirty())
-                {dirty=true;
-                 break;
-                }
+        boolean dirty=this.dirty;
+        if(!dirty)
+            for(MapType type:MapType.values())
+                if(maps[type.ordinal()].isDirty())
+                    {dirty=true;
+                     break;
+                    }
         return(dirty);
     }
     
     @Override
-    public final void unmarkDirty(){}
-    
-    @Override
-    public final void markDirty(){}
+	public final void markDirty(){
+		dirty=true;
+	}
+
+	@Override
+	public final void unmarkDirty(){
+		dirty=false;
+	}
     
     @Override
     public final void resolve(){

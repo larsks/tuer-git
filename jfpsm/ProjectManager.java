@@ -199,7 +199,7 @@ public final class ProjectManager extends JPanel{
                           final boolean showImport=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof Map);
                           final boolean showExport=singleSelection&&userObject instanceof Project||userObject instanceof Map;
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
-                          final boolean showRename=singleSelection&&(userObject instanceof Project||userObject instanceof Floor||userObject instanceof Tile);
+                          final boolean showRename=singleSelection&&(userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
                           boolean showOpenAndClose;
                           showOpenAndClose=false;
@@ -688,22 +688,25 @@ public final class ProjectManager extends JPanel{
     
     final void renameSelectedEntity(){
         TreePath path=projectsTree.getSelectionPath();
-        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-        Object userObject=selectedNode.getUserObject();
-        if(userObject instanceof Project)
-            {//TODO: delete the file
-             //      mark the project as dirty
+        DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+        JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+        NamingDialog enterNameDialog=null;
+        if(userObject instanceof Floor)
+            {enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"floor");
+             enterNameDialog.setTitle("Rename floor");
             }
         else
-            if(userObject instanceof Floor)
-                {
-                 
+            if(userObject instanceof Tile)
+                {enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"tile");
+                 enterNameDialog.setTitle("Rename tile");
                 }
-            else
-                if(userObject instanceof Tile)
-                    {
-                     
-                    }
+        if(enterNameDialog!=null)
+	        {enterNameDialog.setVisible(true);
+             String name=enterNameDialog.getValidatedText();
+             enterNameDialog.dispose();
+		     if(name!=null)
+		         userObject.setName(name);
+		    }
     }
     
     final Color getSelectedTileColor(final Project project){
