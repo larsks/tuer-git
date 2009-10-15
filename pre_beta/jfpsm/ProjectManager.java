@@ -199,7 +199,7 @@ public final class ProjectManager extends JPanel{
                           final boolean showImport=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof Map);
                           final boolean showExport=singleSelection&&userObject instanceof Project||userObject instanceof Map;
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
-                          final boolean showRename=singleSelection&&(userObject instanceof Floor||userObject instanceof Tile);
+                          final boolean showRename=singleSelection&&(userObject instanceof FloorSet||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
                           boolean showOpenAndClose;
                           showOpenAndClose=false;
@@ -700,6 +700,15 @@ public final class ProjectManager extends JPanel{
                 {enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"tile");
                  enterNameDialog.setTitle("Rename tile");
                 }
+            else
+            	if(userObject instanceof FloorSet)
+            	    {ArrayList<String> usedLevelNames=getAllChildrenNames(selectedNode);
+            	     //FIXME: remove this fix, a level should be in a level set
+            	     //"Tile Set" is a reserved name
+            	     usedLevelNames.add("Tile Set");
+            		 enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),usedLevelNames,"level");
+                     enterNameDialog.setTitle("Rename level");
+            	    }
         if(enterNameDialog!=null)
 	        {enterNameDialog.setVisible(true);
              String name=enterNameDialog.getValidatedText();
