@@ -226,7 +226,7 @@ public final class ProjectSet extends JFPSMUserObject{
             {int nameLength=fullname.length();
              String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());     
              try{ZipFile zipFile=new ZipFile(projectFile);
-                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                 Enumeration<? extends ZipEntry> entries=zipFile.entries();
                  ZipEntry entry;
                  BufferedImage imageMap;
                  String[] path;
@@ -267,6 +267,7 @@ public final class ProjectSet extends JFPSMUserObject{
                                }
                           }
                      }
+                 zipFile.close();
                  if(project!=null)
                      {//if the project was already loaded, return 
                       //the project previously created with this name

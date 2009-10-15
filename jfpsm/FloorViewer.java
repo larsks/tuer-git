@@ -38,7 +38,7 @@ final class FloorViewer extends Viewer{
             drawingPanels[type.ordinal()]=new FloorDrawingPanel(floor,type,zoomParams,this);
         JSplitPane leftVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,drawingPanels[MapType.CONTAINER_MAP.ordinal()],drawingPanels[MapType.CONTENT_MAP.ordinal()]);
         leftVerticalSplitPane.setOneTouchExpandable(true);
-        pathDrawingPanel=new DrawingPanel("path map",new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB),zoomParams,this);
+        pathDrawingPanel=new DrawingPanel("path map",new BufferedImage(floor.getMap(MapType.CONTAINER_MAP).getWidth(),floor.getMap(MapType.CONTAINER_MAP).getHeight(),BufferedImage.TYPE_INT_ARGB),zoomParams,this);
         JSplitPane rightVerticalSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,drawingPanels[MapType.LIGHT_MAP.ordinal()],pathDrawingPanel);
         rightVerticalSplitPane.setOneTouchExpandable(true);
         JSplitPane horizontalSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,leftVerticalSplitPane,rightVerticalSplitPane);
