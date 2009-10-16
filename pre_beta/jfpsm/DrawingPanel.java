@@ -82,6 +82,12 @@ class DrawingPanel extends JPanel{
 	    return(success);
 	}
 	
+	final void move(int x1,int y1,int x2,int y2){
+	    zoomParams.setCenterx(zoomParams.getCenterx()+x2-x1);
+	    zoomParams.setCentery(zoomParams.getCentery()+y2-y1);
+	    viewer.repaint();
+	}
+	
 	final ZoomParameters getZoomParameters(){
 	    return(zoomParams);
 	}
