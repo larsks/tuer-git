@@ -210,7 +210,7 @@ public final class ProjectManager extends JPanel{
                             	   {showOpenAndClose=true;
                             		break;
                             	   }
-                              }            
+                              }
                           boolean showDelete;
                           showDelete=false;
                           for(TreePath currentPath:paths)
@@ -219,7 +219,7 @@ public final class ProjectManager extends JPanel{
                                    {showDelete=true;
                                     break;
                             	   }
-                              }                   
+                              }
                     	  newMenuItem.setVisible(showNew);
                     	  renameMenuItem.setVisible(showRename);
                           importMenuItem.setVisible(showImport);

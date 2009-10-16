@@ -24,9 +24,13 @@ class DrawingMouseAdapter extends MouseAdapter{
     
     private final DrawingPanel drawingPanel;
     
-    private int previousX;
+    private int previousLeftClickX;
     
-    private int previousY;
+    private int previousLeftClickY;
+    
+    private int previousRightClickX;
+    
+    private int previousRightClickY;
     
     
     DrawingMouseAdapter(final DrawingPanel drawingPanel){
@@ -38,11 +42,19 @@ class DrawingMouseAdapter extends MouseAdapter{
     @Override
     public final void mousePressed(MouseEvent e){
         if(SwingUtilities.isLeftMouseButton(e))
-            {previousX=e.getX();
-             previousY=e.getY();
+            {previousLeftClickX=e.getX();
+             previousLeftClickY=e.getY();
              if(zoomParams!=null)
-                 {previousX=zoomParams.getAbsoluteXFromRelativeX(previousX);
-                  previousY=zoomParams.getAbsoluteYFromRelativeY(previousY);
+                 {previousLeftClickX=zoomParams.getAbsoluteXFromRelativeX(previousLeftClickX);
+                  previousLeftClickY=zoomParams.getAbsoluteYFromRelativeY(previousLeftClickY);
+                 }
+            }
+        if(SwingUtilities.isRightMouseButton(e))
+            {previousRightClickX=e.getX();
+             previousRightClickY=e.getY();
+             if(zoomParams!=null)
+                 {previousRightClickX=zoomParams.getAbsoluteXFromRelativeX(previousRightClickX);
+                  previousRightClickY=zoomParams.getAbsoluteYFromRelativeY(previousRightClickY);
                  }
             }
     }
@@ -55,9 +67,19 @@ class DrawingMouseAdapter extends MouseAdapter{
                  {x=zoomParams.getAbsoluteXFromRelativeX(x);
                   y=zoomParams.getAbsoluteYFromRelativeY(y);                  
                  }
-             drawingPanel.draw(previousX,previousY,x,y);
-             previousX=x;
-             previousY=y;
+             drawingPanel.draw(previousLeftClickX,previousLeftClickY,x,y);
+             previousLeftClickX=x;
+             previousLeftClickY=y;
+            }
+        if(SwingUtilities.isRightMouseButton(e))
+            {int x=e.getX(),y=e.getY();
+             if(zoomParams!=null)
+                 {x=zoomParams.getAbsoluteXFromRelativeX(x);
+                  y=zoomParams.getAbsoluteYFromRelativeY(y);                  
+                 }
+             drawingPanel.move(previousRightClickX,previousRightClickY,x,y);
+             previousRightClickX=x;
+             previousRightClickY=y;
             }
     }
     
