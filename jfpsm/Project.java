@@ -28,7 +28,7 @@ public final class Project extends JFPSMUserObject{
     
     private static final String fileExtension = ".jfpsm.zip";
     
-    private FloorSet floorSet;
+    private LevelSet levelSet;
 
     private TileSet tileSet;
     
@@ -38,8 +38,9 @@ public final class Project extends JFPSMUserObject{
     
     public Project(String name){
         super(name);
-        floorSet=new FloorSet("Floor Set");
+        levelSet=new LevelSet("Level Set");
         tileSet=new TileSet("Tile Set");
+        markDirty();
     }
     
     
@@ -61,7 +62,7 @@ public final class Project extends JFPSMUserObject{
     
     @Override
     public final boolean isDirty(){
-        return(floorSet.isDirty()||tileSet.isDirty());
+        return(levelSet.isDirty()||tileSet.isDirty());
     }
     
     @Override
@@ -70,13 +71,13 @@ public final class Project extends JFPSMUserObject{
     @Override
     public final void markDirty(){}
     
-    public final FloorSet getFloorSet(){
-        return(floorSet);
-    }
+    public final LevelSet getLevelSet(){
+		return(levelSet);
+	}
 
-    public final void setFloorSet(FloorSet floorSet){
-        this.floorSet=floorSet;
-    }
+	public final void setLevelSet(LevelSet levelSet){
+		this.levelSet=levelSet;
+	}
 
     public final TileSet getTileSet(){
         return(tileSet);
@@ -91,7 +92,9 @@ public final class Project extends JFPSMUserObject{
     }
 
     @Override
-    public final void resolve(){}
+    public final void resolve(){
+    	unmarkDirty();
+    }
     
     @Override
     final boolean canInstantiateChildren(){

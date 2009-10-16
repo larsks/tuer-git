@@ -122,17 +122,17 @@ public final class ProjectSet extends JFPSMUserObject{
           	          fis.close();    
           	          ZipEntry floorEntry;
           	          String floorDirectory;
-          	          String floorSetName=project.getFloorSet().getName();
-          	          for(Floor floor:project.getFloorSet().getFloorsList())
-          	              {floorDirectory="levelset/"+floorSetName+"/"+floor.getName()+"/";
-          	               //save each map
-          	               for(MapType type:MapType.values())
-          	                   {floorEntry=new ZipEntry(floorDirectory+type.getFilename());
-              	                floorEntry.setMethod(ZipEntry.DEFLATED);
-              	                zoStream.putNextEntry(floorEntry);
-              	                ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);          	            	    
-          	                   }
-          	              }         	          
+          	          for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
+          	        	  for(Floor floor:floorSet.getFloorsList())
+          	                  {floorDirectory="levelset/"+floorSet.getName()+"/"+floor.getName()+"/";
+          	                   //save each map
+          	                   for(MapType type:MapType.values())
+          	                       {floorEntry=new ZipEntry(floorDirectory+type.getFilename());
+              	                    floorEntry.setMethod(ZipEntry.DEFLATED);
+              	                    zoStream.putNextEntry(floorEntry);
+              	                    ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);          	            	    
+          	                       }
+          	                  }         	          
           	          //close the ZipOutputStream
           	          zoStream.close();
           	          //delete the temporary file
@@ -242,17 +242,17 @@ public final class ProjectSet extends JFPSMUserObject{
                                {path=entry.getName().split("/");
                                 if(path.length==4&&path[0].equals("levelset"))
                                     {//find the floor that should contain this map
-                                     String floorSetName=project.getFloorSet().getName();
-                                     for(Floor floor:project.getFloorSet().getFloorsList())
-                                         if(path[1].equals(floorSetName)&&path[2].equals(floor.getName()))
-                                             {imageMap=ImageIO.read(zipFile.getInputStream(entry));
-                                              for(MapType type:MapType.values())
-                                                  if(path[3].equals(type.getFilename()))
-                                                      {floor.getMap(type).setImage(imageMap);
-                                                       break;
-                                                      }                                              
-                                              break;
-                                             }
+                                     for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
+                             	         for(Floor floor:floorSet.getFloorsList())
+                                             if(path[1].equals(floorSet.getName())&&path[2].equals(floor.getName()))
+                                                 {imageMap=ImageIO.read(zipFile.getInputStream(entry));
+                                                  for(MapType type:MapType.values())
+                                                      if(path[3].equals(type.getFilename()))
+                                                          {floor.getMap(type).setImage(imageMap);
+                                                           break;
+                                                          }                                              
+                                                  break;
+                                                 }
                                     }
                                 else
                                     if(path.length>=3&&path[0].equals("tileset"))

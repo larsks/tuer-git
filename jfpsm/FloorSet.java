@@ -100,7 +100,6 @@ public final class FloorSet extends JFPSMUserObject{
 
     @Override
     final boolean isRemovable(){
-        //TODO: set to true when the level nodes is ready
-        return(false);
+        return(true);
     }
 }
