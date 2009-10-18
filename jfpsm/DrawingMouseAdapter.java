@@ -13,6 +13,7 @@
 */
 package jfpsm;
 
+import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.SwingUtilities;
@@ -56,7 +57,14 @@ class DrawingMouseAdapter extends MouseAdapter{
                  {previousRightClickX=zoomParams.getAbsoluteXFromRelativeX(previousRightClickX);
                   previousRightClickY=zoomParams.getAbsoluteYFromRelativeY(previousRightClickY);
                  }
+             drawingPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
+    }
+    
+    @Override
+    public final void mouseReleased(MouseEvent e){
+        if(SwingUtilities.isRightMouseButton(e))
+            drawingPanel.setCursor(Cursor.getDefaultCursor());
     }
     
     @Override
