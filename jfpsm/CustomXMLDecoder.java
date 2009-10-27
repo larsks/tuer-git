@@ -35,7 +35,13 @@ public final class CustomXMLDecoder extends XMLDecoder{
         	{if(o instanceof Resolvable)
        		     ((Resolvable)o).resolve();
         	 if(o instanceof Dirtyable)
-                 ((Dirtyable)o).unmarkDirty();       	 
+                 ((Dirtyable)o).unmarkDirty();
+        	 /*for(Field field:o.getClass().getDeclaredFields())
+        	     if(!Modifier.isTransient(field.getModifiers()))
+        	         {
+        	          
+        	         }*/
+        	 //FIXME: call these methods on all attributes
         	}
         return(o);
     }

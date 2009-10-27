@@ -13,26 +13,16 @@
 */
 package jfpsm;
 
-import java.beans.XMLEncoder;
-import java.io.OutputStream;
+import java.io.Serializable;
 
-/**
- * XML encoder that sets the dirty flag at false
- * to ensure the object has no pending change
- * @author Julien Gouesse
- *
- */
-public final class CustomXMLEncoder extends XMLEncoder{
+public abstract class VolumeParameters<Ardor3DMesh> implements Serializable,Dirtyable {
 
-    public CustomXMLEncoder(OutputStream out){
-        super(out);
-    }
+    
+    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(VolumeParameters.class);}
+    
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    public final void writeObject(Object o){
-        super.writeObject(o);
-        if(o!=null&&o instanceof Dirtyable)
-            ((Dirtyable)o).unmarkDirty();
-        //FIXME: call these methods on all attributes
-    }
+    public abstract Ardor3DMesh getArdor3DMesh();
+    
+    
 }

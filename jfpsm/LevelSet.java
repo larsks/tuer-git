@@ -76,11 +76,6 @@ public final class LevelSet extends JFPSMUserObject{
 		this.floorSetsList=floorSetsList;
 		markDirty();
 	}
-
-	@Override
-    public final void resolve(){
-        unmarkDirty();
-    }
     
     @Override
     final boolean canInstantiateChildren(){

@@ -84,11 +84,6 @@ public final class TileSet extends JFPSMUserObject{
     }
     
     @Override
-    public final void resolve(){
-        unmarkDirty();
-    }
-    
-    @Override
     final boolean canInstantiateChildren(){
         return(true);
     }

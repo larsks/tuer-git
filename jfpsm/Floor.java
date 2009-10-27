@@ -77,12 +77,6 @@ public final class Floor extends JFPSMUserObject{
 	public final void unmarkDirty(){
 		dirty=false;
 	}
-    
-    @Override
-    public final void resolve(){
-    	initializeMaps();
-    	unmarkDirty();
-    }
 
     public final Map[] getMaps(){
         return(maps);

@@ -60,7 +60,7 @@ final class EntityViewer extends JPanel{
     	    	 entityView=new FloorViewer((Floor)entity,project,projectManager);
     	     else
     	    	 if(entity instanceof Tile)
-    	    	     entityView=new JPanel(new GridLayout(1,1));
+    	    	     entityView=new TileViewer((Tile)entity,project,projectManager);
              entityTabbedPane.addTab(entity.getName(),entityView);
              tabComponent=new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
              entityToTabComponentMap.put(entity,tabComponent);

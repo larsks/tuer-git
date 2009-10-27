@@ -90,11 +90,6 @@ public final class Project extends JFPSMUserObject{
     public static final String getFileExtension(){
     	return(fileExtension);
     }
-
-    @Override
-    public final void resolve(){
-    	unmarkDirty();
-    }
     
     @Override
     final boolean canInstantiateChildren(){
