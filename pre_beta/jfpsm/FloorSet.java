@@ -82,11 +82,6 @@ public final class FloorSet extends JFPSMUserObject{
         this.floorsList=floorsList;
         markDirty();
     }
-
-    @Override
-    public final void resolve(){
-        unmarkDirty();
-    }
     
     @Override
     final boolean canInstantiateChildren(){

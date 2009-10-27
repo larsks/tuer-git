@@ -26,4 +26,7 @@ public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resol
         //mark the entity as dirty when the user renames it
         markDirty();
     }
+    
+    @Override
+    public void resolve(){}
 }

@@ -26,14 +26,17 @@ public final class Tile extends JFPSMUserObject{
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Tile.class);}
 	
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
 
     /**
      * color used to identify a tile, appears in the 2D maps
      */
     private Color color;
+    
+    private VolumeParameters<?> volumeParameters;
 
     private transient boolean dirty;
+    
     
     public Tile(){
     	this("");
@@ -42,8 +45,9 @@ public final class Tile extends JFPSMUserObject{
     public Tile(String name){
         super(name);
         //this tile is being created, this is a pending change
-        dirty=true;
+        markDirty();
         color=Color.WHITE;
+        volumeParameters=null;
     }
     
     
@@ -53,12 +57,12 @@ public final class Tile extends JFPSMUserObject{
 
     public final void setColor(Color color){
         this.color=color;
-        dirty=true;
+        markDirty();
     }
     
     @Override
     public final boolean isDirty(){
-        return(dirty);
+        return(dirty||(volumeParameters!=null&&volumeParameters.isDirty()));
     }
     
     @Override
@@ -69,11 +73,6 @@ public final class Tile extends JFPSMUserObject{
     @Override
     public final void markDirty(){
         dirty=true;
-    }
-
-    @Override
-    public final void resolve(){
-        color=Color.WHITE;
     }
     
     @Override
@@ -89,5 +88,13 @@ public final class Tile extends JFPSMUserObject{
     @Override
     final boolean isRemovable(){
         return(true);
+    }
+
+    public final VolumeParameters<?> getVolumeParameters(){
+        return(volumeParameters);
+    }
+
+    public final void setVolumeParameters(VolumeParameters<?> volumeParameters){
+        this.volumeParameters=volumeParameters;
     }
 }

@@ -73,12 +73,6 @@ final class Map extends JFPSMUserObject{
             	image.setRGB(x,y,Color.WHITE.getRGB());
 	}
 	
-	@Override
-    public final void resolve(){
-		initializeImage();
-		unmarkDirty();
-    }
-	
 	public final int getWidth(){
 	    return(image.getWidth());
 	}
