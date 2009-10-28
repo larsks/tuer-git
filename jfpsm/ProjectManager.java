@@ -93,6 +93,8 @@ public final class ProjectManager extends JPanel{
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
         final JMenuItem exportMenuItem=new JMenuItem("Export");
+        //FIXME: re-organize the GUI that allows to generate game files
+        final JMenuItem generateGameFilesMenuItem=new JMenuItem("Generate game files");
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
         final JMenuItem openMenuItem=new JMenuItem("Open");        
         final JMenuItem closeMenuItem=new JMenuItem("Close");       
@@ -102,6 +104,7 @@ public final class ProjectManager extends JPanel{
         treePopupMenu.add(renameMenuItem);
         treePopupMenu.add(importMenuItem);
         treePopupMenu.add(exportMenuItem);
+        treePopupMenu.add(generateGameFilesMenuItem);
         treePopupMenu.add(refreshMenuItem);
         treePopupMenu.add(openMenuItem);
         treePopupMenu.add(closeMenuItem);
@@ -112,6 +115,7 @@ public final class ProjectManager extends JPanel{
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
         importMenuItem.addActionListener(new ImportSelectedEntityAction(this));
         exportMenuItem.addActionListener(new ExportSelectedEntityAction(this));
+        generateGameFilesMenuItem.addActionListener(new GenerateGameFilesAction(this));
         refreshMenuItem.addActionListener(new RefreshSelectedEntitiesAction(this));
         openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
@@ -198,6 +202,7 @@ public final class ProjectManager extends JPanel{
                           final boolean showNew=singleSelection&&userObject.canInstantiateChildren();
                           final boolean showImport=singleSelection&&(userObject instanceof ProjectSet||userObject instanceof Map);
                           final boolean showExport=singleSelection&&userObject instanceof Project||userObject instanceof Map;
+                          final boolean showGenerateGameFiles=singleSelection&&userObject instanceof Project;
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof FloorSet||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
@@ -224,6 +229,7 @@ public final class ProjectManager extends JPanel{
                     	  renameMenuItem.setVisible(showRename);
                           importMenuItem.setVisible(showImport);
                           exportMenuItem.setVisible(showExport);
+                          generateGameFilesMenuItem.setVisible(showGenerateGameFiles);
                           refreshMenuItem.setVisible(showRefresh);
                           openMenuItem.setVisible(showOpenAndClose);
                           closeMenuItem.setVisible(showOpenAndClose);
@@ -861,5 +867,34 @@ public final class ProjectManager extends JPanel{
                       }
                  }
             }   
+    }
+    
+    
+    /**
+     * @deprecated
+     * this is a temporary method that will be removed in the 
+     * first release candidate
+     */
+    @Deprecated
+    final void generateGameFiles(){
+        TreePath path=projectsTree.getSelectionPath();
+        DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+        JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+        if(userObject instanceof Project)
+            {Project project=(Project)userObject;
+             for(FloorSet level:project.getLevelSet().getFloorSetsList())
+                 for(Floor floor:level.getFloorsList())
+                     for(Map map:floor.getMaps())
+                         {map.getImage();
+                          /**
+                           * use the colors and the tiles to 
+                           * compute the geometry in an 
+                           * engine-agnostic format, the image 
+                           * is seen as a grid. Remove duplicate 
+                           * surfaces if needed  
+                           */
+                          //TODO: implement it
+                         }
+            }
     }
 }

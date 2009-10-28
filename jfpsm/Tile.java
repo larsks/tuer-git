@@ -33,7 +33,7 @@ public final class Tile extends JFPSMUserObject{
      */
     private Color color;
     
-    private VolumeParameters<?> volumeParameters;
+    private VolumeParameters volumeParameters;
 
     private transient boolean dirty;
     
@@ -90,11 +90,11 @@ public final class Tile extends JFPSMUserObject{
         return(true);
     }
 
-    public final VolumeParameters<?> getVolumeParameters(){
+    public final VolumeParameters getVolumeParameters(){
         return(volumeParameters);
     }
 
-    public final void setVolumeParameters(VolumeParameters<?> volumeParameters){
+    public final void setVolumeParameters(VolumeParameters volumeParameters){
         this.volumeParameters=volumeParameters;
         markDirty();
     }
