@@ -13,16 +13,28 @@
 */
 package jfpsm;
 
-import java.io.Serializable;
+enum VolumeType {
 
-public abstract class VolumeParameters<Ardor3DMesh> implements Serializable,Dirtyable {
-
+    CUBOID("cuboid"),
+    PARALLELEPIPED("parallelepiped"),
+    QUADRILATERAL_FRUSTUM("quadrilateral frustum"),
+    DISPLACEMENT_TELEPORTER("displacement teleporter"),
+    FLOOR_LINK("floor link");
     
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(VolumeParameters.class);}
+    private final String label;
     
-    private static final long serialVersionUID = 1L;
-
-    public abstract Ardor3DMesh getArdor3DMesh();
     
-    abstract VolumeType getVolumeType();
+    VolumeType(final String label){
+        this.label=label;
+    }
+    
+    
+    final String getLabel(){
+        return(label);
+    }
+    
+    @Override
+    public final String toString(){
+        return(label);
+    }
 }

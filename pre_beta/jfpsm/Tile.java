@@ -96,5 +96,6 @@ public final class Tile extends JFPSMUserObject{
 
     public final void setVolumeParameters(VolumeParameters<?> volumeParameters){
         this.volumeParameters=volumeParameters;
+        markDirty();
     }
 }

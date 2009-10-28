@@ -27,6 +27,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+
 final class TileViewer extends Viewer{
 
     
@@ -35,27 +36,32 @@ final class TileViewer extends Viewer{
     private static final String CUBOID="cuboid";
     
     private static final String NOVOLUME="no volume";
+    
+    private final CardLayout volumeParametersCardLayout;
+    
+    private final JPanel volumeParametersPanel;
 
     
     TileViewer(final Tile tile,final Project project,final ProjectManager projectManager){
         super(tile,project,projectManager);
         setLayout(new GridLayout(1,1));
+        if(tile.getVolumeParameters()==null)
+            //FIXME: set a cuboid instead
+            tile.setVolumeParameters(null);
+        //Create the radio buttons for the volume type
         ButtonGroup volumeTypeButtonGroup=new ButtonGroup();
-        JRadioButton cuboidButton=new JRadioButton("cuboid");
-        JRadioButton parallelepipedButton=new JRadioButton("parallelepiped");
-        JRadioButton quadFrustumButton=new JRadioButton("quadrilateral frustum");
-        JRadioButton teleporterButton=new JRadioButton("displacement teleporter");
-        JRadioButton floorLinkButton=new JRadioButton("floor link");
-        final JRadioButton[] volumeTypeButtons=new JRadioButton[]{cuboidButton,parallelepipedButton,quadFrustumButton,teleporterButton,floorLinkButton};
-        for(JRadioButton button:volumeTypeButtons)
-            volumeTypeButtonGroup.add(button);       
+        final JRadioButton[] volumeTypeButtons=new JRadioButton[VolumeType.values().length];
+        for(VolumeType volumeType:VolumeType.values())
+            {volumeTypeButtons[volumeType.ordinal()]=new JRadioButton(volumeType.getLabel());
+             volumeTypeButtonGroup.add(volumeTypeButtons[volumeType.ordinal()]);
+            }      
         JPanel volumePanel=new JPanel();
         volumePanel.setLayout(new BoxLayout(volumePanel,BoxLayout.X_AXIS));
         //Add the panel to choose a volume type
         volumePanel.add(createVolumeChoicePanel(volumeTypeButtons));
         //Add the panel for volume parameters
-        final JPanel volumeParametersPanel=new JPanel();
-        final CardLayout volumeParametersCardLayout=new CardLayout();
+        volumeParametersPanel=new JPanel();
+        volumeParametersCardLayout=new CardLayout();
         volumeParametersPanel.setLayout(volumeParametersCardLayout);
         volumeParametersPanel.setAlignmentY(Component.TOP_ALIGNMENT);
         //Add a panel for no volume
@@ -69,27 +75,46 @@ final class TileViewer extends Viewer{
         volumePanel.add(volumeParametersPanel);
         add(volumePanel);
         //Add action listeners
-        ActionListener noVolumeActionListener=new ActionListener(){         
-            @Override
-            public void actionPerformed(ActionEvent e){
-                volumeParametersCardLayout.show(volumeParametersPanel,NOVOLUME);
-            }
-        };
-        ActionListener cuboidActionListener=new ActionListener(){         
-            @Override
-            public void actionPerformed(ActionEvent e){
-                volumeParametersCardLayout.show(volumeParametersPanel,CUBOID);
-            }
-        };
-        cuboidButton.addActionListener(cuboidActionListener);
-        parallelepipedButton.addActionListener(noVolumeActionListener);
-        quadFrustumButton.addActionListener(noVolumeActionListener);
-        teleporterButton.addActionListener(noVolumeActionListener);        
-        floorLinkButton.addActionListener(noVolumeActionListener);
+        for(VolumeType volumeType:VolumeType.values())
+            volumeTypeButtons[volumeType.ordinal()].addActionListener(new VolumeTypeActionListener(this,volumeType));
+        //Select the button that matches with the current volume type
+        final VolumeParameters<?> volumeParam=tile.getVolumeParameters();
+        if(volumeParam!=null)
+            volumeTypeButtons[volumeParam.getVolumeType().ordinal()].setSelected(true);
     }
     
     
-    private final JPanel createVolumeChoicePanel(JRadioButton[] volumeTypeButtons){
+    private static final class VolumeTypeActionListener implements ActionListener{
+
+        
+        private final TileViewer viewer;
+        
+        private final VolumeType type;
+        
+        
+        private VolumeTypeActionListener(final TileViewer viewer,final VolumeType type){
+            this.viewer=viewer;
+            this.type=type;
+        }
+        
+        
+        @Override
+        public void actionPerformed(ActionEvent e){
+            viewer.showVolumeParametersPart(type);
+            //((Tile)viewer.getEntity()).getVolumeParameters();
+            //TODO: if the volume type has changed, change the volume parameter
+        }
+        
+    }
+    
+    private final void showVolumeParametersPart(VolumeType volumeType){
+        if(volumeType.equals(VolumeType.CUBOID))
+            volumeParametersCardLayout.show(volumeParametersPanel,CUBOID);
+        else
+            volumeParametersCardLayout.show(volumeParametersPanel,NOVOLUME);
+    }
+    
+    private final JPanel createVolumeChoicePanel(JRadioButton[] volumeTypeButtons){        
         JPanel volumeChoicePanel=new JPanel();
         volumeChoicePanel.setLayout(new BoxLayout(volumeChoicePanel,BoxLayout.Y_AXIS));
         volumeChoicePanel.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -103,9 +128,9 @@ final class TileViewer extends Viewer{
         JPanel cuboidParametersPanel=new JPanel();
         cuboidParametersPanel.setLayout(new BoxLayout(cuboidParametersPanel,BoxLayout.Y_AXIS));
         cuboidParametersPanel.add(new JLabel("size"));
-        final JSlider[][] sliders=new JSlider[][]{createSizeAndOffsetSliders(),
-                                                  createSizeAndOffsetSliders(),
-                                                  createSizeAndOffsetSliders()};
+        final JSlider[][] sliders=new JSlider[][]{createSizeAndOffsetSliders(0),
+                                                  createSizeAndOffsetSliders(1),
+                                                  createSizeAndOffsetSliders(2)};
         cuboidParametersPanel.add(sliders[0][0]);
         cuboidParametersPanel.add(sliders[1][0]);
         cuboidParametersPanel.add(sliders[2][0]);
@@ -116,7 +141,7 @@ final class TileViewer extends Viewer{
         return(cuboidParametersPanel);
     }
     
-    private final JSlider[] createSizeAndOffsetSliders(){
+    private final JSlider[] createSizeAndOffsetSliders(final int index){
         final JSlider sizeSlider=new JSlider(0,100,100);
         sizeSlider.setMinorTickSpacing(1);
         sizeSlider.setMajorTickSpacing(10);
@@ -127,24 +152,32 @@ final class TileViewer extends Viewer{
         offsetSlider.setMajorTickSpacing(10);
         offsetSlider.setPaintTicks(true);
         offsetSlider.setPaintLabels(true);
-        TileParametersChangeListener changeListener=new TileParametersChangeListener(sizeSlider,offsetSlider);
+        CuboidParametersChangeListener changeListener=new CuboidParametersChangeListener(sizeSlider,offsetSlider,index,(Tile)getEntity());
         sizeSlider.addChangeListener(changeListener);
         offsetSlider.addChangeListener(changeListener);
         return(new JSlider[]{sizeSlider,offsetSlider});
     }
     
-    private static final class TileParametersChangeListener implements ChangeListener{
+    private static final class CuboidParametersChangeListener implements ChangeListener{
         
         
         private final JSlider sizeSlider;
         
         private final JSlider offsetSlider;
         
+        private final int index;
         
-        private TileParametersChangeListener(final JSlider sizeSlider,
-                                             final JSlider offsetSlider){
+        private final Tile tile;
+        
+        
+        private CuboidParametersChangeListener(final JSlider sizeSlider,
+                                             final JSlider offsetSlider,
+                                             final int index,
+                                             final Tile tile){
             this.sizeSlider=sizeSlider;
             this.offsetSlider=offsetSlider;
+            this.index=index;
+            this.tile=tile;
         }
         
         
@@ -163,6 +196,8 @@ final class TileViewer extends Viewer{
                            offsetSlider.setValueIsAdjusting(true);
                            offsetSlider.setValue(offset);
                            offsetSlider.setValueIsAdjusting(false);
+                           //TODO: update the offset
+                           tile.getVolumeParameters();
                           }
                      }
                  else
@@ -175,6 +210,8 @@ final class TileViewer extends Viewer{
                                sizeSlider.setValueIsAdjusting(true);
                                sizeSlider.setValue(size);
                                sizeSlider.setValueIsAdjusting(false);
+                               //TODO: update the size
+                               tile.getVolumeParameters();
                               }
                          }
                 }            
