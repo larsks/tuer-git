@@ -46,8 +46,7 @@ final class TileViewer extends Viewer{
         super(tile,project,projectManager);
         setLayout(new GridLayout(1,1));
         if(tile.getVolumeParameters()==null)
-            //FIXME: set a cuboid instead
-            tile.setVolumeParameters(null);
+            tile.setVolumeParameters(new CuboidParameters());
         //Create the radio buttons for the volume type
         ButtonGroup volumeTypeButtonGroup=new ButtonGroup();
         final JRadioButton[] volumeTypeButtons=new JRadioButton[VolumeType.values().length];
@@ -78,9 +77,11 @@ final class TileViewer extends Viewer{
         for(VolumeType volumeType:VolumeType.values())
             volumeTypeButtons[volumeType.ordinal()].addActionListener(new VolumeTypeActionListener(this,volumeType));
         //Select the button that matches with the current volume type
-        final VolumeParameters<?> volumeParam=tile.getVolumeParameters();
+        final VolumeParameters volumeParam=tile.getVolumeParameters();
         if(volumeParam!=null)
-            volumeTypeButtons[volumeParam.getVolumeType().ordinal()].setSelected(true);
+            {volumeTypeButtons[volumeParam.getVolumeType().ordinal()].setSelected(true);
+             showVolumeParametersPart(volumeParam.getVolumeType());
+            }
     }
     
     
@@ -100,9 +101,19 @@ final class TileViewer extends Viewer{
         
         @Override
         public void actionPerformed(ActionEvent e){
+            //Change the volume parameters if needed
+            final Tile tile=(Tile)viewer.getEntity();
+            VolumeParameters volumeParam=tile.getVolumeParameters();
+            if(type.equals(VolumeType.CUBOID))
+                {if(volumeParam==null)
+                     tile.setVolumeParameters(new CuboidParameters());
+                }
+            else
+                {if(volumeParam!=null)
+                    tile.setVolumeParameters(null);
+                }
+            //Show the editor part
             viewer.showVolumeParametersPart(type);
-            //((Tile)viewer.getEntity()).getVolumeParameters();
-            //TODO: if the volume type has changed, change the volume parameter
         }
         
     }
@@ -125,12 +136,32 @@ final class TileViewer extends Viewer{
     }
     
     private final JPanel createCuboidParametersPanel(){
-        JPanel cuboidParametersPanel=new JPanel();
-        cuboidParametersPanel.setLayout(new BoxLayout(cuboidParametersPanel,BoxLayout.Y_AXIS));
-        cuboidParametersPanel.add(new JLabel("size"));
         final JSlider[][] sliders=new JSlider[][]{createSizeAndOffsetSliders(0),
-                                                  createSizeAndOffsetSliders(1),
-                                                  createSizeAndOffsetSliders(2)};
+                createSizeAndOffsetSliders(1),
+                createSizeAndOffsetSliders(2)};
+        JPanel cuboidParametersPanel=new JPanel(){
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public final void setVisible(boolean visible){
+                super.setVisible(visible);
+                if(isVisible())
+                    {CuboidParameters cuboidParam=(CuboidParameters)((Tile)getEntity()).getVolumeParameters();
+                     for(int i=0;i<3;i++)
+                         for(int j=0;j<2;j++)
+                             sliders[i][j].setValueIsAdjusting(true);
+                     for(int i=0;i<3;i++)
+                         {sliders[i][0].setValue(Math.round(cuboidParam.getSize()[i]*100));
+                          sliders[i][1].setValue(Math.round(cuboidParam.getOffset()[i]*100));
+                         }
+                     for(int i=0;i<3;i++)
+                         for(int j=0;j<2;j++)
+                             sliders[i][j].setValueIsAdjusting(false);
+                    }
+            }
+        };
+        cuboidParametersPanel.setLayout(new BoxLayout(cuboidParametersPanel,BoxLayout.Y_AXIS));
+        cuboidParametersPanel.add(new JLabel("size"));       
         cuboidParametersPanel.add(sliders[0][0]);
         cuboidParametersPanel.add(sliders[1][0]);
         cuboidParametersPanel.add(sliders[2][0]);
@@ -187,6 +218,7 @@ final class TileViewer extends Viewer{
                !offsetSlider.getValueIsAdjusting())
                 {int size=sizeSlider.getValue();
                  int offset=offsetSlider.getValue();
+                 CuboidParameters cuboidParam=(CuboidParameters)tile.getVolumeParameters();
                  if(e.getSource()==sizeSlider)
                      {size=Math.max(1,size);
                       int remaining=100-size;
@@ -195,10 +227,10 @@ final class TileViewer extends Viewer{
                           {offset=Math.max(0,offset-excess);
                            offsetSlider.setValueIsAdjusting(true);
                            offsetSlider.setValue(offset);
-                           offsetSlider.setValueIsAdjusting(false);
-                           //TODO: update the offset
-                           tile.getVolumeParameters();
+                           offsetSlider.setValueIsAdjusting(false);                          
+                           cuboidParam.setOffset(index,offset/100.0f);
                           }
+                      cuboidParam.setSize(index,size/100.0f);
                      }
                  else
                      if(e.getSource()==offsetSlider)
@@ -210,9 +242,9 @@ final class TileViewer extends Viewer{
                                sizeSlider.setValueIsAdjusting(true);
                                sizeSlider.setValue(size);
                                sizeSlider.setValueIsAdjusting(false);
-                               //TODO: update the size
-                               tile.getVolumeParameters();
+                               cuboidParam.setSize(index,size/100.0f);
                               }
+                          cuboidParam.setOffset(index,offset/100.0f);
                          }
                 }            
         }       

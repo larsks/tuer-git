@@ -16,7 +16,7 @@ package jfpsm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-final class ExportSelectedEntityAction implements ActionListener {
+final class ExportSelectedEntityAction implements ActionListener{
 
     
     private final ProjectManager projectManager;

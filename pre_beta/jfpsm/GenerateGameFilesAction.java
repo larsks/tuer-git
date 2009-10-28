@@ -13,14 +13,22 @@
 */
 package jfpsm;
 
-import java.io.Serializable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public abstract class VolumeParameters implements Serializable,Dirtyable {
+final class GenerateGameFilesAction implements ActionListener{
 
     
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(VolumeParameters.class);}
+    private final ProjectManager projectManager;
     
-    private static final long serialVersionUID=1L;
     
-    abstract VolumeType getVolumeType();
+    GenerateGameFilesAction(ProjectManager projectManager){
+        this.projectManager=projectManager;
+    }
+    
+    @Override
+    public final void actionPerformed(ActionEvent e){
+        projectManager.generateGameFiles();
+    }
+
 }
