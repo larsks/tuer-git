@@ -42,6 +42,8 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     }
     
     public static final void main(String[] args){
+    	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
+    	System.setProperty("sun.java2d.noddraw","true");
         new JFPSMServiceProvider(EngineServiceProvider.getInstance(),
                                  EngineServiceSeeker.getInstance());
         MainWindow.runInstance(args);

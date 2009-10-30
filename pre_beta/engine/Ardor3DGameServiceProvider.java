@@ -97,7 +97,9 @@ public class Ardor3DGameServiceProvider implements Scene {
     private static final String initialLogoPath = "images/initial_logo.png";
     
     
-    public static void main(final String[] args) {
+    public static void main(final String[] args){
+    	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
+    	System.setProperty("sun.java2d.noddraw","true");
         final Ardor3DGameServiceProvider application = new Ardor3DGameServiceProvider();
         application.start();
     }

@@ -167,6 +167,8 @@ public final class TuerServiceProvider extends Ardor3DGameServiceProvider {
     }
     
     public static void main(final String[] args){
+    	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
+    	System.setProperty("sun.java2d.noddraw","true");
         final TuerServiceProvider application=new TuerServiceProvider();
         application.start();
     }
