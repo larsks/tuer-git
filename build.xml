@@ -26,8 +26,7 @@
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
 	<target name="dist" depends="compile" description="Creates the java archive">
-		<!-- TODO: include only the jfpsm package -->
-		<jar destfile="jfpsm.jar" basedir="${destdir}" 
+		<jar destfile="${destdir}/jfpsm.jar" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
 			<exclude name="**/gpl.txt" />
@@ -37,6 +36,19 @@
 				<attribute name="Main-Class" value="jfpsm.MainWindow"/>
 			</manifest>
 		</jar>
+		<jar destfile="${destdir}/tuer.jar" basedir="${destdir}" 
+			includes="**/*.class"
+			compress="false">
+			<include name="**/*.png" />
+			<!-- TUER does not need JFPSM classes -->
+			<exclude name="**/jfpsm/*.class" />
+			<exclude name="**/gpl.txt" />
+			<!-- ANT file -->
+			<exclude name="**/build.xml" />
+			<manifest>
+				<attribute name="Main-Class" value="engine.TuerServiceProvider"/>
+			</manifest>
+		</jar>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
@@ -44,14 +56,21 @@
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
 	   	    <fileset dir="${destdir}" includes="**/*.class" />
+	  		<fileset dir="${destdir}" includes="**/*.jar" />
 	   	</delete>
-		<delete file="${destdir}/jfpsm.jar" failonerror="false" />
 	</target>
 	<!-- =================================================================== -->
 	<!-- Run Targets                                                         -->
 	<!-- =================================================================== -->  
 	<target name="run-jfpsm" description="Runs JFPSM">
 		<java classname="connection.JFPSMServiceProvider"
+			  fork="true"
+			  dir="${destdir}"
+			  failonerror="true">
+		</java>
+	</target>
+	<target name="run-tuer" description="Runs TUER">
+		<java classname="engine.TuerServiceProvider"
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
