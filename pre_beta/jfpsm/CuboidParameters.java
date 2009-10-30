@@ -13,14 +13,18 @@ public final class CuboidParameters extends VolumeParameters{
     
     private float[] size;
     
+    private boolean[] shownFaces;
+    
     
     public CuboidParameters(){
-        this(new float[]{0,0,0},new float[]{1,1,1});
+        this(new float[]{0,0,0},new float[]{1,1,1},new boolean[]{true,true,true,true,true,true});
     }
     
-    public CuboidParameters(float[] offset,float[] size){
+    public CuboidParameters(float[] offset,float[] size,boolean[] shownFaces){
         this.offset=offset;
         this.size=size;
+        this.shownFaces=shownFaces;
+        markDirty();
     }
     
     
@@ -50,10 +54,12 @@ public final class CuboidParameters extends VolumeParameters{
 
     public final void setOffset(float[] offset){
         this.offset=offset;
+        markDirty();
     }
     
     public final void setOffset(int index,float value){
         this.offset[index]=value;
+        markDirty();
     }
 
     public final float[] getSize(){
@@ -62,9 +68,19 @@ public final class CuboidParameters extends VolumeParameters{
 
     public final void setSize(float[] size){
         this.size=size;
+        markDirty();
     }
     
     public final void setSize(int index,float value){
         this.size[index]=value;
+        markDirty();
     }
+
+	public final boolean[] getShownFaces(){
+		return(shownFaces);
+	}
+
+	public final void setShownFaces(boolean[] shownFaces){
+		this.shownFaces=shownFaces;
+	}
 }

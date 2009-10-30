@@ -882,19 +882,65 @@ public final class ProjectManager extends JPanel{
         JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
         if(userObject instanceof Project)
             {Project project=(Project)userObject;
+             int floorIndex;
+             BufferedImage image;
+             int w,h,rgb;
+             Map map;             
+             AbsoluteVolumeParameters[][] avp;
              for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                 for(Floor floor:level.getFloorsList())
-                     for(Map map:floor.getMaps())
-                         {map.getImage();
-                          /**
-                           * use the colors and the tiles to 
-                           * compute the geometry in an 
-                           * engine-agnostic format, the image 
-                           * is seen as a grid. Remove duplicate 
-                           * surfaces if needed  
-                           */
-                          //TODO: implement it
-                         }
+                 {floorIndex=0;
+            	  for(Floor floor:level.getFloorsList())
+                      {map=floor.getMap(MapType.CONTAINER_MAP);
+            		   /*for(Map map:floor.getMaps())                     
+                           {*/image=map.getImage();
+                    	    w=image.getWidth();
+                            h=image.getHeight();                           
+                            avp=new AbsoluteVolumeParameters[w][h];
+                            /**
+                             * use the colors and the tiles to 
+                             * compute the geometry in an 
+                             * engine-agnostic format, the image 
+                             * is seen as a grid. Remove duplicate 
+                             * surfaces if needed  
+                             */
+                            //TODO: implement it
+                            for(int i=0;i<w;i++)
+                        	    for(int j=0;j<h;j++)
+                        	        {avp[i][j]=new AbsoluteVolumeParameters();
+                        	         //compute the absolute coordinates of the left bottom back vertex
+                        	         avp[i][j].leftBottomBackVertex[0]=i;                       	         
+                        	         avp[i][j].leftBottomBackVertex[1]=-0.5f+floorIndex;
+                        	         avp[i][j].leftBottomBackVertex[2]=j;
+                        	         rgb=image.getRGB(i,j);
+                        	         //use the color of the image to get the matching tile
+                        	         for(Tile tile:project.getTileSet().getTilesList())
+                        	        	 if(tile.getColor().getRGB()==rgb)
+                        	        	     {avp[i][j].volumeParam=tile.getVolumeParameters();
+                        	        		  break;
+                        	        	     }
+                        	         //FIXME: this parameter should be set somewhere else
+                        	         avp[i][j].normalsOutwards=false;
+                        	        }
+                           /*}*/
+                       //TODO: create a single .abin file
+                       
+            		   floorIndex++;
+                      }
+                 }
             }
+    }
+    
+    private static final class AbsoluteVolumeParameters{
+    	
+    	
+    	private final float[] leftBottomBackVertex;
+    	
+    	private VolumeParameters volumeParam;
+    	
+    	private boolean normalsOutwards;
+    	
+    	private AbsoluteVolumeParameters(){
+    		leftBottomBackVertex=new float[3];
+    	}
     }
 }
