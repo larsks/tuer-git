@@ -41,7 +41,7 @@
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
-	<target name="clean" description="Deletes the snap directory, the java archive and the .class files">
+	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
 	   	    <fileset dir="${destdir}" includes="**/*.class" />
 	   	</delete>
@@ -51,7 +51,7 @@
 	<!-- Run Targets                                                         -->
 	<!-- =================================================================== -->  
 	<target name="run-jfpsm" description="Runs JFPSM">
-		<java classname="jfpsm.MainWindow"
+		<java classname="connection.JFPSMServiceProvider"
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">

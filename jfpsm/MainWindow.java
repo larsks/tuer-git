@@ -39,7 +39,7 @@ import javax.swing.WindowConstants;
 public final class MainWindow{
 
     
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
     
     private JFrame applicativeFrame;
     
@@ -188,16 +188,18 @@ public final class MainWindow{
     	JOptionPane.showMessageDialog(applicativeFrame,errorMessage,errorTitle,JOptionPane.ERROR_MESSAGE);
     }
     
-    public static void main(String[] args){
-    	//launch a minimal GUI to be able to display a popup if something goes wrong later        
-    	MainWindow mainWindow=new MainWindow(new JFrame());
-    	//run the application
-    	try{mainWindow.run();}
+    public static final void runInstance(String[] args){
+        //launch a minimal GUI to be able to display a popup if something goes wrong later        
+        MainWindow mainWindow=new MainWindow(new JFrame());
+        //test a software component
+        EngineServiceSeeker.getInstance().dummyTest();
+        //run the application
+        try{mainWindow.run();}
         catch(Throwable throwable)
         {//display a popup to tell the user something goes wrong
          mainWindow.displayErrorMessage(throwable,true);
          //force the exit
          mainWindow.quit(false);
         }
-    }   
+    }
 }
