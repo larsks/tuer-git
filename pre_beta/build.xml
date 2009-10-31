@@ -8,6 +8,113 @@
 <project name="TUER" default="build" basedir=".">
 	<property name="destdir" value="."/>
 	<property name="srcdir" value="."/>
+	<condition property="isSolaris_i586">
+		<and>
+		    <os name="SunOS" />
+			<or>
+				<os arch="i386" />
+				<os arch="i586" />
+			</or>
+		</and>
+	</condition>
+	<condition property="isSolaris_amd64">
+		<and>
+		    <os name="SunOS" />
+			<os arch="amd64" />
+		</and>
+	</condition>
+	<condition property="isSolaris_sparc">
+		<and>
+		    <os name="SunOS" />
+			<os arch="sparc" />
+		</and>
+	</condition>
+	<condition property="isSolaris_sparcv9">
+		<and>
+			<os name="SunOS" />
+			<os arch="sparcv9" />
+		</and>
+	</condition>
+	<condition property="isWindows_amd64">
+		<and>
+	        <os family="windows" />
+		    <os arch="amd64" />
+		</and>
+	</condition>
+	<condition property="isWindows_i586">
+		<and>
+		    <os family="windows" />
+			<or>
+				<os arch="i386" />
+				<os arch="i586" />
+			</or>
+		</and>
+	</condition>
+	<condition property="isMac_ppc">
+		<and>
+	        <os family="mac" />
+			<os arch="ppc" />
+		</and>
+	</condition>
+	<condition property="isMac_universal">
+		<and>
+		    <os family="mac" />
+			<not>
+			    <os arch="ppc" />
+			</not>
+		</and>
+	</condition>
+	<condition property="isLinux_amd64">
+		<and>
+		    <os name="linux" />
+		    <os arch="amd64" />
+		</and>
+	</condition>
+	<condition property="isLinux_i586">
+		<and>
+		    <os name="linux" />
+			<or>
+			    <os arch="i386" />
+				<os arch="i586" />
+			</or>
+		</and>
+	</condition>
+	<path id="project.class.path">
+	    <!-- N.B: do not add java.class.path -->
+		<pathelement path="${destdir}"/>
+		<pathelement location="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar"/>
+		<pathelement location="../ardor3d-core/lib/google/guice-1.0.jar"/>
+		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl.jar"/>
+		<!-- uncomment these lines when the ticket 144 is fixed -->
+		<!--<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-linux-i586.jar" if="isLinux_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-linux-amd64.jar" if="isLinux_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-windows-i586.jar" if="isWindows_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-windows-i586.jar" if="isWindows_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-macosx-ppc.jar" if="isMac_ppc"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-macosx-universal.jar" if="isMac_universal"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-solaris-i586.jar" if="isSolaris_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-solaris-amd64.jar" if="isSolaris_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-solaris-sparc.jar" if="isSolaris_sparc"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-solaris-sparcv9.jar" if="isSolaris_sparcv9"/>-->
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt.jar"/>
+		<!-- uncomment these lines when the ticket 144 is fixed -->
+		<!--<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-linux-i586.jar" if="isLinux_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-linux-amd64.jar" if="isLinux_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-windows-i586.jar" if="isWindows_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-windows-i586.jar" if="isWindows_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-macosx-ppc.jar" if="isMac_ppc"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-macosx-universal.jar" if="isMac_universal"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-i586.jar" if="isSolaris_i586"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-amd64.jar" if="isSolaris_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparc.jar" if="isSolaris_sparc"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparcv9.jar" if="isSolaris_sparcv9"/>-->
+		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar"/>				
+	</path>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
@@ -15,6 +122,7 @@
 	    <javac srcdir="${srcdir}"       	   
 	           destdir="${destdir}"
 	           debug="on" >
+	    	<classpath refid="project.class.path"/>
 	        <include name="**/*.java"/>
 	    </javac>
 	</target>
@@ -30,6 +138,8 @@
 			includes="**/*.class" 
 			compress="false">
 			<exclude name="**/gpl.txt" />
+			<!-- the collada models are not yet used -->
+			<exclude name="**/dae/*" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<manifest>
@@ -42,6 +152,9 @@
 			<include name="**/*.png" />
 			<!-- TUER does not need JFPSM classes -->
 			<exclude name="**/jfpsm/*.class" />
+			<exclude name="**/connection/*.class" />
+			<!-- the collada models are not yet used -->
+			<exclude name="**/dae/*" />
 			<exclude name="**/gpl.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
@@ -67,6 +180,7 @@
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
+			<classpath refid="project.class.path"/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
@@ -74,6 +188,7 @@
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
+			<classpath refid="project.class.path"/>
 		</java>
 	</target>
 </project>

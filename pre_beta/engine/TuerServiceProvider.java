@@ -47,7 +47,7 @@ public final class TuerServiceProvider extends Ardor3DGameServiceProvider {
     
     private Box europeBox;
     
-    private static final String europeImagePath="images/europe_map.png";
+    private static final String europeImagePath="europe_map.png";
     
     
     protected final void init(){
