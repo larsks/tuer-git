@@ -94,7 +94,7 @@ public class Ardor3DGameServiceProvider implements Scene {
 
     private final StateMachine _stateMachine = new StateMachine(_root);
     
-    private static final String initialLogoPath = "images/initial_logo.png";
+    private static final String initialLogoPath = "initial_logo.png";
     
     
     public static void main(final String[] args){
@@ -162,6 +162,8 @@ public class Ardor3DGameServiceProvider implements Scene {
         // Done, do cleanup
         ContextGarbageCollector.doFinalCleanup(_canvas.getCanvasRenderer().getRenderer());
         _canvas.close();
+        //necessary for Java Webstart
+        System.exit(0);
     }
 
     /**
@@ -238,12 +240,10 @@ public class Ardor3DGameServiceProvider implements Scene {
 
         // Set the location of our example resources.
         try {
-            SimpleResourceLocator srl = new SimpleResourceLocator(Ardor3DGameServiceProvider.class.getClassLoader().getResource(
-                    ""));
+            SimpleResourceLocator srl = new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
-            srl = new SimpleResourceLocator(Ardor3DGameServiceProvider.class.getClassLoader().getResource(
-                    ""));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
+            //srl = new SimpleResourceLocator(getClass().getResource("/"));
+            //ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
         } catch (final URISyntaxException ex) {
             ex.printStackTrace();
         }
