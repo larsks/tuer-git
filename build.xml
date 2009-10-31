@@ -133,7 +133,19 @@
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the java archive">
+	<target name="dist" depends="compile" description="Creates and signs the java archive">
+	    <delete file="key" failonerror="false" />
+		<input message="Please enter the store pass:" addproperty="storepass"/>
+		<genkey alias="gouessej" storepass="${storepass}" keystore="key" >
+			<dname>
+				<param name="CN" value="Julien GOUESSE"/>
+				<param name="OU" value="Engineer"/>
+				<param name="O"  value="FGF"/>
+				<param name="C"  value="FR"/>
+				<param name="L"  value="PARIS"/>
+				<param name="S"  value="FRANCE"/>
+			</dname>
+		</genkey>
 		<jar destfile="${destdir}/jfpsm.jar" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -162,12 +174,33 @@
 				<attribute name="Main-Class" value="engine.TuerServiceProvider"/>
 			</manifest>
 		</jar>
+		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
+		    <path>
+		    	<fileset file="../ardor3d-core/lib/google/guice-1.0.jar" />
+		    	<fileset file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" />
+		    	<fileset file="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar" />
+		    	<fileset file="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar" />
+		    	<fileset file="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar" />
+		    	<fileset file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" />
+		    	<fileset file="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar" />
+		    	<fileset file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" />
+		      	<fileset file="${destdir}/tuer.jar" />
+		        <fileset file="${destdir}/jfpsm.jar" />
+		    </path>
+		</signjar>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Deploy                                                            -->
+	<!-- ================================================================= -->
+	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files onto the server">
+	    <!-- TODO: use scp task to do it -->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
+	  		<fileset file="key" />
 	   	    <fileset dir="${destdir}" includes="**/*.class" />
 	  		<fileset dir="${destdir}" includes="**/*.jar" />
 	   	</delete>
