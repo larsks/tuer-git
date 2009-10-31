@@ -113,7 +113,11 @@
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-amd64.jar" if="isSolaris_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparc.jar" if="isSolaris_sparc"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparcv9.jar" if="isSolaris_sparcv9"/>-->
-		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar"/>				
+		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar"/>
+		<!-- Paul Lamb 3D Sound System -->
+		<pathelement location="./SoundSystem.jar"/>
+		<pathelement location="./LibraryJavaSound.jar"/>
+	    <pathelement location="./CodecJOrbis.jar"/>
 	</path>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
@@ -184,8 +188,12 @@
 		    	<fileset file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" />
 		    	<fileset file="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar" />
 		    	<fileset file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" />
-		      	<fileset file="${destdir}/tuer.jar" />
-		        <fileset file="${destdir}/jfpsm.jar" />
+		      	<fileset file="${destdir}/tuer.jar"/>
+		        <fileset file="${destdir}/jfpsm.jar"/>
+		    	<!-- Paul Lamb 3D Sound System -->
+		    	<fileset file="./SoundSystem.jar"/>
+		    	<fileset file="./LibraryJavaSound.jar"/>
+		    	<fileset file="./CodecJOrbis.jar"/>
 		    </path>
 		</signjar>
 	</target>
@@ -201,8 +209,9 @@
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
 	  		<fileset file="key" />
-	   	    <fileset dir="${destdir}" includes="**/*.class" />
-	  		<fileset dir="${destdir}" includes="**/*.jar" />
+	   	    <fileset dir="${destdir}" includes="**/*.class"/>
+	  		<fileset file="${destdir}/tuer.jar"/>
+	  		<fileset file="${destdir}/jfpsm.jar"/>
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->
@@ -217,7 +226,7 @@
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
-		<java classname="engine.TuerServiceProvider"
+		<java classname="engine.Ardor3DGameServiceProvider"
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
