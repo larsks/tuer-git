@@ -175,7 +175,7 @@
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<manifest>
-				<attribute name="Main-Class" value="engine.TuerServiceProvider"/>
+				<attribute name="Main-Class" value="engine.Ardor3DGameServiceProvider"/>
 			</manifest>
 		</jar>
 		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
