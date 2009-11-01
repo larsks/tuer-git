@@ -50,7 +50,7 @@ public abstract class UniformlyVariableMovementController implements Serializabl
     private double[] axis;
     
     /**constant acceleration*/
-    private double constantAcceleration;
+    private double initialAcceleration;
     
     /**initial speed*/
     private double initialSpeed;
@@ -58,21 +58,17 @@ public abstract class UniformlyVariableMovementController implements Serializabl
     /**initial value*/
     private double initialValue;
     
-    /**terminal value*/
-    private double terminalValue;
-    
     
     public UniformlyVariableMovementController(){
-        this((Vector3)Vector3.ZERO,0,0,0,0);
+        this((Vector3)Vector3.ZERO,0,0,0);
     }
     
     public UniformlyVariableMovementController(final Vector3 axisVector,
             final double constantAcceleration,final double initialSpeed,
-            final double initialValue,final double terminalValue){
-        this.constantAcceleration=constantAcceleration;
+            final double initialValue){
+        this.initialAcceleration=constantAcceleration;
         this.initialSpeed=initialSpeed;
         this.initialValue=initialValue;       
-        this.terminalValue=terminalValue;
         this.axis=getValidAxis(initialSpeed,axisVector);
         checkNeeded=true;
         check();
@@ -82,9 +78,8 @@ public abstract class UniformlyVariableMovementController implements Serializabl
     private final void check(){
         if(checkNeeded)
             {initialSpeed=getValidVariationValue(initialSpeed);
-             constantAcceleration=getValidVariationValue(constantAcceleration);
+             initialAcceleration=getValidVariationValue(initialAcceleration);
              initialValue=getValidMovementValue(initialValue,initialSpeed);
-             terminalValue=getValidMovementValue(terminalValue,initialSpeed);
              Vector3 axisVector;
              if(axis==null)
                  axisVector=null;
@@ -190,16 +185,6 @@ public abstract class UniformlyVariableMovementController implements Serializabl
         this.initialValue=initialValue;
         checkNeeded=true;
     }
-
-    public final double getTerminalValue(){
-        check();
-        return(terminalValue);
-    }
-
-    public final void setTerminalValue(final double terminalValue){
-        this.terminalValue=terminalValue;
-        checkNeeded=true;
-    }
     
     public final void reset(){
         elapsedTime=0;
@@ -211,24 +196,6 @@ public abstract class UniformlyVariableMovementController implements Serializabl
      * @param value value of the movement at this time
      * */
     protected abstract void apply(final Spatial caller,final double value);
-    
-    private final double restrictValueToValidInterval(final double value){
-        check();
-        final double validValue;
-        if(isMeaningfulValue(terminalValue))
-            {if(initialValue==terminalValue)
-                 validValue=initialValue;
-             else
-                 if(initialValue<terminalValue)
-                     validValue=Math.min(value,terminalValue);
-                 else
-                     validValue=Math.max(value,terminalValue);
-            }
-        else
-            validValue=value;
-        final double meaningfulValue=getMeaningfulValue(validValue);
-        return(meaningfulValue);
-    }
     
     /**
      * tells whether a value has a meaning for the movement
@@ -246,22 +213,46 @@ public abstract class UniformlyVariableMovementController implements Serializabl
     protected abstract double getMeaningfulValue(final double value);
     
     @Override
-    public final void update(final double time,final Spatial caller){
-        check();
-        final double previousElapsedTime=elapsedTime;
-        elapsedTime+=time;
-        final double value;
-        if(restrictValueToValidInterval((constantAcceleration/2)*(previousElapsedTime*previousElapsedTime)+(previousElapsedTime*initialSpeed)+initialValue)==terminalValue)
-            value=terminalValue;
-        else
-            value=restrictValueToValidInterval((constantAcceleration/2)*(elapsedTime*elapsedTime)+(elapsedTime*initialSpeed)+initialValue);            
+    public final void update(final double timeSinceLastCall,final Spatial caller){
+        elapsedTime+=timeSinceLastCall;            
         if(caller!=null)
-            apply(caller,value);
+            apply(caller,getValue());
+    }
+    
+    public final double getElapsedTime(){
+        return(elapsedTime);
+    }
+    
+    public final double getValue(){
+        return(getValueAtTime(elapsedTime));
+    }
+    
+    public final double getSpeed(){
+        return(getSpeedAtTime(elapsedTime));
+    }
+    
+    public final double getAcceleration(){
+        return(getAccelerationAtTime(elapsedTime));
+    }
+    
+    public final double getValueAtTime(final double time){
+        check();
+        return(getMeaningfulValue((initialAcceleration/2)*(time*time)+(time*initialSpeed)+initialValue));
+    }
+    
+    public final double getSpeedAtTime(final double time){
+        check();
+        return(initialAcceleration*time+initialSpeed);
+    }
+    
+    public final double getAccelerationAtTime(final double time){
+        check();
+        return(initialAcceleration);
     }
 
-    public final double getConstantAcceleration(){
+    public final double getInitialAcceleration(){
         check();
-        return(constantAcceleration);
+        return(initialAcceleration);
     }
 
     /**
@@ -269,8 +260,8 @@ public abstract class UniformlyVariableMovementController implements Serializabl
      * as the acceleration is expected to be constant
      * @param constantAcceleration
      */
-    public final void setConstantAcceleration(final double constantAcceleration){
-        this.constantAcceleration=constantAcceleration;
+    public final void setInitialAcceleration(final double constantAcceleration){
+        this.initialAcceleration=constantAcceleration;
         checkNeeded=true;
     }
 }
