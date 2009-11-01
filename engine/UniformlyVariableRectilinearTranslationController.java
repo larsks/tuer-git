@@ -31,8 +31,8 @@ public final class UniformlyVariableRectilinearTranslationController extends Uni
 
     public UniformlyVariableRectilinearTranslationController(final Vector3 axisVector,
             final double constantAcceleration,final double initialSpeed,
-            final double initialTranslationFactor,final double terminalTranslationFactor){
-        super(axisVector,constantAcceleration,initialSpeed,initialTranslationFactor,terminalTranslationFactor);
+            final double initialTranslationFactor){
+        super(axisVector,constantAcceleration,initialSpeed,initialTranslationFactor);
     }
 
     @Override

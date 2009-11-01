@@ -34,8 +34,8 @@ public final class UniformlyVariableRotationController extends UniformlyVariable
     
     public UniformlyVariableRotationController(final Vector3 axisVector,
             final double constantAcceleration,final double initialSpeed,
-            final double initialAngle,final double terminalAngle){
-        super(axisVector,constantAcceleration,initialSpeed,initialAngle,terminalAngle);
+            final double initialAngle){
+        super(axisVector,constantAcceleration,initialSpeed,initialAngle);
     }
     
     
