@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.imageio.ImageIO;
@@ -102,11 +103,11 @@ public class Ardor3DGameServiceProvider implements Scene{
     /**root of our scene*/
     private final Node root;
     
-    enum Step{/*RATING,*/
+    enum Step{RATING,
               INITIALIZATION,
               INTRODUCTION,
-              /*MAIN_MENU,
-              LOADING_DISPLAY,*/
+              MAIN_MENU,
+              LOADING_DISPLAY,
               GAME,
               GAME_OVER,
               PAUSE_MENU,
@@ -135,7 +136,7 @@ public class Ardor3DGameServiceProvider implements Scene{
     }
 
     public Ardor3DGameServiceProvider(){
-        this(new boolean[]{false,true,false,false,false,false,false});
+        this(new boolean[]{false,false,true});
     }
     
     /**
@@ -143,7 +144,13 @@ public class Ardor3DGameServiceProvider implements Scene{
      */
     public Ardor3DGameServiceProvider(final boolean[] modifiableTextureFlags){
         exit=false;
-        this.modifiableTextureFlags=modifiableTextureFlags;
+        this.modifiableTextureFlags=new boolean[Step.values().length];
+        Arrays.fill(this.modifiableTextureFlags,false);
+        if(modifiableTextureFlags!=null)
+            {final int flagCount=Math.min(this.modifiableTextureFlags.length,modifiableTextureFlags.length);
+             for(int i=0;i<flagCount;i++)
+                 this.modifiableTextureFlags[i]=modifiableTextureFlags[i];
+            }
         textureImages=new BufferedImage[Step.values().length];
         imageBuffers=new ByteBuffer[Step.values().length];
         illustrationBox=new Box[Step.values().length];
@@ -175,10 +182,6 @@ public class Ardor3DGameServiceProvider implements Scene{
     }
 
     
-    final StateMachine getStateMachine(){
-        return(stateMachine);
-    }
-    
     /**
      * Kicks off the example logic, first setting up the scene, then continuously updating and rendering it until exit
      * is flagged. Afterwards, the scene and gl surface are cleaned up.
@@ -201,7 +204,7 @@ public class Ardor3DGameServiceProvider implements Scene{
                       soundSystem.backgroundMusic("Internationale",getClass().getResource("/sounds/internationale.ogg"),"internationale.ogg",true);
                  }
              //update controllers/render states/transforms/bounds for rootNode.
-             root.updateGeometricState(timer.getTimePerFrame(), true);
+             root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
              //Thread.yield();
             }
@@ -231,14 +234,14 @@ public class Ardor3DGameServiceProvider implements Scene{
         // Set its location in space.
         illustrationBox[Step.INITIALIZATION.ordinal()].setTranslation(new Vector3(0,0,-15));       
         
-        stateMachine.addState();
+        //create one state per step
+        for(int i=0;i<Step.values().length;i++)
+            stateMachine.addState();
         // Add the box to the initial state
         stateMachine.attachChild(Step.INITIALIZATION.ordinal(),illustrationBox[Step.INITIALIZATION.ordinal()]);
         //Enable the first state
         stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);
         
-        // Add a second state to the state machine
-        stateMachine.addState();
         // bind the physical layer to the logical layer
         stateMachine.getLogicalLayer(Step.INITIALIZATION.ordinal()).registerInput(canvas, physicalLayer);
         stateMachine.getLogicalLayer(Step.INTRODUCTION.ordinal()).registerInput(canvas, physicalLayer);
@@ -251,8 +254,6 @@ public class Ardor3DGameServiceProvider implements Scene{
         stateMachine.getLogicalLayer(Step.INITIALIZATION.ordinal()).registerTrigger(escTrigger);
         stateMachine.getLogicalLayer(Step.INTRODUCTION.ordinal()).registerTrigger(escTrigger);
         
-        //Add a state for the game itself
-        stateMachine.addState();
         stateMachine.getLogicalLayer(Step.GAME.ordinal()).registerInput(canvas, physicalLayer);
         stateMachine.getLogicalLayer(Step.GAME.ordinal()).registerTrigger(escTrigger);
         
@@ -271,9 +272,9 @@ public class Ardor3DGameServiceProvider implements Scene{
         // set it to rotate:
         illustrationBox[Step.INITIALIZATION.ordinal()].addController(new SpatialController<Box>(){
             private static final long serialVersionUID=1L;
-            private final Vector3 axis=new Vector3(0, 1, 0).normalizeLocal();
+            private final Vector3 axis=new Vector3(0,1,0).normalizeLocal();
             private final Matrix3 rotate=new Matrix3();
-            private double angle = 0;
+            private double angle=0;
 
             public void update(final double time, final Box caller){
                 // update our rotation
@@ -281,7 +282,7 @@ public class Ardor3DGameServiceProvider implements Scene{
                 while(angle>180)
                     angle-=360;
                 rotate.fromAngleNormalAxis(angle*MathUtils.DEG_TO_RAD,axis);
-                illustrationBox[Step.INITIALIZATION.ordinal()].setRotation(rotate);
+                caller.setRotation(rotate);
             }
         });
 
@@ -337,7 +338,7 @@ public class Ardor3DGameServiceProvider implements Scene{
         
         illustrationBox[Step.INTRODUCTION.ordinal()]=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
         illustrationBox[Step.INTRODUCTION.ordinal()].setModelBound(new BoundingBox());
-        illustrationBox[Step.INTRODUCTION.ordinal()].setTranslation(new Vector3(0, 0, -75));
+        illustrationBox[Step.INTRODUCTION.ordinal()].setTranslation(new Vector3(0,0,-75));
         stateMachine.attachChild(Step.INTRODUCTION.ordinal(),illustrationBox[Step.INTRODUCTION.ordinal()]);
         //Set a texture state to the box
         textureStates[Step.INTRODUCTION.ordinal()]=new TextureState();
@@ -432,7 +433,7 @@ public class Ardor3DGameServiceProvider implements Scene{
              if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()))
                  {// Update the whole texture so that the display reflects the change
                   // Get the data of the image
-                  final byte data[] = AWTImageLoader.asByteArray(textureImages[Step.INTRODUCTION.ordinal()]);
+                  final byte data[]=AWTImageLoader.asByteArray(textureImages[Step.INTRODUCTION.ordinal()]);
                   // Update the buffer
                   imageBuffers[Step.INTRODUCTION.ordinal()].rewind();
                   imageBuffers[Step.INTRODUCTION.ordinal()].put(data);

@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package jfpsm;
+package misc;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -33,7 +33,7 @@ import java.lang.reflect.Modifier;
  * @author Julien Gouesse
  *
  */
-public final class SerializationHelper {
+public final class SerializationHelper{
 
 	/**
 	 * force the XML encoder/decoder to ignore transient members like the binary serialization

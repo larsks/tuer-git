@@ -24,8 +24,8 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
 import javax.imageio.ImageIO;
+import misc.SerializationHelper;
 
 /**
  * Container of projects, it is a kind of workspace.

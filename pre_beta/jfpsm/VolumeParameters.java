@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.io.Serializable;
+import misc.SerializationHelper;
 
 public abstract class VolumeParameters implements Serializable,Dirtyable {
 

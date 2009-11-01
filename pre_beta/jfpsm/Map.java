@@ -16,6 +16,7 @@ package jfpsm;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import misc.SerializationHelper;
 
 final class Map extends JFPSMUserObject{
 
