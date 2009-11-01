@@ -13,6 +13,8 @@
 */
 package jfpsm;
 
+import misc.SerializationHelper;
+
 /**
  * A floor is a subsection in a level (downstairs, upstairs, ...). 
  * It uses several images (containers, lights, contents) to contain the 

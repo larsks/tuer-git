@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.awt.Color;
+import misc.SerializationHelper;
 
 /**
  * A tile associates a color with a textured pattern. This pattern

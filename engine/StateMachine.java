@@ -1,3 +1,16 @@
+/*This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation, version 2
+  of the License.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+  MA 02111-1307, USA.
+*/
 package engine;
 
 import java.util.ArrayList;
@@ -24,24 +37,29 @@ final class StateMachine{
     }
     
     final void addState(){
-        State state=new State();
+        addState(new State(this));        
+    }
+    
+    final void addState(final State state){
         statesList.add(state);
         switchNode.attachChild(state.root);
     }
     
     final void updateLogicalLayer(final ReadOnlyTimer timer){
+        int i=0;
         for(State state:statesList)
-            if(state.enabled)
-                state.logicalLayer.checkTriggers(timer.getTimePerFrame());
+            {if(isEnabled(i))
+                 state.logicalLayer.checkTriggers(timer.getTimePerFrame());
+             i++;
+            }
     }
     
     final void setEnabled(int index,boolean enabled){
-        statesList.get(index).enabled=enabled;
         switchNode.setVisible(index,enabled);
     }
     
     final boolean isEnabled(int index){
-        return(statesList.get(index).enabled);
+        return(switchNode.getVisible(index));
     }
     
     final LogicalLayer getLogicalLayer(int index){
@@ -52,26 +70,43 @@ final class StateMachine{
         return(statesList.get(index).root.attachChild(child));
     }
     
-    private static final class State{
+    private final int getStateIndex(State state){      
+        return(statesList.indexOf(state));
+    }
+    
+    
+    static class State{
 
         
         /**
          * layer used to handle the input
          */
-        private final LogicalLayer logicalLayer;
+        protected final LogicalLayer logicalLayer;
         
         /**
          * root node
          */
-        private final Node root;
+        protected final Node root;
         
-        private boolean enabled;
+        private final StateMachine stateMachine;
         
         
-        State(){
+        protected State(final StateMachine stateMachine){
+            this.stateMachine=stateMachine;
             logicalLayer=new LogicalLayer();
             root=new Node();
-            enabled=false;
+        }
+        
+        
+        public final boolean isEnabled(){
+            final int index=stateMachine.getStateIndex(this);
+            return(index==-1?false:stateMachine.switchNode.getVisible(index));
+        }
+        
+        public final void setEnabled(final boolean enabled){
+            final int index=stateMachine.getStateIndex(this);
+            if(index!=-1)
+                stateMachine.switchNode.setVisible(index,enabled);
         }
     }
 }

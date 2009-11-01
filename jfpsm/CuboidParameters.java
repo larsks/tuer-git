@@ -1,5 +1,7 @@
 package jfpsm;
 
+import misc.SerializationHelper;
+
 public final class CuboidParameters extends VolumeParameters{
 
     
