@@ -18,9 +18,10 @@ import misc.SerializationHelper;
 import com.ardor3d.math.MathUtils;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
 
-public final class UniformlyVariableRotationController extends UniformlyVariableMovementController{
+public final class UniformlyVariableRotationController extends MovementEquationController{
 
     
     static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableRotationController.class);}
@@ -29,18 +30,18 @@ public final class UniformlyVariableRotationController extends UniformlyVariable
     
 
     public UniformlyVariableRotationController(){
-        super();
+        this(0,0,0,Vector3.ZERO);
     }
     
-    public UniformlyVariableRotationController(final Vector3 axisVector,
-            final double constantAcceleration,final double initialSpeed,
-            final double initialAngle){
-        super(axisVector,constantAcceleration,initialSpeed,initialAngle);
+    public UniformlyVariableRotationController(final double constantAcceleration,
+            final double initialSpeed,final double initialAngle,
+            final ReadOnlyVector3 axisVector){
+        super(new UniformlyVariableRotationEquation(constantAcceleration,initialSpeed,initialAngle),axisVector);
     }
     
     
     @Override
-    protected final void apply(final Spatial caller,final double angle){
+    protected final void apply(final double angle,final Spatial caller){
         if(getAxis()!=null)
             {Vector3 axisVector=Vector3.fetchTempInstance();
              axisVector.set(getAxis()[0],getAxis()[1],getAxis()[2]);             
@@ -53,33 +54,4 @@ public final class UniformlyVariableRotationController extends UniformlyVariable
              Vector3.releaseTempInstance(axisVector);            
             }        
     }
-
-    @Override
-    protected final double getMeaningfulValue(final double angle){
-        final double meaningfulValue;
-        if(Double.isNaN(angle))
-            meaningfulValue=0;
-        else
-            if(Double.isInfinite(angle))
-                {if(angle<0)
-                     meaningfulValue=-180;
-                 else
-                     meaningfulValue=180;
-                }
-            else
-                if(-180<=angle&&angle<=180)
-                    meaningfulValue=angle;
-                else
-                    if(angle>180)
-                        meaningfulValue=angle-Math.round((float)Math.floor((angle-180)/360))*360;
-                    else
-                        meaningfulValue=angle+Math.round((float)Math.floor((angle+180)/-360))*360;       
-        return(meaningfulValue);
-    }
-
-    @Override
-    protected final boolean isMeaningfulValue(final double angle){
-        return(!Double.isNaN(angle)&&!Double.isInfinite(angle)&&-180<=angle&&angle<=180);
-    }
-
 }

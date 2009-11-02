@@ -15,9 +15,10 @@ package engine;
 
 import misc.SerializationHelper;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
 
-public final class UniformlyVariableRectilinearTranslationController extends UniformlyVariableMovementController {
+public final class UniformlyVariableRectilinearTranslationController extends MovementEquationController{
 
     
     static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableRectilinearTranslationController.class);}
@@ -26,17 +27,18 @@ public final class UniformlyVariableRectilinearTranslationController extends Uni
 
     
     public UniformlyVariableRectilinearTranslationController(){
-        super();
+        this(0,0,0,Vector3.ZERO);
     }
 
-    public UniformlyVariableRectilinearTranslationController(final Vector3 axisVector,
-            final double constantAcceleration,final double initialSpeed,
-            final double initialTranslationFactor){
-        super(axisVector,constantAcceleration,initialSpeed,initialTranslationFactor);
+    public UniformlyVariableRectilinearTranslationController(final double constantAcceleration,
+            final double initialSpeed,final double initialTranslationFactor,
+            final ReadOnlyVector3 axisVector){
+        super(new UniformlyVariableMovementEquation(constantAcceleration,initialSpeed,initialTranslationFactor),axisVector);
     }
 
+    
     @Override
-    protected final void apply(final Spatial caller,final double translationFactor){
+    protected final void apply(final double translationFactor,final Spatial caller){
         if(getAxis()!=null)
             {Vector3 axisVector=Vector3.fetchTempInstance();
              axisVector.set(getAxis()[0],getAxis()[1],getAxis()[2]);
@@ -45,27 +47,4 @@ public final class UniformlyVariableRectilinearTranslationController extends Uni
              Vector3.releaseTempInstance(axisVector);
             }
     }
-
-    @Override
-    protected final double getMeaningfulValue(double value){
-        final double meaningfulValue;
-        if(Double.isNaN(value))
-            meaningfulValue=0;
-        else
-            if(Double.isInfinite(value))
-                {if(value<0)
-                     meaningfulValue=-Double.MAX_VALUE;
-                 else
-                     meaningfulValue=Double.MAX_VALUE;
-                }
-            else
-                meaningfulValue=value;
-        return(meaningfulValue);
-    }
-
-    @Override
-    protected final boolean isMeaningfulValue(double value){
-        return(!Double.isNaN(value)&&!Double.isInfinite(value));
-    }
-
 }

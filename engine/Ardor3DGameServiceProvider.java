@@ -381,7 +381,7 @@ public class Ardor3DGameServiceProvider implements Scene{
             
             private int index=0;
             
-            public void update(final double time, final Box caller){
+            public void update(final double time,final Box caller){
                 // modify the underlying image
                 int red, green, blue;
                 int modifiedPixelsCount = 0;
@@ -442,8 +442,9 @@ public class Ardor3DGameServiceProvider implements Scene{
                   final Texture2D texture=(Texture2D)((TextureState) illustrationBox[Step.INTRODUCTION.ordinal()].getLocalRenderState(
                         StateType.Texture)).getTexture();
                   // Update the texture (the whole texture is updated)
-                  renderer.updateTexture2DSubImage(texture, 0, 0,textureImages[Step.INTRODUCTION.ordinal()].getWidth(),textureImages[Step.INTRODUCTION.ordinal()].getHeight(),
-                          imageBuffers[Step.INTRODUCTION.ordinal()],0,0,textureImages[Step.INTRODUCTION.ordinal()].getWidth());
+                  renderer.updateTexture2DSubImage(texture,0,0,textureImages[Step.INTRODUCTION.ordinal()].getWidth(),
+                		  textureImages[Step.INTRODUCTION.ordinal()].getHeight(),imageBuffers[Step.INTRODUCTION.ordinal()],
+                		  0,0,textureImages[Step.INTRODUCTION.ordinal()].getWidth());
                  }
             }
         return(isOpen);
