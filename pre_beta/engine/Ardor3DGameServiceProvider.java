@@ -424,7 +424,7 @@ public class Ardor3DGameServiceProvider implements Scene{
              if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()))
                  {// Update the whole texture so that the display reflects the change
                   // Get the data of the image
-                  final byte data[]=AWTImageLoader.asByteArray(textureImages[Step.INTRODUCTION.ordinal()]);
+                  final byte[] data=AWTImageLoader.asByteArray(textureImages[Step.INTRODUCTION.ordinal()]);
                   // Update the buffer
                   imageBuffers[Step.INTRODUCTION.ordinal()].rewind();
                   imageBuffers[Step.INTRODUCTION.ordinal()].put(data);
