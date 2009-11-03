@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.imageio.ImageIO;
+import sound.Sample;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
@@ -108,6 +109,8 @@ public class Ardor3DGameServiceProvider implements Scene{
               PAUSE_MENU,
               END_LEVEL_DISPLAY,
               END_GAME_DISPLAY};
+              
+    private Sample music;
 
     private final StateMachine stateMachine;
     
@@ -150,7 +153,7 @@ public class Ardor3DGameServiceProvider implements Scene{
         worldUp=new Vector3(0, 1, 0);
         timer=new Timer();
         root=new Node();
-        stateMachine=new StateMachine(root);
+        stateMachine=new StateMachine(root);       
         // Setup a jogl canvas and canvas renderer
         final JoglCanvasRenderer canvasRenderer = new JoglCanvasRenderer(this);
         // Get the default display mode
@@ -166,6 +169,11 @@ public class Ardor3DGameServiceProvider implements Scene{
         mouseManager.setGrabbed(GrabbedState.GRABBED);
         physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper(canvas), new AwtMouseWrapper(canvas),
                 new AwtFocusWrapper(canvas));
+        try{music=new Sample(getClass().getResource("/sounds/internationale.ogg"));
+            music.open();
+           }
+        catch(Exception e)
+        {e.printStackTrace();} 
     }
 
     
@@ -187,6 +195,7 @@ public class Ardor3DGameServiceProvider implements Scene{
              if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()) && timer.getTimeInSeconds() > 15)
                  {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
                   stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);
+                  music.play();
                  }
              //update controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
@@ -246,6 +255,7 @@ public class Ardor3DGameServiceProvider implements Scene{
         final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN), new TriggerAction() {
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
                 stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
+                music.stop();
                 stateMachine.setEnabled(Step.GAME.ordinal(),true);
             }
         });
