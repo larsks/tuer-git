@@ -28,11 +28,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.imageio.ImageIO;
-import paulscode.sound.SoundSystem;
-import paulscode.sound.SoundSystemConfig;
-import paulscode.sound.SoundSystemException;
-import paulscode.sound.codecs.CodecJOrbis;
-import paulscode.sound.libraries.LibraryJavaSound;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
@@ -113,8 +108,6 @@ public class Ardor3DGameServiceProvider implements Scene{
               PAUSE_MENU,
               END_LEVEL_DISPLAY,
               END_GAME_DISPLAY};
-              
-    private SoundSystem soundSystem;
 
     private final StateMachine stateMachine;
     
@@ -158,12 +151,6 @@ public class Ardor3DGameServiceProvider implements Scene{
         timer=new Timer();
         root=new Node();
         stateMachine=new StateMachine(root);
-        //Initialize the sound
-        try{soundSystem=new SoundSystem(LibraryJavaSound.class);
-            SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
-           }
-        catch(SoundSystemException sse)
-        {sse.printStackTrace();}       
         // Setup a jogl canvas and canvas renderer
         final JoglCanvasRenderer canvasRenderer = new JoglCanvasRenderer(this);
         // Get the default display mode
@@ -200,8 +187,6 @@ public class Ardor3DGameServiceProvider implements Scene{
              if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()) && timer.getTimeInSeconds() > 15)
                  {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
                   stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);
-                  if(soundSystem!=null)
-                      soundSystem.backgroundMusic("Internationale",getClass().getResource("/sounds/internationale.ogg"),"internationale.ogg",true);
                  }
              //update controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
@@ -213,8 +198,6 @@ public class Ardor3DGameServiceProvider implements Scene{
         // Done, do cleanup
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         canvas.close();
-        if(soundSystem!=null)
-            soundSystem.cleanup();
         //necessary for Java Webstart
         System.exit(0);
     }
@@ -263,8 +246,6 @@ public class Ardor3DGameServiceProvider implements Scene{
         final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN), new TriggerAction() {
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
                 stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
-                if(soundSystem!=null)
-                    soundSystem.stop("Internationale");
                 stateMachine.setEnabled(Step.GAME.ordinal(),true);
             }
         });
