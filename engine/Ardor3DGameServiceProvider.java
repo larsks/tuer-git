@@ -17,15 +17,8 @@ import java.awt.Color;
 import java.awt.DisplayMode;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
-import javax.imageio.ImageIO;
 import sound.Sample;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.Canvas;
@@ -33,7 +26,6 @@ import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
-import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
@@ -64,9 +56,7 @@ import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.Timer;
-import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.ResourceLocatorTool;
-import com.ardor3d.util.resource.ResourceSource;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 
 /**
@@ -108,42 +98,20 @@ public class Ardor3DGameServiceProvider implements Scene{
 
     private final StateMachine stateMachine;
     
-    /**images used to modify textures at runtime (null if the texture should not be modified)*/
-    private final BufferedImage[] textureImages;
-    
-    private final ByteBuffer[] imageBuffers;
-    
-    private final Box[] illustrationBox;
-    
-    private final boolean[] modifiableTextureFlags;
-    
     
     public static void main(final String[] args){
     	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
     	System.setProperty("sun.java2d.noddraw","true");
-        final Ardor3DGameServiceProvider application = new Ardor3DGameServiceProvider();
+        final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
     }
 
-    public Ardor3DGameServiceProvider(){
-        this(new boolean[]{false,false,true});
-    }
     
     /**
      * Constructs the example class, also creating the native window and GL surface.
      */
-    public Ardor3DGameServiceProvider(final boolean[] modifiableTextureFlags){
+    public Ardor3DGameServiceProvider(){
         exit=false;
-        this.modifiableTextureFlags=new boolean[Step.values().length];
-        Arrays.fill(this.modifiableTextureFlags,false);
-        if(modifiableTextureFlags!=null)
-            {final int flagCount=Math.min(this.modifiableTextureFlags.length,modifiableTextureFlags.length);
-             for(int i=0;i<flagCount;i++)
-                 this.modifiableTextureFlags[i]=modifiableTextureFlags[i];
-            }
-        textureImages=new BufferedImage[Step.values().length];
-        imageBuffers=new ByteBuffer[Step.values().length];
-        illustrationBox=new Box[Step.values().length];
         worldUp=new Vector3(0, 1, 0);
         timer=new Timer();
         root=new Node();
@@ -216,19 +184,19 @@ public class Ardor3DGameServiceProvider implements Scene{
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
 
         // Make a box...
-        illustrationBox[Step.INITIALIZATION.ordinal()]=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
+        final Box initializationIllustrationBox=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
 
         // Setup a bounding box for it.
-        illustrationBox[Step.INITIALIZATION.ordinal()].setModelBound(new BoundingBox());
+        initializationIllustrationBox.setModelBound(new BoundingBox());
 
         // Set its location in space.
-        illustrationBox[Step.INITIALIZATION.ordinal()].setTranslation(new Vector3(0,0,-15));       
+        initializationIllustrationBox.setTranslation(new Vector3(0,0,-15));       
         
         //create one state per step
         for(int i=0;i<Step.values().length;i++)
             stateMachine.addState();
         // Add the box to the initial state
-        stateMachine.attachChild(Step.INITIALIZATION.ordinal(),illustrationBox[Step.INITIALIZATION.ordinal()]);
+        stateMachine.attachChild(Step.INITIALIZATION.ordinal(),initializationIllustrationBox);
         //Enable the first state
         stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);
         
@@ -259,7 +227,7 @@ public class Ardor3DGameServiceProvider implements Scene{
         });
         stateMachine.getLogicalLayer(Step.INTRODUCTION.ordinal()).registerTrigger(returnTrigger);
         // set it to rotate:
-        illustrationBox[Step.INITIALIZATION.ordinal()].addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0)));
+        initializationIllustrationBox.addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0)));
 
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
@@ -272,25 +240,6 @@ public class Ardor3DGameServiceProvider implements Scene{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
-        
-        AffineTransform flipVerticallyTr;
-        AffineTransformOp flipVerticallyOp;
-        //Load images used to update the textures at runtime
-        for(Step step:Step.values())
-            if(modifiableTextureFlags[step.ordinal()])
-                {try{ResourceSource resourceSource=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,getIllustrationImagePathFromStep(step));
-                     if(resourceSource!=null)
-                         {textureImages[step.ordinal()]=ImageIO.read(resourceSource.openStream());
-                          //flip the image vertically
-                          flipVerticallyTr=AffineTransform.getScaleInstance(1,-1);                    
-                          flipVerticallyTr.translate(0,-textureImages[step.ordinal()].getHeight());
-                          flipVerticallyOp=new AffineTransformOp(flipVerticallyTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                          textureImages[step.ordinal()]=flipVerticallyOp.filter(textureImages[step.ordinal()],null);                              
-                         }                         
-                    } 
-                 catch(IOException ioe)
-                 {ioe.printStackTrace();}
-                }
         // Load collada model
         /*
          * try { final Node colladaNode = ColladaImporter.readColladaScene("collada/duck/duck.dae");
@@ -303,49 +252,32 @@ public class Ardor3DGameServiceProvider implements Scene{
         buf.setFunction(ZBufferState.TestFunction.LessThanOrEqualTo);
         root.setRenderState(buf);
 
-        final TextureState[] textureStates=new TextureState[Step.values().length];
         // Create a texture with the initial logo
-        textureStates[Step.INITIALIZATION.ordinal()]=new TextureState();
-        textureStates[Step.INITIALIZATION.ordinal()].setEnabled(true);
-        textureStates[Step.INITIALIZATION.ordinal()].setTexture(TextureManager.load(getIllustrationImagePathFromStep(Step.INITIALIZATION),Texture.MinificationFilter.Trilinear,
+        TextureState ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(getIllustrationImagePathFromStep(Step.INITIALIZATION),Texture.MinificationFilter.Trilinear,
                 Format.GuessNoCompression,true));
-        illustrationBox[Step.INITIALIZATION.ordinal()].setRenderState(textureStates[Step.INITIALIZATION.ordinal()]);
+        initializationIllustrationBox.setRenderState(ts);
         
-        illustrationBox[Step.INTRODUCTION.ordinal()]=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
-        illustrationBox[Step.INTRODUCTION.ordinal()].setModelBound(new BoundingBox());
-        illustrationBox[Step.INTRODUCTION.ordinal()].setTranslation(new Vector3(0,0,-75));
-        stateMachine.attachChild(Step.INTRODUCTION.ordinal(),illustrationBox[Step.INTRODUCTION.ordinal()]);
+        final Box introductionIllustrationBox=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
+        introductionIllustrationBox.setModelBound(new BoundingBox());
+        introductionIllustrationBox.setTranslation(new Vector3(0,0,-75));
+        stateMachine.attachChild(Step.INTRODUCTION.ordinal(),introductionIllustrationBox);
         //Set a texture state to the box
-        textureStates[Step.INTRODUCTION.ordinal()]=new TextureState();
-        textureStates[Step.INTRODUCTION.ordinal()].setEnabled(true);
-        textureStates[Step.INTRODUCTION.ordinal()].setTexture(TextureManager.load(getIllustrationImagePathFromStep(Step.INTRODUCTION),Texture.MinificationFilter.Trilinear,
+        ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(getIllustrationImagePathFromStep(Step.INTRODUCTION),Texture.MinificationFilter.Trilinear,
                 Format.GuessNoCompression,true));
-        illustrationBox[Step.INTRODUCTION.ordinal()].setRenderState(textureStates[Step.INTRODUCTION.ordinal()]);
-        //check if each image has a valid size, otherwise resize it
-        int index;
-        byte[] data;
-        for(Step step:Step.values())
-            {index=step.ordinal();
-             if(modifiableTextureFlags[index]&&textureImages[index]!=null&&textureStates[index]!=null)
-                {Image image=textureStates[index].getTexture().getImage();
-                 if(textureImages[index].getWidth()!=image.getWidth()||textureImages[index].getHeight()!=image.getHeight())
-                     {final AffineTransform scaleTr=AffineTransform.getScaleInstance((double)image.getWidth()/textureImages[index].getWidth(),(double)image.getHeight()/textureImages[index].getHeight());
-                      final AffineTransformOp scaleOp=new AffineTransformOp(scaleTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                      textureImages[index]=scaleOp.filter(textureImages[index],null);
-                     }
-                 data=AWTImageLoader.asByteArray(textureImages[index]);
-                 imageBuffers[index]=BufferUtils.createByteBuffer(data.length);
-                }
-            }
+        introductionIllustrationBox.setRenderState(ts);
         //configure the spread effect
-        final Point spreadCenter=new Point(textureImages[Step.INTRODUCTION.ordinal()].getWidth()/2,textureImages[Step.INTRODUCTION.ordinal()].getHeight()/2);     
+        final Point spreadCenter=new Point(205,265);     
         HashMap<Color,Color> colorSubstitutionTable=new HashMap<Color,Color>();
         colorSubstitutionTable.put(Color.BLUE,Color.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
-        illustrationBox[Step.INTRODUCTION.ordinal()].addController(new CircularSpreadTextureUpdaterController(getIllustrationImagePathFromStep(Step.INTRODUCTION),equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer()));
+        introductionIllustrationBox.addController(new CircularSpreadTextureUpdaterController(getIllustrationImagePathFromStep(Step.INTRODUCTION),equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer()));
         //set a controller that moves the image        
-        illustrationBox[Step.INTRODUCTION.ordinal()].addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1)));
+        introductionIllustrationBox.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1)));
     }
     
     private static final String getIllustrationImagePathFromStep(Step step){
