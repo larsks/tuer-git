@@ -23,10 +23,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 import sound.Sample;
 import com.ardor3d.bounding.BoundingBox;
@@ -37,7 +35,6 @@ import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.Texture2D;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.input.GrabbedState;
@@ -54,19 +51,16 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
-import com.ardor3d.math.MathUtils;
-import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
-import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.renderer.state.ZBufferState;
-import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.ContextGarbageCollector;
+import com.ardor3d.util.GameTaskQueue;
+import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.Timer;
@@ -197,6 +191,10 @@ public class Ardor3DGameServiceProvider implements Scene{
                   stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);
                   music.play();
                  }
+             if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()) && timer.getTimeInSeconds() > 21)
+                 {stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
+                  stateMachine.setEnabled(Step.GAME.ordinal(),true);             
+                 }
              //update controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
@@ -261,21 +259,7 @@ public class Ardor3DGameServiceProvider implements Scene{
         });
         stateMachine.getLogicalLayer(Step.INTRODUCTION.ordinal()).registerTrigger(returnTrigger);
         // set it to rotate:
-        illustrationBox[Step.INITIALIZATION.ordinal()].addController(new SpatialController<Box>(){
-            private static final long serialVersionUID=1L;
-            private final Vector3 axis=new Vector3(0,1,0).normalizeLocal();
-            private final Matrix3 rotate=new Matrix3();
-            private double angle=0;
-
-            public void update(final double time, final Box caller){
-                // update our rotation
-                angle+=(timer.getTimePerFrame()*25);
-                while(angle>180)
-                    angle-=360;
-                rotate.fromAngleNormalAxis(angle*MathUtils.DEG_TO_RAD,axis);
-                caller.setRotation(rotate);
-            }
-        });
+        illustrationBox[Step.INITIALIZATION.ordinal()].addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0)));
 
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
@@ -353,56 +337,15 @@ public class Ardor3DGameServiceProvider implements Scene{
                  imageBuffers[index]=BufferUtils.createByteBuffer(data.length);
                 }
             }
-        //Spread effect
-        final ArrayList<Point> verticesList=new ArrayList<Point>();
-        for(int i=0;i<textureImages[Step.INTRODUCTION.ordinal()].getWidth();i++)
-            for(int j=0;j<textureImages[Step.INTRODUCTION.ordinal()].getHeight();j++)
-                verticesList.add(new Point(i,j));
-        final Point center=new Point(textureImages[Step.INTRODUCTION.ordinal()].getWidth()/2,textureImages[Step.INTRODUCTION.ordinal()].getHeight()/2);
-        Collections.sort(verticesList,new Comparator<Point>(){
-            @Override
-            public int compare(Point p1, Point p2) {
-                double d1=p1.distance(center);
-                double d2=p2.distance(center);
-                return(d1==d2?0:d1<d2?-1:1);
-            }           
-        });
+        //configure the spread effect
+        final Point spreadCenter=new Point(textureImages[Step.INTRODUCTION.ordinal()].getWidth()/2,textureImages[Step.INTRODUCTION.ordinal()].getHeight()/2);     
+        HashMap<Color,Color> colorSubstitutionTable=new HashMap<Color,Color>();
+        colorSubstitutionTable.put(Color.BLUE,Color.RED);
+        MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
-        illustrationBox[Step.INTRODUCTION.ordinal()].addController(new SpatialController<Box>(){
-            
-            private int index=0;
-            
-            public void update(final double time,final Box caller){
-                // modify the underlying image
-                int red, green, blue;
-                int modifiedPixelsCount = 0;
-                final int maxModifiedPixelsCount = (int) (20000 * time);
-                int i,j;
-                Point vertex;
-                for(;index<verticesList.size();index++)
-                    {vertex=verticesList.get(index);
-                     i=vertex.x;
-                     j=vertex.y;
-                     red=(textureImages[Step.INTRODUCTION.ordinal()].getRGB(i,j)>>16)&0xFF;
-                     green=(textureImages[Step.INTRODUCTION.ordinal()].getRGB(i,j)>>8)&0xFF;
-                     blue=textureImages[Step.INTRODUCTION.ordinal()].getRGB(i,j)&0xFF;
-                     //Replace blue by red
-                     if(red==0&&green==0&&blue==255)
-                         {textureImages[Step.INTRODUCTION.ordinal()].setRGB(i,j,Color.RED.getRGB());
-                          modifiedPixelsCount++;
-                         }
-                     if(modifiedPixelsCount > maxModifiedPixelsCount)
-                         break;
-                    }
-                //Move the box to the front
-                ReadOnlyVector3 translation=caller.getTranslation();
-                double z;
-                if((z=translation.getZ())<-15)
-                    {z=Math.min(z+time*10,-15);
-                     caller.setTranslation(translation.getX(),translation.getY(),z);
-                    }
-            }
-        });
+        illustrationBox[Step.INTRODUCTION.ordinal()].addController(new CircularSpreadTextureUpdaterController(getIllustrationImagePathFromStep(Step.INTRODUCTION),equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer()));
+        //set a controller that moves the image        
+        illustrationBox[Step.INTRODUCTION.ordinal()].addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1)));
     }
     
     private static final String getIllustrationImagePathFromStep(Step step){
@@ -419,29 +362,15 @@ public class Ardor3DGameServiceProvider implements Scene{
     public boolean renderUnto(final Renderer renderer){
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
-            {// Draw the root and all its children.
+            {//executes all rendering tasks queued by controllers
+             GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).execute(renderer);
+             // Draw the root and all its children.
              renderer.draw(root);
-             if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()))
-                 {// Update the whole texture so that the display reflects the change
-                  // Get the data of the image
-                  final byte[] data=AWTImageLoader.asByteArray(textureImages[Step.INTRODUCTION.ordinal()]);
-                  // Update the buffer
-                  imageBuffers[Step.INTRODUCTION.ordinal()].rewind();
-                  imageBuffers[Step.INTRODUCTION.ordinal()].put(data);
-                  imageBuffers[Step.INTRODUCTION.ordinal()].rewind();
-                  // Get the texture
-                  final Texture2D texture=(Texture2D)((TextureState) illustrationBox[Step.INTRODUCTION.ordinal()].getLocalRenderState(
-                        StateType.Texture)).getTexture();
-                  // Update the texture (the whole texture is updated)
-                  renderer.updateTexture2DSubImage(texture,0,0,textureImages[Step.INTRODUCTION.ordinal()].getWidth(),
-                		  textureImages[Step.INTRODUCTION.ordinal()].getHeight(),imageBuffers[Step.INTRODUCTION.ordinal()],
-                		  0,0,textureImages[Step.INTRODUCTION.ordinal()].getWidth());
-                 }
             }
         return(isOpen);
     }
 
-    public PickResults doPick(final Ray3 pickRay){
+    public final PickResults doPick(final Ray3 pickRay){
         // Ignore
         return(null);
     }

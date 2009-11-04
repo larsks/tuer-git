@@ -10,7 +10,8 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
-*/package engine;
+*/
+package engine;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -26,6 +27,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+
 import javax.imageio.ImageIO;
 import misc.SerializationHelper;
 import com.ardor3d.image.Texture;
@@ -35,6 +38,7 @@ import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.ResourceLocatorTool;
@@ -76,18 +80,22 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	private transient int updateX,updateY,updateWidth,updateHeight;
 	
 	private transient int bytesPerPixel;
+	
+	private transient Renderer renderer;
 
 	
 	public TextureUpdaterController(){
-	    this(null,null,null);
+	    this(null,null,null,null);
 	}
 	
 	public TextureUpdaterController(final String imageResourceName,
 	        final MovementEquation equation,
-	        final HashMap<Color,Color> colorSubstitutionTable){
+	        final HashMap<Color,Color> colorSubstitutionTable,
+	        final Renderer renderer){
         this.imageResourceName=imageResourceName;
 	    this.equation=equation;
         this.colorSubstitutionTable=colorSubstitutionTable;
+        this.renderer=renderer;
 	    elapsedTime=0;
 	    inited=false;
 	}
@@ -134,29 +142,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         Collections.sort(coloredVerticesList,getColoredPointComparator());
     }
     
-    protected abstract Comparator<Entry<Point,Color>> getColoredPointComparator();/*{
-        return(new CenteredColoredPointComparator(new Point(originalImage.getWidth()/2,originalImage.getHeight()/2)));
-    }*/
-    
-    /*private static final class CenteredColoredPointComparator implements Comparator<Entry<Point,Color>>{
-        
-        private final Point center;
-        
-        private CenteredColoredPointComparator(final Point center){
-            this.center=center;
-        }
-        
-        
-        @Override
-        public final int compare(final Entry<Point, Color> o1,
-                                 final Entry<Point, Color> o2){
-            final Point p1=o1.getKey();
-            final Point p2=o2.getKey();
-            double d1=p1.distance(center);
-            double d2=p2.distance(center);
-            return(d1==d2?0:d1<d2?-1:1);
-        } 
-    }*/
+    protected abstract Comparator<Entry<Point,Color>> getColoredPointComparator();
 
 	/**
 	 * 
@@ -218,6 +204,14 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                   updateY=minY;
                   updateWidth=maxX-minX+1;
                   updateHeight=maxY-minY+1;
+                  //update the texture on the rendering thread
+                  GameTaskQueueManager.getManager().render(new Callable<Void>(){
+                      @Override
+                      public Void call() throws Exception{
+                          updateTexture();
+                          return(null);
+                      }
+                  });
                  }
              else
                  {updateX=0;
@@ -228,8 +222,8 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
             }
 	}
 	
-	/**update the texture (it must be done on the rendering thread)*/
-	public final void updateTexture(final Renderer renderer){
+	/**update the texture*/
+	private final void updateTexture(){
 	    //modify the texture by using the image data
 	    renderer.updateTexture2DSubImage(texture,updateX,updateY,updateWidth,updateHeight,imageBuffer,updateX,updateY,texture.getImage().getWidth());
 	}
