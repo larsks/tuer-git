@@ -39,7 +39,10 @@ public final class UniformlyVariableRotationEquation extends UniformlyVariableMo
 
     
     @Override
-    protected final double validateValue(final double value){       
-        return(Math.max(Math.min(180,validateNumber(value)),-180));
+    protected final double validateValue(final double value){
+        double validValue=validateNumber(value);
+        if(Math.abs(validValue)>180)
+            validValue-=(validValue>0?1:-1)*(Math.floor((validValue-180)/360)+1)*360;
+        return(validValue);
     }
 }
