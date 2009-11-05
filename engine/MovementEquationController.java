@@ -15,9 +15,9 @@ package engine;
 
 import java.io.Serializable;
 import java.util.Arrays;
-
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import misc.SerializationHelper;
-
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
@@ -36,22 +36,29 @@ public abstract class MovementEquationController implements Serializable,Spatial
     /**elapsed time in seconds*/
     private transient double elapsedTime;
     
+    /**elapsed time in seconds outside all time windows*/
+    private transient double inertialTime;
+    
     /**axis of the movement*/
     private double[] axis;
     
+    /**table containing time windows*/
+    private LinkedHashMap<Double,Double> timeWindowsTable;
+    
     
     public MovementEquationController(){
-        this(null,Vector3.ZERO);
+        this(null,Vector3.ZERO,new LinkedHashMap<Double,Double>());
     }
     
-    public MovementEquationController(final MovementEquation movementEquation,
-            final ReadOnlyVector3 axisVector){
-        this(movementEquation,Vector3.isValid(axisVector)?new double[]{axisVector.getX(),axisVector.getY(),axisVector.getZ()}:null);
+    public MovementEquationController(final MovementEquation movementEquation,final ReadOnlyVector3 axisVector,final LinkedHashMap<Double,Double> timeWindowsTable){
+        this(movementEquation,Vector3.isValid(axisVector)?new double[]{axisVector.getX(),axisVector.getY(),axisVector.getZ()}:null,timeWindowsTable);
     }
     
-    public MovementEquationController(final MovementEquation movementEquation,
-            final double[] axis){
+    public MovementEquationController(final MovementEquation movementEquation,final double[] axis,final LinkedHashMap<Double,Double> timeWindowsTable){
         this.movementEquation=movementEquation;
+        this.elapsedTime=0;
+        this.inertialTime=0;
+        setTimeWindowsTable(timeWindowsTable);
         setAxis(axis);
     }
     
@@ -81,6 +88,7 @@ public abstract class MovementEquationController implements Serializable,Spatial
     
     public final void reset(){
         elapsedTime=0;
+        inertialTime=0;
     }
     
     /**
@@ -100,8 +108,41 @@ public abstract class MovementEquationController implements Serializable,Spatial
     
     @Override
     public final void update(final double timeSinceLastCall,final Spatial caller){
+        final double previousElapsedTime=elapsedTime;
         elapsedTime+=timeSinceLastCall;
         if(caller!=null&&movementEquation!=null)
-            apply(movementEquation.getValueAtTime(elapsedTime),caller);
+            {double startTime,endTime;
+             double activeElapsedTime=0;
+             if(timeWindowsTable!=null)
+                 for(Entry<Double,Double> entry:timeWindowsTable.entrySet())
+                     {startTime=entry.getKey().doubleValue();
+                      endTime=entry.getValue().doubleValue();
+                      if(startTime<=elapsedTime&&previousElapsedTime<=endTime)
+                          activeElapsedTime+=Math.min(endTime,elapsedTime)-Math.max(startTime,previousElapsedTime);                      
+                     }
+             inertialTime+=timeSinceLastCall-activeElapsedTime;
+             apply(movementEquation.getValueAtTime(elapsedTime-inertialTime),caller);
+            }
+    }
+
+    public final LinkedHashMap<Double,Double> getTimeWindowsTable(){
+        return(timeWindowsTable);
+    }
+
+    public final void setTimeWindowsTable(final LinkedHashMap<Double,Double> timeWindowsTable){
+        this.timeWindowsTable=timeWindowsTable;
+        if(timeWindowsTable!=null)
+            {//check if all intervals are valid
+             double startTime,endTime;
+             for(Entry<Double,Double> entry:timeWindowsTable.entrySet())
+                 if(entry.getKey()!=null&&entry.getValue()!=null)
+                     {startTime=entry.getKey().doubleValue();
+                      endTime=entry.getValue().doubleValue();
+                      if(startTime>endTime)
+                          throw new IllegalArgumentException("The start time cannot be greater than the end time!");
+                     }
+                 else
+                     throw new IllegalArgumentException("A table of time windows cannot contain null values!");
+            }
     }
 }

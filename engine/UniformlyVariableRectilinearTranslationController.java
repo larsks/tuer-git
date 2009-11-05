@@ -13,6 +13,8 @@
 */
 package engine;
 
+import java.util.LinkedHashMap;
+
 import misc.SerializationHelper;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
@@ -27,13 +29,13 @@ public final class UniformlyVariableRectilinearTranslationController extends Mov
 
     
     public UniformlyVariableRectilinearTranslationController(){
-        this(0,0,0,Vector3.ZERO);
+        this(0,0,0,Vector3.ZERO,new LinkedHashMap<Double,Double>());
     }
 
     public UniformlyVariableRectilinearTranslationController(final double constantAcceleration,
             final double initialSpeed,final double initialTranslationFactor,
-            final ReadOnlyVector3 axisVector){
-        super(new UniformlyVariableMovementEquation(constantAcceleration,initialSpeed,initialTranslationFactor),axisVector);
+            final ReadOnlyVector3 axisVector,final LinkedHashMap<Double,Double> timeWindowsTable){
+        super(new UniformlyVariableMovementEquation(constantAcceleration,initialSpeed,initialTranslationFactor),axisVector,timeWindowsTable);
     }
 
     
