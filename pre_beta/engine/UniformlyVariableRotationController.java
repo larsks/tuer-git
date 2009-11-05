@@ -13,6 +13,8 @@
 */
 package engine;
 
+import java.util.LinkedHashMap;
+
 import misc.SerializationHelper;
 
 import com.ardor3d.math.MathUtils;
@@ -30,13 +32,14 @@ public final class UniformlyVariableRotationController extends MovementEquationC
     
 
     public UniformlyVariableRotationController(){
-        this(0,0,0,Vector3.ZERO);
+        this(0,0,0,Vector3.ZERO,new LinkedHashMap<Double,Double>());
     }
     
     public UniformlyVariableRotationController(final double constantAcceleration,
             final double initialSpeed,final double initialAngle,
-            final ReadOnlyVector3 axisVector){
-        super(new UniformlyVariableRotationEquation(constantAcceleration,initialSpeed,initialAngle),axisVector);
+            final ReadOnlyVector3 axisVector,
+            final LinkedHashMap<Double,Double> timeWindowsTable){
+        super(new UniformlyVariableRotationEquation(constantAcceleration,initialSpeed,initialAngle),axisVector,timeWindowsTable);
     }
     
     

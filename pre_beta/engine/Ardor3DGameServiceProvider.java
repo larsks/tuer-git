@@ -19,6 +19,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import sound.Sample;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.Canvas;
@@ -159,10 +161,10 @@ public class Ardor3DGameServiceProvider implements Scene{
                   stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);
                   music.play();
                  }
-             if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()) && timer.getTimeInSeconds() > 21)
+             /*if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()) && timer.getTimeInSeconds() > 21)
                  {stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
                   stateMachine.setEnabled(Step.GAME.ordinal(),true);             
-                 }
+                 }*/
              //update controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
@@ -226,8 +228,10 @@ public class Ardor3DGameServiceProvider implements Scene{
             }
         });
         stateMachine.getLogicalLayer(Step.INTRODUCTION.ordinal()).registerTrigger(returnTrigger);
-        // set it to rotate:
-        initializationIllustrationBox.addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0)));
+        // set it to rotate
+        LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
+        timeWindowsTable.put(Double.valueOf(0),Double.valueOf(16));
+        initializationIllustrationBox.addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0),timeWindowsTable));
 
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
@@ -276,8 +280,10 @@ public class Ardor3DGameServiceProvider implements Scene{
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
         introductionIllustrationBox.addController(new CircularSpreadTextureUpdaterController(getIllustrationImagePathFromStep(Step.INTRODUCTION),equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer()));
-        //set a controller that moves the image        
-        introductionIllustrationBox.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1)));
+        //set a controller that moves the image
+        timeWindowsTable=new LinkedHashMap<Double,Double>();
+        timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
+        introductionIllustrationBox.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
     }
     
     private static final String getIllustrationImagePathFromStep(Step step){
