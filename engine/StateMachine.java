@@ -36,26 +36,23 @@ final class StateMachine{
         parent.attachChild(switchNode);
     }
     
-    final void addState(){
-        addState(new State(this));        
-    }
     
     final void addState(final State state){
         statesList.add(state);
-        switchNode.attachChild(state.root);
+        switchNode.attachChild(state.getRoot());
     }
     
     final void updateLogicalLayer(final ReadOnlyTimer timer){
         int i=0;
         for(State state:statesList)
             {if(isEnabled(i))
-                 state.logicalLayer.checkTriggers(timer.getTimePerFrame());
+                 state.getLogicalLayer().checkTriggers(timer.getTimePerFrame());
              i++;
             }
     }
     
     final void setEnabled(int index,boolean enabled){
-        switchNode.setVisible(index,enabled);
+        statesList.get(index).setEnabled(enabled);
     }
     
     final boolean isEnabled(int index){
@@ -63,50 +60,10 @@ final class StateMachine{
     }
     
     final LogicalLayer getLogicalLayer(int index){
-        return(statesList.get(index).logicalLayer);
+        return(statesList.get(index).getLogicalLayer());
     }
     
     final int attachChild(int index,Spatial child){
-        return(statesList.get(index).root.attachChild(child));
-    }
-    
-    private final int getStateIndex(State state){      
-        return(statesList.indexOf(state));
-    }
-    
-    
-    static class State{
-
-        
-        /**
-         * layer used to handle the input
-         */
-        protected final LogicalLayer logicalLayer;
-        
-        /**
-         * root node
-         */
-        protected final Node root;
-        
-        private final StateMachine stateMachine;
-        
-        
-        protected State(final StateMachine stateMachine){
-            this.stateMachine=stateMachine;
-            logicalLayer=new LogicalLayer();
-            root=new Node();
-        }
-        
-        
-        public final boolean isEnabled(){
-            final int index=stateMachine.getStateIndex(this);
-            return(index==-1?false:stateMachine.switchNode.getVisible(index));
-        }
-        
-        public final void setEnabled(final boolean enabled){
-            final int index=stateMachine.getStateIndex(this);
-            if(index!=-1)
-                stateMachine.switchNode.setVisible(index,enabled);
-        }
+        return(statesList.get(index).getRoot().attachChild(child));
     }
 }
