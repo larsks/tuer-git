@@ -135,18 +135,6 @@
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
 	<target name="dist" depends="compile" description="Creates and signs the java archive">
-	    <delete file="key" failonerror="false" />
-		<input message="Please enter the store pass:" addproperty="storepass"/>
-		<genkey alias="gouessej" storepass="${storepass}" keystore="key" >
-			<dname>
-				<param name="CN" value="Julien GOUESSE"/>
-				<param name="OU" value="Engineer"/>
-				<param name="O"  value="FGF"/>
-				<param name="C"  value="FR"/>
-				<param name="L"  value="PARIS"/>
-				<param name="S"  value="FRANCE"/>
-			</dname>
-		</genkey>
 		<jar destfile="${destdir}/jfpsm.jar" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -175,6 +163,18 @@
 				<attribute name="Main-Class" value="engine.Ardor3DGameServiceProvider"/>
 			</manifest>
 		</jar>
+		<delete file="key" failonerror="false" />
+		<input message="Please enter the store pass:" addproperty="storepass"/>
+		<genkey alias="gouessej" storepass="${storepass}" keystore="key" >
+			<dname>
+				<param name="CN" value="Julien GOUESSE"/>
+				<param name="OU" value="Engineer"/>
+				<param name="O"  value="FGF"/>
+				<param name="C"  value="FR"/>
+				<param name="L"  value="PARIS"/>
+				<param name="S"  value="FRANCE"/>
+			</dname>
+		</genkey>
 		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
 		    <path>
 		    	<fileset file="../ardor3d-core/lib/google/guice-1.0.jar" />
