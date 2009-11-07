@@ -48,8 +48,7 @@ final class IntroductionState extends State{
         // puts a texture onto it
         TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(Step.INTRODUCTION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,
-                Format.GuessNoCompression,true));
+        ts.setTexture(TextureManager.load(Step.INTRODUCTION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,Format.GuessNoCompression,true));
         box.setRenderState(ts);        
         //configure the spread effect
         final Point spreadCenter=new Point(205,265);     

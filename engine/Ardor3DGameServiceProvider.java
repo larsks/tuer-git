@@ -15,7 +15,11 @@ package engine;
 
 import java.awt.DisplayMode;
 import java.awt.GraphicsEnvironment;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.Scene;
@@ -36,6 +40,7 @@ import com.ardor3d.math.Ray3;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.ui.text.BMFont;
 import com.ardor3d.util.ContextGarbageCollector;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -66,18 +71,36 @@ final class Ardor3DGameServiceProvider implements Scene{
     /**root of our scene*/
     private final Node root;
     
-    enum Step{RATING,
+    private double contentSystemRatingStartTime;
+    
+    private double initializationStartTime;
+    
+    private double introductionStartTime;
+    
+    enum Step{/**PEGI-equivalent rating*/
+              CONTENT_RATING_SYSTEM,
+              /**logo (trademark or brandname)*/
               INITIALIZATION,
+              /**introduction scene*/
               INTRODUCTION,
+              /**main menu*/
               MAIN_MENU,
+              /**display of the level loading*/
               LOADING_DISPLAY,
+              /**in-game display*/
               GAME,
+              /**display when the player loses*/
               GAME_OVER,
+              /**pause menu*/
               PAUSE_MENU,
+              /**display at the end of a level with figures, etc...*/
               END_LEVEL_DISPLAY,
+              /**final scene*/
               END_GAME_DISPLAY};
 
     private final StateMachine stateMachine;
+    
+    private static ArrayList<BMFont> fontsList;
     
     
     public static void main(final String[] args){
@@ -88,11 +111,32 @@ final class Ardor3DGameServiceProvider implements Scene{
     }
 
     
+    private final static ArrayList<BMFont> createFontsList(){
+        final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/DejaVuSansCondensed-20-bold-regular.fnt"),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/Computerfont-35-medium-regular.fnt"),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        return(fontsList);
+    }
+    
+    static final List<BMFont> getFontsList(){
+        if(fontsList==null)
+            fontsList=createFontsList();
+        return(Collections.unmodifiableList(fontsList));
+    }
+
+
     /**
      * Constructs the example class, also creating the native window and GL surface.
      */
     private Ardor3DGameServiceProvider(){
         exit=false;
+        contentSystemRatingStartTime=Double.NaN;
+        initializationStartTime=Double.NaN;
+        introductionStartTime=Double.NaN;
         timer=new Timer();
         root=new Node();
         stateMachine=new StateMachine(root);       
@@ -126,9 +170,29 @@ final class Ardor3DGameServiceProvider implements Scene{
                  }
              updateLogicalLayer(timer);
              timer.update();
-             if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal())&&timer.getTimeInSeconds()>10)
-                 {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
-                  stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);                 
+             if(stateMachine.isEnabled(Step.CONTENT_RATING_SYSTEM.ordinal()))
+                 {if(Double.isNaN(contentSystemRatingStartTime))
+                      contentSystemRatingStartTime=timer.getTimeInSeconds();
+                  if(timer.getTimeInSeconds()-contentSystemRatingStartTime>2)
+                      {stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),false);
+                       stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);       
+                      }
+                 }
+             if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()))
+                 {if(Double.isNaN(initializationStartTime))
+                      initializationStartTime=timer.getTimeInSeconds();
+                  if(timer.getTimeInSeconds()-initializationStartTime>3)
+                      {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
+                       stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);       
+                      }
+                 }
+             if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()))
+                 {if(Double.isNaN(introductionStartTime))
+                      introductionStartTime=timer.getTimeInSeconds();
+                  if(timer.getTimeInSeconds()-introductionStartTime>17)
+                     {stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
+                      stateMachine.setEnabled(Step.MAIN_MENU.ordinal(),true);
+                     }
                  }
              //update controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
@@ -169,21 +233,23 @@ final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
+        final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION);
+        final SwitchStepAction fromInitToIntroAction=new SwitchStepAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
         final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
         final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LOADING_DISPLAY);
         //create one state per step
-        stateMachine.addState(new State());
-        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction));
+        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,exitAction,fromRatingToInitAction));
+        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction));        
         stateMachine.addState(new MainMenuState(canvas,physicalLayer,(AwtMouseManager)mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
-        stateMachine.addState(new State());
+        stateMachine.addState(new LoadingDisplayState(canvas,physicalLayer,exitAction));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction));
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         //Enable the first state
-        stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);
+        stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),true);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
