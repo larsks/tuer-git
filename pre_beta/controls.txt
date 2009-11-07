@@ -1,0 +1,26 @@
+CONTROLS
+
+W: move forward                      
+Z: move forward                      
+S: move backward                     
+A: strafe left                       
+Q: strafe left                       
+D: strafe right                      
+LEFT ARROW: turn left                
+RIGHT ARROW: turn right              
+UP ARROW: look up                    
+DOWN ARROW: look down                
+C: crouch                            
+P: pause
+CTRL: reload
+RETURN: activate
+SHIFT: run
+SPACE: shoot
+N: next weapon
+P: previous weapon
+ESC: quit game
+MOUSE LEFT BUTTON: shoot
+MOUSE MIDDLE BUTTON: crouch
+MOUSE RIGHT BUTTON: reload
+MOUSE WHEEL UP: next weapon
+MOUSE WHEEL DOWN: previous weapon

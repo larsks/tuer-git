@@ -32,7 +32,7 @@ import engine.Ardor3DGameServiceProvider.Step;
 final class InitializationState extends State{
   
     
-    InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
+    InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
         super();
         final Box box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
@@ -50,7 +50,8 @@ final class InitializationState extends State{
         box.setRenderState(ts);
         getRoot().attachChild(box);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
+        final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toIntroAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,returnTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);

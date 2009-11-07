@@ -153,6 +153,7 @@
 			includes="**/*.class"
 			compress="false">
 			<include name="**/*.png" />
+			<include name="**/*.fnt" />
 			<!-- TUER does not need JFPSM classes -->
 			<exclude name="**/jfpsm/*.class" />
 			<exclude name="**/connection/*.class" />
@@ -177,6 +178,7 @@
 				<param name="S"  value="FRANCE"/>
 			</dname>
 		</genkey>
+		<!-- TODO: rather copy these JAR before signing them -->
 		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
 		    <path>
 		    	<fileset file="../ardor3d-core/lib/google/guice-1.0.jar" />
