@@ -41,6 +41,7 @@
 		    <os arch="amd64" />
 		</and>
 	</condition>
+	<!-- TODO: detect x86_64 -->
 	<condition property="isWindows_i586">
 		<and>
 		    <os family="windows" />
@@ -70,6 +71,7 @@
 		    <os arch="amd64" />
 		</and>
 	</condition>
+	<!-- TODO: detect x86_64 -->
 	<condition property="isLinux_i586">
 		<and>
 		    <os name="linux" />
@@ -94,7 +96,7 @@
 		<!--<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-linux-i586.jar" if="isLinux_i586"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-linux-amd64.jar" if="isLinux_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-windows-i586.jar" if="isWindows_i586"/>
-		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-windows-i586.jar" if="isWindows_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-windows-amd64.jar" if="isWindows_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-macosx-ppc.jar" if="isMac_ppc"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-macosx-universal.jar" if="isMac_universal"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-solaris-i586.jar" if="isSolaris_i586"/>
@@ -106,7 +108,7 @@
 		<!--<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-linux-i586.jar" if="isLinux_i586"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-linux-amd64.jar" if="isLinux_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-windows-i586.jar" if="isWindows_i586"/>
-		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-windows-i586.jar" if="isWindows_amd64"/>
+		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-windows-amd64.jar" if="isWindows_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-macosx-ppc.jar" if="isMac_ppc"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-macosx-universal.jar" if="isMac_universal"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-i586.jar" if="isSolaris_i586"/>

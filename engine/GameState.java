@@ -14,15 +14,18 @@
 package engine;
 
 import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.control.FirstPersonControl;
 import com.ardor3d.input.logical.InputTrigger;
+import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
 
 final class GameState extends State{
 
     
-    GameState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final InputTrigger[] triggers){
+    GameState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
         final Vector3 worldUp=new Vector3(0,1,0);
         // Load collada model
@@ -32,6 +35,8 @@ final class GameState extends State{
          */
         // drag only at false to remove the need of pressing a button to move
         FirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);

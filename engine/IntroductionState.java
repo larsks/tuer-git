@@ -22,8 +22,11 @@ import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
+import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
+import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.shape.Box;
@@ -37,7 +40,7 @@ final class IntroductionState extends State{
     private Sample music;
 
     
-    IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final InputTrigger[] triggers){
+    IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
         super();
         final Box box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
@@ -60,6 +63,9 @@ final class IntroductionState extends State{
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
         getRoot().attachChild(box);
+        final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,toMainMenuTrigger};
         // bind the physical layer to the logical layer
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
