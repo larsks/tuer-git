@@ -18,8 +18,11 @@ import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
+import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
+import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.shape.Box;
@@ -29,7 +32,7 @@ import engine.Ardor3DGameServiceProvider.Step;
 final class InitializationState extends State{
   
     
-    InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final InputTrigger[] triggers){
+    InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
         final Box box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
@@ -46,6 +49,8 @@ final class InitializationState extends State{
                 Format.GuessNoCompression,true));
         box.setRenderState(ts);
         getRoot().attachChild(box);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);

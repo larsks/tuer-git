@@ -23,15 +23,12 @@ import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.input.GrabbedState;
-import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.awt.AwtFocusWrapper;
 import com.ardor3d.input.awt.AwtKeyboardWrapper;
 import com.ardor3d.input.awt.AwtMouseManager;
 import com.ardor3d.input.awt.AwtMouseWrapper;
-import com.ardor3d.input.logical.InputTrigger;
-import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
@@ -166,26 +163,21 @@ final class Ardor3DGameServiceProvider implements Scene{
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
            } 
         catch(final URISyntaxException urise)
-        {urise.printStackTrace();}       
-        final InputTrigger escTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE), new TriggerAction() {
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                exit = true;
+        {urise.printStackTrace();}
+        final TriggerAction exitAction=new TriggerAction(){
+            public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
+                exit=true;
             }
-        });
-        final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),new TriggerAction(){
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
-                //FIXME: rather go to the main menu
-                stateMachine.setEnabled(Step.GAME.ordinal(),true);
-            }
-        });
+        };
+        final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
+        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LOADING_DISPLAY);
         //create one state per step
-        stateMachine.addState(new State());       
-        stateMachine.addState(new InitializationState(canvas,physicalLayer,new InputTrigger[]{escTrigger}));
-        stateMachine.addState(new IntroductionState(canvas,physicalLayer,new InputTrigger[]{escTrigger,returnTrigger}));        
         stateMachine.addState(new State());
+        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction));
+        stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction));        
+        stateMachine.addState(new MainMenuState(canvas,physicalLayer,(AwtMouseManager)mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
         stateMachine.addState(new State());
-        stateMachine.addState(new GameState(canvas,physicalLayer,new InputTrigger[]{escTrigger}));
+        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction));
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         stateMachine.addState(new State());
@@ -215,5 +207,30 @@ final class Ardor3DGameServiceProvider implements Scene{
     public final PickResults doPick(final Ray3 pickRay){
         // Ignore
         return(null);
+    }
+    
+    private static final class SwitchStepAction implements TriggerAction{
+
+        
+        private final StateMachine stateMachine;
+        
+        private final Step sourceStep;
+        
+        private final Step destinationStep;
+               
+        
+        private SwitchStepAction(final StateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+            this.stateMachine=stateMachine;
+            this.sourceStep=sourceStep;
+            this.destinationStep=destinationStep;
+        }
+        
+        
+        @Override
+        public void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
+            stateMachine.setEnabled(sourceStep.ordinal(),false);
+            stateMachine.setEnabled(destinationStep.ordinal(),true);           
+        }
+        
     }
 }

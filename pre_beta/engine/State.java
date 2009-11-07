@@ -23,7 +23,7 @@ public class State{
     /**
      * layer used to handle the input
      */
-    private final LogicalLayer logicalLayer;
+    private LogicalLayer logicalLayer;
     
     /**
      * root node
@@ -32,7 +32,7 @@ public class State{
     
     
     public State(){
-        logicalLayer=new LogicalLayer();
+        this.logicalLayer=new LogicalLayer();
         root=new Node();
     }
     
