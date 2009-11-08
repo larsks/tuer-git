@@ -15,9 +15,9 @@ package engine;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import sound.Sample;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.image.Texture;
@@ -37,7 +37,9 @@ import engine.Ardor3DGameServiceProvider.Step;
 final class IntroductionState extends State{
     
     
-    private Sample music;
+    private static final String soundSamplePath="/sounds/introduction.ogg";
+    
+    private final String sourcename;
 
     
     IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
@@ -70,11 +72,11 @@ final class IntroductionState extends State{
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
         // load the music
-        try{music=new Sample(getClass().getResource("/sounds/internationale.ogg"));
-            music.open();
-           }
-        catch(Exception e)
-        {e.printStackTrace();}
+        final URL sampleUrl=getClass().getResource(soundSamplePath);
+        if(sampleUrl!=null)
+            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl);
+        else
+            sourcename=null;
     }
     
     @Override
@@ -83,9 +85,13 @@ final class IntroductionState extends State{
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 music.play();
+                 {if(sourcename!=null)
+                      SoundManager.getInstance().play(sourcename);
+                 }
              else
-                 music.stop();
+                 {if(sourcename!=null)
+                      SoundManager.getInstance().stop(sourcename);
+                 }
             }
     }
 }
