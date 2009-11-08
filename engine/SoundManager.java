@@ -36,12 +36,25 @@ public final class SoundManager{
         {System.out.println("The initialization of the sound manager failed: "+sse);}
     }
     
-    public final String preloadSoundSample(final URL url){
+    public final String preloadSoundSample(final URL url,final boolean backgroundMusic){
         final String path=url.getPath();
         final String identifier=path.substring(path.lastIndexOf("/"));
         final String sourcename=identifier.substring(0,identifier.lastIndexOf("."));
+        final boolean priority;
+        final int attenuationModel;
+        final float rollOffFactor;
+        if(backgroundMusic)
+            {priority=true;
+             attenuationModel=SoundSystemConfig.ATTENUATION_NONE;
+             rollOffFactor=0;
+            }
+        else
+            {priority=false;
+             attenuationModel=SoundSystemConfig.ATTENUATION_ROLLOFF;
+             rollOffFactor=SoundSystemConfig.getDefaultRolloff();
+            }
         if(soundSystem!=null)
-            soundSystem.newSource(false,sourcename,url,identifier,false,0,0,0,SoundSystemConfig.ATTENUATION_ROLLOFF,SoundSystemConfig.getDefaultRolloff());
+            soundSystem.newSource(priority,sourcename,url,identifier,false,0,0,0,attenuationModel,rollOffFactor);
         return(sourcename);
     }
     

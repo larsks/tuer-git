@@ -6,6 +6,8 @@
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
+	<!-- set your own deployment directory below -->
+	<property name="deploymentdestdir" value="."/>
 	<property name="destdir" value="."/>
 	<property name="srcdir" value="."/>
 	<condition property="isSolaris_i586">
@@ -156,6 +158,9 @@
 			compress="false">
 			<include name="**/*.png" />
 			<include name="**/*.fnt" />
+			<include name="**/controls.txt" />
+			<include name="**/credits.txt" />
+			<include name="**/sounds/*.ogg" />
 			<!-- TUER does not need JFPSM classes -->
 			<exclude name="**/jfpsm/*.class" />
 			<exclude name="**/connection/*.class" />
@@ -180,17 +185,25 @@
 				<param name="S"  value="FRANCE"/>
 			</dname>
 		</genkey>
-		<!-- TODO: rather copy these JAR before signing them -->
+		<!-- copy these JAR into the local destination directory -->
+		<copy file="../ardor3d-core/lib/google/guice-1.0.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
 		    <path>
-		    	<fileset file="../ardor3d-core/lib/google/guice-1.0.jar" />
-		    	<fileset file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" />
-		    	<fileset file="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar" />
-		    	<fileset file="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar" />
-		    	<fileset file="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar" />
-		    	<fileset file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" />
-		    	<fileset file="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar" />
-		    	<fileset file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/guice-1.0.jar" />
+		    	<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
+		    	<fileset file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" />
 		      	<fileset file="${destdir}/tuer.jar"/>
 		        <fileset file="${destdir}/jfpsm.jar"/>
 		    	<fileset file="./CodecJOrbis.jar"/>
@@ -204,6 +217,19 @@
 	<!-- ================================================================= -->
 	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files onto the server">
 	    <!-- TODO: use scp task to do it -->
+		<copy file="${destdir}/guice-1.0.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/google-collect-1.0-rc1.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
+		<copy file="${destdir}/tuer.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/jfpsm.jar" todir="${deploymentdestdir}"/>
+		<copy file="./CodecJOrbis.jar" todir="${deploymentdestdir}"/>
+		<copy file="./LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
+		<copy file="./SoundSystem.jar" todir="${deploymentdestdir}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
@@ -214,6 +240,14 @@
 	   	    <fileset dir="${destdir}" includes="**/*.class"/>
 	  		<fileset file="${destdir}/tuer.jar"/>
 	  		<fileset file="${destdir}/jfpsm.jar"/>
+	  		<fileset file="${destdir}/guice-1.0.jar" />
+	  		<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
+	  		<fileset file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" />
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->

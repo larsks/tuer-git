@@ -66,4 +66,27 @@ final class StateMachine{
     final int attachChild(int index,Spatial child){
         return(statesList.get(index).getRoot().attachChild(child));
     }
+    
+    final ArrayList<Runnable> getStateInitializationTasksList(){
+        final ArrayList<Runnable> initializationTasksList=new ArrayList<Runnable>();
+        for(State state:statesList)
+            initializationTasksList.add(new StateInitializationRunnable(state));
+        return(initializationTasksList);
+    }
+    
+    private static final class StateInitializationRunnable implements Runnable{
+        
+        
+        private final State state;
+        
+        
+        private StateInitializationRunnable(final State state){
+            this.state=state;
+        }
+        
+        @Override
+        public final void run(){
+            state.init();           
+        }  
+    }
 }
