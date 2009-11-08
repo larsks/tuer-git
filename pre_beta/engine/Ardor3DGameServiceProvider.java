@@ -202,6 +202,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         canvas.getCanvasRenderer().setCurrentContext();
 
         // Done, do cleanup
+        SoundManager.getInstance().cleanup();
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         canvas.close();
         //necessary for Java Webstart

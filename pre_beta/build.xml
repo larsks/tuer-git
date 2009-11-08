@@ -116,7 +116,9 @@
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparc.jar" if="isSolaris_sparc"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparcv9.jar" if="isSolaris_sparcv9"/>-->
 		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar"/>
-		<pathelement location="./JOrbisJOgg.jar"/>
+		<pathelement location="./CodecJOrbis.jar"/>
+		<pathelement location="./LibraryJavaSound.jar"/>
+		<pathelement location="./SoundSystem.jar"/>
 	</path>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
@@ -191,7 +193,9 @@
 		    	<fileset file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" />
 		      	<fileset file="${destdir}/tuer.jar"/>
 		        <fileset file="${destdir}/jfpsm.jar"/>
-		    	<fileset file="./JOrbisJOgg.jar"/>
+		    	<fileset file="./CodecJOrbis.jar"/>
+		    	<fileset file="./LibraryJavaSound.jar"/>
+		    	<fileset file="./SoundSystem.jar"/>
 		    </path>
 		</signjar>
 	</target>
