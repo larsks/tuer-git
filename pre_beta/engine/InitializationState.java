@@ -25,16 +25,25 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.state.TextureState;
+import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import engine.Ardor3DGameServiceProvider.Step;
 
-final class InitializationState extends State{
+public final class InitializationState extends State{   
   
     
-    InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
+    private final Box box;
+    
+    private final TaskManagementProgressionNode taskNode;
+    
+    
+    public InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
         super();
-        final Box box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
+        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
+        taskNode.setTranslation(0,-canvas.getHeight()/2.5,0);
+        box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));       
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
@@ -42,18 +51,41 @@ final class InitializationState extends State{
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(10));
         // set it to rotate
         box.addController(new UniformlyVariableRotationController(0,25,0,new Vector3(0,1,0),timeWindowsTable));
-        // puts a texture onto it
-        TextureState ts=new TextureState();
-        ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(Step.INITIALIZATION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,
-                Format.GuessNoCompression,true));
-        box.setRenderState(ts);
+        // execute tasks
+        box.addController(new SpatialController<Spatial>(){
+            @Override
+            public final void update(final double time,final Spatial caller){
+                TaskManager.getInstance().executeFirstTask();
+            }
+        });
         getRoot().attachChild(box);
+        getRoot().attachChild(taskNode);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toIntroAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,returnTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    
+    @Override
+    public final void init(){
+        // puts a texture onto the box
+        TextureState ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(Step.INITIALIZATION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,
+                Format.GuessNoCompression,true));
+        box.setRenderState(ts);
+    }
+    
+    @Override
+    public void setEnabled(final boolean enabled){
+        final boolean wasEnabled=isEnabled();
+        if(wasEnabled!=enabled)
+            {super.setEnabled(enabled);
+             if(enabled)
+                 taskNode.reset();
+            }
     }
 }

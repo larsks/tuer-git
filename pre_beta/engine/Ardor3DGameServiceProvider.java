@@ -181,7 +181,8 @@ final class Ardor3DGameServiceProvider implements Scene{
              if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()))
                  {if(Double.isNaN(initializationStartTime))
                       initializationStartTime=timer.getTimeInSeconds();
-                  if(timer.getTimeInSeconds()-initializationStartTime>3)
+                  if(timer.getTimeInSeconds()-initializationStartTime>5&&
+                     TaskManager.getInstance().getTaskCount()==0)
                       {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
                        stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);       
                       }
@@ -224,8 +225,6 @@ final class Ardor3DGameServiceProvider implements Scene{
         // Set the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-            srl=new SimpleResourceLocator(getClass().getResource("/dae"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
@@ -235,7 +234,7 @@ final class Ardor3DGameServiceProvider implements Scene{
             }
         };
         final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION);
-        final SwitchStepAction fromInitToIntroAction=new SwitchStepAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
+        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
         final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
         final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LOADING_DISPLAY);
         //create one state per step
@@ -249,6 +248,9 @@ final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         stateMachine.addState(new State());
+        // enqueue initialization tasks
+        for(Runnable task:stateMachine.getStateInitializationTasksList())
+            TaskManager.getInstance().enqueueTask(task);
         //Enable the first state
         stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),true);
     }
@@ -276,7 +278,8 @@ final class Ardor3DGameServiceProvider implements Scene{
         return(null);
     }
     
-    private static final class SwitchStepAction implements TriggerAction{
+    
+    private static class SwitchStepAction implements TriggerAction{
 
         
         private final StateMachine stateMachine;
@@ -297,7 +300,19 @@ final class Ardor3DGameServiceProvider implements Scene{
         public void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
             stateMachine.setEnabled(sourceStep.ordinal(),false);
             stateMachine.setEnabled(destinationStep.ordinal(),true);           
+        }       
+    }
+    
+    private static final class SwitchStepOnlyIfTaskQueueEmptyAction extends SwitchStepAction{
+        
+        private SwitchStepOnlyIfTaskQueueEmptyAction(final StateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+            super(stateMachine,sourceStep,destinationStep);
         }
         
+        @Override
+        public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
+            if(TaskManager.getInstance().getTaskCount()==0)
+                super.perform(source,inputState,tpf);
+        }
     }
 }

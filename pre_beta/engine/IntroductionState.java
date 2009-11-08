@@ -34,24 +34,23 @@ import com.ardor3d.util.TextureManager;
 
 import engine.Ardor3DGameServiceProvider.Step;
 
-final class IntroductionState extends State{
+public final class IntroductionState extends State{
     
     
     private static final String soundSamplePath="/sounds/introduction.ogg";
     
-    private final String sourcename;
+    private static final String textureFilename="introduction.png";
+    
+    private String sourcename;
+    
+    private final Box box;
 
     
-    IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
+    public IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
         super();
-        final Box box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
+        box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
-        box.setTranslation(new Vector3(0,0,-75));       
-        // puts a texture onto it
-        TextureState ts=new TextureState();
-        ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(Step.INTRODUCTION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,Format.GuessNoCompression,true));
-        box.setRenderState(ts);        
+        box.setTranslation(new Vector3(0,0,-75));
         //configure the spread effect
         final Point spreadCenter=new Point(205,265);     
         HashMap<Color,Color> colorSubstitutionTable=new HashMap<Color,Color>();
@@ -71,12 +70,21 @@ final class IntroductionState extends State{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    @Override
+    public final void init(){
         // load the music
-        final URL sampleUrl=getClass().getResource(soundSamplePath);
+        final URL sampleUrl=IntroductionState.class.getResource(soundSamplePath);
         if(sampleUrl!=null)
-            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl);
+            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
         else
             sourcename=null;
+        // puts a texture onto the box
+        final TextureState ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(textureFilename,Texture.MinificationFilter.Trilinear,Format.GuessNoCompression,true));
+        box.setRenderState(ts);
     }
     
     @Override

@@ -51,6 +51,8 @@ public class State{
             }       
     }
     
+    public void init(){}
+    
     private final SwitchNode getSwitchNode(){
         return((SwitchNode)root.getParent());
     }

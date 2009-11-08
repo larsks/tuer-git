@@ -35,4 +35,10 @@ final class ContentRatingSystemState extends State{
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
     }
+    
+    @Override
+    public final void init(){
+        //do nothing here because this method will be called
+        //after the display of this state
+    }
 }
