@@ -27,9 +27,11 @@ import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.shape.Box;
+import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 
 import engine.Ardor3DGameServiceProvider.Step;
@@ -62,7 +64,17 @@ public final class IntroductionState extends State{
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
-        getRoot().attachChild(box);
+        getRoot().attachChild(box);       
+        // show the game title as text
+        final BMText textNode=new BMText("gameTitleNode","TUER",Ardor3DGameServiceProvider.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        textNode.setFontScale(6);
+        textNode.setTextColor(ColorRGBA.BLACK);
+        textNode.setTranslation(0,0,-75);
+        timeWindowsTable=new LinkedHashMap<Double,Double>();
+        timeWindowsTable.put(Double.valueOf(0),Double.valueOf(8));
+        textNode.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
+        getRoot().attachChild(textNode);
+        // add the triggers
         final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,toMainMenuTrigger};

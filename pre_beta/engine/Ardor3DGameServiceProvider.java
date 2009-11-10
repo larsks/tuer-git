@@ -86,7 +86,7 @@ final class Ardor3DGameServiceProvider implements Scene{
               /**main menu*/
               MAIN_MENU,
               /**display of the level loading*/
-              LOADING_DISPLAY,
+              LEVEL_LOADING_DISPLAY,
               /**in-game display*/
               GAME,
               /**display when the player loses*/
@@ -94,9 +94,9 @@ final class Ardor3DGameServiceProvider implements Scene{
               /**pause menu*/
               PAUSE_MENU,
               /**display at the end of a level with figures, etc...*/
-              END_LEVEL_DISPLAY,
+              LEVEL_END_DISPLAY,
               /**final scene*/
-              END_GAME_DISPLAY};
+              GAME_END_DISPLAY};
 
     private final StateMachine stateMachine;
     
@@ -236,7 +236,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION);
         final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
         final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
-        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LOADING_DISPLAY);
+        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY);
         //create one state per step
         stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,exitAction,fromRatingToInitAction));
         stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction));
@@ -248,10 +248,18 @@ final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new State());
         stateMachine.addState(new State());
         stateMachine.addState(new State());
-        // enqueue initialization tasks
-        for(Runnable task:stateMachine.getStateInitializationTasksList())
-            TaskManager.getInstance().enqueueTask(task);
-        //Enable the first state
+        // enqueue initialization tasks for states that are not in-game states
+        // do not enqueue the task of the first state as it would be called after its display
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INTRODUCTION.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.MAIN_MENU.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_LOADING_DISPLAY.ordinal()));
+        // do not enqueue the game task now as it is the role of the level loading display
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_OVER.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.PAUSE_MENU.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_END_DISPLAY.ordinal()));
+        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_END_DISPLAY.ordinal()));        
+        // enable the first state
         stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),true);
     }
 
