@@ -51,15 +51,15 @@ final class StateMachine{
             }
     }
     
-    final void setEnabled(int index,boolean enabled){
+    final void setEnabled(final int index,final boolean enabled){
         statesList.get(index).setEnabled(enabled);
     }
     
-    final boolean isEnabled(int index){
+    final boolean isEnabled(final int index){
         return(switchNode.getVisible(index));
     }
     
-    final LogicalLayer getLogicalLayer(int index){
+    final LogicalLayer getLogicalLayer(final int index){
         return(statesList.get(index).getLogicalLayer());
     }
     
@@ -67,11 +67,8 @@ final class StateMachine{
         return(statesList.get(index).getRoot().attachChild(child));
     }
     
-    final ArrayList<Runnable> getStateInitializationTasksList(){
-        final ArrayList<Runnable> initializationTasksList=new ArrayList<Runnable>();
-        for(State state:statesList)
-            initializationTasksList.add(new StateInitializationRunnable(state));
-        return(initializationTasksList);
+    final Runnable getStateInitializationTask(final int index){
+    	return(new StateInitializationRunnable(statesList.get(index)));
     }
     
     private static final class StateInitializationRunnable implements Runnable{

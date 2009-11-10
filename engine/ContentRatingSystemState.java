@@ -22,11 +22,14 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.ui.text.BMText;
 
 final class ContentRatingSystemState extends State{
+	
+	
+	private final String text="Adults Only (+18)\n\nViolence\n\nBad Language\n\nFear\n\nSex\n\nDrugs\n\nDiscrimination";
 
     
     ContentRatingSystemState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toInitAction){
         super();
-        final BMText textNode=new BMText("contentSystemRatingNode","Mature (+18)",Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("contentSystemRatingNode",text,Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toInitAction);
