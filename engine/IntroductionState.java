@@ -59,7 +59,7 @@ public final class IntroductionState extends State{
         colorSubstitutionTable.put(Color.BLUE,Color.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
-        box.addController(new CircularSpreadTextureUpdaterController(Step.INTRODUCTION.toString().toLowerCase()+".png",equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer()));
+        box.addController(new CircularSpreadTextureUpdaterController(Step.INTRODUCTION.toString().toLowerCase()+".png",equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
         //set a controller that moves the image
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));

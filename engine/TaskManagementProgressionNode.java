@@ -37,7 +37,7 @@ public final class TaskManagementProgressionNode extends Node{
         maxTaskCount=0;
         bar=new UIProgressBar("",true);
         bar.setPercentFilled(0);
-        bar.setComponentWidth(250);
+        //bar.setComponentWidth(250);
         final UIPanel panel=new UIPanel(new RowLayout(false));
         panel.add(new UILabel("Loading... Please wait"));
         panel.add(bar);
