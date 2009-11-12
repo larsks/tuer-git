@@ -18,6 +18,7 @@ import java.awt.Point;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 
 public final class CircularSpreadTextureUpdaterController extends TextureUpdaterController{
@@ -32,8 +33,8 @@ public final class CircularSpreadTextureUpdaterController extends TextureUpdater
     public CircularSpreadTextureUpdaterController(String imageResourceName,
             MovementEquation equation,
             HashMap<Color, Color> colorSubstitutionTable,
-            final Point spreadCenter,final Renderer renderer){
-        super(imageResourceName,equation,colorSubstitutionTable,renderer);
+            final Point spreadCenter,final Renderer renderer,final RenderContext renderContext){
+        super(imageResourceName,equation,colorSubstitutionTable,renderer,renderContext);
         this.spreadCenter=spreadCenter;
     }
 

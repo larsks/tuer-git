@@ -225,6 +225,8 @@ final class Ardor3DGameServiceProvider implements Scene{
         // Set the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
+            srl=new SimpleResourceLocator(getClass().getResource("/dae"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
@@ -237,12 +239,15 @@ final class Ardor3DGameServiceProvider implements Scene{
         final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
         final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
         final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY);
+        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME);
+        
+        final LoadingDisplayState loadingDisplayState;
         //create one state per step
         stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,exitAction,fromRatingToInitAction));
         stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction));        
         stateMachine.addState(new MainMenuState(canvas,physicalLayer,(AwtMouseManager)mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
-        stateMachine.addState(new LoadingDisplayState(canvas,physicalLayer,exitAction));
+        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction));
         stateMachine.addState(new State());
         stateMachine.addState(new State());
@@ -259,6 +264,8 @@ final class Ardor3DGameServiceProvider implements Scene{
         TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.PAUSE_MENU.ordinal()));
         TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_END_DISPLAY.ordinal()));
         TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_END_DISPLAY.ordinal()));        
+        // put the task that loads a level into the level loading state
+        loadingDisplayState.setLevelInitializationTask(stateMachine.getStateInitializationTask(Step.GAME.ordinal()));
         // enable the first state
         stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),true);
     }
@@ -273,7 +280,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
             {//executes all rendering tasks queued by controllers
-             GameTaskQueueManager.getManager().getQueue(GameTaskQueue.RENDER).execute(renderer);
+             GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).execute(renderer);
              // Draw the root and all its children.
              renderer.draw(root);
             }

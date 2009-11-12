@@ -31,10 +31,13 @@ import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 import misc.SerializationHelper;
+
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
@@ -82,20 +85,23 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	private transient int bytesPerPixel;
 	
 	private transient Renderer renderer;
+	
+	private transient final RenderContext renderContext;
 
 	
 	public TextureUpdaterController(){
-	    this(null,null,null,null);
+	    this(null,null,null,null,null);
 	}
 	
 	public TextureUpdaterController(final String imageResourceName,
 	        final MovementEquation equation,
 	        final HashMap<Color,Color> colorSubstitutionTable,
-	        final Renderer renderer){
+	        final Renderer renderer,final RenderContext renderContext){
         this.imageResourceName=imageResourceName;
 	    this.equation=equation;
         this.colorSubstitutionTable=colorSubstitutionTable;
         this.renderer=renderer;
+        this.renderContext=renderContext;
 	    elapsedTime=0;
 	    inited=false;
 	}
@@ -205,7 +211,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                   updateWidth=maxX-minX+1;
                   updateHeight=maxY-minY+1;
                   //update the texture on the rendering thread
-                  GameTaskQueueManager.getManager().render(new Callable<Void>(){
+                  GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>(){
                       @Override
                       public Void call() throws Exception{
                           updateTexture();

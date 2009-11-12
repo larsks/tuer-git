@@ -13,6 +13,7 @@
 */
 package engine;
 
+import com.ardor3d.extension.model.collada.ColladaImporter;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
@@ -21,18 +22,17 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.scenegraph.Node;
 
 final class GameState extends State{
+    
+    
+    private int levelIndex;
 
     
     GameState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
-        final Vector3 worldUp=new Vector3(0,1,0);
-        // Load collada model
-        /*
-         * try { final Node colladaNode = ColladaImporter.readColladaScene("collada/duck/duck.dae");
-         * _root.attachChild(colladaNode); } catch (final Exception ex) { ex.printStackTrace(); }
-         */
+        final Vector3 worldUp=new Vector3(0,1,0);              
         // drag only at false to remove the need of pressing a button to move
         FirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
@@ -40,5 +40,22 @@ final class GameState extends State{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    
+    final void setLevelIndex(final int levelIndex){
+        this.levelIndex=levelIndex;
+    }
+    
+    @Override
+    public final void init(){
+        // Remove all previously attached children
+        getRoot().detachAllChildren();
+        // Load collada model
+        try {final Node colladaNode=ColladaImporter.readColladaScene("LID"+levelIndex+".dae");
+             getRoot().attachChild(colladaNode); 
+            }
+        catch(final Exception ex)
+        {ex.printStackTrace();} 
     }
 }
