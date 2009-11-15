@@ -14,7 +14,7 @@
 package engine;
 
 import com.ardor3d.extension.model.collada.ColladaImporter;
-import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.control.FirstPersonControl;
@@ -22,24 +22,46 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Node;
 
 final class GameState extends State{
     
     
     private int levelIndex;
+    
+    private final NativeCanvas canvas;
+    
+    private double previousFrustumNear;
+    
+    private double previousFrustumFar;
+    
+    private final Vector3 previousCamLocation;
+    
+    private final Vector3 currentCamLocation;
 
     
-    GameState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
+    GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
+        this.canvas=canvas;
+        this.previousCamLocation=new Vector3(canvas.getCanvasRenderer().getCamera().getLocation());
+        this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
         // drag only at false to remove the need of pressing a button to move
-        FirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
+        FirstPersonControl fpsc=FirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
+        fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+        /*getRoot().addController(new SpatialController<Spatial>(){
+            @Override
+            public final void update(double time, Spatial caller){
+                System.out.println("FPS: "+(time>0?1/time:0));
+            }           
+        });*/
     }
     
     
@@ -51,11 +73,38 @@ final class GameState extends State{
     public final void init(){
         // Remove all previously attached children
         getRoot().detachAllChildren();
+        //FIXME: it should not be hard-coded
+        currentCamLocation.set(115,0,223);
         // Load collada model
         try {final Node colladaNode=ColladaImporter.readColladaScene("LID"+levelIndex+".dae");
-             getRoot().attachChild(colladaNode); 
+             CullState cullState=new CullState();
+             cullState.setEnabled(true);
+             cullState.setCullFace(CullState.Face.Back);
+             colladaNode.setRenderState(cullState);
+             getRoot().attachChild(colladaNode);
             }
         catch(final Exception ex)
-        {ex.printStackTrace();} 
+        {ex.printStackTrace();}
+    }
+    
+    @Override
+    public void setEnabled(final boolean enabled){
+        final boolean wasEnabled=isEnabled();
+        if(wasEnabled!=enabled)
+            {super.setEnabled(enabled);
+             final Camera cam=canvas.getCanvasRenderer().getCamera();
+             if(enabled)
+                 {previousFrustumNear=cam.getFrustumNear();
+                  previousFrustumFar=cam.getFrustumFar();
+                  previousCamLocation.set(cam.getLocation());
+                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.3,300);
+                  cam.setLocation(currentCamLocation);
+                 }
+             else
+                 {currentCamLocation.set(cam.getLocation());                  
+                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),previousFrustumNear,previousFrustumFar);
+                  cam.setLocation(previousCamLocation);
+                 }
+            }
     }
 }

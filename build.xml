@@ -164,12 +164,8 @@
 			<!-- TUER does not need JFPSM classes -->
 			<exclude name="**/jfpsm/*.class" />
 			<exclude name="**/connection/*.class" />
-			<!-- the collada models and textures -->
+			<!-- the collada models -->
 			<include name="**/dae/*.dae" />
-			<include name="**/dae/*.png" />
-			<include name="**/dae/*.gif" />
-			<include name="**/dae/*.jpg" />
-			<include name="**/dae/*.jpeg" />
 			<exclude name="**/gpl.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />

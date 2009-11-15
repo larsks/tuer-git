@@ -19,7 +19,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import com.ardor3d.bounding.BoundingBox;
-import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.input.Key;
@@ -48,7 +48,7 @@ public final class IntroductionState extends State{
     private final Box box;
 
     
-    public IntroductionState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
+    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
         super();
         box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());

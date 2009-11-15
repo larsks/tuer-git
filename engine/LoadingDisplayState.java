@@ -13,7 +13,7 @@
 */
 package engine;
 
-import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
@@ -31,12 +31,10 @@ final class LoadingDisplayState extends State{
     private Runnable levelInitializationTask;
 
     
-    LoadingDisplayState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction){
+    LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction){
         super();
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
-        taskNode.setTranslation(0,-canvas.getHeight()/2.5,0);
-        /*final BMText textNode=new BMText("loadingGameNode","Feature not yet implemented!",Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
-        getRoot().attachChild(textNode);*/
+        taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         getRoot().attachChild(taskNode);
         // execute tasks
         taskNode.addController(new SpatialController<Spatial>(){

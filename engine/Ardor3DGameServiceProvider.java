@@ -13,6 +13,7 @@
 */
 package engine;
 
+import java.awt.Component;
 import java.awt.DisplayMode;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
@@ -56,7 +58,7 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
 final class Ardor3DGameServiceProvider implements Scene{
 
     /**Our native window, not the gl surface itself*/
-    private final JoglCanvas canvas;
+    private final NativeCanvas canvas;
 
     private final PhysicalLayer physicalLayer;
 
@@ -138,20 +140,19 @@ final class Ardor3DGameServiceProvider implements Scene{
         initializationStartTime=Double.NaN;
         introductionStartTime=Double.NaN;
         timer=new Timer();
-        root=new Node();
+        root=new Node("root node of the game");
         stateMachine=new StateMachine(root);       
-        // Setup a jogl canvas and canvas renderer
-        final JoglCanvasRenderer canvasRenderer = new JoglCanvasRenderer(this);
         // Get the default display mode
         final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         // Choose the full-screen mode
         final DisplaySettings settings=new DisplaySettings(defaultMode.getWidth(),defaultMode.getHeight(),defaultMode.getBitDepth(),0,0,8,0,0,true,false);
-        canvas=new JoglCanvas(canvasRenderer,settings);
+        // Setup a canvas and a canvas renderer       
+        canvas=new JoglCanvas(new JoglCanvasRenderer(this),settings);
         canvas.init();
-        mouseManager=new AwtMouseManager(canvas);
+        mouseManager=new AwtMouseManager((Component)canvas);
         // remove the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper(canvas),new AwtMouseWrapper(canvas),new AwtFocusWrapper(canvas));
+        physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas),new AwtFocusWrapper((Component)canvas));
     }
 
     
@@ -219,7 +220,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         final ZBufferState buf=new ZBufferState();
         buf.setEnabled(true);
         buf.setFunction(ZBufferState.TestFunction.LessThanOrEqualTo);
-        root.setRenderState(buf);       
+        root.setRenderState(buf);
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
         // Set the location of our resources.
@@ -243,10 +244,10 @@ final class Ardor3DGameServiceProvider implements Scene{
         
         final LoadingDisplayState loadingDisplayState;
         //create one state per step
-        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,exitAction,fromRatingToInitAction));
+        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction));
         stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction));        
-        stateMachine.addState(new MainMenuState(canvas,physicalLayer,(AwtMouseManager)mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
+        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
         stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction));
         stateMachine.addState(new State());

@@ -15,7 +15,7 @@ package engine;
 
 import java.util.LinkedHashMap;
 import com.ardor3d.bounding.BoundingBox;
-import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.input.Key;
@@ -39,10 +39,10 @@ public final class InitializationState extends State{
     private final TaskManagementProgressionNode taskNode;
     
     
-    public InitializationState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
+    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
         super();
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
-        taskNode.setTranslation(0,-canvas.getHeight()/2.5,0);
+        taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));       
