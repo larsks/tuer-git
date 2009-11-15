@@ -24,11 +24,11 @@ import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.event.ActionEvent;
 import com.ardor3d.extension.ui.event.ActionListener;
 import com.ardor3d.extension.ui.layout.RowLayout;
-import com.ardor3d.framework.jogl.JoglCanvas;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.Key;
+import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
-import com.ardor3d.input.awt.AwtMouseManager;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
@@ -40,11 +40,11 @@ import com.ardor3d.ui.text.BMText;
 final class MainMenuState extends State{
     
     
-    private final JoglCanvas canvas;
+    private final NativeCanvas canvas;
     
     private final PhysicalLayer physicalLayer;
     
-    private final AwtMouseManager awtMouseManager;
+    private final MouseManager mouseManager;
     
     private final UIFrame mainFrame;
     
@@ -63,13 +63,13 @@ final class MainMenuState extends State{
     private static final String controlsPath="/controls.txt";
     
     
-    MainMenuState(final JoglCanvas canvas,final PhysicalLayer physicalLayer,
-                  final AwtMouseManager awtMouseManager,
+    MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+                  final MouseManager mouseManager,
                   final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction){
         super();
         this.canvas=canvas;
         this.physicalLayer=physicalLayer;
-        this.awtMouseManager=awtMouseManager;
+        this.mouseManager=mouseManager;
         // create the panels
         initialMenuPanel=createInitialMenuPanel(exitAction);       
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
@@ -115,12 +115,12 @@ final class MainMenuState extends State{
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 {awtMouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+                 {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   // show the initial menu
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else
-                 awtMouseManager.setGrabbed(GrabbedState.GRABBED);
+                 mouseManager.setGrabbed(GrabbedState.GRABBED);
             }
     }
     
