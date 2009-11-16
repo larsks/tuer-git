@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.ardor3d.extension.ui.UIComponent;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -119,6 +121,9 @@ final class Ardor3DGameServiceProvider implements Scene{
         catch(IOException ioe)
         {ioe.printStackTrace();}
         try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/Computerfont-35-medium-regular.fnt"),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/arial-16-bold-regular.fnt"),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
         return(fontsList);
@@ -223,6 +228,8 @@ final class Ardor3DGameServiceProvider implements Scene{
         root.setRenderState(buf);
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
+        // Set the default font
+        UIComponent.setDefaultFont(getFontsList().get(2));
         // Set the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
