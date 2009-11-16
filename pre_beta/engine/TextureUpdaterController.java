@@ -28,11 +28,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-
 import javax.imageio.ImageIO;
 import misc.SerializationHelper;
-
-import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
 import com.ardor3d.image.Image.Format;

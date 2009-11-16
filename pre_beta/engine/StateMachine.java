@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import com.ardor3d.input.logical.LogicalLayer;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
-import com.ardor3d.scenegraph.extension.SwitchNode;
 import com.ardor3d.util.ReadOnlyTimer;
 
 
@@ -27,13 +26,12 @@ final class StateMachine{
     
     private final ArrayList<State> statesList;
     
-    private final SwitchNode switchNode;
+    private final StateMachineSwitchNode switchNode;
     
     
     StateMachine(final Node parent){
         statesList=new ArrayList<State>();
-        switchNode=new SwitchNode();
-        switchNode.setUpdateOnlyVisibleChildrenBoundsAndTransforms(true);
+        switchNode=new StateMachineSwitchNode();
         parent.attachChild(switchNode);
     }
     

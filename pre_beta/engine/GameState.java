@@ -17,7 +17,6 @@ import com.ardor3d.extension.model.collada.ColladaImporter;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
-import com.ardor3d.input.control.FirstPersonControl;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
@@ -25,6 +24,8 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Node;
+
+import engine.input.ExtendedFirstPersonControl;
 
 final class GameState extends State{
     
@@ -49,7 +50,7 @@ final class GameState extends State{
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
         // drag only at false to remove the need of pressing a button to move
-        FirstPersonControl fpsc=FirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
+        ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
