@@ -33,6 +33,7 @@ final class StateMachine{
     StateMachine(final Node parent){
         statesList=new ArrayList<State>();
         switchNode=new SwitchNode();
+        switchNode.setUpdateOnlyVisibleChildrenBoundsAndTransforms(true);
         parent.attachChild(switchNode);
     }
     
