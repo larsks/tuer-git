@@ -13,7 +13,6 @@
 */
 package engine;
 
-import com.ardor3d.extension.model.collada.ColladaImporter;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
@@ -24,6 +23,7 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.util.export.binary.BinaryImporter;
 
 import engine.input.ExtendedFirstPersonControl;
 
@@ -76,13 +76,13 @@ final class GameState extends State{
         getRoot().detachAllChildren();
         //FIXME: it should not be hard-coded
         currentCamLocation.set(115,0,223);
-        // Load collada model
-        try {final Node colladaNode=ColladaImporter.readColladaScene("LID"+levelIndex+".dae");
+        // Load level model
+        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
              CullState cullState=new CullState();
              cullState.setEnabled(true);
              cullState.setCullFace(CullState.Face.Back);
-             colladaNode.setRenderState(cullState);
-             getRoot().attachChild(colladaNode);
+             levelNode.setRenderState(cullState);
+             getRoot().attachChild(levelNode);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}

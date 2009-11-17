@@ -166,6 +166,7 @@
 			<exclude name="**/connection/*.class" />
 			<!-- the collada models -->
 			<include name="**/dae/*.dae" />
+			<include name="**/abin/*.abin" />
 			<exclude name="**/gpl.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
