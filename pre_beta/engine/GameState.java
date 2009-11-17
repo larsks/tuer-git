@@ -19,6 +19,7 @@ import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
@@ -83,6 +84,28 @@ final class GameState extends State{
              cullState.setCullFace(CullState.Face.Back);
              levelNode.setRenderState(cullState);
              getRoot().attachChild(levelNode);
+             final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
+             uziNode.setTranslation(111.5,0,219);
+             uziNode.setScale(0.2);
+             getRoot().attachChild(uziNode);
+             final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
+             smachNode.setTranslation(112.5,0,219);
+             smachNode.setScale(0.2);
+             getRoot().attachChild(smachNode);
+             final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
+             pistolNode.setTranslation(113.5,0,219);
+             pistolNode.setScale(0.001);
+             pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+             getRoot().attachChild(pistolNode);
+             final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
+             pistol2Node.setTranslation(114.5,0,219);
+             pistol2Node.setScale(0.02);
+             pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+             getRoot().attachChild(pistol2Node);
+             final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
+             pistol3Node.setTranslation(115.5,0,219);
+             pistol3Node.setScale(0.02);
+             getRoot().attachChild(pistol3Node);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}
