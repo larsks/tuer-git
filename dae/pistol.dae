@@ -32,8 +32,7 @@
 </diffuse>
 <specular><color>0.9 0.9 0.9 1 </color>
 </specular>
-<shininess><float>Infinity</float>
-</shininess><reflectivity><float>0.1</float>
+<reflectivity><float>0.1</float>
 </reflectivity></blinn><extra><technique profile="FCOLLADA"><emission_level><float>0.0</float>
 </emission_level></technique></extra>
 </technique>
