@@ -233,8 +233,6 @@ final class Ardor3DGameServiceProvider implements Scene{
         // Set the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-            srl=new SimpleResourceLocator(getClass().getResource("/dae"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
