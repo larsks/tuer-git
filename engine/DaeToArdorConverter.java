@@ -3,7 +3,7 @@ package engine;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import com.ardor3d.extension.model.collada.ColladaImporter;
+import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.export.binary.BinaryExporter;
@@ -23,9 +23,10 @@ public final class DaeToArdorConverter{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
+        ColladaImporter colladaImporter=new ColladaImporter();
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             final Node colladaNode=ColladaImporter.readColladaScene(arg);
+             final Node colladaNode=colladaImporter.readColladaFile(arg).getScene();
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              File destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".dae"))+".abin");

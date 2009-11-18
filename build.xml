@@ -86,8 +86,9 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
-		<pathelement location="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.6-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar"/>
+		<!-- TODO: JDOM -->
 		<pathelement location="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/guice-1.0.jar"/>
@@ -189,7 +190,7 @@
 		<!-- copy these JAR into the local destination directory -->
 		<copy file="../ardor3d-core/lib/google/guice-1.0.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-animations/target/ardor3d-animations-0.6-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-animation/target/ardor3d-animation-0.6-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${destdir}"/>
@@ -199,7 +200,7 @@
 		    <path>
 		    	<fileset file="${destdir}/guice-1.0.jar" />
 		    	<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
-		    	<fileset file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
@@ -220,7 +221,7 @@
 	    <!-- TODO: use scp task to do it -->
 		<copy file="${destdir}/guice-1.0.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/google-collect-1.0-rc1.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
@@ -243,7 +244,7 @@
 	  		<fileset file="${destdir}/jfpsm.jar"/>
 	  		<fileset file="${destdir}/guice-1.0.jar" />
 	  		<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
-	  		<fileset file="${destdir}/ardor3d-animations-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
