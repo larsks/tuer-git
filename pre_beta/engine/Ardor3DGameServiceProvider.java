@@ -157,7 +157,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         mouseManager=new AwtMouseManager((Component)canvas);
         // remove the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas),new AwtFocusWrapper((Component)canvas));
+        physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
     }
 
     

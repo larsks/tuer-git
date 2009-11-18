@@ -24,8 +24,10 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.util.export.binary.BinaryImporter;
-
 import engine.input.ExtendedFirstPersonControl;
 
 final class GameState extends State{
@@ -42,12 +44,15 @@ final class GameState extends State{
     private final Vector3 previousCamLocation;
     
     private final Vector3 currentCamLocation;
+    
+    private final CameraNode playerNode;
 
     
     GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
         this.canvas=canvas;
-        this.previousCamLocation=new Vector3(canvas.getCanvasRenderer().getCamera().getLocation());
+        Camera cam=canvas.getCanvasRenderer().getCamera();
+        this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
         // drag only at false to remove the need of pressing a button to move
@@ -64,6 +69,24 @@ final class GameState extends State{
                 System.out.println("FPS: "+(time>0?1/time:0));
             }           
         });*/
+        // configure the collision system
+        /*CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
+        collisionResults=new BoundingCollisionResults();
+        PickingUtil.findCollisions(spatial,scene,collisionResults);
+        for(int i=0;i<collisionResults.getNumber();i++)
+            {collisionResults.getCollisionData(i);
+             //handle the collision
+            }
+        collisionResults.clear();*/
+        // create a node that follows the camera
+        playerNode=new CameraNode("player",cam);
+        playerNode.addController(new SpatialController<Spatial>(){
+            @Override
+            public void update(double timeSinceLastCall, Spatial caller) {
+                // sync the camera node with the camera
+                playerNode.updateFromCamera();
+            }           
+        });
     }
     
     
@@ -77,6 +100,8 @@ final class GameState extends State{
         getRoot().detachAllChildren();
         //FIXME: it should not be hard-coded
         currentCamLocation.set(115,0,223);
+        //attach the player itself
+        getRoot().attachChild(playerNode);
         // Load level model
         try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
              CullState cullState=new CullState();
@@ -106,6 +131,19 @@ final class GameState extends State{
              pistol3Node.setTranslation(115.5,0,219);
              pistol3Node.setScale(0.02);
              getRoot().attachChild(pistol3Node);
+             final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
+             laserNode.setTranslation(116.5,0,219);
+             laserNode.setScale(0.02);
+             getRoot().attachChild(laserNode);
+             final Node copNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/cop.abin"));
+             copNode.setTranslation(117.5,0,219);
+             copNode.setScale(0.5);
+             copNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(0,1,0)));
+             getRoot().attachChild(copNode);
+             final Node alienNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/giger_alien.abin"));
+             alienNode.setTranslation(118.5,-0.5,219);
+             alienNode.setScale(0.3);
+             getRoot().attachChild(alienNode);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}
