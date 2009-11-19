@@ -13,9 +13,12 @@
 */
 package connection;
 
+import java.io.File;
+import java.util.ArrayList;
 import engine.EngineServiceProvider;
 import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
+import jfpsm.ILevelRelativeVolumeElement;
 import jfpsm.MainWindow;
 
 public final class JFPSMServiceProvider implements I3DServiceSeeker{
@@ -37,13 +40,24 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     }
     
     @Override
-    public final void dummyTest(){
-        delegate.dummyTest();
+    public final void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementsList){
+        ArrayList<engine.ILevelRelativeVolumeElement[][]> engineVolumeElementsList=new ArrayList<engine.ILevelRelativeVolumeElement[][]>();
+        engine.ILevelRelativeVolumeElement[][] eilrvea;
+        for(ILevelRelativeVolumeElement[][] ilrvea:volumeElementsList)
+            {eilrvea=new engine.ILevelRelativeVolumeElement[ilrvea.length][];
+             for(int i=0;i<ilrvea.length;i++)
+                 {eilrvea[i]=new engine.ILevelRelativeVolumeElement[ilrvea[i].length];
+                  for(int j=0;j<ilrvea[i].length;j++)
+                      eilrvea[i][j]=new LevelRelativeVolumeElementConnector(ilrvea[i][j]);
+                 }            
+             engineVolumeElementsList.add(eilrvea);
+            }
+        delegate.writeLevel(levelFile,engineVolumeElementsList);
     }
     
     public static final void main(String[] args){
-    	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
-    	System.setProperty("sun.java2d.noddraw","true");
+        //Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
+        System.setProperty("sun.java2d.noddraw","true");
         new JFPSMServiceProvider(EngineServiceProvider.getInstance(),
                                  EngineServiceSeeker.getInstance());
         MainWindow.runInstance(args);

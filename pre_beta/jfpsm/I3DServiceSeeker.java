@@ -13,7 +13,10 @@
 */
 package jfpsm;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public interface I3DServiceSeeker{
     public void bind3DServiceSeeker(I3DServiceSeeker seeker);
-    public void dummyTest();
+    public void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementList);
 }

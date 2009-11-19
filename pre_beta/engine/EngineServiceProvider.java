@@ -13,6 +13,10 @@
 */
 package engine;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public final class EngineServiceProvider implements I3DServiceProvider{
     
     
@@ -25,7 +29,21 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     }
     
     @Override
-    public final void dummyTest(){
-        System.out.println("I love communism!");
+    public void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementsList){
+        boolean success=true;
+        if(!levelFile.exists())
+            {try{success=levelFile.createNewFile();} 
+             catch(IOException ioe)
+             {success=false;}
+             if(!success)
+                 throw new RuntimeException("The file "+levelFile.getAbsolutePath()+" cannot be created!");
+            }
+        if(success)
+            {/**
+              * create one node per level
+              * create one node per floor (array)
+              * use the geometries passed as arguments to build the mesh data
+              */            
+            }
     }
 }

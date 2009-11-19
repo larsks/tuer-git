@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import com.ardor3d.extension.ui.UIComponent;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
@@ -285,10 +284,10 @@ final class Ardor3DGameServiceProvider implements Scene{
     public final boolean renderUnto(final Renderer renderer){
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
-            {//executes all rendering tasks queued by controllers
-             GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).execute(renderer);
-             // Draw the root and all its children.
+            {// Draw the root and all its children.
              renderer.draw(root);
+             //executes all rendering tasks queued by controllers
+             GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).execute(renderer);
             }
         return(isOpen);
     }

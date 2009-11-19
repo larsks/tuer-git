@@ -11,12 +11,15 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package jfpsm;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
-
-public interface I3DServiceProvider{
-    public void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementsList);
+public interface ILevelRelativeVolumeElement{   
+    public float[] getLevelRelativePosition();
+    public FloatBuffer getVertexBuffer();
+    public IntBuffer getIndexBuffer();
+    public FloatBuffer getNormalBuffer();
+    public FloatBuffer getTexCoordBuffer();
 }
