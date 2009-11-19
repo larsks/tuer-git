@@ -23,6 +23,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.imageio.ImageIO;
@@ -875,7 +877,7 @@ public final class ProjectManager extends JPanel{
      * this is a temporary method that will be removed in the 
      * first release candidate
      */
-    @Deprecated
+    @Deprecated   
     final void generateGameFiles(){
         TreePath path=projectsTree.getSelectionPath();
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
@@ -885,16 +887,19 @@ public final class ProjectManager extends JPanel{
              int floorIndex;
              BufferedImage image;
              int w,h,rgb;
-             Map map;             
+             Map map;
+             File levelFile;
+             ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
              AbsoluteVolumeParameters[][] avp;
+             ArrayList<AbsoluteVolumeParameters[][]> levelVolumeParamsList=new ArrayList<AbsoluteVolumeParameters[][]>();
              for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                 {floorIndex=0;
-            	  for(Floor floor:level.getFloorsList())
+                 {floorIndex=0;                 
+                  for(Floor floor:level.getFloorsList())
                       {map=floor.getMap(MapType.CONTAINER_MAP);
-            		   /*for(Map map:floor.getMaps())                     
+                       /*for(Map map:floor.getMaps())                     
                            {*/image=map.getImage();
-                    	    w=image.getWidth();
-                            h=image.getHeight();                           
+                            w=image.getWidth();
+                            h=image.getHeight();
                             avp=new AbsoluteVolumeParameters[w][h];
                             /**
                              * use the colors and the tiles to 
@@ -903,44 +908,67 @@ public final class ProjectManager extends JPanel{
                              * is seen as a grid. Remove duplicate 
                              * surfaces if needed  
                              */
-                            //TODO: implement it
                             for(int i=0;i<w;i++)
-                        	    for(int j=0;j<h;j++)
-                        	        {avp[i][j]=new AbsoluteVolumeParameters();
-                        	         //compute the absolute coordinates of the left bottom back vertex
-                        	         avp[i][j].leftBottomBackVertex[0]=i;                       	         
-                        	         avp[i][j].leftBottomBackVertex[1]=-0.5f+floorIndex;
-                        	         avp[i][j].leftBottomBackVertex[2]=j;
-                        	         rgb=image.getRGB(i,j);
-                        	         //use the color of the image to get the matching tile
-                        	         for(Tile tile:project.getTileSet().getTilesList())
-                        	        	 if(tile.getColor().getRGB()==rgb)
-                        	        	     {avp[i][j].volumeParam=tile.getVolumeParameters();
-                        	        		  break;
-                        	        	     }
-                        	         //FIXME: this parameter should be set somewhere else
-                        	         avp[i][j].normalsOutwards=false;
-                        	        }
+                                for(int j=0;j<h;j++)
+                                    {avp[i][j]=new AbsoluteVolumeParameters();
+                                     //compute the absolute coordinates of the left bottom back vertex
+                                     avp[i][j].center[0]=i+0.5f;                                    
+                                     avp[i][j].center[1]=floorIndex;
+                                     avp[i][j].center[2]=j+0.5f;
+                                     rgb=image.getRGB(i,j);
+                                     //use the color of the image to get the matching tile
+                                     for(Tile tile:project.getTileSet().getTilesList())
+                                         if(tile.getColor().getRGB()==rgb)
+                                             {avp[i][j].volumeParam=tile.getVolumeParameters();
+                                              break;
+                                             }
+                                    }
                            /*}*/
-                       //TODO: create a single .abin file
-                       
-            		   floorIndex++;
+                       levelVolumeParamsList.add(avp);
+                       floorIndex++;
                       }
+                  levelFile=new File(workspace.createLevelPath(level.getName()));
+                  EngineServiceSeeker.getInstance().writeLevel(levelFile,levelVolumeParamsList);
+                  //remove the useless volume parameters
+                  levelVolumeParamsList.clear();
                  }
             }
     }
     
-    private static final class AbsoluteVolumeParameters{
+    private static final class AbsoluteVolumeParameters implements ILevelRelativeVolumeElement{
     	
     	
-    	private final float[] leftBottomBackVertex;
+    	private final float[] center;
     	
     	private VolumeParameters volumeParam;
     	
-    	private boolean normalsOutwards;
-    	
     	private AbsoluteVolumeParameters(){
-    		leftBottomBackVertex=new float[3];
+    		center=new float[3];
     	}
+
+        @Override
+        public final float[] getLevelRelativePosition(){
+            return(center);
+        }
+
+        @Override
+        public final IntBuffer getIndexBuffer(){
+            return(volumeParam.getIndexBuffer());
+        }
+
+        @Override
+        public FloatBuffer getNormalBuffer(){
+            return(volumeParam.getNormalBuffer());
+        }
+
+        @Override
+        public FloatBuffer getVertexBuffer(){
+            return(volumeParam.getVertexBuffer());
+        }
+        
+        @Override
+        public FloatBuffer getTexCoordBuffer(){
+            return(volumeParam.getTexCoordBuffer());
+        }
     }
 }

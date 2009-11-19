@@ -1,5 +1,10 @@
 package jfpsm;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+import com.sun.opengl.util.BufferUtil;
+
 import misc.SerializationHelper;
 
 public final class CuboidParameters extends VolumeParameters{
@@ -17,6 +22,14 @@ public final class CuboidParameters extends VolumeParameters{
     
     private boolean[] shownFaces;
     
+    private FloatBuffer vertexBuffer;
+    
+    private FloatBuffer normalBuffer;
+    
+    private IntBuffer indexBuffer;
+    
+    private FloatBuffer texCoordBuffer;
+    
     
     public CuboidParameters(){
         this(new float[]{0,0,0},new float[]{1,1,1},new boolean[]{true,true,true,true,true,true});
@@ -26,6 +39,12 @@ public final class CuboidParameters extends VolumeParameters{
         this.offset=offset;
         this.size=size;
         this.shownFaces=shownFaces;
+        //6 faces * 4 vertices * 3 coordinates
+        this.vertexBuffer=BufferUtil.newFloatBuffer(72);
+        this.normalBuffer=BufferUtil.newFloatBuffer(72);
+        //6 faces * 2 triangles * 3 indices
+        this.indexBuffer=BufferUtil.newIntBuffer(36);
+        this.texCoordBuffer=BufferUtil.newFloatBuffer(72);       
         markDirty();
     }
     
@@ -85,4 +104,24 @@ public final class CuboidParameters extends VolumeParameters{
 	public final void setShownFaces(boolean[] shownFaces){
 		this.shownFaces=shownFaces;
 	}
+	
+	@Override
+    public final IntBuffer getIndexBuffer(){
+        return(indexBuffer);
+    }
+
+    @Override
+    public FloatBuffer getNormalBuffer(){
+        return(normalBuffer);
+    }
+
+    @Override
+    public FloatBuffer getVertexBuffer(){
+        return(vertexBuffer);
+    }
+    
+    @Override
+    public FloatBuffer getTexCoordBuffer(){
+        return(texCoordBuffer);
+    }
 }

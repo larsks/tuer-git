@@ -73,6 +73,10 @@ public final class ProjectSet extends JFPSMUserObject{
         return(workspaceDirectory.getAbsolutePath()+System.getProperty("file.separator")+projectName+Project.getFileExtension());
     }
     
+    final String createLevelPath(String levelName){
+        return(workspaceDirectory.getAbsolutePath()+System.getProperty("file.separator")+levelName+".abin");
+    }
+    
     final void removeProject(Project project){
         if(projectsList.remove(project))
             {dirty=true;

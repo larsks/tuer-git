@@ -14,6 +14,9 @@
 package jfpsm;
 
 import java.io.Serializable;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
 import misc.SerializationHelper;
 
 public abstract class VolumeParameters implements Serializable,Dirtyable {
@@ -24,4 +27,12 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     private static final long serialVersionUID=1L;
     
     abstract VolumeType getVolumeType();
+    
+    abstract IntBuffer getIndexBuffer();
+
+    abstract FloatBuffer getNormalBuffer();
+
+    abstract FloatBuffer getVertexBuffer();
+    
+    abstract FloatBuffer getTexCoordBuffer();
 }

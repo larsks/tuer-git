@@ -1,5 +1,8 @@
 package jfpsm;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public final class EngineServiceSeeker implements I3DServiceSeeker{
 
     
@@ -17,7 +20,8 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
         return(instance);
     }
     
-    public final void dummyTest(){
-        delegate.dummyTest();
+    @Override
+    public final void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementList){
+        delegate.writeLevel(levelFile,volumeElementList);
     }
 }

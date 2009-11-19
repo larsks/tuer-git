@@ -191,8 +191,6 @@ public final class MainWindow{
     public static final void runInstance(String[] args){
         //launch a minimal GUI to be able to display a popup if something goes wrong later        
         MainWindow mainWindow=new MainWindow(new JFrame());
-        //test a software component
-        EngineServiceSeeker.getInstance().dummyTest();
         //run the application
         try{mainWindow.run();}
         catch(Throwable throwable)
