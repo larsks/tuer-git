@@ -1,3 +1,16 @@
+/*This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation, version 2
+  of the License.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+  MA 02111-1307, USA.
+*/
 package jfpsm;
 
 import java.nio.FloatBuffer;
@@ -20,6 +33,8 @@ public final class CuboidParameters extends VolumeParameters{
     
     private float[] size;
     
+    private float[][] texCoord;
+    
     public enum Side{BACK,RIGHT,FRONT,LEFT,TOP,BOTTOM};
     
     public enum Orientation{OUTWARDS,INWARDS,NONE};
@@ -36,12 +51,17 @@ public final class CuboidParameters extends VolumeParameters{
     
     
     public CuboidParameters(){
-        this(new float[]{0,0,0},new float[]{1,1,1},new Orientation[]{Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS});
+        this(new float[]{0,0,0},new float[]{1,1,1},
+             new Orientation[]{Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS,Orientation.OUTWARDS},
+             new float[][]{new float[]{0,1,0,1},new float[]{0,1,0,1},new float[]{0,1,0,1},new float[]{0,1,0,1},new float[]{0,1,0,1},new float[]{0,1,0,1}});
     }
     
-    public CuboidParameters(float[] offset,float[] size,Orientation[] faceOrientation){
+    public CuboidParameters(final float[] offset,
+            final float[] size,final Orientation[] faceOrientation,
+            final float[][] texCoord){
         this.offset=offset;
         this.size=size;
+        this.texCoord=texCoord;
         this.faceOrientation=faceOrientation;
         //6 faces * 4 vertices * 3 coordinates
         this.vertexBuffer=BufferUtil.newFloatBuffer(72);
@@ -106,7 +126,7 @@ public final class CuboidParameters extends VolumeParameters{
         markDirty();
     }
 	
-	private void recomputeBuffersIfNeeded(){
+	private final void recomputeBuffersIfNeeded(){
 	    if(buffersRecomputationNeeded)
 	        {if(vertexBuffer==null)
 	            {//6 faces * 4 vertices * 3 coordinates
@@ -241,6 +261,7 @@ public final class CuboidParameters extends VolumeParameters{
                  }
              texCoordBuffer.rewind();
              //fill the texture coord buffer
+             //TODO: use texCoord
              texCoordBuffer.put(1).put(0);
              texCoordBuffer.put(0).put(0);
              texCoordBuffer.put(0).put(1);
@@ -276,31 +297,66 @@ public final class CuboidParameters extends VolumeParameters{
 	        }
 	}
 	
-	public void setOrientation(Side side,Orientation orientation){
+	public final void setOrientation(Side side,Orientation orientation){
 	    faceOrientation[side.ordinal()]=orientation;
 	    buffersRecomputationNeeded=true;
+	    markDirty();
 	}
 	
-	@Override
+	public final Orientation getOrientation(Side side){
+	    return(faceOrientation[side.ordinal()]);
+	}
+	
+	public final Orientation[] getFaceOrientation(){
+	    return(faceOrientation);
+	}
+	
+	public final void setFaceOrientation(final Orientation[] faceOrientation){
+        this.faceOrientation=faceOrientation;
+        buffersRecomputationNeeded=true;
+        markDirty();
+    }
+	
+	public final float[][] getTexCoord(){
+	    return(texCoord);
+	}
+	
+	public final float getTexCoord(final Side side,final int texCoordIndex){
+        return(texCoord[side.ordinal()][texCoordIndex]);
+    }
+	
+	public final void setTexCoord(final Side side,final int texCoordIndex,final float value){
+        this.texCoord[side.ordinal()][texCoordIndex]=value;
+        buffersRecomputationNeeded=true;
+        markDirty();
+    }
+	
+	public final void setTexCoord(final float[][] texCoord){
+        this.texCoord=texCoord;
+        buffersRecomputationNeeded=true;
+        markDirty();
+    }
+
+    @Override
     public final IntBuffer getIndexBuffer(){
         recomputeBuffersIfNeeded();
         return(indexBuffer);
     }
 
     @Override
-    public FloatBuffer getNormalBuffer(){
+    public final FloatBuffer getNormalBuffer(){
         recomputeBuffersIfNeeded();
         return(normalBuffer);
     }
 
     @Override
-    public FloatBuffer getVertexBuffer(){
+    public final FloatBuffer getVertexBuffer(){
         recomputeBuffersIfNeeded();
         return(vertexBuffer);
     }
     
     @Override
-    public FloatBuffer getTexCoordBuffer(){
+    public final FloatBuffer getTexCoordBuffer(){
         recomputeBuffersIfNeeded();
         return(texCoordBuffer);
     }
