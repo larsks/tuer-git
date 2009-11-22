@@ -87,14 +87,14 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
-		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.6-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
 		<!-- TODO: JDOM -->
-		<pathelement location="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/guice-1.0.jar"/>
-		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl.jar"/>
 		<!-- uncomment these lines when the ticket 144 is fixed -->
 		<!--<pathelement location="../ardor3d-jogl/lib/jogl/jogl-natives-linux-i586.jar" if="isLinux_i586"/>
@@ -119,7 +119,7 @@
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-amd64.jar" if="isSolaris_amd64"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparc.jar" if="isSolaris_sparc"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt-natives-solaris-sparcv9.jar" if="isSolaris_sparcv9"/>-->
-		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar"/>
 		<pathelement location="./CodecJOrbis.jar"/>
 		<pathelement location="./LibraryJavaSound.jar"/>
 		<pathelement location="./SoundSystem.jar"/>
@@ -191,22 +191,22 @@
 		<!-- copy these JAR into the local destination directory -->
 		<copy file="../ardor3d-core/lib/google/guice-1.0.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-animation/target/ardor3d-animation-0.6-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-collada/target/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-core/target/ardor3d-core-0.6-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-awt/target/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.6-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-ui/target/ardor3d-ui-0.6-SNAPSHOT.jar" todir="${destdir}"/>	
+		<copy file="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
 		    <path>
 		    	<fileset file="${destdir}/guice-1.0.jar" />
 		    	<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
-		    	<fileset file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
 		      	<fileset file="${destdir}/tuer.jar"/>
 		        <fileset file="${destdir}/jfpsm.jar"/>
 		    	<fileset file="./CodecJOrbis.jar"/>
@@ -222,12 +222,12 @@
 	    <!-- TODO: use scp task to do it -->
 		<copy file="${destdir}/guice-1.0.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/google-collect-1.0-rc1.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
+		<copy file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
 		<copy file="${destdir}/tuer.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/jfpsm.jar" todir="${deploymentdestdir}"/>
 		<copy file="./CodecJOrbis.jar" todir="${deploymentdestdir}"/>
@@ -245,12 +245,12 @@
 	  		<fileset file="${destdir}/jfpsm.jar"/>
 	  		<fileset file="${destdir}/guice-1.0.jar" />
 	  		<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
-	  		<fileset file="${destdir}/ardor3d-animation-0.6-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-collada-0.6-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-core-0.6-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-awt-0.6-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-jogl-0.6-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-ui-0.6-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->
