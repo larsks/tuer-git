@@ -836,7 +836,7 @@ public final class ProjectManager extends JPanel{
                        //remove the tile from the workspace and from the file if any
                        tileSet.removeTile(tile);
                        //remove the tile from the tree
-                       treeModel.removeNodeFromParent(node);                       
+                       treeModel.removeNodeFromParent(node);
                       }
                   for(DefaultMutableTreeNode node:floorsTrashList)
                       {FloorSet floorSet=(FloorSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();
@@ -849,9 +849,8 @@ public final class ProjectManager extends JPanel{
                       {LevelSet levelSet=(LevelSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();
                        FloorSet floorSet=(FloorSet)node.getUserObject();
                        for(Floor floor:floorSet.getFloorsList())
-                           {mainWindow.getEntityViewer().closeEntityView(floor);
-                            floorSet.removeFloor(floor);
-                           }
+                           mainWindow.getEntityViewer().closeEntityView(floor);
+                       floorSet.removeAllFloors();
                        levelSet.removeFloorSet(floorSet);
                        treeModel.removeNodeFromParent(node);
                       }
@@ -912,9 +911,9 @@ public final class ProjectManager extends JPanel{
                                 for(int j=0;j<h;j++)
                                     {avp[i][j]=new AbsoluteVolumeParameters();
                                      //compute the absolute coordinates of the left bottom back vertex
-                                     avp[i][j].center[0]=i+0.5f;                                    
-                                     avp[i][j].center[1]=floorIndex;
-                                     avp[i][j].center[2]=j+0.5f;
+                                     avp[i][j].translation[0]=i;                                    
+                                     avp[i][j].translation[1]=floorIndex-0.5f;
+                                     avp[i][j].translation[2]=j;
                                      rgb=image.getRGB(i,j);
                                      //use the color of the image to get the matching tile
                                      for(Tile tile:project.getTileSet().getTilesList())
@@ -938,17 +937,17 @@ public final class ProjectManager extends JPanel{
     private static final class AbsoluteVolumeParameters implements ILevelRelativeVolumeElement{
     	
     	
-    	private final float[] center;
+    	private final float[] translation;
     	
     	private VolumeParameters volumeParam;
     	
     	private AbsoluteVolumeParameters(){
-    		center=new float[3];
+    		translation=new float[3];
     	}
 
         @Override
         public final float[] getLevelRelativePosition(){
-            return(center);
+            return(translation);
         }
 
         @Override

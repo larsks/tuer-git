@@ -17,6 +17,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.MeshData;
+import com.ardor3d.scenegraph.Node;
+import com.ardor3d.util.export.binary.BinaryExporter;
+
 public final class EngineServiceProvider implements I3DServiceProvider{
     
     
@@ -39,11 +44,43 @@ public final class EngineServiceProvider implements I3DServiceProvider{
                  throw new RuntimeException("The file "+levelFile.getAbsolutePath()+" cannot be created!");
             }
         if(success)
-            {/**
-              * create one node per level
-              * create one node per floor (array)
-              * use the geometries passed as arguments to build the mesh data
-              */            
+            {System.out.println("JFPSM attempts to write the level into the file "+levelFile.getName());
+             // Create one node per level
+             final Node levelNode=new Node(levelFile.getName().substring(0,levelFile.getName().lastIndexOf(".")));
+             Node floorNode;
+             int floorIndex=0,meshIndex;
+             MeshData volumeElementMeshData;
+             Mesh volumeElementMesh;
+             for(ILevelRelativeVolumeElement[][] floorVolumeElements:volumeElementsList)
+                 {// Create one node per floor (array)
+                  floorNode=new Node("level "+levelNode.getName()+" floor "+floorIndex);
+                  meshIndex=0;
+                  // Use the geometries passed as arguments to build the mesh data
+                  for(int i=0;i<floorVolumeElements.length;i++)
+                      for(int j=0;j<floorVolumeElements[i].length;j++)
+                          {volumeElementMeshData=new MeshData();
+                           volumeElementMeshData.setVertexBuffer(floorVolumeElements[i][j].getVertexBuffer());
+                           volumeElementMeshData.setIndexBuffer(floorVolumeElements[i][j].getIndexBuffer());
+                           volumeElementMeshData.setTextureBuffer(floorVolumeElements[i][j].getTexCoordBuffer(),0);
+                           volumeElementMeshData.setNormalBuffer(floorVolumeElements[i][j].getNormalBuffer());
+                           volumeElementMesh=new Mesh(floorNode.getName()+" mesh "+meshIndex);
+                           floorNode.attachChild(volumeElementMesh);
+                           meshIndex++;
+                          }
+                  levelNode.attachChild(floorNode);
+                  floorIndex++;
+                 }
+             System.out.println("JFPSM attempts to write the level into the file "+levelFile.getName());
+             // Export the level node
+             try{BinaryExporter.getInstance().save(levelNode,levelFile);}
+             catch(IOException ioe)
+             {success=false;
+              ioe.printStackTrace();
+             }
+             if(success)
+                 System.out.println("[INFO] Export into the file "+levelFile.getName()+" successful");
+             else
+                 System.out.println("[WARNING]Export into the file "+levelFile.getName()+" not successful!");
             }
     }
 }

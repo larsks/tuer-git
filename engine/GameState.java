@@ -27,6 +27,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
+import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import engine.input.ExtendedFirstPersonControl;
 
@@ -46,6 +47,8 @@ final class GameState extends State{
     private final Vector3 currentCamLocation;
     
     private final CameraNode playerNode;
+    
+    private final BasicText fpsTextLabel;
 
     
     GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
@@ -63,12 +66,14 @@ final class GameState extends State{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
-        /*getRoot().addController(new SpatialController<Spatial>(){
+        fpsTextLabel=BasicText.createDefaultTextLabel("FPS display","");
+        fpsTextLabel.setTranslation(new Vector3(0,20,0));
+        fpsTextLabel.addController(new SpatialController<Spatial>(){
             @Override
-            public final void update(double time, Spatial caller){
-                System.out.println("FPS: "+(time>0?1/time:0));
+            public final void update(double time,Spatial caller){
+                fpsTextLabel.setText(Math.round(time>0?1/time:0)+" FPS");
             }           
-        });*/
+        });
         // configure the collision system
         /*CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
         collisionResults=new BoundingCollisionResults();
@@ -102,6 +107,8 @@ final class GameState extends State{
         currentCamLocation.set(115,0,223);
         //attach the player itself
         getRoot().attachChild(playerNode);
+        //attach the FPS display node
+        getRoot().attachChild(fpsTextLabel);
         // Load level model
         try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
              CullState cullState=new CullState();

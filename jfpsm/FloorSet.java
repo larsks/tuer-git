@@ -74,6 +74,11 @@ public final class FloorSet extends JFPSMUserObject{
         floorsList.remove(floor);
         markDirty();
     }
+    
+    public final void removeAllFloors(){
+        floorsList.clear();
+        markDirty();
+    }
 
     public final ArrayList<Floor> getFloorsList(){
         return(floorsList);

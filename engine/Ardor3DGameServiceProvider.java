@@ -43,6 +43,7 @@ import com.ardor3d.math.Ray3;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.hint.DataMode;
 import com.ardor3d.ui.text.BMFont;
 import com.ardor3d.util.ContextGarbageCollector;
 import com.ardor3d.util.GameTaskQueue;
@@ -220,6 +221,8 @@ final class Ardor3DGameServiceProvider implements Scene{
      */
     private final void init(){
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
+        // use VBO if available, otherwise use vertex arrays
+        root.getSceneHints().setDataMode(DataMode.VBO);
         // Create a ZBuffer to display pixels closest to the camera above farther ones.
         final ZBufferState buf=new ZBufferState();
         buf.setEnabled(true);
