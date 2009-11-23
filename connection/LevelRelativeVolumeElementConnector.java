@@ -26,27 +26,32 @@ final class LevelRelativeVolumeElementConnector implements ILevelRelativeVolumeE
         this.delegate=delegate;
     }
 
-    public float[] getLevelRelativePosition(){
+    public final float[] getLevelRelativePosition(){
         return(delegate.getLevelRelativePosition());
     }
 
     @Override
-    public IntBuffer getIndexBuffer(){
+    public final IntBuffer getIndexBuffer(){
         return(delegate.getIndexBuffer());
     }
 
     @Override
-    public FloatBuffer getNormalBuffer(){
+    public final FloatBuffer getNormalBuffer(){
         return(delegate.getNormalBuffer());
     }
 
     @Override
-    public FloatBuffer getVertexBuffer(){
+    public final FloatBuffer getVertexBuffer(){
         return(delegate.getVertexBuffer());
     }
     
     @Override
-    public FloatBuffer getTexCoordBuffer(){
+    public final FloatBuffer getTexCoordBuffer(){
         return(delegate.getTexCoordBuffer());
+    }
+    
+    @Override
+    public final int getVolumeParamIdentifier(){
+        return(delegate.getVolumeParamIdentifier());
     }
 }
