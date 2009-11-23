@@ -32,7 +32,7 @@ public final class CuboidParameters extends VolumeParameters{
     private float[] offset;
     
     private float[] size;
-    
+    /**texture coordinates sorted by side*/
     private float[][] texCoord;
     
     public enum Side{BACK,RIGHT,FRONT,LEFT,TOP,BOTTOM};
@@ -125,34 +125,34 @@ public final class CuboidParameters extends VolumeParameters{
         buffersRecomputationNeeded=true;
         markDirty();
     }
-	
-	private final void recomputeBuffersIfNeeded(){
-	    if(buffersRecomputationNeeded)
-	        {if(vertexBuffer==null)
-	            {//6 faces * 4 vertices * 3 coordinates
-	             vertexBuffer=BufferUtil.newFloatBuffer(72);	             
-	            }	         
-	         float[] center=new float[3];
-	         for(int i=0;i<3;i++)
-	             center[i]=(size[i]/2)+offset[i];
-	         float[][] vertices=new float[8][3];
-	         vertices[0]=new float[]{center[0]-size[0]/2,center[1]-size[1]/2,center[2]-size[2]/2};
-	         vertices[1]=new float[]{center[0]+size[0]/2,center[1]-size[1]/2,center[2]-size[2]/2};
-	         vertices[2]=new float[]{center[0]+size[0]/2,center[1]+size[1]/2,center[2]-size[2]/2};
-	         vertices[3]=new float[]{center[0]-size[0]/2,center[1]+size[1]/2,center[2]-size[2]/2};	         
-	         vertices[4]=new float[]{center[0]+size[0]/2,center[1]-size[1]/2,center[2]+size[2]/2};
-	         vertices[5]=new float[]{center[0]-size[0]/2,center[1]-size[1]/2,center[2]+size[2]/2};
-	         vertices[6]=new float[]{center[0]+size[0]/2,center[1]+size[1]/2,center[2]+size[2]/2};
-	         vertices[7]=new float[]{center[0]-size[0]/2,center[1]+size[1]/2,center[2]+size[2]/2};
+    
+    private final void recomputeBuffersIfNeeded(){
+        if(buffersRecomputationNeeded)
+            {if(vertexBuffer==null)
+                {//6 faces * 4 vertices * 3 coordinates
+                 vertexBuffer=BufferUtil.newFloatBuffer(72);                 
+                }            
+             float[] center=new float[3];
+             for(int i=0;i<3;i++)
+                 center[i]=(size[i]/2)+offset[i];
+             float[][] vertices=new float[8][3];
+             vertices[0]=new float[]{center[0]-size[0]/2,center[1]-size[1]/2,center[2]-size[2]/2};
+             vertices[1]=new float[]{center[0]+size[0]/2,center[1]-size[1]/2,center[2]-size[2]/2};
+             vertices[2]=new float[]{center[0]+size[0]/2,center[1]+size[1]/2,center[2]-size[2]/2};
+             vertices[3]=new float[]{center[0]-size[0]/2,center[1]+size[1]/2,center[2]-size[2]/2};           
+             vertices[4]=new float[]{center[0]+size[0]/2,center[1]-size[1]/2,center[2]+size[2]/2};
+             vertices[5]=new float[]{center[0]-size[0]/2,center[1]-size[1]/2,center[2]+size[2]/2};
+             vertices[6]=new float[]{center[0]+size[0]/2,center[1]+size[1]/2,center[2]+size[2]/2};
+             vertices[7]=new float[]{center[0]-size[0]/2,center[1]+size[1]/2,center[2]+size[2]/2};
              //fill the vertex buffer
-	         vertexBuffer.rewind();
-	         // Back
-	         vertexBuffer.put(vertices[0]);
-	         vertexBuffer.put(vertices[1]);
-	         vertexBuffer.put(vertices[2]);
-	         vertexBuffer.put(vertices[3]);
-	         // Right
-	         vertexBuffer.put(vertices[1]);
+             vertexBuffer.rewind();
+             // Back
+             vertexBuffer.put(vertices[0]);
+             vertexBuffer.put(vertices[1]);
+             vertexBuffer.put(vertices[2]);
+             vertexBuffer.put(vertices[3]);
+             // Right
+             vertexBuffer.put(vertices[1]);
              vertexBuffer.put(vertices[4]);
              vertexBuffer.put(vertices[6]);
              vertexBuffer.put(vertices[2]);
@@ -229,27 +229,27 @@ public final class CuboidParameters extends VolumeParameters{
              normalBuffer.put(0).put(0).put(value);
              normalBuffer.put(0).put(0).put(value);
              normalBuffer.put(0).put(0).put(value);    
-             value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?1:-1;
+             value=faceOrientation[Side.RIGHT.ordinal()]==Orientation.OUTWARDS?1:-1;
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
-             value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?1:-1;
+             value=faceOrientation[Side.FRONT.ordinal()]==Orientation.OUTWARDS?1:-1;
              normalBuffer.put(0).put(0).put(value);
              normalBuffer.put(0).put(0).put(value);
              normalBuffer.put(0).put(0).put(value);
              normalBuffer.put(0).put(0).put(value);
-             value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?-1:1;
+             value=faceOrientation[Side.LEFT.ordinal()]==Orientation.OUTWARDS?-1:1;
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
              normalBuffer.put(value).put(0).put(0);
-             value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?1:-1;
+             value=faceOrientation[Side.TOP.ordinal()]==Orientation.OUTWARDS?1:-1;
              normalBuffer.put(0).put(value).put(0);
              normalBuffer.put(0).put(value).put(0);
              normalBuffer.put(0).put(value).put(0);
              normalBuffer.put(0).put(value).put(0);
-             value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?-1:1;
+             value=faceOrientation[Side.BOTTOM.ordinal()]==Orientation.OUTWARDS?-1:1;
              normalBuffer.put(0).put(value).put(0);
              normalBuffer.put(0).put(value).put(0);
              normalBuffer.put(0).put(value).put(0);
@@ -261,77 +261,57 @@ public final class CuboidParameters extends VolumeParameters{
                  }
              texCoordBuffer.rewind();
              //fill the texture coord buffer
-             //TODO: use texCoord
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
-             texCoordBuffer.put(1).put(0);
-             texCoordBuffer.put(0).put(0);
-             texCoordBuffer.put(0).put(1);
-             texCoordBuffer.put(1).put(1);
-             
+             float u0,u1,v0,v1;
+             for(Side side:Side.values())
+                 {u0=texCoord[side.ordinal()][0];
+                  u1=texCoord[side.ordinal()][1];
+                  v0=texCoord[side.ordinal()][2];
+                  v1=texCoord[side.ordinal()][3];
+                  texCoordBuffer.put(u1).put(v0);
+                  texCoordBuffer.put(u0).put(v0);
+                  texCoordBuffer.put(u0).put(v1);
+                  texCoordBuffer.put(u1).put(v1);
+                 }
              texCoordBuffer.rewind();
-	         buffersRecomputationNeeded=false;
-	        }
-	}
-	
-	public final void setOrientation(Side side,Orientation orientation){
-	    faceOrientation[side.ordinal()]=orientation;
-	    buffersRecomputationNeeded=true;
-	    markDirty();
-	}
-	
-	public final Orientation getOrientation(Side side){
-	    return(faceOrientation[side.ordinal()]);
-	}
-	
-	public final Orientation[] getFaceOrientation(){
-	    return(faceOrientation);
-	}
-	
-	public final void setFaceOrientation(final Orientation[] faceOrientation){
+             buffersRecomputationNeeded=false;
+            }
+    }
+    
+    public final void setOrientation(Side side,Orientation orientation){
+        faceOrientation[side.ordinal()]=orientation;
+        buffersRecomputationNeeded=true;
+        markDirty();
+    }
+    
+    public final Orientation getOrientation(Side side){
+        return(faceOrientation[side.ordinal()]);
+    }
+    
+    public final Orientation[] getFaceOrientation(){
+        return(faceOrientation);
+    }
+    
+    public final void setFaceOrientation(final Orientation[] faceOrientation){
         this.faceOrientation=faceOrientation;
         buffersRecomputationNeeded=true;
         markDirty();
     }
-	
-	public final float[][] getTexCoord(){
-	    return(texCoord);
-	}
-	
-	public final float getTexCoord(final Side side,final int texCoordIndex){
+    
+    public final float[][] getTexCoord(){
+        return(texCoord);
+    }
+    
+    public final float getTexCoord(final Side side,final int texCoordIndex){
         return(texCoord[side.ordinal()][texCoordIndex]);
     }
-	
-	public final void setTexCoord(final Side side,final int texCoordIndex,final float value){
+    
+    public final void setTexCoord(final Side side,final int texCoordIndex,final float value){
         this.texCoord[side.ordinal()][texCoordIndex]=value;
         buffersRecomputationNeeded=true;
         markDirty();
     }
-	
-	public final void setTexCoord(final float[][] texCoord){
+    
+    public final void setTexCoord(final float[][] texCoord){
         this.texCoord=texCoord;
         buffersRecomputationNeeded=true;
         markDirty();

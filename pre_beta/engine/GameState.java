@@ -110,7 +110,7 @@ final class GameState extends State{
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
         // Load level model
-        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource(/*"/abin/tutorial.abin"*/"/abin/LID"+levelIndex+".abin"));
              CullState cullState=new CullState();
              cullState.setEnabled(true);
              cullState.setCullFace(CullState.Face.Back);

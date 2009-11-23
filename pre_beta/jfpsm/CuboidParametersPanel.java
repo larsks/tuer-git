@@ -107,14 +107,14 @@ final class CuboidParametersPanel extends JPanel{
                      sliders[i][j].setValueIsAdjusting(false);
              // Set the radio buttons to the selection corresponding to the stored data            
              CuboidParameters.Orientation orientation;
-             boolean isSpinnerVisible;
+             boolean isSpinnerEnabled;
              for(CuboidParameters.Side side:CuboidParameters.Side.values())
                  {orientation=cuboidParam.getOrientation(side);
-                  isSpinnerVisible=orientation!=CuboidParameters.Orientation.NONE;
+                  isSpinnerEnabled=orientation!=CuboidParameters.Orientation.NONE;
                   radioButtons[side.ordinal()][orientation.ordinal()].setSelected(true);
                   for(JSpinner spinner:uvTexCoordSpinners[side.ordinal()])
-                      spinner.setVisible(isSpinnerVisible);
-                  if(isSpinnerVisible)
+                      spinner.setEnabled(isSpinnerEnabled);
+                  if(isSpinnerEnabled)
                       {// Update the spinners too
                        for(int spIndex=0;spIndex<4;spIndex++)
                            uvTexCoordSpinners[side.ordinal()][spIndex].setValue(Float.valueOf(((CuboidParameters)tile.getVolumeParameters()).getTexCoord(side,spIndex)));
@@ -225,9 +225,9 @@ final class CuboidParametersPanel extends JPanel{
         @Override
         public final void actionPerformed(final ActionEvent ae){
             cuboidParam.setOrientation(side,orientation);
-            final boolean isVisible=orientation!=CuboidParameters.Orientation.NONE;
-            uvTexCoordSpinners[0].setVisible(isVisible);
-            uvTexCoordSpinners[1].setVisible(isVisible);
+            final boolean isEnabled=orientation!=CuboidParameters.Orientation.NONE;
+            for(JSpinner spinner:uvTexCoordSpinners)
+                spinner.setEnabled(isEnabled);
         }
     }
     

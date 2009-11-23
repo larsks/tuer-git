@@ -882,55 +882,60 @@ public final class ProjectManager extends JPanel{
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
         JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
         if(userObject instanceof Project)
-            {Project project=(Project)userObject;
-             int floorIndex;
-             BufferedImage image;
-             int w,h,rgb;
-             Map map;
-             File levelFile;
-             ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
-             AbsoluteVolumeParameters[][] avp;
-             ArrayList<AbsoluteVolumeParameters[][]> levelVolumeParamsList=new ArrayList<AbsoluteVolumeParameters[][]>();
-             for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                 {floorIndex=0;                 
-                  for(Floor floor:level.getFloorsList())
-                      {map=floor.getMap(MapType.CONTAINER_MAP);
-                       /*for(Map map:floor.getMaps())                     
-                           {*/image=map.getImage();
-                            w=image.getWidth();
-                            h=image.getHeight();
-                            avp=new AbsoluteVolumeParameters[w][h];
-                            /**
-                             * use the colors and the tiles to 
-                             * compute the geometry in an 
-                             * engine-agnostic format, the image 
-                             * is seen as a grid. Remove duplicate 
-                             * surfaces if needed  
-                             */
-                            for(int i=0;i<w;i++)
-                                for(int j=0;j<h;j++)
-                                    {avp[i][j]=new AbsoluteVolumeParameters();
-                                     //compute the absolute coordinates of the left bottom back vertex
-                                     avp[i][j].translation[0]=i;                                    
-                                     avp[i][j].translation[1]=floorIndex-0.5f;
-                                     avp[i][j].translation[2]=j;
-                                     rgb=image.getRGB(i,j);
-                                     //use the color of the image to get the matching tile
-                                     for(Tile tile:project.getTileSet().getTilesList())
-                                         if(tile.getColor().getRGB()==rgb)
-                                             {avp[i][j].volumeParam=tile.getVolumeParameters();
-                                              break;
-                                             }
-                                    }
-                           /*}*/
-                       levelVolumeParamsList.add(avp);
-                       floorIndex++;
-                      }
-                  levelFile=new File(workspace.createLevelPath(level.getName()));
-                  EngineServiceSeeker.getInstance().writeLevel(levelFile,levelVolumeParamsList);
-                  //remove the useless volume parameters
-                  levelVolumeParamsList.clear();
+            {final Project project=(Project)userObject;
+             final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
+             new Thread(new Runnable(){
+                 @Override
+                 public final void run(){           
+                     int floorIndex;
+                     BufferedImage image;
+                     int w,h,rgb;
+                     Map map;
+                     File levelFile;            
+                     AbsoluteVolumeParameters[][] avp;
+                     ArrayList<AbsoluteVolumeParameters[][]> levelVolumeParamsList=new ArrayList<AbsoluteVolumeParameters[][]>();
+                     for(FloorSet level:project.getLevelSet().getFloorSetsList())
+                         {floorIndex=0;                 
+                          for(Floor floor:level.getFloorsList())
+                              {map=floor.getMap(MapType.CONTAINER_MAP);
+                               /*for(Map map:floor.getMaps())                     
+                               {*/image=map.getImage();
+                               w=image.getWidth();
+                               h=image.getHeight();
+                               avp=new AbsoluteVolumeParameters[w][h];
+                               /**
+                                * use the colors and the tiles to 
+                                * compute the geometry in an 
+                                * engine-agnostic format, the image 
+                                * is seen as a grid. Remove duplicate 
+                                * surfaces if needed  
+                                */
+                               for(int i=0;i<w;i++)
+                                   for(int j=0;j<h;j++)
+                                       {avp[i][j]=new AbsoluteVolumeParameters();
+                                        //compute the absolute coordinates of the left bottom back vertex
+                                       avp[i][j].translation[0]=i;                                    
+                                       avp[i][j].translation[1]=floorIndex-0.5f;
+                                       avp[i][j].translation[2]=j;
+                                       rgb=image.getRGB(i,j);
+                                       //use the color of the image to get the matching tile
+                                       for(Tile tile:project.getTileSet().getTilesList())
+                                           if(tile.getColor().getRGB()==rgb)
+                                               {avp[i][j].volumeParam=tile.getVolumeParameters();
+                                                break;
+                                               }
+                                      }
+                               /*}*/
+                               levelVolumeParamsList.add(avp);
+                               floorIndex++;
+                              }
+                          levelFile=new File(workspace.createLevelPath(level.getName()));
+                          EngineServiceSeeker.getInstance().writeLevel(levelFile,levelVolumeParamsList);
+                          //remove the useless volume parameters
+                          levelVolumeParamsList.clear();
+                         }
                  }
+             }).start();
             }
     }
     
@@ -956,18 +961,23 @@ public final class ProjectManager extends JPanel{
         }
 
         @Override
-        public FloatBuffer getNormalBuffer(){
+        public final FloatBuffer getNormalBuffer(){
             return(volumeParam.getNormalBuffer());
         }
 
         @Override
-        public FloatBuffer getVertexBuffer(){
+        public final FloatBuffer getVertexBuffer(){
             return(volumeParam.getVertexBuffer());
         }
         
         @Override
-        public FloatBuffer getTexCoordBuffer(){
+        public final FloatBuffer getTexCoordBuffer(){
             return(volumeParam.getTexCoordBuffer());
+        }
+        
+        @Override
+        public final int getVolumeParamIdentifier(){
+            return(volumeParam.hashCode());
         }
     }
 }

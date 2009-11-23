@@ -22,4 +22,5 @@ public interface ILevelRelativeVolumeElement{
     public IntBuffer getIndexBuffer();
     public FloatBuffer getNormalBuffer();
     public FloatBuffer getTexCoordBuffer();
+    public int getVolumeParamIdentifier();
 }
