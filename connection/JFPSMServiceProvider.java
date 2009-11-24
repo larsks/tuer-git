@@ -14,11 +14,11 @@
 package connection;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import engine.EngineServiceProvider;
 import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
-import jfpsm.ILevelRelativeVolumeElement;
 import jfpsm.MainWindow;
 
 public final class JFPSMServiceProvider implements I3DServiceSeeker{
@@ -40,19 +40,25 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     }
     
     @Override
-    public final void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementsList){
-        ArrayList<engine.ILevelRelativeVolumeElement[][]> engineVolumeElementsList=new ArrayList<engine.ILevelRelativeVolumeElement[][]>();
-        engine.ILevelRelativeVolumeElement[][] eilrvea;
-        for(ILevelRelativeVolumeElement[][] ilrvea:volumeElementsList)
-            {eilrvea=new engine.ILevelRelativeVolumeElement[ilrvea.length][];
-             for(int i=0;i<ilrvea.length;i++)
-                 {eilrvea[i]=new engine.ILevelRelativeVolumeElement[ilrvea[i].length];
-                  for(int j=0;j<ilrvea[i].length;j++)
-                      eilrvea[i][j]=new LevelRelativeVolumeElementConnector(ilrvea[i][j]);
-                 }            
-             engineVolumeElementsList.add(eilrvea);
-            }
-        delegate.writeLevel(levelFile,engineVolumeElementsList);
+    public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
+    	return(delegate.writeSavableInstanceIntoFile(savable,file));
+    }
+    
+    @Override
+    public final void attachChildToNode(final Object parent,final Object child){
+    	delegate.attachChildToNode(parent,child);
+    }
+    
+    @Override
+    public final Object createNode(final String name){
+    	return(delegate.createNode(name));
+    }
+    
+    @Override
+    public final Object createMeshFromBuffers(final String name,
+    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
+    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
+    	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
     
     public static final void main(String[] args){

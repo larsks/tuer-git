@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -38,6 +39,8 @@ final class CuboidParametersPanel extends JPanel{
     private final JRadioButton[][] radioButtons;
     
     private final JSpinner[][] uvTexCoordSpinners;
+    
+    private final JCheckBox mergeCheckBox;
     
     private final Tile tile;
     
@@ -86,6 +89,9 @@ final class CuboidParametersPanel extends JPanel{
              orientationSubPanel.add(sideSubPanel);
             }
         add(orientationSubPanel);
+        mergeCheckBox=new JCheckBox("merge");
+        mergeCheckBox.addActionListener(new MergeCheckBoxActionListener(cuboidParam));
+        add(mergeCheckBox);
     }
     
     
@@ -120,6 +126,7 @@ final class CuboidParametersPanel extends JPanel{
                            uvTexCoordSpinners[side.ordinal()][spIndex].setValue(Float.valueOf(((CuboidParameters)tile.getVolumeParameters()).getTexCoord(side,spIndex)));
                       }
                  }
+             mergeCheckBox.setSelected(cuboidParam.isMergeEnabled());
             }
     }
     
@@ -229,6 +236,20 @@ final class CuboidParametersPanel extends JPanel{
             for(JSpinner spinner:uvTexCoordSpinners)
                 spinner.setEnabled(isEnabled);
         }
+    }
+    
+    private static final class MergeCheckBoxActionListener implements ActionListener{
+
+    	private final VolumeParameters volumeParam;
+    	
+    	private MergeCheckBoxActionListener(final VolumeParameters volumeParam){
+    		this.volumeParam=volumeParam;
+    	}
+    	
+		@Override
+		public final void actionPerformed(ActionEvent ae){
+			volumeParam.setMergeEnabled(((JCheckBox)ae.getSource()).isSelected());
+		}   	
     }
     
     private static final class UVSpinnerChangeListener implements ChangeListener{
