@@ -14,9 +14,15 @@
 package jfpsm;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public interface I3DServiceSeeker{
     public void bind3DServiceSeeker(I3DServiceSeeker seeker);
-    public void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementList);
+    public boolean writeSavableInstanceIntoFile(final Object savable,final File file);
+    public void attachChildToNode(final Object parent,final Object child);
+    public Object createNode(final String name);
+    public Object createMeshFromBuffers(final String name,
+    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
+    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
 }

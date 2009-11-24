@@ -23,8 +23,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.imageio.ImageIO;
@@ -38,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -47,6 +46,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
 
 /**
  * Panel that allows to manipulate the projects in a tree containing their
@@ -872,11 +872,8 @@ public final class ProjectManager extends JPanel{
     
     
     /**
-     * @deprecated
-     * this is a temporary method that will be removed in the 
-     * first release candidate
+     * generate level files one by one
      */
-    @Deprecated   
     final void generateGameFiles(){
         TreePath path=projectsTree.getSelectionPath();
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
@@ -884,100 +881,20 @@ public final class ProjectManager extends JPanel{
         if(userObject instanceof Project)
             {final Project project=(Project)userObject;
              final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
-             new Thread(new Runnable(){
+             SwingUtilities.invokeLater(new Runnable(){
                  @Override
-                 public final void run(){           
-                     int floorIndex;
-                     BufferedImage image;
-                     int w,h,rgb;
-                     Map map;
-                     File levelFile;            
-                     AbsoluteVolumeParameters[][] avp;
-                     ArrayList<AbsoluteVolumeParameters[][]> levelVolumeParamsList=new ArrayList<AbsoluteVolumeParameters[][]>();
+                 public final void run(){
+                     int levelIndex=0;
+                     File levelFile;
                      for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                         {floorIndex=0;                 
-                          for(Floor floor:level.getFloorsList())
-                              {map=floor.getMap(MapType.CONTAINER_MAP);
-                               /*for(Map map:floor.getMaps())                     
-                               {*/image=map.getImage();
-                               w=image.getWidth();
-                               h=image.getHeight();
-                               avp=new AbsoluteVolumeParameters[w][h];
-                               /**
-                                * use the colors and the tiles to 
-                                * compute the geometry in an 
-                                * engine-agnostic format, the image 
-                                * is seen as a grid. Remove duplicate 
-                                * surfaces if needed  
-                                */
-                               for(int i=0;i<w;i++)
-                                   for(int j=0;j<h;j++)
-                                       {avp[i][j]=new AbsoluteVolumeParameters();
-                                        //compute the absolute coordinates of the left bottom back vertex
-                                       avp[i][j].translation[0]=i;                                    
-                                       avp[i][j].translation[1]=floorIndex-0.5f;
-                                       avp[i][j].translation[2]=j;
-                                       rgb=image.getRGB(i,j);
-                                       //use the color of the image to get the matching tile
-                                       for(Tile tile:project.getTileSet().getTilesList())
-                                           if(tile.getColor().getRGB()==rgb)
-                                               {avp[i][j].volumeParam=tile.getVolumeParameters();
-                                                break;
-                                               }
-                                      }
-                               /*}*/
-                               levelVolumeParamsList.add(avp);
-                               floorIndex++;
-                              }
-                          levelFile=new File(workspace.createLevelPath(level.getName()));
-                          EngineServiceSeeker.getInstance().writeLevel(levelFile,levelVolumeParamsList);
-                          //remove the useless volume parameters
-                          levelVolumeParamsList.clear();
+                         {levelFile=new File(workspace.createLevelPath(level.getName()));
+                          try{GameFilesGenerator.getInstance().writeLevel(level, levelIndex, project,levelFile);}
+                          catch(Throwable throwable)
+                          {mainWindow.displayErrorMessage(throwable,false);}
+                          levelIndex++;
                          }
                  }
-             }).start();
+             });            
             }
-    }
-    
-    private static final class AbsoluteVolumeParameters implements ILevelRelativeVolumeElement{
-    	
-    	
-    	private final float[] translation;
-    	
-    	private VolumeParameters volumeParam;
-    	
-    	private AbsoluteVolumeParameters(){
-    		translation=new float[3];
-    	}
-
-        @Override
-        public final float[] getLevelRelativePosition(){
-            return(translation);
-        }
-
-        @Override
-        public final IntBuffer getIndexBuffer(){
-            return(volumeParam.getIndexBuffer());
-        }
-
-        @Override
-        public final FloatBuffer getNormalBuffer(){
-            return(volumeParam.getNormalBuffer());
-        }
-
-        @Override
-        public final FloatBuffer getVertexBuffer(){
-            return(volumeParam.getVertexBuffer());
-        }
-        
-        @Override
-        public final FloatBuffer getTexCoordBuffer(){
-            return(volumeParam.getTexCoordBuffer());
-        }
-        
-        @Override
-        public final int getVolumeParamIdentifier(){
-            return(volumeParam.hashCode());
-        }
     }
 }

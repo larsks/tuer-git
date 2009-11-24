@@ -26,6 +26,8 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     
     private static final long serialVersionUID=1L;
     
+    private boolean mergeEnabled;
+    
     abstract VolumeType getVolumeType();
     
     abstract IntBuffer getIndexBuffer();
@@ -35,4 +37,13 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     abstract FloatBuffer getVertexBuffer();
     
     abstract FloatBuffer getTexCoordBuffer();
+
+	public final boolean isMergeEnabled(){
+		return(mergeEnabled);
+	}
+
+	public final void setMergeEnabled(final boolean mergeEnabled){
+		this.mergeEnabled=mergeEnabled;
+		markDirty();
+	}
 }

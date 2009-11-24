@@ -1,7 +1,8 @@
 package jfpsm;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public final class EngineServiceSeeker implements I3DServiceSeeker{
 
@@ -21,7 +22,24 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
     }
     
     @Override
-    public final void writeLevel(File levelFile,ArrayList<? extends ILevelRelativeVolumeElement[][]> volumeElementList){
-        delegate.writeLevel(levelFile,volumeElementList);
+    public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
+    	return(delegate.writeSavableInstanceIntoFile(savable,file));
+    }
+    
+    @Override
+    public final void attachChildToNode(final Object parent,final Object child){
+    	delegate.attachChildToNode(parent,child);
+    }
+    
+    @Override
+    public final Object createNode(final String name){
+    	return(delegate.createNode(name));
+    }
+    
+    @Override
+    public final Object createMeshFromBuffers(final String name,
+    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
+    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
+    	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
 }

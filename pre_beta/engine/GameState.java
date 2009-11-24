@@ -118,7 +118,7 @@ final class GameState extends State{
              getRoot().attachChild(levelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setTranslation(111.5,0,219);
-             uziNode.setScale(0.2);
+             uziNode.setScale(0.2);           
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
              smachNode.setTranslation(112.5,0,219);
