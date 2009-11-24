@@ -61,6 +61,7 @@ final class GameFilesGenerator{
                       for(Tile tile:project.getTileSet().getTilesList())
                           if(tile.getColor().getRGB()==rgb)
                               {avp[i][j].setVolumeParam(tile.getVolumeParameters());
+                               avp[i][j].setName(tile.getName());
                                break;
                               }
                      }
@@ -85,6 +86,7 @@ final class GameFilesGenerator{
              Object volumeElementMesh;
              HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable;
              HashMap<Integer,ArrayList<Buffer>> volumeParamTable;
+             HashMap<Integer,String> tileNameTable;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer;
@@ -97,6 +99,7 @@ final class GameFilesGenerator{
                  {// Create a table to sort all elements using the same volume parameter
                   volumeParamLocationTable=new HashMap<Integer,ArrayList<float[]>>();
                   volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
+                  tileNameTable=new HashMap<Integer, String>();
                   for(int i=0;i<floorVolumeElements.length;i++)
                       for(int j=0;j<floorVolumeElements[i].length;j++)
                           if(!floorVolumeElements[i][j].isVoid())
@@ -111,6 +114,7 @@ final class GameFilesGenerator{
                                     bufferList.add(floorVolumeElements[i][j].getNormalBuffer());
                                     bufferList.add(floorVolumeElements[i][j].getTexCoordBuffer());
                                     volumeParamTable.put(key,bufferList);
+                                    tileNameTable.put(key,floorVolumeElements[i][j].getName());
                                    }
                                locationList.add(floorVolumeElements[i][j].getLevelRelativePosition());
                               }
@@ -155,9 +159,10 @@ final class GameFilesGenerator{
                        totalIndexBuffer.rewind();
                        totalNormalBuffer.rewind();
                        totalTexCoordBuffer.rewind();
-                       meshName=floorNodeName+" mesh "+meshIndex;
+                       meshName=floorNodeName+"CID"+meshIndex;
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
+                       EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileNameTable.get(key)+".png");
                        EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }

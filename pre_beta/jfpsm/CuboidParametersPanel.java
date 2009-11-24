@@ -17,8 +17,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,6 +39,8 @@ final class CuboidParametersPanel extends JPanel{
     
     
     private static final long serialVersionUID=1L;
+    
+    private static final String[] uvSpinnerNames=new String[]{"u0","u1","v0","v1"};
 
     private final JSlider[][] sliders;
     
@@ -45,7 +53,7 @@ final class CuboidParametersPanel extends JPanel{
     private final Tile tile;
     
     
-    CuboidParametersPanel(Tile tile){
+    CuboidParametersPanel(Tile tile,final ProjectManager projectManager){
         this.tile=tile;
         sliders=new JSlider[][]{createSizeAndOffsetSliders(0),
                 createSizeAndOffsetSliders(1),
@@ -84,14 +92,23 @@ final class CuboidParametersPanel extends JPanel{
                   sideButtonGroup.add(radioButtons[side.ordinal()][orientation.ordinal()]);
                   sideSubPanel.add(radioButtons[side.ordinal()][orientation.ordinal()]);
                  }
-             for(JSpinner spinner:uvTexCoordSpinners[side.ordinal()])
-                 sideSubPanel.add(spinner);
+             for(int spIndex=0;spIndex<4;spIndex++)
+                 {sideSubPanel.add(new JLabel(uvSpinnerNames[spIndex]));
+                  sideSubPanel.add(uvTexCoordSpinners[side.ordinal()][spIndex]);
+                 }
              orientationSubPanel.add(sideSubPanel);
             }
         add(orientationSubPanel);
+        JPanel bottomPanel=new JPanel(new FlowLayout());      
         mergeCheckBox=new JCheckBox("merge");
+        mergeCheckBox.setToolTipText("automatically merge close elements");
         mergeCheckBox.addActionListener(new MergeCheckBoxActionListener(cuboidParam));
-        add(mergeCheckBox);
+        bottomPanel.add(mergeCheckBox);
+        JButton tileTextureSelectionButton=new JButton("Choose texture...");
+        tileTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile.getName()+".png",projectManager));
+        tileTextureSelectionButton.setToolTipText("choose a texture used for the tile");
+        bottomPanel.add(tileTextureSelectionButton);
+        add(bottomPanel);
     }
     
     
@@ -247,7 +264,7 @@ final class CuboidParametersPanel extends JPanel{
     	}
     	
 		@Override
-		public final void actionPerformed(ActionEvent ae){
+		public final void actionPerformed(final ActionEvent ae){
 			volumeParam.setMergeEnabled(((JCheckBox)ae.getSource()).isSelected());
 		}   	
     }
@@ -272,6 +289,47 @@ final class CuboidParametersPanel extends JPanel{
         @Override
         public final void stateChanged(final ChangeEvent ce){
             cuboidParam.setTexCoord(side,texCoordIndex,((Number)((JSpinner)ce.getSource()).getValue()).floatValue());
+        }
+    }
+    
+    private static final class ChooseTextureActionListener implements ActionListener{
+        
+        private final String tileTextureFilename;
+        
+        private final ProjectManager projectManager;
+        
+        private ChooseTextureActionListener(final String tileTextureFilename,
+                final ProjectManager projectManager){
+            this.tileTextureFilename=tileTextureFilename;
+            this.projectManager=projectManager;
+        }
+        
+        @Override
+        public final void actionPerformed(final ActionEvent ae){
+            BufferedImage image=projectManager.openFileAndLoadImage();
+            if(image!=null)
+                {String absTexPath=projectManager.createRawDataPath(tileTextureFilename);
+                 File texFile=new File(absTexPath);
+                 boolean success=true;
+                 if(!texFile.exists())
+                     {try{if(!texFile.createNewFile())
+                              throw new IOException("The file "+absTexPath+" cannot be created!");
+                         }
+                      catch(IOException ioe)
+                      {projectManager.displayErrorMessage(ioe,false);
+                       success=false;
+                      }
+                     }
+                 if(success)
+                     {try{if(!ImageIO.write(image,"png",texFile))
+                              throw new UnsupportedOperationException("no appropriate writer found for format PNG");
+                         }
+                      catch(Exception e)
+                      {projectManager.displayErrorMessage(e,false);
+                       success=false;
+                      }                  
+                     }
+                }
         }
     }
 }

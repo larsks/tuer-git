@@ -61,6 +61,11 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
     
+    @Override
+    public final void attachTextureToSpatial(final Object spatial,final String path){
+        delegate.attachTextureToSpatial(spatial, path);
+    }
+    
     public static final void main(String[] args){
         //Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
         System.setProperty("sun.java2d.noddraw","true");

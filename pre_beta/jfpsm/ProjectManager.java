@@ -296,13 +296,17 @@ public final class ProjectManager extends JPanel{
    			                             {//TODO: use a monitor
    			                       	      try{projectSet.saveProject(project);}
    			                              catch(Throwable throwable)
-   			                              {mainWindow.displayErrorMessage(throwable,false);}
+   			                              {displayErrorMessage(throwable,false);}
    			                             }       			                      
    			                    }
    				           }
    			          }
    		         }
    	        }
+    }
+    
+    final void displayErrorMessage(Throwable throwable,boolean fatal){
+        mainWindow.displayErrorMessage(throwable,fatal);
     }
     
     /**
@@ -487,7 +491,7 @@ public final class ProjectManager extends JPanel{
                   projectSet=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
                   try{projectSet.saveProject(project);}
                   catch(Throwable throwable)
-                  {mainWindow.displayErrorMessage(throwable,false);}
+                  {displayErrorMessage(throwable,false);}
                  }
             }
     }
@@ -506,7 +510,7 @@ public final class ProjectManager extends JPanel{
              if(result==JFileChooser.APPROVE_OPTION)
                  {try{projectSet.saveProject(project,fileChooser.getSelectedFile());}
                   catch(Throwable throwable)
-                  {mainWindow.displayErrorMessage(throwable,false);}
+                  {displayErrorMessage(throwable,false);}
                  }
             }
         else
@@ -526,7 +530,7 @@ public final class ProjectManager extends JPanel{
                               ImageIO.write(map.getImage(),formatName,imageFile);
                          }
                       catch(Throwable throwable)
-                      {mainWindow.displayErrorMessage(throwable,false);}                  
+                      {displayErrorMessage(throwable,false);}                  
                      }
                 }
     }
@@ -587,7 +591,7 @@ public final class ProjectManager extends JPanel{
                                }
                           } 
                        catch (Throwable throwable)
-                       {mainWindow.displayErrorMessage(throwable,false);
+                       {displayErrorMessage(throwable,false);
                         success=false;
                        }
                        if(success)
@@ -603,7 +607,7 @@ public final class ProjectManager extends JPanel{
                 }
     }
     
-    private final BufferedImage openFileAndLoadImage(){
+    final BufferedImage openFileAndLoadImage(){
         JFileChooser fileChooser=new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Images","bmp","gif","jpg","jpeg","png"));
@@ -612,7 +616,7 @@ public final class ProjectManager extends JPanel{
         if(result==JFileChooser.APPROVE_OPTION)
             {try{image=ImageIO.read(fileChooser.getSelectedFile());}
              catch(Throwable throwable)
-             {mainWindow.displayErrorMessage(throwable,false);}                  
+             {displayErrorMessage(throwable,false);}                  
             }
         return(image);
     }
@@ -870,6 +874,10 @@ public final class ProjectManager extends JPanel{
             }   
     }
     
+    final String createRawDataPath(String name){
+        ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)projectsTree.getModel().getRoot()).getUserObject();
+        return(workspace.createRawDataPath(name));
+    }
     
     /**
      * generate level files one by one
@@ -880,17 +888,16 @@ public final class ProjectManager extends JPanel{
         JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
         if(userObject instanceof Project)
             {final Project project=(Project)userObject;
-             final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
              SwingUtilities.invokeLater(new Runnable(){
                  @Override
                  public final void run(){
                      int levelIndex=0;
                      File levelFile;
                      for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                         {levelFile=new File(workspace.createLevelPath(level.getName()));
+                         {levelFile=new File(createRawDataPath(level.getName()+".abin"));
                           try{GameFilesGenerator.getInstance().writeLevel(level, levelIndex, project,levelFile);}
                           catch(Throwable throwable)
-                          {mainWindow.displayErrorMessage(throwable,false);}
+                          {displayErrorMessage(throwable,false);}
                           levelIndex++;
                          }
                  }
