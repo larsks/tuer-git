@@ -13,6 +13,8 @@ final class AbsoluteVolumeParameters{
 	
 	private VolumeParameters volumeParam;
 	
+	private String name;
+	
 	AbsoluteVolumeParameters(){
 		translation=new float[3];
 	}
@@ -58,5 +60,13 @@ final class AbsoluteVolumeParameters{
 
     public final void setVolumeParam(final VolumeParameters volumeParam){
         this.volumeParam=volumeParam;
+    }
+    
+    public final String getName(){
+        return(name);
+    }
+    
+    public final void setName(final String name){
+        this.name=name;
     }
 }

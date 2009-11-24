@@ -42,4 +42,9 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
+    
+    @Override
+    public final void attachTextureToSpatial(final Object spatial,final String path){
+        delegate.attachTextureToSpatial(spatial, path);
+    }
 }

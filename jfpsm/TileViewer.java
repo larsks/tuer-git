@@ -67,7 +67,7 @@ final class TileViewer extends Viewer{
         volumeParametersPanel.add(noVolumePanel,NOVOLUME);
         volumeParametersCardLayout.addLayoutComponent(noVolumePanel,NOVOLUME);       
         //Add a panel for cuboids
-        JPanel cuboidParametersPanel=new CuboidParametersPanel((Tile)getEntity());
+        JPanel cuboidParametersPanel=new CuboidParametersPanel((Tile)getEntity(),projectManager);
         volumeParametersPanel.add(cuboidParametersPanel,CUBOID);
         volumeParametersCardLayout.addLayoutComponent(cuboidParametersPanel,CUBOID);
         volumePanel.add(volumeParametersPanel);

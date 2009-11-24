@@ -15,19 +15,43 @@ package engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+
+import com.ardor3d.image.Texture;
+import com.ardor3d.image.Image.Format;
+import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.Savable;
 import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
 
 public final class EngineServiceProvider implements I3DServiceProvider{
     
     
     private static final EngineServiceProvider instance=new EngineServiceProvider();
+    
+    
+    private EngineServiceProvider(){
+        // Add our awt based image loader.
+        AWTImageLoader.registerLoader();
+        // Set the location of our resources.
+        URL imagesURL=getClass().getResource("/images");
+        if(imagesURL!=null)
+            try{SimpleResourceLocator srl=new SimpleResourceLocator(imagesURL);
+                ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
+               } 
+            catch(final URISyntaxException urise)
+            {urise.printStackTrace();}
+    }
     
     
     public static final EngineServiceProvider getInstance(){
@@ -68,5 +92,14 @@ public final class EngineServiceProvider implements I3DServiceProvider{
         Mesh mesh=new Mesh(name);
         mesh.setMeshData(meshData);
     	return(mesh);
+    }
+    
+    @Override
+    public final void attachTextureToSpatial(final Object spatial,final String path){
+        TextureState ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(path,Texture.MinificationFilter.Trilinear,
+                Format.GuessNoCompression,true));
+        ((Spatial)spatial).setRenderState(ts);
     }
 }

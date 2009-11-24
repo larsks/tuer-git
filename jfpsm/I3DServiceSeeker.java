@@ -25,4 +25,5 @@ public interface I3DServiceSeeker{
     public Object createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
+    public void attachTextureToSpatial(final Object spatial,final String path);
 }
