@@ -14,6 +14,7 @@
 package engine;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -24,5 +25,5 @@ public interface I3DServiceProvider{
     public Object createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
-    public void attachTextureToSpatial(final Object spatial,final String path);
+    public void attachTextureToSpatial(final Object spatial,final URL url);
 }

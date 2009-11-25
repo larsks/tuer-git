@@ -83,6 +83,14 @@ final class EntityViewer extends JPanel{
     		entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
         return(success);
     }
+    
+    final boolean renameEntityView(final Namable entity){
+    	final boolean success;
+    	final JPanel tabComponent;
+    	if(success=(tabComponent=entityToTabComponentMap.get(entity))!=null)
+	        ((JLabel)tabComponent.getComponent(0)).setText(entity.getName());
+    	return(success);
+    }
         
     final boolean closeEntityView(final Namable entity){
     	JPanel tabComponent=entityToTabComponentMap.get(entity);
