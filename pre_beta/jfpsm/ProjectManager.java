@@ -751,7 +751,10 @@ public final class ProjectManager extends JPanel{
              String name=enterNameDialog.getValidatedText();
              enterNameDialog.dispose();
 		     if(name!=null)
-		         userObject.setName(name);
+		         {userObject.setName(name);
+		          //rename the entity view opened on this entity if any
+		          mainWindow.getEntityViewer().renameEntityView(userObject);
+		         }
 		    }
     }
     

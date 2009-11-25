@@ -15,11 +15,9 @@ package engine;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
@@ -31,8 +29,6 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.Savable;
 import com.ardor3d.util.export.binary.BinaryExporter;
-import com.ardor3d.util.resource.ResourceLocatorTool;
-import com.ardor3d.util.resource.SimpleResourceLocator;
 
 public final class EngineServiceProvider implements I3DServiceProvider{
     
@@ -43,14 +39,6 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     private EngineServiceProvider(){
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
-        // Set the location of our resources.
-        URL imagesURL=getClass().getResource("/images");
-        if(imagesURL!=null)
-            try{SimpleResourceLocator srl=new SimpleResourceLocator(imagesURL);
-                ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-               } 
-            catch(final URISyntaxException urise)
-            {urise.printStackTrace();}
     }
     
     
@@ -95,10 +83,10 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,final String path){
+    public final void attachTextureToSpatial(final Object spatial,final URL url){
         TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(path,Texture.MinificationFilter.Trilinear,
+        ts.setTexture(TextureManager.load(url,Texture.MinificationFilter.Trilinear,
                 Format.GuessNoCompression,true));
         ((Spatial)spatial).setRenderState(ts);
     }

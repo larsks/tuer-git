@@ -128,10 +128,14 @@ public final class CuboidParameters extends VolumeParameters{
     
     private final void recomputeBuffersIfNeeded(){
         if(buffersRecomputationNeeded)
-            {if(vertexBuffer==null)
-                {//6 faces * 4 vertices * 3 coordinates
-                 vertexBuffer=BufferUtil.newFloatBuffer(72);                 
-                }            
+            {int visibleFacesCount=0;
+             for(int i=0;i<6;i++)
+                 if(faceOrientation[i]!=Orientation.NONE)
+                     visibleFacesCount++;
+        	 if(vertexBuffer==null||vertexBuffer.capacity()!=visibleFacesCount*12)
+                 {//6 faces * 4 vertices * 3 coordinates
+                  vertexBuffer=BufferUtil.newFloatBuffer(visibleFacesCount*12);                 
+                 }            
              float[] center=new float[3];
              for(int i=0;i<3;i++)
                  center[i]=(size[i]/2)+offset[i];
@@ -147,131 +151,135 @@ public final class CuboidParameters extends VolumeParameters{
              //fill the vertex buffer
              vertexBuffer.rewind();
              // Back
-             vertexBuffer.put(vertices[0]);
-             vertexBuffer.put(vertices[1]);
-             vertexBuffer.put(vertices[2]);
-             vertexBuffer.put(vertices[3]);
+             if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[0]);
+                  vertexBuffer.put(vertices[1]);
+                  vertexBuffer.put(vertices[2]);
+                  vertexBuffer.put(vertices[3]);
+                 }
              // Right
-             vertexBuffer.put(vertices[1]);
-             vertexBuffer.put(vertices[4]);
-             vertexBuffer.put(vertices[6]);
-             vertexBuffer.put(vertices[2]);
+             if(faceOrientation[Side.RIGHT.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[1]);
+                  vertexBuffer.put(vertices[4]);
+                  vertexBuffer.put(vertices[6]);
+                  vertexBuffer.put(vertices[2]);
+                 }
              // Front
-             vertexBuffer.put(vertices[4]);
-             vertexBuffer.put(vertices[5]);
-             vertexBuffer.put(vertices[7]);
-             vertexBuffer.put(vertices[6]);
+             if(faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[4]);
+                  vertexBuffer.put(vertices[5]);
+                  vertexBuffer.put(vertices[7]);
+                  vertexBuffer.put(vertices[6]);
+                 }
              // Left
-             vertexBuffer.put(vertices[5]);
-             vertexBuffer.put(vertices[0]);
-             vertexBuffer.put(vertices[3]);
-             vertexBuffer.put(vertices[7]);
+             if(faceOrientation[Side.LEFT.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[5]);
+                  vertexBuffer.put(vertices[0]);
+                  vertexBuffer.put(vertices[3]);
+                  vertexBuffer.put(vertices[7]);
+                 }
              // Top
-             vertexBuffer.put(vertices[2]);
-             vertexBuffer.put(vertices[6]);
-             vertexBuffer.put(vertices[7]);
-             vertexBuffer.put(vertices[3]);
+             if(faceOrientation[Side.TOP.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[2]);
+                  vertexBuffer.put(vertices[6]);
+                  vertexBuffer.put(vertices[7]);
+                  vertexBuffer.put(vertices[3]);
+                 }
              // Bottom
-             vertexBuffer.put(vertices[0]);
-             vertexBuffer.put(vertices[5]);
-             vertexBuffer.put(vertices[4]);
-             vertexBuffer.put(vertices[1]);
-             vertexBuffer.rewind();
-             int visibleFacesCount=0;
-             for(int i=0;i<6;i++)
-                 if(faceOrientation[i]!=Orientation.NONE)
-                     visibleFacesCount++;
+             if(faceOrientation[Side.BOTTOM.ordinal()]!=Orientation.NONE)
+                 {vertexBuffer.put(vertices[0]);
+                  vertexBuffer.put(vertices[5]);
+                  vertexBuffer.put(vertices[4]);
+                  vertexBuffer.put(vertices[1]);
+                  vertexBuffer.rewind();
+                 }
              if(indexBuffer==null||indexBuffer.capacity()!=visibleFacesCount*6)
                  {//6 faces * 2 triangles * 3 indices
                   indexBuffer=BufferUtil.newIntBuffer(visibleFacesCount*6);
                  }
              //fill the index buffer
              indexBuffer.rewind();
-             if(faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(2).put(1).put(0).put(3).put(2).put(0);
-             else
-                 if(faceOrientation[Side.BACK.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(0).put(1).put(2).put(0).put(2).put(3);
-             if(faceOrientation[Side.RIGHT.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(6).put(5).put(4).put(7).put(6).put(4);
-             else 
-                 if(faceOrientation[Side.RIGHT.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(4).put(5).put(6).put(4).put(6).put(7);
-             if(faceOrientation[Side.FRONT.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(10).put(9).put(8).put(11).put(10).put(8);
-             else
-                 if(faceOrientation[Side.FRONT.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(8).put(9).put(10).put(8).put(10).put(11);
-             if(faceOrientation[Side.LEFT.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(14).put(13).put(12).put(15).put(14).put(12);
-             else
-                 if(faceOrientation[Side.LEFT.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(12).put(13).put(14).put(12).put(14).put(15);
-             if(faceOrientation[Side.TOP.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(18).put(17).put(16).put(19).put(18).put(16);
-             else
-                 if(faceOrientation[Side.TOP.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(16).put(17).put(18).put(16).put(18).put(19);
-             if(faceOrientation[Side.BOTTOM.ordinal()]==Orientation.OUTWARDS)
-                 indexBuffer.put(22).put(21).put(20).put(23).put(22).put(20);
-             else
-                 if(faceOrientation[Side.BOTTOM.ordinal()]==Orientation.INWARDS)
-                     indexBuffer.put(20).put(21).put(22).put(20).put(22).put(23);
+             int indexOffset=0;
+             for(Side side:Side.values())
+                  {if(faceOrientation[side.ordinal()]==Orientation.OUTWARDS)
+                	   {indexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);
+                	    indexOffset+=4;
+                	   }
+                   else
+                	   if(faceOrientation[side.ordinal()]==Orientation.INWARDS)
+                		   {indexBuffer.put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(0+indexOffset).put(2+indexOffset).put(3+indexOffset);
+                		    indexOffset+=4;
+                		   }
+                  }
              indexBuffer.rewind();
-             if(normalBuffer==null)
+             if(normalBuffer==null||normalBuffer.capacity()!=visibleFacesCount*12)
                  {//6 faces * 4 vertices * 3 coordinates
-                  normalBuffer=BufferUtil.newFloatBuffer(72);
+                  normalBuffer=BufferUtil.newFloatBuffer(visibleFacesCount*12);
                  }            
              //fill the normal buffer
              normalBuffer.rewind();
-             int value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?-1:1;
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);    
-             value=faceOrientation[Side.RIGHT.ordinal()]==Orientation.OUTWARDS?1:-1;
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             value=faceOrientation[Side.FRONT.ordinal()]==Orientation.OUTWARDS?1:-1;
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);
-             normalBuffer.put(0).put(0).put(value);
-             value=faceOrientation[Side.LEFT.ordinal()]==Orientation.OUTWARDS?-1:1;
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             normalBuffer.put(value).put(0).put(0);
-             value=faceOrientation[Side.TOP.ordinal()]==Orientation.OUTWARDS?1:-1;
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
-             value=faceOrientation[Side.BOTTOM.ordinal()]==Orientation.OUTWARDS?-1:1;
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
-             normalBuffer.put(0).put(value).put(0);
+             int value;
+             if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.BACK.ordinal()]==Orientation.OUTWARDS?-1:1;
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);           	  
+                 }
+             if(faceOrientation[Side.RIGHT.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.RIGHT.ordinal()]==Orientation.OUTWARDS?1:-1;
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                 }
+             if(faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.FRONT.ordinal()]==Orientation.OUTWARDS?1:-1;
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);
+                  normalBuffer.put(0).put(0).put(value);
+                 }
+             if(faceOrientation[Side.LEFT.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.LEFT.ordinal()]==Orientation.OUTWARDS?-1:1;
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                  normalBuffer.put(value).put(0).put(0);
+                 }
+             if(faceOrientation[Side.TOP.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.TOP.ordinal()]==Orientation.OUTWARDS?1:-1;
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                 }
+             if(faceOrientation[Side.BOTTOM.ordinal()]!=Orientation.NONE)
+                 {value=faceOrientation[Side.BOTTOM.ordinal()]==Orientation.OUTWARDS?-1:1;
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                  normalBuffer.put(0).put(value).put(0);
+                 }
              normalBuffer.rewind();
-             if(texCoordBuffer==null)
-                 {//6 faces * 4 vertices * 3 coordinates
-                  texCoordBuffer=BufferUtil.newFloatBuffer(72);
+             if(texCoordBuffer==null||texCoordBuffer.capacity()!=visibleFacesCount*8)
+                 {//6 faces * 4 vertices * 2 coordinates
+                  texCoordBuffer=BufferUtil.newFloatBuffer(visibleFacesCount*8);
                  }
              texCoordBuffer.rewind();
              //fill the texture coord buffer
              float u0,u1,v0,v1;
              for(Side side:Side.values())
-                 {u0=texCoord[side.ordinal()][0];
-                  u1=texCoord[side.ordinal()][1];
-                  v0=texCoord[side.ordinal()][2];
-                  v1=texCoord[side.ordinal()][3];
-                  texCoordBuffer.put(u1).put(v0);
-                  texCoordBuffer.put(u0).put(v0);
-                  texCoordBuffer.put(u0).put(v1);
-                  texCoordBuffer.put(u1).put(v1);
-                 }
+            	 if(faceOrientation[side.ordinal()]!=Orientation.NONE)
+                     {u0=texCoord[side.ordinal()][0];
+                      u1=texCoord[side.ordinal()][1];
+                      v0=texCoord[side.ordinal()][2];
+                      v1=texCoord[side.ordinal()][3];
+                      texCoordBuffer.put(u1).put(v0);
+                      texCoordBuffer.put(u0).put(v0);
+                      texCoordBuffer.put(u0).put(v1);
+                      texCoordBuffer.put(u1).put(v1);
+                     }
              texCoordBuffer.rewind();
              buffersRecomputationNeeded=false;
             }

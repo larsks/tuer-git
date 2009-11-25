@@ -116,6 +116,7 @@ final class GameState extends State{
              cullState.setCullFace(CullState.Face.Back);
              levelNode.setRenderState(cullState);
              getRoot().attachChild(levelNode);
+             
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setTranslation(111.5,0,219);
              uziNode.setScale(0.2);           

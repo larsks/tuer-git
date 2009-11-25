@@ -80,10 +80,8 @@ final class GameFilesGenerator{
              final String levelNodeName="LID"+levelIndex;
              // Create one node per level
              final Object levelNode=EngineServiceSeeker.getInstance().createNode(levelNodeName);
-             Object floorNode;
-             String floorNodeName;
-             String meshName;
-             Object volumeElementMesh;
+             String floorNodeName,meshName,tilePath;
+             Object volumeElementMesh,floorNode;
              HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable;
              HashMap<Integer,ArrayList<Buffer>> volumeParamTable;
              HashMap<Integer,String> tileNameTable;
@@ -162,7 +160,8 @@ final class GameFilesGenerator{
                        meshName=floorNodeName+"CID"+meshIndex;
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
-                       EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileNameTable.get(key)+".png");
+                       tilePath=destFile.getParent()+System.getProperty("file.separator")+tileNameTable.get(key)+".png";
+                       EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,new File(tilePath).toURI().toURL());
                        EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }

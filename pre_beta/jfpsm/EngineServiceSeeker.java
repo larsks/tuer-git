@@ -1,6 +1,7 @@
 package jfpsm;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -44,7 +45,7 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,final String path){
-        delegate.attachTextureToSpatial(spatial, path);
+    public final void attachTextureToSpatial(final Object spatial,final URL url){
+        delegate.attachTextureToSpatial(spatial,url);
     }
 }
