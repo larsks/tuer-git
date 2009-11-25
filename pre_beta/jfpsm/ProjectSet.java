@@ -124,19 +124,27 @@ public final class ProjectSet extends JFPSMUserObject{
           	          while((bytesIn=fis.read(readBuffer))!=-1) 
           	              zoStream.write(readBuffer,0,bytesIn);         	          
           	          fis.close();    
-          	          ZipEntry floorEntry;
+          	          ZipEntry entry;
           	          String floorDirectory;
           	          for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
           	        	  for(Floor floor:floorSet.getFloorsList())
           	                  {floorDirectory="levelset/"+floorSet.getName()+"/"+floor.getName()+"/";
           	                   //save each map
           	                   for(MapType type:MapType.values())
-          	                       {floorEntry=new ZipEntry(floorDirectory+type.getFilename());
-              	                    floorEntry.setMethod(ZipEntry.DEFLATED);
-              	                    zoStream.putNextEntry(floorEntry);
-              	                    ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);          	            	    
+          	                       {entry=new ZipEntry(floorDirectory+type.getFilename());
+              	                    entry.setMethod(ZipEntry.DEFLATED);
+              	                    zoStream.putNextEntry(entry);
+              	                    ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);
           	                       }
-          	                  }         	          
+          	                  }
+          	          final String tileDirectory="tileset/";
+          	          for(Tile tile:project.getTileSet().getTilesList())
+          	              if(tile.getTexture()!=null)
+          	                  {entry=new ZipEntry(tileDirectory+tile.getName()+".png");
+          	                   entry.setMethod(ZipEntry.DEFLATED);
+                               zoStream.putNextEntry(entry);
+                               ImageIO.write(tile.getTexture(),"png",zoStream);
+          	                  }
           	          //close the ZipOutputStream
           	          zoStream.close();
           	          //delete the temporary file
@@ -259,14 +267,11 @@ public final class ProjectSet extends JFPSMUserObject{
                                                  }
                                     }
                                 else
-                                    if(path.length>=3&&path[0].equals("tileset"))
+                                    if(path.length==2&&path[0].equals("tileset"))
                                         {//find the tile that should contain this file
                                          for(Tile tile:project.getTileSet().getTilesList())
-                                             if(path[1].equals(tile.getName()))
-                                                 {
-                                                  
-                                                  //load the tile
-                                                 }                      
+                                             if(path[1].equals(tile.getName()+".png"))
+                                                 tile.setTexture(ImageIO.read(zipFile.getInputStream(entry)));                     
                                         }
                                }
                           }

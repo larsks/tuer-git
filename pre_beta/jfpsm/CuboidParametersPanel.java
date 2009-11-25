@@ -18,10 +18,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -50,10 +46,12 @@ final class CuboidParametersPanel extends JPanel{
     
     private final JCheckBox mergeCheckBox;
     
+    private final JLabel textureLoadStateLabel;
+    
     private final Tile tile;
     
     
-    CuboidParametersPanel(Tile tile,final ProjectManager projectManager){
+    CuboidParametersPanel(final Tile tile,final ProjectManager projectManager){
         this.tile=tile;
         sliders=new JSlider[][]{createSizeAndOffsetSliders(0),
                 createSizeAndOffsetSliders(1),
@@ -105,9 +103,11 @@ final class CuboidParametersPanel extends JPanel{
         mergeCheckBox.addActionListener(new MergeCheckBoxActionListener(cuboidParam));
         bottomPanel.add(mergeCheckBox);
         JButton tileTextureSelectionButton=new JButton("Choose texture...");
-        tileTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile.getName()+".png",projectManager));
+        tileTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile,projectManager,this));
         tileTextureSelectionButton.setToolTipText("choose a texture used for the tile");
         bottomPanel.add(tileTextureSelectionButton);
+        textureLoadStateLabel=new JLabel();
+        bottomPanel.add(textureLoadStateLabel);
         add(bottomPanel);
     }
     
@@ -144,7 +144,15 @@ final class CuboidParametersPanel extends JPanel{
                       }
                  }
              mergeCheckBox.setSelected(cuboidParam.isMergeEnabled());
+             updateTextureLoadStateLabel();
             }
+    }
+    
+    private final void updateTextureLoadStateLabel(){
+        if(tile.getTexture()!=null)
+            textureLoadStateLabel.setText("texture OK");
+        else
+            textureLoadStateLabel.setText("no texture");
     }
     
     private final JSlider[] createSizeAndOffsetSliders(final int index){
@@ -294,41 +302,25 @@ final class CuboidParametersPanel extends JPanel{
     
     private static final class ChooseTextureActionListener implements ActionListener{
         
-        private final String tileTextureFilename;
-        
         private final ProjectManager projectManager;
         
-        private ChooseTextureActionListener(final String tileTextureFilename,
-                final ProjectManager projectManager){
-            this.tileTextureFilename=tileTextureFilename;
+        private final CuboidParametersPanel cuboidParametersPanel;
+        
+        private final Tile tile;
+        
+        private ChooseTextureActionListener(final Tile tile,final ProjectManager projectManager,
+                final CuboidParametersPanel cuboidParametersPanel){
+            this.tile=tile;
             this.projectManager=projectManager;
+            this.cuboidParametersPanel=cuboidParametersPanel;
         }
         
         @Override
         public final void actionPerformed(final ActionEvent ae){
             BufferedImage image=projectManager.openFileAndLoadImage();
             if(image!=null)
-                {String absTexPath=projectManager.createRawDataPath(tileTextureFilename);
-                 File texFile=new File(absTexPath);
-                 boolean success=true;
-                 if(!texFile.exists())
-                     {try{if(!texFile.createNewFile())
-                              throw new IOException("The file "+absTexPath+" cannot be created!");
-                         }
-                      catch(IOException ioe)
-                      {projectManager.displayErrorMessage(ioe,false);
-                       success=false;
-                      }
-                     }
-                 if(success)
-                     {try{if(!ImageIO.write(image,"png",texFile))
-                              throw new UnsupportedOperationException("no appropriate writer found for format PNG");
-                         }
-                      catch(Exception e)
-                      {projectManager.displayErrorMessage(e,false);
-                       success=false;
-                      }                  
-                     }
+                {tile.setTexture(image);
+                 cuboidParametersPanel.updateTextureLoadStateLabel();
                 }
         }
     }

@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import misc.SerializationHelper;
 
 /**
@@ -38,6 +39,8 @@ public final class Tile extends JFPSMUserObject{
 
     private transient boolean dirty;
     
+    private transient BufferedImage texture;
+    
     
     public Tile(){
     	this("");
@@ -51,6 +54,14 @@ public final class Tile extends JFPSMUserObject{
         volumeParameters=null;
     }
     
+    
+    public final BufferedImage getTexture(){
+        return(texture);
+    }
+    
+    public final void setTexture(final BufferedImage texture){
+        this.texture=texture;
+    }
     
     public final Color getColor(){
         return(color);

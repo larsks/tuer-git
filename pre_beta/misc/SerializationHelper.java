@@ -37,6 +37,7 @@ public final class SerializationHelper{
 
 	/**
 	 * force the XML encoder/decoder to ignore transient members like the binary serialization
+	 * FIXME: it does not work properly on collections
 	 * @param myClass
 	 */
     public static final void forceHandlingOfTransientModifiersForXMLSerialization(Class<?> myClass){
