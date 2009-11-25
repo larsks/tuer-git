@@ -7,7 +7,7 @@
 
 <project name="TUER" default="build" basedir=".">
 	<!-- set your own deployment directory below -->
-	<!-- ../../Documents/programmation/web/sourceforge/very_experimental/ -->
+	<!--<property name="deploymentdestdir" value="../../Documents/programmation/web/sourceforge/very_experimental/"/>-->
 	<property name="deploymentdestdir" value="."/>
 	<property name="destdir" value="."/>
 	<property name="srcdir" value="."/>
