@@ -62,6 +62,10 @@ final class AbsoluteVolumeParameters{
         this.volumeParam=volumeParam;
     }
     
+    public final int[][][] getVerticesIndicesOfMergeableFaces(){
+        return(volumeParam!=null?volumeParam.getVerticesIndicesOfMergeableFaces():null);
+    }
+    
     public final String getName(){
         return(name);
     }

@@ -46,4 +46,15 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 		this.mergeEnabled=mergeEnabled;
 		markDirty();
 	}
+	
+	public int[][][] getVerticesIndicesOfMergeableFaces(){
+	    /**
+	     * It should perform the following operations:
+	     * - compute the real normals by using the vertices
+	     * - detect the opposed faces
+	     * - compute the distances between the pairs of vertices
+	     * - detect equivalent triangles
+	     * */
+	    return(null);
+	}
 }

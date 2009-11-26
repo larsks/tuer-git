@@ -22,9 +22,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
-
 import javax.imageio.ImageIO;
-
 import com.sun.opengl.util.BufferUtil;
 
 final class GameFilesGenerator{
@@ -87,10 +85,12 @@ final class GameFilesGenerator{
              String floorNodeName,meshName,tilePath;
              File tileFile;
              Object volumeElementMesh,floorNode;
-             HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable;
-             HashMap<Integer,ArrayList<Buffer>> volumeParamTable;
-             HashMap<Integer,String> tileNameTable;
-             HashMap<Integer,Boolean> mergeTable;
+             HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable=new HashMap<Integer,ArrayList<float[]>>();
+             HashMap<Integer,ArrayList<Buffer>> volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
+             HashMap<Integer,String> tileNameTable=new HashMap<Integer,String>();
+             HashMap<Integer,Boolean> mergeTable=new HashMap<Integer,Boolean>();
+             HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
+             int[][][] verticesIndicesOfMergeableFaces=null;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer;
@@ -100,14 +100,13 @@ final class GameFilesGenerator{
              floorIndex=0;
              int meshIndex,indexOffset;
              boolean isMergeEnabled;
-             float[] vertexCoords=new float[1],normals=new float[1],texCoords=new float[1];
-             int[] indices=new int[1];
+             float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
+             int[] indices=new int[3];
              for(AbsoluteVolumeParameters[][] floorVolumeElements:volumeElementsList)
-                 {// Create a table to sort all elements using the same volume parameter
-                  volumeParamLocationTable=new HashMap<Integer,ArrayList<float[]>>();
-                  volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
-                  tileNameTable=new HashMap<Integer,String>();
-                  mergeTable=new HashMap<Integer,Boolean>();
+                 {volumeParamLocationTable.clear();
+                  volumeParamTable.clear();
+                  tileNameTable.clear();
+                  mergeTable.clear();
                   for(int i=0;i<floorVolumeElements.length;i++)
                       for(int j=0;j<floorVolumeElements[i].length;j++)
                           if(!floorVolumeElements[i][j].isVoid())
@@ -124,6 +123,8 @@ final class GameFilesGenerator{
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][j].getName());
                                     mergeTable.put(key,Boolean.valueOf(floorVolumeElements[i][j].isMergeEnabled()));
+                                    if(floorVolumeElements[i][j].isMergeEnabled())
+                                        verticesIndicesOfMergeableFacesTable.put(key,floorVolumeElements[i][j].getVerticesIndicesOfMergeableFaces());
                                    }
                                locationList.add(floorVolumeElements[i][j].getLevelRelativePosition());
                               }
@@ -140,49 +141,49 @@ final class GameFilesGenerator{
                        indexBuffer=(IntBuffer)bufferList.get(1);
                        normalBuffer=(FloatBuffer)bufferList.get(2);
                        texCoordBuffer=(FloatBuffer)bufferList.get(3);
+                       if(vertexCoords.length<vertexBuffer.capacity())
+                           vertexCoords=new float[vertexBuffer.capacity()];
+                       if(indices.length<indexBuffer.capacity())
+                           indices=new int[indexBuffer.capacity()];
+                       if(normals.length<normalBuffer.capacity())
+                           normals=new float[normalBuffer.capacity()];
+                       if(texCoords.length<texCoordBuffer.capacity())
+                           texCoords=new float[texCoordBuffer.capacity()];
                        totalVertexBuffer=BufferUtil.newFloatBuffer(vertexBuffer.capacity()*locationList.size());
                        totalIndexBuffer=BufferUtil.newIntBuffer(indexBuffer.capacity()*locationList.size());
                        totalNormalBuffer=BufferUtil.newFloatBuffer(normalBuffer.capacity()*locationList.size());
                        totalTexCoordBuffer=BufferUtil.newFloatBuffer(texCoordBuffer.capacity()*locationList.size());           
                        indexOffset=0;
-                       isMergeEnabled=/*mergeTable.get(key).booleanValue()*/false;
+                       isMergeEnabled=mergeTable.get(key).booleanValue();
+                       if(isMergeEnabled)
+                           verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
                        for(float[] location:locationList)
-                           {if(vertexCoords.length<vertexBuffer.capacity())
-                                vertexCoords=new float[vertexBuffer.capacity()];
-                            if(vertexBuffer.capacity()<vertexBuffer.remaining())
-                                System.out.println("PB");
-                            vertexBuffer.get(vertexCoords,0,vertexBuffer.capacity());
+                           {vertexBuffer.get(vertexCoords,0,vertexBuffer.capacity());
                             vertexBuffer.rewind();
                             // Use the location to translate the vertices
                             for(int i=0;i<vertexBuffer.capacity();i++)
                                 vertexCoords[i]+=location[i%location.length];
-                            if(indices.length<indexBuffer.capacity())
-                                indices=new int[indexBuffer.capacity()];
                             indexBuffer.get(indices,0,indexBuffer.capacity());
                             indexBuffer.rewind();
                             // Add an offset to the indices
                             for(int i=0;i<indexBuffer.capacity();i++)
-                                indices[i]+=indexOffset;
-                            if(normals.length<normalBuffer.capacity())
-                                normals=new float[normalBuffer.capacity()];
+                                indices[i]+=indexOffset;                           
                             normalBuffer.get(normals,0,normalBuffer.capacity());
-                            normalBuffer.rewind();                  
-                            if(texCoords.length<texCoordBuffer.capacity())
-                                texCoords=new float[texCoordBuffer.capacity()];
+                            normalBuffer.rewind();
                             texCoordBuffer.get(texCoords,0,texCoordBuffer.capacity());
-                            texCoordBuffer.rewind();                            
-                            if(isMergeEnabled)
+                            texCoordBuffer.rewind();
+                            /*if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
                                 {
-                                 //TODO: 
+                                 //TODO: use verticesIndicesOfMergeableFaces
                                 }
                             else
-                                {totalVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
+                                {*/totalVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
                                  totalIndexBuffer.put(indices,0,indexBuffer.capacity());
                                  totalNormalBuffer.put(normals,0,normalBuffer.capacity());
                                  totalTexCoordBuffer.put(texCoords,0,texCoordBuffer.capacity());
                                  // Update the offset
                                  indexOffset+=vertexBuffer.capacity()/3;                             
-                                }                          
+                                /*}*/                        
                            }
                        totalVertexBuffer.rewind();
                        totalIndexBuffer.rewind();
@@ -192,6 +193,9 @@ final class GameFilesGenerator{
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
                        tilePath=destFile.getParent()+System.getProperty("file.separator")+tileNameTable.get(key)+".png";
+                       //create a file containing the texture of the tile because it 
+                       //is necessary to attach a texture to a mesh (the URL cannot 
+                       //point to a file that does not exist)
                        tileFile=new File(tilePath);
                        if(!tileFile.exists())
                            if(!tileFile.createNewFile())
@@ -202,6 +206,7 @@ final class GameFilesGenerator{
                                 break;
                                }
                        EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
+                       //this file is now useless, delete it
                        tileFile.delete();
                        EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
@@ -219,5 +224,5 @@ final class GameFilesGenerator{
              else
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
             }
-    }  
+    }
 }

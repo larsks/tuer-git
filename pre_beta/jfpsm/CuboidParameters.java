@@ -285,6 +285,19 @@ public final class CuboidParameters extends VolumeParameters{
             }
     }
     
+    public final int[][][] getVerticesIndicesOfMergeableFaces(){
+        //6 2 3
+        int[][][] verticesIndicesOfMergeableFaces=new int[][][]{
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
+                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}}};
+        //TODO: implement it
+        return(verticesIndicesOfMergeableFaces);
+    }
+    
     public final void setOrientation(Side side,Orientation orientation){
         faceOrientation[side.ordinal()]=orientation;
         buffersRecomputationNeeded=true;
