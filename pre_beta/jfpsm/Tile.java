@@ -61,6 +61,7 @@ public final class Tile extends JFPSMUserObject{
     
     public final void setTexture(final BufferedImage texture){
         this.texture=texture;
+        markDirty();
     }
     
     public final Color getColor(){
