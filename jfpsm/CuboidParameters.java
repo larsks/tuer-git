@@ -190,9 +190,9 @@ public final class CuboidParameters extends VolumeParameters{
                  {vertexBuffer.put(vertices[0]);
                   vertexBuffer.put(vertices[5]);
                   vertexBuffer.put(vertices[4]);
-                  vertexBuffer.put(vertices[1]);
-                  vertexBuffer.rewind();
+                  vertexBuffer.put(vertices[1]);                  
                  }
+             vertexBuffer.rewind();
              if(indexBuffer==null||indexBuffer.capacity()!=visibleFacesCount*6)
                  {//6 faces * 2 triangles * 3 indices
                   indexBuffer=BufferUtil.newIntBuffer(visibleFacesCount*6);

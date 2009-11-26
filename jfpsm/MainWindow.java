@@ -177,7 +177,11 @@ public final class MainWindow{
     	final String lineSep=System.getProperty("line.separator");
     	Throwable currentThrowable=throwable;
     	while(currentThrowable!=null)
-    		{errorMessage+=currentThrowable.getMessage()+lineSep;
+    		{errorMessage+=currentThrowable.getClass().getName();
+    		 if(currentThrowable.getMessage()!=null)
+    		     errorMessage+=": "+currentThrowable.getMessage()+lineSep;
+    		 else
+    		     errorMessage+=lineSep;
     		 for(StackTraceElement element:currentThrowable.getStackTrace())
     		     errorMessage+=element.toString()+lineSep;    		     
     		 currentThrowable=currentThrowable.getCause();
