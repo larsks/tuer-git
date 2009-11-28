@@ -31,6 +31,8 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     abstract VolumeType getVolumeType();
     
     abstract IntBuffer getIndexBuffer();
+    
+    abstract IntBuffer getMergeableIndexBuffer();
 
     abstract FloatBuffer getNormalBuffer();
 

@@ -15,6 +15,8 @@ package jfpsm;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+
 import com.sun.opengl.util.BufferUtil;
 import misc.SerializationHelper;
 
@@ -47,7 +49,11 @@ public final class CuboidParameters extends VolumeParameters{
     
     private transient IntBuffer indexBuffer;
     
+    private transient IntBuffer mergeableIndexBuffer;
+    
     private transient FloatBuffer texCoordBuffer;
+    
+    private transient int[][][] verticesIndicesOfMergeableFaces;
     
     
     public CuboidParameters(){
@@ -64,11 +70,13 @@ public final class CuboidParameters extends VolumeParameters{
         this.texCoord=texCoord;
         this.faceOrientation=faceOrientation;
         //6 faces * 4 vertices * 3 coordinates
-        this.vertexBuffer=BufferUtil.newFloatBuffer(72);
+        /*this.vertexBuffer=BufferUtil.newFloatBuffer(72);
         this.normalBuffer=BufferUtil.newFloatBuffer(72);
         //6 faces * 2 triangles * 3 indices
         this.indexBuffer=BufferUtil.newIntBuffer(36);
-        this.texCoordBuffer=BufferUtil.newFloatBuffer(72);
+        this.mergeableIndexBuffer=BufferUtil.newIntBuffer(36);
+        //6 faces * 4 vertices * 2 coordinates
+        this.texCoordBuffer=BufferUtil.newFloatBuffer(48);*/
         buffersRecomputationNeeded=true;
         markDirty();
     }
@@ -197,21 +205,46 @@ public final class CuboidParameters extends VolumeParameters{
                  {//6 faces * 2 triangles * 3 indices
                   indexBuffer=BufferUtil.newIntBuffer(visibleFacesCount*6);
                  }
+             if(mergeableIndexBuffer==null||mergeableIndexBuffer.capacity()!=visibleFacesCount*6)
+                 {//6 faces * 2 triangles * 3 indices
+                  mergeableIndexBuffer=BufferUtil.newIntBuffer(visibleFacesCount*6);
+                 }
              //fill the index buffer
              indexBuffer.rewind();
+             mergeableIndexBuffer.rewind();
              int indexOffset=0;
+             final int[] firstVerticesIndicesInIndexBufferBySide=new int[Side.values().length];
+             final boolean[] changeDiagonal=new boolean[]{false,true,true,false,true,false};
              for(Side side:Side.values())
                   {if(faceOrientation[side.ordinal()]==Orientation.OUTWARDS)
-                	   {indexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);
+                	   {firstVerticesIndicesInIndexBufferBySide[side.ordinal()]=indexBuffer.position();
+                	    indexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);    
+                	    if(changeDiagonal[side.ordinal()])
+                	        mergeableIndexBuffer.put(3+indexOffset).put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(3+indexOffset).put(1+indexOffset);
+                	    else
+                	        mergeableIndexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);
                 	    indexOffset+=4;
                 	   }
                    else
                 	   if(faceOrientation[side.ordinal()]==Orientation.INWARDS)
-                		   {indexBuffer.put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(0+indexOffset).put(2+indexOffset).put(3+indexOffset);
-                		    indexOffset+=4;
+                		   {firstVerticesIndicesInIndexBufferBySide[side.ordinal()]=indexBuffer.position();
+                		    indexBuffer.put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(0+indexOffset).put(2+indexOffset).put(3+indexOffset);
+                		    //use normals to outwards instead of inwards to ease the merge
+                		    if(changeDiagonal[side.ordinal()])
+                                mergeableIndexBuffer.put(3+indexOffset).put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(3+indexOffset).put(1+indexOffset);
+                            else
+                                mergeableIndexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);
+                		    /*if(changeDiagonal[side.ordinal()])
+                                mergeableIndexBuffer.put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(1+indexOffset).put(3+indexOffset).put(2+indexOffset);                               
+                            else
+                                mergeableIndexBuffer.put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(0+indexOffset).put(2+indexOffset).put(3+indexOffset);*/
+                		    indexOffset+=4;               		    
                 		   }
+                	   else
+                	       firstVerticesIndicesInIndexBufferBySide[side.ordinal()]=-1;
                   }
              indexBuffer.rewind();
+             mergeableIndexBuffer.rewind();
              if(normalBuffer==null||normalBuffer.capacity()!=visibleFacesCount*12)
                  {//6 faces * 4 vertices * 3 coordinates
                   normalBuffer=BufferUtil.newFloatBuffer(visibleFacesCount*12);
@@ -281,20 +314,37 @@ public final class CuboidParameters extends VolumeParameters{
                       texCoordBuffer.put(u1).put(v1);
                      }
              texCoordBuffer.rewind();
+             ArrayList<int[][]> verticesIndicesOfMergeableFacesList=new ArrayList<int[][]>();   
+             int fvi0,fvi1;
+             if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE&&
+                faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
+                 {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.BACK.ordinal()];
+                  fvi1=firstVerticesIndicesInIndexBufferBySide[Side.FRONT.ordinal()];           
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
+                 }
+             if(faceOrientation[Side.LEFT.ordinal()]!=Orientation.NONE&&
+                faceOrientation[Side.RIGHT.ordinal()]!=Orientation.NONE)
+                 {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.LEFT.ordinal()];
+                  fvi1=firstVerticesIndicesInIndexBufferBySide[Side.RIGHT.ordinal()];
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});              
+                 }
+             if(faceOrientation[Side.BOTTOM.ordinal()]!=Orientation.NONE&&
+                faceOrientation[Side.TOP.ordinal()]!=Orientation.NONE)
+                 {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.BOTTOM.ordinal()];
+                  fvi1=firstVerticesIndicesInIndexBufferBySide[Side.TOP.ordinal()];
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
+                 }
+             //6 2 3
+             verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);     
              buffersRecomputationNeeded=false;
             }
     }
     
     public final int[][][] getVerticesIndicesOfMergeableFaces(){
-        //6 2 3
-        int[][][] verticesIndicesOfMergeableFaces=new int[][][]{
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}},
-                new int[][]{new int[]{-1,-1,-1},new int[]{-1,-1,-1}}};
-        //TODO: implement it
+        recomputeBuffersIfNeeded();
         return(verticesIndicesOfMergeableFaces);
     }
     
@@ -342,8 +392,14 @@ public final class CuboidParameters extends VolumeParameters{
     public final IntBuffer getIndexBuffer(){
         recomputeBuffersIfNeeded();
         return(indexBuffer);
-    }
+    }   
 
+    @Override
+    public final IntBuffer getMergeableIndexBuffer(){
+        recomputeBuffersIfNeeded();
+        return(mergeableIndexBuffer);
+    }
+    
     @Override
     public final FloatBuffer getNormalBuffer(){
         recomputeBuffersIfNeeded();
