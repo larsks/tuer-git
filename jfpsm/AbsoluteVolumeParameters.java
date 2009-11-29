@@ -34,6 +34,10 @@ final class AbsoluteVolumeParameters{
         return(volumeParam!=null?volumeParam.getIndexBuffer():null);
     }
 
+    public final IntBuffer getMergeableIndexBuffer(){
+        return(volumeParam!=null?volumeParam.getMergeableIndexBuffer():null);
+    }
+    
     public final FloatBuffer getNormalBuffer(){
         return(volumeParam!=null?volumeParam.getNormalBuffer():null);
     }
