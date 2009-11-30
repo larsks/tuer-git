@@ -16,7 +16,6 @@ package jfpsm;
 import java.io.Serializable;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-
 import misc.SerializationHelper;
 
 public abstract class VolumeParameters implements Serializable,Dirtyable {

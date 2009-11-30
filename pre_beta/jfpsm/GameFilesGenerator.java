@@ -20,6 +20,7 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
@@ -101,6 +102,8 @@ final class GameFilesGenerator{
              HashMap<Integer,Boolean> mergeTable=new HashMap<Integer,Boolean>();
              HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
              int[][][] verticesIndicesOfMergeableFaces=null;
+             int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
+             boolean mergeableFaceFound=false;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer;
@@ -114,7 +117,9 @@ final class GameFilesGenerator{
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
              Buffer[][][][] buffersGrid=new Buffer[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()][5];       
+             int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[] logicalGridPos;
+             final int[] triIndices=new int[3];
              for(AbsoluteVolumeParameters[][] floorVolumeElements:volumeElementsList)
                  {volumeParamLocationTable.clear();
                   volumeParamTable.clear();
@@ -164,14 +169,17 @@ final class GameFilesGenerator{
                            normals=new float[normalBuffer.capacity()];
                        if(texCoords.length<texCoordBuffer.capacity())
                            texCoords=new float[texCoordBuffer.capacity()];
-                       /*totalVertexBuffer=BufferUtil.newFloatBuffer(vertexBuffer.capacity()*locationList.size());
-                       totalIndexBuffer=BufferUtil.newIntBuffer(indexBuffer.capacity()*locationList.size());
-                       totalNormalBuffer=BufferUtil.newFloatBuffer(normalBuffer.capacity()*locationList.size());
-                       totalTexCoordBuffer=BufferUtil.newFloatBuffer(texCoordBuffer.capacity()*locationList.size());*/           
                        indexOffset=0;
                        isMergeEnabled=mergeTable.get(key).booleanValue();
                        if(isMergeEnabled)
-                           verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
+                           {verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
+                            //copy the vertices indices
+                            absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
+                            for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
+                                for(int jj=0;jj<2;jj++)
+                                    for(int kk=0;kk<3;kk++)
+                                        absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
+                           }
                        for(float[] location:locationList)
                            {vertexBuffer.get(vertexCoords,0,vertexBuffer.capacity());
                             vertexBuffer.rewind();
@@ -191,10 +199,6 @@ final class GameFilesGenerator{
                             normalBuffer.rewind();
                             texCoordBuffer.get(texCoords,0,texCoordBuffer.capacity());
                             texCoordBuffer.rewind();
-                            /*totalVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
-                            totalIndexBuffer.put(indices,0,indexBuffer.capacity());
-                            totalNormalBuffer.put(normals,0,normalBuffer.capacity());
-                            totalTexCoordBuffer.put(texCoords,0,texCoordBuffer.capacity());*/
                             logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);
                             localVertexBuffer=BufferUtil.newFloatBuffer(vertexBuffer.capacity());
                             localVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
@@ -222,24 +226,45 @@ final class GameFilesGenerator{
                                  localMergeableIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeableIndexBuffer.rewind();
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=localMergeableIndexBuffer;
+                                 indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
                                 }
                             else
                                 buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=null;
                             // Update the offset
                             indexOffset+=vertexBuffer.capacity()/3;
                            }
-                       
+                       //if the merge is enabled, perform the merge
                        if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
                            {for(int i=0;i<grid.getLogicalWidth();i++)
                                 for(int k=0;k<grid.getLogicalDepth();k++)
                                     if(buffersGrid[i][j][k][4]!=null)
-                                        {/**
-                                          * find the smallest value in the mergeable index buffer
-                                          * use it to compute the index offset: Math.floor(min/(vertexBuffer.capacity()/3)*(vertexBuffer.capacity()/3)
-                                          * for each set of 3 indices
-                                          *     if it is in the mergeable faces
-                                          *         check if adjoining faces can be merged with it
-                                          */
+                                        {indexOffset=indexOffsetArray[i][j][k];
+                                         //add the offset
+                                         for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                                             for(int jj=0;jj<2;jj++)
+                                                 for(int kk=0;kk<3;kk++)
+                                                     absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]+=indexOffset;
+                                         while(buffersGrid[i][j][k][4].hasRemaining())
+                                             {((IntBuffer)buffersGrid[i][j][k][4]).get(triIndices,0,3);
+                                              mergeableFaceFound=false;
+                                              for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                                                  for(int jj=0;!mergeableFaceFound&&jj<2;jj++)
+                                                      if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
+                                                          {for(int jjj=0;jjj<2;jjj++)
+                                                               if(jjj!=jj)
+                                                                   {//TODO: check if adjoining faces can be merged with it
+                                                                    //absoluteVerticesIndicesOfMergeableFaces[ii][jjj];
+                                                                    
+                                                                   }                           
+                                                           break;
+                                                          }                         
+                                             }
+                                         buffersGrid[i][j][k][4].rewind();
+                                         //sustract the offset
+                                         for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                                             for(int jj=0;jj<2;jj++)
+                                                 for(int kk=0;kk<3;kk++)
+                                                     absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
                                         }
                            }
                        
@@ -275,8 +300,12 @@ final class GameFilesGenerator{
                                     totalTexCoordBuffer.put((FloatBuffer)buffersGrid[i][j][k][3]);
                                }
                        
-                       //TODO: put null values in the grid of buffers 
-                       
+                       //put null values into the grid of buffers
+                       //because it has to be emptied before using another volume parameter
+                       for(int i=0;i<grid.getLogicalWidth();i++)
+                           for(int k=0;k<grid.getLogicalDepth();k++)
+                               for(int bi=0;bi<5;bi++)
+                                   buffersGrid[i][j][k][bi]=null;
                        totalVertexBuffer.rewind();
                        totalIndexBuffer.rewind();
                        totalNormalBuffer.rewind();
