@@ -16,7 +16,6 @@ package jfpsm;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-
 import com.sun.opengl.util.BufferUtil;
 import misc.SerializationHelper;
 
