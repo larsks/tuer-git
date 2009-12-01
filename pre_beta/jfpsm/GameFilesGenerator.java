@@ -103,6 +103,7 @@ final class GameFilesGenerator{
              HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
              int[][][] verticesIndicesOfMergeableFaces=null;
              int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
+             int[] localAbsoluteVerticesIndicesOfMergeableFace=new int[3];
              boolean mergeableFaceFound=false;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
@@ -252,9 +253,18 @@ final class GameFilesGenerator{
                                                       if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
                                                           {for(int jjj=0;jjj<2;jjj++)
                                                                if(jjj!=jj)
-                                                                   {//TODO: check if adjoining faces can be merged with it
-                                                                    //absoluteVerticesIndicesOfMergeableFaces[ii][jjj];
-                                                                    
+                                                                   {//check if adjoining faces can be merged with it
+                                                                    for(int locali=i;locali<i+2&&locali<grid.getLogicalWidth();locali++)
+                                                                        for(int localj=j;localj<j+2&&localj<grid.getLogicalHeight();localj++)
+                                                                            for(int localk=k;localk<k+2&&localk<grid.getLogicalDepth();localk++)
+                                                                                //if this section is different of the current section
+                                                                                if(locali!=i||localj!=j||localk!=k)
+                                                                                    {for(int index=0;index<3;index++)
+                                                                                         localAbsoluteVerticesIndicesOfMergeableFace[index]=verticesIndicesOfMergeableFaces[ii][jjj][index]+indexOffsetArray[locali][localj][localk];
+                                                                                     //TODO: compare the vertices by using triIndices & localAbsoluteVerticesIndicesOfMergeableFace
+                                                                                     //if the vertices compose 2 identical triangles
+                                                                                     //    store the start index and the end index of the interval of the index data to delete further
+                                                                                    }
                                                                    }                           
                                                            break;
                                                           }                         
@@ -266,6 +276,8 @@ final class GameFilesGenerator{
                                                  for(int kk=0;kk<3;kk++)
                                                      absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
                                         }
+                            //TODO: recreate the index buffers by retaining only kept data
+                            //TODO: check if some vertices have become useless, remove them and recompute the indices
                            }
                        
                        totalVertexBufferSize=0;
