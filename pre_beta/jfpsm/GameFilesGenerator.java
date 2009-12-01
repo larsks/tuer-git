@@ -109,7 +109,7 @@ final class GameFilesGenerator{
              boolean mergeableFaceFound=false;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
-             FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer;
+             FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer,newIndiceBuffer;
              IntBuffer totalIndexBuffer,indexBuffer,mergeableIndexBuffer,localIndexBuffer,localMergeableIndexBuffer,localMergeIndexBuffer;
              int totalVertexBufferSize,totalIndexBufferSize,totalNormalBufferSize,totalTexCoordBufferSize;
              ArrayList<float[]> locationList;
@@ -123,7 +123,7 @@ final class GameFilesGenerator{
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[] logicalGridPos;
              final int[] triIndices=new int[3];
-             int startPos,localStartPos;
+             int startPos,localStartPos,newBufferSize,indice;
              for(AbsoluteVolumeParameters[][] floorVolumeElements:volumeElementsList)
                  {volumeParamLocationTable.clear();
                   volumeParamTable.clear();
@@ -229,10 +229,12 @@ final class GameFilesGenerator{
                                  localMergeableIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
                                  localMergeableIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeableIndexBuffer.rewind();
+                                 //fill the buffer used for the merge, it will contain rearranged indices (easier to compare)
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=localMergeableIndexBuffer;
                                  localMergeIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.rewind();
+                                 //fill the buffer used for the merge, it will contain the markers
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][5]=localMergeIndexBuffer;
                                  indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
                                 }
@@ -313,10 +315,44 @@ final class GameFilesGenerator{
                                                  for(int kk=0;kk<3;kk++)
                                                      absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
                                         }
-                            //TODO: recreate the index buffers by retaining only kept data
-                            //TODO: check if some vertices have become useless, remove them and recompute the indices
-                           }
-                       
+                           for(int i=0;i<grid.getLogicalWidth();i++)
+                               for(int k=0;k<grid.getLogicalDepth();k++)
+                                   if(buffersGrid[i][j][k][4]!=null)
+                                       {indexOffset=indexOffsetArray[i][j][k];
+                                        //compute the new size
+                                        newBufferSize=0;
+                                        ((IntBuffer)buffersGrid[i][j][k][5]).rewind();
+                                        while(((IntBuffer)buffersGrid[i][j][k][5]).hasRemaining())
+                                            if(((IntBuffer)buffersGrid[i][j][k][5]).get()!=-1)
+                                                newBufferSize++;     
+                                        ((IntBuffer)buffersGrid[i][j][k][5]).rewind();
+                                        //check if the index buffer has to be remade
+                                        if(newBufferSize!=((IntBuffer)buffersGrid[i][j][k][5]).capacity())
+                                            {((IntBuffer)buffersGrid[i][j][k][1]).rewind();
+                                             newIndiceBuffer=BufferUtil.newFloatBuffer(newBufferSize);
+                                             //remake the index buffer by retaining the valid indices
+                                             while(((IntBuffer)buffersGrid[i][j][k][5]).hasRemaining())
+                                                 {//get the index from the buffer containing the markers
+                                                  indice=((IntBuffer)buffersGrid[i][j][k][5]).get();
+                                                  if(indice!=-1)
+                                                      {//get the index from the buffer containing the valid indices
+                                                       indice=((IntBuffer)buffersGrid[i][j][k][1]).get();
+                                                       newIndiceBuffer.put(indice);
+                                                      }
+                                                  else
+                                                      {//skip the index that has to be deleted
+                                                       ((IntBuffer)buffersGrid[i][j][k][1]).get();
+                                                      }
+                                                 }
+                                             ((IntBuffer)buffersGrid[i][j][k][1]).rewind();
+                                             ((IntBuffer)buffersGrid[i][j][k][5]).rewind();
+                                             //TODO: check if some vertices have become useless, remove them and recompute the indices
+                                             //suggestion: use an hash set
+                                             //replace the old indice buffer by the new indice buffer
+                                             //buffersGrid[i][j][k][1]=newIndiceBuffer;                    
+                                            }                                       
+                                       }                            
+                           }                     
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
                        totalNormalBufferSize=0;
