@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
@@ -37,6 +38,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -62,6 +64,10 @@ public final class ProjectManager extends JPanel{
 	private final JTree projectsTree;
 	
 	private final MainWindow mainWindow;
+	
+	private boolean quitEnabled;
+	
+	private final ProgressDialog progressDialog;
 
 	
 	/**
@@ -70,6 +76,8 @@ public final class ProjectManager extends JPanel{
 	 */
 	public ProjectManager(final MainWindow mainWindow){
 		this.mainWindow=mainWindow;
+		quitEnabled=true;
+		progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));		
         final DefaultMutableTreeNode projectsRoot=new DefaultMutableTreeNode(new ProjectSet("Project Set"));
         projectsTree=new JTree(new DefaultTreeModel(projectsRoot));
@@ -882,6 +890,14 @@ public final class ProjectManager extends JPanel{
         return(workspace.createRawDataPath(name));
     }
     
+    final synchronized boolean isQuitEnabled(){
+    	return(quitEnabled);
+    }
+    
+    final synchronized void setQuitEnabled(final boolean quitEnabled){
+    	this.quitEnabled=quitEnabled;
+    }
+    
     /**
      * generate level files one by one
      */
@@ -890,21 +906,75 @@ public final class ProjectManager extends JPanel{
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
         JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
         if(userObject instanceof Project)
-            {final Project project=(Project)userObject;
-             SwingUtilities.invokeLater(new Runnable(){
-                 @Override
-                 public final void run(){
-                     int levelIndex=0;
-                     File levelFile;
-                     for(FloorSet level:project.getLevelSet().getFloorSetsList())
-                         {levelFile=new File(createRawDataPath(level.getName()+".abin"));
-                          try{GameFilesGenerator.getInstance().writeLevel(level, levelIndex, project,levelFile);}
-                          catch(Throwable throwable)
-                          {displayErrorMessage(throwable,false);}
-                          levelIndex++;
-                         }
-                 }
-             });            
+            {final Project project=(Project)userObject;             
+             new GameFileExportSwingWorker(this,project,progressDialog).execute();
             }
+    }
+    
+    private static final class GameFileExportSwingWorker extends SwingWorker<ArrayList<String>,String>{
+    	
+    	
+    	private final ArrayList<FloorSet> levelsList;
+    	
+    	private final ProjectManager projectManager;
+    	
+    	private final Project project;
+    	
+    	private final ProgressDialog dialog;
+    	
+    	
+    	private GameFileExportSwingWorker(final ProjectManager projectManager,final Project project,final ProgressDialog dialog){
+    		this.levelsList=project.getLevelSet().getFloorSetsList();
+    		this.projectManager=projectManager;
+    		this.project=project;
+    		this.dialog=dialog;
+    		SwingUtilities.invokeLater(new Runnable(){
+    			 @Override
+    			 public final void run(){
+    				 dialog.reset();
+    				 dialog.setVisible(true);
+    			 }
+    		});
+    	}
+    	
+    	
+    	@Override
+    	protected final ArrayList<String> doInBackground(){
+    		//prevent the user from leaving the application during an export
+    		projectManager.setQuitEnabled(false);
+    		ArrayList<String> filenamesList=new ArrayList<String>();
+    		File levelFile;
+    		int levelIndex=0;
+    		for(FloorSet level:levelsList)
+    		    {levelFile=new File(projectManager.createRawDataPath(level.getName()+".abin"));
+                 try{GameFilesGenerator.getInstance().writeLevel(level,levelIndex,project,levelFile);}
+                 catch(Throwable throwable)
+                 {projectManager.displayErrorMessage(throwable,false);}
+                 filenamesList.add(level.getName());
+                 publish(level.getName());
+                 setProgress(100*filenamesList.size()/levelsList.size());
+                 levelIndex++;
+    		    }    		
+    		return(filenamesList);
+    	}
+    	
+    	@Override
+    	protected final void process(List<String> chunks){
+    		StringBuilder builder=new StringBuilder();
+    		for(String chunk:chunks)
+    			{builder.append(chunk);
+    			 builder.append(" ");
+    			}
+    		dialog.setText(builder.toString());
+    		dialog.setValue(100*chunks.size()/levelsList.size());
+    	}
+    	
+    	@Override
+        protected final void done(){
+    		//allow the user to leave the application
+   	        projectManager.setQuitEnabled(true);
+   	        dialog.setVisible(false);
+   	        dialog.reset();
+    	}
     }
 }
