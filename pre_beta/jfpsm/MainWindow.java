@@ -156,20 +156,23 @@ public final class MainWindow{
      * @param confirm true if the user has to be prompted before closing
      */
     private final void quit(boolean confirm){
-    	final boolean doIt;
-    	if(confirm)
-    		doIt=JOptionPane.showConfirmDialog(applicativeFrame,"Exit JFPSM?","Confirm Exit",JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION;
-    	else
-    		doIt=true;
-    	if(doIt)
-    	    {//save all projects
-    		 if(projectManager!=null)
-        	     projectManager.saveCurrentWorkspace();
-    	     //destroy the window
-    		 applicativeFrame.dispose();
-             //this call is necessary to remove the application from memory when using Java Webstart
-             System.exit(0);       	 
-    	    }    	
+    	final boolean quitEnabled=projectManager==null||projectManager.isQuitEnabled();
+    	if(quitEnabled)
+    	    {final boolean doIt;
+        	 if(confirm)
+        		 doIt=JOptionPane.showConfirmDialog(applicativeFrame,"Exit JFPSM?","Confirm Exit",JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION;
+        	 else
+        		 doIt=true;
+        	 if(doIt)
+        	     {//save all projects
+        		  if(projectManager!=null)
+            	      projectManager.saveCurrentWorkspace();
+        	      //destroy the window
+        		  applicativeFrame.dispose();
+                  //this call is necessary to remove the application from memory when using Java Webstart
+                  System.exit(0);       	 
+        	     }
+    	    }
     }
 
     final void displayErrorMessage(Throwable throwable,boolean fatal){
