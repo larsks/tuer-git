@@ -109,8 +109,8 @@ final class GameFilesGenerator{
              boolean mergeableFaceFound=false;
              // Use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
-             FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer,newIndiceBuffer,newVertexBuffer;
-             IntBuffer totalIndexBuffer,indexBuffer,mergeableIndexBuffer,localIndexBuffer,localMergeableIndexBuffer,localMergeIndexBuffer;
+             FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer,newVertexBuffer,newNormalBuffer,newTexCoordBuffer;
+             IntBuffer totalIndexBuffer,indexBuffer,mergeableIndexBuffer,localIndexBuffer,localMergeableIndexBuffer,localMergeIndexBuffer,newIndiceBuffer;
              int totalVertexBufferSize,totalIndexBufferSize,totalNormalBufferSize,totalTexCoordBufferSize;
              ArrayList<float[]> locationList;
              ArrayList<Buffer> bufferList;
@@ -120,8 +120,10 @@ final class GameFilesGenerator{
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
              Buffer[][][][] buffersGrid=new Buffer[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()][6];       
-             HashMap<Integer,Integer> indexCountTable=new HashMap<Integer, Integer>();
+             HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
+             HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
+             int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[] logicalGridPos;
              final int[] triIndices=new int[3];
              int startPos,localStartPos,newBufferSize,indice;
@@ -173,18 +175,20 @@ final class GameFilesGenerator{
                        if(normals.length<normalBuffer.capacity())
                            normals=new float[normalBuffer.capacity()];
                        if(texCoords.length<texCoordBuffer.capacity())
-                           texCoords=new float[texCoordBuffer.capacity()];
-                       indexOffset=0;
+                           texCoords=new float[texCoordBuffer.capacity()];                      
                        isMergeEnabled=mergeTable.get(key).booleanValue();
                        if(isMergeEnabled)
                            {verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
-                            //copy the vertices indices
-                            absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
-                            for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
-                                for(int jj=0;jj<2;jj++)
-                                    for(int kk=0;kk<3;kk++)
-                                        absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
+                            if(verticesIndicesOfMergeableFaces!=null)
+                                {//copy the vertices indices
+                                 absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
+                                 for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
+                                     for(int jj=0;jj<2;jj++)
+                                         for(int kk=0;kk<3;kk++)
+                                             absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
+                                }
                            }
+                       indexOffset=0;
                        for(float[] location:locationList)
                            {vertexBuffer.get(vertexCoords,0,vertexBuffer.capacity());
                             vertexBuffer.rewind();
@@ -196,15 +200,15 @@ final class GameFilesGenerator{
                                     //FIXME: remove "-0.5f"
                                     vertexCoords[i]+=location[i%location.length]-0.5f;
                             indexBuffer.get(indices,0,indexBuffer.capacity());
-                            indexBuffer.rewind();
+                            indexBuffer.rewind();                           
+                            logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);
                             // Add an offset to the indices
                             for(int i=0;i<indexBuffer.capacity();i++)
                                 indices[i]+=indexOffset;                           
                             normalBuffer.get(normals,0,normalBuffer.capacity());
                             normalBuffer.rewind();
                             texCoordBuffer.get(texCoords,0,texCoordBuffer.capacity());
-                            texCoordBuffer.rewind();
-                            logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);
+                            texCoordBuffer.rewind();                           
                             localVertexBuffer=BufferUtil.newFloatBuffer(vertexBuffer.capacity());
                             localVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
                             localVertexBuffer.rewind();
@@ -246,7 +250,8 @@ final class GameFilesGenerator{
                            }
                        //if the merge is enabled, perform the merge
                        if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
-                           {for(int i=0;i<grid.getLogicalWidth();i++)
+                           {//mark all useless indices to ease their later removal
+                            for(int i=0;i<grid.getLogicalWidth();i++)
                                 for(int k=0;k<grid.getLogicalDepth();k++)
                                     if(buffersGrid[i][j][k][4]!=null)
                                         {indexOffset=indexOffsetArray[i][j][k];
@@ -316,6 +321,7 @@ final class GameFilesGenerator{
                                                  for(int kk=0;kk<3;kk++)
                                                      absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
                                         }
+                           //rebuild all index buffers by retaining only useful indices and do the same for all other buffers
                            for(int i=0;i<grid.getLogicalWidth();i++)
                                for(int k=0;k<grid.getLogicalDepth();k++)
                                    if(buffersGrid[i][j][k][4]!=null)
@@ -331,16 +337,19 @@ final class GameFilesGenerator{
                                         if(newBufferSize!=((IntBuffer)buffersGrid[i][j][k][5]).capacity())
                                             {//if the new buffer is empty
                                              if(newBufferSize==0)
-                                                 {//remove all buffers
+                                                 {//replace all buffers by empty buffers
                                                   for(int bufIndex=0;bufIndex<6;bufIndex++)
-                                                      buffersGrid[i][j][k][bufIndex]=null;
+                                                      if(bufIndex==1||bufIndex==4||bufIndex==5)
+                                                          buffersGrid[i][j][k][bufIndex]=BufferUtil.newIntBuffer(0);
+                                                      else
+                                                          buffersGrid[i][j][k][bufIndex]=BufferUtil.newFloatBuffer(0);
                                                  }
                                              else
                                                  {((IntBuffer)buffersGrid[i][j][k][1]).rewind();
                                                   while(((IntBuffer)buffersGrid[i][j][k][1]).hasRemaining())
                                                       indexCountTable.put(Integer.valueOf(((IntBuffer)buffersGrid[i][j][k][1]).get()),Integer.valueOf(0));
                                                   ((IntBuffer)buffersGrid[i][j][k][1]).rewind();
-                                                  newIndiceBuffer=BufferUtil.newFloatBuffer(newBufferSize);
+                                                  newIndiceBuffer=BufferUtil.newIntBuffer(newBufferSize);
                                                   //make the new index buffer by retaining the valid indices
                                                   while(((IntBuffer)buffersGrid[i][j][k][5]).hasRemaining())
                                                       {//get the index from the buffer containing the markers
@@ -357,27 +366,61 @@ final class GameFilesGenerator{
                                                             ((IntBuffer)buffersGrid[i][j][k][1]).get();
                                                            }
                                                       }
+                                                  newIndiceBuffer.rewind();
                                                   ((IntBuffer)buffersGrid[i][j][k][1]).rewind();
                                                   ((IntBuffer)buffersGrid[i][j][k][5]).rewind();
                                                   newBufferSize=0;
                                                   //check if some vertices have become useless
                                                   for(Entry<Integer,Integer> countEntry:indexCountTable.entrySet())
-                                                      if(countEntry.getValue().intValue()>0)
-                                                          //we use an increment of 3 because there are 3 coordinates per vertex
-                                                          newBufferSize+=3;
-                                                  //create a new vertex buffer
-                                                  //newVertexBuffer=BufferUtil.newFloatBuffer(newBufferSize);
-                                                  //TODO: retain the valid coordinates, skip the others
+                                                      if(countEntry.getValue().intValue()>0)                                           
+                                                          newBufferSize++;
+                                                  //create a new vertex buffer (3 coordinates per vertex)
+                                                  newVertexBuffer=BufferUtil.newFloatBuffer(newBufferSize*3);
+                                                  newNormalBuffer=BufferUtil.newFloatBuffer(newBufferSize*3);
+                                                  newTexCoordBuffer=BufferUtil.newFloatBuffer(newBufferSize*2);
+                                                  for(int newIndice=indexOffset,oldIndice=indexOffset;newIndice<(newVertexBuffer.capacity()/3)+indexOffset;oldIndice++,newIndice++)                     
+                                                      {//retain the valid coordinates, skip the others
+                                                       while(indexCountTable.get(Integer.valueOf(oldIndice)).intValue()==0)
+                                                           oldIndice++;
+                                                       //there are 3 coordinates per vertex
+                                                       newVertexBuffer.put(((FloatBuffer)buffersGrid[i][j][k][0]).get((oldIndice-indexOffset)*3));
+                                                       newVertexBuffer.put(((FloatBuffer)buffersGrid[i][j][k][0]).get(((oldIndice-indexOffset)*3)+1));
+                                                       newVertexBuffer.put(((FloatBuffer)buffersGrid[i][j][k][0]).get(((oldIndice-indexOffset)*3)+2));
+                                                       //there are 3 coordinates per normal
+                                                       newNormalBuffer.put(((FloatBuffer)buffersGrid[i][j][k][2]).get((oldIndice-indexOffset)*3));
+                                                       newNormalBuffer.put(((FloatBuffer)buffersGrid[i][j][k][2]).get(((oldIndice-indexOffset)*3)+1));
+                                                       newNormalBuffer.put(((FloatBuffer)buffersGrid[i][j][k][2]).get(((oldIndice-indexOffset)*3)+2));
+                                                       //there are 2 texture coordinates
+                                                       newTexCoordBuffer.put(((FloatBuffer)buffersGrid[i][j][k][3]).get((oldIndice-indexOffset)*2));
+                                                       newTexCoordBuffer.put(((FloatBuffer)buffersGrid[i][j][k][3]).get(((oldIndice-indexOffset)*2)+1));
+                                                       //associate the previous index to the next index
+                                                       reindexationTable.put(Integer.valueOf(oldIndice),Integer.valueOf(newIndice));
+                                                      }
+                                                  newVertexBuffer.rewind();
+                                                  newNormalBuffer.rewind();
+                                                  newTexCoordBuffer.rewind();
+                                                  //update the index buffer to take into account the new indexation
+                                                  for(int l=0;l<newIndiceBuffer.capacity();l++)
+                                                      //replace each old index by its corresponding new index
+                                                      newIndiceBuffer.put(l,reindexationTable.get(Integer.valueOf(newIndiceBuffer.get(l))));
+                                                  //not mandatory as we have just used an absolute access above
+                                                  newIndiceBuffer.rewind();
+                                                  reindexationTable.clear();
                                                   //replace the old vertex buffer by the new one
-                                                  //buffersGrid[i][j][k][0]=newVertexBuffer;
-                                                  //TODO: update the normal buffer and the texture coordinates buffer
+                                                  buffersGrid[i][j][k][0]=newVertexBuffer;
+                                                  //do the same for the normal buffer
+                                                  buffersGrid[i][j][k][2]=newNormalBuffer;
+                                                  //do the same for the texture coordinates buffer
+                                                  buffersGrid[i][j][k][3]=newTexCoordBuffer;
                                                   //replace the old index buffer by the new index buffer
-                                                  //buffersGrid[i][j][k][1]=newIndiceBuffer;
+                                                  buffersGrid[i][j][k][1]=newIndiceBuffer;
                                                   //reset the counters of occurrence
                                                   indexCountTable.clear();
                                                  }
                                             }                                       
-                                       }                            
+                                       }
+                            //each individual change of index interval impacts all index buffers
+                            //TODO: then, remove all useless index intervals and update all index buffers
                            }                     
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
