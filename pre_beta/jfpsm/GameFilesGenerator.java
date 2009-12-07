@@ -115,7 +115,7 @@ final class GameFilesGenerator{
              ArrayList<float[]> locationList;
              ArrayList<Buffer> bufferList;
              j=0;
-             int meshIndex,indexOffset;
+             int meshIndex,indexOffset,deletedIndicesCount;
              boolean isMergeEnabled;
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
@@ -124,6 +124,7 @@ final class GameFilesGenerator{
              HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
+             ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<int[]>();
              int[] logicalGridPos;
              final int[] triIndices=new int[3];
              int startPos,localStartPos,newBufferSize,indice;
@@ -242,6 +243,7 @@ final class GameFilesGenerator{
                                  //fill the buffer used for the merge, it will contain the markers
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][5]=localMergeIndexBuffer;
                                  indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
+                                 indexArrayOffsetIndicesList.add(logicalGridPos);
                                 }
                             else
                                 buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=null;
@@ -408,19 +410,38 @@ final class GameFilesGenerator{
                                                   reindexationTable.clear();
                                                   //replace the old vertex buffer by the new one
                                                   buffersGrid[i][j][k][0]=newVertexBuffer;
+                                                  //replace the old index buffer by the new index buffer
+                                                  buffersGrid[i][j][k][1]=newIndiceBuffer;
                                                   //do the same for the normal buffer
                                                   buffersGrid[i][j][k][2]=newNormalBuffer;
                                                   //do the same for the texture coordinates buffer
-                                                  buffersGrid[i][j][k][3]=newTexCoordBuffer;
-                                                  //replace the old index buffer by the new index buffer
-                                                  buffersGrid[i][j][k][1]=newIndiceBuffer;
+                                                  buffersGrid[i][j][k][3]=newTexCoordBuffer;                                     
                                                   //reset the counters of occurrence
                                                   indexCountTable.clear();
                                                  }
                                             }                                       
                                        }
                             //each individual change of index interval impacts all index buffers
-                            //TODO: then, remove all useless index intervals and update all index buffers
+                            //then, remove all useless index intervals and update all index buffers
+                            indexOffset=0;
+                            //compute new index offsets
+                            for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
+                                {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
+                                 newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
+                                 indexOffset+=buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][0].capacity()/3;
+                                }
+                            //use these new index offsets
+                            for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
+                                {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
+                                 indexOffset=newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]];
+                                 if(indexOffset!=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]])
+                                     {//use the subtraction of the both values to update all index buffers
+                                      deletedIndicesCount=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]-indexOffset;
+                                      for(int l=0;l<buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1].capacity();l++)
+                                          ((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).put(l,((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).get(l)-deletedIndicesCount);
+                                     }
+                                }
+                            indexArrayOffsetIndicesList.clear();
                            }                     
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
