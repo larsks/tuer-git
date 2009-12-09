@@ -91,7 +91,7 @@ final class GameFilesGenerator{
             {final long time=System.currentTimeMillis();
              System.out.println("[INFO] JFPSM attempts to create a level node...");
              final String levelNodeName="LID"+levelIndex;
-             // Create one node per level
+             //create one node per level
              final Object levelNode=EngineServiceSeeker.getInstance().createNode(levelNodeName);
              String floorNodeName,meshName,tilePath;
              File tileFile;
@@ -107,7 +107,7 @@ final class GameFilesGenerator{
              float[] vertex=new float[3],localVertex=new float[3];
              boolean mergeableFacesFound=false;
              boolean mergeableFaceFound=false;
-             // Use the identifier of the volume parameter as a key rather than the vertex buffer
+             //use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer,newVertexBuffer,newNormalBuffer,newTexCoordBuffer;
              IntBuffer totalIndexBuffer,indexBuffer,mergeableIndexBuffer,localIndexBuffer,localMergeableIndexBuffer,localMergeIndexBuffer,newIndiceBuffer;
@@ -155,11 +155,11 @@ final class GameFilesGenerator{
                                    }
                                locationList.add(floorVolumeElements[i][k].getLevelRelativePosition());
                               }
-                  // Create one node per floor (array)
+                  //create one node per floor (array)
                   floorNodeName=levelNodeName+"NID"+j;
                   floorNode=EngineServiceSeeker.getInstance().createNode(floorNodeName);                
                   meshIndex=0;
-                  // Use the geometries passed as arguments to build the mesh data
+                  //use the geometries passed as arguments to build the mesh data
                   for(Entry<Integer,ArrayList<float[]>> entry:volumeParamLocationTable.entrySet())
                       {key=entry.getKey();
                        locationList=entry.getValue();
@@ -193,7 +193,7 @@ final class GameFilesGenerator{
                        for(float[] location:locationList)
                            {vertexBuffer.get(vertexCoords,0,vertexBuffer.capacity());
                             vertexBuffer.rewind();
-                            // Use the location to translate the vertices
+                            //use the location to translate the vertices
                             for(int i=0;i<vertexBuffer.capacity();i++)
                                 if(i%location.length!=1)
                                     vertexCoords[i]+=location[i%location.length];
@@ -203,7 +203,7 @@ final class GameFilesGenerator{
                             indexBuffer.get(indices,0,indexBuffer.capacity());
                             indexBuffer.rewind();                           
                             logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);
-                            // Add an offset to the indices
+                            //add an offset to the indices
                             for(int i=0;i<indexBuffer.capacity();i++)
                                 indices[i]+=indexOffset;                           
                             normalBuffer.get(normals,0,normalBuffer.capacity());
@@ -229,7 +229,7 @@ final class GameFilesGenerator{
                             if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
                                 {mergeableIndexBuffer.get(indices,0,mergeableIndexBuffer.capacity());
                                  mergeableIndexBuffer.rewind();
-                                 // Add an offset to the indices
+                                 //add an offset to the indices
                                  for(int i=0;i<mergeableIndexBuffer.capacity();i++)
                                      indices[i]+=indexOffset;
                                  localMergeableIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
@@ -247,7 +247,7 @@ final class GameFilesGenerator{
                                 }
                             else
                                 buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=null;
-                            // Update the offset
+                            //update the offset
                             indexOffset+=vertexBuffer.capacity()/3;
                            }
                        //if the merge is enabled, perform the merge
@@ -335,7 +335,7 @@ final class GameFilesGenerator{
                                             if(((IntBuffer)buffersGrid[i][j][k][5]).get()!=-1)
                                                 newBufferSize++;     
                                         ((IntBuffer)buffersGrid[i][j][k][5]).rewind();
-                                        //check if the index buffer has to be remade
+                                        //check if the index buffer has to be rebuilt
                                         if(newBufferSize!=((IntBuffer)buffersGrid[i][j][k][5]).capacity())
                                             {//if the new buffer is empty
                                              if(newBufferSize==0)
@@ -442,11 +442,13 @@ final class GameFilesGenerator{
                                      }
                                 }
                             indexArrayOffsetIndicesList.clear();
-                           }                     
+                           }
+                       //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
                        totalNormalBufferSize=0;
                        totalTexCoordBufferSize=0;
+                       //compute the size of the buffers resulting of the regroupment
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
                                {if(buffersGrid[i][j][k][0]!=null)
@@ -458,11 +460,12 @@ final class GameFilesGenerator{
                                 if(buffersGrid[i][j][k][3]!=null)
                                     totalTexCoordBufferSize+=buffersGrid[i][j][k][3].capacity();
                                }
+                       //create these buffers
                        totalVertexBuffer=BufferUtil.newFloatBuffer(totalVertexBufferSize);
                        totalIndexBuffer=BufferUtil.newIntBuffer(totalIndexBufferSize);
                        totalNormalBuffer=BufferUtil.newFloatBuffer(totalNormalBufferSize);
                        totalTexCoordBuffer=BufferUtil.newFloatBuffer(totalTexCoordBufferSize);
-                       
+                       //fill them
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
                                {if(buffersGrid[i][j][k][0]!=null)
@@ -473,8 +476,7 @@ final class GameFilesGenerator{
                                     totalNormalBuffer.put((FloatBuffer)buffersGrid[i][j][k][2]);
                                 if(buffersGrid[i][j][k][3]!=null)
                                     totalTexCoordBuffer.put((FloatBuffer)buffersGrid[i][j][k][3]);
-                               }
-                       
+                               }                      
                        //put null values into the grid of buffers
                        //because it has to be emptied before using another volume parameter
                        for(int i=0;i<grid.getLogicalWidth();i++)
@@ -485,6 +487,7 @@ final class GameFilesGenerator{
                        totalIndexBuffer.rewind();
                        totalNormalBuffer.rewind();
                        totalTexCoordBuffer.rewind();
+                       //create a mesh for this floor and for the volume parameter currently in use
                        meshName=floorNodeName+"CID"+meshIndex;
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);

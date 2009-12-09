@@ -110,7 +110,7 @@ final class GameState extends State{
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
         // Load level model
-        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource(/*"/abin/tutorial.abin"*/"/abin/LID"+levelIndex+".abin"));
+        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
              CullState cullState=new CullState();
              cullState.setEnabled(true);
              cullState.setCullFace(CullState.Face.Back);
@@ -131,6 +131,8 @@ final class GameState extends State{
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
+             //remove the bullet as it is not necessary now
+             ((Node)pistol2Node.getChild(0)).detachChildAt(2);
              pistol2Node.setTranslation(114.5,0,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
