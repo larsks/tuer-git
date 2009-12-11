@@ -71,7 +71,7 @@ final class GameState extends State{
         fpsTextLabel.addController(new SpatialController<Spatial>(){
             @Override
             public final void update(double time,Spatial caller){
-                fpsTextLabel.setText(Math.round(time>0?1/time:0)+" FPS");
+                fpsTextLabel.setText(" "+Math.round(time>0?1/time:0)+" FPS");
             }           
         });
         // configure the collision system
@@ -104,7 +104,7 @@ final class GameState extends State{
         // Remove all previously attached children
         getRoot().detachAllChildren();
         //FIXME: it should not be hard-coded
-        currentCamLocation.set(115,0,223);
+        currentCamLocation.set(115,0.5,223);
         //attach the player itself
         getRoot().attachChild(playerNode);
         //attach the FPS display node
@@ -115,43 +115,42 @@ final class GameState extends State{
              cullState.setEnabled(true);
              cullState.setCullFace(CullState.Face.Back);
              levelNode.setRenderState(cullState);
-             getRoot().attachChild(levelNode);
-             
+             getRoot().attachChild(levelNode);            
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
-             uziNode.setTranslation(111.5,0,219);
+             uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);           
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
-             smachNode.setTranslation(112.5,0,219);
+             smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
-             pistolNode.setTranslation(113.5,0,219);
+             pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
              //remove the bullet as it is not necessary now
              ((Node)pistol2Node.getChild(0)).detachChildAt(2);
-             pistol2Node.setTranslation(114.5,0,219);
+             pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
-             pistol3Node.setTranslation(115.5,0,219);
+             pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
-             laserNode.setTranslation(116.5,0,219);
+             laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
              getRoot().attachChild(laserNode);
              final Node copNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/cop.abin"));
-             copNode.setTranslation(117.5,0,219);
+             copNode.setTranslation(117.5,0.5,219);
              copNode.setScale(0.5);
              copNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(0,1,0)));
              getRoot().attachChild(copNode);
              final Node alienNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/giger_alien.abin"));
-             alienNode.setTranslation(118.5,-0.5,219);
+             alienNode.setTranslation(118.5,0,219);
              alienNode.setScale(0.3);
              getRoot().attachChild(alienNode);
             }
