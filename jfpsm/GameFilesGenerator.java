@@ -195,11 +195,7 @@ final class GameFilesGenerator{
                             vertexBuffer.rewind();
                             //use the location to translate the vertices
                             for(int i=0;i<vertexBuffer.capacity();i++)
-                                if(i%location.length!=1)
-                                    vertexCoords[i]+=location[i%location.length];
-                                else
-                                    //FIXME: remove "-0.5f"
-                                    vertexCoords[i]+=location[i%location.length]-0.5f;
+                                vertexCoords[i]+=location[i%location.length];                              
                             indexBuffer.get(indices,0,indexBuffer.capacity());
                             indexBuffer.rewind();                           
                             logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);

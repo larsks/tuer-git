@@ -68,14 +68,6 @@ public final class CuboidParameters extends VolumeParameters{
         this.size=size;
         this.texCoord=texCoord;
         this.faceOrientation=faceOrientation;
-        //6 faces * 4 vertices * 3 coordinates
-        /*this.vertexBuffer=BufferUtil.newFloatBuffer(72);
-        this.normalBuffer=BufferUtil.newFloatBuffer(72);
-        //6 faces * 2 triangles * 3 indices
-        this.indexBuffer=BufferUtil.newIntBuffer(36);
-        this.mergeableIndexBuffer=BufferUtil.newIntBuffer(36);
-        //6 faces * 4 vertices * 2 coordinates
-        this.texCoordBuffer=BufferUtil.newFloatBuffer(48);*/
         buffersRecomputationNeeded=true;
         markDirty();
     }
@@ -233,10 +225,6 @@ public final class CuboidParameters extends VolumeParameters{
                                 mergeableIndexBuffer.put(3+indexOffset).put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(3+indexOffset).put(1+indexOffset);
                             else
                                 mergeableIndexBuffer.put(2+indexOffset).put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(2+indexOffset).put(0+indexOffset);
-                		    /*if(changeDiagonal[side.ordinal()])
-                                mergeableIndexBuffer.put(1+indexOffset).put(0+indexOffset).put(3+indexOffset).put(1+indexOffset).put(3+indexOffset).put(2+indexOffset);                               
-                            else
-                                mergeableIndexBuffer.put(0+indexOffset).put(1+indexOffset).put(2+indexOffset).put(0+indexOffset).put(2+indexOffset).put(3+indexOffset);*/
                 		    indexOffset+=4;               		    
                 		   }
                 	   else
