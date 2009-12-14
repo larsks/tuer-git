@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,24 +37,28 @@ final class GameFilesGenerator{
         return(instance);
     }
     
-    final void writeLevel(final FloorSet level,final int levelIndex,final Project project,final File destFile)throws Exception{
+    private Entry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid> createVolumeParametersAndGridFromLevel(final FloorSet level,final Project project){        
         BufferedImage image;
         int width=0,depth=0,rgb;
         Map map;
         AbsoluteVolumeParameters[][] avp;
         ArrayList<AbsoluteVolumeParameters[][]> volumeElementsList=new ArrayList<AbsoluteVolumeParameters[][]>();
+        //get the biggest dimension of the floors
         for(Floor floor:level.getFloorsList())
             {map=floor.getMap(MapType.CONTAINER_MAP);
              image=map.getImage();
              width=Math.max(width,image.getWidth());
              depth=Math.max(depth,image.getHeight());
-            }        
+            }
+        //use them to build the regular grid
         final RegularGrid grid=new RegularGrid(width,level.getFloorsList().size(),depth,1,1,1);
-        /**floor index*/
+        //floor index
         int j=0;
         float[] gridSectionPos;
+        //loop on all floors
         for(Floor floor:level.getFloorsList())
-            {map=floor.getMap(MapType.CONTAINER_MAP);
+            {//we will have to look at each kind of map...
+             map=floor.getMap(MapType.CONTAINER_MAP);
              image=map.getImage();
              width=image.getWidth();
              depth=image.getHeight();
@@ -81,7 +86,12 @@ final class GameFilesGenerator{
              volumeElementsList.add(avp);
              j++;
             }
+        return(new AbstractMap.SimpleEntry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid>(volumeElementsList,grid));
+    }
+    
+    final void writeLevel(final FloorSet level,final int levelIndex,final Project project,final File destFile)throws Exception{            
         boolean success=true;
+        //create the file used to store a level if it does not yet exist
         if(!destFile.exists())
             {success=destFile.createNewFile();
              if(!success)
@@ -114,11 +124,14 @@ final class GameFilesGenerator{
              int totalVertexBufferSize,totalIndexBufferSize,totalNormalBufferSize,totalTexCoordBufferSize;
              ArrayList<float[]> locationList;
              ArrayList<Buffer> bufferList;
-             j=0;
              int meshIndex,indexOffset,deletedIndicesCount;
              boolean isMergeEnabled;
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
+             //create the grid and the absolute volume parameters
+             Entry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid> volumParamsAndGrid=createVolumeParametersAndGridFromLevel(level,project);
+             ArrayList<AbsoluteVolumeParameters[][]> volumeElementsList=volumParamsAndGrid.getKey();
+             RegularGrid grid=volumParamsAndGrid.getValue();
              Buffer[][][][] buffersGrid=new Buffer[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()][6];       
              HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
              HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
@@ -128,20 +141,29 @@ final class GameFilesGenerator{
              int[] logicalGridPos;
              final int[] triIndices=new int[3];
              int startPos,localStartPos,newBufferSize,indice;
+             //start with the first floor
+             int j=0;
+             //loop on 2D arrays of volume elements of all floors
              for(AbsoluteVolumeParameters[][] floorVolumeElements:volumeElementsList)
                  {volumeParamLocationTable.clear();
                   volumeParamTable.clear();
                   tileNameTable.clear();
                   mergeTable.clear();
+                  //loop on volume elements of a 2D array of a floor
                   for(int i=0;i<floorVolumeElements.length;i++)
                       for(int k=0;k<floorVolumeElements[i].length;k++)
+                          //check if the volume element is pertinent
                           if(!floorVolumeElements[i][k].isVoid())
                               {key=Integer.valueOf(floorVolumeElements[i][k].getVolumeParamIdentifier());
+                               //get the list of locations of this volume element if any
                                locationList=volumeParamLocationTable.get(key);
+                               //if there is no such list
                                if(locationList==null)
-                                   {locationList=new ArrayList<float[]>();
+                                   {//create it
+                                    locationList=new ArrayList<float[]>();
                                     volumeParamLocationTable.put(key,locationList);
                                     bufferList=new ArrayList<Buffer>();
+                                    //copy all buffers
                                     bufferList.add(floorVolumeElements[i][k].getVertexBuffer());
                                     bufferList.add(floorVolumeElements[i][k].getIndexBuffer());
                                     bufferList.add(floorVolumeElements[i][k].getNormalBuffer());
@@ -150,7 +172,8 @@ final class GameFilesGenerator{
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][k].getName());
                                     mergeTable.put(key,Boolean.valueOf(floorVolumeElements[i][k].isMergeEnabled()));
-                                    if(floorVolumeElements[i][k].isMergeEnabled())
+                                    //mergeable faces are used to compute the bounding boxes of the system of collision detection too 
+                                    if(floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces()!=null)
                                         verticesIndicesOfMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces());
                                    }
                                locationList.add(floorVolumeElements[i][k].getLevelRelativePosition());
@@ -178,16 +201,14 @@ final class GameFilesGenerator{
                        if(texCoords.length<texCoordBuffer.capacity())
                            texCoords=new float[texCoordBuffer.capacity()];                      
                        isMergeEnabled=mergeTable.get(key).booleanValue();
-                       if(isMergeEnabled)
-                           {verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
-                            if(verticesIndicesOfMergeableFaces!=null)
-                                {//copy the vertices indices
-                                 absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
-                                 for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
-                                     for(int jj=0;jj<2;jj++)
-                                         for(int kk=0;kk<3;kk++)
-                                             absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
-                                }
+                       verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
+                       if(verticesIndicesOfMergeableFaces!=null)
+                           {//copy the vertices indices
+                            absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
+                            for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
+                                for(int jj=0;jj<2;jj++)
+                                    for(int kk=0;kk<3;kk++)
+                                        absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
                            }
                        indexOffset=0;
                        for(float[] location:locationList)
@@ -222,7 +243,7 @@ final class GameFilesGenerator{
                             localTexCoordBuffer.put(texCoords,0,texCoordBuffer.capacity());
                             localTexCoordBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][3]=localTexCoordBuffer;
-                            if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
+                            if(verticesIndicesOfMergeableFaces!=null)
                                 {mergeableIndexBuffer.get(indices,0,mergeableIndexBuffer.capacity());
                                  mergeableIndexBuffer.rewind();
                                  //add an offset to the indices
@@ -236,7 +257,7 @@ final class GameFilesGenerator{
                                  localMergeIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.rewind();
-                                 //fill the buffer used for the merge, it will contain the markers
+                                 //fill the buffer used for the merge, it will contain the markers (-1 for vertices that have to be removed)
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][5]=localMergeIndexBuffer;
                                  indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
                                  indexArrayOffsetIndicesList.add(logicalGridPos);
@@ -246,8 +267,9 @@ final class GameFilesGenerator{
                             //update the offset
                             indexOffset+=vertexBuffer.capacity()/3;
                            }
-                       //if the merge is enabled, perform the merge
-                       if(isMergeEnabled&&verticesIndicesOfMergeableFaces!=null)
+                       //if the merge is possible, compute the merged structures that can be used both for the merge itself and
+                       //for the computation of the bounding boxes of the system handling the detection of collisions
+                       if(verticesIndicesOfMergeableFaces!=null)
                            {//mark all useless indices to ease their later removal
                             for(int i=0;i<grid.getLogicalWidth();i++)
                                 for(int k=0;k<grid.getLogicalDepth();k++)
@@ -260,10 +282,13 @@ final class GameFilesGenerator{
                                                      absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]+=indexOffset;
                                          while(buffersGrid[i][j][k][4].hasRemaining())
                                              {startPos=((IntBuffer)buffersGrid[i][j][k][4]).position();
+                                              //get the indices of the vertices composing the current triangle
                                               ((IntBuffer)buffersGrid[i][j][k][4]).get(triIndices,0,3);      
                                               mergeableFaceFound=false;
+                                              //loop on all merge candidates
                                               for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
                                                   for(int jj=0;!mergeableFaceFound&&jj<2;jj++)
+                                                      //if the indices are identical
                                                       if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
                                                           {for(int jjj=0;jjj<2;jjj++)
                                                                if(jjj!=jj)
@@ -294,6 +319,9 @@ final class GameFilesGenerator{
                                                                                           for(int delIndex=0;delIndex<3;delIndex++)
                                                                                               ((IntBuffer)buffersGrid[i][j][k][5]).put(startPos+delIndex,-1);
                                                                                           localStartPos=-1;
+                                                                                          //look for the indices of the vertices of this face in 
+                                                                                          //the part of the grid in order to get the position of 
+                                                                                          //the indice of the first vertex
                                                                                           for(int delIndex=0;delIndex<((IntBuffer)buffersGrid[i][j][k][5]).capacity();delIndex+=3)
                                                                                               if(((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex)==localAbsoluteVerticesIndicesOfMergeableFace[delIndex%3]&&
                                                                                                  ((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex+1)==localAbsoluteVerticesIndicesOfMergeableFace[(delIndex+1)%3]&&
@@ -301,10 +329,13 @@ final class GameFilesGenerator{
                                                                                                   {localStartPos=delIndex;
                                                                                                    break;
                                                                                                   }
+                                                                                          //if these indices have been found
                                                                                           if(localStartPos!=-1)
+                                                                                              //replace the indices that have to be deleted by -1
                                                                                               for(int delIndex=0;delIndex<3;delIndex++)
                                                                                                   ((IntBuffer)buffersGrid[locali][localj][localk][5]).put(localStartPos+delIndex,-1);
                                                                                           else
+                                                                                              //something is wrong, the face is orphaned
                                                                                               System.out.println("[WARNING] indices not found");
                                                                                          }                                                                                                                                                                      
                                                                                     }
@@ -404,16 +435,19 @@ final class GameFilesGenerator{
                                                   //not mandatory as we have just used an absolute access above
                                                   newIndiceBuffer.rewind();
                                                   reindexationTable.clear();
-                                                  //replace the old vertex buffer by the new one
-                                                  buffersGrid[i][j][k][0]=newVertexBuffer;
-                                                  //replace the old index buffer by the new index buffer
-                                                  buffersGrid[i][j][k][1]=newIndiceBuffer;
-                                                  //do the same for the normal buffer
-                                                  buffersGrid[i][j][k][2]=newNormalBuffer;
-                                                  //do the same for the texture coordinates buffer
-                                                  buffersGrid[i][j][k][3]=newTexCoordBuffer;                                     
                                                   //reset the counters of occurrence
                                                   indexCountTable.clear();
+                                                  //if the merged structures have to be used for the merge
+                                                  if(isMergeEnabled)
+                                                      {//replace the old vertex buffer by the new one
+                                                       buffersGrid[i][j][k][0]=newVertexBuffer;
+                                                       //replace the old index buffer by the new index buffer
+                                                       buffersGrid[i][j][k][1]=newIndiceBuffer;
+                                                       //do the same for the normal buffer
+                                                       buffersGrid[i][j][k][2]=newNormalBuffer;
+                                                       //do the same for the texture coordinates buffer
+                                                       buffersGrid[i][j][k][3]=newTexCoordBuffer;
+                                                      }
                                                  }
                                             }                                       
                                        }
@@ -503,14 +537,18 @@ final class GameFilesGenerator{
                        EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
                        //this file is now useless, delete it
                        tileFile.delete();
+                       //attach the newly created mesh to its floor
                        EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }
+                  //attach the floor to its level
                   EngineServiceSeeker.getInstance().attachChildToNode(levelNode,floorNode);
+                  //look at the next floor
                   j++;
                  }
              System.out.println("[INFO] level node successfully created");
              System.out.println("[INFO] JFPSM attempts to write the level into the file "+destFile.getName());
+             //write the level into a file
              success=EngineServiceSeeker.getInstance().writeSavableInstanceIntoFile(levelNode,destFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destFile.getName()+" successful");
