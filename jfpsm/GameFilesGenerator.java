@@ -113,8 +113,6 @@ final class GameFilesGenerator{
              HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
              int[][][] verticesIndicesOfMergeableFaces=null;
              int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
-             int[] localAbsoluteVerticesIndicesOfMergeableFace=new int[3];
-             float[] vertex=new float[3],localVertex=new float[3];
              //use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer;
@@ -131,13 +129,10 @@ final class GameFilesGenerator{
              ArrayList<AbsoluteVolumeParameters[][]> volumeElementsList=volumParamsAndGrid.getKey();
              RegularGrid grid=volumParamsAndGrid.getValue();
              Buffer[][][][] buffersGrid=new Buffer[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()][6];       
-             HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
-             HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<int[]>();
              int[] logicalGridPos;
-             final int[] triIndices=new int[3];
              //start with the first floor
              int j=0;
              //loop on 2D arrays of volume elements of all floors
@@ -268,13 +263,9 @@ final class GameFilesGenerator{
                        //for the computation of the bounding boxes of the system handling the detection of collisions
                        if(verticesIndicesOfMergeableFaces!=null)
                            {computeMergedStructures(verticesIndicesOfMergeableFaces,
-                                absoluteVerticesIndicesOfMergeableFaces,
-                                localAbsoluteVerticesIndicesOfMergeableFace,
-                                vertex, localVertex, isMergeEnabled, grid,
-                                buffersGrid, indexCountTable,
-                                reindexationTable, indexOffsetArray,
-                                newIndexOffsetArray,
-                                indexArrayOffsetIndicesList, triIndices, j);
+                                absoluteVerticesIndicesOfMergeableFaces,                            
+                                isMergeEnabled,grid,buffersGrid,indexOffsetArray,newIndexOffsetArray,
+                                indexArrayOffsetIndicesList,j);
                            }
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
@@ -367,30 +358,21 @@ final class GameFilesGenerator{
      * 
      * @param verticesIndicesOfMergeableFaces
      * @param absoluteVerticesIndicesOfMergeableFaces
-     * @param localAbsoluteVerticesIndicesOfMergeableFace
-     * @param vertex
-     * @param localVertex
-     * @param isMergeEnabled
-     * @param grid
+     * @param isMergeEnabled flag indicating whether the merge is enabled
+     * @param grid regular grid of the level
      * @param buffersGrid
-     * @param indexCountTable
-     * @param reindexationTable
      * @param indexOffsetArray
      * @param newIndexOffsetArray
      * @param indexArrayOffsetIndicesList
-     * @param triIndices
-     * @param j
+     * @param j floor index
      */
-    private final void computeMergedStructures(int[][][] verticesIndicesOfMergeableFaces,
-            int[][][] absoluteVerticesIndicesOfMergeableFaces,
-            int[] localAbsoluteVerticesIndicesOfMergeableFace, float[] vertex,
-            float[] localVertex, boolean isMergeEnabled, RegularGrid grid,
-            Buffer[][][][] buffersGrid,
-            HashMap<Integer, Integer> indexCountTable,
-            HashMap<Integer, Integer> reindexationTable,
-            int[][][] indexOffsetArray, int[][][] newIndexOffsetArray,
-            ArrayList<int[]> indexArrayOffsetIndicesList,
-            final int[] triIndices, int j) {
+    private final void computeMergedStructures(final int[][][] verticesIndicesOfMergeableFaces,
+            final int[][][] absoluteVerticesIndicesOfMergeableFaces,
+            final boolean isMergeEnabled,final RegularGrid grid,
+            final Buffer[][][][] buffersGrid,
+            final int[][][] indexOffsetArray,final int[][][] newIndexOffsetArray,
+            final ArrayList<int[]> indexArrayOffsetIndicesList,
+            final int j) {
         boolean mergeableFacesFound;
         boolean mergeableFaceFound;
         FloatBuffer newVertexBuffer;
@@ -404,6 +386,13 @@ final class GameFilesGenerator{
         int localStartPos;
         int newBufferSize;
         int indice;
+        //indices of the vertices composing the triangle
+        final int[] triIndices=new int[3];
+        float[] vertex=new float[3],localVertex=new float[3];
+        int[] localAbsoluteVerticesIndicesOfMergeableFace=new int[3];
+        //table of the occurrences of the indices
+        HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
+        HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
         //mark all useless indices to ease their later removal
             for(int i=0;i<grid.getLogicalWidth();i++)
                 for(int k=0;k<grid.getLogicalDepth();k++)
