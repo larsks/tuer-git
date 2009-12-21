@@ -335,6 +335,12 @@ public final class CuboidParameters extends VolumeParameters{
         return(verticesIndicesOfMergeableFaces);
     }
     
+    @Override
+    public float[][][] getAxisAlignedBoundingBoxesExtremeCoordinates(final float[][] containerBoundingBox){
+        //TODO: implement it
+        return(null);
+    }
+    
     public final void setOrientation(Side side,Orientation orientation){
         faceOrientation[side.ordinal()]=orientation;
         buffersRecomputationNeeded=true;

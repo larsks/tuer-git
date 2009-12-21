@@ -58,4 +58,13 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 	     * */
 	    return(null);
 	}
+	
+	/**
+	 * get the vertex coordinates of the extreme values of the bounding boxes
+	 * @param containerBoundingBox bounding box that contains the volume
+	 * @return vertex coordinates of the extreme values of the bounding boxes
+	 */
+	public float[][][] getAxisAlignedBoundingBoxesExtremeCoordinates(final float[][] containerBoundingBox){
+	    return(null);
+	}
 }

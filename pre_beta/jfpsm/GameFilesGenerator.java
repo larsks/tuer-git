@@ -89,13 +89,28 @@ final class GameFilesGenerator{
         return(new AbstractMap.SimpleEntry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid>(volumeElementsList,grid));
     }
     
-    final void writeLevel(final FloorSet level,final int levelIndex,final Project project,final File destFile)throws Exception{            
+    /**
+     * write the level mesh into a file and the bounding boxes used for the collisions in another one
+     * @param level
+     * @param levelIndex
+     * @param project
+     * @param destFile
+     * @param destCollisionFile
+     * @throws Exception
+     */
+    final void writeLevel(final FloorSet level,final int levelIndex,final Project project,final File destFile,final File destCollisionFile)throws Exception{            
         boolean success=true;
         //create the file used to store a level if it does not yet exist
         if(!destFile.exists())
             {success=destFile.createNewFile();
              if(!success)
                  throw new RuntimeException("The file "+destFile.getAbsolutePath()+" cannot be created!");
+            }
+        //create the file used to store the bounding boxes of the level used for the collisions if it does not yet exist
+        if(success&&!destCollisionFile.exists())
+            {success=destCollisionFile.createNewFile();
+             if(!success)
+                 throw new RuntimeException("The file "+destCollisionFile.getAbsolutePath()+" cannot be created!");
             }
         if(success)
             {final long time=System.currentTimeMillis();
@@ -132,6 +147,7 @@ final class GameFilesGenerator{
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<int[]>();
+             ArrayList<Object> boundingBoxesList=new ArrayList<Object>();
              int[] logicalGridPos;
              //start with the first floor
              int j=0;
@@ -346,10 +362,19 @@ final class GameFilesGenerator{
              success=EngineServiceSeeker.getInstance().writeSavableInstanceIntoFile(levelNode,destFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destFile.getName()+" successful");
-                  System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");
+                  //System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");
                  }
              else
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
+             System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
+             //write the bounding boxes of the level into a file
+             success=EngineServiceSeeker.getInstance().writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
+             if(success)
+                 {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
+                  System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");
+                 }
+             else
+                 System.out.println("[WARNING]Export into the file "+destCollisionFile.getName()+" not successful!");
             }
     }
 

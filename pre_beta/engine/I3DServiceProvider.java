@@ -17,9 +17,11 @@ import java.io.File;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 public interface I3DServiceProvider{
     public boolean writeSavableInstanceIntoFile(final Object savable,final File file);
+    public boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file);
     public void attachChildToNode(final Object parent,final Object child);
     public Object createNode(final String name);
     public Object createMeshFromBuffers(final String name,

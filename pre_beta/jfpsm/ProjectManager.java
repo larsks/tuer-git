@@ -943,11 +943,12 @@ public final class ProjectManager extends JPanel{
     		//prevent the user from leaving the application during an export
     		projectManager.setQuitEnabled(false);
     		ArrayList<String> filenamesList=new ArrayList<String>();
-    		File levelFile;
+    		File levelFile,levelCollisionFile;
     		int levelIndex=0;
     		for(FloorSet level:levelsList)
     		    {levelFile=new File(projectManager.createRawDataPath(level.getName()+".abin"));
-                 try{GameFilesGenerator.getInstance().writeLevel(level,levelIndex,project,levelFile);}
+    		     levelCollisionFile=new File(projectManager.createRawDataPath(level.getName()+".collision.abin"));
+                 try{GameFilesGenerator.getInstance().writeLevel(level,levelIndex,project,levelFile,levelCollisionFile);}
                  catch(Throwable throwable)
                  {projectManager.displayErrorMessage(throwable,false);}
                  filenamesList.add(level.getName());
