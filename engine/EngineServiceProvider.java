@@ -14,10 +14,14 @@
 package engine;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
@@ -54,6 +58,32 @@ public final class EngineServiceProvider implements I3DServiceProvider{
             catch(IOException ioe)
             {success=false;
              ioe.printStackTrace();
+            }
+        return(success);
+    }
+    
+    @Override
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+        boolean success=true;
+        FileOutputStream fos=null;
+        try{fos=new FileOutputStream(file);} 
+        catch(FileNotFoundException fnfe)
+        {success=false;
+         fnfe.printStackTrace();
+        }
+        if(success)
+            try{for(Object savable:savablesList)
+                    if(!(success=BinaryExporter.getInstance().save((Savable)savable,fos)))
+                        break;
+                fos.close(); 
+               }
+            catch(IOException ioe)
+            {success=false;
+             ioe.printStackTrace();
+            }
+            catch(ClassCastException cce)
+            {success=false;
+             cce.printStackTrace();
             }
         return(success);
     }

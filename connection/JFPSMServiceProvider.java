@@ -17,6 +17,8 @@ import java.io.File;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+
 import engine.EngineServiceProvider;
 import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
@@ -43,6 +45,11 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     @Override
     public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
+    }
+    
+    @Override
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+        return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override

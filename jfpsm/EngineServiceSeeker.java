@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 public final class EngineServiceSeeker implements I3DServiceSeeker{
 
@@ -25,6 +26,11 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
     @Override
     public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
+    }
+    
+    @Override
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+        return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override
