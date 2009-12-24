@@ -152,7 +152,12 @@ final class GameState extends State{
              final Node alienNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/giger_alien.abin"));
              alienNode.setTranslation(118.5,0,219);
              alienNode.setScale(0.3);
-             getRoot().attachChild(alienNode);
+             getRoot().attachChild(alienNode);       
+             final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
+             creatureNode.setTranslation(118.5,0.7,217);
+             creatureNode.setScale(0.0002);
+             creatureNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+             getRoot().attachChild(creatureNode);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}
