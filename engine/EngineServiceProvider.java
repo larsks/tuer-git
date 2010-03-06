@@ -73,8 +73,12 @@ public final class EngineServiceProvider implements I3DServiceProvider{
         }
         if(success)
             try{for(Object savable:savablesList)
-                    if(!(success=BinaryExporter.getInstance().save((Savable)savable,fos)))
+                    {try{BinaryExporter.getInstance().save((Savable)savable,fos);}
+                     catch(Throwable t)
+                     {success=false;}
+            	     if(!success)
                         break;
+                    }
                 fos.close(); 
                }
             catch(IOException ioe)
