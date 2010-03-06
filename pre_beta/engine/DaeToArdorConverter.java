@@ -26,7 +26,7 @@ public final class DaeToArdorConverter{
         ColladaImporter colladaImporter=new ColladaImporter();
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             final Node colladaNode=colladaImporter.readColladaFile(arg).getScene();
+             final Node colladaNode=colladaImporter.load(arg).getScene();
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              File destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".dae"))+".abin");
