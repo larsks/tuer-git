@@ -19,14 +19,17 @@ import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
+import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
+import com.ardor3d.scenegraph.hint.DataMode;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import engine.input.ExtendedFirstPersonControl;
@@ -85,13 +88,13 @@ final class GameState extends State{
         collisionResults.clear();*/
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        playerNode.addController(new SpatialController<Spatial>(){
+        /*playerNode.addController(new SpatialController<Spatial>(){
             @Override
             public void update(double timeSinceLastCall, Spatial caller) {
                 // sync the camera node with the camera
                 playerNode.updateFromCamera();
             }           
-        });
+        });*/
     }
     
     
@@ -106,7 +109,7 @@ final class GameState extends State{
         //FIXME: it should not be hard-coded
         currentCamLocation.set(115,0.5,223);
         //attach the player itself
-        getRoot().attachChild(playerNode);
+        //getRoot().attachChild(playerNode);
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
         // Load level model
@@ -115,14 +118,42 @@ final class GameState extends State{
              cullState.setEnabled(true);
              cullState.setCullFace(CullState.Face.Back);
              levelNode.setRenderState(cullState);
-             getRoot().attachChild(levelNode);            
+             getRoot().attachChild(levelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);           
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
-             smachNode.setTranslation(112.5,0.15,219);
+             //smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
+             smachNode.addController(new SpatialController<Spatial>(){
+            	 private Matrix3 correctWeaponRotation=new Matrix3();
+            	 private Matrix3 halfRotationAroundY=new Matrix3().fromAngles(0, Math.PI, 0);
+            	 private Vector3 translation=new Vector3();
+                 @Override
+                 public void update(double timeSinceLastCall, Spatial caller) {
+                     // sync the camera node with the camera
+                     playerNode.updateFromCamera();
+                     //use the correct rotation (combine the camera location with a rotation around Y)
+                     correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY);
+                	 smachNode.setRotation(correctWeaponRotation);
+                	 //smachNode.setTranslation(new Vector3(playerNode.getTranslation()).addLocal(0,0,2));
+                     translation.zero();
+                     //-1 * camera.getLeft() (as the weapon is on the right side)
+                     translation.subtractLocal(playerNode.getRotation().getValue(0,0),playerNode.getRotation().getValue(1,0),playerNode.getRotation().getValue(2,0));
+                     //-0.1 * camera.getUp()
+                     translation.subtractLocal(0.1*playerNode.getRotation().getValue(0,1),0.1*playerNode.getRotation().getValue(1,1),0.1*playerNode.getRotation().getValue(2,1));
+                     //2 * camera.getDirection() (as the weapon is in front of me)
+                     translation.addLocal(2*playerNode.getRotation().getValue(0,2),2*playerNode.getRotation().getValue(1,2),2*playerNode.getRotation().getValue(2,2));
+                     //normalize and set distance
+                     translation.normalizeLocal().multiplyLocal(0.4);
+                     //add "world" translation
+                     translation.addLocal(playerNode.getTranslation());
+                     smachNode.setTranslation(translation);
+                 }           
+             });
+             getRoot().attachChild(smachNode);
+             //changeMode(smachNode);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
              pistolNode.setTranslation(113.5,0.1,219);
@@ -162,6 +193,28 @@ final class GameState extends State{
         catch(final Exception ex)
         {ex.printStackTrace();}
     }
+    
+    /*private static void changeMode(Spatial spatial){
+    	spatial.getSceneHints().setDataMode(DataMode.VBOInterleaved);
+    	if(spatial instanceof Node)
+    	    {for(Spatial child:((Node)spatial).getChildren())
+    		     changeMode(child);
+    	    }
+    	else
+    		if(spatial instanceof Mesh)
+    	        {((Mesh)spatial).getMeshData().getNormalCoords().setNeedsRefresh(true);
+      		     ((Mesh)spatial).getMeshData().getTextureCoords().get(0).setNeedsRefresh(true);
+    		     ((Mesh)spatial).getMeshData().getVertexCoords().setNeedsRefresh(true);
+    		     if(((Mesh)spatial).getMeshData().getColorCoords()!=null)
+    		         ((Mesh)spatial).getMeshData().getColorCoords().setNeedsRefresh(true);
+    		     if(((Mesh)spatial).getMeshData().getFogCoords()!=null)
+    		         ((Mesh)spatial).getMeshData().getFogCoords().setNeedsRefresh(true);
+    		     if(((Mesh)spatial).getMeshData().getTangentCoords()!=null)
+    		         ((Mesh)spatial).getMeshData().getTangentCoords().setNeedsRefresh(true);
+    		     if(((Mesh)spatial).getMeshData().getInterleavedData()!=null)
+    		         ((Mesh)spatial).getMeshData().getInterleavedData().setNeedsRefresh(true);
+    	        }
+    }*/
     
     @Override
     public void setEnabled(final boolean enabled){
