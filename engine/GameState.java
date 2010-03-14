@@ -134,21 +134,13 @@ final class GameState extends State{
                  public void update(double timeSinceLastCall, Spatial caller) {
                      // sync the camera node with the camera
                      playerNode.updateFromCamera();
-                     //use the correct rotation (combine the camera location with a rotation around Y)
+                     //use the correct rotation (combine the camera rotation with a rotation around Y)
                      correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY);
                 	 smachNode.setRotation(correctWeaponRotation);
-                	 //smachNode.setTranslation(new Vector3(playerNode.getTranslation()).addLocal(0,0,2));
-                     translation.zero();
-                     //-1 * camera.getLeft() (as the weapon is on the right side)
-                     translation.subtractLocal(playerNode.getRotation().getValue(0,0),playerNode.getRotation().getValue(1,0),playerNode.getRotation().getValue(2,0));
-                     //-0.1 * camera.getUp()
-                     translation.subtractLocal(0.1*playerNode.getRotation().getValue(0,1),0.1*playerNode.getRotation().getValue(1,1),0.1*playerNode.getRotation().getValue(2,1));
-                     //2 * camera.getDirection() (as the weapon is in front of me)
-                     translation.addLocal(2*playerNode.getRotation().getValue(0,2),2*playerNode.getRotation().getValue(1,2),2*playerNode.getRotation().getValue(2,2));
-                     //normalize and set distance
-                     translation.normalizeLocal().multiplyLocal(0.4);
-                     //add "world" translation
-                     translation.addLocal(playerNode.getTranslation());
+                	 //computes the local translation (when the player has neither rotation nor translation)
+                	 translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
+                	 //combines it with the rotation of the player and his translation
+                     playerNode.getRotation().applyPost(translation,translation).addLocal(playerNode.getTranslation());
                      smachNode.setTranslation(translation);
                  }           
              });
