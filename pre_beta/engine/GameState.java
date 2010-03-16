@@ -13,25 +13,36 @@
 */
 package engine;
 
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+
+import com.ardor3d.bounding.BoundingBox;
+import com.ardor3d.bounding.CollisionTree;
+import com.ardor3d.bounding.CollisionTreeManager;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.intersection.BoundingCollisionResults;
+import com.ardor3d.intersection.CollisionResults;
+import com.ardor3d.intersection.PickingUtil;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
-import com.ardor3d.scenegraph.hint.DataMode;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
+import com.ardor3d.util.geom.BufferUtils;
+
 import engine.input.ExtendedFirstPersonControl;
 
 final class GameState extends State{
@@ -50,6 +61,10 @@ final class GameState extends State{
     private final Vector3 currentCamLocation;
     
     private final CameraNode playerNode;
+    
+    private final PlayerWeaponController playerWeaponController;
+    
+    private final ArrayList<Node> collectibleObjectsList;
     
     private final BasicText fpsTextLabel;
 
@@ -78,9 +93,9 @@ final class GameState extends State{
             }           
         });
         // configure the collision system
-        /*CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
-        collisionResults=new BoundingCollisionResults();
-        PickingUtil.findCollisions(spatial,scene,collisionResults);
+        CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
+        final CollisionResults collisionResults=new BoundingCollisionResults();
+        /*PickingUtil.findCollisions(spatial,scene,collisionResults);
         for(int i=0;i<collisionResults.getNumber();i++)
             {collisionResults.getCollisionData(i);
              //handle the collision
@@ -88,13 +103,38 @@ final class GameState extends State{
         collisionResults.clear();*/
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        /*playerNode.addController(new SpatialController<Spatial>(){
+        //add a mesh with an invisible mesh data
+        Mesh playerMesh=new Mesh("player");
+        MeshData playerMeshData=new MeshData();
+        FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
+        playerVertexBuffer.put(-0.5f).put(-0.5f).put(-0.5f).put(0.5f).put(0.5f).put(0.5f).rewind();
+        playerMeshData.setVertexBuffer(playerVertexBuffer);
+        playerMesh.setMeshData(playerMeshData);
+        playerNode.attachChild(playerMesh);
+        //add a bounding box to the camera node
+        NodeHelper.setModelBound(playerNode,BoundingBox.class);
+        playerWeaponController=new PlayerWeaponController(playerNode);
+        collectibleObjectsList=new ArrayList<Node>();
+        playerNode.addController(new SpatialController<Spatial>(){
             @Override
             public void update(double timeSinceLastCall, Spatial caller) {
                 // sync the camera node with the camera
                 playerNode.updateFromCamera();
+                ArrayList<Node> collectedObjectsList=new ArrayList<Node>();
+                for(Node collectible:collectibleObjectsList)
+                    {PickingUtil.findCollisions(collectible,playerNode,collisionResults);
+                	 if(collisionResults.getNumber()>0)
+                	     {//System.out.println(collectible);
+                		  //TODO: try to collect the object (update the player model (MVC))
+                		  //      if it succeeds, detach the object from the root
+                	      collectedObjectsList.add(collectible);
+                	     }
+                	 collisionResults.clear();
+                    }
+                collectibleObjectsList.removeAll(collectedObjectsList);
+                NodeHelper.detachChildren(getRoot(),collectedObjectsList);
             }           
-        });*/
+        });
     }
     
     
@@ -104,12 +144,14 @@ final class GameState extends State{
     
     @Override
     public final void init(){
+    	// clear the list of objects that can be picked up
+    	collectibleObjectsList.clear();
         // Remove all previously attached children
         getRoot().detachAllChildren();
         //FIXME: it should not be hard-coded
         currentCamLocation.set(115,0.5,223);
         //attach the player itself
-        //getRoot().attachChild(playerNode);
+        getRoot().attachChild(playerNode);
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
         // Load level model
@@ -121,36 +163,21 @@ final class GameState extends State{
              getRoot().attachChild(levelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setTranslation(111.5,0.15,219);
-             uziNode.setScale(0.2);           
+             uziNode.setScale(0.2);
+             //TODO: add some bounding boxes for all objects that can be picked up
+             collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
-             //smachNode.setTranslation(112.5,0.15,219);
+             smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
-             smachNode.addController(new SpatialController<Spatial>(){
-            	 private Matrix3 correctWeaponRotation=new Matrix3();
-            	 private Matrix3 halfRotationAroundY=new Matrix3().fromAngles(0, Math.PI, 0);
-            	 private Vector3 translation=new Vector3();
-                 @Override
-                 public void update(double timeSinceLastCall, Spatial caller) {
-                     // sync the camera node with the camera
-                     playerNode.updateFromCamera();
-                     //use the correct rotation (combine the camera rotation with a rotation around Y)
-                     correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY);
-                	 smachNode.setRotation(correctWeaponRotation);
-                	 //computes the local translation (when the player has neither rotation nor translation)
-                	 translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
-                	 //combines it with the rotation of the player and his translation
-                     playerNode.getRotation().applyPost(translation,translation).addLocal(playerNode.getTranslation());
-                     smachNode.setTranslation(translation);
-                 }           
-             });
-             getRoot().attachChild(smachNode);
-             //changeMode(smachNode);
+             collectibleObjectsList.add(smachNode);
+             //smachNode.addController(playerWeaponController);           
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+             collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
              //remove the bullet as it is not necessary now
@@ -158,14 +185,17 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+             collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
+             collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
              laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
+             collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
              final Node copNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/cop.abin"));
              copNode.setTranslation(117.5,0.5,219);
@@ -181,32 +211,13 @@ final class GameState extends State{
              creatureNode.setScale(0.0002);
              creatureNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
              getRoot().attachChild(creatureNode);
+             //add a bounding box to each collectible object
+             for(Node collectible:collectibleObjectsList)
+            	 NodeHelper.setModelBound(collectible,BoundingBox.class);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}
     }
-    
-    /*private static void changeMode(Spatial spatial){
-    	spatial.getSceneHints().setDataMode(DataMode.VBOInterleaved);
-    	if(spatial instanceof Node)
-    	    {for(Spatial child:((Node)spatial).getChildren())
-    		     changeMode(child);
-    	    }
-    	else
-    		if(spatial instanceof Mesh)
-    	        {((Mesh)spatial).getMeshData().getNormalCoords().setNeedsRefresh(true);
-      		     ((Mesh)spatial).getMeshData().getTextureCoords().get(0).setNeedsRefresh(true);
-    		     ((Mesh)spatial).getMeshData().getVertexCoords().setNeedsRefresh(true);
-    		     if(((Mesh)spatial).getMeshData().getColorCoords()!=null)
-    		         ((Mesh)spatial).getMeshData().getColorCoords().setNeedsRefresh(true);
-    		     if(((Mesh)spatial).getMeshData().getFogCoords()!=null)
-    		         ((Mesh)spatial).getMeshData().getFogCoords().setNeedsRefresh(true);
-    		     if(((Mesh)spatial).getMeshData().getTangentCoords()!=null)
-    		         ((Mesh)spatial).getMeshData().getTangentCoords().setNeedsRefresh(true);
-    		     if(((Mesh)spatial).getMeshData().getInterleavedData()!=null)
-    		         ((Mesh)spatial).getMeshData().getInterleavedData().setNeedsRefresh(true);
-    	        }
-    }*/
     
     @Override
     public void setEnabled(final boolean enabled){
@@ -228,4 +239,36 @@ final class GameState extends State{
                  }
             }
     }
+    
+    private static final class PlayerWeaponController implements SpatialController<Spatial>{
+    	
+    	private final Matrix3 correctWeaponRotation;
+    	
+   	    private final Matrix3 halfRotationAroundY;
+   	    
+   	    private final Vector3 translation;
+   	    
+   	    private final CameraNode playerNode;
+   	    
+   	    private PlayerWeaponController(CameraNode playerNode){
+   	    	this.playerNode=playerNode;
+   	    	correctWeaponRotation=new Matrix3();
+   	    	halfRotationAroundY=new Matrix3().fromAngles(0, Math.PI, 0);
+   	    	translation=new Vector3();
+   	    }
+   	    
+        @Override
+        public void update(double timeSinceLastCall, Spatial caller) {
+            // sync the camera node with the camera
+            playerNode.updateFromCamera();
+            //use the correct rotation (combine the camera rotation with a rotation around Y)
+            correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY);
+            caller.setRotation(correctWeaponRotation);
+       	    //computes the local translation (when the player has neither rotation nor translation)
+       	    translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
+       	    //combines it with the rotation of the player and his translation
+            playerNode.getRotation().applyPost(translation,translation).addLocal(playerNode.getTranslation());
+            caller.setTranslation(translation);
+        }
+    } 
 }
