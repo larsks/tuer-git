@@ -15,7 +15,6 @@ package engine;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -42,7 +41,6 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
-
 import engine.input.ExtendedFirstPersonControl;
 
 final class GameState extends State{
@@ -73,6 +71,10 @@ final class GameState extends State{
         super();
         this.canvas=canvas;
         Camera cam=canvas.getCanvasRenderer().getCamera();
+        // create a node that follows the camera
+        playerNode=new CameraNode("player",cam);
+        playerWeaponController=new PlayerWeaponController(playerNode);
+        //TODO: create player data
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
@@ -80,7 +82,10 @@ final class GameState extends State{
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
+        //TODO: add some triggers to change weapon, reload and shoot
+        //final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyPressedCondition(Key.PLUS),nextWeaponAction);
+        //final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyPressedCondition(Key.MINUS),previousWeaponAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger/*,nextWeaponAction,previousWeaponAction*/};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -101,8 +106,6 @@ final class GameState extends State{
              //handle the collision
             }
         collisionResults.clear();*/
-        // create a node that follows the camera
-        playerNode=new CameraNode("player",cam);
         //add a mesh with an invisible mesh data
         Mesh playerMesh=new Mesh("player");
         MeshData playerMeshData=new MeshData();
@@ -113,7 +116,6 @@ final class GameState extends State{
         playerNode.attachChild(playerMesh);
         //add a bounding box to the camera node
         NodeHelper.setModelBound(playerNode,BoundingBox.class);
-        playerWeaponController=new PlayerWeaponController(playerNode);
         collectibleObjectsList=new ArrayList<Node>();
         playerNode.addController(new SpatialController<Spatial>(){
             @Override
@@ -124,8 +126,7 @@ final class GameState extends State{
                 for(Node collectible:collectibleObjectsList)
                     {PickingUtil.findCollisions(collectible,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
-                	     {//System.out.println(collectible);
-                		  //TODO: try to collect the object (update the player model (MVC))
+                	     {//TODO: try to collect the object (update the player model (MVC))
                 		  //      if it succeeds, detach the object from the root
                 	      collectedObjectsList.add(collectible);
                 	     }
@@ -164,19 +165,22 @@ final class GameState extends State{
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);
-             //TODO: add some bounding boxes for all objects that can be picked up
+             uziNode.setUserData(Weapon.Identifier.UZI);
+             //add some bounding boxes for all objects that can be picked up
              collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
              smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
+             smachNode.setUserData(Weapon.Identifier.SMACH);
              collectibleObjectsList.add(smachNode);
-             //smachNode.addController(playerWeaponController);           
+             //smachNode.addController(playerWeaponController);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+             pistolNode.setUserData(Weapon.Identifier.PISTOL);
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
@@ -185,11 +189,13 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+             pistol2Node.setUserData(Weapon.Identifier.PISTOL2);
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
+             pistol3Node.setUserData(Weapon.Identifier.PISTOL3);
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
