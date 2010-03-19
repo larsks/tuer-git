@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.Image.Format;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
@@ -95,7 +94,7 @@ public final class IntroductionState extends State{
         // puts a texture onto the box
         final TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(textureFilename,Texture.MinificationFilter.Trilinear,Format.GuessNoCompression,true));
+        ts.setTexture(TextureManager.load(textureFilename,Texture.MinificationFilter.Trilinear,true));
         box.setRenderState(ts);
     }
     

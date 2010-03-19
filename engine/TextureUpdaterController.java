@@ -32,7 +32,6 @@ import javax.imageio.ImageIO;
 import misc.SerializationHelper;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
-import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
@@ -107,7 +106,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
     private final void init(){
         ResourceSource resourceSource=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,imageResourceName);
         //create texture from resource name
-        texture=(Texture2D)TextureManager.load(imageResourceName,Texture.MinificationFilter.Trilinear,Format.GuessNoCompression,true);
+        texture=(Texture2D)TextureManager.load(imageResourceName,Texture.MinificationFilter.Trilinear,true);
         //load the image
         try{originalImage=ImageIO.read(resourceSource.openStream());}
         catch(IOException ioe)
