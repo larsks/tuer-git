@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
+import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
@@ -60,6 +63,8 @@ final class GameState extends State{
     
     private final CameraNode playerNode;
     
+    private final PlayerData playerData;
+    
     private final PlayerWeaponController playerWeaponController;
     
     private final ArrayList<Node> collectibleObjectsList;
@@ -74,7 +79,7 @@ final class GameState extends State{
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
         playerWeaponController=new PlayerWeaponController(playerNode);
-        //TODO: create player data
+        playerData=new PlayerData(getRoot(),playerWeaponController);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
@@ -82,10 +87,22 @@ final class GameState extends State{
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        //TODO: add some triggers to change weapon, reload and shoot
-        //final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyPressedCondition(Key.PLUS),nextWeaponAction);
-        //final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyPressedCondition(Key.MINUS),previousWeaponAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger/*,nextWeaponAction,previousWeaponAction*/};
+        final TriggerAction nextWeaponAction=new TriggerAction(){		
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+				playerData.selectNextWeapon();
+			}
+		};
+		final TriggerAction previousWeaponAction=new TriggerAction(){		
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+				playerData.selectNextWeapon();
+			}
+		};
+        //add some triggers to change weapon, reload and shoot
+        final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),nextWeaponAction);
+        final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -126,9 +143,10 @@ final class GameState extends State{
                 for(Node collectible:collectibleObjectsList)
                     {PickingUtil.findCollisions(collectible,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
-                	     {//TODO: try to collect the object (update the player model (MVC))
-                		  //      if it succeeds, detach the object from the root
-                	      collectedObjectsList.add(collectible);
+                	     {//tries to collect the object (update the player model (MVC))
+                		  //if it succeeds, detach the object from the root later
+                		  if(playerData.collect(collectible))
+                	          collectedObjectsList.add(collectible);
                 	     }
                 	 collisionResults.clear();
                     }
@@ -163,6 +181,7 @@ final class GameState extends State{
              levelNode.setRenderState(cullState);
              getRoot().attachChild(levelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
+             uziNode.setName("uzi");
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);
              uziNode.setUserData(Weapon.Identifier.UZI);
@@ -170,13 +189,14 @@ final class GameState extends State{
              collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
              final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
+             smachNode.setName("smach");
              smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
              smachNode.setUserData(Weapon.Identifier.SMACH);
              collectibleObjectsList.add(smachNode);
-             //smachNode.addController(playerWeaponController);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
+             pistolNode.setName("pistol");
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
@@ -184,6 +204,7 @@ final class GameState extends State{
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
+             pistol2Node.setName("pistol2");
              //remove the bullet as it is not necessary now
              ((Node)pistol2Node.getChild(0)).detachChildAt(2);
              pistol2Node.setTranslation(114.5,0.1,219);
@@ -193,14 +214,17 @@ final class GameState extends State{
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
+             pistol3Node.setName("pistol3");
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
              pistol3Node.setUserData(Weapon.Identifier.PISTOL3);
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
+             laserNode.setName("laser");
              laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
+             laserNode.setUserData(Weapon.Identifier.LASER);
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
              final Node copNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/cop.abin"));
@@ -268,7 +292,7 @@ final class GameState extends State{
             // sync the camera node with the camera
             playerNode.updateFromCamera();
             //use the correct rotation (combine the camera rotation with a rotation around Y)
-            correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY);
+            correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY)/*.multiplyLocal(caller.getRotation())*/;
             caller.setRotation(correctWeaponRotation);
        	    //computes the local translation (when the player has neither rotation nor translation)
        	    translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);

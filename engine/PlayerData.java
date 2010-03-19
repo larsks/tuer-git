@@ -38,7 +38,8 @@ final class PlayerData {
 	private Node parent;
 	
 	
-	PlayerData(Node parent){
+	PlayerData(Node parent,SpatialController<Spatial> weaponController){
+		this.weaponController=weaponController;
 		this.parent=parent;
 		health=maxHealth;
 		invincible=false;
@@ -52,8 +53,8 @@ final class PlayerData {
 	
 	boolean collect(Node collectible){
 		//check if the collectible can be collected
-		final boolean result=weaponsAvailability[((Weapon.Identifier)collectible.getUserData()).ordinal()];
-		if(result)
+		final boolean result;
+		if(!weaponsAvailability[((Weapon.Identifier)collectible.getUserData()).ordinal()])
 		    {if(collectible.getParent()!=null)
 			     {
 		    	  collectible.getParent().detachChild(collectible);
@@ -61,7 +62,10 @@ final class PlayerData {
 		     final int weaponIndex=((Weapon.Identifier)collectible.getUserData()).ordinal();
 		     weaponsAvailability[weaponIndex]=true;
 		     weaponsList[weaponIndex]=collectible;
+		     result=true;
 		    }
+		else
+			result=false;
 		return(result);
 	}
 	
@@ -105,11 +109,11 @@ final class PlayerData {
     private void selectWeapon(boolean next){
     	Weapon.Identifier oldWeaponIDInUse=weaponIDInUse;
     	final int weaponCount=Weapon.Identifier.values().length;
-		final int firstIndex=weaponIDInUse!=null?(weaponIDInUse.ordinal()-1)%weaponCount:0;
+    	int multiplier=next?1:-1;
+    	final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.ordinal()+weaponCount)+multiplier)%weaponCount:0;
 		int currentIndex;
-		int multiplier=next?1:-1;
-		for(int i=0;i<weaponCount-1;i++)
-		    {currentIndex=(firstIndex+(i*multiplier))%weaponCount;
+		for(int i=0;i<weaponCount;i++)
+		    {currentIndex=(firstIndex+(i*multiplier)+weaponCount)%weaponCount;
 			 if(weaponsAvailability[currentIndex])
 			     {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
 				  break;
