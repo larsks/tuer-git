@@ -21,9 +21,7 @@ import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.Image.Format;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
@@ -33,6 +31,7 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.Savable;
 import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.resource.URLResourceSource;
 
 public final class EngineServiceProvider implements I3DServiceProvider{
     
@@ -120,8 +119,7 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     public final void attachTextureToSpatial(final Object spatial,final URL url){
         TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(url,Texture.MinificationFilter.Trilinear,
-                Format.GuessNoCompression,true));
+        ts.setTexture(TextureManager.load(new URLResourceSource(url),Texture.MinificationFilter.Trilinear,true));
         ((Spatial)spatial).setRenderState(ts);
     }
 }
