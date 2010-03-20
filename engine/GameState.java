@@ -13,6 +13,7 @@
 */
 package engine;
 
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import com.ardor3d.bounding.BoundingBox;
@@ -25,6 +26,7 @@ import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
+import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
@@ -53,6 +55,10 @@ final class GameState extends State{
     private int levelIndex;
     
     private final NativeCanvas canvas;
+    
+    private String sourcename;
+    
+    private static final String soundSamplePath="/sounds/pickup.ogg";
     
     private double previousFrustumNear;
     
@@ -103,9 +109,10 @@ final class GameState extends State{
 			}
 		};
         //add some triggers to change weapon, reload and shoot
+		final InputTrigger nextWeaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),nextWeaponAction);
         final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),nextWeaponAction);
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger};
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger,nextWeaponMouseWheelTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -182,6 +189,9 @@ final class GameState extends State{
                 		  if(playerData.collect(collectible))
                 	          {collectedObjectsList.add(collectible);
                 	           headUpDisplayLabel.setText("picked up "+collectible.getName());
+                	           //play a sound
+                	           if(sourcename!=null)
+                                   SoundManager.getInstance().play(sourcename);
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -199,6 +209,12 @@ final class GameState extends State{
     
     @Override
     public final void init(){
+    	// load the sound
+        final URL sampleUrl=IntroductionState.class.getResource(soundSamplePath);
+        if(sampleUrl!=null)
+            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+        else
+            sourcename=null;
     	// clear the list of objects that can be picked up
     	collectibleObjectsList.clear();
         // Remove all previously attached children
