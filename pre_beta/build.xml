@@ -91,7 +91,7 @@
 		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
 		<!-- TODO: JDOM -->
 		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar"/>
+		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/guice-1.0.jar"/>
 		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
@@ -262,6 +262,7 @@
 			  dir="${destdir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
+			<jvmarg value="-Xmx1024m"/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
@@ -270,6 +271,8 @@
 			  dir="${destdir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
+		    <jvmarg value="-Xmx256m"/>
+			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
 		</java>
 	</target>
 </project>
