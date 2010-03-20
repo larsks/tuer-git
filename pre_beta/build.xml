@@ -92,7 +92,6 @@
 		<!-- TODO: JDOM -->
 		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0.jar"/>
-		<pathelement location="../ardor3d-core/lib/google/guice-1.0.jar"/>
 		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl.jar"/>
@@ -189,18 +188,16 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
-		<copy file="../ardor3d-core/lib/google/guice-1.0.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-core/lib/google/google-collect-1.0-rc1.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-core/lib/google/google-collect-1.0.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
-		<signjar alias="gouessej" keystore="key" storepass="gbilysm" lazy="false" >
+		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
-		    	<fileset file="${destdir}/guice-1.0.jar" />
-		    	<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
+		    	<fileset file="${destdir}/google-collect-1.0.jar" />
 		    	<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
@@ -220,8 +217,7 @@
 	<!-- ================================================================= -->
 	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files onto the server">
 	    <!-- TODO: use scp task to do it -->
-		<copy file="${destdir}/guice-1.0.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/google-collect-1.0-rc1.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/google-collect-1.0.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
@@ -243,8 +239,7 @@
 	   	    <fileset dir="${destdir}" includes="**/*.class"/>
 	  		<fileset file="${destdir}/tuer.jar"/>
 	  		<fileset file="${destdir}/jfpsm.jar"/>
-	  		<fileset file="${destdir}/guice-1.0.jar" />
-	  		<fileset file="${destdir}/google-collect-1.0-rc1.jar" />
+	  		<fileset file="${destdir}/google-collect-1.0.jar" />
 	  		<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
