@@ -49,35 +49,40 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import engine.input.ExtendedFirstPersonControl;
 
+/**
+ * State used during the game, the party.
+ * @author Julien Gouesse
+ *
+ */
 final class GameState extends State{
     
-    
+    /**index of the level*/
     private int levelIndex;
-    
+    /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
-    
-    private String sourcename;
-    
-    private static final String soundSamplePath="/sounds/pickup.ogg";
-    
+    /**source name of the sound played when picking up a weapon*/
+    private String pickupWeaponSourcename;
+    /**path of the sound sample played when picking up a weapon*/
+    private static final String pickupWeaponSoundSamplePath="/sounds/pickup_weapon.ogg";
+    /**previous (before entering this state) frustum far value*/
     private double previousFrustumNear;
-    
+    /**previous (before entering this state) frustum near value*/
     private double previousFrustumFar;
-    
+    /**previous (before entering this state) location of the camera*/
     private final Vector3 previousCamLocation;
-    
+    /**current location of the camera*/
     private final Vector3 currentCamLocation;
-    
+    /**node of the player*/
     private final CameraNode playerNode;
-    
+    /**data of the player*/
     private final PlayerData playerData;
-    
+    /**controller that updates the weapon transforms depending on the player*/
     private final PlayerWeaponController playerWeaponController;
-    
+    /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
-    
+    /**text label showing the frame rate*/
     private final BasicText fpsTextLabel;
-    
+    /**text label of the head-up display*/
     private final BasicText headUpDisplayLabel;
 
     
@@ -105,14 +110,25 @@ final class GameState extends State{
 		final TriggerAction previousWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
-				playerData.selectNextWeapon();
+				playerData.selectPreviousWeapon();
+			}
+		};
+		final TriggerAction wheelWeaponAction=new TriggerAction(){		
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+				//if the mouse wheel has been rotated up/away from the user
+				if(inputState.getCurrent().getMouseState().getDwheel()<0)
+				    playerData.selectNextWeapon();
+				else
+					//otherwise the mouse wheel has been rotated down/towards the user
+					playerData.selectPreviousWeapon();
 			}
 		};
         //add some triggers to change weapon, reload and shoot
-		final InputTrigger nextWeaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),nextWeaponAction);
+		final InputTrigger weaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),wheelWeaponAction);
         final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),nextWeaponAction);
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger,nextWeaponMouseWheelTrigger};
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -125,7 +141,7 @@ final class GameState extends State{
             }           
         });
         headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");
-        headUpDisplayLabel.setTranslation(new Vector3(0,50,0));
+        headUpDisplayLabel.setTranslation(new Vector3(0,1100,0));
         headUpDisplayLabel.addController(new SpatialController<Spatial>(){
         	
         	private String latestText="";
@@ -190,8 +206,8 @@ final class GameState extends State{
                 	          {collectedObjectsList.add(collectible);
                 	           headUpDisplayLabel.setText("picked up "+collectible.getName());
                 	           //play a sound
-                	           if(sourcename!=null)
-                                   SoundManager.getInstance().play(sourcename);
+                	           if(pickupWeaponSourcename!=null)
+                                   SoundManager.getInstance().play(pickupWeaponSourcename);
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -210,11 +226,11 @@ final class GameState extends State{
     @Override
     public final void init(){
     	// load the sound
-        final URL sampleUrl=IntroductionState.class.getResource(soundSamplePath);
+        final URL sampleUrl=IntroductionState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null)
-            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+            pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
         else
-            sourcename=null;
+            pickupWeaponSourcename=null;
     	// clear the list of objects that can be picked up
     	collectibleObjectsList.clear();
         // Remove all previously attached children
@@ -254,7 +270,7 @@ final class GameState extends State{
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-             pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL,new Matrix3(pistolNode.getRotation())));
+             pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
@@ -264,14 +280,14 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             pistol2Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL2,new Matrix3(pistol2Node.getRotation())));
+             pistol2Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_9MM,new Matrix3(pistol2Node.getRotation())));
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setName("a Mag 60");
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
-             pistol3Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL3,new Matrix3(pistol3Node.getRotation())));
+             pistol3Node.setUserData(new WeaponUserData(Weapon.Identifier.MAG_60,new Matrix3(pistol3Node.getRotation())));
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));

@@ -25,6 +25,7 @@ public final class CircularSpreadTextureUpdaterController extends TextureUpdater
 
     private static final long serialVersionUID=1L;
 
+    /**location from where we start spreading*/
     private Point spreadCenter;
     
     

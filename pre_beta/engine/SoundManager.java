@@ -20,11 +20,17 @@ import paulscode.sound.SoundSystemException;
 import paulscode.sound.codecs.CodecJOrbis;
 import paulscode.sound.libraries.LibraryJavaSound;
 
+/**
+ * Sound manager that relies on Java Sound System written by Paul Lamb.
+ * If the sound is not available, it simply does nothing.
+ * @author Julien Gouesse
+ *
+ */
 public final class SoundManager{
 
-    
+    /**unique instance of the sound manager (design pattern "singleton")*/
     private static final SoundManager instance=new SoundManager();
-    
+    /**underlying sound system written by Paul Lamb*/
     private SoundSystem soundSystem;
     
     

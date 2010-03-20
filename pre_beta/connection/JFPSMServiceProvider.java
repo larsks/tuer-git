@@ -24,9 +24,14 @@ import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
 import jfpsm.MainWindow;
 
+/**
+ * Service provider of JFPSM. It allows to separate the concerns, not to mix the editor and the 3D engine
+ * @author Julien Gouesse
+ *
+ */
 public final class JFPSMServiceProvider implements I3DServiceSeeker{
     
-    
+    /**delegate that executes the services of the engine*/
     private final engine.I3DServiceProvider delegate;
     
     

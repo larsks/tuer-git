@@ -60,9 +60,11 @@ final class Ardor3DGameServiceProvider implements Scene{
 
     /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
-
+    
+    /**physical layer of the input system*/
     private final PhysicalLayer physicalLayer;
-
+    
+    /**mouse manager used to handle the cursor*/
     private final MouseManager mouseManager;
 
     /**Our timer*/
@@ -74,10 +76,13 @@ final class Ardor3DGameServiceProvider implements Scene{
     /**root of our scene*/
     private final Node root;
     
+    /**start time of the state "content system rating"*/
     private double contentSystemRatingStartTime;
     
+    /**start time of the state "initialization"*/
     private double initializationStartTime;
     
+    /**start time of the state "introduction"*/
     private double introductionStartTime;
     
     enum Step{/**PEGI-equivalent rating*/
@@ -101,8 +106,10 @@ final class Ardor3DGameServiceProvider implements Scene{
               /**final scene*/
               GAME_END_DISPLAY};
 
+    /**state machine*/
     private final StateMachine stateMachine;
     
+    /**list of bitmap fonts*/
     private static ArrayList<BMFont> fontsList;
     
     
