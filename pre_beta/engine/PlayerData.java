@@ -54,12 +54,10 @@ final class PlayerData {
 	boolean collect(Node collectible){
 		//check if the collectible can be collected
 		final boolean result;
-		if(!weaponsAvailability[((Weapon.Identifier)collectible.getUserData()).ordinal()])
+		final int weaponIndex=((GameState.WeaponUserData)collectible.getUserData()).getId().ordinal();
+		if(!weaponsAvailability[weaponIndex])
 		    {if(collectible.getParent()!=null)
-			     {
-		    	  collectible.getParent().detachChild(collectible);
-			     }
-		     final int weaponIndex=((Weapon.Identifier)collectible.getUserData()).ordinal();
+			     collectible.getParent().detachChild(collectible);
 		     weaponsAvailability[weaponIndex]=true;
 		     weaponsList[weaponIndex]=collectible;
 		     result=true;
