@@ -29,51 +29,68 @@ import com.ardor3d.renderer.Camera;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
+/**
+ * Adaptation of the class FirstPersonControl in order to handle QWERTY (WSAD) & AZERTY (ZSQD) keyboards correctly. 
+ * @author Julien Gouesse
+ *
+ */
 public final class ExtendedFirstPersonControl{
 
-    private final Vector3 _upAxis = new Vector3();
-    private double _mouseRotateSpeed = .005;
-    private double _moveSpeed = 50;
-    private double _keyRotateSpeed = 2.25;
-    private final Matrix3 _workerMatrix = new Matrix3();
-    private final Vector3 _workerStoreA = new Vector3();
+	/**axis headed to up*/
+    private final Vector3 upAxis = new Vector3();
+    /**turn speed when using the mouse*/
+    private double mouseRotateSpeed = .005;
+    /**speed of move (front, back ,strafe)*/
+    private double moveSpeed = 50;
+    /**turn speed when using the arrow keys*/
+    private double keyRotateSpeed = 2.25;
+    /**temporary matrix*/
+    private final Matrix3 workerMatrix = new Matrix3();
+    /**temporary vector*/
+    private final Vector3 workerStoreA = new Vector3();
 
     public ExtendedFirstPersonControl(final ReadOnlyVector3 upAxis) {
-        _upAxis.set(upAxis);
+        this.upAxis.set(upAxis);
     }
 
     public ReadOnlyVector3 getUpAxis() {
-        return _upAxis;
+        return upAxis;
     }
 
     public void setUpAxis(final ReadOnlyVector3 upAxis) {
-        _upAxis.set(upAxis);
+    	this.upAxis.set(upAxis);
     }
 
     public double getMouseRotateSpeed() {
-        return _mouseRotateSpeed;
+        return mouseRotateSpeed;
     }
 
     public void setMouseRotateSpeed(final double speed) {
-        _mouseRotateSpeed = speed;
+        mouseRotateSpeed = speed;
     }
 
     public double getMoveSpeed() {
-        return _moveSpeed;
+        return moveSpeed;
     }
 
     public void setMoveSpeed(final double speed) {
-        _moveSpeed = speed;
+        moveSpeed = speed;
     }
 
     public double getKeyRotateSpeed() {
-        return _keyRotateSpeed;
+        return keyRotateSpeed;
     }
 
     public void setKeyRotateSpeed(final double speed) {
-        _keyRotateSpeed = speed;
+        keyRotateSpeed = speed;
     }
 
+    /**
+     * handle all moves performed with the keyboard
+     * @param camera
+     * @param kb
+     * @param tpf
+     */
     protected void move(final Camera camera, final KeyboardState kb, final double tpf) {
         // MOVEMENT
         int moveFB = 0, strafeLR = 0;
@@ -91,7 +108,7 @@ public final class ExtendedFirstPersonControl{
         }
 
         if (moveFB != 0 || strafeLR != 0) {
-            final Vector3 loc = _workerStoreA.zero();
+            final Vector3 loc = workerStoreA.zero();
             if (moveFB == 1) {
                 loc.addLocal(camera.getDirection());
             } else if (moveFB == -1) {
@@ -102,7 +119,7 @@ public final class ExtendedFirstPersonControl{
             } else if (strafeLR == -1) {
                 loc.subtractLocal(camera.getLeft());
             }
-            loc.normalizeLocal().multiplyLocal(_moveSpeed * tpf).addLocal(camera.getLocation());
+            loc.normalizeLocal().multiplyLocal(moveSpeed * tpf).addLocal(camera.getLocation());
             camera.setLocation(loc);
         }
 
@@ -121,31 +138,37 @@ public final class ExtendedFirstPersonControl{
             rotX -= 1;
         }
         if (rotX != 0 || rotY != 0) {
-            rotate(camera, rotX * (_keyRotateSpeed / _mouseRotateSpeed) * tpf, rotY
-                    * (_keyRotateSpeed / _mouseRotateSpeed) * tpf);
+            rotate(camera, rotX * (keyRotateSpeed / mouseRotateSpeed) * tpf, rotY
+                    * (keyRotateSpeed / mouseRotateSpeed) * tpf);
         }
     }
 
+    /**
+     * handle the rotation with the mouse
+     * @param camera
+     * @param dx
+     * @param dy
+     */
     protected void rotate(final Camera camera, final double dx, final double dy) {
 
         if (dx != 0) {
-            _workerMatrix.fromAngleNormalAxis(_mouseRotateSpeed * dx, _upAxis != null ? _upAxis : camera.getUp());
-            _workerMatrix.applyPost(camera.getLeft(), _workerStoreA);
-            camera.setLeft(_workerStoreA);
-            _workerMatrix.applyPost(camera.getDirection(), _workerStoreA);
-            camera.setDirection(_workerStoreA);
-            _workerMatrix.applyPost(camera.getUp(), _workerStoreA);
-            camera.setUp(_workerStoreA);
+            workerMatrix.fromAngleNormalAxis(mouseRotateSpeed * dx, upAxis != null ? upAxis : camera.getUp());
+            workerMatrix.applyPost(camera.getLeft(), workerStoreA);
+            camera.setLeft(workerStoreA);
+            workerMatrix.applyPost(camera.getDirection(), workerStoreA);
+            camera.setDirection(workerStoreA);
+            workerMatrix.applyPost(camera.getUp(), workerStoreA);
+            camera.setUp(workerStoreA);
         }
 
         if (dy != 0) {
-            _workerMatrix.fromAngleNormalAxis(_mouseRotateSpeed * dy, camera.getLeft());
-            _workerMatrix.applyPost(camera.getLeft(), _workerStoreA);
-            camera.setLeft(_workerStoreA);
-            _workerMatrix.applyPost(camera.getDirection(), _workerStoreA);
-            camera.setDirection(_workerStoreA);
-            _workerMatrix.applyPost(camera.getUp(), _workerStoreA);
-            camera.setUp(_workerStoreA);
+            workerMatrix.fromAngleNormalAxis(mouseRotateSpeed * dy, camera.getLeft());
+            workerMatrix.applyPost(camera.getLeft(), workerStoreA);
+            camera.setLeft(workerStoreA);
+            workerMatrix.applyPost(camera.getDirection(), workerStoreA);
+            camera.setDirection(workerStoreA);
+            workerMatrix.applyPost(camera.getUp(), workerStoreA);
+            camera.setUp(workerStoreA);
         }
 
         camera.normalize();
@@ -159,7 +182,6 @@ public final class ExtendedFirstPersonControl{
      */
     public static ExtendedFirstPersonControl setupTriggers(final LogicalLayer layer, final ReadOnlyVector3 upAxis,
             final boolean dragOnly) {
-
         final ExtendedFirstPersonControl control = new ExtendedFirstPersonControl(upAxis);
         control.setupMouseTriggers(layer, dragOnly, control.setupKeyboardTriggers(layer));
         return control;
@@ -184,7 +206,6 @@ public final class ExtendedFirstPersonControl{
     }
 
     public Predicate<TwoInputStates> setupKeyboardTriggers(final LogicalLayer layer) {
-
         final Predicate<TwoInputStates> keysHeld = new Predicate<TwoInputStates>() {
             Key[] keys = new Key[] { Key.W, Key.Z, Key.A, Key.Q, Key.S, Key.D, Key.LEFT, Key.RIGHT, Key.UP, Key.DOWN };
 

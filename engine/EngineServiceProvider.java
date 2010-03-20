@@ -33,9 +33,15 @@ import com.ardor3d.util.export.Savable;
 import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.resource.URLResourceSource;
 
+/**
+ * service provider of the engine, this part is dependent on the underneath 3D engine. It should be quite
+ * easy to modify this class to support any other engine
+ * @author Julien Gouesse
+ *
+ */
 public final class EngineServiceProvider implements I3DServiceProvider{
     
-    
+    /**unique instance of the engine service provider (design pattern "singleton")*/
     private static final EngineServiceProvider instance=new EngineServiceProvider();
     
     
