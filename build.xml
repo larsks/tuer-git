@@ -158,6 +158,7 @@
 			includes="**/*.class"
 			compress="false">
 			<include name="**/*.png" />
+			<include name="**/*.jpg" />
 			<include name="**/*.fnt" />
 			<include name="**/controls.txt" />
 			<include name="**/credits.txt" />
