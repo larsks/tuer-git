@@ -41,7 +41,6 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
-import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -226,7 +225,7 @@ final class GameState extends State{
                 	 playerZ=playerStartZ+(stepZ*i);
                 	 for(int z=0;z<2&&!collisionFound;z++)
              	    	for(int x=0;x<2&&!collisionFound;x++)
-             	    	    collisionFound=collisionMap[(int)Math.round(playerX-0.2+(x*0.4))][(int)Math.round(playerZ-0.2+(z*0.4))];
+             	    	    collisionFound=collisionMap[(int)(playerX-0.2+(x*0.4))][(int)(playerZ-0.2+(z*0.4))];
                 	 if(!collisionFound)
                 		 {correctX=playerX;
                 		  correctZ=playerZ;
@@ -296,10 +295,7 @@ final class GameState extends State{
         getRoot().attachChild(headUpDisplayLabel);
         // Load level model
         try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
-             CullState cullState=new CullState();
-             cullState.setEnabled(true);
-             cullState.setCullFace(CullState.Face.Back);
-             levelNode.setRenderState(cullState);
+             NodeHelper.setBackCullState(levelNode);
              getRoot().attachChild(levelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setName("an uzi");
@@ -352,10 +348,12 @@ final class GameState extends State{
              copNode.setTranslation(117.5,0.5,219);
              copNode.setScale(0.5);
              copNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(0,1,0)));
+             NodeHelper.setBackCullState(copNode);
              getRoot().attachChild(copNode);
              final Node alienNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/giger_alien.abin"));
              alienNode.setTranslation(118.5,0,219);
              alienNode.setScale(0.3);
+             NodeHelper.setBackCullState(alienNode);
              getRoot().attachChild(alienNode);       
              final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
              creatureNode.setTranslation(118.5,0.7,217);
@@ -380,7 +378,7 @@ final class GameState extends State{
                  {previousFrustumNear=cam.getFrustumNear();
                   previousFrustumFar=cam.getFrustumFar();
                   previousCamLocation.set(cam.getLocation());
-                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.3,300);
+                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.2,200);
                   cam.setLocation(currentCamLocation);
                  }
              else
@@ -464,7 +462,7 @@ final class GameState extends State{
             	 playerZ=playerStartZ+(stepZ*i);
             	 for(int z=0;z<2&&!collisionFound;z++)
          	    	for(int x=0;x<2&&!collisionFound;x++)
-         	    	    collisionFound=collisionMap[(int)Math.round(playerX-0.2+(x*0.4))][(int)Math.round(playerZ-0.2+(z*0.4))];
+         	    	    collisionFound=collisionMap[(int)(playerX-0.2+(x*0.4))][(int)(playerZ-0.2+(z*0.4))];
             	 if(!collisionFound)
             		 {correctX=playerX;
             		  correctZ=playerZ;
