@@ -16,6 +16,7 @@ package engine;
 import java.util.ArrayList;
 
 import com.ardor3d.bounding.BoundingVolume;
+import com.ardor3d.renderer.state.CullState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
@@ -43,6 +44,13 @@ import com.ardor3d.scenegraph.hint.DataMode;
 	             if(((Mesh)spatial).getMeshData().getInterleavedData()!=null)
 	                 ((Mesh)spatial).getMeshData().getInterleavedData().setNeedsRefresh(true);
 	            }
+	}
+	
+	static final void setBackCullState(Spatial spatial){
+		CullState cullState=new CullState();
+        cullState.setEnabled(true);
+        cullState.setCullFace(CullState.Face.Back);
+        spatial.setRenderState(cullState);
 	}
 	
 	static final void setModelBound(Spatial spatial,Class<? extends BoundingVolume> boundingClass){
