@@ -147,7 +147,7 @@ final class GameState extends State{
             }           
         });
         headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");
-        headUpDisplayLabel.setTranslation(new Vector3(0,1100,0));
+        headUpDisplayLabel.setTranslation(new Vector3(0,/*1100*/40,0));
         headUpDisplayLabel.addController(new SpatialController<Spatial>(){
         	
         	private String latestText="";
