@@ -27,27 +27,42 @@ final class PlayerData {
 	
 	private boolean invincible;
 	
-	private boolean[] weaponsAvailability;
+	private boolean dualWeaponUse;
 	
-	private transient Node[] weaponsList;
+	private boolean[] rightHandWeaponsAvailability;
+	
+	private boolean[] leftHandWeaponsAvailability;
+	
+	private transient Node[] rightHandWeaponsList;
+	
+	private transient Node[] leftHandWeaponsList;
 	
 	private Weapon.Identifier weaponIDInUse;
 	
-	private SpatialController<Spatial> weaponController;
+	private SpatialController<Spatial> rightWeaponController;
+	
+	private SpatialController<Spatial> leftWeaponController;
 	
 	private Node parent;
 	
 	
-	PlayerData(Node parent,SpatialController<Spatial> weaponController){
-		this.weaponController=weaponController;
+	PlayerData(Node parent,SpatialController<Spatial> rightWeaponController,SpatialController<Spatial> leftWeaponController){
+		this.rightWeaponController=rightWeaponController;
+		this.leftWeaponController=leftWeaponController;
 		this.parent=parent;
 		health=maxHealth;
 		invincible=false;
 		weaponIDInUse=null;
-		weaponsAvailability=new boolean[Weapon.Identifier.values().length];
-		weaponsList=new Node[Weapon.Identifier.values().length];
-		Arrays.fill(weaponsAvailability,false);
-		Arrays.fill(weaponsList,null);
+		dualWeaponUse=false;
+		final int weaponCount=Weapon.Identifier.values().length;
+		rightHandWeaponsAvailability=new boolean[weaponCount];
+		leftHandWeaponsAvailability=new boolean[weaponCount];
+		rightHandWeaponsList=new Node[weaponCount];
+		leftHandWeaponsList=new Node[weaponCount];
+		Arrays.fill(rightHandWeaponsAvailability,false);
+		Arrays.fill(leftHandWeaponsAvailability,false);
+		Arrays.fill(rightHandWeaponsList,null);
+		Arrays.fill(leftHandWeaponsList,null);
 	}
 	
 	
@@ -55,12 +70,23 @@ final class PlayerData {
 		//check if the collectible can be collected
 		final boolean result;
 		final int weaponIndex=((GameState.WeaponUserData)collectible.getUserData()).getId().ordinal();
-		if(!weaponsAvailability[weaponIndex])
-		    {if(collectible.getParent()!=null)
-			     collectible.getParent().detachChild(collectible);
-		     weaponsAvailability[weaponIndex]=true;
-		     weaponsList[weaponIndex]=collectible;
-		     result=true;
+		if(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex])
+		    {if(!rightHandWeaponsAvailability[weaponIndex])
+		         {rightHandWeaponsAvailability[weaponIndex]=true;
+		          rightHandWeaponsList[weaponIndex]=collectible;
+		          result=true;
+		         }
+		     else
+		    	 //FIXME: check if this weapon can have a dual use
+		    	 if(true)
+		             {leftHandWeaponsAvailability[weaponIndex]=true;
+		    	      leftHandWeaponsList[weaponIndex]=collectible;
+		    	      result=true;
+		             }
+		    	 /*else
+		    		 result=false;*/
+		     if(result&&collectible.getParent()!=null)
+		    	 collectible.getParent().detachChild(collectible);
 		    }
 		else
 			result=false;
@@ -92,8 +118,11 @@ final class PlayerData {
 	void respawn(){
 		health=maxHealth;
 		weaponIDInUse=null;
-		Arrays.fill(weaponsAvailability,false);
-		Arrays.fill(weaponsList,null);
+		dualWeaponUse=false;
+		Arrays.fill(rightHandWeaponsAvailability,false);
+		Arrays.fill(leftHandWeaponsAvailability,false);
+		Arrays.fill(rightHandWeaponsList,null);
+		Arrays.fill(leftHandWeaponsList,null);
 	}
 	
 	void selectNextWeapon(){
@@ -105,27 +134,99 @@ final class PlayerData {
 	}
     
     private void selectWeapon(boolean next){
-    	Weapon.Identifier oldWeaponIDInUse=weaponIDInUse;
-    	final int weaponCount=Weapon.Identifier.values().length;
-    	int multiplier=next?1:-1;
-    	final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.ordinal()+weaponCount)+multiplier)%weaponCount:0;
-		int currentIndex;
-		for(int i=0;i<weaponCount;i++)
-		    {currentIndex=(firstIndex+(i*multiplier)+weaponCount)%weaponCount;
-			 if(weaponsAvailability[currentIndex])
-			     {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
-				  break;
-			     }
-		    }
-		if(oldWeaponIDInUse!=weaponIDInUse)
-	        {if(oldWeaponIDInUse!=null)
-	             {Node oldWeapon=weaponsList[oldWeaponIDInUse.ordinal()];
-	              oldWeapon.clearControllers();
-	              parent.detachChild(oldWeapon);
-	             }
-	         Node newWeapon=weaponsList[weaponIDInUse.ordinal()];
-	         newWeapon.addController(weaponController);
-	         parent.attachChild(newWeapon);
-	        }
+    	final Weapon.Identifier oldWeaponIDInUse=weaponIDInUse;
+    	final boolean oldDualWeaponUse=dualWeaponUse;
+    	//if the player wants to use a single weapon instead of 2
+    	if(!next&&dualWeaponUse)
+    		dualWeaponUse=false;
+    	else
+    		//if the player wants to use 2 identical weapons instead of 1
+    		if(next&&!dualWeaponUse&&weaponIDInUse!=null&&leftHandWeaponsAvailability[weaponIDInUse.ordinal()]&&rightHandWeaponsAvailability[weaponIDInUse.ordinal()])
+    			dualWeaponUse=true;
+    		else
+    		    {final int weaponCount=Weapon.Identifier.values().length;
+    	         int multiplier=next?1:-1;
+    	         final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.ordinal()+weaponCount)+multiplier)%weaponCount:0;
+		         int currentIndex;
+		         for(int i=0;i<weaponCount*2;i++)
+		             {currentIndex=(firstIndex+((i/2)*multiplier)+weaponCount)%weaponCount;
+		              if(i%2==0)
+		                  {if(next)
+		                       {if(rightHandWeaponsAvailability[currentIndex])
+				                    {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+				                     dualWeaponUse=false;
+					                 break;
+				                    }
+		                       }
+		                   else
+		                       {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
+			                        {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+			                         dualWeaponUse=true;
+				                     break;
+			                        }
+		                       }
+		                  }
+		              else
+		                  {if(next)
+	                           {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
+		                            {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+		                             dualWeaponUse=true;
+			                         break;
+		                            }
+	                           }
+		                   else
+		                       {if(rightHandWeaponsAvailability[currentIndex])
+			                        {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+			                         dualWeaponUse=false;
+				                     break;
+			                        }
+		                       }
+		                  }
+		             }
+    	        }
+    	if(oldWeaponIDInUse!=weaponIDInUse||oldDualWeaponUse!=dualWeaponUse)
+    	    {Node oldWeapon,newWeapon;
+    		 if(oldWeaponIDInUse!=weaponIDInUse)
+    	         {//if at least one weapon was used previously
+    	    	  if(oldWeaponIDInUse!=null)
+	                  {//drop the right hand weapon
+    	    		   oldWeapon=rightHandWeaponsList[oldWeaponIDInUse.ordinal()];
+	                   oldWeapon.clearControllers();
+	                   parent.detachChild(oldWeapon);
+	                   if(oldDualWeaponUse)
+	    	    	      {//drop the left hand weapon
+	                	   oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.ordinal()];
+	    	               oldWeapon.clearControllers();
+	    	               parent.detachChild(oldWeapon);
+	    	    	      }
+	                  }
+    	    	  //add the right hand weapon
+    	    	  newWeapon=rightHandWeaponsList[weaponIDInUse.ordinal()];
+		          newWeapon.addController(rightWeaponController);
+		          parent.attachChild(newWeapon);
+    	    	  if(dualWeaponUse)
+    	    	      {//add the left hand weapon
+    	    		   newWeapon=leftHandWeaponsList[weaponIDInUse.ordinal()];
+   		               newWeapon.addController(leftWeaponController);
+   		               parent.attachChild(newWeapon);
+    	    	      }
+    	         }
+    	     else
+    	    	 //only the dual use has changed
+    	         {if(dualWeaponUse)
+    	              {//add the left hand weapon
+    	        	   newWeapon=leftHandWeaponsList[weaponIDInUse.ordinal()];
+    		           newWeapon.addController(leftWeaponController);
+    		           parent.attachChild(newWeapon);
+    	              }
+    	          else
+    	        	  if(oldWeaponIDInUse!=null)
+    	                  {//drop the left hand weapon
+    	        	       oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.ordinal()];
+    	                   oldWeapon.clearControllers();
+    	                   parent.detachChild(oldWeapon);
+    	                  }
+    	         }
+    	    }
 	}
 }

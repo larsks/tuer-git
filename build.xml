@@ -11,7 +11,7 @@
 	<property name="deploymentdestdir" value="."/>
 	<property name="destdir" value="."/>
 	<property name="srcdir" value="."/>
-	<condition property="isSolaris_i586">
+	<!--<condition property="isSolaris_i586">
 		<and>
 		    <os name="SunOS" />
 			<or>
@@ -44,7 +44,6 @@
 		    <os arch="amd64" />
 		</and>
 	</condition>
-	<!-- TODO: detect x86_64 -->
 	<condition property="isWindows_i586">
 		<and>
 		    <os family="windows" />
@@ -74,7 +73,6 @@
 		    <os arch="amd64" />
 		</and>
 	</condition>
-	<!-- TODO: detect x86_64 -->
 	<condition property="isLinux_i586">
 		<and>
 		    <os name="linux" />
@@ -83,7 +81,7 @@
 				<os arch="i586" />
 			</or>
 		</and>
-	</condition>
+	</condition>-->
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
