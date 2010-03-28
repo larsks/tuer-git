@@ -50,6 +50,9 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
+import com.ardor3d.util.geom.ClonedCopyLogic;
+import com.ardor3d.util.geom.SceneCopier;
+
 import engine.input.ExtendedFirstPersonControl;
 
 /**
@@ -79,8 +82,6 @@ final class GameState extends State{
     private final CameraNode playerNode;
     /**data of the player*/
     private final PlayerData playerData;
-    /**controller that updates the weapon transforms depending on the player*/
-    private final PlayerWeaponController playerWeaponController;
     /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
     /**text label showing the frame rate*/
@@ -98,8 +99,11 @@ final class GameState extends State{
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        playerWeaponController=new PlayerWeaponController(playerNode,cam,collisionMap);
-        playerData=new PlayerData(getRoot(),playerWeaponController);
+        //controller that updates the weapon transforms depending on the player (right hand)
+        PlayerWeaponController rightPlayerWeaponController=new PlayerWeaponController(playerNode,cam,collisionMap,true);
+        //the same (left hand)
+        PlayerWeaponController leftPlayerWeaponController=new PlayerWeaponController(playerNode,cam,collisionMap,false);
+        playerData=new PlayerData(getRoot(),rightPlayerWeaponController,leftPlayerWeaponController);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
@@ -320,6 +324,11 @@ final class GameState extends State{
              pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);
+             final Node duplicatePistolNode=(Node)SceneCopier.makeCopy(pistolNode,new ClonedCopyLogic());
+             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
+             duplicatePistolNode.setTranslation(113.5,0.1,217);
+             collectibleObjectsList.add(duplicatePistolNode);
+             getRoot().attachChild(duplicatePistolNode);
              final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
              pistol2Node.setName("a pistol (9mm)");
              //remove the bullet as it is not necessary now
@@ -428,7 +437,10 @@ final class GameState extends State{
    	    
    	    private final boolean[][] collisionMap;
    	    
-   	    private PlayerWeaponController(CameraNode playerNode,Camera cam,boolean[][] collisionMap){
+   	    private final boolean rightHandedWeapon;
+   	    
+   	    private PlayerWeaponController(CameraNode playerNode,Camera cam,boolean[][] collisionMap,boolean rightHandedWeapon){
+   	    	this.rightHandedWeapon=rightHandedWeapon;
    	    	this.playerNode=playerNode;
    	    	this.cam=cam;
    	    	this.collisionMap=collisionMap;
@@ -475,7 +487,10 @@ final class GameState extends State{
             correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY).multiplyLocal(((WeaponUserData)caller.getUserData()).getRotation());
             caller.setRotation(correctWeaponRotation);
        	    //computes the local translation (when the player has neither rotation nor translation)
-       	    translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
+       	    if(rightHandedWeapon)
+                translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
+       	    else
+       	    	translation.set(1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
        	    //combines it with the rotation of the player and his translation
             playerNode.getRotation().applyPost(translation,translation).addLocal(playerNode.getTranslation());
             caller.setTranslation(translation);
