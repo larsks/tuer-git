@@ -99,11 +99,7 @@ final class GameState extends State{
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        //controller that updates the weapon transforms depending on the player (right hand)
-        PlayerWeaponController rightPlayerWeaponController=new PlayerWeaponController(playerNode,cam,collisionMap,true);
-        //the same (left hand)
-        PlayerWeaponController leftPlayerWeaponController=new PlayerWeaponController(playerNode,cam,collisionMap,false);
-        playerData=new PlayerData(getRoot(),rightPlayerWeaponController,leftPlayerWeaponController);
+        playerData=new PlayerData(playerNode);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
@@ -184,12 +180,6 @@ final class GameState extends State{
         // configure the collision system
         CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
         final CollisionResults collisionResults=new BoundingCollisionResults();
-        /*PickingUtil.findCollisions(spatial,scene,collisionResults);
-        for(int i=0;i<collisionResults.getNumber();i++)
-            {collisionResults.getCollisionData(i);
-             //handle the collision
-            }
-        collisionResults.clear();*/
         //add a mesh with an invisible mesh data
         Mesh playerMesh=new Mesh("player");
         MeshData playerMeshData=new MeshData();
@@ -239,14 +229,18 @@ final class GameState extends State{
                 previousPosition.set(playerNode.getTranslation());
                 cam.setLocation(playerNode.getTranslation());
                 //checks if any object is collected
-                ArrayList<Node> collectedObjectsList=new ArrayList<Node>();
-                for(Node collectible:collectibleObjectsList)
-                    {PickingUtil.findCollisions(collectible,playerNode,collisionResults);
+                Node collectible;
+                for(int i=collectibleObjectsList.size()-1;i>=0;i--)
+                    {collectible=collectibleObjectsList.get(i);
+                	 PickingUtil.findCollisions(collectible,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
                 	     {//tries to collect the object (update the player model (MVC))
                 		  //if it succeeds, detach the object from the root later
                 		  if(playerData.collect(collectible))
-                	          {collectedObjectsList.add(collectible);
+                	          {//remove it from the list of collectible objects
+                			   collectibleObjectsList.remove(i);
+                			   //detach it from the root
+                	           getRoot().detachChild(collectible);
                 	           headUpDisplayLabel.setText("picked up "+collectible.getName());
                 	           //play a sound
                 	           if(pickupWeaponSourcename!=null)
@@ -255,8 +249,6 @@ final class GameState extends State{
                 	     }
                 	 collisionResults.clear();
                     }
-                collectibleObjectsList.removeAll(collectedObjectsList);
-                NodeHelper.detachChildren(getRoot(),collectedObjectsList);
             }           
         });
     }
@@ -421,80 +413,4 @@ final class GameState extends State{
     		return(rotation);
     	}
     }
-    
-    private static final class PlayerWeaponController implements SpatialController<Spatial>{
-    	
-    	private final Matrix3 correctWeaponRotation;
-    	
-   	    private final Matrix3 halfRotationAroundY;
-   	    
-   	    private final Vector3 translation;
-   	    
-   	    private final CameraNode playerNode;
-   	    
-   	    private final Camera cam;
-   	    
-   	    private Vector3 previousPosition=new Vector3(115,0.5,223);
-   	    
-   	    private final boolean[][] collisionMap;
-   	    
-   	    private final boolean rightHandedWeapon;
-   	    
-   	    private PlayerWeaponController(CameraNode playerNode,Camera cam,boolean[][] collisionMap,boolean rightHandedWeapon){
-   	    	this.rightHandedWeapon=rightHandedWeapon;
-   	    	this.playerNode=playerNode;
-   	    	this.cam=cam;
-   	    	this.collisionMap=collisionMap;
-   	    	correctWeaponRotation=new Matrix3();
-   	    	halfRotationAroundY=new Matrix3().fromAngles(0, Math.PI, 0);
-   	    	translation=new Vector3();
-   	    }
-   	    
-        @Override
-        public void update(double timeSinceLastCall, Spatial caller){
-        	//FIXME: these 3 lines should be called only once
-            // sync the camera node with the camera
-            playerNode.updateFromCamera();
-            //temporary avoids to move on Y               
-            playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
-            cam.setLocation(playerNode.getTranslation());
-            //FIXME: remove this temporary system
-            double playerStartX=previousPosition.getX();
-            double playerStartZ=previousPosition.getZ();
-            double playerEndX=playerNode.getTranslation().getX();
-            double playerEndZ=playerNode.getTranslation().getZ();
-            double playerX,playerZ;
-            double distance=previousPosition.distance(playerNode.getTranslation());
-            int stepCount=(int)Math.ceil(distance/0.2);
-            double stepX=stepCount==0?0:(playerEndX-playerStartX)/stepCount;
-            double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
-            boolean collisionFound=false;
-            double correctX=playerStartX,correctZ=playerStartZ;
-            for(int i=1;i<=stepCount&&!collisionFound;i++)
-                {playerX=playerStartX+(stepX*i);
-            	 playerZ=playerStartZ+(stepZ*i);
-            	 for(int z=0;z<2&&!collisionFound;z++)
-         	    	for(int x=0;x<2&&!collisionFound;x++)
-         	    	    collisionFound=collisionMap[(int)(playerX-0.2+(x*0.4))][(int)(playerZ-0.2+(z*0.4))];
-            	 if(!collisionFound)
-            		 {correctX=playerX;
-            		  correctZ=playerZ;
-            		 }
-                }
-            playerNode.setTranslation(correctX,0.5,correctZ);
-            previousPosition.set(playerNode.getTranslation());
-            cam.setLocation(playerNode.getTranslation());
-            //use the correct rotation (combine the camera rotation with a rotation around Y)
-            correctWeaponRotation.set(playerNode.getRotation()).multiplyLocal(halfRotationAroundY).multiplyLocal(((WeaponUserData)caller.getUserData()).getRotation());
-            caller.setRotation(correctWeaponRotation);
-       	    //computes the local translation (when the player has neither rotation nor translation)
-       	    if(rightHandedWeapon)
-                translation.set(-1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
-       	    else
-       	    	translation.set(1,-0.1,2).normalizeLocal().multiplyLocal(0.4);
-       	    //combines it with the rotation of the player and his translation
-            playerNode.getRotation().applyPost(translation,translation).addLocal(playerNode.getTranslation());
-            caller.setTranslation(translation);
-        }
-    } 
 }
