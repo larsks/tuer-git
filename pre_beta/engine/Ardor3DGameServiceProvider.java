@@ -156,7 +156,7 @@ final class Ardor3DGameServiceProvider implements Scene{
         // Get the default display mode
         final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         // Choose the full-screen mode
-        final DisplaySettings settings=new DisplaySettings(defaultMode.getWidth(),defaultMode.getHeight(),defaultMode.getBitDepth(),0,0,8,0,0,true,false);
+        final DisplaySettings settings=new DisplaySettings(defaultMode.getWidth(),defaultMode.getHeight(),defaultMode.getBitDepth(),0,0,24,0,0,true,false);
         // Setup a canvas and a canvas renderer       
         canvas=new JoglCanvas(new JoglCanvasRenderer(this),settings);
         canvas.init();

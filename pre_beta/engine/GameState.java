@@ -363,12 +363,13 @@ final class GameState extends State{
              alienNode.setTranslation(118.5,0,219);
              alienNode.setScale(0.3);
              NodeHelper.setBackCullState(alienNode);
-             getRoot().attachChild(alienNode);       
-             final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
+             getRoot().attachChild(alienNode);
+             //TODO: uncomment these lines when we have a texture for this enemy
+             /*final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
              creatureNode.setTranslation(118.5,0.7,217);
              creatureNode.setScale(0.0002);
              creatureNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             getRoot().attachChild(creatureNode);
+             getRoot().attachChild(creatureNode);*/
              //add a bounding box to each collectible object
              for(Node collectible:collectibleObjectsList)
             	 NodeHelper.setModelBound(collectible,BoundingBox.class);
