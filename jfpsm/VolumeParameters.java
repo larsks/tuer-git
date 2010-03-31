@@ -48,6 +48,10 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 		markDirty();
 	}
 	
+	/**
+	 * get the vertices indices of faces whose vertices might be equal
+	 * @return vertices indices of faces whose vertices might be equal
+	 */
 	public int[][][] getVerticesIndicesOfMergeableFaces(){
 	    /**
 	     * It should perform the following operations:
@@ -55,6 +59,19 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 	     * - detect the opposed faces
 	     * - compute the distances between the pairs of vertices
 	     * - detect equivalent triangles
+	     * */
+	    return(null);
+	}
+	
+	/**
+	 * get the vertices indices of faces whose vertices might be adjacent
+	 * @return vertices indices of faces whose vertices might be adjacent
+	 */
+	public int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
+	    /**
+	     * It should perform the following operations:
+	     * - for each coordinate type, check if all coordinates are equal
+	     * - if so, check if there is any adjacency in u, v or u & v
 	     * */
 	    return(null);
 	}

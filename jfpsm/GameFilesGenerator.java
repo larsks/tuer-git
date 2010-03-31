@@ -126,7 +126,8 @@ final class GameFilesGenerator{
              HashMap<Integer,String> tileNameTable=new HashMap<Integer,String>();
              HashMap<Integer,Boolean> mergeTable=new HashMap<Integer,Boolean>();
              HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
-             int[][][] verticesIndicesOfMergeableFaces=null;
+             HashMap<Integer,int[][][]> verticesIndicesOfAdjacentMergeableFacesTable=new HashMap<Integer, int[][][]>();
+             int[][][] verticesIndicesOfMergeableFaces=null,verticesIndicesOfAdjacentMergeableFaces=null;
              int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
              //use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
@@ -180,6 +181,8 @@ final class GameFilesGenerator{
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][k].getName());
                                     mergeTable.put(key,Boolean.valueOf(floorVolumeElements[i][k].isMergeEnabled()));
+                                    if(floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFaces()!=null)
+                                    	verticesIndicesOfAdjacentMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFaces());
                                     //mergeable faces are used to compute the bounding boxes of the system of collision detection too 
                                     if(floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces()!=null)
                                         verticesIndicesOfMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces());
@@ -210,6 +213,7 @@ final class GameFilesGenerator{
                            texCoords=new float[texCoordBuffer.capacity()];                      
                        isMergeEnabled=mergeTable.get(key).booleanValue();
                        verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
+                       verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesTable.get(key);
                        if(verticesIndicesOfMergeableFaces!=null)
                            {//copy the vertices indices
                             absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
@@ -282,6 +286,11 @@ final class GameFilesGenerator{
                                 absoluteVerticesIndicesOfMergeableFaces,                            
                                 isMergeEnabled,grid,buffersGrid,indexOffsetArray,newIndexOffsetArray,
                                 indexArrayOffsetIndicesList,j);
+                           }
+                       //if the merge between adjacent faces is possible, just do it
+                       if(verticesIndicesOfAdjacentMergeableFaces!=null)
+                           {//TODO: 
+                    	    //
                            }
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
@@ -419,85 +428,85 @@ final class GameFilesGenerator{
         HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
         HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
         //mark all useless indices to ease their later removal
-            for(int i=0;i<grid.getLogicalWidth();i++)
-                for(int k=0;k<grid.getLogicalDepth();k++)
-                    if(buffersGrid[i][j][k][4]!=null)
-                        {indexOffset=indexOffsetArray[i][j][k];
-                         //add the offset
-                         for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
-                             for(int jj=0;jj<2;jj++)
-                                 for(int kk=0;kk<3;kk++)
-                                     absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]+=indexOffset;
-                         while(buffersGrid[i][j][k][4].hasRemaining())
-                             {startPos=((IntBuffer)buffersGrid[i][j][k][4]).position();
-                              //get the indices of the vertices composing the current triangle
-                              ((IntBuffer)buffersGrid[i][j][k][4]).get(triIndices,0,3);      
-                              mergeableFaceFound=false;
-                              //loop on all merge candidates
-                              for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
-                                  for(int jj=0;!mergeableFaceFound&&jj<2;jj++)
-                                      //if the indices are identical
-                                      if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
-                                          {for(int jjj=0;jjj<2;jjj++)
-                                               if(jjj!=jj)
-                                                   {//check if adjoining faces can be merged with it
-                                                    for(int locali=i;locali<i+2&&locali<grid.getLogicalWidth();locali++)
-                                                        for(int localj=j;localj<j+2&&localj<grid.getLogicalHeight();localj++)
-                                                            for(int localk=k;localk<k+2&&localk<grid.getLogicalDepth();localk++)
-                                                                //if this section is different of the current section
-                                                                if((locali!=i||localj!=j||localk!=k)&&buffersGrid[locali][localj][localk][4]!=null)
-                                                                    {//we assume this face is a good candidate                                                                                   
-                                                                     mergeableFacesFound=true;
-                                                                     //for each vertex of the triangle
-                                                                     for(int index=0;index<3&&mergeableFacesFound;index++)
-                                                                         {//convert into absolute indexing
-                                                                          localAbsoluteVerticesIndicesOfMergeableFace[index]=verticesIndicesOfMergeableFaces[ii][jjj][index]+indexOffsetArray[locali][localj][localk];
-                                                                          //for each coordinate
-                                                                          for(int subIndex=0;subIndex<3;subIndex++)
-                                                                              {//use internal indexing
-                                                                               localVertex[subIndex]=((FloatBuffer)buffersGrid[locali][localj][localk][0]).get((verticesIndicesOfMergeableFaces[ii][jjj][index]*3)+subIndex);
-                                                                               vertex[subIndex]=((FloatBuffer)buffersGrid[i][j][k][0]).get((verticesIndicesOfMergeableFaces[ii][jj][index]*3)+subIndex);
+        for(int i=0;i<grid.getLogicalWidth();i++)
+            for(int k=0;k<grid.getLogicalDepth();k++)
+                if(buffersGrid[i][j][k][4]!=null)
+                    {indexOffset=indexOffsetArray[i][j][k];
+                     //add the offset
+                     for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                         for(int jj=0;jj<2;jj++)
+                             for(int kk=0;kk<3;kk++)
+                                 absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]+=indexOffset;
+                     while(buffersGrid[i][j][k][4].hasRemaining())
+                         {startPos=((IntBuffer)buffersGrid[i][j][k][4]).position();
+                          //get the indices of the vertices composing the current triangle
+                          ((IntBuffer)buffersGrid[i][j][k][4]).get(triIndices,0,3);      
+                          mergeableFaceFound=false;
+                          //loop on all merge candidates
+                          for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                              for(int jj=0;!mergeableFaceFound&&jj<2;jj++)
+                                  //if the indices are identical
+                                  if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
+                                      {for(int jjj=0;jjj<2;jjj++)
+                                           if(jjj!=jj)
+                                               {//check if adjoining faces can be merged with it
+                                                for(int locali=i;locali<i+2&&locali<grid.getLogicalWidth();locali++)
+                                                    for(int localj=j;localj<j+2&&localj<grid.getLogicalHeight();localj++)
+                                                        for(int localk=k;localk<k+2&&localk<grid.getLogicalDepth();localk++)
+                                                            //if this section is different of the current section
+                                                            if((locali!=i||localj!=j||localk!=k)&&buffersGrid[locali][localj][localk][4]!=null)
+                                                                {//we assume this face is a good candidate                                                                                   
+                                                                 mergeableFacesFound=true;
+                                                                 //for each vertex of the triangle
+                                                                 for(int index=0;index<3&&mergeableFacesFound;index++)
+                                                                     {//convert into absolute indexing
+                                                                      localAbsoluteVerticesIndicesOfMergeableFace[index]=verticesIndicesOfMergeableFaces[ii][jjj][index]+indexOffsetArray[locali][localj][localk];
+                                                                      //for each coordinate
+                                                                      for(int subIndex=0;subIndex<3;subIndex++)
+                                                                          {//use internal indexing
+                                                                           localVertex[subIndex]=((FloatBuffer)buffersGrid[locali][localj][localk][0]).get((verticesIndicesOfMergeableFaces[ii][jjj][index]*3)+subIndex);
+                                                                           vertex[subIndex]=((FloatBuffer)buffersGrid[i][j][k][0]).get((verticesIndicesOfMergeableFaces[ii][jj][index]*3)+subIndex);
+                                                                          }
+                                                                      if(!Arrays.equals(localVertex,vertex))
+                                                                          mergeableFacesFound=false;
+                                                                     }
+                                                                 //if the vertices compose 2 identical triangles
+                                                                 if(mergeableFacesFound)
+                                                                     {//replace the indices that have to be deleted by -1
+                                                                      for(int delIndex=0;delIndex<3;delIndex++)
+                                                                          ((IntBuffer)buffersGrid[i][j][k][5]).put(startPos+delIndex,-1);
+                                                                      localStartPos=-1;
+                                                                      //look for the indices of the vertices of this face in 
+                                                                      //the part of the grid in order to get the position of 
+                                                                      //the indice of the first vertex
+                                                                      for(int delIndex=0;delIndex<((IntBuffer)buffersGrid[i][j][k][5]).capacity();delIndex+=3)
+                                                                          if(((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex)==localAbsoluteVerticesIndicesOfMergeableFace[delIndex%3]&&
+                                                                             ((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex+1)==localAbsoluteVerticesIndicesOfMergeableFace[(delIndex+1)%3]&&
+                                                                             ((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex+2)==localAbsoluteVerticesIndicesOfMergeableFace[(delIndex+2)%3])
+                                                                              {localStartPos=delIndex;
+                                                                               break;
                                                                               }
-                                                                          if(!Arrays.equals(localVertex,vertex))
-                                                                              mergeableFacesFound=false;
-                                                                         }
-                                                                     //if the vertices compose 2 identical triangles
-                                                                     if(mergeableFacesFound)
-                                                                         {//replace the indices that have to be deleted by -1
+                                                                      //if these indices have been found
+                                                                      if(localStartPos!=-1)
+                                                                          //replace the indices that have to be deleted by -1
                                                                           for(int delIndex=0;delIndex<3;delIndex++)
-                                                                              ((IntBuffer)buffersGrid[i][j][k][5]).put(startPos+delIndex,-1);
-                                                                          localStartPos=-1;
-                                                                          //look for the indices of the vertices of this face in 
-                                                                          //the part of the grid in order to get the position of 
-                                                                          //the indice of the first vertex
-                                                                          for(int delIndex=0;delIndex<((IntBuffer)buffersGrid[i][j][k][5]).capacity();delIndex+=3)
-                                                                              if(((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex)==localAbsoluteVerticesIndicesOfMergeableFace[delIndex%3]&&
-                                                                                 ((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex+1)==localAbsoluteVerticesIndicesOfMergeableFace[(delIndex+1)%3]&&
-                                                                                 ((IntBuffer)buffersGrid[locali][localj][localk][5]).get(delIndex+2)==localAbsoluteVerticesIndicesOfMergeableFace[(delIndex+2)%3])
-                                                                                  {localStartPos=delIndex;
-                                                                                   break;
-                                                                                  }
-                                                                          //if these indices have been found
-                                                                          if(localStartPos!=-1)
-                                                                              //replace the indices that have to be deleted by -1
-                                                                              for(int delIndex=0;delIndex<3;delIndex++)
-                                                                                  ((IntBuffer)buffersGrid[locali][localj][localk][5]).put(localStartPos+delIndex,-1);
-                                                                          else
-                                                                              //something is wrong, the face is orphaned
-                                                                              System.out.println("[WARNING] indices not found");
-                                                                         }                                                                                                                                                                      
-                                                                    }
-                                                   }                           
+                                                                              ((IntBuffer)buffersGrid[locali][localj][localk][5]).put(localStartPos+delIndex,-1);
+                                                                      else
+                                                                          //something is wrong, the face is orphaned
+                                                                          System.out.println("[WARNING] indices not found");
+                                                                     }                                                                                                                                                                      
+                                                                }
+                                               }                           
                                            break;
-                                          }                         
-                             }
-                         buffersGrid[i][j][k][4].rewind();
-                         //subtract the offset
-                         for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
-                             for(int jj=0;jj<2;jj++)
-                                 for(int kk=0;kk<3;kk++)
-                                     absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
-                        }
+                                      }                         
+                         }
+                     buffersGrid[i][j][k][4].rewind();
+                     //subtract the offset
+                     for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                         for(int jj=0;jj<2;jj++)
+                             for(int kk=0;kk<3;kk++)
+                                 absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
+                    }
            //rebuild all index buffers by retaining only useful indices and do the same for all other buffers
            for(int i=0;i<grid.getLogicalWidth();i++)
                for(int k=0;k<grid.getLogicalDepth();k++)
@@ -599,26 +608,26 @@ final class GameFilesGenerator{
                                  }
                             }                                       
                        }
-            //each individual change of index interval impacts all index buffers
-            //then, remove all useless index intervals and update all index buffers
-            indexOffset=0;
-            //compute new index offsets
-            for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
-                {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
-                 newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
-                 indexOffset+=buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][0].capacity()/3;
-                }
-            //use these new index offsets
-            for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
-                {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
-                 indexOffset=newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]];
-                 if(indexOffset!=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]])
-                     {//use the subtraction of the both values to update all index buffers
-                      deletedIndicesCount=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]-indexOffset;
-                      for(int l=0;l<buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1].capacity();l++)
-                          ((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).put(l,((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).get(l)-deletedIndicesCount);
-                     }
-                }
-            indexArrayOffsetIndicesList.clear();
+        //each individual change of index interval impacts all index buffers
+        //then, remove all useless index intervals and update all index buffers
+        indexOffset=0;
+        //compute new index offsets
+        for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
+            {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
+             newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
+             indexOffset+=buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][0].capacity()/3;
+            }
+        //use these new index offsets
+        for(int indexOffsetIndex=0;indexOffsetIndex<indexArrayOffsetIndicesList.size();indexOffsetIndex++)
+            {logicalGridPos=indexArrayOffsetIndicesList.get(indexOffsetIndex);
+             indexOffset=newIndexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]];
+             if(indexOffset!=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]])
+                 {//use the subtraction of the both values to update all index buffers
+                  deletedIndicesCount=indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]-indexOffset;
+                  for(int l=0;l<buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1].capacity();l++)
+                      ((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).put(l,((IntBuffer)buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]).get(l)-deletedIndicesCount);
+                 }
+            }
+        indexArrayOffsetIndicesList.clear();
     }
 }

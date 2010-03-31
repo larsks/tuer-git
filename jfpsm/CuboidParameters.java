@@ -54,6 +54,8 @@ public final class CuboidParameters extends VolumeParameters{
     
     private transient int[][][] verticesIndicesOfMergeableFaces;
     
+    private transient int[][][] verticesIndicesOfAdjacentMergeableFaces;
+    
     
     public CuboidParameters(){
         this(new float[]{0,0,0},new float[]{1,1,1},
@@ -306,7 +308,7 @@ public final class CuboidParameters extends VolumeParameters{
              if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
                  {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.BACK.ordinal()];
-                  fvi1=firstVerticesIndicesInIndexBufferBySide[Side.FRONT.ordinal()];           
+                  fvi1=firstVerticesIndicesInIndexBufferBySide[Side.FRONT.ordinal()];
                   verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
                   verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
                  }
@@ -326,13 +328,21 @@ public final class CuboidParameters extends VolumeParameters{
                  }
              //6 2 3
              verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);     
+             //TODO: compute verticesIndicesOfAdjacentMergeableFaces
              buffersRecomputationNeeded=false;
             }
     }
     
+    @Override
     public final int[][][] getVerticesIndicesOfMergeableFaces(){
         recomputeBuffersIfNeeded();
         return(verticesIndicesOfMergeableFaces);
+    }
+    
+    @Override
+    public final int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
+        recomputeBuffersIfNeeded();
+        return(verticesIndicesOfAdjacentMergeableFaces);
     }
     
     @Override
