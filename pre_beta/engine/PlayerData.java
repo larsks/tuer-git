@@ -14,9 +14,10 @@
 package engine;
 
 import java.util.Arrays;
+import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.Spatial;
-import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.scenegraph.extension.CameraNode;
+import engine.GameState.WeaponUserData;
 
 final class PlayerData {
     
@@ -39,17 +40,11 @@ final class PlayerData {
 	
 	private Weapon.Identifier weaponIDInUse;
 	
-	private SpatialController<Spatial> rightWeaponController;
-	
-	private SpatialController<Spatial> leftWeaponController;
-	
-	private Node parent;
+	private CameraNode cameraNode;
 	
 	
-	PlayerData(Node parent,SpatialController<Spatial> rightWeaponController,SpatialController<Spatial> leftWeaponController){
-		this.rightWeaponController=rightWeaponController;
-		this.leftWeaponController=leftWeaponController;
-		this.parent=parent;
+	PlayerData(CameraNode cameraNode){
+		this.cameraNode=cameraNode;
 		health=maxHealth;
 		invincible=false;
 		weaponIDInUse=null;
@@ -192,23 +187,23 @@ final class PlayerData {
 	                  {//drop the right hand weapon
     	    		   oldWeapon=rightHandWeaponsList[oldWeaponIDInUse.ordinal()];
 	                   oldWeapon.clearControllers();
-	                   parent.detachChild(oldWeapon);
+	                   cameraNode.detachChild(oldWeapon);
 	                   if(oldDualWeaponUse)
 	    	    	      {//drop the left hand weapon
 	                	   oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.ordinal()];
 	    	               oldWeapon.clearControllers();
-	    	               parent.detachChild(oldWeapon);
+	    	               cameraNode.detachChild(oldWeapon);
 	    	    	      }
 	                  }
     	    	  //add the right hand weapon
     	    	  newWeapon=rightHandWeaponsList[weaponIDInUse.ordinal()];
-		          newWeapon.addController(rightWeaponController);
-		          parent.attachChild(newWeapon);
+    	    	  initializeWeaponLocalTransform(newWeapon,true);
+		          cameraNode.attachChild(newWeapon);
     	    	  if(dualWeaponUse)
     	    	      {//add the left hand weapon
     	    		   newWeapon=leftHandWeaponsList[weaponIDInUse.ordinal()];
-   		               newWeapon.addController(leftWeaponController);
-   		               parent.attachChild(newWeapon);
+    	    		   initializeWeaponLocalTransform(newWeapon,false);
+   		               cameraNode.attachChild(newWeapon);
     	    	      }
     	         }
     	     else
@@ -216,17 +211,28 @@ final class PlayerData {
     	         {if(dualWeaponUse)
     	              {//add the left hand weapon
     	        	   newWeapon=leftHandWeaponsList[weaponIDInUse.ordinal()];
-    		           newWeapon.addController(leftWeaponController);
-    		           parent.attachChild(newWeapon);
+    	        	   initializeWeaponLocalTransform(newWeapon,false);
+    		           cameraNode.attachChild(newWeapon);
     	              }
     	          else
     	        	  if(oldWeaponIDInUse!=null)
     	                  {//drop the left hand weapon
     	        	       oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.ordinal()];
     	                   oldWeapon.clearControllers();
-    	                   parent.detachChild(oldWeapon);
+    	                   cameraNode.detachChild(oldWeapon);
     	                  }
     	         }
     	    }
 	}
+    
+    private final void initializeWeaponLocalTransform(Node newWeapon,boolean rightHanded){
+    	Matrix3 correctWeaponRotation=new Matrix3();
+    	//FIXME: move this half rotation into the user data of the weapon
+    	correctWeaponRotation.fromAngles(0, Math.PI, 0).multiplyLocal(((WeaponUserData)newWeapon.getUserData()).getRotation());
+    	newWeapon.setRotation(correctWeaponRotation);
+    	if(rightHanded)
+    		newWeapon.setTranslation(-0.17870682064350812,-0.01787068206435081,0.35741364128701625);
+    	else
+    		newWeapon.setTranslation(0.17870682064350812,-0.01787068206435081,0.35741364128701625);
+    }
 }
