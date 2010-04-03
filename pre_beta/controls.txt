@@ -16,7 +16,7 @@ CTRL: reload
 RETURN: activate
 SHIFT: run
 SPACE: shoot
-N: next weapon
+M: next weapon
 P: previous weapon
 ESC: quit game
 MOUSE LEFT BUTTON: shoot

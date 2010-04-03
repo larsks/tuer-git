@@ -28,7 +28,6 @@ import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
-import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
@@ -106,22 +105,54 @@ final class GameState extends State{
         // drag only at false to remove the need of pressing a button to move
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
-        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        //create a text node that asks the user to confirm or not the exit
+        final BasicText exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
+        exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
+        final InputTrigger exitPromptTrigger=new InputTrigger(new KeyReleasedCondition(Key.ESCAPE),new TriggerAction(){
+        	@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//if the player jas not been prompted
+        		if(!getRoot().hasChild(exitPromptTextLabel))
+        		    getRoot().attachChild(exitPromptTextLabel);
+			}
+		});
+        final InputTrigger exitConfirmTrigger=new InputTrigger(new KeyReleasedCondition(Key.Y),new TriggerAction(){     	
+        	@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//if the player has just been prompted
+        		if(getRoot().hasChild(exitPromptTextLabel))
+				    {//remove the prompt message
+        			 getRoot().detachChild(exitPromptTextLabel);
+        			 //quit the program
+        			 exitAction.perform(source,inputState,tpf);
+				    }
+			}
+		});
+        final InputTrigger exitInfirmTrigger=new InputTrigger(new KeyReleasedCondition(Key.N),new TriggerAction(){     	
+        	@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//if the player has just been prompted
+        		if(getRoot().hasChild(exitPromptTextLabel))
+				    {//remove the prompt message
+        			 getRoot().detachChild(exitPromptTextLabel);
+				    }
+			}
+		});
         final TriggerAction nextWeaponAction=new TriggerAction(){		
 			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				playerData.selectNextWeapon();
 			}
 		};
 		final TriggerAction previousWeaponAction=new TriggerAction(){		
 			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				playerData.selectPreviousWeapon();
 			}
 		};
 		final TriggerAction wheelWeaponAction=new TriggerAction(){		
 			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf) {
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the mouse wheel has been rotated up/away from the user
 				if(inputState.getCurrent().getMouseState().getDwheel()<0)
 				    playerData.selectNextWeapon();
@@ -134,7 +165,7 @@ final class GameState extends State{
 		final InputTrigger weaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),wheelWeaponAction);
         final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),nextWeaponAction);
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger};
+        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
