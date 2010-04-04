@@ -15,7 +15,12 @@ package jfpsm;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
+
 import com.sun.opengl.util.BufferUtil;
 import misc.SerializationHelper;
 
@@ -303,7 +308,7 @@ public final class CuboidParameters extends VolumeParameters{
                       texCoordBuffer.put(u1).put(v1);
                      }
              texCoordBuffer.rewind();
-             ArrayList<int[][]> verticesIndicesOfMergeableFacesList=new ArrayList<int[][]>();   
+             ArrayList<int[][]> verticesIndicesOfMergeableFacesList=new ArrayList<int[][]>();
              int fvi0,fvi1;
              if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
@@ -326,9 +331,16 @@ public final class CuboidParameters extends VolumeParameters{
                   verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
                   verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
                  }
-             //6 2 3
+             //6 faces * 2 triangles * 3 indices
              verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);     
-             //TODO: compute verticesIndicesOfAdjacentMergeableFaces
+             ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<int[][]>();
+             int indexIndex=0;
+             for(Side side:Side.values())
+                 if(faceOrientation[side.ordinal()]!=Orientation.NONE)
+                     {verticesIndicesOfAdjacentMergeableFacesList.add(new int[][]{new int[]{indexBuffer.get(indexIndex),indexBuffer.get(indexIndex+1),indexBuffer.get(indexIndex+2)},new int[]{indexBuffer.get(indexIndex+3),indexBuffer.get(indexIndex+4),indexBuffer.get(indexIndex+5)}});
+                      indexIndex+=6;
+                     }
+             verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);
              buffersRecomputationNeeded=false;
             }
     }
@@ -343,6 +355,98 @@ public final class CuboidParameters extends VolumeParameters{
     public final int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
         recomputeBuffersIfNeeded();
         return(verticesIndicesOfAdjacentMergeableFaces);
+    }
+    
+    @Override
+    public final Entry<int[][][],int[][]> getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(RegularGrid grid){
+    	recomputeBuffersIfNeeded();
+    	ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<int[][]>();
+    	ArrayList<int[]> adjacencyCoordIndicesList=new ArrayList<int[]>();
+    	int[] adjacentCoordsCount=new int[6];
+    	ArrayList<Integer> adjacencyCoordIndices=new ArrayList<Integer>();
+    	int[] adjacencyCoordIndicesArray;
+    	boolean canMerge;
+    	ArrayList<Integer> indices=new ArrayList<Integer>();
+    	int index,adjacencyCoordIndex;
+    	float coord,dot;
+    	float[] vec0=new float[3],vec1=new float[3],vec2=new float[3],vec3=new float[3],adjacencyLinkVec=new float[3];
+    	//for each face
+    	for(int faceIndex=0;faceIndex<verticesIndicesOfAdjacentMergeableFaces.length;faceIndex++)
+    		{Arrays.fill(adjacentCoordsCount,0);
+    		 indices.clear();
+    		 //for each triangle
+    		 for(int triangleIndex=0;triangleIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex].length;triangleIndex++)
+    		     //for each index
+    			 for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex].length;indexIndex++)
+    		         {//get the index
+    				  index=verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex][indexIndex];
+    		          //if the index has not already been tested
+    		          if(!indices.contains(Integer.valueOf(index)))
+    		              {//mark it as tested
+    		          	   indices.add(Integer.valueOf(index));
+    		           	   //for each coordinate
+    		           	   for(int coordIndex=0;coordIndex<3;coordIndex++)
+    		           	       {//get the coordinate
+    		           	        coord=vertexBuffer.get((index*3)+coordIndex);
+    		                    //if the coordinate matches with any of the coordinate of the grid section, increment the counter
+    		           	        if(coord==0)
+    		                        adjacentCoordsCount[coordIndex*2]++;
+    		                    else
+    		                        if(coord==grid.getSectionPhysicalSize(coordIndex))
+    		              	            adjacentCoordsCount[(coordIndex*2)+1]++;
+    		                   }
+    		              }
+    		         }
+    		 adjacencyCoordIndices.clear();
+    		 for(int coordIndex=0;coordIndex<3;coordIndex++)
+    			 //if 2 coordinates match with each coordinate of the grid section for this coordinate index
+    			 if((adjacentCoordsCount[coordIndex*2]==2&&adjacentCoordsCount[(coordIndex*2)+1]==2))
+    				 adjacencyCoordIndices.add(Integer.valueOf(coordIndex));
+    		 canMerge=false;
+    		 if(adjacencyCoordIndices.size()>=1&&indices.size()==4)
+    		     {//check that the shape is rectangular  			  
+    			  //compute the 4 vectors
+    			  for(int coordIndex=0;coordIndex<3;coordIndex++)
+    			      {vec0[coordIndex]=vertexBuffer.get((indices.get(1).intValue()*3)+coordIndex)-vertexBuffer.get((indices.get(0).intValue()*3)+coordIndex);
+    			       vec1[coordIndex]=vertexBuffer.get((indices.get(2).intValue()*3)+coordIndex)-vertexBuffer.get((indices.get(1).intValue()*3)+coordIndex);
+    			       vec2[coordIndex]=vertexBuffer.get((indices.get(3).intValue()*3)+coordIndex)-vertexBuffer.get((indices.get(2).intValue()*3)+coordIndex);
+    			       vec3[coordIndex]=vertexBuffer.get((indices.get(0).intValue()*3)+coordIndex)-vertexBuffer.get((indices.get(3).intValue()*3)+coordIndex);
+    			      }
+    			  dot=0;
+    			  //dot product
+    			  for(int coordIndex=0;coordIndex<3;coordIndex++)
+    				  dot+=vec0[coordIndex]*vec1[coordIndex];
+    			  if(dot==0)
+    				  {//another dot product
+    				   for(int coordIndex=0;coordIndex<3;coordIndex++)
+        				   dot+=vec1[coordIndex]*vec2[coordIndex];
+    				   if(dot==0)
+    				       {//the shape is rectangular
+    					    //check if it is possible to link 2 adjacent faces together
+    					    for(int adjacencyCoordIndexIndex=adjacencyCoordIndices.size()-1;adjacencyCoordIndexIndex>=0;adjacencyCoordIndexIndex--)
+    					        {adjacencyCoordIndex=adjacencyCoordIndices.get(adjacencyCoordIndexIndex);
+    					    	 Arrays.fill(adjacencyLinkVec,0);
+    					    	 adjacencyLinkVec[adjacencyCoordIndex]=grid.getSectionPhysicalSize(adjacencyCoordIndex);
+    					    	 if(!Arrays.equals(adjacencyLinkVec,vec0)&&!Arrays.equals(adjacencyLinkVec,vec1)&&!Arrays.equals(adjacencyLinkVec,vec2)&&!Arrays.equals(adjacencyLinkVec,vec3))
+    					    		 adjacencyCoordIndices.remove(adjacencyCoordIndexIndex);
+    					        }
+    					    if(adjacencyCoordIndices.size()>0)
+    					        canMerge=true;
+    				       }
+    				  }
+    		     }
+    		 if(canMerge)
+    			 {verticesIndicesOfAdjacentMergeableFacesList.add(verticesIndicesOfAdjacentMergeableFaces[faceIndex]);
+    			  adjacencyCoordIndicesArray=new int[adjacencyCoordIndices.size()];
+    			  for(int adjacencyCoordIndexIndex=0;adjacencyCoordIndexIndex<adjacencyCoordIndices.size();adjacencyCoordIndexIndex++)
+    				  adjacencyCoordIndicesArray[adjacencyCoordIndexIndex]=adjacencyCoordIndices.get(adjacencyCoordIndexIndex).intValue();
+    			  adjacencyCoordIndicesList.add(adjacencyCoordIndicesArray);
+    			 }
+    		}
+    	int[][][] verticesIndicesOfAdjacentMergeableFacesForThisGrid=verticesIndicesOfAdjacentMergeableFacesList.toArray(new int[verticesIndicesOfAdjacentMergeableFacesList.size()][2][3]);
+    	int[][] adjacencyCoordIndicesPerFaceArray=adjacencyCoordIndicesList.toArray(new int[adjacencyCoordIndicesList.size()][]);
+    	Entry<int[][][],int[][]> entry=new AbstractMap.SimpleImmutableEntry<int[][][],int[][]>(verticesIndicesOfAdjacentMergeableFacesForThisGrid,adjacencyCoordIndicesPerFaceArray);
+    	return(entry);
     }
     
     @Override

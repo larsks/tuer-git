@@ -16,6 +16,8 @@ package jfpsm;
 import java.io.Serializable;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Map.Entry;
+
 import misc.SerializationHelper;
 
 public abstract class VolumeParameters implements Serializable,Dirtyable {
@@ -74,6 +76,17 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 	     * - if so, check if there is any adjacency in u, v or u & v
 	     * */
 	    return(null);
+	}
+	
+	/**
+	 * get the vertices indices of faces whose vertices might be adjacent
+	 * and located on the border of a grid section
+	 * @param grid regular grid
+	 * @return vertices indices of faces whose vertices might be adjacent
+	 *         and located on the border of a grid section
+	 */
+	public Entry<int[][][],int[][]> getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(RegularGrid grid){
+		return(null);
 	}
 	
 	/**

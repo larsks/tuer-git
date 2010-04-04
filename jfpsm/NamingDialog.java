@@ -176,7 +176,7 @@ public class NamingDialog extends JDialog implements ActionListener,PropertyChan
              //presses the same button next time, no
              //property change event will be fired.
              optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
-             updateValidationData(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)));            
+             updateValidationData(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)));
              clearAndHide();
            }
     }

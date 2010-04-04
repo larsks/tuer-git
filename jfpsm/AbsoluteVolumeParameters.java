@@ -5,6 +5,7 @@ package jfpsm;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Map.Entry;
 
 final class AbsoluteVolumeParameters{
 	
@@ -72,6 +73,10 @@ final class AbsoluteVolumeParameters{
     
     public final int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
         return(volumeParam!=null?volumeParam.getVerticesIndicesOfAdjacentMergeableFaces():null);
+    }
+    
+    public final Entry<int[][][],int[][]> getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(RegularGrid grid){
+        return(volumeParam!=null?volumeParam.getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(grid):null);
     }
     
     public final String getName(){
