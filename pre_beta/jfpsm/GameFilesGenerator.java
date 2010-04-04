@@ -125,9 +125,10 @@ final class GameFilesGenerator{
              HashMap<Integer,ArrayList<Buffer>> volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
              HashMap<Integer,String> tileNameTable=new HashMap<Integer,String>();
              HashMap<Integer,Boolean> mergeTable=new HashMap<Integer,Boolean>();
-             HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer, int[][][]>();
-             HashMap<Integer,int[][][]> verticesIndicesOfAdjacentMergeableFacesTable=new HashMap<Integer, int[][][]>();
-             int[][][] verticesIndicesOfMergeableFaces=null,verticesIndicesOfAdjacentMergeableFaces=null;
+             HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer,int[][][]>();
+             HashMap<Integer,Entry<int[][][],int[][]>> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable=new HashMap<Integer,Entry<int[][][],int[][]>>();
+             int[][][] verticesIndicesOfMergeableFaces=null;
+             Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=null;
              int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
              //use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
@@ -181,8 +182,9 @@ final class GameFilesGenerator{
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][k].getName());
                                     mergeTable.put(key,Boolean.valueOf(floorVolumeElements[i][k].isMergeEnabled()));
-                                    if(floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFaces()!=null)
-                                    	verticesIndicesOfAdjacentMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFaces());
+                                    verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(grid);
+                                    if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
+                                    	verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.put(key,verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices);                                  	
                                     //mergeable faces are used to compute the bounding boxes of the system of collision detection too 
                                     if(floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces()!=null)
                                         verticesIndicesOfMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces());
@@ -213,7 +215,7 @@ final class GameFilesGenerator{
                            texCoords=new float[texCoordBuffer.capacity()];                      
                        isMergeEnabled=mergeTable.get(key).booleanValue();
                        verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
-                       verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesTable.get(key);
+                       verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.get(key);
                        if(verticesIndicesOfMergeableFaces!=null)
                            {//copy the vertices indices
                             absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
@@ -288,9 +290,9 @@ final class GameFilesGenerator{
                                 indexArrayOffsetIndicesList,j);
                            }
                        //if the merge between adjacent faces is possible, just do it
-                       if(verticesIndicesOfAdjacentMergeableFaces!=null)
+                       if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
                            {//TODO: 
-                    	    //
+                    	    
                            }
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;

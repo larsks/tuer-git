@@ -86,4 +86,27 @@ public class RegularGrid extends FiniteGrid{
     public final float getSectionPhysicalDepth(){
         return(sectionPhysicalDepth);
     }
+    
+    public final float getSectionPhysicalSize(int coordIndex){
+    	if(0>coordIndex||coordIndex>2)
+    		throw new IllegalArgumentException("the coordinate index should");
+    	float value;
+    	switch(coordIndex)
+    	    {case 0:
+    	         {value=getSectionPhysicalWidth();
+    	          break; 
+    	         }
+    	     case 1:
+    	         {value=getSectionPhysicalHeight();
+    	          break;
+    	         }
+    	     case 2:
+    	         {value=getSectionPhysicalDepth();
+    	          break;
+    	         }
+    	     default:
+    	    	 value=Float.NaN;
+    	    }
+    	return(value);
+    }
 }
