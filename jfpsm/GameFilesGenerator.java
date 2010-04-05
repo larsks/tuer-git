@@ -273,14 +273,15 @@ final class GameFilesGenerator{
                                  localMergeIndexBuffer.rewind();
                                  //fill the buffer used for the merge, it will contain the markers (-1 for vertices that have to be removed)
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][5]=localMergeIndexBuffer;
-                                 indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
                                  indexArrayOffsetIndicesList.add(logicalGridPos);
                                 }
                             else
                                 buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=null;
+                            //store the index offset that can be used for the both kind of merge
+                            indexOffsetArray[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]]=indexOffset;
                             //update the offset
                             indexOffset+=vertexBuffer.capacity()/3;
-                           }
+                           }                      
                        //if the merge is possible, compute the merged structures that can be used both for the merge itself and
                        //for the computation of the bounding boxes of the system handling the detection of collisions
                        if(verticesIndicesOfMergeableFaces!=null)
@@ -290,10 +291,11 @@ final class GameFilesGenerator{
                                 indexArrayOffsetIndicesList,j);
                            }
                        //if the merge between adjacent faces is possible, just do it
-                       if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
-                           {//TODO: 
-                    	    
-                           }
+                       //TODO: uncomment this when it is ready
+                       /*if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
+                           {computeMergedStructuresWithAdjacentTiles(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
+                        		grid,buffersGrid,indexOffsetArray,j);
+                           }*/
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
@@ -388,6 +390,117 @@ final class GameFilesGenerator{
                  System.out.println("[WARNING]Export into the file "+destCollisionFile.getName()+" not successful!");
             }
     }
+    
+    private static final void computeMergedStructuresWithAdjacentTiles(final Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
+    		final RegularGrid grid,final Buffer[][][][] buffersGrid,int[][][] indexOffsetArray,final int j){
+    	int[][][] verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getKey();
+    	int[][] adjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getValue();
+    	int[][] verticesIndicesOfAdjacentMergeableFace;
+    	int[] verticesIndicesOfAdjacentMergeableFaceArray,indexBufferPart=null;
+    	int indexOffset,adjacencyCoordIndex,indexIndexOffset,mergedGridSectionsCount;
+    	int[] indices=new int[3];
+    	//align each line of verticesIndicesOfAdjacentMergeableFaces on a 1D array
+    	int[][] verticesIndicesOfAdjacentMergeableFacesArray=new int[verticesIndicesOfAdjacentMergeableFaces.length][];
+    	int indicesPerFaceCount;
+    	for(int faceIndex=0;faceIndex<verticesIndicesOfAdjacentMergeableFaces.length;faceIndex++)
+    		if(verticesIndicesOfAdjacentMergeableFaces[faceIndex]!=null)
+    	        {//compute the count of indices per face
+    			 indicesPerFaceCount=0;
+    		     for(int triangleIndex=0;triangleIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex].length;triangleIndex++)
+    		    	 if(verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex]!=null)
+    			         indicesPerFaceCount+=verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex].length;
+    		     //allocate a 1D array per face
+    		     verticesIndicesOfAdjacentMergeableFacesArray[faceIndex]=new int[indicesPerFaceCount];
+    		     //copy the data
+    		     for(int triangleIndex=0,indexIndex1D=0;triangleIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex].length;triangleIndex++)
+    		    	 if(verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex]!=null)
+    		    	     {for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex].length;indexIndex++)
+    		    	          {verticesIndicesOfAdjacentMergeableFacesArray[faceIndex][indexIndex1D]=verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex][indexIndex];
+    		    	           indexIndex1D++;
+    		    	          }
+    		    	     }
+    	        }
+    	for(int i=0;i<grid.getLogicalWidth();i++)
+            for(int k=0;k<grid.getLogicalDepth();k++)
+            	//check if the index buffer of this section is not null as
+            	//the index buffer might become null after a merge and it might
+            	//be used by another volume parameter
+            	if(buffersGrid[i][j][k][1]!=null)
+                    {indexOffset=indexOffsetArray[i][j][k];
+            	     if(indices.length!=buffersGrid[i][j][k][1].capacity())
+            	    	 indices=new int[buffersGrid[i][j][k][1].capacity()];
+            	     //copy the index buffer (with the offset)
+            	     ((IntBuffer)buffersGrid[i][j][k][1]).get(indices,0,indices.length);
+            	     //compute the indices without the offset
+            	     for(int indexIndex=0;indexIndex<indices.length;indexIndex++)
+                         indices[indexIndex]+=indexOffset;
+            	     for(int faceIndex=0;faceIndex<verticesIndicesOfAdjacentMergeableFaces.length;faceIndex++)
+            	    	 {verticesIndicesOfAdjacentMergeableFace=verticesIndicesOfAdjacentMergeableFaces[faceIndex];
+            	    	  if(verticesIndicesOfAdjacentMergeableFace!=null&&adjacencyCoordIndices[faceIndex]!=null)
+            	    		  {//get the 1D array that matches with this face
+            	    		   verticesIndicesOfAdjacentMergeableFaceArray=verticesIndicesOfAdjacentMergeableFacesArray[faceIndex];
+            	    		   //store an invalid value to check further if a valid one has been found
+            	    		   indexIndexOffset=-1;
+            	    		   //allocate the index buffer part if needed
+            	    		   if(indexBufferPart==null||indexBufferPart.length!=verticesIndicesOfAdjacentMergeableFaceArray.length)
+            	    			   indexBufferPart=new int[verticesIndicesOfAdjacentMergeableFaceArray.length];
+            	    		   //compare the 2D array with indices to find the index index offset
+            	    		   if(indexBufferPart.length>0)
+            	    		       for(int indexIndex=0;indexIndex<indices.length-indexBufferPart.length+1&&indexIndexOffset==-1;indexIndex++)
+            	    		           {//fill the index buffer part
+            	    		    	    for(int indexBufferPartIndex=0;indexBufferPartIndex<indexBufferPart.length;indexBufferPartIndex++)
+            	    		    	    	indexBufferPart[indexBufferPartIndex]=indices[indexIndex+indexBufferPartIndex];
+            	    		    	    //compare the index buffer part with the vertices indices of this face
+            	    		    	    if(Arrays.equals(indexBufferPart,verticesIndicesOfAdjacentMergeableFaceArray))
+            	    		    	    	indexIndexOffset=indexIndex;
+            	    		           }
+            	    		   //if a valid index index offset has been found
+            	    		   if(indexIndexOffset!=-1)
+            	    		       for(int adjacencyCoordIndexIndex=0;adjacencyCoordIndexIndex<adjacencyCoordIndices[faceIndex].length;adjacencyCoordIndexIndex++)            	    		  
+            	    	               {adjacencyCoordIndex=adjacencyCoordIndices[faceIndex][adjacencyCoordIndexIndex];           	    		        
+            	    	                switch(adjacencyCoordIndex)
+            	    	                    {case 0:
+            	    	                         {mergedGridSectionsCount=1;
+            	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null;ii++)
+            	    	                              {//TODO: remove a part of each index buffer by using the index index offset 
+            	    	                        	   //      and the size of the part of index buffer previously used
+            	    	                        	   //TODO: if the index buffer is empty, set it to null
+            	    	                        	   //if the index buffer of the grid section has been set to null (as it was empty)
+            	    	                        	   if(buffersGrid[ii][j][k][1]==null)
+            	    	                        	       {//empty all other buffers of this grid section
+            	    	                        		    for(int bufferIndex=0;bufferIndex<buffersGrid[ii][j][k].length;bufferIndex++)
+            	    	                        	    	    if(bufferIndex!=1)
+            	    	                        	    	        buffersGrid[ii][j][k][bufferIndex]=null;
+            	    	                        	       }
+            	    	                        	   mergedGridSectionsCount++;
+            	    	                              }
+            	    	                          if(mergedGridSectionsCount>1)
+            	    	                              {//TODO: replace the indices inside the part of the index buffer by new indices (?)
+            	    	                        	   //TODO: translate all vertices whose abscissa is  equal to i*gridSectionWidth
+            	    	                        	   //TODO: update the texture coordinates of those vertices
+            	    	                              }
+            	    	                          break;
+            	    	                         }
+            	    	                     case 1:
+            	    	                         {//ignore silently the adjacency on Y because merging tiles of different levels is not allowed
+            	    	                	      break;
+            	    	                         }
+            	    	                     case 2:
+            	    	                         {
+            	    	                          break;
+            	    	                         }
+            	    	                     default:
+            	    	                         {//absurd coordinate index
+            	    	                	      throw new IllegalArgumentException("The coordinate index "+adjacencyCoordIndex+" is not a valid coordinate index, only 0, 1 and 2 are accepted");
+            	    	                         }
+            	    	                    }           	    	            
+            	    	               }
+            	    		   else
+            	    			   System.out.println("[WARN] no valid index index offset found");
+            	    		  }
+            	    	 }
+                    }
+    }
 
     /**
      * compute the merged structures for a single type of volume parameter in a floor
@@ -402,7 +515,7 @@ final class GameFilesGenerator{
      * @param indexArrayOffsetIndicesList
      * @param j floor index
      */
-    private final void computeMergedStructures(final int[][][] verticesIndicesOfMergeableFaces,
+    private static final void computeMergedStructures(final int[][][] verticesIndicesOfMergeableFaces,
             final int[][][] absoluteVerticesIndicesOfMergeableFaces,
             final boolean isMergeEnabled,final RegularGrid grid,
             final Buffer[][][][] buffersGrid,

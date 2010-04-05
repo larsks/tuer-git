@@ -80,10 +80,12 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
 	
 	/**
 	 * get the vertices indices of faces whose vertices might be adjacent
+	 * and the adjacency coordinates indices of these faces
 	 * and located on the border of a grid section
 	 * @param grid regular grid
 	 * @return vertices indices of faces whose vertices might be adjacent
-	 *         and located on the border of a grid section
+	 *         and located on the border of a grid section and the 
+	 *         adjacency coordinates indices of these faces
 	 */
 	public Entry<int[][][],int[][]> getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(RegularGrid grid){
 		return(null);
