@@ -18,7 +18,7 @@ import java.nio.IntBuffer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collections;
 import java.util.Map.Entry;
 
 import com.sun.opengl.util.BufferUtil;
@@ -436,7 +436,9 @@ public final class CuboidParameters extends VolumeParameters{
     				  }
     		     }
     		 if(canMerge)
-    			 {verticesIndicesOfAdjacentMergeableFacesList.add(verticesIndicesOfAdjacentMergeableFaces[faceIndex]);
+    			 {//sort the coordinate indices
+    			  Collections.sort(adjacencyCoordIndices);
+    			  verticesIndicesOfAdjacentMergeableFacesList.add(verticesIndicesOfAdjacentMergeableFaces[faceIndex]);
     			  adjacencyCoordIndicesArray=new int[adjacencyCoordIndices.size()];
     			  for(int adjacencyCoordIndexIndex=0;adjacencyCoordIndexIndex<adjacencyCoordIndices.size();adjacencyCoordIndexIndex++)
     				  adjacencyCoordIndicesArray[adjacencyCoordIndexIndex]=adjacencyCoordIndices.get(adjacencyCoordIndexIndex).intValue();
