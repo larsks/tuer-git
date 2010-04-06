@@ -391,6 +391,15 @@ final class GameFilesGenerator{
             }
     }
     
+    /**
+     * merge adjacent faces
+     * @param verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices vertices indices of adjacent faces that can be merged and adjacency coordinate indices indicating the direction used to merge them
+     * @param grid grid
+     * @param buffersGrid grid containing the buffers
+     * @param indexOffsetArray array containing the index offsets that allow to go from local indices to global indices
+     * @param j floor index
+     */
+    @SuppressWarnings("unused")
     private static final void computeMergedStructuresWithAdjacentTiles(final Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
     		final RegularGrid grid,final Buffer[][][][] buffersGrid,int[][][] indexOffsetArray,final int j){
     	int[][][] verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getKey();
@@ -422,18 +431,19 @@ final class GameFilesGenerator{
     	        }
     	for(int i=0;i<grid.getLogicalWidth();i++)
             for(int k=0;k<grid.getLogicalDepth();k++)
-            	//check if the index buffer of this section is not null as
-            	//the index buffer might become null after a merge and it might
-            	//be used by another volume parameter
-            	if(buffersGrid[i][j][k][1]!=null)
-                    {indexOffset=indexOffsetArray[i][j][k];
-            	     if(indices.length!=buffersGrid[i][j][k][1].capacity())
+            	//check if the index buffer of this section is not null or empty
+            	if(buffersGrid[i][j][k][1]!=null&&buffersGrid[i][j][k][1].capacity()>0)
+                    {//get the index offset that allows to go from the local index to the global index
+            		 indexOffset=indexOffsetArray[i][j][k]; 
+                     if(indices.length!=buffersGrid[i][j][k][1].capacity())
             	    	 indices=new int[buffersGrid[i][j][k][1].capacity()];
             	     //copy the index buffer (with the offset)
             	     ((IntBuffer)buffersGrid[i][j][k][1]).get(indices,0,indices.length);
             	     //compute the indices without the offset
             	     for(int indexIndex=0;indexIndex<indices.length;indexIndex++)
-                         indices[indexIndex]+=indexOffset;
+            	    	 //preserve invalid values
+            	    	 if(indices[indexIndex]!=-1)
+                             indices[indexIndex]-=indexOffset;
             	     for(int faceIndex=0;faceIndex<verticesIndicesOfAdjacentMergeableFaces.length;faceIndex++)
             	    	 {verticesIndicesOfAdjacentMergeableFace=verticesIndicesOfAdjacentMergeableFaces[faceIndex];
             	    	  if(verticesIndicesOfAdjacentMergeableFace!=null&&adjacencyCoordIndices[faceIndex]!=null)
@@ -444,7 +454,7 @@ final class GameFilesGenerator{
             	    		   //allocate the index buffer part if needed
             	    		   if(indexBufferPart==null||indexBufferPart.length!=verticesIndicesOfAdjacentMergeableFaceArray.length)
             	    			   indexBufferPart=new int[verticesIndicesOfAdjacentMergeableFaceArray.length];
-            	    		   //compare the 2D array with indices to find the index index offset
+            	    		   //compare the 1D array with indices to find the index index offset
             	    		   if(indexBufferPart.length>0)
             	    		       for(int indexIndex=0;indexIndex<indices.length-indexBufferPart.length+1&&indexIndexOffset==-1;indexIndex++)
             	    		           {//fill the index buffer part
@@ -461,23 +471,20 @@ final class GameFilesGenerator{
             	    	                switch(adjacencyCoordIndex)
             	    	                    {case 0:
             	    	                         {mergedGridSectionsCount=1;
-            	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null;ii++)
-            	    	                              {//TODO: remove a part of each index buffer by using the index index offset 
-            	    	                        	   //      and the size of the part of index buffer previously used
-            	    	                        	   //TODO: if the index buffer is empty, set it to null
-            	    	                        	   //if the index buffer of the grid section has been set to null (as it was empty)
-            	    	                        	   if(buffersGrid[ii][j][k][1]==null)
-            	    	                        	       {//empty all other buffers of this grid section
-            	    	                        		    for(int bufferIndex=0;bufferIndex<buffersGrid[ii][j][k].length;bufferIndex++)
-            	    	                        	    	    if(bufferIndex!=1)
-            	    	                        	    	        buffersGrid[ii][j][k][bufferIndex]=null;
-            	    	                        	       }
+            	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null&&buffersGrid[ii][j][k][1].capacity()>0;ii++)
+            	    	                              {//mark useless indices with -1
+            	    	                        	   for(int indexIndex=0;indexIndex<indexBufferPart.length;indexIndex++)
+            	    	                        		   ((IntBuffer)buffersGrid[ii][j][k][1]).put(indexIndexOffset+indexIndex,-1);
             	    	                        	   mergedGridSectionsCount++;
             	    	                              }
             	    	                          if(mergedGridSectionsCount>1)
-            	    	                              {//TODO: replace the indices inside the part of the index buffer by new indices (?)
-            	    	                        	   //TODO: translate all vertices whose abscissa is  equal to i*gridSectionWidth
-            	    	                        	   //TODO: update the texture coordinates of those vertices
+            	    	                              {//translate all vertices of the concerned face whose abscissa is equal to the rightmost abscissa of the section
+            	    	                        	   for(int indexBufferPartIndex=0;indexBufferPartIndex<indexBufferPart.length;indexBufferPartIndex++)
+            	    	                        		   if(((FloatBuffer)buffersGrid[i][j][k][0]).get(indexBufferPart[indexBufferPartIndex]*3)==((i+1)*grid.getSectionPhysicalWidth()))
+            	    	                        		       {((FloatBuffer)buffersGrid[i][j][k][0]).put(indexBufferPart[indexBufferPartIndex]*3,((FloatBuffer)buffersGrid[i][j][k][0]).get(indexBufferPart[indexBufferPartIndex]*3)+((mergedGridSectionsCount-1)*grid.getSectionPhysicalWidth()));
+            	    	                        			    //update the texture coordinates (U only) of those vertices
+            	    	                        			    ((FloatBuffer)buffersGrid[i][j][k][3]).put(indexBufferPart[indexBufferPartIndex]*2,((FloatBuffer)buffersGrid[i][j][k][3]).get(indexBufferPart[indexBufferPartIndex]*2)+(mergedGridSectionsCount-1));
+            	    	                        		       }
             	    	                              }
             	    	                          break;
             	    	                         }
@@ -500,6 +507,16 @@ final class GameFilesGenerator{
             	    		  }
             	    	 }
                     }
+    	//N.B: we consider each index is useless only in a single face
+    	for(int i=0;i<grid.getLogicalWidth();i++)
+            for(int k=0;k<grid.getLogicalDepth();k++)
+            	if(buffersGrid[i][j][k][1]!=null&&buffersGrid[i][j][k][1].capacity()>0)
+            	    {//TODO: deduce removed indices from the original index buffer
+            		 //TODO: remove useless vertices
+            		 //TODO: remove useless normals
+            		 //TODO: remove useless texture coordinates
+            		 //TODO: remove useless indices (marked with -1)
+            	    }
     }
 
     /**
