@@ -39,7 +39,7 @@ public final class Tile extends JFPSMUserObject{
 
     private transient boolean dirty;
     
-    private transient BufferedImage texture;
+    private transient BufferedImageContainer textureContainer;
     
     
     public Tile(){
@@ -52,15 +52,26 @@ public final class Tile extends JFPSMUserObject{
         markDirty();
         color=Color.WHITE;
         volumeParameters=null;
+        textureContainer=new BufferedImageContainer();
     }
     
     
     public final BufferedImage getTexture(){
-        return(texture);
+        return(getTexture(0));
     }
     
-    public final void setTexture(final BufferedImage texture){
-        this.texture=texture;
+    public final BufferedImage getTexture(final int index){
+        return(textureContainer!=null?textureContainer.get(index):null);
+    }
+    
+    public final void setTexture(final BufferedImage texture){   	
+    	setTexture(0,texture);
+    }
+    
+    public final void setTexture(final int index,final BufferedImage texture){
+    	if(textureContainer==null)
+    		textureContainer=new BufferedImageContainer();
+    	textureContainer.set(index,texture);
         markDirty();
     }
     
