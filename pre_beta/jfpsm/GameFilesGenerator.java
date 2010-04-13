@@ -124,12 +124,12 @@ final class GameFilesGenerator{
              HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable=new HashMap<Integer,ArrayList<float[]>>();
              HashMap<Integer,ArrayList<Buffer>> volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
              HashMap<Integer,String> tileNameTable=new HashMap<Integer,String>();
-             HashMap<Integer,Boolean> mergeTable=new HashMap<Integer,Boolean>();
-             HashMap<Integer,int[][][]> verticesIndicesOfMergeableFacesTable=new HashMap<Integer,int[][][]>();
+             HashMap<Integer,Entry<Boolean,Boolean>> removalOfIdenticalFacesAndMergeOfAdjacentFacesTable=new HashMap<Integer,Entry<Boolean,Boolean>>();
+             HashMap<Integer,int[][][]> verticesIndicesOfPotentiallyIdenticalFacesTable=new HashMap<Integer,int[][][]>();
              HashMap<Integer,Entry<int[][][],int[][]>> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable=new HashMap<Integer,Entry<int[][][],int[][]>>();
-             int[][][] verticesIndicesOfMergeableFaces=null;
+             int[][][] verticesIndicesOfPotentiallyIdenticalFaces=null;
              Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=null;
-             int[][][] absoluteVerticesIndicesOfMergeableFaces=null;
+             int[][][] absoluteVerticesIndicesOfPotentiallyIdenticalFaces=null;
              //use the identifier of the volume parameter as a key rather than the vertex buffer
              Integer key;
              FloatBuffer vertexBuffer,normalBuffer,texCoordBuffer,totalVertexBuffer,totalNormalBuffer,totalTexCoordBuffer,localVertexBuffer,localNormalBuffer,localTexCoordBuffer;
@@ -138,7 +138,7 @@ final class GameFilesGenerator{
              ArrayList<float[]> locationList;
              ArrayList<Buffer> bufferList;
              int meshIndex,indexOffset;
-             boolean isMergeEnabled;
+             boolean isRemovalOfIdenticalFacesEnabled,isMergeOfAdjacentFacesEnabled;
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
              //create the grid and the absolute volume parameters
@@ -159,7 +159,7 @@ final class GameFilesGenerator{
                  {volumeParamLocationTable.clear();
                   volumeParamTable.clear();
                   tileNameTable.clear();
-                  mergeTable.clear();
+                  removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.clear();
                   //loop on volume elements of a 2D array of a floor
                   for(int i=0;i<floorVolumeElements.length;i++)
                       for(int k=0;k<floorVolumeElements[i].length;k++)
@@ -182,13 +182,13 @@ final class GameFilesGenerator{
                                     bufferList.add(floorVolumeElements[i][k].getMergeableIndexBuffer());
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][k].getName());
-                                    mergeTable.put(key,Boolean.valueOf(floorVolumeElements[i][k].isMergeEnabled()));
+                                    removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.put(key,new AbstractMap.SimpleEntry<Boolean,Boolean>(Boolean.valueOf(floorVolumeElements[i][k].isRemovalOfIdenticalFacesEnabled()),Boolean.valueOf(floorVolumeElements[i][k].isMergeOfAdjacentFacesEnabled())));
                                     verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(grid);
                                     if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
                                     	verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.put(key,verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices);                                  	
-                                    //mergeable faces are used to compute the bounding boxes of the system of collision detection too 
-                                    if(floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces()!=null)
-                                        verticesIndicesOfMergeableFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfMergeableFaces());
+                                    //faces that are potentially identical are used to compute the bounding boxes of the system of collision detection too 
+                                    if(floorVolumeElements[i][k].getVerticesIndicesOfPotentiallyIdenticalFaces()!=null)
+                                        verticesIndicesOfPotentiallyIdenticalFacesTable.put(key,floorVolumeElements[i][k].getVerticesIndicesOfPotentiallyIdenticalFaces());
                                    }
                                locationList.add(floorVolumeElements[i][k].getLevelRelativePosition());
                               }
@@ -214,16 +214,17 @@ final class GameFilesGenerator{
                            normals=new float[normalBuffer.capacity()];
                        if(texCoords.length<texCoordBuffer.capacity())
                            texCoords=new float[texCoordBuffer.capacity()];                      
-                       isMergeEnabled=mergeTable.get(key).booleanValue();
-                       verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesTable.get(key);
+                       isRemovalOfIdenticalFacesEnabled=removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.get(key).getKey().booleanValue();
+                       isMergeOfAdjacentFacesEnabled=removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.get(key).getValue().booleanValue();
+                       verticesIndicesOfPotentiallyIdenticalFaces=verticesIndicesOfPotentiallyIdenticalFacesTable.get(key);
                        verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.get(key);
-                       if(verticesIndicesOfMergeableFaces!=null)
+                       if(verticesIndicesOfPotentiallyIdenticalFaces!=null)
                            {//copy the vertices indices
-                            absoluteVerticesIndicesOfMergeableFaces=new int[verticesIndicesOfMergeableFaces.length][2][3];
-                            for(int ii=0;ii<verticesIndicesOfMergeableFaces.length;ii++)
+                            absoluteVerticesIndicesOfPotentiallyIdenticalFaces=new int[verticesIndicesOfPotentiallyIdenticalFaces.length][2][3];
+                            for(int ii=0;ii<verticesIndicesOfPotentiallyIdenticalFaces.length;ii++)
                                 for(int jj=0;jj<2;jj++)
                                     for(int kk=0;kk<3;kk++)
-                                        absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]=verticesIndicesOfMergeableFaces[ii][jj][kk];
+                                        absoluteVerticesIndicesOfPotentiallyIdenticalFaces[ii][jj][kk]=verticesIndicesOfPotentiallyIdenticalFaces[ii][jj][kk];
                            }
                        indexOffset=0;
                        for(float[] location:locationList)
@@ -258,7 +259,7 @@ final class GameFilesGenerator{
                             localTexCoordBuffer.put(texCoords,0,texCoordBuffer.capacity());
                             localTexCoordBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][3]=localTexCoordBuffer;
-                            if(verticesIndicesOfMergeableFaces!=null)
+                            if(verticesIndicesOfPotentiallyIdenticalFaces!=null)
                                 {mergeableIndexBuffer.get(indices,0,mergeableIndexBuffer.capacity());
                                  mergeableIndexBuffer.rewind();
                                  //add an offset to the indices
@@ -285,17 +286,17 @@ final class GameFilesGenerator{
                            }                      
                        //if the merge is possible, compute the merged structures that can be used both for the merge itself and
                        //for the computation of the bounding boxes of the system handling the detection of collisions
-                       if(verticesIndicesOfMergeableFaces!=null)
-                           {computeMergedStructures(verticesIndicesOfMergeableFaces,
-                                absoluteVerticesIndicesOfMergeableFaces,                            
-                                isMergeEnabled,grid,buffersGrid,indexOffsetArray,newIndexOffsetArray,
+                       if(verticesIndicesOfPotentiallyIdenticalFaces!=null)
+                           {computeStructuresWithoutIdenticalFaces(verticesIndicesOfPotentiallyIdenticalFaces,
+                                absoluteVerticesIndicesOfPotentiallyIdenticalFaces,                            
+                                isRemovalOfIdenticalFacesEnabled,grid,buffersGrid,indexOffsetArray,newIndexOffsetArray,
                                 indexArrayOffsetIndicesList,j);
                            }
                        //if the merge between adjacent faces is possible, just do it
                        //TODO: uncomment this when it is ready
                        /*if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
                            {computeMergedStructuresWithAdjacentTiles(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
-                        		grid,buffersGrid,newIndexOffsetArray,newOtherIndexOffsetArray,indexArrayOffsetIndicesList,j);
+                        		isMergeOfAdjacentFacesEnabled,grid,buffersGrid,newIndexOffsetArray,newOtherIndexOffsetArray,indexArrayOffsetIndicesList,j);
                            }*/
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
@@ -397,15 +398,18 @@ final class GameFilesGenerator{
     /**
      * merge adjacent faces
      * @param verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices vertices indices of adjacent faces that can be merged and adjacency coordinate indices indicating the direction used to merge them
-     * @param grid grid
+     * @param isMergeOfAdjacentFacesEnabled flag indicating whether the merge of adjacent faces is enabled
+     * @param grid regular grid of the level
      * @param buffersGrid grid containing the buffers
      * @param indexOffsetArray array containing the index offsets that allow to go from local indices to global indices
+     * @param newIndexOffsetArray
+     * @param indexArrayOffsetIndicesList
      * @param j floor index
      */
     @SuppressWarnings("unused")
-    private static final void computeMergedStructuresWithAdjacentTiles(final Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
-    		final RegularGrid grid,final Buffer[][][][] buffersGrid,int[][][] indexOffsetArray,int[][][] newIndexOffsetArray,
-    		final ArrayList<int[]> indexArrayOffsetIndicesList,final int j){
+    private static final void computeMergedStructuresWithAdjacentFaces(final Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
+    		final boolean isMergeOfAdjacentFacesEnabled,final RegularGrid grid,final Buffer[][][][] buffersGrid,int[][][] indexOffsetArray,
+    		int[][][] newIndexOffsetArray,final ArrayList<int[]> indexArrayOffsetIndicesList,final int j){
     	int[][][] verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getKey();
     	int[][] adjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getValue();
     	int[][] verticesIndicesOfAdjacentMergeableFace;
@@ -544,17 +548,17 @@ final class GameFilesGenerator{
             		 //remove useless texture coordinates
             		 //remove useless indices (marked with -1)
             	    }*/
-    	rebuildBuffersWithoutUselessData(true,grid,buffersGrid,
+    	rebuildBuffersWithoutUselessData(isMergeOfAdjacentFacesEnabled,grid,buffersGrid,
 				indexOffsetArray,newIndexOffsetArray,
 				indexArrayOffsetIndicesList,j,1);
     }
 
     /**
-     * compute the merged structures for a single type of volume parameter in a floor
+     * compute the structures without identical faces for a single type of volume parameter in a floor
      * 
-     * @param verticesIndicesOfMergeableFaces
-     * @param absoluteVerticesIndicesOfMergeableFaces
-     * @param isMergeEnabled flag indicating whether the merge is enabled
+     * @param verticesIndicesOfPotentiallyIdenticalFaces
+     * @param absoluteVerticesIndicesOfPotentiallyIdenticalFaces
+     * @param isRemovalOfIdenticalFacesEnabled flag indicating whether the removal of layered identical faces is enabled
      * @param grid regular grid of the level
      * @param buffersGrid
      * @param indexOffsetArray
@@ -562,9 +566,9 @@ final class GameFilesGenerator{
      * @param indexArrayOffsetIndicesList
      * @param j floor index
      */
-    private static final void computeMergedStructures(final int[][][] verticesIndicesOfMergeableFaces,
-            final int[][][] absoluteVerticesIndicesOfMergeableFaces,
-            final boolean isMergeEnabled,final RegularGrid grid,
+    private static final void computeStructuresWithoutIdenticalFaces(final int[][][] verticesIndicesOfPotentiallyIdenticalFaces,
+            final int[][][] absoluteVerticesIndicesOfPotentiallyIdenticalFaces,
+            final boolean isRemovalOfIdenticalFacesEnabled,final RegularGrid grid,
             final Buffer[][][][] buffersGrid,
             final int[][][] indexOffsetArray,final int[][][] newIndexOffsetArray,
             final ArrayList<int[]> indexArrayOffsetIndicesList,
@@ -584,20 +588,20 @@ final class GameFilesGenerator{
                 if(buffersGrid[i][j][k][4]!=null)
                     {indexOffset=indexOffsetArray[i][j][k];
                      //add the offset
-                     for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                     for(int ii=0;ii<absoluteVerticesIndicesOfPotentiallyIdenticalFaces.length;ii++)
                          for(int jj=0;jj<2;jj++)
                              for(int kk=0;kk<3;kk++)
-                                 absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]+=indexOffset;
+                            	 absoluteVerticesIndicesOfPotentiallyIdenticalFaces[ii][jj][kk]+=indexOffset;
                      while(buffersGrid[i][j][k][4].hasRemaining())
                          {startPos=((IntBuffer)buffersGrid[i][j][k][4]).position();
                           //get the indices of the vertices composing the current triangle
                           ((IntBuffer)buffersGrid[i][j][k][4]).get(triIndices,0,3);      
                           mergeableFaceFound=false;
                           //loop on all merge candidates
-                          for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                          for(int ii=0;!mergeableFaceFound&&ii<absoluteVerticesIndicesOfPotentiallyIdenticalFaces.length;ii++)
                               for(int jj=0;!mergeableFaceFound&&jj<2;jj++)
                                   //if the indices are identical
-                                  if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfMergeableFaces[ii][jj]))
+                                  if(mergeableFaceFound=Arrays.equals(triIndices,absoluteVerticesIndicesOfPotentiallyIdenticalFaces[ii][jj]))
                                       {for(int jjj=0;jjj<2;jjj++)
                                            if(jjj!=jj)
                                                {//check if adjoining faces can be merged with it
@@ -611,12 +615,12 @@ final class GameFilesGenerator{
                                                                  //for each vertex of the triangle
                                                                  for(int index=0;index<3&&mergeableFacesFound;index++)
                                                                      {//convert into absolute indexing
-                                                                      localAbsoluteVerticesIndicesOfMergeableFace[index]=verticesIndicesOfMergeableFaces[ii][jjj][index]+indexOffsetArray[locali][localj][localk];
+                                                                      localAbsoluteVerticesIndicesOfMergeableFace[index]=verticesIndicesOfPotentiallyIdenticalFaces[ii][jjj][index]+indexOffsetArray[locali][localj][localk];
                                                                       //for each coordinate
                                                                       for(int subIndex=0;subIndex<3;subIndex++)
                                                                           {//use internal indexing
-                                                                           localVertex[subIndex]=((FloatBuffer)buffersGrid[locali][localj][localk][0]).get((verticesIndicesOfMergeableFaces[ii][jjj][index]*3)+subIndex);
-                                                                           vertex[subIndex]=((FloatBuffer)buffersGrid[i][j][k][0]).get((verticesIndicesOfMergeableFaces[ii][jj][index]*3)+subIndex);
+                                                                           localVertex[subIndex]=((FloatBuffer)buffersGrid[locali][localj][localk][0]).get((verticesIndicesOfPotentiallyIdenticalFaces[ii][jjj][index]*3)+subIndex);
+                                                                           vertex[subIndex]=((FloatBuffer)buffersGrid[i][j][k][0]).get((verticesIndicesOfPotentiallyIdenticalFaces[ii][jj][index]*3)+subIndex);
                                                                           }
                                                                       if(!Arrays.equals(localVertex,vertex))
                                                                           mergeableFacesFound=false;
@@ -653,12 +657,12 @@ final class GameFilesGenerator{
                          }
                      buffersGrid[i][j][k][4].rewind();
                      //subtract the offset
-                     for(int ii=0;ii<absoluteVerticesIndicesOfMergeableFaces.length;ii++)
+                     for(int ii=0;ii<absoluteVerticesIndicesOfPotentiallyIdenticalFaces.length;ii++)
                          for(int jj=0;jj<2;jj++)
                              for(int kk=0;kk<3;kk++)
-                                 absoluteVerticesIndicesOfMergeableFaces[ii][jj][kk]-=indexOffset;
+                            	 absoluteVerticesIndicesOfPotentiallyIdenticalFaces[ii][jj][kk]-=indexOffset;
                     }
-        rebuildBuffersWithoutUselessData(isMergeEnabled,grid,buffersGrid,
+        rebuildBuffersWithoutUselessData(isRemovalOfIdenticalFacesEnabled,grid,buffersGrid,
 				indexOffsetArray,newIndexOffsetArray,
 				indexArrayOffsetIndicesList,j,4);
     }

@@ -57,7 +57,7 @@ public final class CuboidParameters extends VolumeParameters{
     
     private transient FloatBuffer texCoordBuffer;
     
-    private transient int[][][] verticesIndicesOfMergeableFaces;
+    private transient int[][][] verticesIndicesOfPotentiallyIdenticalFaces;
     
     private transient int[][][] verticesIndicesOfAdjacentMergeableFaces;
     
@@ -308,31 +308,31 @@ public final class CuboidParameters extends VolumeParameters{
                       texCoordBuffer.put(u1).put(v1);
                      }
              texCoordBuffer.rewind();
-             ArrayList<int[][]> verticesIndicesOfMergeableFacesList=new ArrayList<int[][]>();
+             ArrayList<int[][]> verticesIndicesOfPotentiallyIdenticalFacesList=new ArrayList<int[][]>();
              int fvi0,fvi1;
              if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
                  {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.BACK.ordinal()];
                   fvi1=firstVerticesIndicesInIndexBufferBySide[Side.FRONT.ordinal()];
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
                  }
              if(faceOrientation[Side.LEFT.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.RIGHT.ordinal()]!=Orientation.NONE)
                  {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.LEFT.ordinal()];
                   fvi1=firstVerticesIndicesInIndexBufferBySide[Side.RIGHT.ordinal()];
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});              
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});              
                  }
              if(faceOrientation[Side.BOTTOM.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.TOP.ordinal()]!=Orientation.NONE)
                  {fvi0=firstVerticesIndicesInIndexBufferBySide[Side.BOTTOM.ordinal()];
                   fvi1=firstVerticesIndicesInIndexBufferBySide[Side.TOP.ordinal()];
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
-                  verticesIndicesOfMergeableFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0),mergeableIndexBuffer.get(fvi0+1),mergeableIndexBuffer.get(fvi0+2)},new int[]{mergeableIndexBuffer.get(fvi1),mergeableIndexBuffer.get(fvi1+1),mergeableIndexBuffer.get(fvi1+2)}});
+                  verticesIndicesOfPotentiallyIdenticalFacesList.add(new int[][]{new int[]{mergeableIndexBuffer.get(fvi0+3),mergeableIndexBuffer.get(fvi0+4),mergeableIndexBuffer.get(fvi0+5)},new int[]{mergeableIndexBuffer.get(fvi1+3),mergeableIndexBuffer.get(fvi1+4),mergeableIndexBuffer.get(fvi1+5)}});
                  }
              //6 faces * 2 triangles * 3 indices
-             verticesIndicesOfMergeableFaces=verticesIndicesOfMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);     
+             verticesIndicesOfPotentiallyIdenticalFaces=verticesIndicesOfPotentiallyIdenticalFacesList.toArray(new int[verticesIndicesOfPotentiallyIdenticalFacesList.size()][2][3]);     
              ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<int[][]>();
              int indexIndex=0;
              for(Side side:Side.values())
@@ -340,15 +340,15 @@ public final class CuboidParameters extends VolumeParameters{
                      {verticesIndicesOfAdjacentMergeableFacesList.add(new int[][]{new int[]{indexBuffer.get(indexIndex),indexBuffer.get(indexIndex+1),indexBuffer.get(indexIndex+2)},new int[]{indexBuffer.get(indexIndex+3),indexBuffer.get(indexIndex+4),indexBuffer.get(indexIndex+5)}});
                       indexIndex+=6;
                      }
-             verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesList.toArray(new int[verticesIndicesOfMergeableFacesList.size()][2][3]);
+             verticesIndicesOfAdjacentMergeableFaces=verticesIndicesOfAdjacentMergeableFacesList.toArray(new int[verticesIndicesOfPotentiallyIdenticalFacesList.size()][2][3]);
              buffersRecomputationNeeded=false;
             }
     }
     
     @Override
-    public final int[][][] getVerticesIndicesOfMergeableFaces(){
+    public final int[][][] getVerticesIndicesOfPotentiallyIdenticalFaces(){
         recomputeBuffersIfNeeded();
-        return(verticesIndicesOfMergeableFaces);
+        return(verticesIndicesOfPotentiallyIdenticalFaces);
     }
     
     @Override
