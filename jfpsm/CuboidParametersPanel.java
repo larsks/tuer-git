@@ -44,7 +44,9 @@ final class CuboidParametersPanel extends JPanel{
     
     private final JSpinner[][] uvTexCoordSpinners;
     
-    private final JCheckBox mergeCheckBox;
+    private final JCheckBox removalOfIdenticalFacesCheckBox;
+    
+    private final JCheckBox mergeOfAdjacentFacesCheckBox;
     
     private final JLabel textureLoadStateLabel;
     
@@ -98,10 +100,14 @@ final class CuboidParametersPanel extends JPanel{
             }
         add(orientationSubPanel);
         JPanel bottomPanel=new JPanel(new FlowLayout());      
-        mergeCheckBox=new JCheckBox("merge");
-        mergeCheckBox.setToolTipText("automatically merge close elements");
-        mergeCheckBox.addActionListener(new MergeCheckBoxActionListener(cuboidParam));
-        bottomPanel.add(mergeCheckBox);
+        removalOfIdenticalFacesCheckBox=new JCheckBox("remove identical faces");
+        removalOfIdenticalFacesCheckBox.setToolTipText("automatically remove layered identical faces");
+        removalOfIdenticalFacesCheckBox.addActionListener(new RemovalOfIdenticalFacesCheckBoxActionListener(cuboidParam));
+        bottomPanel.add(removalOfIdenticalFacesCheckBox);
+        mergeOfAdjacentFacesCheckBox=new JCheckBox("merge adjacent faces");
+        mergeOfAdjacentFacesCheckBox.setToolTipText("merge adjacent faces");
+        mergeOfAdjacentFacesCheckBox.addActionListener(new MergeOfAdjacentFacesCheckBoxActionListener(cuboidParam));
+        bottomPanel.add(mergeOfAdjacentFacesCheckBox);
         JButton tileTextureSelectionButton=new JButton("Choose texture...");
         tileTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile,projectManager,this));
         tileTextureSelectionButton.setToolTipText("choose a texture used for the tile");
@@ -143,7 +149,8 @@ final class CuboidParametersPanel extends JPanel{
                            uvTexCoordSpinners[side.ordinal()][spIndex].setValue(Float.valueOf(((CuboidParameters)tile.getVolumeParameters()).getTexCoord(side,spIndex)));
                       }
                  }
-             mergeCheckBox.setSelected(cuboidParam.isMergeEnabled());
+             removalOfIdenticalFacesCheckBox.setSelected(cuboidParam.isRemovalOfIdenticalFacesEnabled());
+             mergeOfAdjacentFacesCheckBox.setSelected(cuboidParam.isMergeOfAdjacentFacesEnabled());
              updateTextureLoadStateLabel();
             }
     }
@@ -263,17 +270,31 @@ final class CuboidParametersPanel extends JPanel{
         }
     }
     
-    private static final class MergeCheckBoxActionListener implements ActionListener{
+    private static final class RemovalOfIdenticalFacesCheckBoxActionListener implements ActionListener{
 
     	private final VolumeParameters volumeParam;
     	
-    	private MergeCheckBoxActionListener(final VolumeParameters volumeParam){
+    	private RemovalOfIdenticalFacesCheckBoxActionListener(final VolumeParameters volumeParam){
     		this.volumeParam=volumeParam;
     	}
     	
 		@Override
 		public final void actionPerformed(final ActionEvent ae){
-			volumeParam.setMergeEnabled(((JCheckBox)ae.getSource()).isSelected());
+			volumeParam.setRemovalOfIdenticalFacesEnabled(((JCheckBox)ae.getSource()).isSelected());
+		}   	
+    }
+    
+    private static final class MergeOfAdjacentFacesCheckBoxActionListener implements ActionListener{
+
+    	private final VolumeParameters volumeParam;
+    	
+    	private MergeOfAdjacentFacesCheckBoxActionListener(final VolumeParameters volumeParam){
+    		this.volumeParam=volumeParam;
+    	}
+    	
+		@Override
+		public final void actionPerformed(final ActionEvent ae){
+			volumeParam.setMergeOfAdjacentFacesEnabled(((JCheckBox)ae.getSource()).isSelected());
 		}   	
     }
     

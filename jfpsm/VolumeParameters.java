@@ -27,7 +27,9 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     
     private static final long serialVersionUID=1L;
     
-    private boolean mergeEnabled;
+    private boolean removalOfIdenticalFacesEnabled;
+    
+    private boolean mergeOfAdjacentFacesEnabled;
     
     abstract VolumeType getVolumeType();
     
@@ -40,21 +42,46 @@ public abstract class VolumeParameters implements Serializable,Dirtyable {
     abstract FloatBuffer getVertexBuffer();
     
     abstract FloatBuffer getTexCoordBuffer();
-
-	public final boolean isMergeEnabled(){
-		return(mergeEnabled);
-	}
-
-	public final void setMergeEnabled(final boolean mergeEnabled){
-		this.mergeEnabled=mergeEnabled;
+    
+    /**
+     * tell whether the removal of layered identical faces is enabled
+     * @return
+     */
+    public final boolean isRemovalOfIdenticalFacesEnabled(){
+    	return(removalOfIdenticalFacesEnabled);
+    }
+    
+    /**
+     * enable or disable the removal of layered identical faces
+     * @param removalOfIdenticalFacesEnabled
+     */
+    public final void setRemovalOfIdenticalFacesEnabled(final boolean removalOfIdenticalFacesEnabled){
+		this.removalOfIdenticalFacesEnabled=removalOfIdenticalFacesEnabled;
 		markDirty();
 	}
+    
+    /**
+     * tell whether the merge of adjacent faces is enabled
+     * @return
+     */
+    public final boolean isMergeOfAdjacentFacesEnabled(){
+    	return(mergeOfAdjacentFacesEnabled);
+    }
+    
+    /**
+     * enable or disable the merge of adjacent faces
+     * @param mergeOfAdjacentFacesEnabled
+     */
+    public final void setMergeOfAdjacentFacesEnabled(final boolean mergeOfAdjacentFacesEnabled){
+    	this.mergeOfAdjacentFacesEnabled=mergeOfAdjacentFacesEnabled;
+    	markDirty();
+    }
 	
 	/**
 	 * get the vertices indices of faces whose vertices might be equal
 	 * @return vertices indices of faces whose vertices might be equal
 	 */
-	public int[][][] getVerticesIndicesOfMergeableFaces(){
+	public int[][][] getVerticesIndicesOfPotentiallyIdenticalFaces(){
 	    /**
 	     * It should perform the following operations:
 	     * - compute the real normals by using the vertices

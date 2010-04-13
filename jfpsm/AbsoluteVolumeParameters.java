@@ -59,16 +59,20 @@ final class AbsoluteVolumeParameters{
     	return(volumeParam==null);
     }
     
-    public final boolean isMergeEnabled(){
-    	return(volumeParam!=null?volumeParam.isMergeEnabled():false);
+    public final boolean isRemovalOfIdenticalFacesEnabled(){
+    	return(volumeParam!=null?volumeParam.isRemovalOfIdenticalFacesEnabled():false);
+    }
+    
+    public final boolean isMergeOfAdjacentFacesEnabled(){
+    	return(volumeParam!=null?volumeParam.isMergeOfAdjacentFacesEnabled():false);
     }
 
     public final void setVolumeParam(final VolumeParameters volumeParam){
         this.volumeParam=volumeParam;
     }
     
-    public final int[][][] getVerticesIndicesOfMergeableFaces(){
-        return(volumeParam!=null?volumeParam.getVerticesIndicesOfMergeableFaces():null);
+    public final int[][][] getVerticesIndicesOfPotentiallyIdenticalFaces(){
+        return(volumeParam!=null?volumeParam.getVerticesIndicesOfPotentiallyIdenticalFaces():null);
     }
     
     public final int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
