@@ -232,7 +232,7 @@ final class GameFilesGenerator{
                             vertexBuffer.rewind();
                             //use the location to translate the vertices
                             for(int i=0;i<vertexBuffer.capacity();i++)
-                                vertexCoords[i]+=location[i%location.length];                              
+                                vertexCoords[i]+=location[i%location.length];
                             indexBuffer.get(indices,0,indexBuffer.capacity());
                             indexBuffer.rewind();                           
                             logicalGridPos=grid.getSectionLogicalPosition(location[0],location[1],location[2]);
@@ -303,7 +303,7 @@ final class GameFilesGenerator{
                        totalIndexBufferSize=0;
                        totalNormalBufferSize=0;
                        totalTexCoordBufferSize=0;
-                       //compute the size of the buffers resulting of the regroupment
+                       //compute the size of the buffers resulting of the grouping
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
                                {if(buffersGrid[i][j][k][0]!=null)
@@ -344,6 +344,13 @@ final class GameFilesGenerator{
                        totalIndexBuffer.rewind();
                        totalNormalBuffer.rewind();
                        totalTexCoordBuffer.rewind();
+                       /**
+                        * FIXME: loop on each sub-volume parameter
+                        * A sub-volume parameter is a piece of volume parameter that represents
+                        * the data of a single face.
+                        * 
+                        * It should use only one set of buffers per kind of face (use all textures)
+                        * */
                        //create a mesh for this floor and for the volume parameter currently in use
                        meshName=floorNodeName+"CID"+meshIndex;
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,

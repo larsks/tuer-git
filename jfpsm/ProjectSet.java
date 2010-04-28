@@ -139,12 +139,13 @@ public final class ProjectSet extends JFPSMUserObject{
           	                  }
           	          final String tileDirectory="tileset/";
           	          for(Tile tile:project.getTileSet().getTilesList())
-          	              if(tile.getTexture()!=null)
-          	                  {entry=new ZipEntry(tileDirectory+tile.getName()+".png");
-          	                   entry.setMethod(ZipEntry.DEFLATED);
-                               zoStream.putNextEntry(entry);
-                               ImageIO.write(tile.getTexture(),"png",zoStream);
-          	                  }
+          	        	  for(int textureIndex=0;textureIndex<tile.getMaxTextureCount();textureIndex++)
+          	                  if(tile.getTexture(textureIndex)!=null)
+          	                      {entry=new ZipEntry(tileDirectory+tile.getName()+textureIndex+".png");
+          	                       entry.setMethod(ZipEntry.DEFLATED);
+                                   zoStream.putNextEntry(entry);
+                                   ImageIO.write(tile.getTexture(textureIndex),"png",zoStream);
+          	                      }
           	          //close the ZipOutputStream
           	          zoStream.close();
           	          //delete the temporary file
@@ -242,6 +243,8 @@ public final class ProjectSet extends JFPSMUserObject{
                  ZipEntry entry;
                  BufferedImage imageMap;
                  String[] path;
+                 int textureIndex;
+                 String textureIndexString;
                  while(entries.hasMoreElements())
                      {entry=entries.nextElement();
                       if(entry.getName().equals("project.xml"))
@@ -270,8 +273,16 @@ public final class ProjectSet extends JFPSMUserObject{
                                     if(path.length==2&&path[0].equals("tileset"))
                                         {//find the tile that should contain this file
                                          for(Tile tile:project.getTileSet().getTilesList())
-                                             if(path[1].equals(tile.getName()+".png"))
-                                                 tile.setTexture(ImageIO.read(zipFile.getInputStream(entry)));                     
+                                             if(path[1].startsWith(tile.getName())&&path[1].endsWith(".png"))
+                                                 {textureIndex=-1;
+                                                  textureIndexString=path[1].substring(tile.getName().length(),path[1].lastIndexOf(".png"));
+                                                  try{textureIndex=Integer.parseInt(textureIndexString);}
+                                                  catch(NumberFormatException nfe)
+                                                  {//ignore this exception as it might happen and it is not a problem                                                  
+                                                  }
+                                                  if(textureIndex!=-1)
+                                            	      tile.setTexture(textureIndex,ImageIO.read(zipFile.getInputStream(entry)));                     
+                                                 }
                                         }
                                }
                           }

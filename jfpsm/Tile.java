@@ -64,6 +64,11 @@ public final class Tile extends JFPSMUserObject{
         return(textureContainer!=null?textureContainer.get(index):null);
     }
     
+    public final int getMaxTextureCount(){
+    	//FIXME: rather use the volume parameters
+    	return(textureContainer.size());
+    }
+    
     public final void setTexture(final BufferedImage texture){   	
     	setTexture(0,texture);
     }
