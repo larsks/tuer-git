@@ -243,19 +243,19 @@ final class GameFilesGenerator{
                             normalBuffer.rewind();
                             texCoordBuffer.get(texCoords,0,texCoordBuffer.capacity());
                             texCoordBuffer.rewind();                           
-                            localVertexBuffer=BufferUtil.newFloatBuffer(vertexBuffer.capacity());
+                            localVertexBuffer=FloatBuffer.allocate(vertexBuffer.capacity());
                             localVertexBuffer.put(vertexCoords,0,vertexBuffer.capacity());
                             localVertexBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][0]=localVertexBuffer;
-                            localIndexBuffer=BufferUtil.newIntBuffer(indexBuffer.capacity());
+                            localIndexBuffer=IntBuffer.allocate(indexBuffer.capacity());
                             localIndexBuffer.put(indices,0,indexBuffer.capacity());
                             localIndexBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][1]=localIndexBuffer;
-                            localNormalBuffer=BufferUtil.newFloatBuffer(normalBuffer.capacity());
+                            localNormalBuffer=FloatBuffer.allocate(normalBuffer.capacity());
                             localNormalBuffer.put(normals,0,normalBuffer.capacity());
                             localNormalBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][2]=localNormalBuffer;
-                            localTexCoordBuffer=BufferUtil.newFloatBuffer(texCoordBuffer.capacity());
+                            localTexCoordBuffer=FloatBuffer.allocate(texCoordBuffer.capacity());
                             localTexCoordBuffer.put(texCoords,0,texCoordBuffer.capacity());
                             localTexCoordBuffer.rewind();
                             buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][3]=localTexCoordBuffer;
@@ -265,12 +265,12 @@ final class GameFilesGenerator{
                                  //add an offset to the indices
                                  for(int i=0;i<mergeableIndexBuffer.capacity();i++)
                                      indices[i]+=indexOffset;
-                                 localMergeableIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
+                                 localMergeableIndexBuffer=IntBuffer.allocate(mergeableIndexBuffer.capacity());
                                  localMergeableIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeableIndexBuffer.rewind();
                                  //fill the buffer used for the merge, it will contain rearranged indices (easier to compare)
                                  buffersGrid[logicalGridPos[0]][logicalGridPos[1]][logicalGridPos[2]][4]=localMergeableIndexBuffer;
-                                 localMergeIndexBuffer=BufferUtil.newIntBuffer(mergeableIndexBuffer.capacity());
+                                 localMergeIndexBuffer=IntBuffer.allocate(mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.put(indices,0,mergeableIndexBuffer.capacity());
                                  localMergeIndexBuffer.rewind();
                                  //fill the buffer used for the merge, it will contain the markers (-1 for vertices that have to be removed)
@@ -364,7 +364,7 @@ final class GameFilesGenerator{
                            if(!tileFile.createNewFile())
                                throw new IOException("The file "+tilePath+" cannot be created!");
                        for(Tile tile:project.getTileSet().getTilesList())
-                           if(tile.getName().equals(tileNameTable.get(key)))
+                           if(tile.getName().equals(tileNameTable.get(key))&&tile.getTexture()!=null)
                                {ImageIO.write(tile.getTexture(),"png",tileFile);
                                 break;
                                }
@@ -450,7 +450,7 @@ final class GameFilesGenerator{
             	if(buffersGrid[i][j][k][1]!=null)
             	    {//(re)allocate the copy if needed
             		 if(buffersGrid[i][j][k][5]==null||buffersGrid[i][j][k][5].capacity()!=buffersGrid[i][j][k][1].capacity())
-            			 buffersGrid[i][j][k][5]=BufferUtil.newIntBuffer(buffersGrid[i][j][k][1].capacity());
+            			 buffersGrid[i][j][k][5]=IntBuffer.allocate(buffersGrid[i][j][k][1].capacity());
             		 //perform the copy
             		 for(int indexIndex=0;indexIndex<buffersGrid[i][j][k][1].capacity();indexIndex++)
             			 ((IntBuffer)buffersGrid[i][j][k][5]).put(indexIndex,((IntBuffer)buffersGrid[i][j][k][1]).get(indexIndex));
@@ -711,16 +711,16 @@ final class GameFilesGenerator{
                               {//replace all buffers by empty buffers
                                for(int bufIndex=0;bufIndex<6;bufIndex++)
                                    if(bufIndex==1||bufIndex==4||bufIndex==5)
-                                       buffersGrid[i][j][k][bufIndex]=BufferUtil.newIntBuffer(0);
+                                       buffersGrid[i][j][k][bufIndex]=IntBuffer.allocate(0);
                                    else
-                                       buffersGrid[i][j][k][bufIndex]=BufferUtil.newFloatBuffer(0);
+                                       buffersGrid[i][j][k][bufIndex]=FloatBuffer.allocate(0);
                               }
                           else
                               {((IntBuffer)buffersGrid[i][j][k][1]).rewind();
                                while(((IntBuffer)buffersGrid[i][j][k][1]).hasRemaining())
                                    indexCountTable.put(Integer.valueOf(((IntBuffer)buffersGrid[i][j][k][1]).get()),Integer.valueOf(0));
                                ((IntBuffer)buffersGrid[i][j][k][1]).rewind();
-                               newIndiceBuffer=BufferUtil.newIntBuffer(newBufferSize);
+                               newIndiceBuffer=IntBuffer.allocate(newBufferSize);
                                //make the new index buffer by retaining the valid indices
                                while(((IntBuffer)buffersGrid[i][j][k][5]).hasRemaining())
                                    {//get the index from the buffer containing the markers
@@ -746,9 +746,9 @@ final class GameFilesGenerator{
                                    if(countEntry.getValue().intValue()>0)                                           
                                        newBufferSize++;
                                //create a new vertex buffer (3 coordinates per vertex)
-                               newVertexBuffer=BufferUtil.newFloatBuffer(newBufferSize*3);
-                               newNormalBuffer=BufferUtil.newFloatBuffer(newBufferSize*3);
-                               newTexCoordBuffer=BufferUtil.newFloatBuffer(newBufferSize*2);
+                               newVertexBuffer=FloatBuffer.allocate(newBufferSize*3);
+                               newNormalBuffer=FloatBuffer.allocate(newBufferSize*3);
+                               newTexCoordBuffer=FloatBuffer.allocate(newBufferSize*2);
                                for(int newIndice=indexOffset,oldIndice=indexOffset;newIndice<(newVertexBuffer.capacity()/3)+indexOffset;oldIndice++,newIndice++)                     
                                    {//retain the valid coordinates, skip the others
                                     while(indexCountTable.get(Integer.valueOf(oldIndice)).intValue()==0)
