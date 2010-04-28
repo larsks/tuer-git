@@ -256,7 +256,7 @@
 			  dir="${destdir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
-			<jvmarg value="-Xmx1024m"/>
+			<jvmarg value="-Xmx128m"/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
