@@ -48,7 +48,7 @@ final class CuboidParametersPanel extends JPanel{
     
     private final JCheckBox mergeOfAdjacentFacesCheckBox;
     
-    private final JLabel textureLoadStateLabel;
+    private final JLabel[] textureLoadStateLabels;
     
     private final Tile tile;
     
@@ -74,6 +74,8 @@ final class CuboidParametersPanel extends JPanel{
         JPanel sideSubPanel;
         radioButtons=new JRadioButton[CuboidParameters.Side.values().length][CuboidParameters.Orientation.values().length];
         uvTexCoordSpinners=new JSpinner[CuboidParameters.Side.values().length][4];
+        JButton tileSideTextureSelectionButton;
+        textureLoadStateLabels=new JLabel[CuboidParameters.Side.values().length];
         for(CuboidParameters.Side side:CuboidParameters.Side.values())
             {sideButtonGroup=new ButtonGroup();
              sideSubPanel=new JPanel();
@@ -96,6 +98,12 @@ final class CuboidParametersPanel extends JPanel{
                  {sideSubPanel.add(new JLabel(uvSpinnerNames[spIndex]));
                   sideSubPanel.add(uvTexCoordSpinners[side.ordinal()][spIndex]);
                  }
+             textureLoadStateLabels[side.ordinal()]=new JLabel();
+             tileSideTextureSelectionButton=new JButton("Choose texture...");
+             tileSideTextureSelectionButton.setToolTipText("choose a texture used for this side");
+             tileSideTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile,projectManager,this,side.ordinal()));
+             sideSubPanel.add(tileSideTextureSelectionButton);
+             sideSubPanel.add(textureLoadStateLabels[side.ordinal()]);
              orientationSubPanel.add(sideSubPanel);
             }
         add(orientationSubPanel);
@@ -108,12 +116,6 @@ final class CuboidParametersPanel extends JPanel{
         mergeOfAdjacentFacesCheckBox.setToolTipText("merge adjacent faces");
         mergeOfAdjacentFacesCheckBox.addActionListener(new MergeOfAdjacentFacesCheckBoxActionListener(cuboidParam));
         bottomPanel.add(mergeOfAdjacentFacesCheckBox);
-        JButton tileTextureSelectionButton=new JButton("Choose texture...");
-        tileTextureSelectionButton.addActionListener(new ChooseTextureActionListener(tile,projectManager,this));
-        tileTextureSelectionButton.setToolTipText("choose a texture used for the tile");
-        bottomPanel.add(tileTextureSelectionButton);
-        textureLoadStateLabel=new JLabel();
-        bottomPanel.add(textureLoadStateLabel);
         add(bottomPanel);
     }
     
@@ -151,15 +153,16 @@ final class CuboidParametersPanel extends JPanel{
                  }
              removalOfIdenticalFacesCheckBox.setSelected(cuboidParam.isRemovalOfIdenticalFacesEnabled());
              mergeOfAdjacentFacesCheckBox.setSelected(cuboidParam.isMergeOfAdjacentFacesEnabled());
-             updateTextureLoadStateLabel();
+             updateTextureLoadStateLabels();
             }
     }
     
-    private final void updateTextureLoadStateLabel(){
-        if(tile.getTexture()!=null)
-            textureLoadStateLabel.setText("texture OK");
-        else
-            textureLoadStateLabel.setText("no texture");
+    private final void updateTextureLoadStateLabels(){
+    	for(CuboidParameters.Side side:CuboidParameters.Side.values())
+            if(tile.getTexture(side.ordinal())!=null)          
+            	textureLoadStateLabels[side.ordinal()].setText("texture OK");       	
+            else
+            	textureLoadStateLabels[side.ordinal()].setText("no texture");
     }
     
     private final JSlider[] createSizeAndOffsetSliders(final int index){
@@ -329,19 +332,22 @@ final class CuboidParametersPanel extends JPanel{
         
         private final Tile tile;
         
+        private final int index;
+        
         private ChooseTextureActionListener(final Tile tile,final ProjectManager projectManager,
-                final CuboidParametersPanel cuboidParametersPanel){
+                final CuboidParametersPanel cuboidParametersPanel,final int index){
             this.tile=tile;
             this.projectManager=projectManager;
             this.cuboidParametersPanel=cuboidParametersPanel;
+            this.index=index;
         }
         
         @Override
         public final void actionPerformed(final ActionEvent ae){
             BufferedImage image=projectManager.openFileAndLoadImage();
             if(image!=null)
-                {tile.setTexture(image);
-                 cuboidParametersPanel.updateTextureLoadStateLabel();
+                {tile.setTexture(index,image);
+                 cuboidParametersPanel.updateTextureLoadStateLabels();
                 }
         }
     }
