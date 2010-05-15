@@ -376,17 +376,6 @@ final class GameState extends State{
              laserNode.setUserData(new WeaponUserData(Weapon.Identifier.LASER,new Matrix3(laserNode.getRotation())));
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
-             final Node copNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/cop.abin"));
-             copNode.setTranslation(117.5,0.5,219);
-             copNode.setScale(0.5);
-             copNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(0,1,0)));
-             NodeHelper.setBackCullState(copNode);
-             getRoot().attachChild(copNode);
-             final Node alienNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/giger_alien.abin"));
-             alienNode.setTranslation(118.5,0,219);
-             alienNode.setScale(0.3);
-             NodeHelper.setBackCullState(alienNode);
-             getRoot().attachChild(alienNode);
              //TODO: uncomment these lines when we have a texture for this enemy
              /*final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
              creatureNode.setTranslation(118.5,0.7,217);
