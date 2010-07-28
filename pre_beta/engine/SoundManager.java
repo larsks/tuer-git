@@ -14,6 +14,10 @@
 package engine;
 
 import java.net.URL;
+
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundSystemException;
@@ -35,7 +39,27 @@ public final class SoundManager{
     
     
     private SoundManager(){
-        try{soundSystem=new SoundSystem(LibraryJavaSound.class);
+    	try{soundSystem=new SoundSystem(LibraryJavaSound.class);
+    	    /**
+    	     * workaround for a known bug: when the first available mixer is 
+    	     * the direct audio device of the embedded microphone of a camera
+    	     * on Linux, Java Sound Audio Engine tries to use it instead of using 
+    	     * the sound card. The bug fix consists in avoiding the use of JSAE in 
+    	     * this case. 
+    	     * */
+    	    if(System.getProperty("os.name").contains("linux")||System.getProperty("os.name").contains("Linux"))
+    	        {Mixer.Info[] infos=AudioSystem.getMixerInfo();
+    	         if(infos.length>0 && infos[0].getName().contains("Camera"))
+    	             {Mixer mixer;
+    	        	  for(int i=1;i<infos.length;i++)
+    	        	      {mixer=AudioSystem.getMixer(infos[i]);
+    	        		   if(!infos[i].getName().contains("Camera")&&!infos[i].getName().equals("Java Sound Audio Engine"))
+    	        		       {LibraryJavaSound.setMixer(mixer);
+    	        			    break;
+    	        		       }
+    	        	      }
+                     }
+    	        }
             SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
            }
         catch(SoundSystemException sse)
