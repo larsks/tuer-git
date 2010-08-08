@@ -16,5 +16,5 @@ package engine;
 public final class Weapon{
 
 	
-	public enum Identifier{PISTOL_9MM,PISTOL_10MM,MAG_60,UZI,SMACH,LASER};
+	public enum Identifier{PISTOL_9MM,PISTOL_10MM,MAG_60,UZI,SMACH,LASER,SHOTGUN};
 }
