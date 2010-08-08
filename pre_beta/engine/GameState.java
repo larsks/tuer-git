@@ -51,7 +51,6 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.geom.ClonedCopyLogic;
 import com.ardor3d.util.geom.SceneCopier;
-
 import engine.input.ExtendedFirstPersonControl;
 
 /**
@@ -303,7 +302,7 @@ final class GameState extends State{
     @Override
     public final void init(){
     	// load the sound
-        final URL sampleUrl=IntroductionState.class.getResource(pickupWeaponSoundSamplePath);
+        final URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null)
             pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
         else
@@ -376,12 +375,20 @@ final class GameState extends State{
              laserNode.setUserData(new WeaponUserData(Weapon.Identifier.LASER,new Matrix3(laserNode.getRotation())));
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
+             
+             final Node shotgunNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/shotgun.abin"));
+             shotgunNode.setName("a shotgun");
+             shotgunNode.setTranslation(117.5,0.1,219);
+             shotgunNode.setScale(0.1);
+             shotgunNode.setUserData(new WeaponUserData(Weapon.Identifier.SHOTGUN,new Matrix3(shotgunNode.getRotation())));
+             collectibleObjectsList.add(shotgunNode);
+             getRoot().attachChild(shotgunNode);
              //TODO: uncomment these lines when we have a texture for this enemy
              /*final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
              creatureNode.setTranslation(118.5,0.7,217);
              creatureNode.setScale(0.0002);
              creatureNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             getRoot().attachChild(creatureNode);*/
+             getRoot().attachChild(creatureNode);*/          
              //add a bounding box to each collectible object
              for(Node collectible:collectibleObjectsList)
             	 NodeHelper.setModelBound(collectible,BoundingBox.class);

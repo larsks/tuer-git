@@ -155,6 +155,7 @@
 		<jar destfile="${destdir}/tuer.jar" basedir="${destdir}" 
 			includes="**/*.class"
 			compress="false">
+			<include name="**/*.bmp" />
 			<include name="**/*.png" />
 			<include name="**/*.jpg" />
 			<include name="**/*.fnt" />
