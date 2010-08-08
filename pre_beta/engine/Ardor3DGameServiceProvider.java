@@ -56,7 +56,7 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
  * General entry point of an application created by JFPSM
  * 
  */
-final class Ardor3DGameServiceProvider implements Scene{
+public final class Ardor3DGameServiceProvider implements Scene{
 
     /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
