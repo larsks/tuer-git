@@ -51,6 +51,7 @@ import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
+import com.ardor3d.util.resource.URLResourceSource;
 
 /**
  * General entry point of an application created by JFPSM
@@ -123,13 +124,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private final static ArrayList<BMFont> createFontsList(){
         final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/DejaVuSansCondensed-20-bold-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/Computerfont-35-medium-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/arial-16-bold-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/arial-16-bold-regular.fnt")),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
         return(fontsList);
