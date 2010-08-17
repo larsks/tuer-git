@@ -49,8 +49,6 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
-import com.ardor3d.util.geom.ClonedCopyLogic;
-import com.ardor3d.util.geom.SceneCopier;
 import engine.input.ExtendedFirstPersonControl;
 
 /**
@@ -345,8 +343,8 @@ final class GameState extends State{
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
              pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              collectibleObjectsList.add(pistolNode);
-             getRoot().attachChild(pistolNode);
-             final Node duplicatePistolNode=(Node)SceneCopier.makeCopy(pistolNode,new ClonedCopyLogic());
+             getRoot().attachChild(pistolNode);            
+             final Node duplicatePistolNode=pistolNode.makeCopy(false);
              duplicatePistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              duplicatePistolNode.setTranslation(113.5,0.1,217);
              collectibleObjectsList.add(duplicatePistolNode);

@@ -123,13 +123,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private final static ArrayList<BMFont> createFontsList(){
         final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/DejaVuSansCondensed-20-bold-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/DejaVuSansCondensed-20-bold-regular.fnt"),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/Computerfont-35-medium-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/Computerfont-35-medium-regular.fnt"),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"/fonts/arial-16-bold-regular.fnt"),false));}
+        try{fontsList.add(new BMFont(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,"fonts/arial-16-bold-regular.fnt"),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}
         return(fontsList);
@@ -212,7 +212,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
              canvas.draw(null);
              //Thread.yield();
             }
-        canvas.getCanvasRenderer().setCurrentContext();
+        canvas.getCanvasRenderer().makeCurrentContext();
 
         // Done, do cleanup
         SoundManager.getInstance().cleanup();
