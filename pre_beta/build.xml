@@ -88,8 +88,9 @@
 		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
 		<!-- TODO: JDOM -->
-		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>
+		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>		
 		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0.jar"/>
+		<pathelement location="../ardor3d-extras/target/ardor3d-extras-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/lib/jogl/jogl.jar"/>
@@ -192,6 +193,7 @@
 		<copy file="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="../ardor3d-extras/target/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
@@ -201,6 +203,7 @@
 		    	<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
@@ -221,6 +224,7 @@
 		<copy file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
@@ -243,6 +247,7 @@
 	  		<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
