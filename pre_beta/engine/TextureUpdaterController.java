@@ -40,8 +40,8 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
-import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.ResourceSource;
+import com.ardor3d.util.resource.URLResourceSource;
 
 public abstract class TextureUpdaterController implements Serializable,SpatialController<Spatial>{
 
@@ -104,9 +104,9 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	
 	
     private final void init(){
-        ResourceSource resourceSource=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,imageResourceName);
+        ResourceSource resourceSource=new URLResourceSource(getClass().getResource(imageResourceName));
         //create texture from resource name
-        texture=(Texture2D)TextureManager.load(imageResourceName,Texture.MinificationFilter.Trilinear,true);
+        texture=(Texture2D)TextureManager.load(resourceSource,Texture.MinificationFilter.Trilinear,true);
         //load the image
         try{originalImage=ImageIO.read(resourceSource.openStream());}
         catch(IOException ioe)

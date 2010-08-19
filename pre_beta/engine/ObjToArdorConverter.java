@@ -16,15 +16,15 @@ public class ObjToArdorConverter {
 	
 	public static final void main(String[] args) throws IOException, URISyntaxException{
         AWTImageLoader.registerLoader();
-        try{SimpleResourceLocator srl=new SimpleResourceLocator(DaeToArdorConverter.class.getResource("/images"));
+        try{SimpleResourceLocator srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-            srl=new SimpleResourceLocator(DaeToArdorConverter.class.getResource("/obj"));
+            srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/obj"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
         final ObjImporter objImporter=new ObjImporter();
-        try{objImporter.setTextureLocator(new SimpleResourceLocator(DaeToArdorConverter.class.getResource("/images")));
+        try{objImporter.setTextureLocator(new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images")));
            } 
         catch(final URISyntaxException ex)
         {ex.printStackTrace();}
