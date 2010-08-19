@@ -381,6 +381,13 @@ final class GameState extends State{
              shotgunNode.setUserData(new WeaponUserData(Weapon.Identifier.SHOTGUN,new Matrix3(shotgunNode.getRotation())));
              collectibleObjectsList.add(shotgunNode);
              getRoot().attachChild(shotgunNode);
+             
+             final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
+             agentNode.setName("an agent");
+             agentNode.setTranslation(118.5,0.4,219);
+             agentNode.setScale(0.015);
+             getRoot().attachChild(agentNode);
+             
              //TODO: uncomment these lines when we have a texture for this enemy
              /*final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
              creatureNode.setTranslation(118.5,0.7,217);

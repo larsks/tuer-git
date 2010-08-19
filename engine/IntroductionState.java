@@ -32,6 +32,7 @@ import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
+import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.Ardor3DGameServiceProvider.Step;
 
@@ -40,7 +41,7 @@ public final class IntroductionState extends State{
     
     private static final String soundSamplePath="/sounds/introduction.ogg";
     
-    private static final String textureFilename="introduction.png";
+    private static final String textureFilePath="/images/introduction.png";
     
     private String sourcename;
     
@@ -58,7 +59,7 @@ public final class IntroductionState extends State{
         colorSubstitutionTable.put(Color.BLUE,Color.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
-        box.addController(new CircularSpreadTextureUpdaterController(Step.INTRODUCTION.toString().toLowerCase()+".png",equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
+        box.addController(new CircularSpreadTextureUpdaterController(textureFilePath,equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
         //set a controller that moves the image
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
@@ -94,7 +95,7 @@ public final class IntroductionState extends State{
         // puts a texture onto the box
         final TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(textureFilename,Texture.MinificationFilter.Trilinear,true));
+        ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(textureFilePath)),Texture.MinificationFilter.Trilinear,true));
         box.setRenderState(ts);
     }
     
