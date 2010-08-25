@@ -294,10 +294,10 @@ final class GameFilesGenerator{
                            }
                        //if the merge between adjacent faces is possible, just do it
                        //TODO: uncomment this when it is ready
-                       /*if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
-                           {computeMergedStructuresWithAdjacentTiles(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
-                        		isMergeOfAdjacentFacesEnabled,grid,buffersGrid,newIndexOffsetArray,newOtherIndexOffsetArray,indexArrayOffsetIndicesList,j);
-                           }*/
+                       if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
+                           {/*computeMergedStructuresWithAdjacentFaces(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
+                        		isMergeOfAdjacentFacesEnabled,grid,buffersGrid,newIndexOffsetArray,newOtherIndexOffsetArray,indexArrayOffsetIndicesList,j);*/
+                           }
                        //regroup all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
@@ -422,7 +422,7 @@ final class GameFilesGenerator{
     	int[][] verticesIndicesOfAdjacentMergeableFace;
     	int[] verticesIndicesOfAdjacentMergeableFaceArray,indexBufferPart=null;
     	int indexOffset,adjacencyCoordIndex,indexIndexOffset,mergedGridSectionsCount;
-    	int[] indices=new int[3];
+    	int[] indices=null;
     	int[][] verticesIndicesOfAdjacentMergeableFacesArray=new int[verticesIndicesOfAdjacentMergeableFaces.length][];
     	int indicesPerFaceCount;
     	//align each line of verticesIndicesOfAdjacentMergeableFaces on a 1D array
@@ -439,7 +439,8 @@ final class GameFilesGenerator{
     		     for(int triangleIndex=0,indexIndex1D=0;triangleIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex].length;triangleIndex++)
     		    	 if(verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex]!=null)
     		    	     {for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex].length;indexIndex++)
-    		    	          {verticesIndicesOfAdjacentMergeableFacesArray[faceIndex][indexIndex1D]=verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex][indexIndex];
+    		    	          {//FIXME: use System.arraycopy
+    		    	    	   verticesIndicesOfAdjacentMergeableFacesArray[faceIndex][indexIndex1D]=verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex][indexIndex];
     		    	           indexIndex1D++;
     		    	          }
     		    	     }
@@ -462,7 +463,7 @@ final class GameFilesGenerator{
             	if(buffersGrid[i][j][k][1]!=null&&buffersGrid[i][j][k][1].capacity()>0)
                     {//get the index offset that allows to go from the local index to the global index
             		 indexOffset=indexOffsetArray[i][j][k]; 
-                     if(indices.length!=buffersGrid[i][j][k][1].capacity())
+                     if(indices==null||indices.length!=buffersGrid[i][j][k][1].capacity())
             	    	 indices=new int[buffersGrid[i][j][k][1].capacity()];
             	     //copy the index buffer (with the offset)
             	     ((IntBuffer)buffersGrid[i][j][k][1]).get(indices,0,indices.length);
@@ -485,8 +486,7 @@ final class GameFilesGenerator{
             	    		   if(indexBufferPart.length>0)
             	    		       for(int indexIndex=0;indexIndex<indices.length-indexBufferPart.length+1&&indexIndexOffset==-1;indexIndex++)
             	    		           {//fill the index buffer part
-            	    		    	    for(int indexBufferPartIndex=0;indexBufferPartIndex<indexBufferPart.length;indexBufferPartIndex++)
-            	    		    	    	indexBufferPart[indexBufferPartIndex]=indices[indexIndex+indexBufferPartIndex];
+            	    		    	    System.arraycopy(indices,indexIndex,indexBufferPart,0,indexBufferPart.length);
             	    		    	    //compare the index buffer part with the vertices indices of this face
             	    		    	    if(Arrays.equals(indexBufferPart,verticesIndicesOfAdjacentMergeableFaceArray))
             	    		    	    	indexIndexOffset=indexIndex;
@@ -499,10 +499,14 @@ final class GameFilesGenerator{
             	    	                    {case 0:
             	    	                         {mergedGridSectionsCount=1;
             	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null&&buffersGrid[ii][j][k][1].capacity()>0;ii++)
-            	    	                              {//mark useless indices with -1
+            	    	                              {//FIXME: use a finer test, any grid element is not a good candidate for a merge  	                        	   
+            	    	                        	   //mark useless indices with -1
             	    	                        	   for(int indexIndex=0;indexIndex<indexBufferPart.length;indexIndex++)
-            	    	                        		   //update rather the copy of the index buffer
-            	    	                        		   ((IntBuffer)buffersGrid[ii][j][k][5]).put(indexIndexOffset+indexIndex,-1);
+            	    	                        		   if(indexIndexOffset+indexIndex<buffersGrid[ii][j][k][5].capacity())
+            	    	                        		       //update rather the copy of the index buffer
+            	    	                        		       ((IntBuffer)buffersGrid[ii][j][k][5]).put(indexIndexOffset+indexIndex,-1);
+            	    	                        		   else
+            	    	                        			   System.out.println("[WARN] index out of bounds: "+(indexIndexOffset+indexIndex)+" capacity: "+buffersGrid[ii][j][k][5].capacity());
             	    	                        	   mergedGridSectionsCount++;
             	    	                              }
             	    	                          if(mergedGridSectionsCount>1)
