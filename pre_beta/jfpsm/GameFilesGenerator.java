@@ -421,8 +421,8 @@ final class GameFilesGenerator{
     	int[][] adjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices.getValue();
     	int[][] verticesIndicesOfAdjacentMergeableFace;
     	int[] verticesIndicesOfAdjacentMergeableFaceArray,indexBufferPart=null;
-    	int indexOffset,adjacencyCoordIndex,indexIndexOffset,mergedGridSectionsCount;
-    	int[] indices=null;
+    	int indexOffset,secondaryIndexOffset,adjacencyCoordIndex,indexIndexOffset,secondaryIndexIndexOffset,mergedGridSectionsCount;
+    	int[] indices=null,secondaryIndices=null;
     	int[][] verticesIndicesOfAdjacentMergeableFacesArray=new int[verticesIndicesOfAdjacentMergeableFaces.length][];
     	int indicesPerFaceCount;
     	//align each line of verticesIndicesOfAdjacentMergeableFaces on a 1D array
@@ -498,22 +498,36 @@ final class GameFilesGenerator{
             	    	                switch(adjacencyCoordIndex)
             	    	                    {case 0:
             	    	                         {mergedGridSectionsCount=1;
-            	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null&&buffersGrid[ii][j][k][1].capacity()>0;ii++)
-            	    	                              {/**
-            	    	                                * TODO: copy buffersGrid[ii][j][k][1] (with the offset) and compute the indices without the offset                        	   
-            	    	                        	    *       look for verticesIndicesOfAdjacentMergeableFaceArray in these indices
-            	    	                        	    *       if it is found, mark useless indices with -1 (in buffersGrid[ii][j][k][5],use the newly computed index index offset)
-            	    	                        	    *       stop the merge if the index index offset is invalid otherwise increment the count of merged grid sections
-            	    	                        	    */
-            	    	                        	   //FIXME: use a finer test, any grid element is not a good candidate for a merge  	                        	   
-            	    	                        	   //mark useless indices with -1
-            	    	                        	   for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaceArray.length;indexIndex++)
-            	    	                        		   if(indexIndexOffset+indexIndex<buffersGrid[ii][j][k][5].capacity())
-            	    	                        		       //update rather the copy of the index buffer
-            	    	                        		       ((IntBuffer)buffersGrid[ii][j][k][5]).put(indexIndexOffset+indexIndex,-1);
-            	    	                        		   else
-            	    	                        			   System.out.println("[WARN] index out of bounds: "+(indexIndexOffset+indexIndex)+" capacity: "+buffersGrid[ii][j][k][5].capacity());
-            	    	                        	   mergedGridSectionsCount++;
+            	    	                          secondaryIndexIndexOffset=Integer.MAX_VALUE;
+            	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null&&buffersGrid[ii][j][k][1].capacity()>0&&secondaryIndexIndexOffset>=0;ii++)
+            	    	                              {//get the index offset that allows to go from the local index to the global index
+            	    	                        	   secondaryIndexOffset=indexOffsetArray[ii][j][k];
+            	    	                        	   if(secondaryIndices==null||secondaryIndices.length!=buffersGrid[ii][j][k][1].capacity())
+            	    	                        		   secondaryIndices=new int[buffersGrid[ii][j][k][1].capacity()];
+            	    	                        	   //copy the index buffer (with the offset)
+            	    	                      	       ((IntBuffer)buffersGrid[ii][j][k][1]).get(secondaryIndices,0,secondaryIndices.length);
+            	    	                      	       //compute the indices without the offset
+            	    	                      	       for(int indexIndex=0;indexIndex<secondaryIndices.length;indexIndex++)
+            	    	                      	    	   //preserve invalid values
+            	    	                      	    	   if(secondaryIndices[indexIndex]!=-1)
+            	    	                      	    		   secondaryIndices[indexIndex]-=secondaryIndexOffset;
+            	    	                      	       //store an invalid value to check further if a valid one has been found
+            	    	                      	       secondaryIndexIndexOffset=-1;
+            	    	                      	       //look for verticesIndicesOfAdjacentMergeableFaceArray in these indices
+            	    	                      	       for(int indexIndex=0;indexIndex<secondaryIndices.length-indexBufferPart.length+1&&secondaryIndexIndexOffset==-1;indexIndex++)
+            	    	                      	           {//fill the index buffer part
+            	               	    		    	        System.arraycopy(secondaryIndices,indexIndex,indexBufferPart,0,indexBufferPart.length);
+            	               	    		    	        //compare the index buffer part with the vertices indices of this face
+            	                	    		    	    if(Arrays.equals(indexBufferPart,verticesIndicesOfAdjacentMergeableFaceArray))
+            	                	    		    	    	secondaryIndexIndexOffset=indexIndex;
+            	    	                      	           }
+            	    	                      	       if(secondaryIndexIndexOffset!=-1)
+            	    	                      	           {//mark useless indices with -1
+            	    	                      	    	    for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaceArray.length;indexIndex++)
+            	    	                      	    	        //update rather the copy of the index buffer
+             	    	                        		        ((IntBuffer)buffersGrid[ii][j][k][5]).put(secondaryIndexIndexOffset+indexIndex,-1);
+            	    	                      	    	    mergedGridSectionsCount++;
+            	    	                      	           }
             	    	                              }
             	    	                          if(mergedGridSectionsCount>1)
             	    	                              {//translate all vertices of the concerned face whose abscissa is equal to the rightmost abscissa of the section
