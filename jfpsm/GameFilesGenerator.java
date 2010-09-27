@@ -499,9 +499,15 @@ final class GameFilesGenerator{
             	    	                    {case 0:
             	    	                         {mergedGridSectionsCount=1;
             	    	                          for(int ii=i+1;ii<grid.getLogicalWidth()&&buffersGrid[ii][j][k][1]!=null&&buffersGrid[ii][j][k][1].capacity()>0;ii++)
-            	    	                              {//FIXME: use a finer test, any grid element is not a good candidate for a merge  	                        	   
+            	    	                              {/**
+            	    	                                * TODO: copy buffersGrid[ii][j][k][1] (with the offset) and compute the indices without the offset                        	   
+            	    	                        	    *       look for verticesIndicesOfAdjacentMergeableFaceArray in these indices
+            	    	                        	    *       if it is found, mark useless indices with -1 (in buffersGrid[ii][j][k][5],use the newly computed index index offset)
+            	    	                        	    *       stop the merge if the index index offset is invalid otherwise increment the count of merged grid sections
+            	    	                        	    */
+            	    	                        	   //FIXME: use a finer test, any grid element is not a good candidate for a merge  	                        	   
             	    	                        	   //mark useless indices with -1
-            	    	                        	   for(int indexIndex=0;indexIndex<indexBufferPart.length;indexIndex++)
+            	    	                        	   for(int indexIndex=0;indexIndex<verticesIndicesOfAdjacentMergeableFaceArray.length;indexIndex++)
             	    	                        		   if(indexIndexOffset+indexIndex<buffersGrid[ii][j][k][5].capacity())
             	    	                        		       //update rather the copy of the index buffer
             	    	                        		       ((IntBuffer)buffersGrid[ii][j][k][5]).put(indexIndexOffset+indexIndex,-1);
@@ -511,11 +517,11 @@ final class GameFilesGenerator{
             	    	                              }
             	    	                          if(mergedGridSectionsCount>1)
             	    	                              {//translate all vertices of the concerned face whose abscissa is equal to the rightmost abscissa of the section
-            	    	                        	   for(int indexBufferPartIndex=0;indexBufferPartIndex<indexBufferPart.length;indexBufferPartIndex++)
-            	    	                        		   if(((FloatBuffer)buffersGrid[i][j][k][0]).get(indexBufferPart[indexBufferPartIndex]*3)==((i+1)*grid.getSectionPhysicalWidth()))
-            	    	                        		       {((FloatBuffer)buffersGrid[i][j][k][0]).put(indexBufferPart[indexBufferPartIndex]*3,((FloatBuffer)buffersGrid[i][j][k][0]).get(indexBufferPart[indexBufferPartIndex]*3)+((mergedGridSectionsCount-1)*grid.getSectionPhysicalWidth()));
+            	    	                        	   for(int indexBufferPartIndex=0;indexBufferPartIndex<verticesIndicesOfAdjacentMergeableFaceArray.length;indexBufferPartIndex++)
+            	    	                        		   if(((FloatBuffer)buffersGrid[i][j][k][0]).get(verticesIndicesOfAdjacentMergeableFaceArray[indexBufferPartIndex]*3)==((i+1)*grid.getSectionPhysicalWidth()))
+            	    	                        		       {((FloatBuffer)buffersGrid[i][j][k][0]).put(verticesIndicesOfAdjacentMergeableFaceArray[indexBufferPartIndex]*3,((FloatBuffer)buffersGrid[i][j][k][0]).get(verticesIndicesOfAdjacentMergeableFaceArray[indexBufferPartIndex]*3)+((mergedGridSectionsCount-1)*grid.getSectionPhysicalWidth()));
             	    	                        			    //update the texture coordinates (U only) of those vertices
-            	    	                        			    ((FloatBuffer)buffersGrid[i][j][k][3]).put(indexBufferPart[indexBufferPartIndex]*2,((FloatBuffer)buffersGrid[i][j][k][3]).get(indexBufferPart[indexBufferPartIndex]*2)+(mergedGridSectionsCount-1));
+            	    	                        			    ((FloatBuffer)buffersGrid[i][j][k][3]).put(verticesIndicesOfAdjacentMergeableFaceArray[indexBufferPartIndex]*2,((FloatBuffer)buffersGrid[i][j][k][3]).get(verticesIndicesOfAdjacentMergeableFaceArray[indexBufferPartIndex]*2)+(mergedGridSectionsCount-1));
             	    	                        		       }
             	    	                              }
             	    	                          break;
