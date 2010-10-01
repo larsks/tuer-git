@@ -236,7 +236,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         // Add our awt based image loader.
         AWTImageLoader.registerLoader();
         // Set the default font
-        UIComponent.setDefaultFont(getFontsList().get(2));
+        //UIComponent.setDefaultFont(getFontsList().get(2));
         // Set the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
