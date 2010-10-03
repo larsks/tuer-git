@@ -11,8 +11,6 @@
 	<property name="deploymentdestdir" value="."/>
 	<property name="destdir" value="."/>
 	<property name="srcdir" value="."/>
-	<!-- load the os-dependent properties -->
-	<property file="build-${os.name}-${os.arch}.properties" />
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
@@ -30,6 +28,9 @@
 		<pathelement location="./LibraryJavaSound.jar"/>
 		<pathelement location="./SoundSystem.jar"/>
 	</path>
+	<target name="set-jogl-library-path">
+		<script language="javascript" src="set-jogl-library-path.js"/>
+	</target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
@@ -164,7 +165,7 @@
 	<!-- =================================================================== -->
 	<!-- Run Targets                                                         -->
 	<!-- =================================================================== -->  
-	<target name="run-jfpsm" description="Runs JFPSM">
+	<target name="run-jfpsm" depends="set-jogl-library-path" description="Runs JFPSM">
 		<java classname="connection.JFPSMServiceProvider"
 			  fork="true"
 			  dir="${destdir}"
@@ -173,7 +174,7 @@
 			<jvmarg value="-Xmx128m"/>
 		</java>
 	</target>
-	<target name="run-tuer" description="Runs TUER">
+	<target name="run-tuer" depends="set-jogl-library-path" description="Runs TUER">	
 		<java classname="engine.Ardor3DGameServiceProvider"
 			  fork="true"
 			  dir="${destdir}"
