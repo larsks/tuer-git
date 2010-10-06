@@ -17,20 +17,20 @@
 		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>		
-		<pathelement location="../ardor3d-core/lib/google/google-collect-1.0.jar"/>
+		<pathelement location="./lib/google-collect/google-collect-1.0.jar"/>
 		<pathelement location="../ardor3d-extras/target/ardor3d-extras-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
 		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-jogl/lib/jogl/jogl.jar"/>
-		<pathelement location="../ardor3d-jogl/lib/jogl/gluegen-rt.jar"/>
+		<pathelement location="./lib/jogl/jogl.jar"/>
+		<pathelement location="./lib/jogl/gluegen-rt.jar"/>
 		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./CodecJOrbis.jar"/>
-		<pathelement location="./LibraryJavaSound.jar"/>
-		<pathelement location="./SoundSystem.jar"/>
+		<pathelement location="./lib/pss/CodecJOrbis.jar"/>
+		<pathelement location="./lib/pss/LibraryJavaSound.jar"/>
+		<pathelement location="./lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
 	    <!-- N.B: do not use the OpenJDK as it does not have any JS engine -->
-		<fail message="Please use Sun's, Oracle's or Apple's Java 1.6 or higher.">
+		<fail message="Please use Sun's, Oracle's or Apple's Java SDK 1.6 or higher.">
 		    <condition>
 		        <not>
 		            <and>
@@ -103,6 +103,8 @@
 			<exclude name="**/gpl.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
+			<!-- miscellaneous libraries -->
+			<exclude name="**/lib/**" />
 			<manifest>
 				<attribute name="Main-Class" value="engine.Ardor3DGameServiceProvider"/>
 			</manifest>
@@ -120,7 +122,10 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
-		<copy file="../ardor3d-core/lib/google/google-collect-1.0.jar" todir="${destdir}"/>
+		<copy file="./lib/google-collect/google-collect-1.0.jar" todir="${destdir}"/>
+		<copy file="./lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
+		<copy file="./lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
+		<copy file="./lib/pss/SoundSystem.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
 		<copy file="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
@@ -140,9 +145,9 @@
 		    	<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
 		      	<fileset file="${destdir}/tuer.jar"/>
 		        <fileset file="${destdir}/jfpsm.jar"/>
-		    	<fileset file="./CodecJOrbis.jar"/>
-		    	<fileset file="./LibraryJavaSound.jar"/>
-		    	<fileset file="./SoundSystem.jar"/>
+		    	<fileset file="${destdir}/CodecJOrbis.jar"/>
+		    	<fileset file="${destdir}/LibraryJavaSound.jar"/>
+		    	<fileset file="${destdir}/SoundSystem.jar"/>
 		    </path>
 		</signjar>
 	</target>
@@ -161,9 +166,9 @@
 		<copy file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
 		<copy file="${destdir}/tuer.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/jfpsm.jar" todir="${deploymentdestdir}"/>
-		<copy file="./CodecJOrbis.jar" todir="${deploymentdestdir}"/>
-		<copy file="./LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
-		<copy file="./SoundSystem.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/CodecJOrbis.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/SoundSystem.jar" todir="${deploymentdestdir}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
