@@ -6,25 +6,25 @@ if(joglLibraryPath==null)
      var osSubName=osName.substring(0,3).toLowerCase()
      if(osSubName.equals("lin"))
          {if(osArch.equals("amd64"))
-              joglLibraryPath="../ardor3d-jogl/lib/jogl/native/linux-amd64/"
+              joglLibraryPath="./lib/jogl/native/linux-amd64/"
           else
               if(osArch.equals("i386")||osArch.equals("i586")||osArch.equals("x86"))
-                  joglLibraryPath="../ardor3d-jogl/lib/jogl/native/linux-i586/"
+                  joglLibraryPath="./lib/jogl/native/linux-i586/"
               else
-                  joglLibraryPath="../ardor3d-jogl/lib/jogl/native/linux-i586/"
+                  joglLibraryPath="./lib/jogl/native/linux-i586/"
          }
      else
          {if(osSubName.equals("mac"))
-              joglLibraryPath="../ardor3d-jogl/lib/jogl/native/macosx-universal/"
+              joglLibraryPath="./lib/jogl/native/macosx-universal/"
           else
               if(osSubName.equals("win"))
                   {if(osArch.equals("amd64"))
-                       joglLibraryPath="../ardor3d-jogl/lib/jogl/native/windows-amd64/"
+                       joglLibraryPath="./lib/jogl/native/windows-amd64/"
 				       else
 				           if(osArch.equals("i386")||osArch.equals("i586")||osArch.equals("x86"))
-                           joglLibraryPath="../ardor3d-jogl/lib/jogl/native/windows_i586/"
+                           joglLibraryPath="./lib/jogl/native/windows-i586/"
 				           else
-                           joglLibraryPath="../ardor3d-jogl/lib/jogl/native/windows_i586/"
+                           joglLibraryPath="./lib/jogl/native/windows-i586/"
                   }
 			}			     
      project.setProperty("jogl.library.path",joglLibraryPath)

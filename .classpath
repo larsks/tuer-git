@@ -2,9 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="CodecJOrbis.jar"/>
-	<classpathentry kind="lib" path="LibraryJavaSound.jar"/>
-	<classpathentry kind="lib" path="SoundSystem.jar"/>
 	<classpathentry kind="lib" path="/ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>
@@ -12,8 +9,11 @@
 	<classpathentry kind="lib" path="/ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="/ardor3d-core/lib/google/google-collect-1.0.jar"/>
-	<classpathentry kind="lib" path="/ardor3d-jogl/lib/jogl/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="/ardor3d-jogl/lib/jogl/jogl.jar"/>
+	<classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
+	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
+	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
+	<classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="lib/jogl/jogl.jar"/>
+	<classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
