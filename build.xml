@@ -14,44 +14,98 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
-		<pathelement location="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar"/>		
+		<pathelement location="./lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>		
 		<pathelement location="./lib/google-collect/google-collect-1.0.jar"/>
-		<pathelement location="../ardor3d-extras/target/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-		<pathelement location="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 		<pathelement location="./lib/jogl/jogl.jar"/>
 		<pathelement location="./lib/jogl/gluegen-rt.jar"/>
-		<pathelement location="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+		<pathelement location="./lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
 		<pathelement location="./lib/pss/CodecJOrbis.jar"/>
 		<pathelement location="./lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="./lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
-	    <!-- N.B: do not use the OpenJDK as it does not have any JS engine -->
-		<fail message="Please use Sun's, Oracle's or Apple's Java SDK 1.6 or higher.">
+		<fail message="Please use Java SDK 1.6 or higher.">
 		    <condition>
-		        <not>
-		            <and>
-		                <or>
-		                    <equals arg1="${ant.java.version}" arg2="1.6" />
-		                    <equals arg1="${ant.java.version}" arg2="1.7" />
-		                </or>
-		                <or>
-		                    <equals arg1="${java.vendor}" arg2="Sun Microsystems Inc." />
-		                    <equals arg1="${java.vendor}" arg2="Oracle Inc." />
-		                    <equals arg1="${java.vendor}" arg2="Apple Inc." />
-		                </or>
-		                <equals arg1="${java.runtime.name}" arg2="Java(TM) SE Runtime Environment" />
-		            </and>
+		        <not>		            
+		            <or>
+		                <equals arg1="${ant.java.version}" arg2="1.6" />
+		                <equals arg1="${ant.java.version}" arg2="1.7" />
+		            </or>		                		            
 		        </not>
 		    </condition>
         </fail>
-		<echo message="Java version: ${ant.java.version}, Java vendor: ${java.vendor}, Java runtime: ${java.runtime.name}"/>
 	</target>
-	<target name="set-jogl-library-path" depends="check-java-version" description="Sets the library path with JOGL binaries">		
-		<script language="javascript" src="set-jogl-library-path.js"/>
+	<condition property="is-linux-amd64">
+	    <and>
+	        <os name="Linux" />
+	    	<os arch="amd64" />
+	    </and>
+	</condition>
+	<condition property="is-linux-i586">
+		<and>
+		    <os name="Linux" />
+			<or>
+		        <os arch="i386" />
+				<os arch="i586" />
+				<os arch="x86" />
+			</or>
+		</and>
+	</condition>
+	<condition property="is-windows-amd64">
+		<and>
+		    <os family="windows" />
+		    <os arch="amd64" />
+		</and>
+	</condition>
+	<condition property="is-windows-i586">
+		<and>
+			<os family="windows" />
+			<or>
+			    <os arch="i386" />
+			    <os arch="i586" />
+				<os arch="x86" />
+			</or>
+		</and>
+	</condition>
+	<condition property="is-macosx-universal">
+		<and>
+			<os name="Mac OS X" />			
+			<not>
+				<os arch="ppc" />
+			</not>
+		</and>
+	</condition>
+	<condition property="is-macosx-ppc">
+		<and>
+			<os name="Mac OS X" />			
+			<os arch="ppc" />
+		</and>
+	</condition>
+	<target name="set-jogl-library-path-linux-amd64" if="is-linux-amd64">
+		<property name="jogl.library.path" value="./lib/jogl/native/linux-amd64/" />
+	</target>
+	<target name="set-jogl-library-path-linux-i586" if="is-linux-i586">
+		<property name="jogl.library.path" value="./lib/jogl/native/linux-i586/" />
+	</target>
+	<target name="set-jogl-library-path-windows-amd64" if="is-windows-amd64">
+		<property name="jogl.library.path" value="./lib/jogl/native/windows-amd64/" />
+	</target>
+	<target name="set-jogl-library-path-windows-i586" if="is-windows-i586">
+		<property name="jogl.library.path" value="./lib/jogl/native/windows-i586/" />
+	</target>
+	<target name="set-jogl-library-path-macosx-universal" if="is-macosx-universal">
+		<property name="jogl.library.path" value="./lib/jogl/native/macosx-universal/" />
+	</target>
+	<target name="set-jogl-library-path-macosx-ppc" if="is-macosx-ppc">
+		<property name="jogl.library.path" value="./lib/jogl/native/macosx-ppc/" />
+	</target>
+	<target name="set-jogl-library-path" depends="set-jogl-library-path-linux-i586,set-jogl-library-path-linux-amd64,set-jogl-library-path-macosx-universal,set-jogl-library-path-macosx-ppc,set-jogl-library-path-windows-i586,set-jogl-library-path-windows-amd64,check-java-version" description="Sets the library path with JOGL binaries">
+		<echo message="jogl.library.path: ${jogl.library.path}" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
@@ -126,13 +180,13 @@
 		<copy file="./lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
 		<copy file="./lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
 		<copy file="./lib/pss/SoundSystem.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-animation/target/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-collada/target/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-core/target/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-extras/target/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-awt/target/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-jogl/target/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="../ardor3d-ui/target/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
+		<copy file="./lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="./lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
 		    	<fileset file="${destdir}/google-collect-1.0.jar" />
