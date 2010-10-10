@@ -14,19 +14,19 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
-		<pathelement location="./lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>		
-		<pathelement location="./lib/google-collect/google-collect-1.0.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/jogl/jogl.jar"/>
-		<pathelement location="./lib/jogl/gluegen-rt.jar"/>
-		<pathelement location="./lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
-		<pathelement location="./lib/pss/CodecJOrbis.jar"/>
-		<pathelement location="./lib/pss/LibraryJavaSound.jar"/>
-		<pathelement location="./lib/pss/SoundSystem.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>		
+		<pathelement location="lib/google-collect/google-collect-1.0.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/jogl/jogl.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/pss/CodecJOrbis.jar"/>
+		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
+		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.6 or higher.">
@@ -43,7 +43,10 @@
 	<condition property="is-linux-amd64">
 	    <and>
 	        <os name="Linux" />
-	    	<os arch="amd64" />
+	    	<or>
+	    		<os arch="amd64" />
+	    		<os arch="x86_64" />
+	    	</or>
 	    </and>
 	</condition>
 	<condition property="is-linux-i586">
@@ -59,7 +62,10 @@
 	<condition property="is-windows-amd64">
 		<and>
 		    <os family="windows" />
-		    <os arch="amd64" />
+			<or>
+		        <os arch="amd64" />
+				<os arch="x86_64" />
+			</or>
 		</and>
 	</condition>
 	<condition property="is-windows-i586">
@@ -87,30 +93,71 @@
 		</and>
 	</condition>
 	<target name="set-jogl-library-path-linux-amd64" if="is-linux-amd64">
-		<property name="jogl.library.path" value="./lib/jogl/native/linux-amd64/" />
+		<property name="jogl.library.path" value="lib/jogl/native/linux-amd64/" />
 	</target>
 	<target name="set-jogl-library-path-linux-i586" if="is-linux-i586">
-		<property name="jogl.library.path" value="./lib/jogl/native/linux-i586/" />
+		<property name="jogl.library.path" value="lib/jogl/native/linux-i586/" />
 	</target>
 	<target name="set-jogl-library-path-windows-amd64" if="is-windows-amd64">
-		<property name="jogl.library.path" value="./lib/jogl/native/windows-amd64/" />
+		<property name="jogl.library.path" value="lib/jogl/native/windows-amd64/" />
 	</target>
 	<target name="set-jogl-library-path-windows-i586" if="is-windows-i586">
-		<property name="jogl.library.path" value="./lib/jogl/native/windows-i586/" />
+		<property name="jogl.library.path" value="lib/jogl/native/windows-i586/" />
 	</target>
 	<target name="set-jogl-library-path-macosx-universal" if="is-macosx-universal">
-		<property name="jogl.library.path" value="./lib/jogl/native/macosx-universal/" />
+		<property name="jogl.library.path" value="lib/jogl/native/macosx-universal/" />
 	</target>
 	<target name="set-jogl-library-path-macosx-ppc" if="is-macosx-ppc">
-		<property name="jogl.library.path" value="./lib/jogl/native/macosx-ppc/" />
+		<property name="jogl.library.path" value="lib/jogl/native/macosx-ppc/" />
 	</target>
 	<target name="set-jogl-library-path" depends="set-jogl-library-path-linux-i586,set-jogl-library-path-linux-amd64,set-jogl-library-path-macosx-universal,set-jogl-library-path-macosx-ppc,set-jogl-library-path-windows-i586,set-jogl-library-path-windows-amd64,check-java-version" description="Sets the library path with JOGL binaries">
 		<echo message="jogl.library.path: ${jogl.library.path}" />
 	</target>
+	<condition property="eclipse-setup-not-ok">
+		<not>
+		    <isset property="eclipse-setup-ok"/>
+		</not>
+	</condition>
+	<target name="setup-eclipse" depends="set-jogl-library-path" if="eclipse-setup-not-ok" description="Generates the .classpath file of the Eclipse project including OS and architecture dependencies">
+		<pathconvert property="os-specific-jogl.library.path">
+			<path location="${jogl.library.path}" />
+		</pathconvert>
+		<!-- TODO: maybe convert the other paths if necessary for Windows -->
+		<echo file=".classpath"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+			    <classpathentry kind="src" path=""/>
+			    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+			    <classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
+			    <classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
+			    <classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
+			    <classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar">
+			        <attributes>
+			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
+			        </attributes>
+			    </classpathentry>
+			    <classpathentry kind="lib" path="lib/jogl/jogl.jar">
+			        <attributes>
+			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
+			        </attributes>
+			    </classpathentry>
+			    <classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="output" path=""/>
+			</classpath>]]>
+		</echo>
+		<!-- Sets this property to avoid generating the .classpath file several times at runtime -->
+		<property name="eclipse-setup-ok" value="true" />
+    </target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
-	<target name="compile" depends="check-java-version" description="Compiles the source code">
+	<target name="compile" depends="set-jogl-library-path" description="Compiles the source code">
 	    <javac srcdir="${srcdir}"       	   
 	           destdir="${destdir}"
 	           debug="on" >
@@ -176,17 +223,17 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
-		<copy file="./lib/google-collect/google-collect-1.0.jar" todir="${destdir}"/>
-		<copy file="./lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
-		<copy file="./lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
-		<copy file="./lib/pss/SoundSystem.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="./lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
+		<copy file="lib/google-collect/google-collect-1.0.jar" todir="${destdir}"/>
+		<copy file="lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
+		<copy file="lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
+		<copy file="lib/pss/SoundSystem.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
 		    	<fileset file="${destdir}/google-collect-1.0.jar" />
@@ -262,8 +309,8 @@
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
 		    <jvmarg value="-Xmx256m"/>
-			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
-			<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
-		</java>
+		    <jvmarg value="-XX:MaxDirectMemorySize=64M"/>
+		    <jvmarg value="-Djava.library.path=${jogl.library.path}"/>
+	    </java>
 	</target>
 </project>

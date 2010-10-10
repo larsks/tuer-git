@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path=""/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
-	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
-	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
-	<classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/jogl/jogl.jar"/>
-	<classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="output" path=""/>
-</classpath>
+			<classpath>
+			    <classpathentry kind="src" path=""/>
+			    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+			    <classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
+			    <classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
+			    <classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
+			    <classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar">
+			        <attributes>
+			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/gouessej/Documents/programmation/java/workspace/tuer/lib/jogl/native/linux-i586"/>
+			        </attributes>
+			    </classpathentry>
+			    <classpathentry kind="lib" path="lib/jogl/jogl.jar">
+			        <attributes>
+			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/gouessej/Documents/programmation/java/workspace/tuer/lib/jogl/native/linux-i586"/>
+			        </attributes>
+			    </classpathentry>
+			    <classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="output" path=""/>
+			</classpath>
+		
