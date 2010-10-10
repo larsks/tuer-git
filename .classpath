@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar" sourcepath="/ardor3d-jogl"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
