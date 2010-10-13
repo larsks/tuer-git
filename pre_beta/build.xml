@@ -6,11 +6,21 @@
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
-	<!-- set your own deployment directory below -->
-	<!--<property name="deploymentdestdir" value="../../Documents/programmation/web/sourceforge/very_experimental/"/>-->
-	<property name="deploymentdestdir" value="."/>
+	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
+	<property name="deploymentdestdir" value="target"/>
+	<!-- intermediary directory containing JARs that are going to be signed -->
 	<property name="destdir" value="."/>
+	<!-- directory containing the source code -->
 	<property name="srcdir" value="."/>
+	<property name="homepage-url" value="http://tuer.sourceforge.net" />
+	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
+	<property name="vendor" value="Julien GOUESSE" />
+	<property name="tuer-main-class" value="engine.Ardor3DGameServiceProvider"/>
+	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
+	<property name="tuer-jar-filename" value="tuer.jar" />
+	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
+	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
+	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
@@ -173,7 +183,7 @@
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
 	<target name="dist" depends="compile" description="Creates and signs the java archive">
-		<jar destfile="${destdir}/jfpsm.jar" basedir="${destdir}" 
+		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
 			<exclude name="**/gpl.txt" />
@@ -182,10 +192,10 @@
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<manifest>
-				<attribute name="Main-Class" value="jfpsm.MainWindow"/>
+				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${destdir}/tuer.jar" basedir="${destdir}" 
+		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${destdir}" 
 			includes="**/*.class"
 			compress="false">
 			<include name="**/*.bmp" />
@@ -207,14 +217,14 @@
 			<!-- miscellaneous libraries -->
 			<exclude name="**/lib/**" />
 			<manifest>
-				<attribute name="Main-Class" value="engine.Ardor3DGameServiceProvider"/>
+				<attribute name="Main-Class" value="${tuer-main-class}"/>
 			</manifest>
 		</jar>
 		<delete file="key" failonerror="false" />
 		<input message="Please enter the store pass:" addproperty="storepass"/>
 		<genkey alias="gouessej" storepass="${storepass}" keystore="key" >
 			<dname>
-				<param name="CN" value="Julien GOUESSE"/>
+				<param name="CN" value="${vendor}"/>
 				<param name="OU" value="Engineer"/>
 				<param name="O"  value="FGF"/>
 				<param name="C"  value="FR"/>
@@ -244,8 +254,8 @@
 		    	<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
-		      	<fileset file="${destdir}/tuer.jar"/>
-		        <fileset file="${destdir}/jfpsm.jar"/>
+		      	<fileset file="${destdir}/${tuer-jar-filename}"/>
+		        <fileset file="${destdir}/${jfpsm-jar-filename}"/>
 		    	<fileset file="${destdir}/CodecJOrbis.jar"/>
 		    	<fileset file="${destdir}/LibraryJavaSound.jar"/>
 		    	<fileset file="${destdir}/SoundSystem.jar"/>
@@ -255,8 +265,81 @@
 	<!-- ================================================================= -->
 	<!-- Deploy                                                            -->
 	<!-- ================================================================= -->
-	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files onto the server">
-	    <!-- TODO: use scp task to do it -->
+	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files into the deployment directory">
+		<delete dir="${deploymentdestdir}" includes="**/*.jar" />
+		<!-- generate the JNLP files used by Java Web Start -->
+		<echo file="${deploymentdestdir}/${tuer-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+			<jnlp spec="1.0+" codebase="${codebase-url}" href="${tuer-jnlp-filename}">
+			  <information>
+			    <title>TUER</title>
+			    <vendor>${vendor}</vendor> 
+			    <homepage href="${homepage-url}"/>
+			    <description>Small Quake-like written in Java + JOGL</description>
+			    <description kind="short">kill them all!!</description>
+			    <icon href="tuerLogo.png"/>
+			    <icon kind="splash" href="tuerLogo.png"/>
+			    <offline-allowed/>
+			  </information>
+			  <security> 
+			    <all-permissions />
+			  </security>
+			  <update check="always" policy="always"/>
+			  <resources>
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=64M"/>  
+			    <property name="sun.java2d.noddraw" value="true"/>
+			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
+			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
+			    <jar href="ardor3d-animation-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-extras-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="google-collect-1.0.jar" download="eager" main="false"/>
+			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
+			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
+			    <jar href="SoundSystem.jar" download="eager" main="false"/>
+			  </resources>
+			  <application-desc main-class="${tuer-main-class}" />
+			</jnlp>
+			]]>
+		</echo>
+		<echo file="${deploymentdestdir}/${jfpsm-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+			<jnlp spec="1.0+" codebase="${codebase-url}" href="${jfpsm-jnlp-filename}">
+			  <information>
+			    <title>JFPSM</title>
+			    <vendor>${vendor}</vendor> 
+			    <homepage href="${homepage-url}"/>
+			    <description>Java First Person Shooter Maker</description>
+			    <description kind="short">JFPSM</description>
+			    <offline-allowed/>
+			  </information>
+			  <security> 
+			    <all-permissions />
+			  </security>
+			  <update check="always" policy="always"/>
+			  <resources>
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=64M"/>  
+			    <property name="sun.java2d.noddraw" value="true"/>
+			    <property name="sun.awt.noerasebackground" value="true"/>
+			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
+			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
+			    <jar href="ardor3d-animation-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-0.7-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="google-collect-1.0.jar" download="eager" main="false"/>
+			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
+			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
+			    <jar href="SoundSystem.jar" download="eager" main="false"/>
+			  </resources>
+			  <application-desc main-class="${jfpsm-main-class}" />
+			</jnlp>
+			]]>
+		</echo>
 		<copy file="${destdir}/google-collect-1.0.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
@@ -265,8 +348,8 @@
 		<copy file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
-		<copy file="${destdir}/tuer.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jfpsm.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/${tuer-jar-filename}" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/${jfpsm-jar-filename}" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/CodecJOrbis.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/SoundSystem.jar" todir="${deploymentdestdir}"/>
@@ -277,9 +360,10 @@
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
 	  		<fileset file="key" />
-	   	    <fileset dir="${destdir}" includes="**/*.class"/>
-	  		<fileset file="${destdir}/tuer.jar"/>
-	  		<fileset file="${destdir}/jfpsm.jar"/>
+	  		<fileset dir="${deploymentdestdir}" includes="**/*.jar" />
+	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
+	  		<fileset file="${destdir}/${tuer-jar-filename}" />
+	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
 	  		<fileset file="${destdir}/google-collect-1.0.jar" />
 	  		<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
@@ -294,7 +378,7 @@
 	<!-- Run Targets                                                         -->
 	<!-- =================================================================== -->  
 	<target name="run-jfpsm" depends="set-jogl-library-path" description="Runs JFPSM">
-		<java classname="connection.JFPSMServiceProvider"
+		<java classname="${jfpsm-main-class}"
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
@@ -303,7 +387,7 @@
 		</java>
 	</target>
 	<target name="run-tuer" depends="set-jogl-library-path" description="Runs TUER">
-		<java classname="engine.Ardor3DGameServiceProvider"
+		<java classname="${tuer-main-class}"
 			  fork="true"
 			  dir="${destdir}"
 			  failonerror="true">
