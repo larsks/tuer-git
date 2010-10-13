@@ -45,12 +45,12 @@ public final class Md2ToArdorConverter{
                      }
              imageSourceFile=new File(sourceFile.getName().substring(0,sourceFile.getName().lastIndexOf(".md2"))+".png");
              imageSource=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE,imageSourceFile.getName());
-             if(imageSource!=null){
-            	 ts=new TextureState();
-                 ts.setEnabled(true);
-                 ts.setTexture(TextureManager.load(new URLResourceSource(imageSource.getURL()),Texture.MinificationFilter.Trilinear,true));
-                 spatial.setRenderState(ts);
-             }
+             if(imageSource!=null)
+                 {ts=new TextureState();
+                  ts.setEnabled(true);
+                  ts.setTexture(TextureManager.load(new URLResourceSource(imageSource.getURL()),Texture.MinificationFilter.Trilinear,true));
+                  spatial.setRenderState(ts);
+                 }
              System.out.println("Converting "+arg+" ...");
              BinaryExporter.getInstance().save(spatial,destFile);
              System.out.println(arg+" successfully converted");

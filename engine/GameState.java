@@ -40,6 +40,8 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.state.RenderState.StateType;
+import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -385,6 +387,8 @@ final class GameState extends State{
              final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
              agentNode.setName("an agent");
              agentNode.setTranslation(118.5,0.4,219);
+             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+             //FIXME: texture ordinates are wrong
              agentNode.setScale(0.015);
              getRoot().attachChild(agentNode);
              
