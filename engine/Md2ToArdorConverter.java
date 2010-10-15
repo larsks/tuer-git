@@ -27,6 +27,7 @@ public final class Md2ToArdorConverter{
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
         Md2Importer md2Importer=new Md2Importer();
+        md2Importer.setFlipTextureVertically(true);
         URLResourceSource imageSource;
         URLResourceSource source;
         Spatial spatial;
