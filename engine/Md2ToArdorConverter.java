@@ -49,7 +49,7 @@ public final class Md2ToArdorConverter{
              if(imageSource!=null)
                  {ts=new TextureState();
                   ts.setEnabled(true);
-                  ts.setTexture(TextureManager.load(new URLResourceSource(imageSource.getURL()),Texture.MinificationFilter.Trilinear,true));
+                  ts.setTexture(TextureManager.load(new URLResourceSource(imageSource.getURL()),Texture.MinificationFilter.Trilinear,false));
                   spatial.setRenderState(ts);
                  }
              System.out.println("Converting "+arg+" ...");
