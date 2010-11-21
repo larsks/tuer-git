@@ -7,13 +7,13 @@
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
 	<classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jogl/jogl.jar"/>
-	<classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/google-collect/guava-r07.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
