@@ -24,16 +24,16 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
-		<pathelement location="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>		
-		<pathelement location="lib/google-collect/google-collect-1.0.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>		
+		<pathelement location="lib/google-collect/guava-r07.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/jogl/jogl.jar"/>
 		<pathelement location="lib/jogl/gluegen-rt.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/pss/CodecJOrbis.jar"/>
 		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="lib/pss/SoundSystem.jar"/>
@@ -150,14 +150,14 @@
 			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
 			        </attributes>
 			    </classpathentry>
-			    <classpathentry kind="lib" path="lib/google-collect/google-collect-1.0.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar"/>
-			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/google-collect/guava-r07.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
+			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
 			    <classpathentry kind="output" path=""/>
 			</classpath>]]>
 		</echo>
@@ -233,27 +233,27 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
-		<copy file="lib/google-collect/google-collect-1.0.jar" todir="${destdir}"/>
+		<copy file="lib/google-collect/guava-r07.jar" todir="${destdir}"/>
 		<copy file="lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
 		<copy file="lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
 		<copy file="lib/pss/SoundSystem.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-core-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${destdir}"/>	
+		<copy file="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<copy file="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
-		    	<fileset file="${destdir}/google-collect-1.0.jar" />
-		    	<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/guava-r07.jar" />
+		    	<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
+		    	<fileset file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
 		      	<fileset file="${destdir}/${tuer-jar-filename}"/>
 		        <fileset file="${destdir}/${jfpsm-jar-filename}"/>
 		    	<fileset file="${destdir}/CodecJOrbis.jar"/>
@@ -289,14 +289,14 @@
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
 			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-collada-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-core-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-extras-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-awt-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-jogl-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-ui-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="google-collect-1.0.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-extras-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="guava-r07.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>
@@ -325,13 +325,13 @@
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
 			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-collada-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-core-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-awt-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-jogl-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-ui-0.7-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="google-collect-1.0.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="guava-r07.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>
@@ -340,14 +340,14 @@
 			</jnlp>
 			]]>
 		</echo>
-		<copy file="${destdir}/google-collect-1.0.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
+		<copy file="${destdir}/guava-r07.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
 		<copy file="${destdir}/${tuer-jar-filename}" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/${jfpsm-jar-filename}" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/CodecJOrbis.jar" todir="${deploymentdestdir}"/>
@@ -364,14 +364,14 @@
 	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
 	  		<fileset file="${destdir}/${tuer-jar-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
-	  		<fileset file="${destdir}/google-collect-1.0.jar" />
-	  		<fileset file="${destdir}/ardor3d-animation-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-collada-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-core-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-extras-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-awt-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-jogl-0.7-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-ui-0.7-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/guava-r07.jar" />
+	  		<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->
