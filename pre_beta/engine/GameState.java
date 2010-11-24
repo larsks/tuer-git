@@ -40,8 +40,8 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
-import com.ardor3d.renderer.state.RenderState.StateType;
-import com.ardor3d.renderer.state.TextureState;
+//import com.ardor3d.renderer.state.RenderState.StateType;
+//import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -110,7 +110,7 @@ final class GameState extends State{
         final InputTrigger exitPromptTrigger=new InputTrigger(new KeyReleasedCondition(Key.ESCAPE),new TriggerAction(){
         	@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//if the player jas not been prompted
+				//if the player has not been prompted
         		if(!getRoot().hasChild(exitPromptTextLabel))
         		    getRoot().attachChild(exitPromptTextLabel);
 			}
@@ -244,12 +244,19 @@ final class GameState extends State{
                 double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
                 boolean collisionFound=false;
                 double correctX=playerStartX,correctZ=playerStartZ;
+                int tmpX,tmpZ;
                 for(int i=1;i<=stepCount&&!collisionFound;i++)
                     {playerX=playerStartX+(stepX*i);
                 	 playerZ=playerStartZ+(stepZ*i);
                 	 for(int z=0;z<2&&!collisionFound;z++)
              	    	for(int x=0;x<2&&!collisionFound;x++)
-             	    	    collisionFound=collisionMap[(int)(playerX-0.2+(x*0.4))][(int)(playerZ-0.2+(z*0.4))];
+             	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
+             	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
+             	    	     if(0<=tmpX && tmpX<collisionMap.length && 0<=tmpZ && tmpZ<collisionMap[tmpX].length)
+             	    		     collisionFound=collisionMap[tmpX][tmpZ];
+             	    	     else
+             	    	    	 collisionFound=false;
+             	    	    }
                 	 if(!collisionFound)
                 		 {correctX=playerX;
                 		  correctZ=playerZ;
@@ -289,7 +296,11 @@ final class GameState extends State{
     	    collisionMap=new boolean[map.getWidth()][map.getHeight()];
     	    for(int y=0;y<map.getHeight();y++)
     	    	for(int x=0;x<map.getWidth();x++)
-    	    		collisionMap[x][y]=(map.getRGB(x, y)==Color.BLUE.getRGB());
+    	    		//FIXME: temporary hack to reach the outdoor section: replace it by a teleporter
+    	    		if(0<=x && x<=1 && 0<=y && y<=1)
+    	    		    collisionMap[x][y]=false;
+    	    		else
+    	    			collisionMap[x][y]=(map.getRGB(x, y)==Color.BLUE.getRGB());
     	   }
     	catch(IOException ioe)
 		{ioe.printStackTrace();}
@@ -323,6 +334,10 @@ final class GameState extends State{
         try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
              NodeHelper.setBackCullState(levelNode);
              getRoot().attachChild(levelNode);
+             final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
+             //NodeHelper.setBackCullState(outdoorPartLevelNode);
+             outdoorPartLevelNode.setTranslation(-128, -6, -128);
+             getRoot().attachChild(outdoorPartLevelNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setName("an uzi");
              uziNode.setTranslation(111.5,0.15,219);
