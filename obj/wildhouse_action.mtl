@@ -1,0 +1,198 @@
+# Blender3D MTL File: wildhouse.blend
+# Material Count: 18
+newmtl white_moss-rock-trail.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd moss-rock-trail.jpg
+
+
+newmtl white_stonewall-1.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd stonewall-1.jpg
+
+
+newmtl Material.005_glasstile2.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd glasstile2.png
+
+
+newmtl white_rocks-large-04-.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd rocks-large-04-.jpg
+
+
+newmtl white_greentransp.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd greentransp.png
+
+
+newmtl white
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl Material.005_greentransp.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd greentransp.png
+
+
+newmtl white_moss-rock.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd moss-rock.jpg
+
+
+newmtl Material.005_moss.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd moss.jpg
+
+
+newmtl Material.005_rocks-large-04-.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd rocks-large-04-.jpg
+
+
+newmtl white_wooddoor2.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wooddoor2.jpg
+
+
+newmtl Material.005_wooddoor2.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wooddoor2.jpg
+
+
+newmtl Material.005_moss-rock.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd moss-rock.jpg
+
+
+newmtl white_woodpanel-side.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd woodpanel-side.jpg
+
+
+newmtl white_moss.JPG
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd moss.jpg
+
+
+newmtl Material.005_woodpanel-side.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd woodpanel-side.jpg
+
+
+newmtl white_glasstile2.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.232964 0.232964 0.232964
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd glasstile2.png
+
+
+newmtl Material.005
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
