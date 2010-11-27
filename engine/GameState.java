@@ -25,6 +25,7 @@ import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.image.Texture;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
@@ -48,9 +49,13 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
+import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
+import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.input.ExtendedFirstPersonControl;
 
 /**
@@ -335,9 +340,26 @@ final class GameState extends State{
              NodeHelper.setBackCullState(levelNode);
              getRoot().attachChild(levelNode);
              final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
-             //NodeHelper.setBackCullState(outdoorPartLevelNode);
              outdoorPartLevelNode.setTranslation(-128, -6, -128);
              getRoot().attachChild(outdoorPartLevelNode);
+             final Skybox skyboxNode=new Skybox("skybox",128,128,128);
+             skyboxNode.setTranslation(-128,0,-128);
+             
+             final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+             
+             skyboxNode.setTexture(Skybox.Face.North,north);
+             skyboxNode.setTexture(Skybox.Face.West,west);
+             skyboxNode.setTexture(Skybox.Face.South,south);
+             skyboxNode.setTexture(Skybox.Face.East,east);
+             skyboxNode.setTexture(Skybox.Face.Up,up);
+             skyboxNode.setTexture(Skybox.Face.Down,down);
+             
+             getRoot().attachChild(skyboxNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setName("an uzi");
              uziNode.setTranslation(111.5,0.15,219);
