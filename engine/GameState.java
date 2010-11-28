@@ -41,6 +41,7 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.state.TextureState;
 //import com.ardor3d.renderer.state.RenderState.StateType;
 //import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
@@ -50,6 +51,7 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
+import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
@@ -70,7 +72,7 @@ final class GameState extends State{
     /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
     /**source name of the sound played when picking up a weapon*/
-    private String pickupWeaponSourcename;
+    private static String pickupWeaponSourcename;
     /**path of the sound sample played when picking up a weapon*/
     private static final String pickupWeaponSoundSamplePath="/sounds/pickup_weapon.ogg";
     /**previous (before entering this state) frustum far value*/
@@ -281,12 +283,15 @@ final class GameState extends State{
                 		  if(playerData.collect(collectible))
                 	          {//remove it from the list of collectible objects
                 			   collectibleObjectsList.remove(i);
-                			   //detach it from the root
-                	           getRoot().detachChild(collectible);
+                			   if(collectible.getParent()!=null)
+                				   //detach this object from its parent so that it is no more visible
+                				   collectible.getParent().detachChild(collectible);
+                			   //display a message when the player picked up something
                 	           headUpDisplayLabel.setText("picked up "+collectible.getName());
-                	           //play a sound
-                	           if(pickupWeaponSourcename!=null)
-                                   SoundManager.getInstance().play(pickupWeaponSourcename);
+                	           CollectibleUserData collectibleUserData=(CollectibleUserData)collectible.getUserData();
+                	           //play a sound if available
+                	           if(collectibleUserData.getSourcename()!=null)
+                                   SoundManager.getInstance().play(collectibleUserData.getSourcename());
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -319,7 +324,7 @@ final class GameState extends State{
     public final void init(){
     	// load the sound
         final URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
-        if(sampleUrl!=null)
+        if(sampleUrl!=null&&pickupWeaponSourcename==null)
             pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
         else
             pickupWeaponSourcename=null;
@@ -343,28 +348,37 @@ final class GameState extends State{
              outdoorPartLevelNode.setTranslation(-128, -6, -128);
              getRoot().attachChild(outdoorPartLevelNode);
              final Skybox skyboxNode=new Skybox("skybox",128,128,128);
-             skyboxNode.setTranslation(-128,0,-128);
-             
+             skyboxNode.setTranslation(-128,0,-128);             
              final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             
+             final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
              skyboxNode.setTexture(Skybox.Face.North,north);
              skyboxNode.setTexture(Skybox.Face.West,west);
              skyboxNode.setTexture(Skybox.Face.South,south);
              skyboxNode.setTexture(Skybox.Face.East,east);
              skyboxNode.setTexture(Skybox.Face.Up,up);
-             skyboxNode.setTexture(Skybox.Face.Down,down);
-             
+             skyboxNode.setTexture(Skybox.Face.Down,down);            
              getRoot().attachChild(skyboxNode);
+             //only to test the medikit
+             //playerData.decreaseHealth(10);
+             final Node medikitNode=new Node("a medikit");
+             final Box medikitBox=new Box("a medikit", new Vector3(0,0,0),0.1,0.1,0.1);
+             final TextureState ts = new TextureState();
+             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
+             medikitBox.setRenderState(ts);
+             medikitNode.setTranslation(112.5, 0.1, 220.5);
+             medikitNode.attachChild(medikitBox);
+             medikitNode.setUserData(new MedikitUserData(20));
+             collectibleObjectsList.add(medikitNode);
+             getRoot().attachChild(medikitNode);
              final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
              uziNode.setName("an uzi");
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);
-             uziNode.setUserData(new WeaponUserData(Weapon.Identifier.UZI,new Matrix3(uziNode.getRotation())));
+             uziNode.setUserData(new WeaponUserData(Weapon.Identifier.UZI,new Matrix3(uziNode.getRotation()),true));
              //add some bounding boxes for all objects that can be picked up
              collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
@@ -372,7 +386,7 @@ final class GameState extends State{
              smachNode.setName("a smach");
              smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
-             smachNode.setUserData(new WeaponUserData(Weapon.Identifier.SMACH,new Matrix3(smachNode.getRotation())));
+             smachNode.setUserData(new WeaponUserData(Weapon.Identifier.SMACH,new Matrix3(smachNode.getRotation()),true));
              collectibleObjectsList.add(smachNode);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
@@ -380,11 +394,11 @@ final class GameState extends State{
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-             pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
+             pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation()),true));
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);            
              final Node duplicatePistolNode=pistolNode.makeCopy(false);
-             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
+             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation()),true));
              duplicatePistolNode.setTranslation(113.5,0.1,217);
              collectibleObjectsList.add(duplicatePistolNode);
              getRoot().attachChild(duplicatePistolNode);
@@ -395,21 +409,21 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             pistol2Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_9MM,new Matrix3(pistol2Node.getRotation())));
+             pistol2Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_9MM,new Matrix3(pistol2Node.getRotation()),true));
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setName("a Mag 60");
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
-             pistol3Node.setUserData(new WeaponUserData(Weapon.Identifier.MAG_60,new Matrix3(pistol3Node.getRotation())));
+             pistol3Node.setUserData(new WeaponUserData(Weapon.Identifier.MAG_60,new Matrix3(pistol3Node.getRotation()),true));
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
              laserNode.setName("a laser");
              laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
-             laserNode.setUserData(new WeaponUserData(Weapon.Identifier.LASER,new Matrix3(laserNode.getRotation())));
+             laserNode.setUserData(new WeaponUserData(Weapon.Identifier.LASER,new Matrix3(laserNode.getRotation()),true));
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
              
@@ -417,7 +431,7 @@ final class GameState extends State{
              shotgunNode.setName("a shotgun");
              shotgunNode.setTranslation(117.5,0.1,219);
              shotgunNode.setScale(0.1);
-             shotgunNode.setUserData(new WeaponUserData(Weapon.Identifier.SHOTGUN,new Matrix3(shotgunNode.getRotation())));
+             shotgunNode.setUserData(new WeaponUserData(Weapon.Identifier.SHOTGUN,new Matrix3(shotgunNode.getRotation()),false));
              collectibleObjectsList.add(shotgunNode);
              getRoot().attachChild(shotgunNode);
              
@@ -464,26 +478,63 @@ final class GameState extends State{
             }
     }
     
-    static final class WeaponUserData{
+    static abstract class CollectibleUserData{
+    	/**source name of the sound played when picking up this kind of object*/
+    	private final String sourcename;
+    	
+    	private CollectibleUserData(final String sourcename){
+    		this.sourcename=sourcename;
+    	}
+    	
+    	final String getSourcename(){
+    		return(sourcename);
+    	}
+    }
+    
+    static final class MedikitUserData extends CollectibleUserData{
+    	
+    	private final int health;
+    	
+    	private MedikitUserData(final int health){
+    		//TODO: add a source name
+    		super(null);
+    		this.health=health;
+    	}
+    	
+    	final int getHealth(){
+    		return(health);
+    	}
+    }
+    
+    static final class WeaponUserData extends CollectibleUserData{
     	
     	
     	private final Weapon.Identifier id;
     	
     	private final ReadOnlyMatrix3 rotation;
     	
+    	/**flag indicating whether a weapon can be used in both hands*/
+    	private final boolean twoHanded;
     	
-    	private WeaponUserData(Weapon.Identifier id,ReadOnlyMatrix3 rotation){
+    	
+    	private WeaponUserData(final Weapon.Identifier id,final ReadOnlyMatrix3 rotation,final boolean twoHanded){
+    		super(pickupWeaponSourcename);
     		this.id=id;
     		this.rotation=rotation;
+    		this.twoHanded=twoHanded;
     	}
     	
     	
-    	Weapon.Identifier getId(){
+    	final Weapon.Identifier getId(){
     		return(id);
     	}
     	
-    	ReadOnlyMatrix3 getRotation(){
+    	final ReadOnlyMatrix3 getRotation(){
     		return(rotation);
+    	}
+    	
+    	final boolean isTwoHanded(){
+    		return(twoHanded);
     	}
     }
 }
