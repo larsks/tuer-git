@@ -91,6 +91,8 @@ final class GameState extends State{
     private final ArrayList<Node> collectibleObjectsList;
     /**text label showing the frame rate*/
     private final BasicText fpsTextLabel;
+    /**text label showing the health*/
+    private final BasicText healthTextLabel;
     /**text label of the head-up display*/
     private final BasicText headUpDisplayLabel;
     @Deprecated
@@ -183,8 +185,16 @@ final class GameState extends State{
                 fpsTextLabel.setText(" "+Math.round(time>0?1/time:0)+" FPS");
             }           
         });
+        healthTextLabel=BasicText.createDefaultTextLabel("health display","");
+        healthTextLabel.setTranslation(new Vector3(0,60,0));
+        healthTextLabel.addController(new SpatialController<Spatial>(){
+            @Override
+            public final void update(double time,Spatial caller){
+            	healthTextLabel.setText("HEALTH: "+playerData.getHealth());
+            }           
+        });
         headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");
-        headUpDisplayLabel.setTranslation(new Vector3(0,/*1100*/40,0));
+        headUpDisplayLabel.setTranslation(new Vector3(0,40,0));
         headUpDisplayLabel.addController(new SpatialController<Spatial>(){
         	
         	private String latestText="";
@@ -338,6 +348,8 @@ final class GameState extends State{
         getRoot().attachChild(playerNode);
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
+        //attach the health display node
+        getRoot().attachChild(healthTextLabel);
         //attach the HUD node
         getRoot().attachChild(headUpDisplayLabel);
         // Load level model
