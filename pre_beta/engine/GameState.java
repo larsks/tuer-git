@@ -287,34 +287,6 @@ final class GameState extends State{
                     }
                 //updates the current location
                 playerNode.setTranslation(correctX,0.5,correctZ);
-                //If the player was not already in a teleporter
-                if(!wasBeingTeleported)
-                    {//checks if any teleporter is used
-                     Node teleporter;
-                     for(int i=teleportersList.size()-1;i>=0&&!wasBeingTeleported;i--)
-                         {teleporter=teleportersList.get(i);
-                          PickingUtil.findCollisions(teleporter,playerNode,collisionResults);
-                          if(collisionResults.getNumber()>0)
-                	          {/**
-                                * The teleporter is bi-directional. A player who was being teleported
-                                * in a direction should not be immediately teleported in the opposite
-                                * direction. I use a flag to avoid this case because applying naively 
-                                * the algorithm would be problematic as the previous position is 
-                                * outside the teleporter and the current position is inside the 
-                                * teleporter.
-                                */
-                        	   if(!wasBeingTeleported)
-                	               {
-                	        	    
-                	                wasBeingTeleported=true;
-                	               }           	                     	        	  
-                	          }
-                          collisionResults.clear();
-                         }
-                    }
-                else
-                	//updates this flag as the teleporter is no more currently in use
-                	wasBeingTeleported=false;               
                 //updates the previous location and the camera
                 previousPosition.set(playerNode.getTranslation());
                 cam.setLocation(playerNode.getTranslation());
@@ -341,7 +313,37 @@ final class GameState extends State{
                 	          }
                 	     }
                 	 collisionResults.clear();
-                    }              
+                    }
+                //checks if any teleporter is used
+                Node teleporter;
+                boolean hasCollision=false;
+                for(int i=teleportersList.size()-1;i>=0&&!hasCollision;i--)
+                    {teleporter=teleportersList.get(i);
+                     PickingUtil.findCollisions(teleporter,playerNode,collisionResults);
+                     hasCollision=collisionResults.getNumber()>0;
+                     collisionResults.clear();
+                     //if the current position is inside a teleporter
+                     if(hasCollision)
+                         {/**
+                           * The teleporter is bi-directional. A player who was being teleported
+                           * in a direction should not be immediately teleported in the opposite
+                           * direction. I use a flag to avoid this case because applying naively 
+                           * the algorithm would be problematic as the previous position is 
+                           * outside the teleporter and the current position is inside the 
+                           * teleporter.
+                           */
+                    	   //if the previous position is not on any teleporter
+                      	   if(!wasBeingTeleported)
+                               {//the players enters a teleporter                        	    
+                      		    wasBeingTeleported=true;
+                      		    //then move him
+                      		    playerNode.setTranslation(((TeleporterUserData)teleporter.getUserData()).getDestination());
+                	           }
+                	      }                          
+                    }
+                //if the players is not on any teleporter
+                if(!hasCollision)
+                	wasBeingTeleported=false;
             }           
         });
     }
@@ -526,6 +528,19 @@ final class GameState extends State{
                   cam.setLocation(previousCamLocation);
                  }
             }
+    }
+    
+    static final class TeleporterUserData{
+    	
+    	private final Vector3 destination;
+    	
+    	private TeleporterUserData(final Vector3 destination){
+    		this.destination=destination;
+    	}
+    	
+    	final Vector3 getDestination(){
+    		return(destination);
+    	}
     }
     
     static abstract class CollectibleUserData{
