@@ -89,6 +89,8 @@ final class GameState extends State{
     private final PlayerData playerData;
     /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
+    /**list of teleporters*/
+    private final ArrayList<Node> teleportersList;
     /**text label showing the frame rate*/
     private final BasicText fpsTextLabel;
     /**text label showing the health*/
@@ -238,9 +240,12 @@ final class GameState extends State{
         //add a bounding box to the camera node
         NodeHelper.setModelBound(playerNode,BoundingBox.class);
         collectibleObjectsList=new ArrayList<Node>();
+        teleportersList=new ArrayList<Node>();
         playerNode.addController(new SpatialController<Spatial>(){
         	
         	private Vector3 previousPosition=new Vector3(115,0.5,223);
+        	
+        	private boolean wasBeingTeleported=false;
         	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
@@ -248,6 +253,7 @@ final class GameState extends State{
                 playerNode.updateFromCamera();
                 //temporary avoids to move on Y               
                 playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
+                // sync the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
                 //FIXME: remove this temporary system
                 double playerStartX=previousPosition.getX();
@@ -279,7 +285,37 @@ final class GameState extends State{
                 		  correctZ=playerZ;
                 		 }
                     }
+                //updates the current location
                 playerNode.setTranslation(correctX,0.5,correctZ);
+                //If the player was not already in a teleporter
+                if(!wasBeingTeleported)
+                    {//checks if any teleporter is used
+                     Node teleporter;
+                     for(int i=teleportersList.size()-1;i>=0&&!wasBeingTeleported;i--)
+                         {teleporter=teleportersList.get(i);
+                          PickingUtil.findCollisions(teleporter,playerNode,collisionResults);
+                          if(collisionResults.getNumber()>0)
+                	          {/**
+                                * The teleporter is bi-directional. A player who was being teleported
+                                * in a direction should not be immediately teleported in the opposite
+                                * direction. I use a flag to avoid this case because applying naively 
+                                * the algorithm would be problematic as the previous position is 
+                                * outside the teleporter and the current position is inside the 
+                                * teleporter.
+                                */
+                        	   if(!wasBeingTeleported)
+                	               {
+                	        	    
+                	                wasBeingTeleported=true;
+                	               }           	                     	        	  
+                	          }
+                          collisionResults.clear();
+                         }
+                    }
+                else
+                	//updates this flag as the teleporter is no more currently in use
+                	wasBeingTeleported=false;               
+                //updates the previous location and the camera
                 previousPosition.set(playerNode.getTranslation());
                 cam.setLocation(playerNode.getTranslation());
                 //checks if any object is collected
@@ -305,7 +341,7 @@ final class GameState extends State{
                 	          }
                 	     }
                 	 collisionResults.clear();
-                    }
+                    }              
             }           
         });
     }
@@ -464,6 +500,8 @@ final class GameState extends State{
              //add a bounding box to each collectible object
              for(Node collectible:collectibleObjectsList)
             	 NodeHelper.setModelBound(collectible,BoundingBox.class);
+             for(Node teleporter:teleportersList)
+            	 NodeHelper.setModelBound(teleporter,BoundingBox.class);
             }
         catch(final Exception ex)
         {ex.printStackTrace();}
