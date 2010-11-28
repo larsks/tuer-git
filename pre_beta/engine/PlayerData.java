@@ -64,27 +64,49 @@ final class PlayerData {
 	boolean collect(Node collectible){
 		//check if the collectible can be collected
 		final boolean result;
-		final int weaponIndex=((GameState.WeaponUserData)collectible.getUserData()).getId().ordinal();
-		if(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex])
-		    {if(!rightHandWeaponsAvailability[weaponIndex])
-		         {rightHandWeaponsAvailability[weaponIndex]=true;
-		          rightHandWeaponsList[weaponIndex]=collectible;
-		          result=true;
-		         }
+		final Object userData=collectible.getUserData();
+		if(userData!=null&&userData instanceof GameState.CollectibleUserData)
+		    {if(userData instanceof GameState.WeaponUserData)
+		         result=collectWeapon(collectible,(GameState.WeaponUserData)userData);
 		     else
-		    	 //FIXME: check if this weapon can have a dual use
-		    	 if(true)
-		             {leftHandWeaponsAvailability[weaponIndex]=true;
-		    	      leftHandWeaponsList[weaponIndex]=collectible;
-		    	      result=true;
-		             }
-		    	 /*else
-		    		 result=false;*/
-		     if(result&&collectible.getParent()!=null)
-		    	 collectible.getParent().detachChild(collectible);
+		    	 if(userData instanceof GameState.MedikitUserData)
+		    		 result=collectMedikit(collectible,(GameState.MedikitUserData)userData);
+		    	     //TODO: handle here the other kinds of collectible objects
+		    	 else
+		    		 result=false;
 		    }
 		else
 			result=false;
+		return(result);
+	}
+	
+	private boolean collectWeapon(Node collectible,final GameState.WeaponUserData weaponUserData){
+		final boolean result;
+		final int weaponIndex=weaponUserData.getId().ordinal();
+	    if(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex])
+            {if(!rightHandWeaponsAvailability[weaponIndex])
+                 {rightHandWeaponsAvailability[weaponIndex]=true;
+                  rightHandWeaponsList[weaponIndex]=collectible;
+                  result=true;
+                 }
+             else
+  	             //check if this weapon can have a dual use
+  	             if(weaponUserData.isTwoHanded())
+                     {leftHandWeaponsAvailability[weaponIndex]=true;
+  	                  leftHandWeaponsList[weaponIndex]=collectible;
+  	                  result=true;
+                     }
+  	             else
+  		             result=false;
+            }
+        else
+	        result=false;
+		return(result);
+	}
+	
+	private boolean collectMedikit(Node collectible,final GameState.MedikitUserData medikitUserData){
+		final boolean result;
+		result=increaseHealth(medikitUserData.getHealth())>0;
 		return(result);
 	}
 	
@@ -95,6 +117,11 @@ final class PlayerData {
 		return(oldHealth-health);
 	}
 	
+	/**
+	 * increases the health
+	 * @param amount the suggested increase of health
+	 * @return the real increase of health
+	 */
 	final int increaseHealth(int amount){
 	    int oldHealth=health;
 	    if(amount>0 && health<maxHealth)
