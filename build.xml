@@ -361,6 +361,8 @@
 	  	<delete>
 	  		<fileset file="key" />
 	  		<fileset dir="${deploymentdestdir}" includes="**/*.jar" />
+	  		<fileset file="${deploymentdestdir}/${tuer-jnlp-filename}" />
+	  		<fileset file="${deploymentdestdir}/${jfpsm-jnlp-filename}" />
 	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
 	  		<fileset file="${destdir}/${tuer-jar-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
@@ -372,6 +374,9 @@
 	  		<fileset file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
+	  		<fileset file="${destdir}/CodecJOrbis.jar" />
+	  		<fileset file="${destdir}/LibraryJavaSound.jar" />
+	  		<fileset file="${destdir}/SoundSystem.jar" />
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->
