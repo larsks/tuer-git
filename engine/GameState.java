@@ -410,8 +410,8 @@ final class GameState extends State{
              final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
              outdoorPartLevelNode.setTranslation(-128, -6, -128);
              getRoot().attachChild(outdoorPartLevelNode);
-             final Skybox skyboxNode=new Skybox("skybox",128,128,128);
-             skyboxNode.setTranslation(-128,0,-128);             
+             final Skybox skyboxNode=new Skybox("skybox",64,64,64);
+             skyboxNode.setTranslation(-128,0,-128);
              final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
              final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -430,7 +430,7 @@ final class GameState extends State{
              teleporterBox.setRandomColors();
              teleporterNode.setTranslation(112.5,0,221.5);
              teleporterNode.attachChild(teleporterBox);
-             teleporterNode.setUserData(new TeleporterUserData(new Vector3(-16,0.5,-16)));
+             teleporterNode.setUserData(new TeleporterUserData(new Vector3(-132,0.5,-102)));
              teleportersList.add(teleporterNode);
              getRoot().attachChild(teleporterNode);
              //only to test the medikit
