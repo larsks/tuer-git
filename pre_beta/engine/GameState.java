@@ -75,6 +75,10 @@ final class GameState extends State{
     private static String pickupWeaponSourcename;
     /**path of the sound sample played when picking up a weapon*/
     private static final String pickupWeaponSoundSamplePath="/sounds/pickup_weapon.ogg";
+    /**source name of the sound played when entering a teleporter*/
+    private static String teleporterUseSourcename;
+    /**path of the sound sample played when entering a teleporter*/
+    private static final String teleporterUseSoundSamplePath="/sounds/teleporter_use.ogg";
     /**previous (before entering this state) frustum far value*/
     private double previousFrustumNear;
     /**previous (before entering this state) frustum near value*/
@@ -249,11 +253,11 @@ final class GameState extends State{
         	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
-                // sync the camera node with the camera
+                //synchronizes the camera node with the camera
                 playerNode.updateFromCamera();
-                //temporary avoids to move on Y               
+                //temporary avoids to move on Y
                 playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
-                // sync the camera with the camera node
+                //synchronizes the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
                 //FIXME: remove this temporary system
                 double playerStartX=previousPosition.getX();
@@ -325,7 +329,7 @@ final class GameState extends State{
                      //if the current position is inside a teleporter
                      if(hasCollision)
                          {/**
-                           * The teleporter is bi-directional. A player who was being teleported
+                           * The teleporter can be bi-directional. A player who was being teleported
                            * in a direction should not be immediately teleported in the opposite
                            * direction. I use a flag to avoid this case because applying naively 
                            * the algorithm would be problematic as the previous position is 
@@ -336,8 +340,16 @@ final class GameState extends State{
                       	   if(!wasBeingTeleported)
                                {//the players enters a teleporter                        	    
                       		    wasBeingTeleported=true;
+                      		    Vector3 teleporterDestination=((TeleporterUserData)teleporter.getUserData()).getDestination();
                       		    //then move him
-                      		    playerNode.setTranslation(((TeleporterUserData)teleporter.getUserData()).getDestination());
+                      		    playerNode.setTranslation(teleporterDestination);
+                      		    //updates the previous location to avoid any problem when detecting the collisions
+                                previousPosition.set(teleporterDestination);
+                                //synchronizes the camera with the camera node
+                                cam.setLocation(teleporterDestination);
+                                //play a sound if available
+                 	            if(teleporterUseSourcename!=null)
+                                    SoundManager.getInstance().play(teleporterUseSourcename);
                 	           }
                 	      }                          
                     }
@@ -354,11 +366,7 @@ final class GameState extends State{
     	    collisionMap=new boolean[map.getWidth()][map.getHeight()];
     	    for(int y=0;y<map.getHeight();y++)
     	    	for(int x=0;x<map.getWidth();x++)
-    	    		//FIXME: temporary hack to reach the outdoor section: replace it by a teleporter
-    	    		if(0<=x && x<=1 && 0<=y && y<=1)
-    	    		    collisionMap[x][y]=false;
-    	    		else
-    	    			collisionMap[x][y]=(map.getRGB(x, y)==Color.BLUE.getRGB());
+    	    		collisionMap[x][y]=(map.getRGB(x, y)==Color.BLUE.getRGB());
     	   }
     	catch(IOException ioe)
 		{ioe.printStackTrace();}
@@ -371,11 +379,16 @@ final class GameState extends State{
     @Override
     public final void init(){
     	// load the sound
-        final URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
+        URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null&&pickupWeaponSourcename==null)
             pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
         else
             pickupWeaponSourcename=null;
+        sampleUrl=GameState.class.getResource(teleporterUseSoundSamplePath);
+        if(sampleUrl!=null&&teleporterUseSourcename==null)
+        	teleporterUseSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+        else
+        	teleporterUseSourcename=null;
     	// clear the list of objects that can be picked up
     	collectibleObjectsList.clear();
         // Remove all previously attached children
@@ -412,14 +425,22 @@ final class GameState extends State{
              skyboxNode.setTexture(Skybox.Face.Up,up);
              skyboxNode.setTexture(Skybox.Face.Down,down);            
              getRoot().attachChild(skyboxNode);
+             final Node teleporterNode=new Node("a teleporter");
+             final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+             teleporterBox.setRandomColors();
+             teleporterNode.setTranslation(112.5,0,221.5);
+             teleporterNode.attachChild(teleporterBox);
+             teleporterNode.setUserData(new TeleporterUserData(new Vector3(-16,0.5,-16)));
+             teleportersList.add(teleporterNode);
+             getRoot().attachChild(teleporterNode);
              //only to test the medikit
              //playerData.decreaseHealth(10);
              final Node medikitNode=new Node("a medikit");
-             final Box medikitBox=new Box("a medikit", new Vector3(0,0,0),0.1,0.1,0.1);
+             final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
              ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
              medikitBox.setRenderState(ts);
-             medikitNode.setTranslation(112.5, 0.1, 220.5);
+             medikitNode.setTranslation(112.5,0.1,220.5);
              medikitNode.attachChild(medikitBox);
              medikitNode.setUserData(new MedikitUserData(20));
              collectibleObjectsList.add(medikitNode);
@@ -488,8 +509,7 @@ final class GameState extends State{
              final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
              agentNode.setName("an agent");
              agentNode.setTranslation(118.5,0.4,219);
-             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             //FIXME: texture ordinates are wrong
+             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
              agentNode.setScale(0.015);
              getRoot().attachChild(agentNode);
              
