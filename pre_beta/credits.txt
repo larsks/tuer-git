@@ -1,4 +1,4 @@
-TUER : Truly Ununsual Experience of Revolution
+TUER : Truly Unusual Experience of Revolution
 pre-beta version (unstable)
 
 Single player first person shooter 
@@ -7,7 +7,7 @@ largely inspired from "Art Attack" by Vincent Stahl (www.stahlforce.com)
 
 project under GPL licence
 
-requires OpenGL 1.3 and Java Runtime Environment 6
+requires OpenGL 1.3 and Java Runtime Environment 1.6
 
 please report any bug : gouessej@yahoo.fr
 
@@ -18,4 +18,5 @@ Vincent Stahl (author of "Art Attack", TUER wouldn't exist without him)
 Yannick Comte (main alpha tester under Linux and Microsoft Windows Vista, author of some videos)
 Maxime Comte (artist who has drawn one of the pistols)
 Psionic3D (artist who drew most of the weapons)
-Otto the cleaner (artist who drew some outdoor environments)
+Oto the cleaner (artist who drew some outdoor environments)
+Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons Sampling Plus 1.0 License)
