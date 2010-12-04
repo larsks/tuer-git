@@ -432,7 +432,15 @@ final class GameState extends State{
              teleporterNode.attachChild(teleporterBox);
              teleporterNode.setUserData(new TeleporterUserData(new Vector3(-132,0.5,-102)));
              teleportersList.add(teleporterNode);
-             getRoot().attachChild(teleporterNode);
+             getRoot().attachChild(teleporterNode);            
+             final Node secondTeleporterNode=new Node("another teleporter");
+             final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+             secondTeleporterBox.setRandomColors();
+             secondTeleporterNode.setTranslation(-132,0,-102);
+             secondTeleporterNode.attachChild(secondTeleporterBox);
+             secondTeleporterNode.setUserData(new TeleporterUserData(new Vector3(112.5,0.5,221.5)));
+             teleportersList.add(secondTeleporterNode);
+             getRoot().attachChild(secondTeleporterNode);            
              //only to test the medikit
              //playerData.decreaseHealth(10);
              final Node medikitNode=new Node("a medikit");
