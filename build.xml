@@ -23,6 +23,8 @@
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
+	<!-- flag indicating whether IzPack is used for the deployment -->
+	<property name="izpack-deployment-enabled" value="false"/>
 	<!-- path of IzPack's compiler (used to create the installer) -->
 	<property name="izpack-compiler-path" value=""/>
 	<!-- XML file used to configure the creation of the JFPSM installer -->
@@ -362,7 +364,7 @@
 		<copy file="${destdir}/LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/SoundSystem.jar" todir="${deploymentdestdir}"/>
 	</target>
-	<target name="prepare-izpack-deployment" depends="prepare-java-web-start-deployment" description="Creates the Izpack installer of JFPSM">
+	<target name="prepare-izpack-deployment" depends="prepare-java-web-start-deployment" if="izpack-deployment-enabled" description="Creates the Izpack installer of JFPSM">
 		<fail message="The property izpack-compiler-path should contain the path of IzPack compiler">
 		    <condition>
 		    	<or>
@@ -375,6 +377,8 @@
 		</fail>
 		<exec executable="${izpack-compiler-path}">
 	    	<arg value="${izpack-deployment-destdir}/${jfpsm-izpack-install-filename}" />
+			<arg value="-k" />
+			<arg value="standard" />
 	    	<arg value="-b" />
 	        <arg value="${izpack-deployment-destdir}" />
 	    	<arg value="-o" />
@@ -393,7 +397,7 @@
 	<!-- ================================================================= -->
 	<!-- Deploy                                                            -->
 	<!-- ================================================================= -->
-	<target name="deploy" depends="prepare-izpack-deployment" description="Creates all installers and puts all signed JARs and all JNLP files required for the deployment into the deployment directory">	     
+	<target name="deploy" depends="prepare-java-web-start-deployment,prepare-izpack-deployment" description="Creates all installers and puts all signed JARs and all JNLP files required for the deployment into the deployment directory">	     
 	    <!-- TODO: put them onto the server -->
 	</target>
 	<!-- ================================================================= -->

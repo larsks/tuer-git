@@ -21,9 +21,10 @@
         <authors>
             <author name="Julien Gouesse" email="gouessej@yahoo.fr"/>
         </authors>
-    <javaversion>1.6</javaversion>
-    <requiresjdk>yes</requiresjdk>
+        <javaversion>1.6</javaversion>
+        <requiresjdk>yes</requiresjdk>
         <url>http://tuer.sourceforge.net</url>
+        <!--<webdir>http://tuer.sourceforge.net/very_experimental/izpack/</webdir>-->
     </info>
 
     <!-- 
@@ -48,6 +49,7 @@
     <resources>
         <res id="LicencePanel.licence" src="../../gpl.txt"/>
         <res id="InfoPanel.info" src="../../credits.txt"/>
+        <res id="Installer.image" src="../tuerLogo.png" />       
     </resources>
 
     <!-- 
@@ -71,8 +73,8 @@
     <packs>
         <pack name="Binaries" required="yes">
             <description>The base files</description>
-            <file src="../../credits.txt" targetdir="$INSTALL_PATH/misc"/>
-            <file src="../../gpl.txt" targetdir="$INSTALL_PATH/misc"/>            
+            <!-- <file src="../../credits.txt" targetdir="$INSTALL_PATH/misc"/> -->
+            <!-- <file src="../../gpl.txt" targetdir="$INSTALL_PATH/misc"/> -->
             <!-- Ardor3D (JAR) -->
             <file src="../ardor3d-animation-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
             <file src="../ardor3d-awt-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
