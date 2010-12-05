@@ -8,8 +8,6 @@
 <project name="TUER" default="build" basedir=".">
 	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
 	<property name="deploymentdestdir" value="target"/>
-	<!-- directory containing IzPack installers -->
-	<property name="izpack-deployment-destdir" value="${deploymentdestdir}/izpack"/>
 	<!-- intermediary directory containing JARs that are going to be signed -->
 	<property name="destdir" value="."/>
 	<!-- directory containing the source code -->
@@ -23,14 +21,6 @@
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
-	<!-- flag indicating whether IzPack is used for the deployment -->
-	<property name="izpack-deployment-enabled" value="false"/>
-	<!-- path of IzPack's compiler (used to create the installer) -->
-	<property name="izpack-compiler-path" value=""/>
-	<!-- XML file used to configure the creation of the JFPSM installer -->
-	<property name="jfpsm-izpack-install-filename" value="jfpsmIzpackInstall.xml"/>
-	<!-- XML file used to configure the creation of the TUER installer -->
-	<property name="tuer-izpack-install-filename" value="tuerIzpackInstall.xml"/>
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 		<pathelement path="${destdir}"/>
@@ -273,9 +263,9 @@
 		</signjar>
 	</target>
 	<!-- ================================================================= -->
-	<!-- Prepare Java Web Start Deployment                                 -->
+	<!-- Deploy                                                            -->
 	<!-- ================================================================= -->
-	<target name="prepare-java-web-start-deployment" depends="dist" description="Puts all signed JARs and all JNLP files required for the deployment with Java Web Start into the deployment directory">
+	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files required for the deployment with Java Web Start into the deployment directory">
 		<delete dir="${deploymentdestdir}" includes="**/*.jar" />
 		<!-- generate the JNLP files used by Java Web Start -->
 		<echo file="${deploymentdestdir}/${tuer-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
@@ -363,42 +353,6 @@
 		<copy file="${destdir}/CodecJOrbis.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/SoundSystem.jar" todir="${deploymentdestdir}"/>
-	</target>
-	<target name="prepare-izpack-deployment" depends="prepare-java-web-start-deployment" if="izpack-deployment-enabled" description="Creates the Izpack installer of JFPSM">
-		<fail message="The property izpack-compiler-path should contain the path of IzPack compiler">
-		    <condition>
-		    	<or>
-		    	    <not>
-		    	        <isset property="izpack-compiler-path"/>
-		    	    </not>		                                  
-		            <equals arg1="${izpack-compiler-path}" arg2="" />		                 
-		        </or>                                           		                
-		    </condition>
-		</fail>
-		<exec executable="${izpack-compiler-path}">
-	    	<arg value="${izpack-deployment-destdir}/${jfpsm-izpack-install-filename}" />
-			<arg value="-k" />
-			<arg value="standard" />
-	    	<arg value="-b" />
-	        <arg value="${izpack-deployment-destdir}" />
-	    	<arg value="-o" />
-	    	<arg value="${izpack-deployment-destdir}/${jfpsm-jar-filename}" />
-	    </exec>
-		<!--<exec executable="${izpack-compiler-path}">
-		    <arg value="${izpack-deployment-destdir}/${tuer-izpack-install-filename}" />
-		    <arg value="-b" />
-		    <arg value="${izpack-deployment-destdir}" />
-		    <arg value="-o" />
-		    <arg value="${izpack-deployment-destdir}/${tuer-jar-filename}" />
-		</exec>-->
-		<!-- TODO: sign the installer(s) -->
-		<!-- TODO: generate the JNLP file(s) -->
-	</target>
-	<!-- ================================================================= -->
-	<!-- Deploy                                                            -->
-	<!-- ================================================================= -->
-	<target name="deploy" depends="prepare-java-web-start-deployment,prepare-izpack-deployment" description="Creates all installers and puts all signed JARs and all JNLP files required for the deployment into the deployment directory">	     
-	    <!-- TODO: put them onto the server -->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
