@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<!-- 
+    A sample installation file.
+    Use it as a base for your own installers :-)
+    
+    To compile it :
+    - go in the bin directory where you installed IzPack
+    - call "compile ../sample/install.xml -b ../sample"
+-->
+
+<installation version="1.0">
+
+    <!-- 
+        The info section.
+        The meaning of the tags should be natural ...
+    -->
+    <info>
+        <appname>JFPSM</appname>
+        <appversion>pre-beta version</appversion>
+        <authors>
+            <author name="Julien Gouesse" email="gouessej@yahoo.fr"/>
+        </authors>
+    <javaversion>1.6</javaversion>
+    <requiresjdk>yes</requiresjdk>
+        <url>http://tuer.sourceforge.net</url>
+    </info>
+
+    <!-- 
+        The gui preferences indication.
+        Sets the installer window to 640x480. It will not be able to change the size.
+    -->
+    <guiprefs width="640" height="480" resizable="yes"/>
+
+    <!-- 
+        The locale section.
+        Asks here to include the English and French langpacks.
+    -->
+    <locale>
+        <langpack iso3="eng"/>
+        <!--<langpack iso3="fra"/>-->
+    </locale>
+
+    <!-- 
+        The resources section.
+        The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
+    -->
+    <resources>
+        <res id="LicencePanel.licence" src="../../gpl.txt"/>
+        <res id="InfoPanel.info" src="../../credits.txt"/>
+    </resources>
+
+    <!-- 
+        The panels section.
+        We indicate here which panels we want to use. The order will be respected.
+    -->
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel"/>
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="FinishPanel"/>
+    </panels>
+
+    <!-- 
+        The packs section.
+        We specify here our packs.
+    -->
+    <packs>
+        <pack name="Binaries" required="yes">
+            <description>The base files</description>
+            <file src="../../credits.txt" targetdir="$INSTALL_PATH/misc"/>
+            <file src="../../gpl.txt" targetdir="$INSTALL_PATH/misc"/>            
+            <!-- Ardor3D (JAR) -->
+            <file src="../ardor3d-animation-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-awt-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-collada-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-core-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-extras-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-jogl-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <file src="../ardor3d-ui-0.8-SNAPSHOT.jar" targetdir="$INSTALL_PATH/lib/jar/ardor3d"/>
+            <!-- Google-collect -->
+            <file src="../guava-r07.jar" targetdir="$INSTALL_PATH/lib/jar/google-collect"/>
+            <!-- JFPSM (JAR) -->
+            <file src="../jfpsm.jar" targetdir="$INSTALL_PATH/lib/jar/jfpsm"/>
+            <!-- JOGL (JAR) -->
+            <!-- <file src="../jogl.jar" targetdir="$INSTALL_PATH/lib/jar/jogl"/> -->
+            <!-- <file src="../gluegen-rt.jar" targetdir="$INSTALL_PATH/lib/jar/jogl"/> -->
+            <!-- JOGL (native): libgluegen-rt.so, libjogl_awt.so, libjogl_cg.so, libjogl.so -->
+            <!--<file src="lib/native/jogl/linux/x86/libgluegen-rt.so" targetdir="$INSTALL_PATH/lib/native/jogl/linux/x86"/>-->
+            <!-- Paul Lamb's Sound System (JAR) -->
+            <file src="../CodecJOrbis.jar" targetdir="$INSTALL_PATH/lib/jar/pss"/>
+            <file src="../LibraryJavaSound.jar" targetdir="$INSTALL_PATH/lib/jar/pss"/>
+            <file src="../SoundSystem.jar" targetdir="$INSTALL_PATH/lib/jar/pss"/>                     
+        <!--  
+             <os family="unix" arch="i386"/>
+              -->       
+              <!-- TODO: add shortcuts -->
+        </pack>
+        <!--<pack name="Docs" required="no">
+            <description>The documentation</description>
+            <file src="doc" targetdir="$INSTALL_PATH"/>-->
+            <!-- Reccursive adding -->
+        <!--</pack>-->
+        <!--<pack name="Sources" required="no">
+            <description>The sources</description>
+            <file src="src" targetdir="$INSTALL_PATH/src"/>-->
+            <!-- TODO: put the zipped source code here -->
+        <!--</pack>-->
+    </packs>
+</installation>
