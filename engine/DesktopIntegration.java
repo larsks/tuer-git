@@ -35,7 +35,8 @@ public final class DesktopIntegration {
 	
 	private enum OS{
 		Linux("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
-		Mac("",null,-1,-1),
+		//do not use alias file format as it is very complicated to create
+		Mac("sh",new String[]{"javaws "},-1,0),
 		Other(null,null,-1,-1),
 		//do not use LNK file format as it differs depending on the version
 		Windows("bat",new String[]{System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+"javaws.exe "},-1,0);
@@ -79,6 +80,7 @@ public final class DesktopIntegration {
 		 * finds the desktop path of the current operating system
 		 */
 		final String osName=System.getProperty("os.name").toLowerCase();
+		final String userHome=System.getProperty("user.home");
 		logger.info("operating system: "+osName);
 		if(osName.contains("linux"))
 		    {operatingSystem=OS.Linux;
@@ -87,8 +89,7 @@ public final class DesktopIntegration {
 			 String XDG_DESKTOP_DIR=System.getenv("XDG_DESKTOP_DIR");
 		     /**
 		      * workaround of a KDE bug. GNOME fills this environment variable correctly, not KDE.
-		      */
-		     final String userHome=System.getProperty("user.home");
+		      */		     
 		     if(XDG_DESKTOP_DIR==null||XDG_DESKTOP_DIR.equals(""))
 		         {logger.warning("XDG_DESKTOP_DIR is not set, use a workaround for non-GNOME window managers");
 		    	  //this script contains the configuration of the user directories including the directory used by the desktop
@@ -180,50 +181,112 @@ public final class DesktopIntegration {
 			if(osName.contains("mac"))
 		        {operatingSystem=OS.Mac;
 				 logger.info("operating system family: Mac");
-				 desktopPath=null;
+				 final String oldMacDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop Folder";
+				 final String modernMacDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
+				 if(new File(oldMacDesktopFolderPath).exists())
+				     {logger.info("use old desktop folder: "+oldMacDesktopFolderPath);
+					  desktopPath=oldMacDesktopFolderPath;
+				     }
+				 else
+					 if(new File(modernMacDesktopFolderPath).exists())
+						 {logger.info("use modern desktop folder: "+modernMacDesktopFolderPath);
+						  desktopPath=modernMacDesktopFolderPath;
+						 }
+					 else
+				         {logger.warning("The desktop folder does not match with any known pattern. There is no way to find it");
+						  desktopPath=null;
+				         }
 		        }
 		    else
 		    	if(osName.contains("windows"))
 			        {operatingSystem=OS.Windows;
 		    		 logger.info("operating system family: Windows");
-		    		 final String REGQUERY_UTIL="reg query ";
-			         final String REGSTR_TOKEN="REG_SZ";
-			         final String DESKTOP_FOLDER_CMD=REGQUERY_UTIL+"\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v DESKTOP";
-			         String registryValue=null;
-			         try
-			            {Process process=Runtime.getRuntime().exec(DESKTOP_FOLDER_CMD);
-			             StreamReader reader=new StreamReader(process.getInputStream());
-			             reader.start();
-			             process.waitFor();
-			             reader.join();
-			             String result=reader.getResult();
-			             int p=result.indexOf(REGSTR_TOKEN);
-			             if(p==-1)
-			            	 registryValue=null;
-			             else 
-			            	 registryValue=result.substring(p+REGSTR_TOKEN.length()).trim();
-			            }
-			         catch(Exception e)
-			         {e.printStackTrace();}
-		    		 desktopPath=registryValue;
+		    		 //use Windows Scripting Host (supported since Windows 98)
+		    		 final String[] wshellCmds=new String[]{"wscript //NoLogo //B","WScript.Echo(WScript.SpecialFolders(\"Desktop\"));"};
+		    		 String specialFolderValue=null;
+		    		 try
+		    		    {Process process=Runtime.getRuntime().exec(wshellCmds[0]);
+		    		     process.waitFor();
+		    		     process=Runtime.getRuntime().exec(wshellCmds[1]);
+		    		     StreamReader reader=new StreamReader(process.getInputStream());
+		                 reader.start();
+		                 process.waitFor();
+		                 reader.join();
+		                 specialFolderValue=reader.getResult();
+		    		    }
+		    		 catch(Exception e)
+		    		 {e.printStackTrace();}
+		    		 if(specialFolderValue!=null)
+		    		     {logger.info("special desktop folder path: "+specialFolderValue);
+		        	      desktopPath=specialFolderValue;
+		    		     }
+		    		 else
+		    		     {//use Windows registry
+		    			  final String REGQUERY_UTIL="reg query ";
+			              final String REGSTR_TOKEN="REG_SZ";
+			              final String DESKTOP_FOLDER_CMD=REGQUERY_UTIL+"\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v DESKTOP";
+			              String registryValue=null;
+			              try
+			                 {Process process=Runtime.getRuntime().exec(DESKTOP_FOLDER_CMD);
+			                  StreamReader reader=new StreamReader(process.getInputStream());
+			                  reader.start();
+			                  process.waitFor();
+			                  reader.join();
+			                  String result=reader.getResult();
+			                  int p=result.indexOf(REGSTR_TOKEN);
+			                  if(p==-1)
+			            	      registryValue=null;
+			                  else 
+			            	      {//get the raw value
+			            	       registryValue=result.substring(p+REGSTR_TOKEN.length()).trim();
+			            	       //substitute environment variables by their values
+			            	       Map<String,String> environmentVarsMap=System.getenv();
+			     		    	   String environmentVariable;
+			     		    	   int indexOfEnvironmentVariableOccurrence;
+			     		    	   for(Entry<String,String> entry:environmentVarsMap.entrySet())
+			     		    	       {environmentVariable=entry.getKey();
+			     		    	        /**
+			     		    	         * It uses indexOf() and substring() because replaceAll() cannot be used as this method uses 
+			     		    	         * regular expressions and interprets '%' as a punctuation character which is often in the names of
+			     		    	         * environment variables.
+			     		    	         */
+			     		    	        indexOfEnvironmentVariableOccurrence=registryValue.indexOf(environmentVariable);
+			     		    	        if(indexOfEnvironmentVariableOccurrence!=-1)
+			     		    	        	registryValue=entry.getValue()+registryValue.substring(indexOfEnvironmentVariableOccurrence+environmentVariable.length(),registryValue.length());
+			     		    	       }
+			            	      }
+			                 }
+			              catch(Exception e)
+			              {e.printStackTrace();}
+			              if(registryValue!=null&&new File(registryValue).exists())
+			                  {logger.info("registry value used as a desktop path: "+registryValue);
+			        	       desktopPath=registryValue;
+			                  }
+			              else
+			        	      {//this is the default desktop folder on Windows Vista and 7, whatever the locale
+			        	       final String modernWindowsDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
+			        	       if(new File(modernWindowsDesktopFolderPath).exists())
+		    		               {logger.info("usual default desktop path: "+modernWindowsDesktopFolderPath);
+			        	            desktopPath=modernWindowsDesktopFolderPath;
+		    		               }
+			        	       else
+			        		       {logger.warning("There is no way to find the desktop folder");
+			        		        desktopPath=null;
+			        		       }
+			        	      }
+		    		     }
 			        }
 			    else
 			    	{operatingSystem=OS.Other;
 			    	 logger.warning("unknown operating system family");
-			    	 desktopPath=null;
+			    	 final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
+			    	 desktopPath=new File(defaultDesktopFolderPath).exists()?defaultDesktopFolderPath:null;
 			    	}
 		if(desktopPath!=null)
-		    {logger.info("desktop path: "+desktopPath);
-		     if(operatingSystem.equals(OS.Linux))
-		         logger.info("operating system supported");
+		    {if(operatingSystem.equals(OS.Other))
+		    	 logger.warning("operating system not supported. Desktop path: "+desktopPath);
 		     else
-		    	 if(operatingSystem.equals(OS.Mac))		    	     
-		    	     logger.warning("operating system not yet supported");		    	     
-		    	 else
-		    		 if(operatingSystem.equals(OS.Windows))		    		     
-		    		     logger.warning("operating system not yet supported");		    		     
-		    		 else		    			 
-		    			 logger.warning("operating system not supported");		    			 
+		    	 logger.info("operating system supported. Desktop path: "+desktopPath);
 		    }
 		else		
 			logger.warning("desktop path not found");
@@ -231,6 +294,10 @@ public final class DesktopIntegration {
 	
 	public static final boolean isDesktopShortcutCreationSupported(){
 		return(instance.desktopPath!=null&&instance.operatingSystem.getDesktopShortcutFileContent()!=null);
+	}
+	
+	public static final String getDesktopDirectoryPath(){
+		return(instance.desktopPath);
 	}
 	
 	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
