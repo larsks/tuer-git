@@ -18,6 +18,9 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import engine.GameState.WeaponUserData;
+import engine.weapon.Ammunition;
+import engine.weapon.AmmunitionContainer;
+import engine.weapon.Weapon;
 
 final class PlayerData {
     
@@ -38,9 +41,11 @@ final class PlayerData {
 	
 	private transient Node[] leftHandWeaponsList;
 	
-	private Weapon.Identifier weaponIDInUse;
+	private Weapon weaponIDInUse;
 	
 	private CameraNode cameraNode;
+	
+	private final AmmunitionContainer ammoContainer;
 	
 	
 	PlayerData(CameraNode cameraNode){
@@ -49,7 +54,7 @@ final class PlayerData {
 		invincible=false;
 		weaponIDInUse=null;
 		dualWeaponUse=false;
-		final int weaponCount=Weapon.Identifier.values().length;
+		final int weaponCount=Weapon.values().length;
 		rightHandWeaponsAvailability=new boolean[weaponCount];
 		leftHandWeaponsAvailability=new boolean[weaponCount];
 		rightHandWeaponsList=new Node[weaponCount];
@@ -58,6 +63,7 @@ final class PlayerData {
 		Arrays.fill(leftHandWeaponsAvailability,false);
 		Arrays.fill(rightHandWeaponsList,null);
 		Arrays.fill(leftHandWeaponsList,null);
+		ammoContainer=new AmmunitionContainer();
 	}
 	
 	
@@ -91,7 +97,7 @@ final class PlayerData {
                  }
              else
   	             //check if this weapon can have a dual use
-  	             if(weaponUserData.isTwoHanded())
+  	             if(weaponUserData.getId().isTwoHanded())
                      {leftHandWeaponsAvailability[weaponIndex]=true;
   	                  leftHandWeaponsList[weaponIndex]=collectible;
   	                  result=true;
@@ -112,7 +118,7 @@ final class PlayerData {
 	
 	int decreaseHealth(int damage){
 		int oldHealth=health;
-		if(!invincible && damage>0 && health > 0)
+		if(!invincible && damage>0)
 			health=Math.max(0,health-damage);
 		return(oldHealth-health);
 	}
@@ -123,8 +129,8 @@ final class PlayerData {
 	 * @return the real increase of health
 	 */
 	final int increaseHealth(int amount){
-	    int oldHealth=health;
-	    if(amount>0 && health<maxHealth)
+	    final int oldHealth=health;
+	    if(amount>0)
 	        health=Math.min(maxHealth,health+amount);
 	    return(health-oldHealth);
 	}
@@ -147,6 +153,33 @@ final class PlayerData {
 		Arrays.fill(leftHandWeaponsList,null);
 	}
 	
+	final int reload(){
+		int reloadedAmmoCount=0;
+		if(weaponIDInUse!=null)
+		    {final int magazineSize=weaponIDInUse.getMagazineSize();
+		     final Ammunition ammo=weaponIDInUse.getAmmunition();
+			 final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
+			 //remove ammo from the container
+			 final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
+			 //add it into the magazine
+			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
+			 //increase reloaded ammunition count
+			 reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
+			 if(dualWeaponUse)
+			     {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();				  
+			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
+				  //remove ammo from the container
+				  final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
+				  //add it into the magazine
+				  leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
+				  //increase reloaded ammunition count
+				  reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
+			     }
+		    }		
+		return(reloadedAmmoCount);
+	}
+	
 	void selectNextWeapon(){
 		selectWeapon(true);
 	}
@@ -156,7 +189,7 @@ final class PlayerData {
 	}
     
     private void selectWeapon(boolean next){
-    	final Weapon.Identifier oldWeaponIDInUse=weaponIDInUse;
+    	final Weapon oldWeaponIDInUse=weaponIDInUse;
     	final boolean oldDualWeaponUse=dualWeaponUse;
     	//if the player wants to use a single weapon instead of 2
     	if(!next&&dualWeaponUse)
@@ -166,7 +199,7 @@ final class PlayerData {
     		if(next&&!dualWeaponUse&&weaponIDInUse!=null&&leftHandWeaponsAvailability[weaponIDInUse.ordinal()]&&rightHandWeaponsAvailability[weaponIDInUse.ordinal()])
     			dualWeaponUse=true;
     		else
-    		    {final int weaponCount=Weapon.Identifier.values().length;
+    		    {final int weaponCount=Weapon.values().length;
     	         int multiplier=next?1:-1;
     	         final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.ordinal()+weaponCount)+multiplier)%weaponCount:0;
 		         int currentIndex;
@@ -175,14 +208,14 @@ final class PlayerData {
 		              if(i%2==0)
 		                  {if(next)
 		                       {if(rightHandWeaponsAvailability[currentIndex])
-				                    {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+				                    {weaponIDInUse=Weapon.values()[currentIndex];
 				                     dualWeaponUse=false;
 					                 break;
 				                    }
 		                       }
 		                   else
 		                       {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
-			                        {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+			                        {weaponIDInUse=Weapon.values()[currentIndex];
 			                         dualWeaponUse=true;
 				                     break;
 			                        }
@@ -191,14 +224,14 @@ final class PlayerData {
 		              else
 		                  {if(next)
 	                           {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
-		                            {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+		                            {weaponIDInUse=Weapon.values()[currentIndex];
 		                             dualWeaponUse=true;
 			                         break;
 		                            }
 	                           }
 		                   else
 		                       {if(rightHandWeaponsAvailability[currentIndex])
-			                        {weaponIDInUse=Weapon.Identifier.values()[currentIndex];
+			                        {weaponIDInUse=Weapon.values()[currentIndex];
 			                         dualWeaponUse=false;
 				                     break;
 			                        }
