@@ -59,6 +59,10 @@ public final class IntroductionState extends State{
         colorSubstitutionTable.put(Color.BLUE,Color.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //set a controller that modifies the image
+        /**
+         * TODO: replace this controller by another one that simply switches the textures because the current
+         * one modifies the unique texture at runtime which is very slow on Intel graphics cards and on-board chips
+         * */
         box.addController(new CircularSpreadTextureUpdaterController(textureFilePath,equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
         //set a controller that moves the image
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();

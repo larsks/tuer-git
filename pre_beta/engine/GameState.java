@@ -59,6 +59,7 @@ import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.input.ExtendedFirstPersonControl;
+import engine.weapon.Weapon;
 
 /**
  * State used during the game, the party.
@@ -457,7 +458,7 @@ final class GameState extends State{
              uziNode.setName("an uzi");
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);
-             uziNode.setUserData(new WeaponUserData(Weapon.Identifier.UZI,new Matrix3(uziNode.getRotation()),true));
+             uziNode.setUserData(new WeaponUserData(Weapon.UZI,new Matrix3(uziNode.getRotation())));
              //add some bounding boxes for all objects that can be picked up
              collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
@@ -465,7 +466,7 @@ final class GameState extends State{
              smachNode.setName("a smach");
              smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
-             smachNode.setUserData(new WeaponUserData(Weapon.Identifier.SMACH,new Matrix3(smachNode.getRotation()),true));
+             smachNode.setUserData(new WeaponUserData(Weapon.SMACH,new Matrix3(smachNode.getRotation())));
              collectibleObjectsList.add(smachNode);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
@@ -473,11 +474,11 @@ final class GameState extends State{
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-             pistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation()),true));
+             pistolNode.setUserData(new WeaponUserData(Weapon.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);            
              final Node duplicatePistolNode=pistolNode.makeCopy(false);
-             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_10MM,new Matrix3(pistolNode.getRotation()),true));
+             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
              duplicatePistolNode.setTranslation(113.5,0.1,217);
              collectibleObjectsList.add(duplicatePistolNode);
              getRoot().attachChild(duplicatePistolNode);
@@ -488,21 +489,21 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             pistol2Node.setUserData(new WeaponUserData(Weapon.Identifier.PISTOL_9MM,new Matrix3(pistol2Node.getRotation()),true));
+             pistol2Node.setUserData(new WeaponUserData(Weapon.PISTOL_9MM,new Matrix3(pistol2Node.getRotation())));
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setName("a Mag 60");
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
-             pistol3Node.setUserData(new WeaponUserData(Weapon.Identifier.MAG_60,new Matrix3(pistol3Node.getRotation()),true));
+             pistol3Node.setUserData(new WeaponUserData(Weapon.MAG_60,new Matrix3(pistol3Node.getRotation())));
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
              laserNode.setName("a laser");
              laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
-             laserNode.setUserData(new WeaponUserData(Weapon.Identifier.LASER,new Matrix3(laserNode.getRotation()),true));
+             laserNode.setUserData(new WeaponUserData(Weapon.LASER,new Matrix3(laserNode.getRotation())));
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
              
@@ -510,7 +511,7 @@ final class GameState extends State{
              shotgunNode.setName("a shotgun");
              shotgunNode.setTranslation(117.5,0.1,219);
              shotgunNode.setScale(0.1);
-             shotgunNode.setUserData(new WeaponUserData(Weapon.Identifier.SHOTGUN,new Matrix3(shotgunNode.getRotation()),false));
+             shotgunNode.setUserData(new WeaponUserData(Weapon.SHOTGUN,new Matrix3(shotgunNode.getRotation())));
              collectibleObjectsList.add(shotgunNode);
              getRoot().attachChild(shotgunNode);
              
@@ -602,23 +603,22 @@ final class GameState extends State{
     static final class WeaponUserData extends CollectibleUserData{
     	
     	
-    	private final Weapon.Identifier id;
+    	private final Weapon id;
     	
     	private final ReadOnlyMatrix3 rotation;
+    	/**ammunition count in the magazine of the weapon*/
+    	private int ammunitionCountInMagazine;
     	
-    	/**flag indicating whether a weapon can be used in both hands*/
-    	private final boolean twoHanded;
     	
-    	
-    	private WeaponUserData(final Weapon.Identifier id,final ReadOnlyMatrix3 rotation,final boolean twoHanded){
+    	private WeaponUserData(final Weapon id,final ReadOnlyMatrix3 rotation){
     		super(pickupWeaponSourcename);
     		this.id=id;
     		this.rotation=rotation;
-    		this.twoHanded=twoHanded;
+    		this.ammunitionCountInMagazine=0;
     	}
     	
     	
-    	final Weapon.Identifier getId(){
+    	final Weapon getId(){
     		return(id);
     	}
     	
@@ -626,8 +626,22 @@ final class GameState extends State{
     		return(rotation);
     	}
     	
-    	final boolean isTwoHanded(){
-    		return(twoHanded);
+    	final int getAmmunitionCountInMagazine(){
+    		return(ammunitionCountInMagazine);
+    	}
+    	
+    	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
+    		final int previousAmmoCount=ammunitionCountInMagazine;
+    		if(ammunitionCountToAddIntoMagazine>0)
+    			ammunitionCountInMagazine=Math.min(id.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
+    		return(ammunitionCountInMagazine-previousAmmoCount);
+    	}
+    	
+    	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
+    		final int previousAmmoCount=ammunitionCountInMagazine;
+    		if(ammunitionCountToRemoveFromMagazine>0)
+    			ammunitionCountInMagazine=Math.max(0,ammunitionCountInMagazine-ammunitionCountToRemoveFromMagazine);
+    		return(previousAmmoCount-ammunitionCountInMagazine);
     	}
     }
 }

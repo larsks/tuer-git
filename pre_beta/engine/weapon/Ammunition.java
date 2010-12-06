@@ -11,10 +11,19 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.weapon;
 
-public final class Weapon{
+public enum Ammunition {
 
+	;
 	
-	public enum Identifier{PISTOL_9MM,PISTOL_10MM,MAG_60,UZI,SMACH,LASER,SHOTGUN};
+	private final int maximumCount;
+	
+	private Ammunition(final int maximumCount){
+		this.maximumCount=maximumCount;
+	}
+	
+	public final int getMaximumCount(){
+		return(maximumCount);
+	}
 }
