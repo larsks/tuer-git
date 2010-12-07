@@ -37,7 +37,7 @@ public final class DesktopIntegration {
 		Linux("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use alias file format as it is very complicated to create
 		Mac("sh",new String[]{"javaws "},-1,0),
-		Other(null,null,-1,-1),
+		Unix("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use LNK file format as it differs depending on the version
 		Windows("bat",new String[]{System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+"javaws.exe "},-1,0);
 		
@@ -82,9 +82,27 @@ public final class DesktopIntegration {
 		final String osName=System.getProperty("os.name").toLowerCase();
 		final String userHome=System.getProperty("user.home");
 		logger.info("operating system: "+osName);
-		if(osName.contains("linux"))
-		    {operatingSystem=OS.Linux;
-			 logger.info("operating system family: Linux");
+		if(osName.startsWith("linux"))
+			operatingSystem=OS.Linux;
+		else
+			if(osName.startsWith("mac"))
+				operatingSystem=OS.Mac;
+			else
+				if(osName.startsWith("windows"))
+					operatingSystem=OS.Windows;
+				else
+					operatingSystem=OS.Unix;		    	 
+		if(operatingSystem.equals(OS.Linux)||operatingSystem.equals(OS.Unix))
+		    {if(operatingSystem.equals(OS.Linux))
+			     logger.info("operating system family: Linux");
+		     else
+		    	 if(osName.startsWith("solaris")||osName.startsWith("sunos")||osName.startsWith("hp-ux")||
+		    	    osName.startsWith("aix")||osName.startsWith("freebsd")||osName.startsWith("openvms")||
+		    	    osName.startsWith("os")||osName.startsWith("irix")||osName.startsWith("netware")||
+		    	    osName.contains("unix"))
+		    		 logger.warning("operating system family: Unix");
+		    	 else
+		    		 logger.warning("unknown operating system family, maybe Unix");
 			 //XDG_DESKTOP_DIR is the environment variable that contains the path of the desktop directory on Linux
 			 String XDG_DESKTOP_DIR=System.getenv("XDG_DESKTOP_DIR");
 		     /**
@@ -150,8 +168,16 @@ public final class DesktopIntegration {
 		     else
 		    	 logger.info("XDG_DESKTOP_DIR is set, use its value");
 		     if(XDG_DESKTOP_DIR==null||XDG_DESKTOP_DIR.equals(""))
-		    	 {logger.warning("XDG_DESKTOP_DIR is not set and the workarounds have failed");
-		    	  desktopPath=null;
+		    	 {logger.warning("XDG_DESKTOP_DIR is not set");
+		    	  final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
+		    	  if(new File(defaultDesktopFolderPath).exists())
+		    	      {logger.info("use the default desktop folder: "+defaultDesktopFolderPath);
+		    		   desktopPath=defaultDesktopFolderPath;
+		    	      }
+		    	  else
+		    		  {logger.warning("the default desktop folder "+defaultDesktopFolderPath+" does not exist");
+		    		   desktopPath=null;
+		    		  }
 		    	 }
 		     else
 		    	 {logger.info("XDG_DESKTOP_DIR raw value: "+XDG_DESKTOP_DIR);
@@ -174,13 +200,27 @@ public final class DesktopIntegration {
 		    	    	   XDG_DESKTOP_DIR=entry.getValue()+XDG_DESKTOP_DIR.substring(indexOfEnvironmentVariableOccurrence+environmentVariable.length(),XDG_DESKTOP_DIR.length());
 		    	      }
 		    	  logger.info("XDG_DESKTOP_DIR value: "+XDG_DESKTOP_DIR);
-		          desktopPath=XDG_DESKTOP_DIR;
+		    	  if(new File(XDG_DESKTOP_DIR).exists())
+		              {logger.info("XDG_DESKTOP_DIR denotes an existing directory");
+		    		   desktopPath=XDG_DESKTOP_DIR;
+		              }
+		    	  else
+		    		  {logger.info("XDG_DESKTOP_DIR does not denote an existing directory");
+		    		   final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
+			    	   if(new File(defaultDesktopFolderPath).exists())
+			    	       {logger.info("use the default desktop folder: "+defaultDesktopFolderPath);
+			    		    desktopPath=defaultDesktopFolderPath;
+			    	       }
+			    	   else
+			    		   {logger.warning("the default desktop folder "+defaultDesktopFolderPath+" does not exist");
+			    		    desktopPath=null;
+			    		   }
+		    		  }
 		    	 }
 		    }
 		else
-			if(osName.contains("mac"))
-		        {operatingSystem=OS.Mac;
-				 logger.info("operating system family: Mac");
+			if(operatingSystem.equals(OS.Mac))
+		        {logger.info("operating system family: Mac");
 				 final String oldMacDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop Folder";
 				 final String modernMacDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
 				 if(new File(oldMacDesktopFolderPath).exists())
@@ -198,25 +238,47 @@ public final class DesktopIntegration {
 				         }
 		        }
 		    else
-		    	if(osName.contains("windows"))
-			        {operatingSystem=OS.Windows;
-		    		 logger.info("operating system family: Windows");
-		    		 //use Windows Scripting Host (supported since Windows 98)
-		    		 final String[] wshellCmds=new String[]{"wscript //NoLogo //B","WScript.Echo(WScript.SpecialFolders(\"Desktop\"));"};
+		    	if(operatingSystem.equals(OS.Windows))
+			        {logger.info("operating system family: Windows");
 		    		 String specialFolderValue=null;
+		    		 File tmpWshFile=null;
+		    		 PrintWriter pw=null;
 		    		 try
-		    		    {Process process=Runtime.getRuntime().exec(wshellCmds[0]);
-		    		     process.waitFor();
-		    		     process=Runtime.getRuntime().exec(wshellCmds[1]);
-		    		     StreamReader reader=new StreamReader(process.getInputStream());
-		                 reader.start();
-		                 process.waitFor();
-		                 reader.join();
-		                 specialFolderValue=reader.getResult();
+		    		    {logger.info("tries to create a temporary file to contain the WSH script...");
+		    			 tmpWshFile=File.createTempFile("getDesktopFolder",".js");
+		    			 logger.info("temporary file "+tmpWshFile.getAbsolutePath()+" successfully created");
+					     pw=new PrintWriter(tmpWshFile);
+					     pw.println("WScript.Echo(WScript.SpecialFolders(\"Desktop\"));");
+					     logger.info("temporary file "+tmpWshFile.getAbsolutePath()+" successfully filled");
 		    		    }
-		    		 catch(Exception e)
-		    		 {e.printStackTrace();}
-		    		 if(specialFolderValue!=null)
+		    		 catch(IOException ioe)
+		    		 {if(tmpWshFile!=null)
+		    	          {tmpWshFile=null;
+		    	           logger.warning("something was wrong while writing the data in the temporary file");
+		    	          }
+		    		  else
+		    			  logger.warning("temporary file not created");
+		    	      ioe.printStackTrace();
+		    	     }
+		    		 finally
+		    		 {if(pw!=null)
+		    			  pw.close();
+		    		 }
+		    		 if(tmpWshFile!=null)
+		    		     {//use Windows Scripting Host (supported since Windows 98)
+		    		      final String wshellCmd="wscript //NoLogo //B "+tmpWshFile.getAbsolutePath();		    		 
+		    		      try
+		    		         {Process process=Runtime.getRuntime().exec(wshellCmd);
+		    		          StreamReader reader=new StreamReader(process.getInputStream());
+		                      reader.start();
+		                      process.waitFor();
+		                      reader.join();
+		                      specialFolderValue=reader.getResult();
+		    		         }
+		    		      catch(Exception e)
+		    		      {e.printStackTrace();}
+			             }
+		    		 if(specialFolderValue!=null&&new File(specialFolderValue).exists())
 		    		     {logger.info("special desktop folder path: "+specialFolderValue);
 		        	      desktopPath=specialFolderValue;
 		    		     }
@@ -263,7 +325,7 @@ public final class DesktopIntegration {
 			        	       desktopPath=registryValue;
 			                  }
 			              else
-			        	      {//this is the default desktop folder on Windows Vista and 7, whatever the locale
+			        	      {//this is the default desktop folder on Windows Vista and 7, whatever the language
 			        	       final String modernWindowsDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
 			        	       if(new File(modernWindowsDesktopFolderPath).exists())
 		    		               {logger.info("usual default desktop path: "+modernWindowsDesktopFolderPath);
@@ -276,14 +338,10 @@ public final class DesktopIntegration {
 			        	      }
 		    		     }
 			        }
-			    else
-			    	{operatingSystem=OS.Other;
-			    	 logger.warning("unknown operating system family");
-			    	 final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
-			    	 desktopPath=new File(defaultDesktopFolderPath).exists()?defaultDesktopFolderPath:null;
-			    	}
+		    	else
+		    		desktopPath=null;
 		if(desktopPath!=null)
-		    {if(operatingSystem.equals(OS.Other))
+		    {if(operatingSystem.equals(OS.Unix))
 		    	 logger.warning("operating system not supported. Desktop path: "+desktopPath);
 		     else
 		    	 logger.info("operating system supported. Desktop path: "+desktopPath);
