@@ -377,11 +377,11 @@ public final class DesktopIntegration {
 			      catch(IOException ioe)
 			      {ioe.printStackTrace();}
 				  if(!fileCreationSuccess)
-				      {logger.warning("the desktop shortcut file"+desktopShortcutFile.getAbsolutePath()+" has not been successfully created");
+				      {logger.warning("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has not been successfully created");
 					   success=false;
 				      }
 				  else
-				      {logger.info("the desktop shortcut file"+desktopShortcutFile.getAbsolutePath()+" has been successfully created");
+				      {logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has been successfully created");
 					   final String[] src=instance.operatingSystem.getDesktopShortcutFileContent();
 				       final String[] desktopShortcutFileContent=new String[src.length];
 				       System.arraycopy(src,0,desktopShortcutFileContent,0,src.length);
