@@ -48,7 +48,7 @@ final class PlayerData {
 	private final AmmunitionContainer ammoContainer;
 	
 	
-	PlayerData(CameraNode cameraNode){
+	PlayerData(final CameraNode cameraNode){
 		this.cameraNode=cameraNode;
 		health=maxHealth;
 		invincible=false;
@@ -67,7 +67,7 @@ final class PlayerData {
 	}
 	
 	
-	boolean collect(Node collectible){
+	boolean collect(final Node collectible){
 		//check if the collectible can be collected
 		final boolean result;
 		final Object userData=collectible.getUserData();
@@ -77,16 +77,19 @@ final class PlayerData {
 		     else
 		    	 if(userData instanceof GameState.MedikitUserData)
 		    		 result=collectMedikit(collectible,(GameState.MedikitUserData)userData);
-		    	     //TODO: handle here the other kinds of collectible objects
 		    	 else
-		    		 result=false;
+		    		 if(userData instanceof GameState.AmmunitionUserData)
+		    			 result=collectAmmunition(collectible,(GameState.AmmunitionUserData)userData);
+		    	         //TODO: handle here the other kinds of collectible objects
+		    	     else
+		    		     result=false;
 		    }
 		else
 			result=false;
 		return(result);
 	}
 	
-	private boolean collectWeapon(Node collectible,final GameState.WeaponUserData weaponUserData){
+	private boolean collectWeapon(final Node collectible,final GameState.WeaponUserData weaponUserData){
 		final boolean result;
 		final int weaponIndex=weaponUserData.getId().ordinal();
 	    if(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex])
@@ -107,6 +110,12 @@ final class PlayerData {
             }
         else
 	        result=false;
+		return(result);
+	}
+	
+	private boolean collectAmmunition(final Node collectible,final GameState.AmmunitionUserData ammoUserData){
+		final boolean result;
+		result=ammoContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount())>0;
 		return(result);
 	}
 	
@@ -146,6 +155,7 @@ final class PlayerData {
 	void respawn(){
 		health=maxHealth;
 		weaponIDInUse=null;
+		ammoContainer.empty();
 		dualWeaponUse=false;
 		Arrays.fill(rightHandWeaponsAvailability,false);
 		Arrays.fill(leftHandWeaponsAvailability,false);
@@ -156,39 +166,94 @@ final class PlayerData {
 	final int reload(){
 		int reloadedAmmoCount=0;
 		if(weaponIDInUse!=null)
-		    {final int magazineSize=weaponIDInUse.getMagazineSize();
-		     final Ammunition ammo=weaponIDInUse.getAmmunition();
-			 final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
-			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
-			 //remove ammo from the container
-			 final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
-			 //add it into the magazine
-			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
-			 //increase reloaded ammunition count
-			 reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
-			 if(dualWeaponUse)
-			     {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();				  
-			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
-				  //remove ammo from the container
-				  final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
-				  //add it into the magazine
-				  leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
-				  //increase reloaded ammunition count
-				  reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
-			     }
+		    {final Ammunition ammo=weaponIDInUse.getAmmunition();
+		     if(ammo!=null)
+		         {final int magazineSize=weaponIDInUse.getMagazineSize();		     
+			      final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+			      final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
+			      //remove ammo from the container
+			      final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
+			      //add it into the magazine
+			      rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
+			      //increase reloaded ammunition count
+			      reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
+			      if(dualWeaponUse)
+			          {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+			           final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
+				       //remove ammo from the container
+				       final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
+				       //add it into the magazine
+				       leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
+				       //increase reloaded ammunition count
+				       reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
+			          }
+		         }
 		    }		
 		return(reloadedAmmoCount);
 	}
 	
-	void selectNextWeapon(){
+	final int getAmmunitionCountInContainer(){
+		final int ammunitionCountInContainer;
+		if(weaponIDInUse!=null)
+		    {final Ammunition ammunition=weaponIDInUse.getAmmunition();
+			 if(ammunition!=null)
+				 ammunitionCountInContainer=ammoContainer.get(ammunition);
+			 else
+				 ammunitionCountInContainer=-1;
+		    }
+		else
+			ammunitionCountInContainer=-1;
+		return(ammunitionCountInContainer);
+	}
+	
+	final int getAmmunitionCountInLeftHandedWeapon(){
+		final int ammunitionCountInLeftHandedWeapon;
+		if(weaponIDInUse!=null&&weaponIDInUse.getAmmunition()!=null&&dualWeaponUse)
+		    {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		     ammunitionCountInLeftHandedWeapon=leftHandWeaponUserData.getAmmunitionCountInMagazine();
+		    }
+		else
+			ammunitionCountInLeftHandedWeapon=-1;
+		return(ammunitionCountInLeftHandedWeapon);
+	}
+	
+	final int getAmmunitionCountInRightHandedWeapon(){
+		final int ammunitionCountInRightHandedWeapon;
+		if(weaponIDInUse!=null&&weaponIDInUse.getAmmunition()!=null)
+		    {final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		     ammunitionCountInRightHandedWeapon=rightHandWeaponUserData.getAmmunitionCountInMagazine();
+		    }
+		else
+			ammunitionCountInRightHandedWeapon=-1;
+		return(ammunitionCountInRightHandedWeapon);
+	}
+	
+	final int shoot(){
+		int consumedAmmunitionCount=0;
+		if(weaponIDInUse!=null)
+	        {final Ammunition ammunition=weaponIDInUse.getAmmunition();
+		     if(ammunition!=null)
+		         {final int ammoPerShot=weaponIDInUse.getAmmunitionPerShot();
+		          final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		          consumedAmmunitionCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		    	  if(dualWeaponUse)
+		    	      {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		    	       consumedAmmunitionCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		    	      }
+		    	 }
+		    }
+		return(consumedAmmunitionCount);
+	}
+	
+	final void selectNextWeapon(){
 		selectWeapon(true);
 	}
 	
-    void selectPreviousWeapon(){
+	final void selectPreviousWeapon(){
     	selectWeapon(false);
 	}
     
-    private void selectWeapon(boolean next){
+    private final void selectWeapon(boolean next){
     	final Weapon oldWeaponIDInUse=weaponIDInUse;
     	final boolean oldDualWeaponUse=dualWeaponUse;
     	//if the player wants to use a single weapon instead of 2
