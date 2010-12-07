@@ -14,16 +14,20 @@
 package engine.weapon;
 
 public enum Ammunition {
-
-	;
+    /**American assault rifle*/
+	BULLET_5_56MM,
+	/**Russian assault rifle*/
+	BULLET_7_62MM,
+	/**American pistols and sub-machine guns*/
+	BULLET_9MM,
+	/**Russian pistols*/
+	BULLET_10MM,
+	/***/
+	CARTRIDGE,
+	/***/
+	ENERGY,
+	/**Russian middle range anti-tank rocket launchers*/
+	ANTI_TANK_ROCKET_105MM;
 	
-	private final int maximumCount;
 	
-	private Ammunition(final int maximumCount){
-		this.maximumCount=maximumCount;
-	}
-	
-	public final int getMaximumCount(){
-		return(maximumCount);
-	}
 }

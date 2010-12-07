@@ -59,6 +59,7 @@ import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.input.ExtendedFirstPersonControl;
+import engine.weapon.Ammunition;
 import engine.weapon.Weapon;
 
 /**
@@ -72,6 +73,8 @@ final class GameState extends State{
     private int levelIndex;
     /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
+    /**source name of the sound played when picking up some ammo*/
+    private static String pickupAmmoSourcename;
     /**source name of the sound played when picking up a weapon*/
     private static String pickupWeaponSourcename;
     /**path of the sound sample played when picking up a weapon*/
@@ -382,9 +385,10 @@ final class GameState extends State{
     	// load the sound
         URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null&&pickupWeaponSourcename==null)
-            pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+            pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);                     
         else
-            pickupWeaponSourcename=null;
+        	pickupWeaponSourcename=null;           
+        pickupAmmoSourcename=pickupWeaponSourcename;
         sampleUrl=GameState.class.getResource(teleporterUseSoundSamplePath);
         if(sampleUrl!=null&&teleporterUseSourcename==null)
         	teleporterUseSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
@@ -600,13 +604,35 @@ final class GameState extends State{
     	}
     }
     
+    static final class AmmunitionUserData extends CollectibleUserData{
+    	
+    	
+    	private final Ammunition ammunition;
+    	
+    	private final int ammunitionCount;
+    	
+    	private AmmunitionUserData(final Ammunition ammunition,final int ammunitionCount){
+    		super(pickupAmmoSourcename);
+    		this.ammunition=ammunition;
+    		this.ammunitionCount=ammunitionCount;
+    	}
+    	
+    	final Ammunition getAmmunition(){
+    		return(ammunition);
+    	}
+    	
+    	final int getAmmunitionCount(){
+    		return(ammunitionCount);
+    	}
+    }
+    
     static final class WeaponUserData extends CollectibleUserData{
     	
     	
     	private final Weapon id;
     	
     	private final ReadOnlyMatrix3 rotation;
-    	/**ammunition count in the magazine of the weapon*/
+    	/**ammunition count in the magazine of the weapon if any, otherwise -1*/
     	private int ammunitionCountInMagazine;
     	
     	
@@ -614,7 +640,7 @@ final class GameState extends State{
     		super(pickupWeaponSourcename);
     		this.id=id;
     		this.rotation=rotation;
-    		this.ammunitionCountInMagazine=0;
+    		this.ammunitionCountInMagazine=id.getAmmunition()!=null?0:-1;
     	}
     	
     	
@@ -632,14 +658,14 @@ final class GameState extends State{
     	
     	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(ammunitionCountToAddIntoMagazine>0)
+    		if(id.getAmmunition()!=null&&ammunitionCountToAddIntoMagazine>0)
     			ammunitionCountInMagazine=Math.min(id.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
     		return(ammunitionCountInMagazine-previousAmmoCount);
     	}
     	
     	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(ammunitionCountToRemoveFromMagazine>0)
+    		if(id.getAmmunition()!=null&&ammunitionCountToRemoveFromMagazine>0)
     			ammunitionCountInMagazine=Math.max(0,ammunitionCountInMagazine-ammunitionCountToRemoveFromMagazine);
     		return(previousAmmoCount-ammunitionCountInMagazine);
     	}

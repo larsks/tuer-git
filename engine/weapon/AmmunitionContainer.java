@@ -13,29 +13,39 @@
 */
 package engine.weapon;
 
+import java.util.Arrays;
+
 public class AmmunitionContainer {
 
-	private final int[] ammunitions;
+	private final int[] ammunitionsCount;
+	
+	private final int[] ammunitionsMaxCount;
 	
 	public AmmunitionContainer(){
-		ammunitions=new int[Ammunition.values().length];
+		ammunitionsCount=new int[Ammunition.values().length];
+		ammunitionsMaxCount=new int[Ammunition.values().length];
+		Arrays.fill(ammunitionsMaxCount,1000);
+	}
+	
+	public final void empty(){
+		Arrays.fill(ammunitionsCount,0);
 	}
 	
 	public final int get(final Ammunition ammunition){
-		return(ammunitions[ammunition.ordinal()]);
+		return(ammunitionsCount[ammunition.ordinal()]);
 	}
 	
 	public final int add(final Ammunition ammunition,final int ammunitionCountToAdd){
-		final int previousAmmunitionCount=ammunitions[ammunition.ordinal()];
+		final int previousAmmunitionCount=ammunitionsCount[ammunition.ordinal()];
 		if(ammunitionCountToAdd>0)
-			ammunitions[ammunition.ordinal()]=Math.min(ammunition.getMaximumCount(),ammunitions[ammunition.ordinal()]+ammunitionCountToAdd);
-		return(ammunitions[ammunition.ordinal()]-previousAmmunitionCount);
+			ammunitionsCount[ammunition.ordinal()]=Math.min(ammunitionsMaxCount[ammunition.ordinal()],ammunitionsCount[ammunition.ordinal()]+ammunitionCountToAdd);
+		return(ammunitionsCount[ammunition.ordinal()]-previousAmmunitionCount);
 	}
 	
 	public final int remove(final Ammunition ammunition,final int ammunitionCountToRemove){
-		final int previousAmmunitionCount=ammunitions[ammunition.ordinal()];
+		final int previousAmmunitionCount=ammunitionsCount[ammunition.ordinal()];
 		if(ammunitionCountToRemove>0)
-			ammunitions[ammunition.ordinal()]=Math.max(0,ammunitions[ammunition.ordinal()]-ammunitionCountToRemove);
-		return(previousAmmunitionCount-ammunitions[ammunition.ordinal()]);
+			ammunitionsCount[ammunition.ordinal()]=Math.max(0,ammunitionsCount[ammunition.ordinal()]-ammunitionCountToRemove);
+		return(previousAmmunitionCount-ammunitionsCount[ammunition.ordinal()]);
 	}
 }
