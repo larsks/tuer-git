@@ -361,9 +361,12 @@ public final class DesktopIntegration {
 	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
 		final boolean success;
 		if(!isDesktopShortcutCreationSupported())
-			success=false;
+			{logger.warning("desktop shortcuts are not supported by this operating system");
+			 success=false;
+			}
 		else
-		    {final File desktopShortcutFile=new File(instance.desktopPath+System.getProperty("file.separator")+desktopShortcutFilenameWithoutExtension+"."+instance.operatingSystem.getDesktopShortcutFileExtension());
+		    {logger.info("desktop shortcuts are supported by this operating system");
+			 final File desktopShortcutFile=new File(instance.desktopPath+System.getProperty("file.separator")+desktopShortcutFilenameWithoutExtension+"."+instance.operatingSystem.getDesktopShortcutFileExtension());
 			 //tries to delete the file if it already exists
 		     if(desktopShortcutFile.exists()&&!desktopShortcutFile.delete())
 				 success=false;
