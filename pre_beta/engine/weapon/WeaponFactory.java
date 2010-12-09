@@ -1,26 +1,32 @@
 package engine.weapon;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
 public final class WeaponFactory {
 
 	
-	private final LinkedHashMap<String,Weapon> weaponsMap;
+	private final HashMap<String,Weapon> weaponsMap;
+	
+	private final HashMap<Integer,Weapon> weaponsIndicesMap;
 	
 	
 	public WeaponFactory(){
-		weaponsMap=new LinkedHashMap<String,Weapon>();
+		weaponsMap=new HashMap<String,Weapon>();
+		weaponsIndicesMap=new HashMap<Integer,Weapon>();
 	}	
 	
 	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot){
 		final boolean success=identifier!=null&&!weaponsMap.containsKey(identifier);
 		if(success)
-			weaponsMap.put(identifier,null/*new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot)*/);
+			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot);
+			 weaponsMap.put(identifier,weapon);
+			 weaponsIndicesMap.put(weapon.getUid(),weapon);
+			}
 		return(success);
 	}
 	
 	public final Weapon getWeapon(final int index){
-		return(weaponsMap.get(index));
+		return(weaponsIndicesMap.get(Integer.valueOf(index)));
 	}
 	
 	public final Weapon getWeapon(final String identifier){
