@@ -65,6 +65,10 @@ public enum Weapon{
 		return(ammunition);
 	}
 	
+	public boolean isForMelee(){
+		return(ammunition==null);
+	}
+	
 	public final int getAmmunitionPerShot(){
 		return(ammunitionPerShot);
 	}

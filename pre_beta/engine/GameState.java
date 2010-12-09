@@ -640,7 +640,7 @@ final class GameState extends State{
     		super(pickupWeaponSourcename);
     		this.id=id;
     		this.rotation=rotation;
-    		this.ammunitionCountInMagazine=id.getAmmunition()!=null?0:-1;
+    		this.ammunitionCountInMagazine=!id.isForMelee()?0:-1;
     	}
     	
     	
@@ -658,14 +658,14 @@ final class GameState extends State{
     	
     	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(id.getAmmunition()!=null&&ammunitionCountToAddIntoMagazine>0)
+    		if(!id.isForMelee()&&ammunitionCountToAddIntoMagazine>0)
     			ammunitionCountInMagazine=Math.min(id.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
     		return(ammunitionCountInMagazine-previousAmmoCount);
     	}
     	
     	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(id.getAmmunition()!=null&&ammunitionCountToRemoveFromMagazine>0)
+    		if(!id.isForMelee()&&ammunitionCountToRemoveFromMagazine>0)
     			ammunitionCountInMagazine=Math.max(0,ammunitionCountInMagazine-ammunitionCountToRemoveFromMagazine);
     		return(previousAmmoCount-ammunitionCountInMagazine);
     	}
