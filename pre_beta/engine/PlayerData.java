@@ -20,6 +20,7 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import engine.GameState.WeaponUserData;
 import engine.weapon.Ammunition;
 import engine.weapon.AmmunitionContainer;
+import engine.weapon.AmmunitionFactory;
 import engine.weapon.Weapon;
 import engine.weapon.WeaponFactory;
 
@@ -51,7 +52,7 @@ final class PlayerData {
 	private final AmmunitionContainer ammoContainer;
 	
 	
-	PlayerData(final CameraNode cameraNode,final WeaponFactory weaponFactory){
+	PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory){
 		this.cameraNode=cameraNode;
 		this.weaponFactory=weaponFactory;
 		health=maxHealth;
@@ -67,7 +68,7 @@ final class PlayerData {
 		Arrays.fill(leftHandWeaponsAvailability,false);
 		Arrays.fill(rightHandWeaponsList,null);
 		Arrays.fill(leftHandWeaponsList,null);
-		ammoContainer=new AmmunitionContainer();
+		ammoContainer=new AmmunitionContainer(ammunitionFactory);
 	}
 	
 	
