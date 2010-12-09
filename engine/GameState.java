@@ -60,6 +60,7 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.input.ExtendedFirstPersonControl;
 import engine.weapon.Ammunition;
+import engine.weapon.AmmunitionFactory;
 import engine.weapon.Weapon;
 import engine.weapon.WeaponFactory;
 
@@ -108,26 +109,43 @@ final class GameState extends State{
     private final BasicText headUpDisplayLabel;
     @Deprecated
     private boolean[][] collisionMap;
+    /***/
+    private final AmmunitionFactory ammunitionFactory;
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
     
     GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
-        //initialize the factory and the build-in weapo
+        //initialize the factories, the build-in ammo and the build-in weapons       
+        ammunitionFactory=new AmmunitionFactory();
+        /**American assault rifle*/
+        ammunitionFactory.addNewAmmunition("BULLET_5_56MM");
+    	/**Russian assault rifle*/
+        ammunitionFactory.addNewAmmunition("BULLET_7_62MM");
+    	/**American pistols and sub-machine guns*/
+        ammunitionFactory.addNewAmmunition("BULLET_9MM");
+    	/**Russian pistols*/
+        ammunitionFactory.addNewAmmunition("BULLET_10MM");
+    	/**cartridge*/
+        ammunitionFactory.addNewAmmunition("CARTRIDGE");
+    	/**power*/
+        ammunitionFactory.addNewAmmunition("ENERGY");
+    	/**Russian middle range anti-tank rocket launchers*/
+        ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM");
         weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,Ammunition.BULLET_9MM,1);
-        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,Ammunition.BULLET_10MM,1);
-        weaponFactory.addNewWeapon("MAG_60",true,30,Ammunition.BULLET_9MM,1);
-        weaponFactory.addNewWeapon("UZI",true,20,Ammunition.BULLET_9MM,1);
-        weaponFactory.addNewWeapon("SMACH",false,35,Ammunition.BULLET_5_56MM,1);
-        weaponFactory.addNewWeapon("LASER",true,15,Ammunition.ENERGY,1);
-        weaponFactory.addNewWeapon("SHOTGUN",false,3,Ammunition.CARTRIDGE,1);
+        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
+        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1);
+        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
+        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
+        weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1);
+        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY"),1);
+        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1);
         readCollisionMap();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        playerData=new PlayerData(playerNode,weaponFactory);
+        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
