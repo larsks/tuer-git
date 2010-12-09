@@ -154,11 +154,21 @@ final class MainMenuState extends State{
             public void actionPerformed(ActionEvent event){
                 exitAction.perform(null,null,-1);
             }
-        });
+        });      
         initialMenuPanel.add(startButton);
         initialMenuPanel.add(controlsButton);
         initialMenuPanel.add(creditsButton);
         initialMenuPanel.add(exitButton);
+        if(DesktopIntegration.isDesktopShortcutCreationSupported())
+            {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut");
+             addDesktopShortcutButton.addActionListener(new ActionListener(){           
+                @Override
+                public void actionPerformed(ActionEvent event){
+                	DesktopIntegration.createDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+                }
+             });
+             initialMenuPanel.add(addDesktopShortcutButton);
+            }
         return(initialMenuPanel);
     }
     
