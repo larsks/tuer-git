@@ -61,6 +61,7 @@ import com.ardor3d.util.resource.URLResourceSource;
 import engine.input.ExtendedFirstPersonControl;
 import engine.weapon.Ammunition;
 import engine.weapon.Weapon;
+import engine.weapon.WeaponFactory;
 
 /**
  * State used during the game, the party.
@@ -107,16 +108,26 @@ final class GameState extends State{
     private final BasicText headUpDisplayLabel;
     @Deprecated
     private boolean[][] collisionMap;
-
+    /**instance that creates all weapons*/
+    private final WeaponFactory weaponFactory;
     
     GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
         super();
+        //initialize the factory and the build-in weapo
+        weaponFactory=new WeaponFactory();                       
+        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,Ammunition.BULLET_9MM,1);
+        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,Ammunition.BULLET_10MM,1);
+        weaponFactory.addNewWeapon("MAG_60",true,30,Ammunition.BULLET_9MM,1);
+        weaponFactory.addNewWeapon("UZI",true,20,Ammunition.BULLET_9MM,1);
+        weaponFactory.addNewWeapon("SMACH",false,35,Ammunition.BULLET_5_56MM,1);
+        weaponFactory.addNewWeapon("LASER",true,15,Ammunition.ENERGY,1);
+        weaponFactory.addNewWeapon("SHOTGUN",false,3,Ammunition.CARTRIDGE,1);
         readCollisionMap();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        playerData=new PlayerData(playerNode);
+        playerData=new PlayerData(playerNode,weaponFactory);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3();
         final Vector3 worldUp=new Vector3(0,1,0);              
@@ -462,7 +473,7 @@ final class GameState extends State{
              uziNode.setName("an uzi");
              uziNode.setTranslation(111.5,0.15,219);
              uziNode.setScale(0.2);
-             uziNode.setUserData(new WeaponUserData(Weapon.UZI,new Matrix3(uziNode.getRotation())));
+             uziNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation())));
              //add some bounding boxes for all objects that can be picked up
              collectibleObjectsList.add(uziNode);
              getRoot().attachChild(uziNode);
@@ -470,7 +481,7 @@ final class GameState extends State{
              smachNode.setName("a smach");
              smachNode.setTranslation(112.5,0.15,219);
              smachNode.setScale(0.2);
-             smachNode.setUserData(new WeaponUserData(Weapon.SMACH,new Matrix3(smachNode.getRotation())));
+             smachNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation())));
              collectibleObjectsList.add(smachNode);
              getRoot().attachChild(smachNode);
              final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
@@ -478,11 +489,11 @@ final class GameState extends State{
              pistolNode.setTranslation(113.5,0.1,219);
              pistolNode.setScale(0.001);
              pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-             pistolNode.setUserData(new WeaponUserData(Weapon.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
+             pistolNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation())));
              collectibleObjectsList.add(pistolNode);
              getRoot().attachChild(pistolNode);            
              final Node duplicatePistolNode=pistolNode.makeCopy(false);
-             duplicatePistolNode.setUserData(new WeaponUserData(Weapon.PISTOL_10MM,new Matrix3(pistolNode.getRotation())));
+             duplicatePistolNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation())));
              duplicatePistolNode.setTranslation(113.5,0.1,217);
              collectibleObjectsList.add(duplicatePistolNode);
              getRoot().attachChild(duplicatePistolNode);
@@ -493,21 +504,21 @@ final class GameState extends State{
              pistol2Node.setTranslation(114.5,0.1,219);
              pistol2Node.setScale(0.02);
              pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             pistol2Node.setUserData(new WeaponUserData(Weapon.PISTOL_9MM,new Matrix3(pistol2Node.getRotation())));
+             pistol2Node.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation())));
              collectibleObjectsList.add(pistol2Node);
              getRoot().attachChild(pistol2Node);
              final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
              pistol3Node.setName("a Mag 60");
              pistol3Node.setTranslation(115.5,0.1,219);
              pistol3Node.setScale(0.02);
-             pistol3Node.setUserData(new WeaponUserData(Weapon.MAG_60,new Matrix3(pistol3Node.getRotation())));
+             pistol3Node.setUserData(new WeaponUserData(weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation())));
              collectibleObjectsList.add(pistol3Node);
              getRoot().attachChild(pistol3Node);
              final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
              laserNode.setName("a laser");
              laserNode.setTranslation(116.5,0.1,219);
              laserNode.setScale(0.02);
-             laserNode.setUserData(new WeaponUserData(Weapon.LASER,new Matrix3(laserNode.getRotation())));
+             laserNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation())));
              collectibleObjectsList.add(laserNode);
              getRoot().attachChild(laserNode);
              
@@ -515,7 +526,7 @@ final class GameState extends State{
              shotgunNode.setName("a shotgun");
              shotgunNode.setTranslation(117.5,0.1,219);
              shotgunNode.setScale(0.1);
-             shotgunNode.setUserData(new WeaponUserData(Weapon.SHOTGUN,new Matrix3(shotgunNode.getRotation())));
+             shotgunNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation())));
              collectibleObjectsList.add(shotgunNode);
              getRoot().attachChild(shotgunNode);
              
@@ -629,23 +640,23 @@ final class GameState extends State{
     static final class WeaponUserData extends CollectibleUserData{
     	
     	
-    	private final Weapon id;
+    	private final Weapon weapon;
     	
     	private final ReadOnlyMatrix3 rotation;
     	/**ammunition count in the magazine of the weapon if any, otherwise -1*/
     	private int ammunitionCountInMagazine;
     	
     	
-    	private WeaponUserData(final Weapon id,final ReadOnlyMatrix3 rotation){
+    	private WeaponUserData(final Weapon weapon,final ReadOnlyMatrix3 rotation){
     		super(pickupWeaponSourcename);
-    		this.id=id;
+    		this.weapon=weapon;
     		this.rotation=rotation;
-    		this.ammunitionCountInMagazine=!id.isForMelee()?0:-1;
+    		this.ammunitionCountInMagazine=!weapon.isForMelee()?0:-1;
     	}
     	
     	
-    	final Weapon getId(){
-    		return(id);
+    	final Weapon getWeapon(){
+    		return(weapon);
     	}
     	
     	final ReadOnlyMatrix3 getRotation(){
@@ -658,14 +669,14 @@ final class GameState extends State{
     	
     	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(!id.isForMelee()&&ammunitionCountToAddIntoMagazine>0)
-    			ammunitionCountInMagazine=Math.min(id.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
+    		if(!weapon.isForMelee()&&ammunitionCountToAddIntoMagazine>0)
+    			ammunitionCountInMagazine=Math.min(weapon.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
     		return(ammunitionCountInMagazine-previousAmmoCount);
     	}
     	
     	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
     		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(!id.isForMelee()&&ammunitionCountToRemoveFromMagazine>0)
+    		if(!weapon.isForMelee()&&ammunitionCountToRemoveFromMagazine>0)
     			ammunitionCountInMagazine=Math.max(0,ammunitionCountInMagazine-ammunitionCountToRemoveFromMagazine);
     		return(previousAmmoCount-ammunitionCountInMagazine);
     	}

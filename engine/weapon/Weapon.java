@@ -13,16 +13,15 @@
 */
 package engine.weapon;
 
-public enum Weapon{
+import java.util.concurrent.atomic.AtomicInteger;
 
-    PISTOL_9MM(true,8,Ammunition.BULLET_9MM,1),
-    PISTOL_10MM(true,10,Ammunition.BULLET_10MM,1),
-    MAG_60(true,30,Ammunition.BULLET_9MM,1),
-    UZI(true,20,Ammunition.BULLET_9MM,1),
-    SMACH(false,35,null,1),
-    LASER(true,15,Ammunition.ENERGY,1),
-    SHOTGUN(false,3,Ammunition.CARTRIDGE,1);
-		
+public final class Weapon implements Comparable<Weapon>{
+	
+    private static AtomicInteger autoIncrementalIndex = new AtomicInteger(0);
+    
+    private final String identifier;
+    /**unique identifier*/
+    private final int uid;
 	/**flag indicating whether a weapon can be used in both hands*/
 	private final boolean twoHanded;
 	/**size of the magazine, -1 for melee weapons*/
@@ -34,7 +33,9 @@ public enum Weapon{
 	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
-	private Weapon(final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot){
+	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot){
+		this.uid=autoIncrementalIndex.getAndIncrement();
+		this.identifier=identifier;
 		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
 		this.ammunition=ammunition;
@@ -71,5 +72,38 @@ public enum Weapon{
 	
 	public final int getAmmunitionPerShot(){
 		return(ammunitionPerShot);
+	}
+	
+	@Override
+	public int hashCode(){
+		return(uid);
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result;
+		if(o==null||!(o instanceof Weapon))
+		    result=false;
+		else
+			result=uid==((Weapon)o).uid;
+		return(result);
+	}
+	
+	public final int getUid(){
+		return(uid);
+	}
+	
+	@Override
+	public final int compareTo(final Weapon weapon){
+		return(uid-weapon.uid);
+	}
+	
+	@Override
+	public final String toString(){
+		return(identifier);
+	}
+	
+	public final String getIdentifier(){
+		return(identifier);
 	}
 }
