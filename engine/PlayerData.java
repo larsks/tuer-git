@@ -165,39 +165,36 @@ final class PlayerData {
 	
 	final int reload(){
 		int reloadedAmmoCount=0;
-		if(weaponIDInUse!=null)
+		if(weaponIDInUse!=null&&!weaponIDInUse.isForMelee())
 		    {final Ammunition ammo=weaponIDInUse.getAmmunition();
-		     if(ammo!=null)
-		         {final int magazineSize=weaponIDInUse.getMagazineSize();		     
-			      final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
-			      final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
+		     final int magazineSize=weaponIDInUse.getMagazineSize();		     
+			 final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
+			 //remove ammo from the container
+			 final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
+			 //add it into the magazine
+			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
+			 //increase reloaded ammunition count
+			 reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
+			 if(dualWeaponUse)
+			     {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
 			      //remove ammo from the container
-			      final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
+			      final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
 			      //add it into the magazine
-			      rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
+			      leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
 			      //increase reloaded ammunition count
-			      reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
-			      if(dualWeaponUse)
-			          {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
-			           final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
-				       //remove ammo from the container
-				       final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
-				       //add it into the magazine
-				       leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
-				       //increase reloaded ammunition count
-				       reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
-			          }
-		         }
-		    }		
+			      reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
+			     }
+		    }		    		
 		return(reloadedAmmoCount);
 	}
 	
 	final int getAmmunitionCountInContainer(){
 		final int ammunitionCountInContainer;
 		if(weaponIDInUse!=null)
-		    {final Ammunition ammunition=weaponIDInUse.getAmmunition();
-			 if(ammunition!=null)
-				 ammunitionCountInContainer=ammoContainer.get(ammunition);
+		    {if(!weaponIDInUse.isForMelee())
+				 ammunitionCountInContainer=ammoContainer.get(weaponIDInUse.getAmmunition());
 			 else
 				 ammunitionCountInContainer=-1;
 		    }
@@ -208,7 +205,7 @@ final class PlayerData {
 	
 	final int getAmmunitionCountInLeftHandedWeapon(){
 		final int ammunitionCountInLeftHandedWeapon;
-		if(weaponIDInUse!=null&&weaponIDInUse.getAmmunition()!=null&&dualWeaponUse)
+		if(weaponIDInUse!=null&&!weaponIDInUse.isForMelee()&&dualWeaponUse)
 		    {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
 		     ammunitionCountInLeftHandedWeapon=leftHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
@@ -219,7 +216,7 @@ final class PlayerData {
 	
 	final int getAmmunitionCountInRightHandedWeapon(){
 		final int ammunitionCountInRightHandedWeapon;
-		if(weaponIDInUse!=null&&weaponIDInUse.getAmmunition()!=null)
+		if(weaponIDInUse!=null&&!weaponIDInUse.isForMelee())
 		    {final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
 		     ammunitionCountInRightHandedWeapon=rightHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
@@ -230,18 +227,15 @@ final class PlayerData {
 	
 	final int shoot(){
 		int consumedAmmunitionCount=0;
-		if(weaponIDInUse!=null)
-	        {final Ammunition ammunition=weaponIDInUse.getAmmunition();
-		     if(ammunition!=null)
-		         {final int ammoPerShot=weaponIDInUse.getAmmunitionPerShot();
-		          final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
-		          consumedAmmunitionCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		    	  if(dualWeaponUse)
-		    	      {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
-		    	       consumedAmmunitionCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		    	      }
+		if(weaponIDInUse!=null&&!weaponIDInUse.isForMelee())
+		    {final int ammoPerShot=weaponIDInUse.getAmmunitionPerShot();
+		     final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		     consumedAmmunitionCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		     if(dualWeaponUse)
+		         {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.ordinal()].getUserData();
+		    	  consumedAmmunitionCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
 		    	 }
-		    }
+		    }		    
 		return(consumedAmmunitionCount);
 	}
 	
