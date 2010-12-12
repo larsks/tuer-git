@@ -269,103 +269,93 @@ final class PlayerData {
 	final void selectPreviousWeapon(){
     	selectWeapon(false);
 	}
-    
-    private final void selectWeapon(boolean next){
-    	ensureWeaponCountChangeDetection();
-    	final Weapon oldWeaponIDInUse=weaponIDInUse;
-    	final boolean oldDualWeaponUse=dualWeaponUse;
-    	//if the player wants to use a single weapon instead of 2
-    	if(!next&&dualWeaponUse)
-    		dualWeaponUse=false;
-    	else
-    		//if the player wants to use 2 identical weapons instead of 1
-    		if(next&&!dualWeaponUse&&weaponIDInUse!=null&&leftHandWeaponsAvailability[weaponIDInUse.getUid()]&&rightHandWeaponsAvailability[weaponIDInUse.getUid()])
-    			dualWeaponUse=true;
-    		else
-    		    {final int weaponCount=weaponFactory.getWeaponCount();
-    	         int multiplier=next?1:-1;
-    	         final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.getUid()+weaponCount)+multiplier)%weaponCount:0;
-		         int currentIndex;
-		         for(int i=0;i<weaponCount*2;i++)
-		             {currentIndex=(firstIndex+((i/2)*multiplier)+weaponCount)%weaponCount;
-		              if(i%2==0)
-		                  {if(next)
-		                       {if(rightHandWeaponsAvailability[currentIndex])
-				                    {weaponIDInUse=weaponFactory.getWeapon(currentIndex);
-				                     dualWeaponUse=false;
-					                 break;
-				                    }
-		                       }
-		                   else
-		                       {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
-			                        {weaponIDInUse=weaponFactory.getWeapon(currentIndex);
-			                         dualWeaponUse=true;
-				                     break;
-			                        }
-		                       }
-		                  }
-		              else
-		                  {if(next)
-	                           {if(leftHandWeaponsAvailability[currentIndex]&&rightHandWeaponsAvailability[currentIndex])
-		                            {weaponIDInUse=weaponFactory.getWeapon(currentIndex);
-		                             dualWeaponUse=true;
-			                         break;
-		                            }
-	                           }
-		                   else
-		                       {if(rightHandWeaponsAvailability[currentIndex])
-			                        {weaponIDInUse=weaponFactory.getWeapon(currentIndex);
-			                         dualWeaponUse=false;
-				                     break;
-			                        }
-		                       }
-		                  }
-		             }
-    	        }
-    	if(oldWeaponIDInUse!=weaponIDInUse||oldDualWeaponUse!=dualWeaponUse)
-    	    {Node oldWeapon,newWeapon;
-    		 if(oldWeaponIDInUse!=weaponIDInUse)
-    	         {//if at least one weapon was used previously
-    	    	  if(oldWeaponIDInUse!=null)
-	                  {//drop the right hand weapon
-    	    		   oldWeapon=rightHandWeaponsList[oldWeaponIDInUse.getUid()];
-	                   oldWeapon.clearControllers();
-	                   cameraNode.detachChild(oldWeapon);
-	                   if(oldDualWeaponUse)
-	    	    	      {//drop the left hand weapon
-	                	   oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
-	    	               oldWeapon.clearControllers();
-	    	               cameraNode.detachChild(oldWeapon);
-	    	    	      }
-	                  }
-    	    	  //add the right hand weapon
-    	    	  newWeapon=rightHandWeaponsList[weaponIDInUse.getUid()];
-    	    	  initializeWeaponLocalTransform(newWeapon,true);
-		          cameraNode.attachChild(newWeapon);
-    	    	  if(dualWeaponUse)
-    	    	      {//add the left hand weapon
-    	    		   newWeapon=leftHandWeaponsList[weaponIDInUse.getUid()];
-    	    		   initializeWeaponLocalTransform(newWeapon,false);
-   		               cameraNode.attachChild(newWeapon);
-    	    	      }
-    	         }
-    	     else
-    	    	 //only the dual use has changed
-    	         {if(dualWeaponUse)
-    	              {//add the left hand weapon
-    	        	   newWeapon=leftHandWeaponsList[weaponIDInUse.getUid()];
-    	        	   initializeWeaponLocalTransform(newWeapon,false);
-    		           cameraNode.attachChild(newWeapon);
+	
+	final boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
+		ensureWeaponCountChangeDetection();
+		final int weaponCount=weaponFactory.getWeaponCount();
+		/**
+		 * check if:
+		 * - the index is valid (i.e in [0;weaponCount[)
+		 * - the weapon is available in the right hand
+		 * - the weapon is available in the left hand if the player wants to use one weapon per hand
+		 * - the player does not want to use one weapon per hand
+		 */
+		final boolean success=index<weaponCount&&rightHandWeaponsAvailability[index]&&((dualWeaponUseWished&&leftHandWeaponsAvailability[index])||!dualWeaponUseWished);		
+		if(success)
+			{final Weapon oldWeaponIDInUse=weaponIDInUse;
+	    	 final boolean oldDualWeaponUse=dualWeaponUse;
+			 weaponIDInUse=weaponFactory.getWeapon(index);
+			 dualWeaponUse=dualWeaponUseWished;
+			 if(oldWeaponIDInUse!=weaponIDInUse||oldDualWeaponUse!=dualWeaponUse)
+	    	     {Node oldWeapon,newWeapon;
+    		      if(oldWeaponIDInUse!=weaponIDInUse)
+    	              {//if at least one weapon was used previously
+    		    	   if(oldWeaponIDInUse!=null)
+    		    	       {//drop the right hand weapon
+    		    		    oldWeapon=rightHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    		    oldWeapon.clearControllers();
+    		    		    cameraNode.detachChild(oldWeapon);
+    		    		    if(oldDualWeaponUse)
+    		    		        {//drop the left hand weapon
+    		    			     oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    			     oldWeapon.clearControllers();
+    		    			     cameraNode.detachChild(oldWeapon);
+    		    		        }
+    		    	       }
+    		    	   //add the right hand weapon
+    		    	   newWeapon=rightHandWeaponsList[weaponIDInUse.getUid()];
+    		    	   initializeWeaponLocalTransform(newWeapon,true);
+    		    	   cameraNode.attachChild(newWeapon);
+    		    	   if(dualWeaponUse)
+    		    	       {//add the left hand weapon
+    		    		    newWeapon=leftHandWeaponsList[weaponIDInUse.getUid()];
+    		    		    initializeWeaponLocalTransform(newWeapon,false);
+    		    		    cameraNode.attachChild(newWeapon);
+    		    	       }
     	              }
-    	          else
-    	        	  if(oldWeaponIDInUse!=null)
-    	                  {//drop the left hand weapon
-    	        	       oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
-    	                   oldWeapon.clearControllers();
-    	                   cameraNode.detachChild(oldWeapon);
-    	                  }
-    	         }
+    		      else
+    		    	  //only the dual use has changed
+    		          {if(dualWeaponUse)
+    		               {//add the left hand weapon
+    		    	        newWeapon=leftHandWeaponsList[weaponIDInUse.getUid()];
+    		    	        initializeWeaponLocalTransform(newWeapon,false);
+    		    	        cameraNode.attachChild(newWeapon);
+    		               }
+    		           else
+    		    	       if(oldWeaponIDInUse!=null)
+    		    	           {//drop the left hand weapon
+    		    		        oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    		        oldWeapon.clearControllers();
+    		    		        cameraNode.detachChild(oldWeapon);
+    		    	           }
+    		          }
+	    	     }
+			}
+		return(success);
+	}
+    
+    private final boolean selectWeapon(final boolean next){
+    	boolean success=false;
+    	final int weaponCount=weaponFactory.getWeaponCount();
+    	if(weaponCount>0)
+    	    {//if the player wants to use a single weapon instead of 2
+    	     if(!next&&dualWeaponUse)
+    		     success=selectWeapon(weaponIDInUse.getUid(),false);
+    	     else
+    		     //if the player wants to use 2 identical weapons instead of 1
+    		     if(next&&!dualWeaponUse&&weaponIDInUse!=null&&leftHandWeaponsAvailability[weaponIDInUse.getUid()]&&rightHandWeaponsAvailability[weaponIDInUse.getUid()])
+    			     success=selectWeapon(weaponIDInUse.getUid(),true);
+    		     else
+    		         {int multiplier=next?1:-1;
+    	              final int firstIndex=weaponIDInUse!=null?((weaponIDInUse.getUid()+weaponCount)+multiplier)%weaponCount:0;
+		              for(int i=0,currentIndex;i<weaponCount*2;i++)
+		                  {currentIndex=(firstIndex+((i/2)*multiplier)+weaponCount)%weaponCount;
+		                   if(success=selectWeapon(currentIndex,next==(i%2==1)))
+              	    	       break;
+		                  }
+    	             }
     	    }
+    	return(success);
 	}
     
     private final void initializeWeaponLocalTransform(Node newWeapon,boolean rightHanded){
