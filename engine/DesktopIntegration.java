@@ -359,65 +359,74 @@ public final class DesktopIntegration {
 	}
 	
 	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
+		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension, javaWebStartJNLPFileUrl,instance.desktopPath));
+	}
+	
+	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl,final String desktopShortcutFilepath){
 		final boolean success;
 		if(!isDesktopShortcutCreationSupported())
 			{logger.warning("desktop shortcuts are not supported by this operating system");
 			 success=false;
 			}
 		else
-		    {logger.info("desktop shortcuts are supported by this operating system");
-			 final File desktopShortcutFile=new File(instance.desktopPath+System.getProperty("file.separator")+desktopShortcutFilenameWithoutExtension+"."+instance.operatingSystem.getDesktopShortcutFileExtension());
-			 //tries to delete the file if it already exists
-		     if(desktopShortcutFile.exists()&&!desktopShortcutFile.delete())
+			if(desktopShortcutFilepath==null)
+			    {logger.warning("the path of the desktop shortcut file should not be null");
 				 success=false;
-			 else
-			     {boolean fileCreationSuccess=false;
-			      //(re)creates the file
-			      try{fileCreationSuccess=desktopShortcutFile.createNewFile();
-			          //drives this file executable so that the operating system does not mark it as untrusted
-			          desktopShortcutFile.setExecutable(true,true);
+			    }
+			else
+		        {logger.info("desktop shortcuts are supported by this operating system");
+			     final File desktopShortcutFile=new File(desktopShortcutFilepath+System.getProperty("file.separator")+desktopShortcutFilenameWithoutExtension+"."+instance.operatingSystem.getDesktopShortcutFileExtension());
+			     //tries to delete the file if it already exists
+		         if(desktopShortcutFile.exists()&&!desktopShortcutFile.delete())
+				     success=false;
+			     else
+			         {boolean fileCreationSuccess=false;
+			          //(re)creates the file
+			          try{fileCreationSuccess=desktopShortcutFile.createNewFile();
+			              //drives this file executable so that the operating system does not mark it as untrusted
+			              desktopShortcutFile.setExecutable(true,true);
+			             }
+			          catch(IOException ioe)
+			          {ioe.printStackTrace();}
+				      if(!fileCreationSuccess)
+				          {logger.warning("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has not been successfully created");
+					       success=false;
+				          }
+				      else
+				          {logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has been successfully created");
+					       final String[] src=instance.operatingSystem.getDesktopShortcutFileContent();
+				           final String[] desktopShortcutFileContent=new String[src.length];
+				           System.arraycopy(src,0,desktopShortcutFileContent,0,src.length);
+				           //fills the future content of the file with the parameters
+				           final int desktopShortcutFileExecutableCommandLineIndex=instance.operatingSystem.getDesktopShortcutFileExecutableCommandLineIndex();
+				           desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]+javaWebStartJNLPFileUrl;
+				           final int desktopShortcutFileNameLineIndex=instance.operatingSystem.getDesktopShortcutFileNameLineIndex();
+				           if(desktopShortcutFileNameLineIndex!=-1)
+				               desktopShortcutFileContent[desktopShortcutFileNameLineIndex]=desktopShortcutFileContent[desktopShortcutFileNameLineIndex]+desktopShortcutFilenameWithoutExtension;
+				           boolean fileWritingSuccess=true;
+					       //writes the content of the file
+					       try
+					          {PrintWriter pw=new PrintWriter(desktopShortcutFile);
+					           for(String line:desktopShortcutFileContent)
+					    	       pw.println(line);
+					           pw.close();
+					          }
+					       catch(FileNotFoundException fnfe)
+					       {fileWritingSuccess=false;
+						    fnfe.printStackTrace();
+					       }
+					       if(!fileWritingSuccess)
+					           {desktopShortcutFile.delete();
+						        logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has not been successfully filled");
+						        success=false;
+					           }
+					       else
+					           {logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has been successfully filled");
+						        success=true;
+					           }
+				          }
 			         }
-			      catch(IOException ioe)
-			      {ioe.printStackTrace();}
-				  if(!fileCreationSuccess)
-				      {logger.warning("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has not been successfully created");
-					   success=false;
-				      }
-				  else
-				      {logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has been successfully created");
-					   final String[] src=instance.operatingSystem.getDesktopShortcutFileContent();
-				       final String[] desktopShortcutFileContent=new String[src.length];
-				       System.arraycopy(src,0,desktopShortcutFileContent,0,src.length);
-				       //fills the future content of the file with the parameters
-				       final int desktopShortcutFileExecutableCommandLineIndex=instance.operatingSystem.getDesktopShortcutFileExecutableCommandLineIndex();
-				       desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]+javaWebStartJNLPFileUrl;
-				       final int desktopShortcutFileNameLineIndex=instance.operatingSystem.getDesktopShortcutFileNameLineIndex();
-				       if(desktopShortcutFileNameLineIndex!=-1)
-				           desktopShortcutFileContent[desktopShortcutFileNameLineIndex]=desktopShortcutFileContent[desktopShortcutFileNameLineIndex]+desktopShortcutFilenameWithoutExtension;
-				       boolean fileWritingSuccess=true;
-					   //writes the content of the file
-					   try
-					      {PrintWriter pw=new PrintWriter(desktopShortcutFile);
-					       for(String line:desktopShortcutFileContent)
-					    	   pw.println(line);
-					       pw.close();
-					      }
-					   catch(FileNotFoundException fnfe)
-					   {fileWritingSuccess=false;
-						fnfe.printStackTrace();
-					   }
-					   if(!fileWritingSuccess)
-					       {desktopShortcutFile.delete();
-						    logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has not been successfully filled");
-						    success=false;
-					       }
-					   else
-					       {logger.info("the desktop shortcut file "+desktopShortcutFile.getAbsolutePath()+" has been successfully filled");
-						    success=true;
-					       }
-				      }
-			     }
-		    }
+		        }
 		return(success);
 	}
 
