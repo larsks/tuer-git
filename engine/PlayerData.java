@@ -247,19 +247,33 @@ final class PlayerData {
 		return(ammunitionCountInRightHandedWeapon);
 	}
 	
-	final int shoot(){
-		int consumedAmmunitionCount=0;
-		if(weaponIDInUse!=null&&!weaponIDInUse.isForMelee())
+	/**
+	 * launch an attack
+	 * @return consumed ammunition if the weapon is not a melee weapon, knock count otherwise
+	 */
+	final int attack(){
+		int consumedAmmunitionOrKnockCount=0;
+		if(weaponIDInUse!=null)
 		    {ensureWeaponCountChangeDetection();
-			 final int ammoPerShot=weaponIDInUse.getAmmunitionPerShot();
-		     final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.getUid()].getUserData();
-		     consumedAmmunitionCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		     if(dualWeaponUse)
-		         {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.getUid()].getUserData();
-		    	  consumedAmmunitionCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		    	 }
-		    }		    
-		return(consumedAmmunitionCount);
+		     if(weaponIDInUse.isForMelee())
+		         {consumedAmmunitionOrKnockCount=dualWeaponUse?2:1;
+		    	  //melee weapon
+		         }
+		     else
+		         {final int ammoPerShot=weaponIDInUse.getAmmunitionPerShot();
+		          final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.getUid()].getUserData();
+		          consumedAmmunitionOrKnockCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		          if(dualWeaponUse)
+		              {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.getUid()].getUserData();
+		    	       consumedAmmunitionOrKnockCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		    	      }
+		         }
+		    }
+		else
+		    {consumedAmmunitionOrKnockCount=1;
+			 //punch & kick
+		    }
+		return(consumedAmmunitionOrKnockCount);
 	}
 	
 	final void selectNextWeapon(){

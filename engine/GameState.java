@@ -27,9 +27,12 @@ import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.input.Key;
+import com.ardor3d.input.MouseButton;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
+import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
+import com.ardor3d.input.logical.MouseButtonReleasedCondition;
 import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
@@ -208,11 +211,75 @@ final class GameState extends State{
 					playerData.selectPreviousWeapon();
 			}
 		};
+		final TriggerAction reloadWeaponAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerData.reload();
+			}
+		};
+		final TriggerAction attackAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerData.attack();
+			}
+		};
+		final TriggerAction pauseAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//TODO: pause
+			}
+		};
+		final TriggerAction crouchAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//TODO: crouch down
+			}
+		};
+		final TriggerAction activateAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//TODO: activate
+			}
+		};
+		final TriggerAction startRunningAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//TODO: start running
+			}
+		};
+		final TriggerAction stopRunningAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				//TODO: stop running
+			}
+		};
+		final TriggerAction selectWeaponOneAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerData.selectWeapon(0,false);
+			}
+		};
         //add some triggers to change weapon, reload and shoot
 		final InputTrigger weaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),wheelWeaponAction);
-        final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),nextWeaponAction);
+        final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.L),nextWeaponAction);
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger};
+        final InputTrigger reloadWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.R),reloadWeaponAction);
+        final InputTrigger reloadWeaponMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.RIGHT),reloadWeaponAction);
+        final InputTrigger attackTrigger=new InputTrigger(new KeyReleasedCondition(Key.SPACE),attackAction);
+        final InputTrigger attackMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.LEFT),attackAction);
+        final InputTrigger pauseTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),pauseAction);
+        final InputTrigger crouchTrigger=new InputTrigger(new KeyReleasedCondition(Key.C),crouchAction);
+        final InputTrigger activateTrigger=new InputTrigger(new KeyReleasedCondition(Key.RETURN),activateAction);
+        final InputTrigger startRunningRightTrigger=new InputTrigger(new KeyPressedCondition(Key.RSHIFT),startRunningAction);
+        final InputTrigger stopRunningRightTrigger=new InputTrigger(new KeyReleasedCondition(Key.RSHIFT),stopRunningAction);
+        final InputTrigger startRunningLeftTrigger=new InputTrigger(new KeyPressedCondition(Key.LSHIFT),startRunningAction);
+        final InputTrigger stopRunningLeftTrigger=new InputTrigger(new KeyReleasedCondition(Key.LSHIFT),stopRunningAction);
+        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.NUMPAD1),selectWeaponOneAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
+        		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger,reloadWeaponTrigger,
+        		reloadWeaponMouseButtonTrigger,attackTrigger,attackMouseButtonTrigger,pauseTrigger,crouchTrigger,
+        		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,startRunningLeftTrigger,
+        		stopRunningLeftTrigger,selectWeaponOneTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);

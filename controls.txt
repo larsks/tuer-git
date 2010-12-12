@@ -12,12 +12,12 @@ UP ARROW: look up
 DOWN ARROW: look down                
 C: crouch                            
 P: pause
-CTRL: reload
+R: reload
 RETURN: activate
 SHIFT: run
-SPACE: shoot
+SPACE: attack
 M: next weapon
-P: previous weapon
+L: previous weapon
 ESC: quit game
 MOUSE LEFT BUTTON: shoot
 MOUSE MIDDLE BUTTON: crouch
