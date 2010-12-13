@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Ammunition implements Comparable<Ammunition>{
     
-	private static AtomicInteger autoIncrementalIndex = new AtomicInteger(0);
+	private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
 	/**unique name*/
     private final String identifier;
     /**unique identifier*/
