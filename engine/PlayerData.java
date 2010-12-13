@@ -14,6 +14,7 @@
 package engine;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
@@ -28,6 +29,12 @@ final class PlayerData {
     
 	
 	private static final int maxHealth=100;
+	
+	private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
+	
+	private final int uid;
+	
+	static final int NO_UID=-1;
 	
 	private int health;
 	
@@ -53,6 +60,7 @@ final class PlayerData {
 	
 	
 	PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory){
+		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.cameraNode=cameraNode;
 		this.weaponFactory=weaponFactory;
 		health=maxHealth;
@@ -110,7 +118,10 @@ final class PlayerData {
 		ensureWeaponCountChangeDetection();
 		final boolean result;
 		final int weaponIndex=weaponUserData.getWeapon().getUid();
-	    if(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex])
+		final int ownerUid=weaponUserData.getOwnerUid();
+		final boolean digitalWatermarkEnabled=weaponUserData.isDigitalWatermarkEnabled();
+	    final boolean canChangeOfOwner=ownerUid!=uid&&!digitalWatermarkEnabled;
+		if((ownerUid==uid||canChangeOfOwner)&&(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex]))
             {if(!rightHandWeaponsAvailability[weaponIndex])
                  {rightHandWeaponsAvailability[weaponIndex]=true;
                   rightHandWeaponsList[weaponIndex]=collectible;
@@ -125,6 +136,8 @@ final class PlayerData {
                      }
   	             else
   		             result=false;
+             if(result&&canChangeOfOwner)
+            	 weaponUserData.setOwnerUid(uid);           	              	 
             }
         else
 	        result=false;
@@ -170,8 +183,16 @@ final class PlayerData {
 	    return(health);
 	}
 	
+	void die(){
+		if(!isAlive())
+		    {//TODO: change the owner uid (if there is no digital watermark) and detach them from the player
+			 //TODO: 
+			 
+		    }
+	}
+	
 	void respawn(){
-		health=maxHealth;
+		health=maxHealth;		
 		weaponIDInUse=null;
 		ammoContainer.empty();
 		dualWeaponUse=false;
