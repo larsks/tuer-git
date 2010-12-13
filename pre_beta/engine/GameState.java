@@ -63,6 +63,7 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.input.ExtendedFirstPersonControl;
 import engine.weapon.Ammunition;
+import engine.weapon.AmmunitionContainer;
 import engine.weapon.AmmunitionFactory;
 import engine.weapon.Weapon;
 import engine.weapon.WeaponFactory;
@@ -104,6 +105,8 @@ final class GameState extends State{
     private final ArrayList<Node> collectibleObjectsList;
     /**list of teleporters*/
     private final ArrayList<Node> teleportersList;
+    /**text label showing the ammunition*/
+    private final BasicText ammoTextLabel;
     /**text label showing the frame rate*/
     private final BasicText fpsTextLabel;
     /**text label showing the health*/
@@ -274,7 +277,7 @@ final class GameState extends State{
         final InputTrigger stopRunningRightTrigger=new InputTrigger(new KeyReleasedCondition(Key.RSHIFT),stopRunningAction);
         final InputTrigger startRunningLeftTrigger=new InputTrigger(new KeyPressedCondition(Key.LSHIFT),startRunningAction);
         final InputTrigger stopRunningLeftTrigger=new InputTrigger(new KeyReleasedCondition(Key.LSHIFT),stopRunningAction);
-        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.NUMPAD1),selectWeaponOneAction);
+        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
         		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger,reloadWeaponTrigger,
         		reloadWeaponMouseButtonTrigger,attackTrigger,attackMouseButtonTrigger,pauseTrigger,crouchTrigger,
@@ -283,6 +286,19 @@ final class GameState extends State{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+        ammoTextLabel=BasicText.createDefaultTextLabel("ammo display","");
+        ammoTextLabel.setTranslation(new Vector3(0,80,0));
+        ammoTextLabel.addController(new SpatialController<Spatial>(){
+            @Override
+            public final void update(double time,Spatial caller){
+            	if(playerData.isCurrentWeaponAmmunitionCountDisplayable())
+            		ammoTextLabel.setText(playerData.getAmmunitionCountInLeftHandedWeapon()+" "+
+            				playerData.getAmmunitionCountInRightHandedWeapon()+" "+
+            				playerData.getAmmunitionCountInContainer());
+            	else
+            		ammoTextLabel.setText("N/A");
+            }           
+        });
         fpsTextLabel=BasicText.createDefaultTextLabel("FPS display","");
         fpsTextLabel.setTranslation(new Vector3(0,20,0));
         fpsTextLabel.addController(new SpatialController<Spatial>(){
@@ -498,6 +514,8 @@ final class GameState extends State{
         currentCamLocation.set(115,0.5,223);
         //attach the player itself
         getRoot().attachChild(playerNode);
+        //attach the ammunition display node
+        getRoot().attachChild(ammoTextLabel);
         //attach the FPS display node
         getRoot().attachChild(fpsTextLabel);
         //attach the health display node
@@ -728,8 +746,8 @@ final class GameState extends State{
     	private final Weapon weapon;
     	
     	private final ReadOnlyMatrix3 rotation;
-    	/**ammunition count in the magazine of the weapon if any, otherwise -1*/
-    	private int ammunitionCountInMagazine;
+    	
+    	private AmmunitionContainer ammunitionInMagazine;
     	
     	private int ownerUid;
     	/**flag indicating whether a weapon can change of owner*/
@@ -742,7 +760,7 @@ final class GameState extends State{
     		this.rotation=rotation;
     		this.ownerUid=ownerUid;
     		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
-    		this.ammunitionCountInMagazine=!weapon.isForMelee()?0:-1;
+    		this.ammunitionInMagazine=new AmmunitionContainer(weapon.isForMelee()?0:weapon.getMagazineSize());
     	}
     	
     	
@@ -772,21 +790,15 @@ final class GameState extends State{
     	}
     	
     	final int getAmmunitionCountInMagazine(){
-    		return(ammunitionCountInMagazine);
+    		return(ammunitionInMagazine.getAmmunitionCount());
     	}
     	
     	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
-    		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(!weapon.isForMelee()&&ammunitionCountToAddIntoMagazine>0)
-    			ammunitionCountInMagazine=Math.min(weapon.getMagazineSize(),ammunitionCountInMagazine+ammunitionCountToAddIntoMagazine);
-    		return(ammunitionCountInMagazine-previousAmmoCount);
+    		return(ammunitionInMagazine.add(ammunitionCountToAddIntoMagazine));
     	}
     	
     	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
-    		final int previousAmmoCount=ammunitionCountInMagazine;
-    		if(!weapon.isForMelee()&&ammunitionCountToRemoveFromMagazine>0)
-    			ammunitionCountInMagazine=Math.max(0,ammunitionCountInMagazine-ammunitionCountToRemoveFromMagazine);
-    		return(previousAmmoCount-ammunitionCountInMagazine);
+    		return(ammunitionInMagazine.remove(ammunitionCountToRemoveFromMagazine));
     	}
     }
 }

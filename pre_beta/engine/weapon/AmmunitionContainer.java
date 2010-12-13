@@ -13,56 +13,40 @@
 */
 package engine.weapon;
 
-import java.util.Arrays;
-
 public class AmmunitionContainer {
 
-	private int[] ammunitionsCount;
+	private int ammunitionCount;
 	
-	private int[] ammunitionsMaxCount;
+	private int ammunitionMaxCount;
 	
-	private final AmmunitionFactory ammunitionFactory;
-	
-	public AmmunitionContainer(final AmmunitionFactory ammunitionFactory){
-		this.ammunitionFactory=ammunitionFactory;
-		ammunitionsCount=new int[ammunitionFactory.getAmmunitionCount()];
-		ammunitionsMaxCount=new int[ammunitionFactory.getAmmunitionCount()];
-		Arrays.fill(ammunitionsMaxCount,1000);
+	public AmmunitionContainer(final int ammunitionMaxCount){
+		this.ammunitionCount=0;
+		this.ammunitionMaxCount=ammunitionMaxCount;
 	}
 	
 	public final void empty(){
-		Arrays.fill(ammunitionsCount,0);
-		ensureAmmunitionCountChangeDetection();
+		this.ammunitionCount=0;
 	}
 	
-	private final void ensureAmmunitionCountChangeDetection(){
-		final int previousAmmoCount=ammunitionsCount.length;
-		final int currentAmmoCount=ammunitionFactory.getAmmunitionCount();
-		//an ammunition cannot be removed from the factory
-		if(currentAmmoCount>previousAmmoCount)
-		    {ammunitionsCount=Arrays.copyOf(ammunitionsCount,currentAmmoCount);
-		     ammunitionsMaxCount=Arrays.copyOf(ammunitionsMaxCount,currentAmmoCount);
-		    }
+	public final int getAmmunitionCount(){
+		return(ammunitionCount);
 	}
 	
-	public final int get(final Ammunition ammunition){
-		ensureAmmunitionCountChangeDetection();
-		return(ammunitionsCount[ammunition.getUid()]);
+	public final int getAmmunitionMaxCount(){
+		return(ammunitionMaxCount);
 	}
 	
-	public final int add(final Ammunition ammunition,final int ammunitionCountToAdd){
-		ensureAmmunitionCountChangeDetection();
-		final int previousAmmunitionCount=ammunitionsCount[ammunition.getUid()];
+	public final int add(final int ammunitionCountToAdd){
+		final int previousAmmunitionCount=ammunitionCount;
 		if(ammunitionCountToAdd>0)
-			ammunitionsCount[ammunition.getUid()]=Math.min(ammunitionsMaxCount[ammunition.getUid()],ammunitionsCount[ammunition.getUid()]+ammunitionCountToAdd);
-		return(ammunitionsCount[ammunition.getUid()]-previousAmmunitionCount);
+			ammunitionCount=Math.min(ammunitionMaxCount,ammunitionCount+ammunitionCountToAdd);
+		return(ammunitionCount-previousAmmunitionCount);
 	}
 	
-	public final int remove(final Ammunition ammunition,final int ammunitionCountToRemove){
-		ensureAmmunitionCountChangeDetection();
-		final int previousAmmunitionCount=ammunitionsCount[ammunition.getUid()];
+	public final int remove(final int ammunitionCountToRemove){
+		final int previousAmmunitionCount=ammunitionCount;
 		if(ammunitionCountToRemove>0)
-			ammunitionsCount[ammunition.getUid()]=Math.max(0,ammunitionsCount[ammunition.getUid()]-ammunitionCountToRemove);
-		return(previousAmmunitionCount-ammunitionsCount[ammunition.getUid()]);
+			ammunitionCount=Math.max(0,ammunitionCount-ammunitionCountToRemove);
+		return(previousAmmunitionCount-ammunitionCount);
 	}
 }
