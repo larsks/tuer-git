@@ -1,16 +1,16 @@
 CONTROLS
 
-W: move forward                      
-Z: move forward                      
-S: move backward                     
-A: strafe left                       
-Q: strafe left                       
-D: strafe right                      
-LEFT ARROW: turn left                
-RIGHT ARROW: turn right              
-UP ARROW: look up                    
-DOWN ARROW: look down                
-C: crouch                            
+W: move forward
+Z: move forward
+S: move backward
+A: strafe left
+Q: strafe left
+D: strafe right
+LEFT ARROW: turn left
+RIGHT ARROW: turn right
+UP ARROW: look up
+DOWN ARROW: look down
+C: crouch
 P: pause
 R: reload
 RETURN: activate
@@ -24,3 +24,7 @@ MOUSE MIDDLE BUTTON: crouch
 MOUSE RIGHT BUTTON: reload
 MOUSE WHEEL UP: next weapon
 MOUSE WHEEL DOWN: previous weapon
+NUMERICAL PAD 8: move forward
+NUMERICAL PAD 2: move backward
+NUMERICAL PAD 4: strafe left
+NUMERICAL PAD 6: strafe right

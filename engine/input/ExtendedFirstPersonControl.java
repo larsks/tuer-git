@@ -94,16 +94,16 @@ public final class ExtendedFirstPersonControl{
     protected void move(final Camera camera, final KeyboardState kb, final double tpf) {
         // MOVEMENT
         int moveFB = 0, strafeLR = 0;
-        if (kb.isDown(Key.W) || kb.isDown(Key.Z)) {
+        if (kb.isDown(Key.W) || kb.isDown(Key.Z) || kb.isDown(Key.NUMPAD8)) {
             moveFB += 1;
         }
-        if (kb.isDown(Key.S)) {
+        if (kb.isDown(Key.S) || kb.isDown(Key.NUMPAD2)) {
             moveFB -= 1;
         }
-        if (kb.isDown(Key.A) || kb.isDown(Key.Q)) {
+        if (kb.isDown(Key.A) || kb.isDown(Key.Q) || kb.isDown(Key.NUMPAD4)) {
             strafeLR += 1;
         }
-        if (kb.isDown(Key.D)) {
+        if (kb.isDown(Key.D) || kb.isDown(Key.NUMPAD6)) {
             strafeLR -= 1;
         }
 
@@ -207,7 +207,7 @@ public final class ExtendedFirstPersonControl{
 
     public Predicate<TwoInputStates> setupKeyboardTriggers(final LogicalLayer layer) {
         final Predicate<TwoInputStates> keysHeld = new Predicate<TwoInputStates>() {
-            Key[] keys = new Key[] { Key.W, Key.Z, Key.A, Key.Q, Key.S, Key.D, Key.LEFT, Key.RIGHT, Key.UP, Key.DOWN };
+            Key[] keys = new Key[] { Key.W, Key.Z, Key.NUMPAD8, Key.A, Key.Q, Key.NUMPAD4, Key.S, Key.NUMPAD2, Key.D, Key.NUMPAD6, Key.LEFT, Key.RIGHT, Key.UP, Key.DOWN };
 
             public boolean apply(final TwoInputStates states) {
                 for (final Key k : keys) {
