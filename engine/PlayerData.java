@@ -20,7 +20,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import engine.GameState.WeaponUserData;
 import engine.weapon.Ammunition;
-import engine.weapon.AmmunitionContainer;
+import engine.weapon.AmmunitionContainerContainer;
 import engine.weapon.AmmunitionFactory;
 import engine.weapon.Weapon;
 import engine.weapon.WeaponFactory;
@@ -56,7 +56,7 @@ final class PlayerData {
 	
 	private final WeaponFactory weaponFactory;
 	
-	private final AmmunitionContainer ammoContainer;
+	private final AmmunitionContainerContainer ammoContainerContainer;
 	
 	
 	PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory){
@@ -76,7 +76,7 @@ final class PlayerData {
 		Arrays.fill(leftHandWeaponsAvailability,false);
 		Arrays.fill(rightHandWeaponsList,null);
 		Arrays.fill(leftHandWeaponsList,null);
-		ammoContainer=new AmmunitionContainer(ammunitionFactory);
+		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
 	}
 	
 	
@@ -146,7 +146,7 @@ final class PlayerData {
 	
 	private boolean collectAmmunition(final Node collectible,final GameState.AmmunitionUserData ammoUserData){
 		final boolean result;
-		result=ammoContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount())>0;
+		result=ammoContainerContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount())>0;
 		return(result);
 	}
 	
@@ -186,7 +186,7 @@ final class PlayerData {
 	void die(){
 		if(!isAlive())
 		    {//TODO: change the owner uid (if there is no digital watermark) and detach them from the player
-			 //TODO: 
+			 //TODO: empty the container of ammunition container (use WeaponUserData)
 			 
 		    }
 	}
@@ -194,7 +194,7 @@ final class PlayerData {
 	void respawn(){
 		health=maxHealth;		
 		weaponIDInUse=null;
-		ammoContainer.empty();
+		ammoContainerContainer.empty();
 		dualWeaponUse=false;
 		Arrays.fill(rightHandWeaponsAvailability,false);
 		Arrays.fill(leftHandWeaponsAvailability,false);
@@ -212,7 +212,7 @@ final class PlayerData {
 			 final GameState.WeaponUserData rightHandWeaponUserData=(GameState.WeaponUserData)rightHandWeaponsList[weaponIDInUse.getUid()].getUserData();
 			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
 			 //remove ammo from the container
-			 final int availableAmmoForRightHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
+			 final int availableAmmoForRightHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
 			 //add it into the magazine
 			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
 			 //increase reloaded ammunition count
@@ -221,7 +221,7 @@ final class PlayerData {
 			     {final GameState.WeaponUserData leftHandWeaponUserData=(GameState.WeaponUserData)leftHandWeaponsList[weaponIDInUse.getUid()].getUserData();
 			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
 			      //remove ammo from the container
-			      final int availableAmmoForLeftHandWeaponReload=ammoContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
+			      final int availableAmmoForLeftHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
 			      //add it into the magazine
 			      leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
 			      //increase reloaded ammunition count
@@ -235,13 +235,17 @@ final class PlayerData {
 		final int ammunitionCountInContainer;
 		if(weaponIDInUse!=null)
 		    {if(!weaponIDInUse.isForMelee())
-				 ammunitionCountInContainer=ammoContainer.get(weaponIDInUse.getAmmunition());
+				 ammunitionCountInContainer=ammoContainerContainer.get(weaponIDInUse.getAmmunition());
 			 else
-				 ammunitionCountInContainer=-1;
+				 ammunitionCountInContainer=0;
 		    }
 		else
-			ammunitionCountInContainer=-1;
+			ammunitionCountInContainer=0;
 		return(ammunitionCountInContainer);
+	}
+	
+	final boolean isCurrentWeaponAmmunitionCountDisplayable(){
+		return(weaponIDInUse!=null&&!weaponIDInUse.isForMelee());
 	}
 	
 	final int getAmmunitionCountInLeftHandedWeapon(){
@@ -252,7 +256,7 @@ final class PlayerData {
 		     ammunitionCountInLeftHandedWeapon=leftHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
 		else
-			ammunitionCountInLeftHandedWeapon=-1;
+			ammunitionCountInLeftHandedWeapon=0;
 		return(ammunitionCountInLeftHandedWeapon);
 	}
 	
@@ -264,7 +268,7 @@ final class PlayerData {
 		     ammunitionCountInRightHandedWeapon=rightHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
 		else
-			ammunitionCountInRightHandedWeapon=-1;
+			ammunitionCountInRightHandedWeapon=0;
 		return(ammunitionCountInRightHandedWeapon);
 	}
 	

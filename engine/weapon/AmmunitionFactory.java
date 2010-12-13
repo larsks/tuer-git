@@ -33,7 +33,7 @@ private final HashMap<String,Ammunition> ammunitionsMap;
 		return(ammunitionsMap.get(identifier));
 	}
 	
-	public final int getAmmunitionCount(){
+	public final int getSize(){
 		return(ammunitionsMap.size());
 	}
 }
