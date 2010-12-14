@@ -37,6 +37,8 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 
+import engine.sound.SoundManager;
+
 final class MainMenuState extends State{
     
     
@@ -65,8 +67,8 @@ final class MainMenuState extends State{
     
     MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
-                  final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction){
-        super();
+                  final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,final SoundManager soundManager){
+        super(soundManager);
         this.canvas=canvas;
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;

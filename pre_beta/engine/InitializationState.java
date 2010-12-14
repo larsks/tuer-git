@@ -29,6 +29,7 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import engine.Ardor3DGameServiceProvider.Step;
+import engine.sound.SoundManager;
 
 public final class InitializationState extends State{   
   
@@ -38,8 +39,8 @@ public final class InitializationState extends State{
     private final TaskManagementProgressionNode taskNode;
     
     
-    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction){
-        super();
+    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction,final SoundManager soundManager){
+        super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);

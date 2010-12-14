@@ -52,6 +52,8 @@ import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 
+import engine.sound.SoundManager;
+
 /**
  * General entry point of an application created by JFPSM
  * 
@@ -109,6 +111,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**state machine*/
     private final StateMachine stateMachine;
     
+    /**sound manager*/
+    private final SoundManager soundManager;
+    
     /**list of bitmap fonts*/
     private static ArrayList<BMFont> fontsList;
     
@@ -152,7 +157,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         introductionStartTime=Double.NaN;
         timer=new Timer();
         root=new Node("root node of the game");
-        stateMachine=new StateMachine(root);       
+        stateMachine=new StateMachine(root);
+        soundManager=new SoundManager();
         // Get the default display mode
         final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         // Choose the full-screen mode
@@ -215,7 +221,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         canvas.getCanvasRenderer().makeCurrentContext();
 
         // Done, do cleanup
-        SoundManager.getInstance().cleanup();
+        soundManager.cleanup();
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         canvas.close();
         //necessary for Java Webstart
@@ -255,16 +261,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
         
         final LoadingDisplayState loadingDisplayState;
         //create one state per step
-        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction));
-        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction));
-        stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction));        
-        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction));
-        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction));
-        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction));
-        stateMachine.addState(new State());
-        stateMachine.addState(new State());
-        stateMachine.addState(new State());
-        stateMachine.addState(new State());
+        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction,soundManager));
+        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager));
+        stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
+        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
+        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager));
+        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager));
+        stateMachine.addState(new State(soundManager));
+        stateMachine.addState(new State(soundManager));
+        stateMachine.addState(new State(soundManager));
+        stateMachine.addState(new State(soundManager));
         // enqueue initialization tasks for states that are not in-game states
         // do not enqueue the task of the first state as it would be called after its display
         TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));

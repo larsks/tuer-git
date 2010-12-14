@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.sound;
 
 import java.net.URL;
 import paulscode.sound.SoundSystem;
@@ -28,13 +28,12 @@ import paulscode.sound.libraries.LibraryJavaSound;
  */
 public final class SoundManager{
 
-    /**unique instance of the sound manager (design pattern "singleton")*/
-    private static final SoundManager instance=new SoundManager();
+	
     /**underlying sound system written by Paul Lamb*/
     private SoundSystem soundSystem;
     
     
-    private SoundManager(){
+    public SoundManager(){
     	try{soundSystem=new SoundSystem(LibraryJavaSound.class);
             SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
            }
@@ -72,10 +71,6 @@ public final class SoundManager{
     public final void stop(String sourcename){
         if(soundSystem!=null)
             soundSystem.stop(sourcename);
-    }
-    
-    public static final SoundManager getInstance(){
-        return(instance);
     }
     
     public final void cleanup(){

@@ -17,21 +17,22 @@ import com.ardor3d.input.logical.LogicalLayer;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.SwitchNode;
 
+import engine.sound.SoundManager;
+
 public class State{
 
     
-    /**
-     * layer used to handle the input
-     */
+    /**layer used to handle the input*/
     private LogicalLayer logicalLayer;
     
-    /**
-     * root node
-     */
+    /**root node*/
     private final Node root;
     
+    private final SoundManager soundManager;
     
-    public State(){
+    
+    public State(final SoundManager soundManager){
+    	this.soundManager=soundManager;
         this.logicalLayer=new LogicalLayer();
         root=new Node();
     }
@@ -67,5 +68,9 @@ public class State{
     
     final LogicalLayer getLogicalLayer(){
         return(logicalLayer);
+    }
+    
+    final SoundManager getSoundManager(){
+    	return(soundManager);
     }
 }

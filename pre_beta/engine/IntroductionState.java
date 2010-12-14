@@ -35,6 +35,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.Ardor3DGameServiceProvider.Step;
+import engine.sound.SoundManager;
 
 public final class IntroductionState extends State{
     
@@ -48,8 +49,8 @@ public final class IntroductionState extends State{
     private final Box box;
 
     
-    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction){
-        super();
+    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction,final SoundManager soundManager){
+        super(soundManager);
         box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-75));
@@ -93,7 +94,7 @@ public final class IntroductionState extends State{
         // load the music
         final URL sampleUrl=IntroductionState.class.getResource(soundSamplePath);
         if(sampleUrl!=null)
-            sourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+            sourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
         else
             sourcename=null;
         // puts a texture onto the box
@@ -110,11 +111,11 @@ public final class IntroductionState extends State{
             {super.setEnabled(enabled);
              if(enabled)
                  {if(sourcename!=null)
-                      SoundManager.getInstance().play(sourcename);
+                      getSoundManager().play(sourcename);
                  }
              else
                  {if(sourcename!=null)
-                      SoundManager.getInstance().stop(sourcename);
+                      getSoundManager().stop(sourcename);
                  }
             }
     }

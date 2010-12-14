@@ -19,11 +19,11 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import engine.GameState.WeaponUserData;
-import engine.weapon.Ammunition;
-import engine.weapon.AmmunitionContainerContainer;
-import engine.weapon.AmmunitionFactory;
-import engine.weapon.Weapon;
-import engine.weapon.WeaponFactory;
+import engine.weaponry.Ammunition;
+import engine.weaponry.AmmunitionContainerContainer;
+import engine.weaponry.AmmunitionFactory;
+import engine.weaponry.Weapon;
+import engine.weaponry.WeaponFactory;
 
 final class PlayerData {
     
@@ -80,9 +80,9 @@ final class PlayerData {
 	}
 	
 	
-	boolean collect(final Node collectible){
+	int collect(final Node collectible){
 		//check if the collectible can be collected
-		final boolean result;
+		final int result;
 		final Object userData=collectible.getUserData();
 		if(userData!=null&&userData instanceof GameState.CollectibleUserData)
 		    {if(userData instanceof GameState.WeaponUserData)
@@ -95,10 +95,10 @@ final class PlayerData {
 		    			 result=collectAmmunition(collectible,(GameState.AmmunitionUserData)userData);
 		    	         //TODO: handle here the other kinds of collectible objects
 		    	     else
-		    		     result=false;
+		    		     result=0;
 		    }
 		else
-			result=false;
+			result=0;
 		return(result);
 	}
 	
@@ -114,7 +114,7 @@ final class PlayerData {
 		    }
 	}
 	
-	private boolean collectWeapon(final Node collectible,final GameState.WeaponUserData weaponUserData){
+	private int collectWeapon(final Node collectible,final GameState.WeaponUserData weaponUserData){
 		ensureWeaponCountChangeDetection();
 		final boolean result;
 		final int weaponIndex=weaponUserData.getWeapon().getUid();
@@ -141,18 +141,18 @@ final class PlayerData {
             }
         else
 	        result=false;
+		return(result?1:0);
+	}
+	
+	private int collectAmmunition(final Node collectible,final GameState.AmmunitionUserData ammoUserData){
+		final int result;
+		result=ammoContainerContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount());
 		return(result);
 	}
 	
-	private boolean collectAmmunition(final Node collectible,final GameState.AmmunitionUserData ammoUserData){
-		final boolean result;
-		result=ammoContainerContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount())>0;
-		return(result);
-	}
-	
-	private boolean collectMedikit(Node collectible,final GameState.MedikitUserData medikitUserData){
-		final boolean result;
-		result=increaseHealth(medikitUserData.getHealth())>0;
+	private int collectMedikit(Node collectible,final GameState.MedikitUserData medikitUserData){
+		final int result;
+		result=increaseHealth(medikitUserData.getHealth());
 		return(result);
 	}
 	
