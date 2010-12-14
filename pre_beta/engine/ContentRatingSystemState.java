@@ -23,9 +23,10 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.ui.text.BMText;
 
+import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
-final class ContentRatingSystemState extends State{
+public final class ContentRatingSystemState extends State{
 	
 	
 	private final String text="Adults Only (+18)\n\nViolence\n\nBad Language\n\nFear\n\nSex\n\nDrugs\n\nDiscrimination";
@@ -33,7 +34,7 @@ final class ContentRatingSystemState extends State{
 	private MouseManager mouseManager;
 	
     
-    ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager){
+	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager){
         super(soundManager);
         this.mouseManager=mouseManager;
         final BMText textNode=new BMText("contentSystemRatingNode",text,Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);

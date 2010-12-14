@@ -15,7 +15,7 @@
 	<property name="homepage-url" value="http://tuer.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
-	<property name="tuer-main-class" value="engine.Ardor3DGameServiceProvider"/>
+	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>

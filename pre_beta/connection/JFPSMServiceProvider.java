@@ -19,7 +19,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-import engine.EngineServiceProvider;
+import engine.service.EngineServiceProvider;
 import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
 import jfpsm.MainWindow;
@@ -32,10 +32,10 @@ import jfpsm.MainWindow;
 public final class JFPSMServiceProvider implements I3DServiceSeeker{
     
     /**delegate that executes the services of the engine*/
-    private final engine.I3DServiceProvider delegate;
+    private final engine.service.I3DServiceProvider delegate;
     
     
-    private JFPSMServiceProvider(final engine.I3DServiceProvider factory,
+    private JFPSMServiceProvider(final engine.service.I3DServiceProvider factory,
                                  final I3DServiceSeeker seeker){
         delegate=factory;
         bind3DServiceSeeker(seeker);

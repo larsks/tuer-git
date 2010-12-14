@@ -21,7 +21,7 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.ReadOnlyTimer;
 
 
-final class StateMachine{
+public final class StateMachine{
     
     
     private final ArrayList<State> statesList;
@@ -29,19 +29,19 @@ final class StateMachine{
     private final StateMachineSwitchNode switchNode;
     
     
-    StateMachine(final Node parent){
+    public StateMachine(final Node parent){
         statesList=new ArrayList<State>();
         switchNode=new StateMachineSwitchNode();
         parent.attachChild(switchNode);
     }
     
     
-    final void addState(final State state){
+    public final void addState(final State state){
         statesList.add(state);
         switchNode.attachChild(state.getRoot());
     }
     
-    final void updateLogicalLayer(final ReadOnlyTimer timer){
+    public final void updateLogicalLayer(final ReadOnlyTimer timer){
         int i=0;
         for(State state:statesList)
             {if(isEnabled(i))
@@ -50,23 +50,23 @@ final class StateMachine{
             }
     }
     
-    final void setEnabled(final int index,final boolean enabled){
+    public final void setEnabled(final int index,final boolean enabled){
         statesList.get(index).setEnabled(enabled);
     }
     
-    final boolean isEnabled(final int index){
+    public final boolean isEnabled(final int index){
         return(switchNode.getVisible(index));
     }
     
-    final LogicalLayer getLogicalLayer(final int index){
+    public final LogicalLayer getLogicalLayer(final int index){
         return(statesList.get(index).getLogicalLayer());
     }
     
-    final int attachChild(int index,Spatial child){
+    public final int attachChild(int index,Spatial child){
         return(statesList.get(index).getRoot().attachChild(child));
     }
     
-    final Runnable getStateInitializationTask(final int index){
+    public final Runnable getStateInitializationTask(final int index){
     	return(new StateInitializationRunnable(statesList.get(index)));
     }
     

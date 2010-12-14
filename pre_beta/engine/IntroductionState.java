@@ -33,8 +33,8 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.resource.URLResourceSource;
-
-import engine.Ardor3DGameServiceProvider.Step;
+import engine.service.Ardor3DGameServiceProvider;
+import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 
 public final class IntroductionState extends State{

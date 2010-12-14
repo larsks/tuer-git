@@ -23,7 +23,7 @@ public final class TaskManager{
     private final ArrayList<Runnable> tasksQueue;
      
     
-    TaskManager(){
+    public TaskManager(){
         tasksQueue=new ArrayList<Runnable>();
     }
     
