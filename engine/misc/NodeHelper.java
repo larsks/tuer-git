@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.misc;
 
 import java.util.ArrayList;
 
@@ -22,9 +22,9 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.hint.DataMode;
 
-/*public */final class NodeHelper{
+public final class NodeHelper{
 
-	static final void setGLAccessMode(Spatial spatial,DataMode glAccessMode){
+	public static final void setGLAccessMode(Spatial spatial,DataMode glAccessMode){
 		spatial.getSceneHints().setDataMode(glAccessMode);
 	    if(spatial instanceof Node)
 	        {for(Spatial child:((Node)spatial).getChildren())
@@ -46,14 +46,14 @@ import com.ardor3d.scenegraph.hint.DataMode;
 	            }
 	}
 	
-	static final void setBackCullState(Spatial spatial){
+	public static final void setBackCullState(Spatial spatial){
 		CullState cullState=new CullState();
         cullState.setEnabled(true);
         cullState.setCullFace(CullState.Face.Back);
         spatial.setRenderState(cullState);
 	}
 	
-	static final void setModelBound(Spatial spatial,Class<? extends BoundingVolume> boundingClass){
+	public static final void setModelBound(Spatial spatial,Class<? extends BoundingVolume> boundingClass){
 		if(spatial instanceof Node)
             {for(Spatial child:((Node)spatial).getChildren())
             	 setModelBound(child,boundingClass);
@@ -67,7 +67,7 @@ import com.ardor3d.scenegraph.hint.DataMode;
 		        {e.printStackTrace();}
 	}
 	
-	static final void detachChildren(Node node,ArrayList<? extends Spatial> childrenList){
+	public static final void detachChildren(Node node,ArrayList<? extends Spatial> childrenList){
 		for(Spatial child:childrenList)
 			node.detachChild(child);
 	}

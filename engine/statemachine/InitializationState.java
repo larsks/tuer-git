@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.statemachine;
 
 import java.util.LinkedHashMap;
 import com.ardor3d.bounding.BoundingBox;
@@ -28,8 +28,11 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
+import engine.movement.UniformlyVariableRotationController;
 import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
+import engine.taskmanagement.TaskManagementProgressionNode;
+import engine.taskmanagement.TaskManager;
 
 public final class InitializationState extends State{   
   

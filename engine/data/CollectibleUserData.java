@@ -11,15 +11,17 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.data;
 
-import java.io.Serializable;
-
-public interface MovementEquation extends Serializable{
-    /**
-     * get the value of the movement after elapsedTime seconds
-     * @param elapsedTime elapsed time in seconds
-     * @return value after elapsedTime seconds
-     */
-    public double getValueAtTime(final double elapsedTime);
+public abstract class CollectibleUserData{
+	/**source name of the sound played when picking up this kind of object*/
+	private final String sourcename;
+	
+	public CollectibleUserData(final String sourcename){
+		this.sourcename=sourcename;
+	}
+	
+	public final String getSourcename(){
+		return(sourcename);
+	}
 }
