@@ -51,16 +51,15 @@ import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
-
-import engine.ContentRatingSystemState;
-import engine.GameState;
-import engine.InitializationState;
-import engine.IntroductionState;
-import engine.LoadingDisplayState;
-import engine.MainMenuState;
-import engine.State;
-import engine.StateMachine;
-import engine.TaskManager;
+import engine.statemachine.ContentRatingSystemState;
+import engine.statemachine.GameState;
+import engine.statemachine.InitializationState;
+import engine.statemachine.IntroductionState;
+import engine.statemachine.LoadingDisplayState;
+import engine.statemachine.MainMenuState;
+import engine.statemachine.State;
+import engine.statemachine.StateMachine;
+import engine.taskmanagement.TaskManager;
 import engine.sound.SoundManager;
 
 /**

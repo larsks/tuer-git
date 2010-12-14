@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.statemachine;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -42,7 +42,6 @@ import com.ardor3d.intersection.PickingUtil;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
-import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
@@ -58,12 +57,16 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
+import engine.data.CollectibleUserData;
+import engine.data.MedikitUserData;
+import engine.data.PlayerData;
+import engine.data.TeleporterUserData;
+import engine.data.WeaponUserData;
 import engine.input.ExtendedFirstPersonControl;
+import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
-import engine.weaponry.Ammunition;
-import engine.weaponry.AmmunitionContainer;
 import engine.weaponry.AmmunitionFactory;
-import engine.weaponry.Weapon;
 import engine.weaponry.WeaponFactory;
 
 /**
@@ -78,9 +81,9 @@ public final class GameState extends State{
     /**Our native window, not the gl surface itself*/
     private final NativeCanvas canvas;
     /**source name of the sound played when picking up some ammo*/
-    private static String pickupAmmoSourcename;
+    public static String pickupAmmoSourcename;
     /**source name of the sound played when picking up a weapon*/
-    private static String pickupWeaponSourcename;
+    public static String pickupWeaponSourcename;
     /**path of the sound sample played when picking up a weapon*/
     private static final String pickupWeaponSoundSamplePath="/sounds/pickup_weapon.ogg";
     /**source name of the sound played when entering a teleporter*/
@@ -673,130 +676,5 @@ public final class GameState extends State{
                   cam.setLocation(previousCamLocation);
                  }
             }
-    }
-    
-    static final class TeleporterUserData{
-    	
-    	private final Vector3 destination;
-    	
-    	private TeleporterUserData(final Vector3 destination){
-    		this.destination=destination;
-    	}
-    	
-    	final Vector3 getDestination(){
-    		return(destination);
-    	}
-    }
-    
-    static abstract class CollectibleUserData{
-    	/**source name of the sound played when picking up this kind of object*/
-    	private final String sourcename;
-    	
-    	private CollectibleUserData(final String sourcename){
-    		this.sourcename=sourcename;
-    	}
-    	
-    	final String getSourcename(){
-    		return(sourcename);
-    	}
-    }
-    
-    static final class MedikitUserData extends CollectibleUserData{
-    	
-    	private final int health;
-    	
-    	private MedikitUserData(final int health){
-    		//TODO: add a source name
-    		super(null);
-    		this.health=health;
-    	}
-    	
-    	final int getHealth(){
-    		return(health);
-    	}
-    }
-    
-    static final class AmmunitionUserData extends CollectibleUserData{
-    	
-    	
-    	private final Ammunition ammunition;
-    	
-    	private final int ammunitionCount;
-    	
-    	private AmmunitionUserData(final Ammunition ammunition,final int ammunitionCount){
-    		super(pickupAmmoSourcename);
-    		this.ammunition=ammunition;
-    		this.ammunitionCount=ammunitionCount;
-    	}
-    	
-    	final Ammunition getAmmunition(){
-    		return(ammunition);
-    	}
-    	
-    	final int getAmmunitionCount(){
-    		return(ammunitionCount);
-    	}
-    }
-    
-    static final class WeaponUserData extends CollectibleUserData{
-    	
-    	
-    	private final Weapon weapon;
-    	
-    	private final ReadOnlyMatrix3 rotation;
-    	
-    	private AmmunitionContainer ammunitionInMagazine;
-    	
-    	private int ownerUid;
-    	/**flag indicating whether a weapon can change of owner*/
-    	private boolean digitalWatermarkEnabled;
-    	
-    	
-    	private WeaponUserData(final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled){
-    		super(pickupWeaponSourcename);
-    		this.weapon=weapon;
-    		this.rotation=rotation;
-    		this.ownerUid=ownerUid;
-    		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
-    		this.ammunitionInMagazine=new AmmunitionContainer(weapon.isForMelee()?0:weapon.getMagazineSize());
-    	}
-    	
-    	
-    	final Weapon getWeapon(){
-    		return(weapon);
-    	}
-    	
-    	final ReadOnlyMatrix3 getRotation(){
-    		return(rotation);
-    	}
-    	
-    	final int getOwnerUid(){
-    		return(ownerUid);
-    	}
-    	
-    	final void setOwnerUid(final int ownerUid){
-    		if(!digitalWatermarkEnabled)
-    		    this.ownerUid=ownerUid;
-    	}
-    	
-    	final boolean isDigitalWatermarkEnabled(){
-    		return(digitalWatermarkEnabled);
-    	}
-    	
-    	final void setDigitalWatermarkEnabled(final boolean digitalWatermarkEnabled){
-    		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
-    	}
-    	
-    	final int getAmmunitionCountInMagazine(){
-    		return(ammunitionInMagazine.getAmmunitionCount());
-    	}
-    	
-    	final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
-    		return(ammunitionInMagazine.add(ammunitionCountToAddIntoMagazine));
-    	}
-    	
-    	final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
-    		return(ammunitionInMagazine.remove(ammunitionCountToRemoveFromMagazine));
-    	}
     }
 }
