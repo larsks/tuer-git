@@ -71,7 +71,7 @@ import engine.weaponry.WeaponFactory;
  * @author Julien Gouesse
  *
  */
-final class GameState extends State{
+public final class GameState extends State{
     
     /**index of the level*/
     private int levelIndex;
@@ -118,7 +118,7 @@ final class GameState extends State{
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
     
-    GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
+    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
         super(soundManager);
         //initialize the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=new AmmunitionFactory();

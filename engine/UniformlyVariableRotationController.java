@@ -50,7 +50,6 @@ public final class UniformlyVariableRotationController extends MovementEquationC
              axisVector.set(getAxis()[0],getAxis()[1],getAxis()[2]);             
              if(Vector3.isValid(axisVector))
                  {Matrix3 rotationMatrix=Matrix3.fetchTempInstance();
-                  //System.out.println("ANGLE="+angle);
                   rotationMatrix.fromAngleNormalAxis(angle*MathUtils.DEG_TO_RAD,axisVector);             
                   caller.setRotation(rotationMatrix);
                   Matrix3.releaseTempInstance(rotationMatrix);

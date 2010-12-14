@@ -28,7 +28,7 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
-import engine.Ardor3DGameServiceProvider.Step;
+import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 
 public final class InitializationState extends State{   

@@ -11,7 +11,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine;
+package engine.service;
 
 import java.awt.Component;
 import java.awt.DisplayMode;
@@ -52,6 +52,15 @@ import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 
+import engine.ContentRatingSystemState;
+import engine.GameState;
+import engine.InitializationState;
+import engine.IntroductionState;
+import engine.LoadingDisplayState;
+import engine.MainMenuState;
+import engine.State;
+import engine.StateMachine;
+import engine.TaskManager;
 import engine.sound.SoundManager;
 
 /**
@@ -87,7 +96,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**start time of the state "introduction"*/
     private double introductionStartTime;
     
-    enum Step{/**PEGI-equivalent rating*/
+    public enum Step{
+    	      /**PEGI-equivalent rating*/
               CONTENT_RATING_SYSTEM,
               /**logo (trademark or brandname)*/
               INITIALIZATION,
@@ -140,7 +150,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         return(fontsList);
     }
     
-    static final List<BMFont> getFontsList(){
+    public static final List<BMFont> getFontsList(){
         if(fontsList==null)
             fontsList=createFontsList();
         return(Collections.unmodifiableList(fontsList));

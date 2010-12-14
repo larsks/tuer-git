@@ -25,7 +25,7 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 
 import engine.sound.SoundManager;
 
-final class LoadingDisplayState extends State{
+public final class LoadingDisplayState extends State{
     
     
     private final TaskManagementProgressionNode taskNode;
@@ -33,7 +33,7 @@ final class LoadingDisplayState extends State{
     private Runnable levelInitializationTask;
 
     
-    LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager){
+    public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager){
         super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
@@ -53,7 +53,7 @@ final class LoadingDisplayState extends State{
             getLogicalLayer().registerTrigger(trigger);
     }
     
-    final void setLevelInitializationTask(final Runnable levelInitializationTask){
+    public final void setLevelInitializationTask(final Runnable levelInitializationTask){
         this.levelInitializationTask=levelInitializationTask;
     }
     
