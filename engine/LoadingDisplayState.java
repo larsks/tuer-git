@@ -23,6 +23,8 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 
+import engine.sound.SoundManager;
+
 final class LoadingDisplayState extends State{
     
     
@@ -31,8 +33,8 @@ final class LoadingDisplayState extends State{
     private Runnable levelInitializationTask;
 
     
-    LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction){
-        super();
+    LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager){
+        super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         getRoot().attachChild(taskNode);

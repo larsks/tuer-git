@@ -23,6 +23,8 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.ui.text.BMText;
 
+import engine.sound.SoundManager;
+
 final class ContentRatingSystemState extends State{
 	
 	
@@ -31,8 +33,8 @@ final class ContentRatingSystemState extends State{
 	private MouseManager mouseManager;
 	
     
-    ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction){
-        super();
+    ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager){
+        super(soundManager);
         this.mouseManager=mouseManager;
         final BMText textNode=new BMText("contentSystemRatingNode",text,Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);

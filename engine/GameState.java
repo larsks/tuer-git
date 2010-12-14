@@ -45,8 +45,6 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.TextureState;
-//import com.ardor3d.renderer.state.RenderState.StateType;
-//import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -60,13 +58,13 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.input.ExtendedFirstPersonControl;
-import engine.weapon.Ammunition;
-import engine.weapon.AmmunitionContainer;
-import engine.weapon.AmmunitionFactory;
-import engine.weapon.Weapon;
-import engine.weapon.WeaponFactory;
+import engine.sound.SoundManager;
+import engine.weaponry.Ammunition;
+import engine.weaponry.AmmunitionContainer;
+import engine.weaponry.AmmunitionFactory;
+import engine.weaponry.Weapon;
+import engine.weaponry.WeaponFactory;
 
 /**
  * State used during the game, the party.
@@ -120,8 +118,8 @@ final class GameState extends State{
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
     
-    GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction){
-        super();
+    GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
+        super(soundManager);
         //initialize the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
@@ -418,7 +416,7 @@ final class GameState extends State{
                 	 if(collisionResults.getNumber()>0)
                 	     {//tries to collect the object (update the player model (MVC))
                 		  //if it succeeds, detach the object from the root later
-                		  if(playerData.collect(collectible))
+                		  if(playerData.collect(collectible)>0)
                 	          {//remove it from the list of collectible objects
                 			   collectibleObjectsList.remove(i);
                 			   if(collectible.getParent()!=null)
@@ -429,7 +427,7 @@ final class GameState extends State{
                 	           CollectibleUserData collectibleUserData=(CollectibleUserData)collectible.getUserData();
                 	           //play a sound if available
                 	           if(collectibleUserData.getSourcename()!=null)
-                                   SoundManager.getInstance().play(collectibleUserData.getSourcename());
+                                   getSoundManager().play(collectibleUserData.getSourcename());
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -465,7 +463,7 @@ final class GameState extends State{
                                 cam.setLocation(teleporterDestination);
                                 //play a sound if available
                  	            if(teleporterUseSourcename!=null)
-                                    SoundManager.getInstance().play(teleporterUseSourcename);
+                                    getSoundManager().play(teleporterUseSourcename);
                 	           }
                 	      }                          
                     }
@@ -497,13 +495,13 @@ final class GameState extends State{
     	// load the sound
         URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null&&pickupWeaponSourcename==null)
-            pickupWeaponSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);                     
+            pickupWeaponSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);                     
         else
         	pickupWeaponSourcename=null;           
         pickupAmmoSourcename=pickupWeaponSourcename;
         sampleUrl=GameState.class.getResource(teleporterUseSoundSamplePath);
         if(sampleUrl!=null&&teleporterUseSourcename==null)
-        	teleporterUseSourcename=SoundManager.getInstance().preloadSoundSample(sampleUrl,true);
+        	teleporterUseSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
         else
         	teleporterUseSourcename=null;
     	// clear the list of objects that can be picked up
