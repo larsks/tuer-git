@@ -23,7 +23,7 @@ public final class AmmunitionUserData extends CollectibleUserData{
 	private final int ammunitionCount;
 	
 	public AmmunitionUserData(final String sourcename,final Ammunition ammunition,final int ammunitionCount){
-		super(sourcename);
+		super(sourcename,ammunition.getLabel());
 		this.ammunition=ammunition;
 		this.ammunitionCount=ammunitionCount;
 	}

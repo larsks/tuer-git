@@ -32,6 +32,7 @@ import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
+import com.ardor3d.input.logical.MouseButtonPressedCondition;
 import com.ardor3d.input.logical.MouseButtonReleasedCondition;
 import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
@@ -127,19 +128,19 @@ public final class GameState extends State{
         //initialize the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
-        ammunitionFactory.addNewAmmunition("BULLET_5_56MM");
+        ammunitionFactory.addNewAmmunition("BULLET_5_56MM","5.56mm bullet");
     	/**Russian assault rifle*/
-        ammunitionFactory.addNewAmmunition("BULLET_7_62MM");
+        ammunitionFactory.addNewAmmunition("BULLET_7_62MM","7.62mm bullet");
     	/**American pistols and sub-machine guns*/
-        ammunitionFactory.addNewAmmunition("BULLET_9MM");
+        ammunitionFactory.addNewAmmunition("BULLET_9MM","9mm bullet");
     	/**Russian pistols*/
-        ammunitionFactory.addNewAmmunition("BULLET_10MM");
+        ammunitionFactory.addNewAmmunition("BULLET_10MM","10mm bullet");
     	/**cartridge*/
-        ammunitionFactory.addNewAmmunition("CARTRIDGE");
+        ammunitionFactory.addNewAmmunition("CARTRIDGE","cartridge");
     	/**power*/
-        ammunitionFactory.addNewAmmunition("ENERGY");
+        ammunitionFactory.addNewAmmunition("ENERGY CELL","energy cell");
     	/**Russian middle range anti-tank rocket launchers*/
-        ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM");
+        ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM","105mm anti tank rocket");
         weaponFactory=new WeaponFactory();                       
         weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
         weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1);
@@ -270,8 +271,8 @@ public final class GameState extends State{
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
         final InputTrigger reloadWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.R),reloadWeaponAction);
         final InputTrigger reloadWeaponMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.RIGHT),reloadWeaponAction);
-        final InputTrigger attackTrigger=new InputTrigger(new KeyReleasedCondition(Key.SPACE),attackAction);
-        final InputTrigger attackMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.LEFT),attackAction);
+        final InputTrigger attackTrigger=new InputTrigger(new KeyPressedCondition(Key.SPACE),attackAction);
+        final InputTrigger attackMouseButtonTrigger=new InputTrigger(new MouseButtonPressedCondition(MouseButton.LEFT),attackAction);
         final InputTrigger pauseTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),pauseAction);
         final InputTrigger crouchTrigger=new InputTrigger(new KeyReleasedCondition(Key.C),crouchAction);
         final InputTrigger activateTrigger=new InputTrigger(new KeyReleasedCondition(Key.RETURN),activateAction);
@@ -414,21 +415,28 @@ public final class GameState extends State{
                 cam.setLocation(playerNode.getTranslation());
                 //checks if any object is collected
                 Node collectible;
-                for(int i=collectibleObjectsList.size()-1;i>=0;i--)
+                CollectibleUserData collectibleUserData;
+                String subElementName;
+                for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
                     {collectible=collectibleObjectsList.get(i);
                 	 PickingUtil.findCollisions(collectible,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
                 	     {//tries to collect the object (update the player model (MVC))
+                		  collectedSubElementsCount=playerData.collect(collectible);
                 		  //if it succeeds, detach the object from the root later
-                		  if(playerData.collect(collectible)>0)
+                		  if(collectedSubElementsCount>0)
                 	          {//remove it from the list of collectible objects
                 			   collectibleObjectsList.remove(i);
                 			   if(collectible.getParent()!=null)
                 				   //detach this object from its parent so that it is no more visible
                 				   collectible.getParent().detachChild(collectible);
+                			   collectibleUserData=(CollectibleUserData)collectible.getUserData();
                 			   //display a message when the player picked up something
-                	           headUpDisplayLabel.setText("picked up "+collectible.getName());
-                	           CollectibleUserData collectibleUserData=(CollectibleUserData)collectible.getUserData();
+                			   subElementName=collectibleUserData.getSubElementName();
+                			   if(subElementName!=null && !subElementName.equals(""))
+                				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
+                			   else
+                			       headUpDisplayLabel.setText("picked up "+collectible.getName());               	           
                 	           //play a sound if available
                 	           if(collectibleUserData.getSourcename()!=null)
                                    getSoundManager().play(collectibleUserData.getSourcename());

@@ -19,7 +19,7 @@ public final class MedikitUserData extends CollectibleUserData{
 	
 	public MedikitUserData(final int health){
 		//TODO: add a source name
-		super(null);
+		super(null,"points of health");
 		this.health=health;
 	}
 	

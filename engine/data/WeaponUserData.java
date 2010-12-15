@@ -32,7 +32,7 @@ public final class WeaponUserData extends CollectibleUserData{
 	
 	
 	public WeaponUserData(final String sourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled){
-		super(sourcename);
+		super(sourcename,null);
 		this.weapon=weapon;
 		this.rotation=rotation;
 		this.ownerUid=ownerUid;
