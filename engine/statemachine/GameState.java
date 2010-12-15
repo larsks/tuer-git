@@ -126,29 +126,8 @@ public final class GameState extends State{
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
         super(soundManager);
         //initialize the factories, the build-in ammo and the build-in weapons       
-        ammunitionFactory=new AmmunitionFactory();
-        /**American assault rifle*/
-        ammunitionFactory.addNewAmmunition("BULLET_5_56MM","5.56mm bullet");
-    	/**Russian assault rifle*/
-        ammunitionFactory.addNewAmmunition("BULLET_7_62MM","7.62mm bullet");
-    	/**American pistols and sub-machine guns*/
-        ammunitionFactory.addNewAmmunition("BULLET_9MM","9mm bullet");
-    	/**Russian pistols*/
-        ammunitionFactory.addNewAmmunition("BULLET_10MM","10mm bullet");
-    	/**cartridge*/
-        ammunitionFactory.addNewAmmunition("CARTRIDGE","cartridge");
-    	/**power*/
-        ammunitionFactory.addNewAmmunition("ENERGY CELL","energy cell");
-    	/**Russian middle range anti-tank rocket launchers*/
-        ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM","105mm anti tank rocket");
-        weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
-        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1);
-        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
-        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1);
-        weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1);
-        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY"),1);
-        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1);
+        ammunitionFactory=initializeAmmunitionFactory();
+        weaponFactory=initializeWeaponFactory();
         readCollisionMap();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
@@ -223,10 +202,16 @@ public final class GameState extends State{
 				playerData.reload();
 			}
 		};
-		final TriggerAction attackAction=new TriggerAction(){
+		final TriggerAction startAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.attack();
+				playerData.setAttackEnabled(true);
+			}
+		};
+		final TriggerAction stopAttackAction=new TriggerAction(){
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerData.setAttackEnabled(false);
 			}
 		};
 		final TriggerAction pauseAction=new TriggerAction(){
@@ -271,8 +256,10 @@ public final class GameState extends State{
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
         final InputTrigger reloadWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.R),reloadWeaponAction);
         final InputTrigger reloadWeaponMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.RIGHT),reloadWeaponAction);
-        final InputTrigger attackTrigger=new InputTrigger(new KeyPressedCondition(Key.SPACE),attackAction);
-        final InputTrigger attackMouseButtonTrigger=new InputTrigger(new MouseButtonPressedCondition(MouseButton.LEFT),attackAction);
+        final InputTrigger startAttackTrigger=new InputTrigger(new KeyPressedCondition(Key.SPACE),startAttackAction);
+        final InputTrigger stopAttackTrigger=new InputTrigger(new KeyReleasedCondition(Key.SPACE),stopAttackAction);
+        final InputTrigger startAttackMouseButtonTrigger=new InputTrigger(new MouseButtonPressedCondition(MouseButton.LEFT),startAttackAction);
+        final InputTrigger stopAttackMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.LEFT),stopAttackAction);
         final InputTrigger pauseTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),pauseAction);
         final InputTrigger crouchTrigger=new InputTrigger(new KeyReleasedCondition(Key.C),crouchAction);
         final InputTrigger activateTrigger=new InputTrigger(new KeyReleasedCondition(Key.RETURN),activateAction);
@@ -283,9 +270,9 @@ public final class GameState extends State{
         final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);       
         final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
         		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger,reloadWeaponTrigger,
-        		reloadWeaponMouseButtonTrigger,attackTrigger,attackMouseButtonTrigger,pauseTrigger,crouchTrigger,
+        		reloadWeaponMouseButtonTrigger,startAttackTrigger,startAttackMouseButtonTrigger,pauseTrigger,crouchTrigger,
         		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,startRunningLeftTrigger,
-        		stopRunningLeftTrigger,selectWeaponOneTrigger};
+        		stopRunningLeftTrigger,selectWeaponOneTrigger,stopAttackTrigger,stopAttackMouseButtonTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -306,8 +293,8 @@ public final class GameState extends State{
         fpsTextLabel.setTranslation(new Vector3(0,20,0));
         fpsTextLabel.addController(new SpatialController<Spatial>(){
             @Override
-            public final void update(double time,Spatial caller){
-                fpsTextLabel.setText(" "+Math.round(time>0?1/time:0)+" FPS");
+            public final void update(double timePerFrame,Spatial caller){
+                fpsTextLabel.setText(" "+Math.round(timePerFrame>0?1/timePerFrame:0)+" FPS");
             }           
         });
         healthTextLabel=BasicText.createDefaultTextLabel("health display","");
@@ -479,11 +466,47 @@ public final class GameState extends State{
                 	           }
                 	      }                          
                     }
-                //if the players is not on any teleporter
+                //if the player is not on any teleporter
                 if(!hasCollision)
                 	wasBeingTeleported=false;
+                //attacks if this feature is enabled
+                if(playerData.isAttackEnabled())
+                	{//FIXME: use a separate timer for this state
+                	 playerData.attack();
+                	}
             }           
         });
+    }
+    
+    private final AmmunitionFactory initializeAmmunitionFactory(){
+    	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
+        /**American assault rifle*/
+        ammunitionFactory.addNewAmmunition("BULLET_5_56MM","5.56mm bullet");
+    	/**Russian assault rifle*/
+        ammunitionFactory.addNewAmmunition("BULLET_7_62MM","7.62mm bullet");
+    	/**American pistols and sub-machine guns*/
+        ammunitionFactory.addNewAmmunition("BULLET_9MM","9mm bullet");
+    	/**Russian pistols*/
+        ammunitionFactory.addNewAmmunition("BULLET_10MM","10mm bullet");
+    	/**cartridge*/
+        ammunitionFactory.addNewAmmunition("CARTRIDGE","cartridge");
+    	/**power*/
+        ammunitionFactory.addNewAmmunition("ENERGY CELL","energy cell");
+    	/**Russian middle range anti-tank rocket launchers*/
+        ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM","105mm anti tank rocket");
+        return(ammunitionFactory);
+    }
+    
+    private final WeaponFactory initializeWeaponFactory(){
+    	final WeaponFactory weaponFactory=new WeaponFactory();                       
+        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
+        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
+        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
+        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY"),1,1000);
+        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
+        return(weaponFactory);
     }
     
     @Deprecated

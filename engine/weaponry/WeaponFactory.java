@@ -15,10 +15,10 @@ public final class WeaponFactory {
 		weaponsIndicesMap=new HashMap<Integer,Weapon>();
 	}	
 	
-	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot){
+	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int attackDurationInMillis){
 		final boolean success=identifier!=null&&!weaponsMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot);
+			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,attackDurationInMillis);
 			 weaponsMap.put(identifier,weapon);
 			 weaponsIndicesMap.put(weapon.getUid(),weapon);
 			}
