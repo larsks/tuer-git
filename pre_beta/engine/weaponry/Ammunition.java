@@ -18,14 +18,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Ammunition implements Comparable<Ammunition>{
     
 	private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
-	/**unique name*/
+	/**unique name (cannot contain any space)*/
     private final String identifier;
+    /**name (can contain space)*/
+    private final String label;
     /**unique identifier*/
     private final int uid;
 	
-    Ammunition(final String identifier){
+    Ammunition(final String identifier,final String label){
     	this.uid=autoIncrementalIndex.getAndIncrement();
     	this.identifier=identifier;
+    	this.label=label;
     }
     
     @Override
@@ -59,5 +62,9 @@ public class Ammunition implements Comparable<Ammunition>{
 	
 	public final String getIdentifier(){
 		return(identifier);
+	}
+	
+	public final String getLabel(){
+		return(label);
 	}
 }

@@ -18,7 +18,7 @@ import java.util.HashMap;
 public final class AmmunitionFactory {
 
 	
-private final HashMap<String,Ammunition> ammunitionsMap;
+    private final HashMap<String,Ammunition> ammunitionsMap;
 	
 	private final HashMap<Integer,Ammunition> ammunitionsIndicesMap;
 	
@@ -28,10 +28,10 @@ private final HashMap<String,Ammunition> ammunitionsMap;
 		ammunitionsIndicesMap=new HashMap<Integer,Ammunition>();
 	}	
 	
-	public final boolean addNewAmmunition(final String identifier){
+	public final boolean addNewAmmunition(final String identifier,final String label){
 		final boolean success=identifier!=null&&!ammunitionsMap.containsKey(identifier);
 		if(success)
-			{final Ammunition ammunition=new Ammunition(identifier);
+			{final Ammunition ammunition=new Ammunition(identifier,label);
 			 ammunitionsMap.put(identifier,ammunition);
 			 ammunitionsIndicesMap.put(ammunition.getUid(),ammunition);
 			}

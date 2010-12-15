@@ -16,12 +16,19 @@ package engine.data;
 public abstract class CollectibleUserData{
 	/**source name of the sound played when picking up this kind of object*/
 	private final String sourcename;
+	/**name of elements contained by this object, can be null if it is not a container*/
+	private final String subElementName;
 	
-	public CollectibleUserData(final String sourcename){
+	public CollectibleUserData(final String sourcename,final String subElementName){
 		this.sourcename=sourcename;
+		this.subElementName=subElementName;
 	}
 	
 	public final String getSourcename(){
 		return(sourcename);
+	}
+	
+	public final String getSubElementName(){
+		return(subElementName);
 	}
 }

@@ -78,7 +78,11 @@ public final class PlayerData {
 		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
 	}
 	
-	
+	/**
+	 * collects a collectible object if possible
+	 * @param collectible
+	 * @return count of collected sub elements
+	 */
 	public int collect(final Node collectible){
 		//check if the collectible can be collected
 		final int result;
