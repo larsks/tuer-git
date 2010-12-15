@@ -30,16 +30,19 @@ public final class Weapon implements Comparable<Weapon>{
 	private final Ammunition ammunition;
 	/**ammo per shot, -1 for melee weapons*/
 	private final int ammunitionPerShot;
+	/**duration of an attack in milliseconds*/
+	private final int attackDurationInMillis;
 	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
-	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot){
+	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int attackDurationInMillis){
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
 		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
 		this.ammunition=ammunition;
 		this.ammunitionPerShot=ammunitionPerShot;
+		this.attackDurationInMillis=attackDurationInMillis;
 	}
 	    
 	/**
@@ -105,5 +108,9 @@ public final class Weapon implements Comparable<Weapon>{
 	
 	public final String getIdentifier(){
 		return(identifier);
+	}
+	
+	public final int getAttackDurationInMillis(){
+		return(attackDurationInMillis);
 	}
 }
