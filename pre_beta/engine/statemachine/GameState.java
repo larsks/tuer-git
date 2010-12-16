@@ -135,7 +135,7 @@ public final class GameState extends State{
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory);
+        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
