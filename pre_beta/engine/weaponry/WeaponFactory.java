@@ -26,7 +26,7 @@ public final class WeaponFactory {
 	}
 	
 	public final Weapon getWeapon(final int index){
-		return(weaponsIndicesMap.get(Integer.valueOf(index)));
+		return(0<=index&&index<getWeaponCount()?weaponsIndicesMap.get(Integer.valueOf(index)):null);
 	}
 	
 	public final Weapon getWeapon(final String identifier){

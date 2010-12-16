@@ -125,6 +125,8 @@ public final class GameState extends State{
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
         super(soundManager);
+        collectibleObjectsList=new ArrayList<Node>();
+        teleportersList=new ArrayList<Node>();
         //initialize the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=initializeAmmunitionFactory();
         weaponFactory=initializeWeaponFactory();
@@ -135,8 +137,161 @@ public final class GameState extends State{
         playerNode=new CameraNode("player",cam);
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory);
         this.previousCamLocation=new Vector3(cam.getLocation());
-        this.currentCamLocation=new Vector3();
-        final Vector3 worldUp=new Vector3(0,1,0);              
+        this.currentCamLocation=new Vector3(previousCamLocation);
+        initializeInput(exitAction,cam,physicalLayer);
+        //initialize all text displays
+        ammoTextLabel=initializeAmmunitionTextLabel();
+        fpsTextLabel=initializeFpsTextLabel();
+        healthTextLabel=initializeHealthTextLabel();
+        headUpDisplayLabel=initializeHeadUpDisplayLabel();
+        initializeCollisionSystem(cam);
+    }
+    
+    private final void initializeCollisionSystem(final Camera cam){
+    	// configure the collision system
+        CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);       
+        //add a mesh with an invisible mesh data
+        Mesh playerMesh=new Mesh("player");
+        MeshData playerMeshData=new MeshData();
+        FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
+        playerVertexBuffer.put(-0.5f).put(-0.9f).put(-0.5f).put(0.5f).put(0.9f).put(0.5f).rewind();
+        playerMeshData.setVertexBuffer(playerVertexBuffer);
+        playerMesh.setMeshData(playerMeshData);
+        playerNode.attachChild(playerMesh);
+        //add a bounding box to the camera node
+        NodeHelper.setModelBound(playerNode,BoundingBox.class);       
+        playerNode.addController(new SpatialController<Spatial>(){
+        	
+        	private final CollisionResults collisionResults=new BoundingCollisionResults();
+        	
+        	private Vector3 previousPosition=new Vector3(115,0.5,223);
+        	
+        	private boolean wasBeingTeleported=false;
+        	
+            @Override
+            public void update(double timeSinceLastCall,Spatial caller){
+                //synchronizes the camera node with the camera
+                playerNode.updateFromCamera();
+                //temporary avoids to move on Y
+                playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
+                //synchronizes the camera with the camera node
+                cam.setLocation(playerNode.getTranslation());
+                //FIXME: remove this temporary system
+                double playerStartX=previousPosition.getX();
+                double playerStartZ=previousPosition.getZ();
+                double playerEndX=playerNode.getTranslation().getX();
+                double playerEndZ=playerNode.getTranslation().getZ();
+                double playerX,playerZ;
+                double distance=previousPosition.distance(playerNode.getTranslation());
+                int stepCount=(int)Math.ceil(distance/0.2);
+                double stepX=stepCount==0?0:(playerEndX-playerStartX)/stepCount;
+                double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
+                boolean collisionFound=false;
+                double correctX=playerStartX,correctZ=playerStartZ;
+                int tmpX,tmpZ;
+                for(int i=1;i<=stepCount&&!collisionFound;i++)
+                    {playerX=playerStartX+(stepX*i);
+                	 playerZ=playerStartZ+(stepZ*i);
+                	 for(int z=0;z<2&&!collisionFound;z++)
+             	    	for(int x=0;x<2&&!collisionFound;x++)
+             	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
+             	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
+             	    	     if(0<=tmpX && tmpX<collisionMap.length && 0<=tmpZ && tmpZ<collisionMap[tmpX].length)
+             	    		     collisionFound=collisionMap[tmpX][tmpZ];
+             	    	     else
+             	    	    	 collisionFound=false;
+             	    	    }
+                	 if(!collisionFound)
+                		 {correctX=playerX;
+                		  correctZ=playerZ;
+                		 }
+                    }
+                //updates the current location
+                playerNode.setTranslation(correctX,0.5,correctZ);
+                //updates the previous location and the camera
+                previousPosition.set(playerNode.getTranslation());
+                cam.setLocation(playerNode.getTranslation());
+                //checks if any object is collected
+                Node collectible;
+                CollectibleUserData collectibleUserData;
+                String subElementName;
+                for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
+                    {collectible=collectibleObjectsList.get(i);
+                	 PickingUtil.findCollisions(collectible,playerNode,collisionResults);
+                	 if(collisionResults.getNumber()>0)
+                	     {//tries to collect the object (update the player model (MVC))
+                		  collectedSubElementsCount=playerData.collect(collectible);
+                		  //if it succeeds, detach the object from the root later
+                		  if(collectedSubElementsCount>0)
+                	          {//remove it from the list of collectible objects
+                			   collectibleObjectsList.remove(i);
+                			   if(collectible.getParent()!=null)
+                				   //detach this object from its parent so that it is no more visible
+                				   collectible.getParent().detachChild(collectible);
+                			   collectibleUserData=(CollectibleUserData)collectible.getUserData();
+                			   //display a message when the player picked up something
+                			   subElementName=collectibleUserData.getSubElementName();
+                			   if(subElementName!=null && !subElementName.equals(""))
+                				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
+                			   else
+                			       headUpDisplayLabel.setText("picked up "+collectible.getName());               	           
+                	           //play a sound if available
+                	           if(collectibleUserData.getSourcename()!=null)
+                                   getSoundManager().play(collectibleUserData.getSourcename());
+                	          }
+                	     }
+                	 collisionResults.clear();
+                    }
+                //checks if any teleporter is used
+                Node teleporter;
+                boolean hasCollision=false;
+                for(int i=teleportersList.size()-1;i>=0&&!hasCollision;i--)
+                    {teleporter=teleportersList.get(i);
+                     PickingUtil.findCollisions(teleporter,playerNode,collisionResults);
+                     hasCollision=collisionResults.getNumber()>0;
+                     collisionResults.clear();
+                     //if the current position is inside a teleporter
+                     if(hasCollision)
+                         {/**
+                           * The teleporter can be bi-directional. A player who was being teleported
+                           * in a direction should not be immediately teleported in the opposite
+                           * direction. I use a flag to avoid this case because applying naively 
+                           * the algorithm would be problematic as the previous position is 
+                           * outside the teleporter and the current position is inside the 
+                           * teleporter.
+                           */
+                    	   //if the previous position is not on any teleporter
+                      	   if(!wasBeingTeleported)
+                               {//the players enters a teleporter                        	    
+                      		    wasBeingTeleported=true;
+                      		    Vector3 teleporterDestination=((TeleporterUserData)teleporter.getUserData()).getDestination();
+                      		    //then move him
+                      		    playerNode.setTranslation(teleporterDestination);
+                      		    //updates the previous location to avoid any problem when detecting the collisions
+                                previousPosition.set(teleporterDestination);
+                                //synchronizes the camera with the camera node
+                                cam.setLocation(teleporterDestination);
+                                //play a sound if available
+                 	            if(teleporterUseSourcename!=null)
+                                    getSoundManager().play(teleporterUseSourcename);
+                	           }
+                	      }                          
+                    }
+                //if the player is not on any teleporter
+                if(!hasCollision)
+                	wasBeingTeleported=false;
+                //attacks if this feature is enabled
+                //FIXME: wrong approach: no attack is launched when the button is pressed during less time than the duration of a time
+                if(playerData.isAttackEnabled())
+                	{//FIXME: use a separate timer for this state
+                	 playerData.attack();
+                	}
+            }           
+        });
+    }
+    
+    private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
+    	final Vector3 worldUp=new Vector3(0,1,0);              
         // drag only at false to remove the need of pressing a button to move
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
@@ -276,36 +431,58 @@ public final class GameState extends State{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
-        ammoTextLabel=BasicText.createDefaultTextLabel("ammo display","");
-        ammoTextLabel.setTranslation(new Vector3(0,80,0));
+    }
+    
+    private final BasicText initializeAmmunitionTextLabel(){
+    	final BasicText ammoTextLabel=BasicText.createDefaultTextLabel("ammo display","");
+    	ammoTextLabel.setTranslation(new Vector3(0,80,0));
         ammoTextLabel.addController(new SpatialController<Spatial>(){
             @Override
             public final void update(double time,Spatial caller){
             	if(playerData.isCurrentWeaponAmmunitionCountDisplayable())
-            		ammoTextLabel.setText(playerData.getAmmunitionCountInLeftHandedWeapon()+" "+
-            				playerData.getAmmunitionCountInRightHandedWeapon()+" "+
-            				playerData.getAmmunitionCountInContainer());
+            		{final StringBuffer text=new StringBuffer();
+            		 if(playerData.isDualWeaponUseEnabled())
+            			 {text.append(playerData.getAmmunitionCountInLeftHandedWeapon());
+            			  text.append(" ");
+            			 }
+            		 text.append(playerData.getAmmunitionCountInRightHandedWeapon());
+            		 text.append(" ");
+            		 text.append(playerData.getAmmunitionCountInContainer());
+            		 ammoTextLabel.setText(text.toString());
+            		}
             	else
             		ammoTextLabel.setText("N/A");
             }           
         });
-        fpsTextLabel=BasicText.createDefaultTextLabel("FPS display","");
-        fpsTextLabel.setTranslation(new Vector3(0,20,0));
+        return(ammoTextLabel);
+    }
+    
+    private final BasicText initializeFpsTextLabel(){
+    	final BasicText fpsTextLabel=BasicText.createDefaultTextLabel("FPS display","");
+    	fpsTextLabel.setTranslation(new Vector3(0,20,0));
         fpsTextLabel.addController(new SpatialController<Spatial>(){
             @Override
             public final void update(double timePerFrame,Spatial caller){
                 fpsTextLabel.setText(" "+Math.round(timePerFrame>0?1/timePerFrame:0)+" FPS");
             }           
         });
-        healthTextLabel=BasicText.createDefaultTextLabel("health display","");
-        healthTextLabel.setTranslation(new Vector3(0,60,0));
+    	return(fpsTextLabel);
+    }
+    
+    private final BasicText initializeHealthTextLabel(){
+    	final BasicText healthTextLabel=BasicText.createDefaultTextLabel("health display","");
+    	healthTextLabel.setTranslation(new Vector3(0,60,0));
         healthTextLabel.addController(new SpatialController<Spatial>(){
             @Override
             public final void update(double time,Spatial caller){
             	healthTextLabel.setText("HEALTH: "+playerData.getHealth());
             }           
         });
-        headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");
+        return(healthTextLabel);
+    }
+    
+    private final BasicText initializeHeadUpDisplayLabel(){    	       
+    	final BasicText headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");           
         headUpDisplayLabel.setTranslation(new Vector3(0,40,0));
         headUpDisplayLabel.addController(new SpatialController<Spatial>(){
         	
@@ -336,146 +513,7 @@ public final class GameState extends State{
             	    }
             }           
         });
-        // configure the collision system
-        CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
-        final CollisionResults collisionResults=new BoundingCollisionResults();
-        //add a mesh with an invisible mesh data
-        Mesh playerMesh=new Mesh("player");
-        MeshData playerMeshData=new MeshData();
-        FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
-        playerVertexBuffer.put(-0.5f).put(-0.9f).put(-0.5f).put(0.5f).put(0.9f).put(0.5f).rewind();
-        playerMeshData.setVertexBuffer(playerVertexBuffer);
-        playerMesh.setMeshData(playerMeshData);
-        playerNode.attachChild(playerMesh);
-        //add a bounding box to the camera node
-        NodeHelper.setModelBound(playerNode,BoundingBox.class);
-        collectibleObjectsList=new ArrayList<Node>();
-        teleportersList=new ArrayList<Node>();
-        playerNode.addController(new SpatialController<Spatial>(){
-        	
-        	private Vector3 previousPosition=new Vector3(115,0.5,223);
-        	
-        	private boolean wasBeingTeleported=false;
-        	
-            @Override
-            public void update(double timeSinceLastCall,Spatial caller){
-                //synchronizes the camera node with the camera
-                playerNode.updateFromCamera();
-                //temporary avoids to move on Y
-                playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
-                //synchronizes the camera with the camera node
-                cam.setLocation(playerNode.getTranslation());
-                //FIXME: remove this temporary system
-                double playerStartX=previousPosition.getX();
-                double playerStartZ=previousPosition.getZ();
-                double playerEndX=playerNode.getTranslation().getX();
-                double playerEndZ=playerNode.getTranslation().getZ();
-                double playerX,playerZ;
-                double distance=previousPosition.distance(playerNode.getTranslation());
-                int stepCount=(int)Math.ceil(distance/0.2);
-                double stepX=stepCount==0?0:(playerEndX-playerStartX)/stepCount;
-                double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
-                boolean collisionFound=false;
-                double correctX=playerStartX,correctZ=playerStartZ;
-                int tmpX,tmpZ;
-                for(int i=1;i<=stepCount&&!collisionFound;i++)
-                    {playerX=playerStartX+(stepX*i);
-                	 playerZ=playerStartZ+(stepZ*i);
-                	 for(int z=0;z<2&&!collisionFound;z++)
-             	    	for(int x=0;x<2&&!collisionFound;x++)
-             	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
-             	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
-             	    	     if(0<=tmpX && tmpX<collisionMap.length && 0<=tmpZ && tmpZ<collisionMap[tmpX].length)
-             	    		     collisionFound=collisionMap[tmpX][tmpZ];
-             	    	     else
-             	    	    	 collisionFound=false;
-             	    	    }
-                	 if(!collisionFound)
-                		 {correctX=playerX;
-                		  correctZ=playerZ;
-                		 }
-                    }
-                //updates the current location
-                playerNode.setTranslation(correctX,0.5,correctZ);
-                //updates the previous location and the camera
-                previousPosition.set(playerNode.getTranslation());
-                cam.setLocation(playerNode.getTranslation());
-                //checks if any object is collected
-                Node collectible;
-                CollectibleUserData collectibleUserData;
-                String subElementName;
-                for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
-                    {collectible=collectibleObjectsList.get(i);
-                	 PickingUtil.findCollisions(collectible,playerNode,collisionResults);
-                	 if(collisionResults.getNumber()>0)
-                	     {//tries to collect the object (update the player model (MVC))
-                		  collectedSubElementsCount=playerData.collect(collectible);
-                		  //if it succeeds, detach the object from the root later
-                		  if(collectedSubElementsCount>0)
-                	          {//remove it from the list of collectible objects
-                			   collectibleObjectsList.remove(i);
-                			   if(collectible.getParent()!=null)
-                				   //detach this object from its parent so that it is no more visible
-                				   collectible.getParent().detachChild(collectible);
-                			   collectibleUserData=(CollectibleUserData)collectible.getUserData();
-                			   //display a message when the player picked up something
-                			   subElementName=collectibleUserData.getSubElementName();
-                			   if(subElementName!=null && !subElementName.equals(""))
-                				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
-                			   else
-                			       headUpDisplayLabel.setText("picked up "+collectible.getName());               	           
-                	           //play a sound if available
-                	           if(collectibleUserData.getSourcename()!=null)
-                                   getSoundManager().play(collectibleUserData.getSourcename());
-                	          }
-                	     }
-                	 collisionResults.clear();
-                    }
-                //checks if any teleporter is used
-                Node teleporter;
-                boolean hasCollision=false;
-                for(int i=teleportersList.size()-1;i>=0&&!hasCollision;i--)
-                    {teleporter=teleportersList.get(i);
-                     PickingUtil.findCollisions(teleporter,playerNode,collisionResults);
-                     hasCollision=collisionResults.getNumber()>0;
-                     collisionResults.clear();
-                     //if the current position is inside a teleporter
-                     if(hasCollision)
-                         {/**
-                           * The teleporter can be bi-directional. A player who was being teleported
-                           * in a direction should not be immediately teleported in the opposite
-                           * direction. I use a flag to avoid this case because applying naively 
-                           * the algorithm would be problematic as the previous position is 
-                           * outside the teleporter and the current position is inside the 
-                           * teleporter.
-                           */
-                    	   //if the previous position is not on any teleporter
-                      	   if(!wasBeingTeleported)
-                               {//the players enters a teleporter                        	    
-                      		    wasBeingTeleported=true;
-                      		    Vector3 teleporterDestination=((TeleporterUserData)teleporter.getUserData()).getDestination();
-                      		    //then move him
-                      		    playerNode.setTranslation(teleporterDestination);
-                      		    //updates the previous location to avoid any problem when detecting the collisions
-                                previousPosition.set(teleporterDestination);
-                                //synchronizes the camera with the camera node
-                                cam.setLocation(teleporterDestination);
-                                //play a sound if available
-                 	            if(teleporterUseSourcename!=null)
-                                    getSoundManager().play(teleporterUseSourcename);
-                	           }
-                	      }                          
-                    }
-                //if the player is not on any teleporter
-                if(!hasCollision)
-                	wasBeingTeleported=false;
-                //attacks if this feature is enabled
-                if(playerData.isAttackEnabled())
-                	{//FIXME: use a separate timer for this state
-                	 playerData.attack();
-                	}
-            }           
-        });
+        return(headUpDisplayLabel);
     }
     
     private final AmmunitionFactory initializeAmmunitionFactory(){
