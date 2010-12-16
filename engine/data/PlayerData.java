@@ -13,7 +13,6 @@
 */
 package engine.data;
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
@@ -22,6 +21,7 @@ import engine.weaponry.Ammunition;
 import engine.weaponry.AmmunitionContainerContainer;
 import engine.weaponry.AmmunitionFactory;
 import engine.weaponry.Weapon;
+import engine.weaponry.WeaponContainer;
 import engine.weaponry.WeaponFactory;
 
 public final class PlayerData {
@@ -39,15 +39,11 @@ public final class PlayerData {
 	/**flag indicating whether the player can be damaged*/
 	private boolean invincible;
 	/**flag indicating whether the player is using 2 identical weapons simultaneously*/
-	private boolean dualWeaponUse;
-	/**availabilities of weapons in the right hand*/
-	private boolean[] rightHandWeaponsAvailability;
-	/**availabilities of weapons in the left hand*/
-	private boolean[] leftHandWeaponsAvailability;
-	/**nodes of weapons in the right hand*/
-	private transient Node[] rightHandWeaponsList;
-	/**nodes of weapons in the left hand*/
-	private transient Node[] leftHandWeaponsList;
+	private boolean dualWeaponUseEnabled;
+	/**weapon container of the right hand*/
+	private final WeaponContainer rightHandWeaponContainer;
+	/**weapon container of the left hand*/
+	private final WeaponContainer leftHandWeaponContainer;
 	/**weapon currently in use*/
 	private Weapon weaponInUse;
 	/**node representing the camera*/
@@ -67,16 +63,9 @@ public final class PlayerData {
 		health=maxHealth;
 		invincible=false;
 		weaponInUse=null;
-		dualWeaponUse=false;
-		final int weaponCount=weaponFactory.getWeaponCount();
-		rightHandWeaponsAvailability=new boolean[weaponCount];
-		leftHandWeaponsAvailability=new boolean[weaponCount];
-		rightHandWeaponsList=new Node[weaponCount];
-		leftHandWeaponsList=new Node[weaponCount];
-		Arrays.fill(rightHandWeaponsAvailability,false);
-		Arrays.fill(leftHandWeaponsAvailability,false);
-		Arrays.fill(rightHandWeaponsList,null);
-		Arrays.fill(leftHandWeaponsList,null);
+		dualWeaponUseEnabled=false;
+		rightHandWeaponContainer=new WeaponContainer(weaponFactory);
+		leftHandWeaponContainer=new WeaponContainer(weaponFactory);
 		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
 		attackEnabled=false;
 	}
@@ -108,40 +97,14 @@ public final class PlayerData {
 		return(result);
 	}
 	
-	private final void ensureWeaponCountChangeDetection(){
-		final int previousWeaponCount=rightHandWeaponsAvailability.length;
-		final int currentWeaponCount=weaponFactory.getWeaponCount();
-		//a weapon cannot be removed from the factory
-		if(currentWeaponCount>previousWeaponCount)
-		    {rightHandWeaponsAvailability=Arrays.copyOf(rightHandWeaponsAvailability,currentWeaponCount);
-		     leftHandWeaponsAvailability=Arrays.copyOf(leftHandWeaponsAvailability,currentWeaponCount);
-		     rightHandWeaponsList=Arrays.copyOf(rightHandWeaponsList,currentWeaponCount);
-		     leftHandWeaponsList=Arrays.copyOf(leftHandWeaponsList,currentWeaponCount);
-		    }
-	}
-	
 	private int collectWeapon(final Node collectible,final WeaponUserData weaponUserData){
-		ensureWeaponCountChangeDetection();
 		final boolean result;
-		final int weaponIndex=weaponUserData.getWeapon().getUid();
+		final Weapon weapon=weaponUserData.getWeapon();
 		final int ownerUid=weaponUserData.getOwnerUid();
 		final boolean digitalWatermarkEnabled=weaponUserData.isDigitalWatermarkEnabled();
 	    final boolean canChangeOfOwner=ownerUid!=uid&&!digitalWatermarkEnabled;
-		if((ownerUid==uid||canChangeOfOwner)&&(!rightHandWeaponsAvailability[weaponIndex]||!leftHandWeaponsAvailability[weaponIndex]))
-            {if(!rightHandWeaponsAvailability[weaponIndex])
-                 {rightHandWeaponsAvailability[weaponIndex]=true;
-                  rightHandWeaponsList[weaponIndex]=collectible;
-                  result=true;
-                 }
-             else
-  	             //check if this weapon can have a dual use
-  	             if(weaponUserData.getWeapon().isTwoHanded())
-                     {leftHandWeaponsAvailability[weaponIndex]=true;
-  	                  leftHandWeaponsList[weaponIndex]=collectible;
-  	                  result=true;
-                     }
-  	             else
-  		             result=false;
+		if((ownerUid==uid||canChangeOfOwner))
+            {result=rightHandWeaponContainer.add(collectible,weapon)||(weapon.isTwoHanded() && leftHandWeaponContainer.add(collectible,weapon));
              if(result&&canChangeOfOwner)
             	 weaponUserData.setOwnerUid(uid);           	              	 
             }
@@ -202,21 +165,17 @@ public final class PlayerData {
 		attackEnabled=false;
 		weaponInUse=null;
 		ammoContainerContainer.empty();
-		dualWeaponUse=false;
-		Arrays.fill(rightHandWeaponsAvailability,false);
-		Arrays.fill(leftHandWeaponsAvailability,false);
-		Arrays.fill(rightHandWeaponsList,null);
-		Arrays.fill(leftHandWeaponsList,null);
-		ensureWeaponCountChangeDetection();
+		dualWeaponUseEnabled=false;
+		rightHandWeaponContainer.empty();
+		leftHandWeaponContainer.empty();
 	}
 	
 	public final int reload(){
 		int reloadedAmmoCount=0;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
-		    {ensureWeaponCountChangeDetection();
-			 final Ammunition ammo=weaponInUse.getAmmunition();
+		    {final Ammunition ammo=weaponInUse.getAmmunition();
 		     final int magazineSize=weaponInUse.getMagazineSize();		     
-			 final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponsList[weaponInUse.getUid()].getUserData();
+			 final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponContainer.getNode(weaponInUse).getUserData();
 			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
 			 //remove ammo from the container
 			 final int availableAmmoForRightHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
@@ -224,8 +183,8 @@ public final class PlayerData {
 			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
 			 //increase reloaded ammunition count
 			 reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
-			 if(dualWeaponUse)
-			     {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponsList[weaponInUse.getUid()].getUserData();
+			 if(dualWeaponUseEnabled)
+			     {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponContainer.getNode(weaponInUse).getUserData();
 			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
 			      //remove ammo from the container
 			      final int availableAmmoForLeftHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
@@ -257,9 +216,8 @@ public final class PlayerData {
 	
 	public final int getAmmunitionCountInLeftHandedWeapon(){
 		final int ammunitionCountInLeftHandedWeapon;
-		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUse)
-		    {ensureWeaponCountChangeDetection();
-			 final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponsList[weaponInUse.getUid()].getUserData();
+		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
+		    {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponContainer.getNode(weaponInUse).getUserData();
 		     ammunitionCountInLeftHandedWeapon=leftHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
 		else
@@ -270,8 +228,7 @@ public final class PlayerData {
 	public final int getAmmunitionCountInRightHandedWeapon(){
 		final int ammunitionCountInRightHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
-		    {ensureWeaponCountChangeDetection();
-			 final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponsList[weaponInUse.getUid()].getUserData();
+		    {final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponContainer.getNode(weaponInUse).getUserData();
 		     ammunitionCountInRightHandedWeapon=rightHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
 		else
@@ -294,17 +251,16 @@ public final class PlayerData {
 	public final int attack(){
 		int consumedAmmunitionOrKnockCount=0;
 		if(weaponInUse!=null)
-		    {ensureWeaponCountChangeDetection();
-		     if(weaponInUse.isForMelee())
-		         {consumedAmmunitionOrKnockCount=dualWeaponUse?2:1;
+		    {if(weaponInUse.isForMelee())
+		         {consumedAmmunitionOrKnockCount=dualWeaponUseEnabled?2:1;
 		    	  //melee weapon
 		         }
 		     else
 		         {final int ammoPerShot=weaponInUse.getAmmunitionPerShot();
-		          final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponsList[weaponInUse.getUid()].getUserData();
+		          final WeaponUserData rightHandWeaponUserData=(WeaponUserData)rightHandWeaponContainer.getNode(weaponInUse).getUserData();
 		          consumedAmmunitionOrKnockCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		          if(dualWeaponUse)
-		              {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponsList[weaponInUse.getUid()].getUserData();
+		          if(dualWeaponUseEnabled)
+		              {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)leftHandWeaponContainer.getNode(weaponInUse).getUserData();
 		    	       consumedAmmunitionOrKnockCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
 		    	      }
 		         }
@@ -325,8 +281,7 @@ public final class PlayerData {
 	}
 	
 	public final boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
-		ensureWeaponCountChangeDetection();
-		final int weaponCount=weaponFactory.getWeaponCount();
+		final Weapon chosenWeapon=weaponFactory.getWeapon(index);
 		/**
 		 * check if:
 		 * - the index is valid (i.e in [0;weaponCount[)
@@ -334,51 +289,51 @@ public final class PlayerData {
 		 * - the weapon is available in the left hand if the player wants to use one weapon per hand
 		 * - the player does not want to use one weapon per hand
 		 */
-		final boolean success=index<weaponCount&&rightHandWeaponsAvailability[index]&&((dualWeaponUseWished&&leftHandWeaponsAvailability[index])||!dualWeaponUseWished);		
+		final boolean success=chosenWeapon!=null&&rightHandWeaponContainer.isAvailable(chosenWeapon)&&((dualWeaponUseWished&&leftHandWeaponContainer.isAvailable(chosenWeapon))||!dualWeaponUseWished);		
 		if(success)
 			{final Weapon oldWeaponIDInUse=weaponInUse;
-	    	 final boolean oldDualWeaponUse=dualWeaponUse;
-			 weaponInUse=weaponFactory.getWeapon(index);
-			 dualWeaponUse=dualWeaponUseWished;
-			 if(oldWeaponIDInUse!=weaponInUse||oldDualWeaponUse!=dualWeaponUse)
+	    	 final boolean oldDualWeaponUse=dualWeaponUseEnabled;
+			 weaponInUse=chosenWeapon;
+			 dualWeaponUseEnabled=dualWeaponUseWished;
+			 if(oldWeaponIDInUse!=weaponInUse||oldDualWeaponUse!=dualWeaponUseEnabled)
 	    	     {Node oldWeapon,newWeapon;
     		      if(oldWeaponIDInUse!=weaponInUse)
     	              {//if at least one weapon was used previously
     		    	   if(oldWeaponIDInUse!=null)
     		    	       {//drop the right hand weapon
-    		    		    oldWeapon=rightHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    		    oldWeapon=rightHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    		    oldWeapon.clearControllers();
     		    		    cameraNode.detachChild(oldWeapon);
     		    		    if(oldDualWeaponUse)
     		    		        {//drop the left hand weapon
-    		    			     oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    			     oldWeapon=leftHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    			     oldWeapon.clearControllers();
     		    			     cameraNode.detachChild(oldWeapon);
     		    		        }
     		    	       }
     		    	   //add the right hand weapon
-    		    	   newWeapon=rightHandWeaponsList[weaponInUse.getUid()];
+    		    	   newWeapon=rightHandWeaponContainer.getNode(weaponInUse);
     		    	   initializeWeaponLocalTransform(newWeapon,true);
     		    	   cameraNode.attachChild(newWeapon);
-    		    	   if(dualWeaponUse)
+    		    	   if(dualWeaponUseEnabled)
     		    	       {//add the left hand weapon
-    		    		    newWeapon=leftHandWeaponsList[weaponInUse.getUid()];
+    		    		    newWeapon=leftHandWeaponContainer.getNode(weaponInUse);
     		    		    initializeWeaponLocalTransform(newWeapon,false);
     		    		    cameraNode.attachChild(newWeapon);
     		    	       }
     	              }
     		      else
     		    	  //only the dual use has changed
-    		          {if(dualWeaponUse)
+    		          {if(dualWeaponUseEnabled)
     		               {//add the left hand weapon
-    		    	        newWeapon=leftHandWeaponsList[weaponInUse.getUid()];
+    		    	        newWeapon=leftHandWeaponContainer.getNode(weaponInUse);
     		    	        initializeWeaponLocalTransform(newWeapon,false);
     		    	        cameraNode.attachChild(newWeapon);
     		               }
     		           else
     		    	       if(oldWeaponIDInUse!=null)
     		    	           {//drop the left hand weapon
-    		    		        oldWeapon=leftHandWeaponsList[oldWeaponIDInUse.getUid()];
+    		    		        oldWeapon=leftHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    		        oldWeapon.clearControllers();
     		    		        cameraNode.detachChild(oldWeapon);
     		    	           }
@@ -393,11 +348,11 @@ public final class PlayerData {
     	final int weaponCount=weaponFactory.getWeaponCount();
     	if(weaponCount>0)
     	    {//if the player wants to use a single weapon instead of 2
-    	     if(!next&&dualWeaponUse)
+    	     if(!next&&dualWeaponUseEnabled)
     		     success=selectWeapon(weaponInUse.getUid(),false);
     	     else
     		     //if the player wants to use 2 identical weapons instead of 1
-    		     if(next&&!dualWeaponUse&&weaponInUse!=null&&leftHandWeaponsAvailability[weaponInUse.getUid()]&&rightHandWeaponsAvailability[weaponInUse.getUid()])
+    		     if(next&&!dualWeaponUseEnabled&&weaponInUse!=null&&leftHandWeaponContainer.isAvailable(weaponInUse)&&rightHandWeaponContainer.isAvailable(weaponInUse))
     			     success=selectWeapon(weaponInUse.getUid(),true);
     		     else
     		         {int multiplier=next?1:-1;
@@ -411,6 +366,10 @@ public final class PlayerData {
     	    }
     	return(success);
 	}
+    
+    public final boolean isDualWeaponUseEnabled(){
+    	return(dualWeaponUseEnabled);
+    }
     
     private final void initializeWeaponLocalTransform(Node newWeapon,boolean rightHanded){
     	Matrix3 correctWeaponRotation=new Matrix3();
