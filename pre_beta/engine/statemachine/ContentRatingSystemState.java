@@ -26,7 +26,7 @@ import com.ardor3d.ui.text.BMText;
 import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
-public final class ContentRatingSystemState extends State{
+public final class ContentRatingSystemState extends ScenegraphState{
 	
 	
 	private final String text="Adults Only (+18)\n\nViolence\n\nBad Language\n\nFear\n\nSex\n\nDrugs\n\nDiscrimination";

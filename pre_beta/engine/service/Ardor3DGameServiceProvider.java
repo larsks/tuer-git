@@ -57,8 +57,8 @@ import engine.statemachine.InitializationState;
 import engine.statemachine.IntroductionState;
 import engine.statemachine.LoadingDisplayState;
 import engine.statemachine.MainMenuState;
-import engine.statemachine.State;
-import engine.statemachine.StateMachine;
+import engine.statemachine.ScenegraphState;
+import engine.statemachine.ScenegraphStateMachine;
 import engine.taskmanagement.TaskManager;
 import engine.sound.SoundManager;
 
@@ -118,7 +118,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
               GAME_END_DISPLAY};
 
     /**state machine*/
-    private final StateMachine stateMachine;
+    private final ScenegraphStateMachine stateMachine;
     
     /**sound manager*/
     private final SoundManager soundManager;
@@ -166,7 +166,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         introductionStartTime=Double.NaN;
         timer=new Timer();
         root=new Node("root node of the game");
-        stateMachine=new StateMachine(root);
+        stateMachine=new ScenegraphStateMachine(root);
         soundManager=new SoundManager();
         // Get the default display mode
         final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
@@ -276,10 +276,10 @@ public final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
         stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager));
-        stateMachine.addState(new State(soundManager));
-        stateMachine.addState(new State(soundManager));
-        stateMachine.addState(new State(soundManager));
-        stateMachine.addState(new State(soundManager));
+        stateMachine.addState(new ScenegraphState(soundManager));
+        stateMachine.addState(new ScenegraphState(soundManager));
+        stateMachine.addState(new ScenegraphState(soundManager));
+        stateMachine.addState(new ScenegraphState(soundManager));
         // enqueue initialization tasks for states that are not in-game states
         // do not enqueue the task of the first state as it would be called after its display
         TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));
@@ -324,14 +324,14 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private static class SwitchStepAction implements TriggerAction{
 
         
-        private final StateMachine stateMachine;
+        private final ScenegraphStateMachine stateMachine;
         
         private final Step sourceStep;
         
         private final Step destinationStep;
                
         
-        private SwitchStepAction(final StateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+        private SwitchStepAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep){
             this.stateMachine=stateMachine;
             this.sourceStep=sourceStep;
             this.destinationStep=destinationStep;
@@ -347,7 +347,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private static final class SwitchStepOnlyIfTaskQueueEmptyAction extends SwitchStepAction{
         
-        private SwitchStepOnlyIfTaskQueueEmptyAction(final StateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep){
             super(stateMachine,sourceStep,destinationStep);
         }
         

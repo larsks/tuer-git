@@ -27,7 +27,7 @@ import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
 
-public final class LoadingDisplayState extends State{
+public final class LoadingDisplayState extends ScenegraphState{
     
     
     private final TaskManagementProgressionNode taskNode;

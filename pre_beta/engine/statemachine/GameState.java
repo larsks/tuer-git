@@ -66,6 +66,7 @@ import engine.data.PlayerData;
 import engine.data.TeleporterUserData;
 import engine.data.WeaponUserData;
 import engine.input.ExtendedFirstPersonControl;
+import engine.misc.ApplicativeTimer;
 import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
 import engine.weaponry.AmmunitionFactory;
@@ -76,7 +77,7 @@ import engine.weaponry.WeaponFactory;
  * @author Julien Gouesse
  *
  */
-public final class GameState extends State{
+public final class GameState extends ScenegraphState{
     
     /**index of the level*/
     private int levelIndex;
@@ -118,13 +119,16 @@ public final class GameState extends State{
     private final BasicText headUpDisplayLabel;
     @Deprecated
     private boolean[][] collisionMap;
-    /***/
+    /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
+    /**timer that can be paused and used to measure the elapsed time*/
+    private final ApplicativeTimer timer;
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
         super(soundManager);
+        timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<Node>();
         teleportersList=new ArrayList<Node>();
         //initialize the factories, the build-in ammo and the build-in weapons       
@@ -159,7 +163,7 @@ public final class GameState extends State{
         playerMesh.setMeshData(playerMeshData);
         playerNode.attachChild(playerMesh);
         //add a bounding box to the camera node
-        NodeHelper.setModelBound(playerNode,BoundingBox.class);       
+        NodeHelper.setModelBound(playerNode,BoundingBox.class);
         playerNode.addController(new SpatialController<Spatial>(){
         	
         	private final CollisionResults collisionResults=new BoundingCollisionResults();
@@ -168,8 +172,15 @@ public final class GameState extends State{
         	
         	private boolean wasBeingTeleported=false;
         	
+        	private long previouslyMeasuredElapsedTime=-1;
+        	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
+            	//update the timer
+            	timer.update();
+            	final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
+            	final long elapsedTimeSinceLastCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
+            	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;
                 //synchronizes the camera node with the camera
                 playerNode.updateFromCamera();
                 //temporary avoids to move on Y
@@ -282,10 +293,10 @@ public final class GameState extends State{
                 	wasBeingTeleported=false;
                 //attacks if this feature is enabled
                 //FIXME: wrong approach: no attack is launched when the button is pressed during less time than the duration of a time
-                if(playerData.isAttackEnabled())
+                /*if(playerData.isAttackEnabled())
                 	{//FIXME: use a separate timer for this state
                 	 playerData.attack();
-                	}
+                	}*/
             }           
         });
     }
@@ -373,6 +384,9 @@ public final class GameState extends State{
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//TODO: pause
+				//TODO: pause the timer
+				timer.setPauseEnabled(true);
+				timer.update();
 			}
 		};
 		final TriggerAction crouchAction=new TriggerAction(){
@@ -631,8 +645,6 @@ public final class GameState extends State{
              secondTeleporterNode.setUserData(new TeleporterUserData(new Vector3(112.5,0.5,221.5)));
              teleportersList.add(secondTeleporterNode);
              getRoot().attachChild(secondTeleporterNode);            
-             //only to test the medikit
-             //playerData.decreaseHealth(10);
              final Node medikitNode=new Node("a medikit");
              final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
@@ -719,20 +731,16 @@ public final class GameState extends State{
              agentNode.setScale(0.015);
              getRoot().attachChild(agentNode);
              
-             //TODO: uncomment these lines when we have a texture for this enemy
-             /*final Node creatureNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/creature.abin"));
-             creatureNode.setTranslation(118.5,0.7,217);
-             creatureNode.setScale(0.0002);
-             creatureNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             getRoot().attachChild(creatureNode);*/          
              //add a bounding box to each collectible object
              for(Node collectible:collectibleObjectsList)
             	 NodeHelper.setModelBound(collectible,BoundingBox.class);
              for(Node teleporter:teleportersList)
             	 NodeHelper.setModelBound(teleporter,BoundingBox.class);
+             //reset the timer at the end of all long operations performed while loading
+             timer.reset();
             }
         catch(final Exception ex)
-        {ex.printStackTrace();}
+        {throw new RuntimeException("the initialization of the game state has failed",ex);}
     }
     
     @Override

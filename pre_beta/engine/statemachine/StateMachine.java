@@ -15,74 +15,38 @@ package engine.statemachine;
 
 import java.util.ArrayList;
 
-import com.ardor3d.input.logical.LogicalLayer;
-import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.Spatial;
-import com.ardor3d.util.ReadOnlyTimer;
 
-
-public final class StateMachine{
+public class StateMachine{
     
     
     private final ArrayList<State> statesList;
     
-    private final StateMachineSwitchNode switchNode;
     
-    
-    public StateMachine(final Node parent){
+    public StateMachine(){
         statesList=new ArrayList<State>();
-        switchNode=new StateMachineSwitchNode();
-        parent.attachChild(switchNode);
     }
     
     
-    public final void addState(final State state){
+    public void addState(final State state){
         statesList.add(state);
-        switchNode.attachChild(state.getRoot());
-    }
-    
-    public final void updateLogicalLayer(final ReadOnlyTimer timer){
-        int i=0;
-        for(State state:statesList)
-            {if(isEnabled(i))
-                 state.getLogicalLayer().checkTriggers(timer.getTimePerFrame());
-             i++;
-            }
     }
     
     public final void setEnabled(final int index,final boolean enabled){
         statesList.get(index).setEnabled(enabled);
+        /*for(State state:statesList)
+        	if(statesList.indexOf(state)!=index && state.isEnabled()==enabled)
+                state.setEnabled(!enabled);*/
     }
     
     public final boolean isEnabled(final int index){
-        return(switchNode.getVisible(index));
+        return(0<=index&&index<statesList.size()?statesList.get(index).isEnabled():false);
     }
     
-    public final LogicalLayer getLogicalLayer(final int index){
-        return(statesList.get(index).getLogicalLayer());
+    protected final int getStateCount(){
+    	return(statesList.size());
     }
     
-    public final int attachChild(int index,Spatial child){
-        return(statesList.get(index).getRoot().attachChild(child));
-    }
-    
-    public final Runnable getStateInitializationTask(final int index){
-    	return(new StateInitializationRunnable(statesList.get(index)));
-    }
-    
-    private static final class StateInitializationRunnable implements Runnable{
-        
-        
-        private final State state;
-        
-        
-        private StateInitializationRunnable(final State state){
-            this.state=state;
-        }
-        
-        @Override
-        public final void run(){
-            state.init();           
-        }  
+    protected final State getState(final int index){
+    	return(0<=index&&index<statesList.size()?statesList.get(index):null);
     }
 }

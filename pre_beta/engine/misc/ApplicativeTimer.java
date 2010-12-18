@@ -1,3 +1,16 @@
+/*This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation, version 2
+  of the License.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+  MA 02111-1307, USA.
+*/
 package engine.misc;
 
 public class ApplicativeTimer {
@@ -21,7 +34,7 @@ public class ApplicativeTimer {
     private long latestPauseElapsedTime;
     
     public ApplicativeTimer(){
-    	startTime=System.nanoTime();
+    	startTime=getSystemNanoTime();
     	pauseEnabled=false;
     	pausePreviouslyEnabled=false;
     	elapsedTime=0L;
@@ -30,16 +43,17 @@ public class ApplicativeTimer {
     }
     
     public final void update(){
+    	final long systemNanoTime=getSystemNanoTime();
     	if(this.pausePreviouslyEnabled!=this.pauseEnabled)
     	    {if(pauseEnabled)
-   		         latestPauseStartTime=System.nanoTime();
+   		         latestPauseStartTime=systemNanoTime;
    		     else   		     
    			     pauseElapsedTime+=latestPauseElapsedTime;   		 
     	    }
     	if(pauseEnabled)
-    		latestPauseElapsedTime=System.nanoTime()-latestPauseStartTime;
+    		latestPauseElapsedTime=systemNanoTime-latestPauseStartTime;
     	else   		
-    	    elapsedTime=System.nanoTime()-startTime-pauseElapsedTime;
+    	    elapsedTime=systemNanoTime-startTime-pauseElapsedTime;
     }
     
     public final void setPauseEnabled(final boolean pauseEnabled){
@@ -58,11 +72,17 @@ public class ApplicativeTimer {
     }
     
     public void reset(){
-    	startTime=System.nanoTime();
+    	startTime=getSystemNanoTime();
     	pauseEnabled=false;
     	pausePreviouslyEnabled=false;
     	elapsedTime=0L;
     	pauseElapsedTime=0L;
     	latestPauseElapsedTime=0L;
+    }
+    
+    private final long getSystemNanoTime(){
+    	final long rawSystemNanoTime=System.nanoTime();
+    	
+    	return(rawSystemNanoTime);
     }
 }
