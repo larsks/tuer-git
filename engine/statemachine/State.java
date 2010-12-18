@@ -13,64 +13,28 @@
 */
 package engine.statemachine;
 
-import com.ardor3d.input.logical.LogicalLayer;
-import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.extension.SwitchNode;
-
-import engine.sound.SoundManager;
 
 public class State{
 
     
-    /**layer used to handle the input*/
-    private LogicalLayer logicalLayer;
-    
-    /**root node*/
-    private final Node root;
-    
-    private final SoundManager soundManager;
+    private boolean enabled;
     
     
-    public State(final SoundManager soundManager){
-    	this.soundManager=soundManager;
-        this.logicalLayer=new LogicalLayer();
-        root=new Node();
+    public State(){
+        enabled=false;
     }
     
     
     public final boolean isEnabled(){
-        final int index=getStateIndex();
-        return(index==-1?false:getSwitchNode().getVisible(index));
+        return(this.enabled);
     }
     
     public void setEnabled(final boolean enabled){
-        final boolean wasEnabled=isEnabled();
-        if(wasEnabled!=enabled)
-            {final int index=getStateIndex();
-             if(index!=-1)
-                 getSwitchNode().setVisible(index,enabled);
+        if(this.enabled!=enabled)
+            {this.enabled=enabled;
+             
             }       
     }
     
     public void init(){}
-    
-    private final SwitchNode getSwitchNode(){
-        return((SwitchNode)root.getParent());
-    }
-    
-    private final int getStateIndex(){
-        return(getSwitchNode().getChildIndex(root));
-    }
-    
-    final Node getRoot(){
-        return(root);
-    }
-    
-    final LogicalLayer getLogicalLayer(){
-        return(logicalLayer);
-    }
-    
-    final SoundManager getSoundManager(){
-    	return(soundManager);
-    }
 }

@@ -42,7 +42,7 @@ import engine.service.Ardor3DGameServiceProvider;
 import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 
-public final class IntroductionState extends State{
+public final class IntroductionState extends ScenegraphState{
     
     
     private static final String soundSamplePath="/sounds/introduction.ogg";

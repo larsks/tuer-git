@@ -41,7 +41,7 @@ import engine.integration.DesktopIntegration;
 import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
-public final class MainMenuState extends State{
+public final class MainMenuState extends ScenegraphState{
     
     
     private final NativeCanvas canvas;

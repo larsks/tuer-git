@@ -27,7 +27,9 @@
 		<pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>		
+		<pathelement location="lib/fettle/fettle-0.4.0.jar"/>
 		<pathelement location="lib/google-collect/guava-r07.jar"/>
+		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
@@ -150,7 +152,9 @@
 			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
 			        </attributes>
 			    </classpathentry>
+			    <classpathentry kind="lib" path="lib/fettle/fettle-0.4.0.jar"/>
 			    <classpathentry kind="lib" path="lib/google-collect/guava-r07.jar"/>
+			    <classpathentry kind="lib" path="lib/mockachino/mockachino-full-0.3.1.jar"/>
 			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
 			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
@@ -233,7 +237,9 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
+		<copy file="lib/fettle/fettle-0.4.0.jar" todir="${destdir}"/>
 		<copy file="lib/google-collect/guava-r07.jar" todir="${destdir}"/>
+		<copy file="lib/mockachino/mockachino-full-0.3.1.jar" todir="${destdir}"/>
 		<copy file="lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
 		<copy file="lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
 		<copy file="lib/pss/SoundSystem.jar" todir="${destdir}"/>
@@ -246,7 +252,9 @@
 		<copy file="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
+		    	<fileset file="${destdir}/fettle-0.4.0.jar" />
 		    	<fileset file="${destdir}/guava-r07.jar" />
+		    	<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
 		    	<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
 		    	<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
@@ -296,7 +304,9 @@
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="fettle-0.4.0.jar" download="eager" main="false"/>
 			    <jar href="guava-r07.jar" download="eager" main="false"/>
+			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>
@@ -331,7 +341,9 @@
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="fettle-0.4.0.jar" download="eager" main="false"/>
 			    <jar href="guava-r07.jar" download="eager" main="false"/>
+			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>
@@ -340,7 +352,9 @@
 			</jnlp>
 			]]>
 		</echo>
+		<copy file="${destdir}/fettle-0.4.0.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/guava-r07.jar" todir="${deploymentdestdir}"/>
+		<copy file="${destdir}/mockachino-full-0.3.1.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
@@ -366,7 +380,9 @@
 	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
 	  		<fileset file="${destdir}/${tuer-jar-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
+	  		<fileset file="${destdir}/fettle-0.4.0.jar" />
 	  		<fileset file="${destdir}/guava-r07.jar" />
+	  		<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
 	  		<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
 	  		<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />

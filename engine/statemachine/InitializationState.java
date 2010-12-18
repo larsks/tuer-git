@@ -34,7 +34,7 @@ import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
 
-public final class InitializationState extends State{   
+public final class InitializationState extends ScenegraphState{   
   
     
     private final Box box;
