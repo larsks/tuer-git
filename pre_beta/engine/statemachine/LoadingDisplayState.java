@@ -42,10 +42,18 @@ public final class LoadingDisplayState extends ScenegraphState{
         getRoot().attachChild(taskNode);
         // execute tasks
         taskNode.addController(new SpatialController<Spatial>(){
+        	
+        	boolean oneSkipDone=false;
+        	
             @Override
             public final void update(final double time,final Spatial caller){
-                TaskManager.getInstance().executeFirstTask();
-                toGameAction.perform(null,null,-1);
+            	//perform the long task only at the second update to display the task node correctly
+            	if(!oneSkipDone)
+            		oneSkipDone=true;
+            	else
+            	    {TaskManager.getInstance().executeFirstTask();
+                     toGameAction.perform(null,null,-1);
+            	    }
             }
         });
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
