@@ -31,9 +31,12 @@ public final class TaskManagementProgressionNode extends Node{
     
     private int maxTaskCount;
     
+    private final TaskManager taskManager;
     
-    public TaskManagementProgressionNode(final Camera cam){
+    
+    public TaskManagementProgressionNode(final Camera cam,final TaskManager taskManager){
         super("task progression node");
+        this.taskManager=taskManager;
         maxTaskCount=0;
         bar=new UIProgressBar("",true);
         bar.setPercentFilled(0);
@@ -57,7 +60,7 @@ public final class TaskManagementProgressionNode extends Node{
         addController(new SpatialController<Spatial>(){
             @Override
             public final void update(final double time,final Spatial caller){
-                final int taskCount=TaskManager.getInstance().getTaskCount();
+                final int taskCount=taskManager.getTaskCount();
                 if(maxTaskCount==0)
                     bar.setPercentFilled(0);
                 else
@@ -67,6 +70,6 @@ public final class TaskManagementProgressionNode extends Node{
     }
     
     public final void reset(){
-        maxTaskCount=TaskManager.getInstance().getTaskCount();
+        maxTaskCount=taskManager.getTaskCount();
     }
 }

@@ -18,8 +18,6 @@ import java.util.ArrayList;
 public final class TaskManager{
     
     
-    private static final TaskManager instance=new TaskManager();
-    
     private final ArrayList<Runnable> tasksQueue;
      
     
@@ -30,10 +28,6 @@ public final class TaskManager{
     
     public final void enqueueTask(final Runnable task){
         tasksQueue.add(task);
-    }
-
-    public static final TaskManager getInstance(){
-        return(instance);
     }
     
     public final int getTaskCount(){

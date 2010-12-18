@@ -126,6 +126,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**list of bitmap fonts*/
     private static ArrayList<BMFont> fontsList;
     
+    private final TaskManager taskManager;
+    
     
     public static void main(final String[] args){
     	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
@@ -161,6 +163,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
      */
     private Ardor3DGameServiceProvider(){
         exit=false;
+        taskManager=new TaskManager();
         contentSystemRatingStartTime=Double.NaN;
         initializationStartTime=Double.NaN;
         introductionStartTime=Double.NaN;
@@ -209,7 +212,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
                  {if(Double.isNaN(initializationStartTime))
                       initializationStartTime=timer.getTimeInSeconds();
                   if(timer.getTimeInSeconds()-initializationStartTime>5&&
-                     TaskManager.getInstance().getTaskCount()==0)
+                	 taskManager.getTaskCount()==0)
                       {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
                        stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);       
                       }
@@ -263,18 +266,18 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         };
         final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION);
-        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION);
+        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION,taskManager);
         final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
         final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY);
-        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME);
+        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME,taskManager);
         
         final LoadingDisplayState loadingDisplayState;
         //create one state per step
         stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction,soundManager));
-        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager));
+        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager,taskManager));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
         stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
-        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager));
+        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager,taskManager));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager));
         stateMachine.addState(new ScenegraphState(soundManager));
         stateMachine.addState(new ScenegraphState(soundManager));
@@ -282,15 +285,15 @@ public final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new ScenegraphState(soundManager));
         // enqueue initialization tasks for states that are not in-game states
         // do not enqueue the task of the first state as it would be called after its display
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.INTRODUCTION.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.MAIN_MENU.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_LOADING_DISPLAY.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.INTRODUCTION.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.MAIN_MENU.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_LOADING_DISPLAY.ordinal()));
         // do not enqueue the game task now as it is the role of the level loading display
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_OVER.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.PAUSE_MENU.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_END_DISPLAY.ordinal()));
-        TaskManager.getInstance().enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_END_DISPLAY.ordinal()));        
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_OVER.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.PAUSE_MENU.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_END_DISPLAY.ordinal()));
+        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_END_DISPLAY.ordinal()));
         // put the task that loads a level into the level loading state
         loadingDisplayState.setLevelInitializationTask(stateMachine.getStateInitializationTask(Step.GAME.ordinal()));
         // enable the first state
@@ -346,14 +349,17 @@ public final class Ardor3DGameServiceProvider implements Scene{
     }
     
     private static final class SwitchStepOnlyIfTaskQueueEmptyAction extends SwitchStepAction{
+    	
+    	private final TaskManager taskManager;
         
-        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final TaskManager taskManager){
             super(stateMachine,sourceStep,destinationStep);
+            this.taskManager=taskManager;
         }
         
         @Override
         public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-            if(TaskManager.getInstance().getTaskCount()==0)
+            if(taskManager.getTaskCount()==0)
                 super.perform(source,inputState,tpf);
         }
     }

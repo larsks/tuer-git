@@ -42,9 +42,9 @@ public final class InitializationState extends ScenegraphState{
     private final TaskManagementProgressionNode taskNode;
     
     
-    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction,final SoundManager soundManager){
+    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
-        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
+        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
@@ -58,7 +58,7 @@ public final class InitializationState extends ScenegraphState{
         box.addController(new SpatialController<Spatial>(){
             @Override
             public final void update(final double time,final Spatial caller){
-                TaskManager.getInstance().executeFirstTask();
+                taskManager.executeFirstTask();
             }
         });
         getRoot().attachChild(box);
