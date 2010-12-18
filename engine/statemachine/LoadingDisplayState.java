@@ -33,11 +33,14 @@ public final class LoadingDisplayState extends ScenegraphState{
     private final TaskManagementProgressionNode taskNode;
     
     private Runnable levelInitializationTask;
+    
+    private final TaskManager taskManager;
 
     
-    public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager){
+    public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
-        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera());
+        this.taskManager=taskManager;
+        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
         getRoot().attachChild(taskNode);
         // execute tasks
@@ -51,7 +54,7 @@ public final class LoadingDisplayState extends ScenegraphState{
             	if(!oneSkipDone)
             		oneSkipDone=true;
             	else
-            	    {TaskManager.getInstance().executeFirstTask();
+            	    {taskManager.executeFirstTask();
                      toGameAction.perform(null,null,-1);
             	    }
             }
@@ -73,7 +76,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 {TaskManager.getInstance().enqueueTask(levelInitializationTask);
+                 {taskManager.enqueueTask(levelInitializationTask);
                   taskNode.reset();
                  }
             }
