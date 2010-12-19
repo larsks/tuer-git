@@ -69,6 +69,7 @@ import engine.input.ExtendedFirstPersonControl;
 import engine.misc.ApplicativeTimer;
 import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
+import engine.taskmanagement.TaskManager;
 import engine.weaponry.AmmunitionFactory;
 import engine.weaponry.WeaponFactory;
 
@@ -126,8 +127,11 @@ public final class GameState extends ScenegraphState{
     /**timer that can be paused and used to measure the elapsed time*/
     private final ApplicativeTimer timer;
     
-    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager){
+    private final TaskManager taskManager;
+    
+    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
+        this.taskManager=taskManager;
         timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<Node>();
         teleportersList=new ArrayList<Node>();
@@ -577,8 +581,7 @@ public final class GameState extends ScenegraphState{
         this.levelIndex=levelIndex;
     }
     
-    @Override
-    public final void init(){
+    private final void loadSounds(){
     	// load the sound
         URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null&&pickupWeaponSourcename==null)
@@ -591,6 +594,27 @@ public final class GameState extends ScenegraphState{
         	teleporterUseSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
         else
         	teleporterUseSourcename=null;
+    }
+    
+    private final void loadLevelModel(){
+    	try{final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+            NodeHelper.setBackCullState(levelNode);
+            getRoot().attachChild(levelNode);
+    	   }
+    	catch(IOException ioe)
+    	{throw new RuntimeException("level loading failed",ioe);}
+    }
+    
+    private final void loadOutdoor(){
+    	try{final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
+            outdoorPartLevelNode.setTranslation(-128, -6, -128);
+            getRoot().attachChild(outdoorPartLevelNode);   		
+    	   }
+    	catch(IOException ioe)
+    	{throw new RuntimeException("outdoor loading failed",ioe);}
+    }
+    
+    private final void performInitialBasicSetup(){
     	// clear the list of objects that can be picked up
     	collectibleObjectsList.clear();
         // Remove all previously attached children
@@ -607,140 +631,227 @@ public final class GameState extends ScenegraphState{
         getRoot().attachChild(healthTextLabel);
         //attach the HUD node
         getRoot().attachChild(headUpDisplayLabel);
+    }
+    
+    private final void performTerminalBasicSetup(){
+    	//add a bounding box to each collectible object
+        for(Node collectible:collectibleObjectsList)
+       	 NodeHelper.setModelBound(collectible,BoundingBox.class);
+        for(Node teleporter:teleportersList)
+       	 NodeHelper.setModelBound(teleporter,BoundingBox.class);
+        //reset the timer at the end of all long operations performed while loading
+        timer.reset();
+    }
+    
+    private final void loadSkybox(){
+	    final Skybox skyboxNode=new Skybox("skybox",64,64,64);
+	    skyboxNode.setTranslation(-128,0,-128);
+	    final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+	    final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+	    final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+	    final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+	    final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+	    final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
+	    skyboxNode.setTexture(Skybox.Face.North,north);
+	    skyboxNode.setTexture(Skybox.Face.West,west);
+	    skyboxNode.setTexture(Skybox.Face.South,south);
+	    skyboxNode.setTexture(Skybox.Face.East,east);
+	    skyboxNode.setTexture(Skybox.Face.Up,up);
+	    skyboxNode.setTexture(Skybox.Face.Down,down);            
+	    getRoot().attachChild(skyboxNode);
+	       
+    }
+    
+    private final void loadTeleporters(){	    
+	    final Node teleporterNode=new Node("a teleporter");
+        final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+        teleporterBox.setRandomColors();
+        teleporterNode.setTranslation(112.5,0,221.5);
+        teleporterNode.attachChild(teleporterBox);
+        teleporterNode.setUserData(new TeleporterUserData(new Vector3(-132,0.5,-102)));
+        teleportersList.add(teleporterNode);
+        getRoot().attachChild(teleporterNode);            
+        final Node secondTeleporterNode=new Node("another teleporter");
+        final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+        secondTeleporterBox.setRandomColors();
+        secondTeleporterNode.setTranslation(-132,0,-102);
+        secondTeleporterNode.attachChild(secondTeleporterBox);
+        secondTeleporterNode.setUserData(new TeleporterUserData(new Vector3(112.5,0.5,221.5)));
+        teleportersList.add(secondTeleporterNode);
+        getRoot().attachChild(secondTeleporterNode);
+    }
+    
+    private final void loadMedikits(){
+    	final Node medikitNode=new Node("a medikit");
+        final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
+        final TextureState ts = new TextureState();
+        ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
+        medikitBox.setRenderState(ts);
+        medikitNode.setTranslation(112.5,0.1,220.5);
+        medikitNode.attachChild(medikitBox);
+        medikitNode.setUserData(new MedikitUserData(20));
+        collectibleObjectsList.add(medikitNode);
+        getRoot().attachChild(medikitNode);
+    }
+    
+    private final void loadWeapons(){
+	    try{final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
+            uziNode.setName("an uzi");
+            uziNode.setTranslation(111.5,0.15,219);
+            uziNode.setScale(0.2);
+            uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false));
+            //add some bounding boxes for all objects that can be picked up
+            collectibleObjectsList.add(uziNode);
+            getRoot().attachChild(uziNode);
+            final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
+            smachNode.setName("a smach");
+            smachNode.setTranslation(112.5,0.15,219);
+            smachNode.setScale(0.2);
+            smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(smachNode);
+            getRoot().attachChild(smachNode);
+            final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
+            pistolNode.setName("a pistol (10mm)");
+            pistolNode.setTranslation(113.5,0.1,219);
+            pistolNode.setScale(0.001);
+            pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+            pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(pistolNode);
+            getRoot().attachChild(pistolNode);            
+            final Node duplicatePistolNode=pistolNode.makeCopy(false);
+            duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
+            duplicatePistolNode.setTranslation(113.5,0.1,217);
+            collectibleObjectsList.add(duplicatePistolNode);
+            getRoot().attachChild(duplicatePistolNode);
+            final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
+            pistol2Node.setName("a pistol (9mm)");
+            //remove the bullet as it is not necessary now
+            ((Node)pistol2Node.getChild(0)).detachChildAt(2);
+            pistol2Node.setTranslation(114.5,0.1,219);
+            pistol2Node.setScale(0.02);
+            pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+            pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(pistol2Node);
+            getRoot().attachChild(pistol2Node);
+            final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
+            pistol3Node.setName("a Mag 60");
+            pistol3Node.setTranslation(115.5,0.1,219);
+            pistol3Node.setScale(0.02);
+            pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(pistol3Node);
+            getRoot().attachChild(pistol3Node);
+            final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
+            laserNode.setName("a laser");
+            laserNode.setTranslation(116.5,0.1,219);
+            laserNode.setScale(0.02);
+            laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(laserNode);
+            getRoot().attachChild(laserNode);
+
+            final Node shotgunNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/shotgun.abin"));
+            shotgunNode.setName("a shotgun");
+            shotgunNode.setTranslation(117.5,0.1,219);
+            shotgunNode.setScale(0.1);
+            shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(shotgunNode);
+            getRoot().attachChild(shotgunNode);	    	
+	       }
+	    catch(IOException ioe)
+	    {throw new RuntimeException("weapons loading failed",ioe);}
+    }
+    
+    private final void loadAmmunitions(){
+    	final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
+        final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
+        bullet9mmAmmoBox.setDefaultColor(ColorRGBA.GREEN);
+        bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
+        bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
+        bullet9mmAmmoNode.setUserData(new AmmunitionUserData(pickupAmmoSourcename,ammunitionFactory.getAmmunition("BULLET_9MM"),30));
+        collectibleObjectsList.add(bullet9mmAmmoNode);
+        getRoot().attachChild(bullet9mmAmmoNode);
+    }
+    
+    private final void loadEnemies(){
+	    try{final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
+            agentNode.setName("an agent");
+            agentNode.setTranslation(118.5,0.4,219);
+            agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
+            agentNode.setScale(0.015);
+            getRoot().attachChild(agentNode);
+	       }
+	    catch(IOException ioe)
+	    {throw new RuntimeException("enemies loading failed",ioe);}
+    }
+    
+    @Override
+    public final void init(){
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadSounds();
+			}
+		}); 	
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				performInitialBasicSetup();
+			}
+		});
         // Load level model
-        try {final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
-             NodeHelper.setBackCullState(levelNode);
-             getRoot().attachChild(levelNode);
-             final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
-             outdoorPartLevelNode.setTranslation(-128, -6, -128);
-             getRoot().attachChild(outdoorPartLevelNode);
-             final Skybox skyboxNode=new Skybox("skybox",64,64,64);
-             skyboxNode.setTranslation(-128,0,-128);
-             final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-             final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
-             skyboxNode.setTexture(Skybox.Face.North,north);
-             skyboxNode.setTexture(Skybox.Face.West,west);
-             skyboxNode.setTexture(Skybox.Face.South,south);
-             skyboxNode.setTexture(Skybox.Face.East,east);
-             skyboxNode.setTexture(Skybox.Face.Up,up);
-             skyboxNode.setTexture(Skybox.Face.Down,down);            
-             getRoot().attachChild(skyboxNode);
-             final Node teleporterNode=new Node("a teleporter");
-             final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-             teleporterBox.setRandomColors();
-             teleporterNode.setTranslation(112.5,0,221.5);
-             teleporterNode.attachChild(teleporterBox);
-             teleporterNode.setUserData(new TeleporterUserData(new Vector3(-132,0.5,-102)));
-             teleportersList.add(teleporterNode);
-             getRoot().attachChild(teleporterNode);            
-             final Node secondTeleporterNode=new Node("another teleporter");
-             final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-             secondTeleporterBox.setRandomColors();
-             secondTeleporterNode.setTranslation(-132,0,-102);
-             secondTeleporterNode.attachChild(secondTeleporterBox);
-             secondTeleporterNode.setUserData(new TeleporterUserData(new Vector3(112.5,0.5,221.5)));
-             teleportersList.add(secondTeleporterNode);
-             getRoot().attachChild(secondTeleporterNode);            
-             final Node medikitNode=new Node("a medikit");
-             final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
-             final TextureState ts = new TextureState();
-             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
-             medikitBox.setRenderState(ts);
-             medikitNode.setTranslation(112.5,0.1,220.5);
-             medikitNode.attachChild(medikitBox);
-             medikitNode.setUserData(new MedikitUserData(20));
-             collectibleObjectsList.add(medikitNode);
-             getRoot().attachChild(medikitNode);         
-             final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
-             final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
-             bullet9mmAmmoBox.setDefaultColor(ColorRGBA.GREEN);
-             bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
-             bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
-             bullet9mmAmmoNode.setUserData(new AmmunitionUserData(pickupAmmoSourcename,ammunitionFactory.getAmmunition("BULLET_9MM"),30));
-             collectibleObjectsList.add(bullet9mmAmmoNode);
-             getRoot().attachChild(bullet9mmAmmoNode);             
-             final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
-             uziNode.setName("an uzi");
-             uziNode.setTranslation(111.5,0.15,219);
-             uziNode.setScale(0.2);
-             uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false));
-             //add some bounding boxes for all objects that can be picked up
-             collectibleObjectsList.add(uziNode);
-             getRoot().attachChild(uziNode);
-             final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
-             smachNode.setName("a smach");
-             smachNode.setTranslation(112.5,0.15,219);
-             smachNode.setScale(0.2);
-             smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(smachNode);
-             getRoot().attachChild(smachNode);
-             final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
-             pistolNode.setName("a pistol (10mm)");
-             pistolNode.setTranslation(113.5,0.1,219);
-             pistolNode.setScale(0.001);
-             pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-             pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(pistolNode);
-             getRoot().attachChild(pistolNode);            
-             final Node duplicatePistolNode=pistolNode.makeCopy(false);
-             duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
-             duplicatePistolNode.setTranslation(113.5,0.1,217);
-             collectibleObjectsList.add(duplicatePistolNode);
-             getRoot().attachChild(duplicatePistolNode);
-             final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
-             pistol2Node.setName("a pistol (9mm)");
-             //remove the bullet as it is not necessary now
-             ((Node)pistol2Node.getChild(0)).detachChildAt(2);
-             pistol2Node.setTranslation(114.5,0.1,219);
-             pistol2Node.setScale(0.02);
-             pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-             pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(pistol2Node);
-             getRoot().attachChild(pistol2Node);
-             final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
-             pistol3Node.setName("a Mag 60");
-             pistol3Node.setTranslation(115.5,0.1,219);
-             pistol3Node.setScale(0.02);
-             pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(pistol3Node);
-             getRoot().attachChild(pistol3Node);
-             final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
-             laserNode.setName("a laser");
-             laserNode.setTranslation(116.5,0.1,219);
-             laserNode.setScale(0.02);
-             laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(laserNode);
-             getRoot().attachChild(laserNode);
-             
-             final Node shotgunNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/shotgun.abin"));
-             shotgunNode.setName("a shotgun");
-             shotgunNode.setTranslation(117.5,0.1,219);
-             shotgunNode.setScale(0.1);
-             shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false));
-             collectibleObjectsList.add(shotgunNode);
-             getRoot().attachChild(shotgunNode);
-             
-             final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
-             agentNode.setName("an agent");
-             agentNode.setTranslation(118.5,0.4,219);
-             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
-             agentNode.setScale(0.015);
-             getRoot().attachChild(agentNode);
-             
-             //add a bounding box to each collectible object
-             for(Node collectible:collectibleObjectsList)
-            	 NodeHelper.setModelBound(collectible,BoundingBox.class);
-             for(Node teleporter:teleportersList)
-            	 NodeHelper.setModelBound(teleporter,BoundingBox.class);
-             //reset the timer at the end of all long operations performed while loading
-             timer.reset();
-            }
-        catch(final Exception ex)
-        {throw new RuntimeException("the initialization of the game state has failed",ex);}
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadLevelModel();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadOutdoor();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadSkybox();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadTeleporters();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadMedikits();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadWeapons();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadAmmunitions();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				loadEnemies();
+			}
+		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				performTerminalBasicSetup();
+			}
+		});
     }
     
     @Override

@@ -278,7 +278,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
         stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
         stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager,taskManager));
-        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager));
+        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager));
         stateMachine.addState(new ScenegraphState(soundManager));
         stateMachine.addState(new ScenegraphState(soundManager));
         stateMachine.addState(new ScenegraphState(soundManager));
