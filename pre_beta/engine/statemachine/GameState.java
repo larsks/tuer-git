@@ -543,7 +543,7 @@ public final class GameState extends ScenegraphState{
     	/**cartridge*/
         ammunitionFactory.addNewAmmunition("CARTRIDGE","cartridge");
     	/**power*/
-        ammunitionFactory.addNewAmmunition("ENERGY CELL","energy cell");
+        ammunitionFactory.addNewAmmunition("ENERGY_CELL","energy cell");
     	/**Russian middle range anti-tank rocket launchers*/
         ammunitionFactory.addNewAmmunition("ANTI_TANK_ROCKET_105MM","105mm anti tank rocket");
         return(ammunitionFactory);
@@ -556,7 +556,7 @@ public final class GameState extends ScenegraphState{
         weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
         weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
         weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
-        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY"),1,1000);
+        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
         weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
         return(weaponFactory);
     }
