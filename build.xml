@@ -14,10 +14,16 @@
 	<property name="srcdir" value="."/>
 	<property name="homepage-url" value="http://tuer.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
+	<property name="legacy-codebase-url" value="${homepage-url}" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
+	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
+	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your manifest -->
+	<property name="tuer-chrome-web-store-manifest-filename" value="manifest.json" />
+	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your icon -->
+	<property name="tuer-chrome-web-store-icon-filename" value="icon_128.png" />
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
@@ -27,7 +33,7 @@
 		<pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>		
-		<pathelement location="lib/fettle/fettle-0.4.0.jar"/>
+		<pathelement location="lib/fettle/fettle-0.4.5.jar"/>
 		<pathelement location="lib/google-collect/guava-r07.jar"/>
 		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
@@ -152,7 +158,7 @@
 			            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
 			        </attributes>
 			    </classpathentry>
-			    <classpathentry kind="lib" path="lib/fettle/fettle-0.4.0.jar"/>
+			    <classpathentry kind="lib" path="lib/fettle/fettle-0.4.5.jar"/>
 			    <classpathentry kind="lib" path="lib/google-collect/guava-r07.jar"/>
 			    <classpathentry kind="lib" path="lib/mockachino/mockachino-full-0.3.1.jar"/>
 			    <classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
@@ -237,7 +243,7 @@
 			</dname>
 		</genkey>
 		<!-- copy these JAR into the local destination directory -->
-		<copy file="lib/fettle/fettle-0.4.0.jar" todir="${destdir}"/>
+		<copy file="lib/fettle/fettle-0.4.5.jar" todir="${destdir}"/>
 		<copy file="lib/google-collect/guava-r07.jar" todir="${destdir}"/>
 		<copy file="lib/mockachino/mockachino-full-0.3.1.jar" todir="${destdir}"/>
 		<copy file="lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
@@ -252,7 +258,7 @@
 		<copy file="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${destdir}"/>	
 		<signjar alias="gouessej" keystore="key" storepass="${storepass}" lazy="false" >
 		    <path>
-		    	<fileset file="${destdir}/fettle-0.4.0.jar" />
+		    	<fileset file="${destdir}/fettle-0.4.5.jar" />
 		    	<fileset file="${destdir}/guava-r07.jar" />
 		    	<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
 		    	<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
@@ -304,7 +310,7 @@
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="fettle-0.4.0.jar" download="eager" main="false"/>
+			    <jar href="fettle-0.4.5.jar" download="eager" main="false"/>
 			    <jar href="guava-r07.jar" download="eager" main="false"/>
 			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
@@ -341,7 +347,7 @@
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="fettle-0.4.0.jar" download="eager" main="false"/>
+			    <jar href="fettle-0.4.5.jar" download="eager" main="false"/>
 			    <jar href="guava-r07.jar" download="eager" main="false"/>
 			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
@@ -352,7 +358,30 @@
 			</jnlp>
 			]]>
 		</echo>
-		<copy file="${destdir}/fettle-0.4.0.jar" todir="${deploymentdestdir}"/>
+		<!-- generate the manifest file for Chrome web store -->
+		<echo file="${deploymentdestdir}/${tuer-chrome-web-store-manifest-filename}"><![CDATA[{
+			  "name": "TUER",
+			  "description": "small FPS taking place in a museum (alpha version)",
+			  "version": "0.0.0.3",
+			  "app": {			    
+			    "launch": {
+			      "web_url": "${legacy-codebase-url}/${tuer-jnlp-filename}"
+			    }
+			  },
+			  "icons": {
+			    "128": "${tuer-chrome-web-store-icon-filename}"
+			  },
+			  "permissions": [
+			  ]
+			}		    
+		    ]]>
+		</echo>
+		<!-- generate the ZIP file for Chrome web store -->
+		<zip destFile="${deploymentdestdir}/${tuer-chrome-web-store-zip-filename}" >
+			<zipfileset dir="${deploymentdestdir}" includes="${tuer-chrome-web-store-manifest-filename}" fullpath="myapp/${tuer-chrome-web-store-manifest-filename}" />
+			<zipfileset dir="${deploymentdestdir}" includes="${tuer-chrome-web-store-icon-filename}" fullpath="myapp/${tuer-chrome-web-store-icon-filename}" />
+		</zip>
+		<copy file="${destdir}/fettle-0.4.5.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/guava-r07.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/mockachino-full-0.3.1.jar" todir="${deploymentdestdir}"/>
 		<copy file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
@@ -377,10 +406,12 @@
 	  		<fileset dir="${deploymentdestdir}" includes="**/*.jar" />
 	  		<fileset file="${deploymentdestdir}/${tuer-jnlp-filename}" />
 	  		<fileset file="${deploymentdestdir}/${jfpsm-jnlp-filename}" />
+	  		<fileset file="${deploymentdestdir}/${tuer-chrome-web-store-manifest-filename}" />
+	  		<fileset file="${deploymentdestdir}/${tuer-chrome-web-store-zip-filename}" />	  		
 	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
 	  		<fileset file="${destdir}/${tuer-jar-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
-	  		<fileset file="${destdir}/fettle-0.4.0.jar" />
+	  		<fileset file="${destdir}/fettle-0.4.5.jar" />
 	  		<fileset file="${destdir}/guava-r07.jar" />
 	  		<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
 	  		<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
