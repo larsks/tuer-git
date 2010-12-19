@@ -48,6 +48,8 @@ public final class LoadingDisplayState extends ScenegraphState{
         	
         	boolean oneSkipDone=false;
         	
+        	boolean firstTaskOk=false;
+        	
             @Override
             public final void update(final double time,final Spatial caller){
             	//perform the long task only at the second update to display the task node correctly
@@ -55,7 +57,13 @@ public final class LoadingDisplayState extends ScenegraphState{
             		oneSkipDone=true;
             	else
             	    {if(taskManager.getTaskCount()>0)
-            		     taskManager.executeFirstTask();
+            		     {taskManager.executeFirstTask();
+            		      if(!firstTaskOk)
+            		          {firstTaskOk=true;
+            		           //the first task is used to enqueue all loading tasks
+            		           taskNode.reset();
+            		          }
+            		     }
             	     else
                          toGameAction.perform(null,null,-1);
             	    }
