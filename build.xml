@@ -14,7 +14,6 @@
 	<property name="srcdir" value="."/>
 	<property name="homepage-url" value="http://tuer.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
-	<property name="legacy-codebase-url" value="${homepage-url}" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
@@ -362,10 +361,10 @@
 		<echo file="${deploymentdestdir}/${tuer-chrome-web-store-manifest-filename}"><![CDATA[{
 			  "name": "TUER",
 			  "description": "small FPS taking place in a museum (alpha version)",
-			  "version": "0.0.0.3",
+			  "version": "0.0.0.4",
 			  "app": {			    
 			    "launch": {
-			      "web_url": "${legacy-codebase-url}/${tuer-jnlp-filename}"
+			      "web_url": "${homepage-url}"
 			    }
 			  },
 			  "icons": {
