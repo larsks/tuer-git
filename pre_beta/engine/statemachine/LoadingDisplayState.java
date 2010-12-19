@@ -54,8 +54,10 @@ public final class LoadingDisplayState extends ScenegraphState{
             	if(!oneSkipDone)
             		oneSkipDone=true;
             	else
-            	    {taskManager.executeFirstTask();
-                     toGameAction.perform(null,null,-1);
+            	    {if(taskManager.getTaskCount()>0)
+            		     taskManager.executeFirstTask();
+            	     else
+                         toGameAction.perform(null,null,-1);
             	    }
             }
         });
