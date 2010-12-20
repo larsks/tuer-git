@@ -32,7 +32,6 @@ import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.awt.AwtFocusWrapper;
-import com.ardor3d.input.awt.AwtKeyboardWrapper;
 import com.ardor3d.input.awt.AwtMouseManager;
 import com.ardor3d.input.awt.AwtMouseWrapper;
 import com.ardor3d.input.logical.TriggerAction;
@@ -51,6 +50,7 @@ import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
+import engine.input.ExtendedAwtKeyboardWrapper;
 import engine.statemachine.ContentRatingSystemState;
 import engine.statemachine.GameState;
 import engine.statemachine.InitializationState;
@@ -181,7 +181,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         mouseManager=new AwtMouseManager((Component)canvas);
         // remove the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new AwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
+        physicalLayer=new PhysicalLayer(new ExtendedAwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
     }
 
     
