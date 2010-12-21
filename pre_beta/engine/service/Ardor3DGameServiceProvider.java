@@ -131,8 +131,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private final TaskManager taskManager;
     
-    private MainMenuState mainMenuState;
-    
     
     public static void main(final String[] args){
     	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
@@ -282,7 +280,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction,soundManager));
         stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager,taskManager));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
-        stateMachine.addState(mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
+        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
         stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager,taskManager));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager));
         stateMachine.addState(new ScenegraphState(soundManager));
