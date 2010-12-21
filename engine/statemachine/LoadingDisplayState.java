@@ -20,8 +20,10 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 //import com.ardor3d.ui.text.BMText;
+import com.ardor3d.renderer.Camera;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.ui.text.BasicText;
 
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
@@ -41,7 +43,8 @@ public final class LoadingDisplayState extends ScenegraphState{
         super(soundManager);
         this.taskManager=taskManager;
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
-        taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
+        final Camera cam=canvas.getCanvasRenderer().getCamera();
+        taskNode.setTranslation(0,-cam.getHeight()/2.5,0);
         getRoot().attachChild(taskNode);
         // execute tasks
         taskNode.addController(new SpatialController<Spatial>(){
@@ -69,6 +72,10 @@ public final class LoadingDisplayState extends ScenegraphState{
             	    }
             }
         });
+        //FIXME: add a mechanism to update the text
+        final BasicText levelTextLabel=BasicText.createDefaultTextLabel("Level","Level 0: The museum");
+        levelTextLabel.setTranslation(cam.getWidth()/2,cam.getHeight()/2,0);
+        getRoot().attachChild(levelTextLabel);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
