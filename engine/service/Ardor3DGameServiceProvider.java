@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -38,6 +40,7 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
 import com.ardor3d.math.Ray3;
+import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
@@ -128,6 +131,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private final TaskManager taskManager;
     
+    private MainMenuState mainMenuState;
+    
     
     public static void main(final String[] args){
     	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
@@ -205,7 +210,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
                       contentSystemRatingStartTime=timer.getTimeInSeconds();
                   if(timer.getTimeInSeconds()-contentSystemRatingStartTime>2)
                       {stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),false);
-                       stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);       
+                       stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);
                       }
                  }
              if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()))
@@ -265,18 +270,19 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION);
-        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION,taskManager);
-        final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU);
-        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY);
-        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME,taskManager);
+        final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();
+        final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION,renderContext);
+        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION,taskManager,renderContext);
+        final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU,renderContext);
+        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY,renderContext);
+        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME,taskManager,renderContext);
         
         final LoadingDisplayState loadingDisplayState;
         //create one state per step
         stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction,soundManager));
         stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager,taskManager));
         stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
-        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
+        stateMachine.addState(mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
         stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager,taskManager));
         stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager));
         stateMachine.addState(new ScenegraphState(soundManager));
@@ -311,7 +317,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
         if(isOpen)
             {// Draw the root and all its children.
              renderer.draw(root);
-             //executes all rendering tasks queued by controllers
+             //executes all update tasks queued by the controllers
+             GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.UPDATE).execute(renderer);
+             //executes all rendering tasks queued by the controllers
              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).execute(renderer);
             }
         return(isOpen);
@@ -332,19 +340,28 @@ public final class Ardor3DGameServiceProvider implements Scene{
         private final Step sourceStep;
         
         private final Step destinationStep;
+        
+        private final RenderContext renderContext;
                
         
-        private SwitchStepAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep){
+        private SwitchStepAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final RenderContext renderContext){
             this.stateMachine=stateMachine;
             this.sourceStep=sourceStep;
             this.destinationStep=destinationStep;
+            this.renderContext=renderContext;
         }
         
         
         @Override
         public void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-            stateMachine.setEnabled(sourceStep.ordinal(),false);
-            stateMachine.setEnabled(destinationStep.ordinal(),true);           
+        	GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
+                @Override
+                public Void call() throws Exception{
+                    stateMachine.setEnabled(sourceStep.ordinal(),false);
+                    stateMachine.setEnabled(destinationStep.ordinal(),true);     
+                    return(null);
+                }
+            });                  
         }       
     }
     
@@ -352,8 +369,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
     	
     	private final TaskManager taskManager;
         
-        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final TaskManager taskManager){
-            super(stateMachine,sourceStep,destinationStep);
+        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final TaskManager taskManager,final RenderContext renderContext){
+            super(stateMachine,sourceStep,destinationStep,renderContext);
             this.taskManager=taskManager;
         }
         
