@@ -13,18 +13,25 @@
 */
 package engine.statemachine;
 
+import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.image.Texture;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.math.Vector3;
 //import com.ardor3d.ui.text.BMText;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.util.TextureManager;
 
+import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
@@ -37,6 +44,8 @@ public final class LoadingDisplayState extends ScenegraphState{
     private Runnable levelInitializationTask;
     
     private final TaskManager taskManager;
+    
+    private final Box box;
 
     
     public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager){
@@ -72,6 +81,10 @@ public final class LoadingDisplayState extends ScenegraphState{
             	    }
             }
         });
+        box=new Box(Step.LEVEL_LOADING_DISPLAY.toString()+"Box",Vector3.ZERO,5,5,5);
+        box.setModelBound(new BoundingBox());
+        box.setTranslation(new Vector3(0,0,-15));
+        getRoot().attachChild(box);
         //FIXME: add a mechanism to update the text
         final BasicText levelTextLabel=BasicText.createDefaultTextLabel("Level","Level 0: The museum");
         levelTextLabel.setTranslation(cam.getWidth()/2,cam.getHeight()/2,0);
@@ -81,6 +94,15 @@ public final class LoadingDisplayState extends ScenegraphState{
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    @Override
+    public final void init(){
+    	// puts a texture onto the box
+        TextureState ts=new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load("communism.png",Texture.MinificationFilter.Trilinear,true));
+        box.setRenderState(ts);
     }
     
     public final void setLevelInitializationTask(final Runnable levelInitializationTask){
