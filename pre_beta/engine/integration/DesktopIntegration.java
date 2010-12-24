@@ -39,7 +39,7 @@ public final class DesktopIntegration {
 		Mac("sh",new String[]{"javaws "},-1,0),
 		Unix("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use LNK file format as it differs depending on the version
-		Windows("bat",new String[]{System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+"javaws.exe "},-1,0);
+		Windows("bat",new String[]{"\""+System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+"javaws.exe\" "},-1,0);
 		
 		private final String desktopShortcutFileExtension;
 		
