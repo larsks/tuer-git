@@ -20,6 +20,146 @@
     <!-- Allow user to override properties without editing this file -->
     <property file="${user.home}/.ant.properties" />
 
+	<path id="project.class.path">
+	    <!-- N.B: do not add java.class.path -->
+	    <pathelement path="${destdir}"/>        
+	    <pathelement location="lib/jogl/jogl.jar"/>
+	    <pathelement location="lib/jogl/gluegen-rt.jar"/>
+		<pathelement location="lib/jme/jme.jar"/>
+		<pathelement location="lib/jme/jme-audio.jar"/>
+		<pathelement location="lib/jme/jme-awt.jar"/>
+		<pathelement location="lib/jme/jme-font.jar"/>
+		<pathelement location="lib/jme/jme-gamestates.jar"/>
+		<pathelement location="lib/jme/jme-model.jar"/>
+		<pathelement location="lib/jme/jme-scene.jar"/>
+	</path>
+	<target name="check-java-version" description="Checks the Java version">
+	    <fail message="Please use Java SDK 1.6 or higher.">
+	        <condition>
+	            <not>                   
+	                <or>
+	                    <equals arg1="${ant.java.version}" arg2="1.6" />
+	                    <equals arg1="${ant.java.version}" arg2="1.7" />
+	                </or>                                           
+	            </not>
+	        </condition>
+	    </fail>
+	</target>
+	<condition property="is-linux-amd64">
+	    <and>
+	        <os name="Linux" />
+	        <or>
+	            <os arch="amd64" />
+	            <os arch="x86_64" />
+	        </or>
+	    </and>
+	</condition>
+	<condition property="is-linux-i586">
+	    <and>
+	        <os name="Linux" />
+	        <or>
+	            <os arch="i386" />
+	            <os arch="i586" />
+	            <os arch="x86" />
+	        </or>
+	    </and>
+	</condition>
+	<condition property="is-windows-amd64">
+	    <and>
+	        <os family="windows" />
+	        <or>
+	            <os arch="amd64" />
+	            <os arch="x86_64" />
+	        </or>
+	    </and>
+	</condition>
+	<condition property="is-windows-i586">
+	    <and>
+	        <os family="windows" />
+	        <or>
+	            <os arch="i386" />
+	            <os arch="i586" />
+	            <os arch="x86" />
+	        </or>
+	    </and>
+	</condition>
+	<condition property="is-macosx-universal">
+	    <and>
+	        <os name="Mac OS X" />          
+	        <not>
+	            <os arch="ppc" />
+	        </not>
+	    </and>
+	</condition>
+	<condition property="is-macosx-ppc">
+	    <and>
+	        <os name="Mac OS X" />          
+	        <os arch="ppc" />
+	    </and>
+	</condition>
+	<target name="set-jogl-library-path-linux-amd64" if="is-linux-amd64">
+	    <property name="jogl.library.path" value="lib/jogl/native/linux-amd64/" />
+	</target>
+	<target name="set-jogl-library-path-linux-i586" if="is-linux-i586">
+	    <property name="jogl.library.path" value="lib/jogl/native/linux-i586/" />
+	</target>
+	<target name="set-jogl-library-path-windows-amd64" if="is-windows-amd64">
+	    <property name="jogl.library.path" value="lib/jogl/native/windows-amd64/" />
+	</target>
+	<target name="set-jogl-library-path-windows-i586" if="is-windows-i586">
+	    <property name="jogl.library.path" value="lib/jogl/native/windows-i586/" />
+	</target>
+	<target name="set-jogl-library-path-macosx-universal" if="is-macosx-universal">
+	    <property name="jogl.library.path" value="lib/jogl/native/macosx-universal/" />
+	</target>
+	<target name="set-jogl-library-path-macosx-ppc" if="is-macosx-ppc">
+	    <property name="jogl.library.path" value="lib/jogl/native/macosx-ppc/" />
+	</target>
+	<target name="set-jogl-library-path" depends="set-jogl-library-path-linux-i586,set-jogl-library-path-linux-amd64,set-jogl-library-path-macosx-universal,set-jogl-library-path-macosx-ppc,set-jogl-library-path-windows-i586,set-jogl-library-path-windows-amd64,check-java-version" description="Sets the library path with JOGL binaries">
+	    <echo message="jogl.library.path: ${jogl.library.path}" />
+	</target>
+	<condition property="eclipse-setup-not-ok">
+	    <not>
+	        <isset property="eclipse-setup-ok"/>
+	    </not>
+	</condition>
+	<condition property="eclipse-setup-not-ok">
+	    <not>
+	        <isset property="eclipse-setup-ok"/>
+	    </not>
+	</condition>
+	<target name="setup-eclipse" depends="set-jogl-library-path" if="eclipse-setup-not-ok" description="Generates the .classpath file of the Eclipse project including OS and architecture dependencies">
+	    <pathconvert property="os-specific-jogl.library.path">
+	        <path location="${jogl.library.path}" />
+	    </pathconvert>
+	    <!-- TODO: maybe convert the other paths if necessary for Windows -->
+	    <echo file=".classpath"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+	        <classpath>
+	            <classpathentry kind="src" path=""/>
+	            <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	            <classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar">
+	                <attributes>
+	                    <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
+	                </attributes>
+	            </classpathentry>
+	            <classpathentry kind="lib" path="lib/jogl/jogl.jar">
+	                <attributes>
+	                    <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
+	                </attributes>
+	            </classpathentry>
+	    	    <classpathentry kind="lib" path="lib/jme/jme.jar"/>
+	      	    <classpathentry kind="lib" path="lib/jme/jme-audio.jar"/>
+	       	    <classpathentry kind="lib" path="lib/jme/jme-awt.jar"/>
+	       	    <classpathentry kind="lib" path="lib/jme/jme-font.jar"/>
+	       	    <classpathentry kind="lib" path="lib/jme/jme-gamestates.jar"/>
+	       	    <classpathentry kind="lib" path="lib/jme/jme-model.jar"/>
+	       	    <classpathentry kind="lib" path="lib/jme/jme-scene.jar"/>
+	            <classpathentry kind="output" path=""/>
+	        </classpath>]]>
+	    </echo>
+	    <!-- Sets this property to avoid generating the .classpath file several times at runtime -->
+	    <property name="eclipse-setup-ok" value="true" />
+	</target>
 
     <!-- ================================================================= -->
     <!-- Compile                                                           -->
@@ -28,6 +168,7 @@
         <javac srcdir="${srcdir}"       	   
                destdir="${destdir}"
                debug="on" >
+        	<classpath refid="project.class.path"/>
             <include name="**/*.java"/>
         </javac>
     </target>
@@ -143,7 +284,7 @@
     <!-- =================================================================== -->
     <!-- Build                                                               -->
     <!-- =================================================================== -->
-    <target name="build" depends="clean, compile, run-datapreprocessor, dist"
+    <target name="build" depends="clean, compile, run-datapreprocessor,run-jme-data-preprocessor, dist"
         description="Performs a clean build of the source code and create the java archive"/>
 
 
@@ -156,16 +297,18 @@
               dir="${destdir}"
               failonerror="true"
               >
+        	<classpath refid="project.class.path"/>
         </java>
     </target>
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
-		    <mkdir dir="${destdir}/xml" />
-			<mkdir dir="${destdir}/data" />
-	        <java classname="connection.DataPreprocessor"
+		<mkdir dir="${destdir}/xml" />
+		<mkdir dir="${destdir}/data" />
+	    <java classname="connection.DataPreprocessor"
 		              fork="true"
 		              dir="${destdir}"
 		              failonerror="true"
-		              >     
+		              >   
+	      	<classpath refid="project.class.path"/>
 	<!-- The program uses only 512 MB but it might me more on bigger maps -->
 	        	    <jvmarg value="-Xmx1536m"/>       	    
 		        	<arg value="texture/worldmap.gif"/>
@@ -216,6 +359,7 @@
 			              failonerror="true"
 			              >
 			<jvmarg value="-Xmx1536m"/>
+			<classpath refid="project.class.path"/>
 			<!-- use the old world map -->
 			<arg value="data/worldmap.data"/>
 			<arg value="xml/WID0.xml"/>
@@ -282,12 +426,13 @@
 			<arg value="jbin/agent.jbin"/>
 	    </java>
 	</target>
-	<target name="run-jme-game" description="Runs the experimental version of the game TUER">
+	<target name="run-tuer" description="Runs the experimental version of the game TUER">
 		<java classname="jme.JMEGameServiceProvider"
 					              fork="true"
 					              dir="${destdir}"
 					              failonerror="true"
 					              >
+			<classpath refid="project.class.path"/>
 			<jvmarg value="-Xmx256m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
 		</java>
