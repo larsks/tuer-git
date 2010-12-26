@@ -291,13 +291,14 @@
     <!-- =================================================================== -->
     <!-- Run Targets                                                         -->
     <!-- =================================================================== -->  
-    <target name="run-game" description="Runs the game TUER">
+    <target name="run-game" depends="set-jogl-library-path" description="Runs the game TUER">
         <java classname="connection.GameServiceProvider"
               fork="true"
               dir="${destdir}"
               failonerror="true"
               >
         	<classpath refid="project.class.path"/>
+        	<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
         </java>
     </target>
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
@@ -410,29 +411,20 @@
 			<arg value="texture/"/>
 			<arg value="jbin/creature.jbin"/>-->
 			
-			<arg value="obj/cop.obj"/>
-			<arg value="obj/cop.mtl"/>
-			<arg value="texture/cop.png"/>
-			<arg value="jbin/cop.jbin"/>
-			
-			<arg value="obj/giger_alien.obj"/>
-			<arg value="obj/giger_alien.mtl"/>
-			<arg value="texture/giger_alien.jpg"/>
-			<arg value="jbin/giger_alien.jbin"/>
-			
 			<!-- human drawn by a member of jmonkeyengine's forum -->
 			<arg value="md2/agent.md2"/>
 			<arg value="texture/agent.png"/>
 			<arg value="jbin/agent.jbin"/>
 	    </java>
 	</target>
-	<target name="run-tuer" description="Runs the experimental version of the game TUER">
+	<target name="run-tuer" depends="set-jogl-library-path" description="Runs the experimental version of the game TUER">
 		<java classname="jme.JMEGameServiceProvider"
 					              fork="true"
 					              dir="${destdir}"
 					              failonerror="true"
 					              >
 			<classpath refid="project.class.path"/>
+			<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
 			<jvmarg value="-Xmx256m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=64M"/>
 		</java>
