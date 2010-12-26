@@ -215,15 +215,7 @@ class JMEDataPreprocessor{
         param=new EntityParameters();
         param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
         param.setScale(new Vector3f(0.03f,0.03f,0.03f));
-        entityParameterTable.put("/jbin/laser.jbin",param);        
-        param=new EntityParameters();
-        param.setScale(new Vector3f(0.3f,0.3f,0.3f));
-        param.setTranslation(new Vector3f(0.0f,-0.5f,-0.0f));
-        entityParameterTable.put("/jbin/giger_alien.jbin",param);        
-        param=new EntityParameters();
-        param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
-        param.setScale(new Vector3f(0.5f,0.5f,0.5f));
-        entityParameterTable.put("/jbin/cop.jbin",param);       
+        entityParameterTable.put("/jbin/laser.jbin",param);
         param=new EntityParameters();
         param.setRotation(new Quaternion().fromAngles(0.0f,-FastMath.PI/2.0f,0.0f));
         param.setScale(new Vector3f(0.018f,0.018f,0.018f));
@@ -257,9 +249,7 @@ class JMEDataPreprocessor{
              entityLocationTable.put(new Vector3f(114.0f,0.0f,220.0f),"/jbin/smach.jbin");
              entityLocationTable.put(new Vector3f(113.5f,0.0f,220.0f),"/jbin/uzi.jbin");
              entityLocationTable.put(new Vector3f(114.75f,0.0f,220.0f),"/jbin/laser.jbin");
-             //handle the enemies
-             entityLocationTable.put(new Vector3f(117.0f,0.0f,220.0f),"/jbin/giger_alien.jbin");
-             entityLocationTable.put(new Vector3f(116.0f,0.0f,220.0f),"/jbin/cop.jbin");
+             //handle the enemy
              entityLocationTable.put(new Vector3f(118.0f,0.0f,220.0f),"/jbin/agent.jbin");                         
              //build the full level model
              FullLevel level=new FullLevel();
