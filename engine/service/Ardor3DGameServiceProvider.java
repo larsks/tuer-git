@@ -314,7 +314,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
             {// Draw the root and all its children.
-             renderer.draw(root);
+             root.onDraw(renderer);
              //executes all update tasks queued by the controllers
              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.UPDATE).execute(renderer);
              //executes all rendering tasks queued by the controllers
