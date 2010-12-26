@@ -292,12 +292,14 @@
 	        	    <arg value="texture/wallTexture0.png"/>
 		</java>
 	</target>
-	<target name="run-game" description="Runs the game TUER">
+	<target name="run-tuer" depends="set-jogl-library-path" description="Runs the game TUER">
 	    <java classname="connection.GameServiceProvider"
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
 	              >
+	    	<classpath refid="project.class.path"/>
+	    	<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
 	    </java>
 	</target>
 </project>
