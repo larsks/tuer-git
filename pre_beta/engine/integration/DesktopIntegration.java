@@ -358,11 +358,15 @@ public final class DesktopIntegration {
 		return(instance.desktopPath);
 	}
 	
-	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
-		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension, javaWebStartJNLPFileUrl,instance.desktopPath));
+	public static final boolean createLaunchDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
+		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,javaWebStartJNLPFileUrl,null,instance.desktopPath));
 	}
 	
-	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl,final String desktopShortcutFilepath){
+	public static final boolean createUninstallDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
+		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,javaWebStartJNLPFileUrl,"-uninstall",instance.desktopPath));
+	}
+	
+	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl,final String optionalFlagsForJavaWebStart,final String desktopShortcutFilepath){
 		final boolean success;
 		if(!isDesktopShortcutCreationSupported())
 			{logger.warning("desktop shortcuts are not supported by this operating system");
@@ -399,7 +403,7 @@ public final class DesktopIntegration {
 				           System.arraycopy(src,0,desktopShortcutFileContent,0,src.length);
 				           //fills the future content of the file with the parameters
 				           final int desktopShortcutFileExecutableCommandLineIndex=instance.operatingSystem.getDesktopShortcutFileExecutableCommandLineIndex();
-				           desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]+javaWebStartJNLPFileUrl;
+				           desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]+((optionalFlagsForJavaWebStart!=null&&!optionalFlagsForJavaWebStart.isEmpty())?optionalFlagsForJavaWebStart+" ":"")+javaWebStartJNLPFileUrl;
 				           final int desktopShortcutFileNameLineIndex=instance.operatingSystem.getDesktopShortcutFileNameLineIndex();
 				           if(desktopShortcutFileNameLineIndex!=-1)
 				               desktopShortcutFileContent[desktopShortcutFileNameLineIndex]=desktopShortcutFileContent[desktopShortcutFileNameLineIndex]+desktopShortcutFilenameWithoutExtension;
@@ -431,7 +435,7 @@ public final class DesktopIntegration {
 	}
 
 	public static final void main(String[] args){
-		createDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+		createLaunchDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
 	}
 	
 	

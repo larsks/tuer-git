@@ -164,14 +164,22 @@ public final class MainMenuState extends ScenegraphState{
         initialMenuPanel.add(creditsButton);
         initialMenuPanel.add(exitButton);
         if(DesktopIntegration.isDesktopShortcutCreationSupported())
-            {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut");
+            {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
              addDesktopShortcutButton.addActionListener(new ActionListener(){           
                 @Override
                 public void actionPerformed(ActionEvent event){
-                	DesktopIntegration.createDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+                	DesktopIntegration.createLaunchDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
                 }
              });
              initialMenuPanel.add(addDesktopShortcutButton);
+             final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
+             addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){           
+                @Override
+                public void actionPerformed(ActionEvent event){
+                	DesktopIntegration.createUninstallDesktopShortcut("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+                }
+             });
+             initialMenuPanel.add(addUninstallDesktopShortcutButton);
             }
         return(initialMenuPanel);
     }
