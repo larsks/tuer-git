@@ -562,6 +562,7 @@ public final class GameState extends ScenegraphState{
         weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
         weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
         weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
+        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",false,1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
         return(weaponFactory);
     }
     
@@ -747,14 +748,23 @@ public final class GameState extends ScenegraphState{
             laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(laserNode);
             getRoot().attachChild(laserNode);
-
             final Node shotgunNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/shotgun.abin"));
             shotgunNode.setName("a shotgun");
             shotgunNode.setTranslation(117.5,0.1,219);
             shotgunNode.setScale(0.1);
             shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(shotgunNode);
-            getRoot().attachChild(shotgunNode);	    	
+            getRoot().attachChild(shotgunNode);	  
+            
+            final Node rocketLauncherNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/rocketlauncher.abin"));
+            //remove the scope
+            rocketLauncherNode.detachChildAt(0);
+            rocketLauncherNode.setName("a rocket launcher");
+            rocketLauncherNode.setTranslation(117.5,0.1,222);
+            rocketLauncherNode.setScale(0.08);
+            rocketLauncherNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false));
+            collectibleObjectsList.add(rocketLauncherNode);
+            getRoot().attachChild(rocketLauncherNode);	
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("weapons loading failed",ioe);}
