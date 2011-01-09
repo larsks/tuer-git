@@ -298,7 +298,7 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=64M"/>  
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>  
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
 			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
@@ -335,7 +335,7 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=64M"/>  
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>  
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-1.1.1a/webstart/jogl.jnlp" />
@@ -444,7 +444,7 @@
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
 		    <jvmarg value="-Xmx256m"/>
-		    <jvmarg value="-XX:MaxDirectMemorySize=64M"/>
+		    <jvmarg value="-XX:MaxDirectMemorySize=128M"/>
 		    <jvmarg value="-Djava.library.path=${jogl.library.path}"/>
 	    </java>
 	</target>
