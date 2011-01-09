@@ -19,4 +19,5 @@ Yannick Comte (main alpha tester under Linux and Microsoft Windows Vista, author
 Maxime Comte (artist who has drawn one of the pistols)
 Psionic3D (artist who drew most of the weapons)
 Oto the cleaner (artist who drew some outdoor environments)
+Markus Borbély (artist who drew the rocket launcher)
 Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons Sampling Plus 1.0 License)
