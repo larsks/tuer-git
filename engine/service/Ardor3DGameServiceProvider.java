@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -40,6 +39,7 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
 import com.ardor3d.math.Ray3;
+import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
@@ -54,6 +54,7 @@ import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 import engine.input.ExtendedAwtKeyboardWrapper;
+import engine.misc.ReliableContextCapabilities;
 import engine.statemachine.ContentRatingSystemState;
 import engine.statemachine.GameState;
 import engine.statemachine.InitializationState;
@@ -159,8 +160,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
             fontsList=createFontsList();
         return(Collections.unmodifiableList(fontsList));
     }
-
-
+    
+    
     /**
      * Constructs the example class, also creating the native window and GL surface.
      */
@@ -178,8 +179,17 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         // Choose the full-screen mode
         final DisplaySettings settings=new DisplaySettings(defaultMode.getWidth(),defaultMode.getHeight(),defaultMode.getBitDepth(),0,0,24,0,0,true,false);
-        // Setup a canvas and a canvas renderer       
-        canvas=new JoglCanvas(new JoglCanvasRenderer(this),settings);
+        // Setup the canvas renderer
+        final JoglCanvasRenderer canvasRenderer=new JoglCanvasRenderer(this){
+        	@Override
+        	public final ContextCapabilities createContextCapabilities(){
+        		final ContextCapabilities defaultCaps = super.createContextCapabilities();
+                final ReliableContextCapabilities realCaps = new ReliableContextCapabilities(defaultCaps);
+                return(realCaps);
+        	}
+        };
+        // Setup a canvas      
+        canvas=new JoglCanvas(canvasRenderer,settings);
         canvas.init();
         mouseManager=new AwtMouseManager((Component)canvas);
         // remove the mouse cursor
