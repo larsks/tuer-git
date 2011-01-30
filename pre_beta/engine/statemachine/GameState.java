@@ -24,6 +24,7 @@ import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
 import com.ardor3d.framework.Canvas;
+import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
 import com.ardor3d.input.Key;
@@ -45,6 +46,8 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.RenderContext;
+import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -793,6 +796,14 @@ public final class GameState extends ScenegraphState{
 	    {throw new RuntimeException("enemies loading failed",ioe);}
     }
     
+    private final void preloadTextures(){
+    	final CanvasRenderer canvasRenderer=canvas.getCanvasRenderer();
+    	final Renderer renderer=canvasRenderer.getRenderer();   	
+    	canvasRenderer.makeCurrentContext();
+    	TextureManager.preloadCache(renderer);
+    	canvasRenderer.releaseCurrentContext();
+    }
+    
     @Override
     public final void init(){
     	taskManager.enqueueTask(new Runnable(){			
@@ -856,6 +867,12 @@ public final class GameState extends ScenegraphState{
 				loadEnemies();
 			}
 		});
+        taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run() {
+				preloadTextures();
+			}
+	    });
         taskManager.enqueueTask(new Runnable(){			
 			@Override
 			public final void run() {
