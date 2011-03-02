@@ -14,7 +14,6 @@
 package jfpsm;
 
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,17 +50,12 @@ final class EntityViewer extends JPanel{
         add(entityTabbedPane);
     }
     
-    final boolean openEntityView(final Namable entity,final Project project){
+    final boolean openEntityView(final JFPSMUserObject entity,final Project project){
     	final boolean success;
     	JPanel tabComponent;
-    	if(success=(tabComponent=entityToTabComponentMap.get(entity))==null)
-    	    {JPanel entityView=new JPanel(new GridLayout(1,1));
-    	     if(entity instanceof Floor)
-    	    	 entityView=new FloorViewer((Floor)entity,project,projectManager);
-    	     else
-    	    	 if(entity instanceof Tile)
-    	    	     entityView=new TileViewer((Tile)entity,project,projectManager);
-             entityTabbedPane.addTab(entity.getName(),entityView);
+    	Viewer entityView=null;
+    	if(success=((tabComponent=entityToTabComponentMap.get(entity))==null&&(entityView=entity.createViewer(project,projectManager))!=null))
+    	    {entityTabbedPane.addTab(entity.getName(),entityView);
              tabComponent=new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
              entityToTabComponentMap.put(entity,tabComponent);
              tabComponent.setOpaque(false);
@@ -80,7 +74,8 @@ final class EntityViewer extends JPanel{
     	    }
     	else
     		//if the view of this entity is already open, select it
-    		entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
+    		if(tabComponent!=null)
+    		    entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
         return(success);
     }
     

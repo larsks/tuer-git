@@ -20,6 +20,10 @@ public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resol
     
     abstract boolean canInstantiateChildren();
     
+    public Viewer createViewer(final Project project,final ProjectManager projectManager){
+    	return(null);
+    }
+    
     @Override
     public final void setName(String name){
         super.setName(name);

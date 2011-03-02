@@ -127,4 +127,9 @@ public final class Tile extends JFPSMUserObject{
         this.volumeParameters=volumeParameters;
         markDirty();
     }
+    
+    @Override
+    public Viewer createViewer(final Project project,final ProjectManager projectManager){
+    	return(new TileViewer(this,project,projectManager));
+    }
 }

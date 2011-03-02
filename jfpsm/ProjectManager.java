@@ -253,20 +253,32 @@ public final class ProjectManager extends JPanel{
                 	if(e.getClickCount()==2)
                 	    {final TreePath path=projectsTree.getSelectionPath();
                          final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                         final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();                 
-                         if(userObject instanceof Tile)
-                             {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
-                              ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                		 
+                         final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();    
+                         if(userObject!=null)
+                             {final Project project=getProjectFromSelectedNode(selectedNode);
+                              if(project!=null)
+                        	      ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                        
                              }
-                         else
-                             if(userObject instanceof Floor)
-                                 {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent().getParent()).getUserObject();                                 
-                                  ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                       
-                                 }
                 	    }
             }           
         });       
         add(treePane);       
+	}
+	
+	private static final Project getProjectFromSelectedNode(final DefaultMutableTreeNode selectedNode){
+		DefaultMutableTreeNode node=selectedNode;
+		Project project=null;
+		Object userObject;
+		while(node!=null)
+		    {userObject=node.getUserObject();
+			 if(userObject!=null&&userObject instanceof Project)
+		         {project=(Project)userObject;
+		    	  break;
+		         }
+			 else
+				 node=(DefaultMutableTreeNode)node.getParent();
+		    }
+		return(project);
 	}
 	
 	/**
