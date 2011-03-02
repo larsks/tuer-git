@@ -103,4 +103,9 @@ public final class Floor extends JFPSMUserObject{
     final boolean isRemovable(){
         return(true);
     }
+    
+    @Override
+    public Viewer createViewer(final Project project,final ProjectManager projectManager){
+    	return(new FloorViewer(this,project,projectManager));
+    }
 }
