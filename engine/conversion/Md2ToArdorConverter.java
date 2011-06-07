@@ -32,6 +32,7 @@ public final class Md2ToArdorConverter{
     
     public static final void main(String[] args) throws IOException, URISyntaxException{
         AWTImageLoader.registerLoader();
+        BinaryExporter binaryExporter=new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(Md2ToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
             srl=new SimpleResourceLocator(Md2ToArdorConverter.class.getResource("/md2"));
@@ -66,7 +67,7 @@ public final class Md2ToArdorConverter{
                   spatial.setRenderState(ts);
                  }
              System.out.println("Converting "+arg+" ...");
-             BinaryExporter.getInstance().save(spatial,destFile);
+             binaryExporter.save(spatial,destFile);
              System.out.println(arg+" successfully converted");
             }
     }

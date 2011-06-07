@@ -29,6 +29,7 @@ public class ObjToArdorConverter {
 	
 	public static final void main(String[] args) throws IOException, URISyntaxException{
         AWTImageLoader.registerLoader();
+        BinaryExporter binaryExporter=new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
             srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/obj"));
@@ -54,7 +55,7 @@ public class ObjToArdorConverter {
                       continue;
                      }
              System.out.println("Converting "+arg+" ...");
-             BinaryExporter.getInstance().save(objSpatial,destFile);
+             binaryExporter.save(objSpatial,destFile);
              System.out.println(arg+" successfully converted");
             }
     }

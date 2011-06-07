@@ -132,8 +132,11 @@ public final class GameState extends ScenegraphState{
     
     private final TaskManager taskManager;
     
+    private final BinaryImporter binaryImporter;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
+        this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<Node>();
@@ -601,7 +604,7 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadLevelModel(){
-    	try{final Node levelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+    	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
             NodeHelper.setBackCullState(levelNode);
             getRoot().attachChild(levelNode);
     	   }
@@ -610,7 +613,7 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadOutdoor(){
-    	try{final Node outdoorPartLevelNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/wildhouse_action.abin"));
+    	try{final Node outdoorPartLevelNode=(Node)binaryImporter.load(getClass().getResource("/abin/wildhouse_action.abin"));
             outdoorPartLevelNode.setTranslation(-128, -6, -128);
             getRoot().attachChild(outdoorPartLevelNode);   		
     	   }
@@ -699,7 +702,7 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadWeapons(){
-	    try{final Node uziNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/uzi.abin"));
+	    try{final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
             uziNode.setName("an uzi");
             uziNode.setTranslation(111.5,0.15,219);
             uziNode.setScale(0.2);
@@ -707,14 +710,14 @@ public final class GameState extends ScenegraphState{
             //add some bounding boxes for all objects that can be picked up
             collectibleObjectsList.add(uziNode);
             getRoot().attachChild(uziNode);
-            final Node smachNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/smach.abin"));
+            final Node smachNode=(Node)binaryImporter.load(getClass().getResource("/abin/smach.abin"));
             smachNode.setName("a smach");
             smachNode.setTranslation(112.5,0.15,219);
             smachNode.setScale(0.2);
             smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(smachNode);
             getRoot().attachChild(smachNode);
-            final Node pistolNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol.abin"));
+            final Node pistolNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
             pistolNode.setName("a pistol (10mm)");
             pistolNode.setTranslation(113.5,0.1,219);
             pistolNode.setScale(0.001);
@@ -727,7 +730,7 @@ public final class GameState extends ScenegraphState{
             duplicatePistolNode.setTranslation(113.5,0.1,217);
             collectibleObjectsList.add(duplicatePistolNode);
             getRoot().attachChild(duplicatePistolNode);
-            final Node pistol2Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol2.abin"));
+            final Node pistol2Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
             pistol2Node.setName("a pistol (9mm)");
             //remove the bullet as it is not necessary now
             ((Node)pistol2Node.getChild(0)).detachChildAt(2);
@@ -737,21 +740,21 @@ public final class GameState extends ScenegraphState{
             pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(pistol2Node);
             getRoot().attachChild(pistol2Node);
-            final Node pistol3Node=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/pistol3.abin"));
+            final Node pistol3Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
             pistol3Node.setName("a Mag 60");
             pistol3Node.setTranslation(115.5,0.1,219);
             pistol3Node.setScale(0.02);
             pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(pistol3Node);
             getRoot().attachChild(pistol3Node);
-            final Node laserNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/laser.abin"));
+            final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
             laserNode.setName("a laser");
             laserNode.setTranslation(116.5,0.1,219);
             laserNode.setScale(0.02);
             laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false));
             collectibleObjectsList.add(laserNode);
             getRoot().attachChild(laserNode);
-            final Node shotgunNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/shotgun.abin"));
+            final Node shotgunNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
             shotgunNode.setName("a shotgun");
             shotgunNode.setTranslation(117.5,0.1,219);
             shotgunNode.setScale(0.1);
@@ -759,7 +762,7 @@ public final class GameState extends ScenegraphState{
             collectibleObjectsList.add(shotgunNode);
             getRoot().attachChild(shotgunNode);	  
             
-            final Node rocketLauncherNode=(Node)BinaryImporter.getInstance().load(getClass().getResource("/abin/rocketlauncher.abin"));
+            final Node rocketLauncherNode=(Node)binaryImporter.load(getClass().getResource("/abin/rocketlauncher.abin"));
             //remove the scope
             rocketLauncherNode.detachChildAt(0);
             rocketLauncherNode.setName("a rocket launcher");
@@ -785,7 +788,7 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadEnemies(){
-	    try{final Mesh agentNode=(Mesh)BinaryImporter.getInstance().load(getClass().getResource("/abin/agent.abin"));
+	    try{final Mesh agentNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/agent.abin"));
             agentNode.setName("an agent");
             agentNode.setTranslation(118.5,0.4,219);
             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
