@@ -44,6 +44,7 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     /**unique instance of the engine service provider (design pattern "singleton")*/
     private static final EngineServiceProvider instance=new EngineServiceProvider();
     
+    private BinaryExporter binaryExporter=new BinaryExporter();
     
     private EngineServiceProvider(){
         // Add our awt based image loader.
@@ -59,7 +60,7 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
     	boolean success=savable instanceof Savable;
     	if(success)
-    	    try{BinaryExporter.getInstance().save((Savable)savable,file);}
+    	    try{binaryExporter.save((Savable)savable,file);}
             catch(IOException ioe)
             {success=false;
              ioe.printStackTrace();
@@ -78,7 +79,7 @@ public final class EngineServiceProvider implements I3DServiceProvider{
         }
         if(success)
             try{for(Object savable:savablesList)
-                    {try{BinaryExporter.getInstance().save((Savable)savable,fos);}
+                    {try{binaryExporter.save((Savable)savable,fos);}
                      catch(Throwable t)
                      {success=false;}
             	     if(!success)

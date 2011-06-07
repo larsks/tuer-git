@@ -29,6 +29,7 @@ public final class DaeToArdorConverter{
     
     public static final void main(String[] args) throws IOException, URISyntaxException{
         AWTImageLoader.registerLoader();
+        BinaryExporter binaryExporter=new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(DaeToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
             srl=new SimpleResourceLocator(DaeToArdorConverter.class.getResource("/dae"));
@@ -49,7 +50,7 @@ public final class DaeToArdorConverter{
                       continue;
                      }
              System.out.println("Converting "+arg+" ...");
-             BinaryExporter.getInstance().save(colladaNode,destFile);
+             binaryExporter.save(colladaNode,destFile);
              System.out.println(arg+" successfully converted");
             }
     }
