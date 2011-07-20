@@ -191,7 +191,7 @@
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates and signs the java archive">
+	<target name="dist" depends="compile" description="Creates and signs the java archives">
 		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${destdir}" 
 			includes="**/*.class" 
 			compress="false">
