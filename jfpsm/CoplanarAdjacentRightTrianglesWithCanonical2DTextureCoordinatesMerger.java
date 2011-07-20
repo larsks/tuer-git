@@ -16,6 +16,7 @@ package jfpsm;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
@@ -142,8 +143,46 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				      }
 				  infoList.add(info);		  
 			     }			 
-			 //TODO: third step: retain only triangles by pairs, each pair of triangles shares the same hypotenuse 
-		     //TODO for each plane of the map, for each RightTriangleInfo instance, find another instance whose hypotenuse is the same (the vertices might be in a different order), otherwise remove this instance from the list of this plane
+			 //third step: retain only triangles by pairs which could be used to create rectangles
+			 Vector3[] tri1Vertices=new Vector3[3];
+			 Vector3[] tri2Vertices=new Vector3[3];
+			 //for each plane of the map
+			 for(Entry<Plane, ArrayList<RightTriangleInfo>> entry:mapOfTrianglesByPlanes.entrySet())
+			     {ArrayList<RightTriangleInfo> rightTrianglesWithSameHypotenusesByPairs=new ArrayList<CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.RightTriangleInfo>();
+				  ArrayList<RightTriangleInfo> rightTriangles=entry.getValue();
+				  final int triCount=rightTriangles.size();
+				  //for each RightTriangleInfo instance
+				  for(int triIndex1=0;triIndex1<triCount-1;triIndex1++)
+				      {RightTriangleInfo tri1=rightTriangles.get(triIndex1);
+					   tri1Vertices=meshData.getPrimitive(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+					   for(int triIndex2=triIndex1+1;triIndex2<triCount;triIndex2++)
+					       {RightTriangleInfo tri2=rightTriangles.get(triIndex2);
+						    tri2Vertices=meshData.getPrimitive(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+						    //checks if the both triangles have the same hypotenuse, if their opposite side have the same length and if 
+						    //their vertices at the right angle are different. It allows to know whether they could be used to create a rectangle
+						    //TODO: check the texture coordinates (they need to have a particular form in order to be merged with other triangles)
+						    if(((tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
+						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
+						        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
+						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]))||
+						       (tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
+								tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
+						        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
+						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])))&&
+						        !tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]))
+						        {rightTrianglesWithSameHypotenusesByPairs.add(tri1);
+						         rightTrianglesWithSameHypotenusesByPairs.add(tri2);
+						    	 break;
+						        }
+					       }
+				      }
+				  rightTriangles.clear();
+				  rightTriangles.addAll(rightTrianglesWithSameHypotenusesByPairs);
+			     }
 			 //TODO: fourth step: merge all sets containing adjacent quads
 		     //TODO create a list of lists of adjacent pairs of triangles inside the same plane
 			 //TODO: fifth step: merge as much triangles of each set as possible if it contains more than 4 triangles (2 quads) by maximizing their areas 
