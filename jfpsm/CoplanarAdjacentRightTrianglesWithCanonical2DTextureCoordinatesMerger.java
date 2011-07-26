@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -33,8 +34,8 @@ import com.ardor3d.util.geom.GeometryTool.MatchCondition;
 
 
 /**
- * mesh optimizer, which merges coplanar adjacent right triangles whose 2D texture coordinates 
- * are [0;0], [0;1], [1;0] or [1;1]
+ * mesh optimizer, which merges coplanar adjacent right triangles whose all 2D texture coordinates 
+ * are canonical ([0;0], [0;1], [1;0] or [1;1])
  * 
  * @author Julien Gouesse
  *
@@ -62,7 +63,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @param mesh using the same set of textures (only on texture per unit) for all vertices
 	 * @return
 	 */
-	public static VertMap minimizeVerts(final Mesh mesh) {
+	public static VertMap minimizeVerts(final Mesh mesh){
 		//uses all conditions with GeometryTool
 		final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs, MatchCondition.Normal, MatchCondition.Color);
 		//reduces the geometry to avoid duplication of vertices
@@ -75,7 +76,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos=new ArrayList<RightTriangleInfo>();
 			 //loops on all sections of the mesh data
 			 Vector3[] triangleVertices=new Vector3[3];
-			 int[] triangleIndices=new int[3];
 			 Vector2[] triangleTextureCoords=new Vector2[3];
 			 final double[] trianglesSidesDistancesSquared=new double[3];
 			 double u,v;
@@ -101,15 +101,15 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						   if(sideIndexOfHypotenuse!=-1)
 						       {//checks whether its texture coordinates are canonical
 							    hasCanonicalTextureCoords=true;
-							    for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&hasCanonicalTextureCoords;textureIndex++){
-							    	triangleTextureCoords=getPrimitiveTextureCoords(meshData,trianglePrimitiveIndex,sectionIndex,textureIndex,triangleTextureCoords);		    
-								    for(int triangleTextureCoordsIndex=0;triangleTextureCoordsIndex<3&&hasCanonicalTextureCoords;triangleTextureCoordsIndex++)
-								        {u=triangleTextureCoords[triangleTextureCoordsIndex].getX();
-								         v=triangleTextureCoords[triangleTextureCoordsIndex].getY();
-								         if((u!=0&&u!=1)||(v!=0&&v!=1))
-								        	 hasCanonicalTextureCoords=false;
-								        }
-							    }	    
+							    for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&hasCanonicalTextureCoords;textureIndex++)
+							        {triangleTextureCoords=getPrimitiveTextureCoords(meshData,trianglePrimitiveIndex,sectionIndex,textureIndex,triangleTextureCoords);		    
+								     for(int triangleTextureCoordsIndex=0;triangleTextureCoordsIndex<3&&hasCanonicalTextureCoords;triangleTextureCoordsIndex++)
+								         {u=triangleTextureCoords[triangleTextureCoordsIndex].getX();
+								          v=triangleTextureCoords[triangleTextureCoordsIndex].getY();
+								          if((u!=0&&u!=1)||(v!=0&&v!=1))
+								        	  hasCanonicalTextureCoords=false;
+								         }
+							        }	    
 							    if(hasCanonicalTextureCoords)
 							        {//stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
 							         RightTriangleInfo rightTriangleInfo=new RightTriangleInfo(trianglePrimitiveIndex,sectionIndex,sideIndexOfHypotenuse);
@@ -146,8 +146,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 //third step: retains only triangles by pairs which could be used to create rectangles
 			 Vector3[] tri1Vertices=new Vector3[3];
 			 Vector3[] tri2Vertices=new Vector3[3];
+			 Vector2[] tri1TextureCoords=new Vector2[3];
+			 Vector2[] tri2TextureCoords=new Vector2[3];
+			 final boolean[][] canonicalTexCoordsFound=new boolean[2][2];
 			 //for each plane of the map
-			 for(Entry<Plane, ArrayList<RightTriangleInfo>> entry:mapOfTrianglesByPlanes.entrySet())
+			 for(Entry<Plane,ArrayList<RightTriangleInfo>> entry:mapOfTrianglesByPlanes.entrySet())
 			     {ArrayList<RightTriangleInfo> rightTrianglesWithSameHypotenusesByPairs=new ArrayList<RightTriangleInfo>();
 				  ArrayList<RightTriangleInfo> rightTriangles=entry.getValue();
 				  final int triCount=rightTriangles.size();
@@ -158,26 +161,90 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					   for(int triIndex2=triIndex1+1;triIndex2<triCount;triIndex2++)
 					       {RightTriangleInfo tri2=rightTriangles.get(triIndex2);
 						    tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
-						    //checks if the both triangles have the same hypotenuse, if their opposite side have the same length and if 
-						    //their vertices at the right angle are different. It allows to know whether they could be used to create a rectangle
-						    //TODO: check the texture coordinates (the vertices of the hypotenuse must have the same texture coordinates in both 
-						    //triangles and a rectangle must contain all possible pairs of canonical texture coordinates)
-						    if(((tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
-						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
-						        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
-						        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
-						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
-						        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]))||
-						       (tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
-								tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
-						        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
-						        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
-						        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
-						        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])))&&
-						        !tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]))
-						        {rightTrianglesWithSameHypotenusesByPairs.add(tri1);
-						         rightTrianglesWithSameHypotenusesByPairs.add(tri2);
-						    	 break;
+						    /**
+						     * checks if the both triangles have the same hypotenuse (i.e it is a quadrilateral with 2 right angles) 
+						     * and if their opposite sides have the same length (i.e it is a parallelogram).
+						     * As a parallelogram with 2 right angles is necessarily a rectangle, such a shape is a rectangle.
+						     * */
+						    boolean sameHypotenuseOppositeSidesOfSameLengthSameWinding=tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
+							        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
+							        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
+							        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]);
+						    boolean sameHypotenuseOppositeSidesOfSameLengthReverseWinding=!sameHypotenuseOppositeSidesOfSameLengthSameWinding&&
+						    		(tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
+									tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
+							        tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							        tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
+							        tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							        tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]));
+						    //checks if their vertices at their right angles are different
+						    boolean sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles=(sameHypotenuseOppositeSidesOfSameLengthSameWinding||
+						    		sameHypotenuseOppositeSidesOfSameLengthReverseWinding)&&
+						    		!tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]);
+						    if(sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles)
+						        {//checks the texture coordinates
+						    	 boolean texCoordsMatch=true;
+						    	 for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
+						             {tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,textureIndex,tri1TextureCoords);
+						              tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,textureIndex,tri2TextureCoords);
+						              //checks if the vertices of the hypotenuse must have the same texture coordinates in both triangles
+						              if(sameHypotenuseOppositeSidesOfSameLengthSameWinding)
+						                  {texCoordsMatch=tri1TextureCoords[tri1.sideIndexOfHypotenuse].equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse])&&
+						                		          tri1TextureCoords[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2TextureCoords[(tri2.sideIndexOfHypotenuse+1)%3]);
+						                  }
+						              else
+						                  {texCoordsMatch=tri1TextureCoords[tri1.sideIndexOfHypotenuse].equals(tri2TextureCoords[(tri2.sideIndexOfHypotenuse+1)%3])&&
+		                		                          tri1TextureCoords[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse]);						            	   
+						                  }
+						              if(texCoordsMatch)
+						                  {/**
+						                    * checks if the rectangle contains all possible pairs of canonical texture coordinates
+						                    * i.e [0;0], [0;1], [1;0] and [1;1]
+						                    * */
+						            	   //resets the array of flags
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length;abscissaIndex++)
+						            	       Arrays.fill(canonicalTexCoordsFound[abscissaIndex],false);
+						            	   //checks the texture coordinates of the vertices of the right angles
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length;abscissaIndex++)
+						            		   for(int ordinateIndex=0;ordinateIndex<canonicalTexCoordsFound[abscissaIndex].length;ordinateIndex++)
+						            	           if(tri1TextureCoords[(tri1.sideIndexOfHypotenuse+2)%3].getX()==abscissaIndex&&
+						            	        	  tri1TextureCoords[(tri1.sideIndexOfHypotenuse+2)%3].getY()==ordinateIndex)
+						            	        	   canonicalTexCoordsFound[abscissaIndex][ordinateIndex]=true;
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length;abscissaIndex++)
+						            		   for(int ordinateIndex=0;ordinateIndex<canonicalTexCoordsFound[abscissaIndex].length;ordinateIndex++)
+						            	           if(tri2TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3].getX()==abscissaIndex&&
+						            	        	  tri2TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3].getY()==ordinateIndex)
+						            	        	   canonicalTexCoordsFound[abscissaIndex][ordinateIndex]=true;
+						            	   /**
+						            	    * checks the texture coordinates of the vertices of the hypotenuse. Looking at the first
+						            	    * triangle is enough as I have already tested that the vertices of the hypotenuse in both 
+						            	    * triangles have the same texture coordinates.
+						            	    * */
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length;abscissaIndex++)
+						            		   for(int ordinateIndex=0;ordinateIndex<canonicalTexCoordsFound[abscissaIndex].length;ordinateIndex++)
+						            	           if(tri1TextureCoords[tri1.sideIndexOfHypotenuse].getX()==abscissaIndex&&
+						            	        	  tri1TextureCoords[tri1.sideIndexOfHypotenuse].getY()==ordinateIndex)
+						            	        	   canonicalTexCoordsFound[abscissaIndex][ordinateIndex]=true;
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length;abscissaIndex++)
+						            		   for(int ordinateIndex=0;ordinateIndex<canonicalTexCoordsFound[abscissaIndex].length;ordinateIndex++)
+						            	           if(tri1TextureCoords[(tri1.sideIndexOfHypotenuse+1)%3].getX()==abscissaIndex&&
+						            	        	  tri1TextureCoords[(tri1.sideIndexOfHypotenuse+1)%3].getY()==ordinateIndex)
+						            	        	   canonicalTexCoordsFound[abscissaIndex][ordinateIndex]=true;
+						            	   //checks all possible pairs of canonical texture coordinates have been found
+						            	   for(int abscissaIndex=0;abscissaIndex<canonicalTexCoordsFound.length&&texCoordsMatch;abscissaIndex++)
+						            		   for(int ordinateIndex=0;ordinateIndex<canonicalTexCoordsFound[abscissaIndex].length&&texCoordsMatch;ordinateIndex++)
+						            			   if(!canonicalTexCoordsFound[abscissaIndex][ordinateIndex])
+						            				   texCoordsMatch=false;
+						                  }
+						             }
+						    	 if(texCoordsMatch&&!rightTrianglesWithSameHypotenusesByPairs.contains(tri1)&&
+						    		!rightTrianglesWithSameHypotenusesByPairs.contains(tri2))
+						    	     {rightTrianglesWithSameHypotenusesByPairs.add(tri1);
+						              rightTrianglesWithSameHypotenusesByPairs.add(tri2);						    		  
+						    	     }
+						    	 break;				    	 
 						        }
 					       }
 				      }
@@ -189,7 +256,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 Vector3[] tri3Vertices=new Vector3[3];
 			 Vector3[] tri4Vertices=new Vector3[3];
 			 //for each plane of the map
-			 for(Entry<Plane, ArrayList<RightTriangleInfo>> entry:mapOfTrianglesByPlanes.entrySet())
+			 for(Entry<Plane,ArrayList<RightTriangleInfo>> entry:mapOfTrianglesByPlanes.entrySet())
 			     {ArrayList<RightTriangleInfo> rightTrianglesByPairs=entry.getValue();
 			      Plane plane=entry.getKey();
 			      final int triCount=rightTrianglesByPairs.size();
@@ -203,7 +270,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            RightTriangleInfo tri4=rightTrianglesByPairs.get(triIndex34+1);
 				            tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
 				            tri2Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
-				            //TODO check if both rectangles have exactly one common side and their parallel sides with the same length
+				            //TODO check if both rectangles have exactly one common side and their orthogonal sides with the same length
 				            //TODO check if both rectangles have the same texture coordinates
 				            if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3])&&
 				                tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
@@ -224,24 +291,52 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			        	    	     {listOfTris=new ArrayList<RightTriangleInfo>();			        	    	      
 			        	    	      listOfListsOfTris.add(listOfTris);
 			        	    	     }
-			        	    	 if(!listOfTris.contains(tri1))
-			        	    	     listOfTris.add(tri1);
-			        	    	 if(!listOfTris.contains(tri2))
-			        	    	     listOfTris.add(tri2);
-			        	    	 if(!listOfTris.contains(tri3))
-			        	    	     listOfTris.add(tri3);
-			        	    	 if(!listOfTris.contains(tri4))
-			        	    	     listOfTris.add(tri4);
+			        	    	 if(!listOfTris.contains(tri1)&&!listOfTris.contains(tri2))
+			        	    	     {listOfTris.add(tri1);			        	    	 
+			        	    	      listOfTris.add(tri2);
+			        	    	     }
+			        	    	 if(!listOfTris.contains(tri3)&&!listOfTris.contains(tri4))
+			        	    	     {listOfTris.add(tri3);
+			        	    	      listOfTris.add(tri4);
+			        	    	     }
 			        	    	 break;
 			        	        }
 			               }
 			          }
 			     }
 			 //TODO: fifth step: create lists of adjacent rectangles in the same planes usable to make bigger rectangles
+			 /**
+			  * Each entry handles the triangles of a plane. Each entry contains several lists of groups of adjacent triangles.
+			  * Each group of adjacent triangles is a list of arrays of adjacent triangles which could be merged to make bigger 
+			  * rectangles
+			  * */
+			 HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][]>>> mapOfListsOfListsOfArraysOfMergeableTris=new HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][]>>>();
+			 //for each plane
+			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo>>> entry:mapOfListsOfTrianglesByPlanes.entrySet())
+			     {Plane plane=entry.getKey();
+				  //for each list of adjacent triangles
+				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
+			          {int width=0;
+				       int height=0;
+			    	   //TODO compute the maximum size of the 2D array of adjacent triangles
+				       if(width>0&&height>0)
+				           {RightTriangleInfo[][] adjacentTrisArray=new RightTriangleInfo[width][height];
+				            ArrayList<RightTriangleInfo[][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][]>();
+				            //TODO compute a list of arrays of adjacent triangles which could be merged to make bigger rectangles
+				            //puts the new list into the map
+				            ArrayList<ArrayList<RightTriangleInfo[][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
+				            if(adjacentTrisArraysListsList==null)
+				                {adjacentTrisArraysListsList=new ArrayList<ArrayList<RightTriangleInfo[][]>>();
+				                 mapOfListsOfListsOfArraysOfMergeableTris.put(plane,adjacentTrisArraysListsList);
+				                }
+				            adjacentTrisArraysListsList.add(adjacentTrisArraysList);
+				           }
+			          }				  
+			     }
 			 //TODO: sixth step: create these bigger rectangles (update their texture coordinates (use coordinates greater 
 			 //than 1) in order to use texture repeat)
 			 //TODO: seventh step: remove the triangles which are no more in the geometry of the mesh
-			 //TODO: eight step: add the new triangles into the geometry of the mesh
+			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 		    }
 		return result;
 	}
