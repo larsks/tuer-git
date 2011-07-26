@@ -87,7 +87,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			         {//loops on all triangles of each section
 					  for(int trianglePrimitiveIndex=0,triangleCount=meshData.getPrimitiveCount(sectionIndex);trianglePrimitiveIndex<triangleCount;trianglePrimitiveIndex++)
 				          {//gets the 3 vertices of the triangle
-						   triangleVertices=meshData.getPrimitive(trianglePrimitiveIndex,sectionIndex,triangleVertices);
+						   triangleVertices=meshData.getPrimitiveVertices(trianglePrimitiveIndex,sectionIndex,triangleVertices);
 				    	   //uses Pythagorean theorem to check whether the triangle is right
 						   //computes the squared distances of all sides
 						   for(int triangleSideIndex=0;triangleSideIndex<3;triangleSideIndex++)
@@ -125,7 +125,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 double distanceToPlane;
 			 for(RightTriangleInfo info:rightTrianglesWithCanonical2DTextureCoordinatesInfos)
 			     {//gets the 3 vertices of the triangle
-				  triangleVertices=meshData.getPrimitive(info.primitiveIndex,info.sectionIndex,triangleVertices);		  
+				  triangleVertices=meshData.getPrimitiveVertices(info.primitiveIndex,info.sectionIndex,triangleVertices);		  
 				  //sets the vertices of the temporary triangle
 				  for(int vertexInternalIndex=0;vertexInternalIndex<3;vertexInternalIndex++)
 				      tmpTriangle.set(vertexInternalIndex,triangleVertices[vertexInternalIndex]);
@@ -154,10 +154,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  //for each RightTriangleInfo instance
 				  for(int triIndex1=0;triIndex1<triCount-1;triIndex1++)
 				      {RightTriangleInfo tri1=rightTriangles.get(triIndex1);
-					   tri1Vertices=meshData.getPrimitive(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+					   tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
 					   for(int triIndex2=triIndex1+1;triIndex2<triCount;triIndex2++)
 					       {RightTriangleInfo tri2=rightTriangles.get(triIndex2);
-						    tri2Vertices=meshData.getPrimitive(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+						    tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
 						    //checks if the both triangles have the same hypotenuse, if their opposite side have the same length and if 
 						    //their vertices at the right angle are different. It allows to know whether they could be used to create a rectangle
 						    //TODO: check the texture coordinates (the vertices of the hypotenuse must have the same texture coordinates in both 
@@ -196,13 +196,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			      for(int triIndex12=0;triIndex12<triCount-3;triIndex12+=2)
 			          {RightTriangleInfo tri1=rightTrianglesByPairs.get(triIndex12);
 			           RightTriangleInfo tri2=rightTrianglesByPairs.get(triIndex12+1);
-			           tri1Vertices=meshData.getPrimitive(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
-			           tri2Vertices=meshData.getPrimitive(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+			           tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+			           tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
 			           for(int triIndex34=triIndex12+2;triIndex34<triCount-1;triIndex34+=2)
 			               {RightTriangleInfo tri3=rightTrianglesByPairs.get(triIndex34);
 				            RightTriangleInfo tri4=rightTrianglesByPairs.get(triIndex34+1);
-				            tri3Vertices=meshData.getPrimitive(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
-				            tri2Vertices=meshData.getPrimitive(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
+				            tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
+				            tri2Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
 				            //TODO check if both rectangles have exactly one common side and their parallel sides with the same length
 				            //TODO check if both rectangles have the same texture coordinates
 				            if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3])&&
