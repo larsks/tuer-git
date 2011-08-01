@@ -285,60 +285,252 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            RightTriangleInfo tri4=rightTrianglesByPairs.get(triIndex34+1);				            
 				            tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
 				            tri4Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
-				            //TODO: check if both rectangles have exactly one common side and their orthogonal sides with the same length
-				            //TODO: at first, find a common vertex not on any hypotenuse
-				            //TODO: then, test the both remaining vertices of the triangle
-				            if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3])&&
-				               tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
-			        	        {//checks the texture coordinates
-						    	 boolean texCoordsMatch=true;
-						    	 //TODO: check if both rectangles have the same texture coordinates
-				            	 if(texCoordsMatch)
-						    	     {ArrayList<RightTriangleInfo> previousListOfTris=null;
-				            		  //if the list of lists for this plane does not exist
-						    	      if(listOfListsOfTris==null)
-						    	          {//creates it and puts it into the map
-						    	    	   listOfListsOfTris=new ArrayList<ArrayList<RightTriangleInfo>>();
-						    	           mapOfListsOfTrianglesByPlanes.put(plane,listOfListsOfTris);
-						    	          }
-						    	      else
-						    	          {//checks if tri3 and tri4 are already in a list
-						    	    	   for(ArrayList<RightTriangleInfo> list:listOfListsOfTris)
-						    	    		   //only looks for tri3 as tri3 and tri4 should be together
-						    	    		   if(list.contains(tri3))
-					    	    	               {previousListOfTris=list;
-					    	    	                break;
-					    	    	               }
-						    	          }
-						    	      //if the new list of triangles has not been created
-						    	      if(listOfTris==null)
-						    	          {//creates it, fills it with the 4 triangles and adds it into the list of lists
-						    	    	   listOfTris=new ArrayList<RightTriangleInfo>();
-						    	           listOfTris.add(tri1);			        	    	 
-						    	           listOfTris.add(tri2);
-						    	           listOfTris.add(tri3);
-								    	   listOfTris.add(tri4);
-						    	           listOfListsOfTris.add(listOfTris);
-						    	          }
-						    	      else
-						    	          {//if tri3 and tri4 are not already in this list, adds them into it
-						    	    	   if(previousListOfTris!=listOfTris)
-						    	               {listOfTris.add(tri3);
-									    	    listOfTris.add(tri4);
-						    	               }
-						    	          }
-						    	      //if tri3 and tri4 are already in another list
-						    	      if(previousListOfTris!=null)
-						    	          {/**
-						    	    	    * removes all elements already added into the new list from the previous list
-						    	    	    * to keep only elements which are not in the new list
-						    	    	    * */
-						    	    	   previousListOfTris.removeAll(listOfTris);
-						    	    	   //adds all elements which are not in the new list into it
-						    	    	   listOfTris.addAll(previousListOfTris);
+				            final boolean oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound;
+				            /**
+				             * checks if both rectangles have exactly one common side, i.e if one vertex is common to 2 triangles 
+				             * from 2 different rectangles but not on any hypotenuse and if another vertex is common to 2 triangles
+				             * from 2 different rectangles but on the both hypotenuse.
+				             * Then, it checks if the orthogonal sides adjacent with this common side have the same length.
+				             * After that, it checks if both rectangles have the same texture coordinates.
+				             * */
+				            //TODO: perform the last check instead of setting oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound to true
+				            if(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+				                {if(tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri3Vertices[tri3.sideIndexOfHypotenuse]))
+				                     {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+				                    	 tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+				                          {
+				                    	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+				                          }
+				                      else
+				                    	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+				                     }
+				                 else
+				                     {if(tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3]))
+				                          {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+				                    	      tri3Vertices[tri3.sideIndexOfHypotenuse].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+				                               {
+				                        	    oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+				                               }
+				                           else
+				                        	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				                    	   
+				                          }
+				                      else
+				                          {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[tri3.sideIndexOfHypotenuse]))
+				                               {if(tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						                    	   tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+						                            {
+				                            	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+						                            }
+						                        else
+						                        	oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				                        	    
+				                               }
+				                           else
+				                               {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3]))
+				                                    {if(tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							                    	    tri3Vertices[tri3.sideIndexOfHypotenuse].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+							                             {
+				                                    	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+							                             }
+							                         else
+							                        	 oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				                            	     
+				                                    }
+				                                else
+				                                	oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+				                               }
+				                          }				                	  
+				                     }
+				                }
+				            else
+				                {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+				                     {if(tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri4Vertices[tri4.sideIndexOfHypotenuse]))
+				                          {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+				                        	  tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+				                               {
+				                        	    oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+				                               }
+				                           else
+				                        	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+				                          }
+				                      else
+				                          {if(tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3]))
+				                               {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+				                        	       tri4Vertices[tri4.sideIndexOfHypotenuse].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+				                                    {
+				                            	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+				                                    }
+				                                else
+				                        	        oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;            	        
+				                               }
+				                           else
+				                               {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri4Vertices[tri4.sideIndexOfHypotenuse]))
+				                                    {if(tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+						                        	    tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+						                                 {
+				                                    	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+						                                 }
+						                             else
+						                        	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				                        	         
+				                                    }
+				                                else
+				                                    {if(tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3]))
+				                                         {if(tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
+							                        	     tri4Vertices[tri4.sideIndexOfHypotenuse].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+							                                  {
+				                                        	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+							                                  }
+							                              else
+							                        	      oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				                            	          
+				                                         }
+				                                     else
+				                                    	 oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+				                                    }
+				                               }
+				                          }
+				                     }
+				                 else
+				                     {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+						                  {if(tri2Vertices[tri2.sideIndexOfHypotenuse].equals(tri3Vertices[tri3.sideIndexOfHypotenuse]))
+						                       {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+						                    	   tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+						                            {
+						                    	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+						                            }
+						                        else
+						                        	oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                       }
+						                   else
+						                       {if(tri2Vertices[tri2.sideIndexOfHypotenuse].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3]))
+						                            {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+						                    	        tri3Vertices[tri3.sideIndexOfHypotenuse].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+						                                 {
+						                            	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+						                                 }
+						                             else
+						                        	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                            }
+						                        else
+						                            {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[tri3.sideIndexOfHypotenuse]))
+						                                 {if(tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+								                    	     tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+								                              {
+						                                	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+								                              }
+								                          else
+								                        	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                                 }
+						                             else
+						                                 {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].equals(tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3]))
+						                                      {if(tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+									                    	      tri3Vertices[tri3.sideIndexOfHypotenuse].distanceSquared(tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]))
+									                               {
+						                                    	    oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+									                               }
+									                           else
+									                        	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                                      }
+						                                  else
+						                                	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                                 }
+						                            }
+						                       }
+						                  }
+						              else
+						                  {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+						                       {if(tri2Vertices[tri2.sideIndexOfHypotenuse].equals(tri4Vertices[tri4.sideIndexOfHypotenuse]))
+							                        {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+							                        	tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+							                             {
+							                        	  oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+							                             }
+							                         else
+							                        	 oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+							                        }
+							                    else
+							                        {if(tri2Vertices[tri2.sideIndexOfHypotenuse].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3]))
+							                             {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+							                        	     tri4Vertices[tri4.sideIndexOfHypotenuse].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+							                                  {
+							                            	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+							                                  }
+							                              else
+							                        	      oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;							                    	      
+							                             }
+							                         else
+							                             {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].equals(tri4Vertices[tri4.sideIndexOfHypotenuse]))
+							                                  {if(tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+									                        	  tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+									                               {
+							                                	    oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+									                               }
+									                           else
+									                        	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;							                        	       
+							                                  }
+							                              else
+							                                  {if(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].equals(tri4Vertices[(tri4.sideIndexOfHypotenuse+1)%3]))
+							                                       {if(tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])==
+										                        	   tri4Vertices[tri4.sideIndexOfHypotenuse].distanceSquared(tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3]))
+										                                {
+							                                    	     oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=true;
+										                                }
+										                            else
+										                        	    oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;			                            	        
+							                                       }
+							                                   else
+							                                	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+							                                  }
+							                             }
+							                        }
+						                       }
+						                   else
+						                	   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
+						                  }				                	 
+				                     }
+				                }
+				            if(oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
+			        	        {ArrayList<RightTriangleInfo> previousListOfTris=null;
+				                 //if the list of lists for this plane does not exist
+						    	 if(listOfListsOfTris==null)
+						    	     {//creates it and puts it into the map
+						    	      listOfListsOfTris=new ArrayList<ArrayList<RightTriangleInfo>>();
+						    	      mapOfListsOfTrianglesByPlanes.put(plane,listOfListsOfTris);
+						    	     }
+						    	 else
+						    	     {//checks if tri3 and tri4 are already in a list
+						    	      for(ArrayList<RightTriangleInfo> list:listOfListsOfTris)
+						    	          //only looks for tri3 as tri3 and tri4 should be together
+						    	          if(list.contains(tri3))
+					    	    	          {previousListOfTris=list;
+					    	    	           break;
+					    	    	          }
+						    	     }
+						    	 //if the new list of triangles has not been created
+						         if(listOfTris==null)
+						    	     {//creates it, fills it with the 4 triangles and adds it into the list of lists
+						    	      listOfTris=new ArrayList<RightTriangleInfo>();
+						    	      listOfTris.add(tri1);			        	    	 
+						    	      listOfTris.add(tri2);
+						    	      listOfTris.add(tri3);
+								      listOfTris.add(tri4);
+						    	      listOfListsOfTris.add(listOfTris);
+						    	     }
+						    	 else
+						    	     {//if tri3 and tri4 are not already in this list, adds them into it
+						    	      if(previousListOfTris!=listOfTris)
+						    	          {listOfTris.add(tri3);
+									       listOfTris.add(tri4);
 						    	          }
 						    	     }
-			        	        }
+						    	 //if tri3 and tri4 are already in another list
+						    	 if(previousListOfTris!=null)
+						    	     {/**
+						    	       * removes all elements already added into the new list from the previous list
+						    	       * to keep only elements which are not in the new list
+						    	       * */
+						    	      previousListOfTris.removeAll(listOfTris);
+						    	      //adds all elements which are not in the new list into it
+						    	      listOfTris.addAll(previousListOfTris);
+						    	     }
+						    	}			        	        
 			               }
 			          }
 			     }
