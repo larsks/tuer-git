@@ -292,6 +292,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            tri4Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
 				            boolean oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;
 				            boolean oneCommonSide2oppositeSidesOfSameLength=false;
+				            boolean oneCommonSide=false;
 				            /**
 				             * checks if both rectangles have exactly one common side, i.e if one vertex is common to 2 triangles 
 				             * from 2 different rectangles but not on any hypotenuse and if another vertex is common to 2 triangles
@@ -302,28 +303,44 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            tris[0]=tri1;
 				            tris[1]=tri2;
 				            tris[2]=tri3;
-				            tris[3]=tri4;				            
-				            for(int i=0;i<4&&!oneCommonSide2oppositeSidesOfSameLength;i++)
-				            	//checks if both rectangles have exactly one common side
-				            	if(trisVertices[i/2][(tris[i/2].sideIndexOfHypotenuse+2)%3].equals(trisVertices[2+(i%2)][(tris[i%2].sideIndexOfHypotenuse+2)%3]))
-				            		for(int j=0;j<4&&!oneCommonSide2oppositeSidesOfSameLength;j++)
-				            			if(trisVertices[i/2][(tris[i/2].sideIndexOfHypotenuse+(((j/2)+1)%2))%3].equals(trisVertices[2+(i%2)][(tris[i%2].sideIndexOfHypotenuse+((j+1)%2))%3])&&
-				            			   //checks if the orthogonal sides adjacent with this common side have the same length
-				            			   trisVertices[i/2][(tris[i/2].sideIndexOfHypotenuse+(j/2))%3].distanceSquared(trisVertices[i/2][(tris[i/2].sideIndexOfHypotenuse+2)%3])==
-				            			   trisVertices[2+(i%2)][(tris[i%2].sideIndexOfHypotenuse+(j%2))%3].distanceSquared(trisVertices[2+(i%2)][(tris[i%2].sideIndexOfHypotenuse+2)%3]))
-				            	            {oneCommonSide2oppositeSidesOfSameLength=true;
-				            				 //checks the texture coordinates
-				            				 boolean texCoordsMatch=true;
-				            				 //for each texture unit
-				            				 for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
-				            				     {//gets all texture coordinates
-				            					  for(int k=0;k<4;k++)
-				     				            	  trisTextureCoords[k]=getPrimitiveTextureCoords(meshData,tris[k].primitiveIndex,tris[k].sectionIndex,textureIndex,trisTextureCoords[k]);
-				            					  //TODO: checks if both rectangles have the same texture coordinates
-				            					  //use trisVertices[((i/2)+1)%2] and trisVertices[2+((i+1)%2)]
-				            				     }
-				            				 oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
-				                            }
+				            tris[3]=tri4;
+				            for(int i=0,ti0,ti1,ti2,ti3;i<4&&!oneCommonSide2oppositeSidesOfSameLength;i++)
+				                {//{0;1}
+				            	 ti0=i/2;
+				            	 Vector3[] tv0=trisVertices[ti0];
+				            	 RightTriangleInfo tr0=tris[ti0];
+				            	 //{2;3}
+				                 ti1=2+(i%2);				                 
+				                 Vector3[] tv1=trisVertices[ti1];
+				                 RightTriangleInfo tr1=tris[ti1];
+				                 //{1;0}
+				                 ti2=((i/2)+1)%2;
+				                 //{3;2}
+				                 ti3=2+((i+1)%2);
+				            	 //checks if both rectangles have exactly one common side
+				            	 if(tv0[(tr0.sideIndexOfHypotenuse+2)%3].equals(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
+				            		 for(int j=0;j<4&&!oneCommonSide&&!oneCommonSide2oppositeSidesOfSameLength;j++)
+				            			 if(tv0[(tr0.sideIndexOfHypotenuse+(((j/2)+1)%2))%3].equals(tv1[(tr1.sideIndexOfHypotenuse+((j+1)%2))%3]))
+				            			     {oneCommonSide=true;
+				            			      //checks if the orthogonal sides adjacent with this common side have the same length
+				            				  if(tv0[(tr0.sideIndexOfHypotenuse+(j/2))%3].distanceSquared(tv0[(tr0.sideIndexOfHypotenuse+2)%3])==
+							            		 tv1[(tr1.sideIndexOfHypotenuse+(j%2))%3].distanceSquared(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
+				            				      {oneCommonSide2oppositeSidesOfSameLength=true;
+				            				       //checks the texture coordinates
+					            				   boolean texCoordsMatch=true;
+					            				   //for each texture unit
+					            				   for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
+					            				       {//gets all texture coordinates
+					            					    for(int k=0;k<4;k++)
+					     				            	    trisTextureCoords[k]=getPrimitiveTextureCoords(meshData,tris[k].primitiveIndex,tris[k].sectionIndex,textureIndex,trisTextureCoords[k]);
+					            					    //TODO: checks if both rectangles have the same texture coordinates
+					            					    //use trisVertices[ti2] and trisVertices[ti3]
+					            					    
+					            				       }
+					            				   oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
+				            				      }
+				            			     }
+			                    }
 				            if(oneCommonSide2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 			        	        {ArrayList<RightTriangleInfo> previousListOfTris=null;
 				                 //if the list of lists for this plane does not exist
