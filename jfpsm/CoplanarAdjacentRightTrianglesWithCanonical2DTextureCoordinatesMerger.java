@@ -186,7 +186,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						              boolean sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles=(sameHypotenuseOppositeSidesOfSameLengthSameWinding||
 						    		     sameHypotenuseOppositeSidesOfSameLengthReverseWinding)&&
 						    		     !tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]);
-						              if(sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles)
+						              //N.B: triangles must have different winding to have the same normal
+						              if(sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles&&
+						            	 sameHypotenuseOppositeSidesOfSameLengthReverseWinding)
 						                  {//checks the texture coordinates
 						    	           boolean texCoordsMatch=true;
 						    	           for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
@@ -315,8 +317,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                 RightTriangleInfo tr1=tris[ti1];
 				                 //{1;0}
 				                 ti2=((i/2)+1)%2;
+				                 Vector3[] tv2=trisVertices[ti2];
+				                 RightTriangleInfo tr2=tris[ti2];
 				                 //{3;2}
 				                 ti3=2+((i+1)%2);
+				                 Vector3[] tv3=trisVertices[ti3];
+				                 RightTriangleInfo tr3=tris[ti3];
 				            	 //checks if both rectangles have exactly one common side
 				            	 if(tv0[(tr0.sideIndexOfHypotenuse+2)%3].equals(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
 				            		 for(int j=0;j<4&&!oneCommonSide&&!oneCommonSide2oppositeSidesOfSameLength;j++)
@@ -327,7 +333,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 							            		 tv1[(tr1.sideIndexOfHypotenuse+(j%2))%3].distanceSquared(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
 				            				      {oneCommonSide2oppositeSidesOfSameLength=true;
 				            				       //checks the texture coordinates
-					            				   boolean texCoordsMatch=true;
+					            				   boolean texCoordsMatch=true;				            				   
 					            				   //for each texture unit
 					            				   for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
 					            				       {//gets all texture coordinates
