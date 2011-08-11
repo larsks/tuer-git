@@ -33,7 +33,7 @@
 		<pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>		
 		<pathelement location="lib/fettle/fettle-0.4.5.jar"/>
-		<pathelement location="lib/google-collect/guava-r08.jar-r07.jar"/>
+		<pathelement location="lib/google-collect/guava-r08.jar"/>
 		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
