@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
-
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -442,28 +441,31 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			  * Each group of adjacent triangles is a list of arrays of adjacent triangles which could be merged to make bigger 
 			  * rectangles
 			  * */
-			 HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][]>>> mapOfListsOfListsOfArraysOfMergeableTris=new HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][]>>>();
+			 HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> mapOfListsOfListsOfArraysOfMergeableTris=new HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>>();
 			 //for each plane
 			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo>>> entry:mapOfListsOfTrianglesByPlanes.entrySet())
 			     {Plane plane=entry.getKey();
 				  //for each list of adjacent triangles
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
-			          {int width=0;
-				       int height=0;
-			    	   //TODO compute the maximum size of the 2D array of adjacent triangles
-				       if(width>0&&height>0)
-				           {RightTriangleInfo[][] adjacentTrisArray=new RightTriangleInfo[width][height];
-				            ArrayList<RightTriangleInfo[][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][]>();
+			          {//builds a quaternary tree from the list of triangles
+				       /*QuaternaryTreeNode quadTree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
+				       if(quadTree!=null)
+				           {*/int width=0;
+				            int height=0;
+				            //TODO compute the maximum size of the 2D array of adjacent triangles
+				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
+				            //TODO fill this array
+				            ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
 				            //TODO compute a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				            //puts the new list into the map
-				            ArrayList<ArrayList<RightTriangleInfo[][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
+				            ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
 				            if(adjacentTrisArraysListsList==null)
-				                {adjacentTrisArraysListsList=new ArrayList<ArrayList<RightTriangleInfo[][]>>();
+				                {adjacentTrisArraysListsList=new ArrayList<ArrayList<RightTriangleInfo[][][]>>();
 				                 mapOfListsOfListsOfArraysOfMergeableTris.put(plane,adjacentTrisArraysListsList);
 				                }
 				            adjacentTrisArraysListsList.add(adjacentTrisArraysList);
 				           }
-			          }				  
+			          /*}*/		  
 			     }
 			 //TODO: sixth step: create these bigger rectangles (update their texture coordinates (use coordinates greater 
 			 //than 1) in order to use texture repeat)
@@ -474,50 +476,163 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	/**
-     * Gets the texture coordinates of the primitive.
-     * 
-     * @param primitiveIndex
-     *            the primitive index
-     * @param section
-     *            the section
-     * @param textureIndex
-     *            the texture index
-     * @param store
-     *            the store
-     * 
-     * @return the texture coordinates of the primitive
-     */
-    public static Vector2[] getPrimitiveTextureCoords(final MeshData meshData, final int primitiveIndex, final int section, final int textureIndex, final Vector2[] store) {
-    	if (meshData.getTextureBuffer(textureIndex) == null) {
-    	    return null;
-    	}
-    	final int count = meshData.getPrimitiveCount(section);
-        if (primitiveIndex >= count || primitiveIndex < 0) {
-            throw new IndexOutOfBoundsException("Invalid primitiveIndex '" + primitiveIndex + "'.  Count is " + count);
-        }
+	 * Gets the texture coordinates of the primitive.
+	 * 
+	 * @param primitiveIndex
+	 *            the primitive index
+	 * @param section
+	 *            the section
+	 * @param textureIndex
+	 *            the texture index
+	 * @param store
+	 *            the store
+	 * 
+	 * @return the texture coordinates of the primitive
+	 */
+	public static Vector2[] getPrimitiveTextureCoords(final MeshData meshData, final int primitiveIndex, final int section, final int textureIndex, final Vector2[] store) {
+	    if (meshData.getTextureBuffer(textureIndex) == null) {
+	        return null;
+	    }
+	    final int count = meshData.getPrimitiveCount(section);
+	    if (primitiveIndex >= count || primitiveIndex < 0) {
+	        throw new IndexOutOfBoundsException("Invalid primitiveIndex '" + primitiveIndex + "'.  Count is " + count);
+	    }
 
-        final IndexMode mode = meshData.getIndexMode(section);
-        final int rSize = mode.getVertexCount();
-        Vector2[] result = store;
-        if (result == null || result.length < rSize) {
-            result = new Vector2[rSize];
-        }
+	    final IndexMode mode = meshData.getIndexMode(section);
+	    final int rSize = mode.getVertexCount();
+	    Vector2[] result = store;
+	    if (result == null || result.length < rSize) {
+	        result = new Vector2[rSize];
+	    }
 
-        for (int i = 0; i < rSize; i++) {
-        	if (result[i] == null) {
-        		result[i] = new Vector2();
-        	}
-        	if (meshData.getIndexBuffer() != null) {
-        		// indexed geometry
-        		BufferUtils.populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex),
-        				meshData.getIndices().get(meshData.getVertexIndex(primitiveIndex, i, section)));
-        	} else {
-        		// non-indexed geometry
-        		BufferUtils
-        		.populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex), meshData.getVertexIndex(primitiveIndex, i, section));
-        	}
-        }
+	    for (int i = 0; i < rSize; i++) {
+	        if (result[i] == null) {
+	            result[i] = new Vector2();
+	        }
+	        if (meshData.getIndexBuffer() != null) {
+	            // indexed geometry
+	            BufferUtils.populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex),
+	                    meshData.getIndices().get(meshData.getVertexIndex(primitiveIndex, i, section)));
+	        } else {
+	            // non-indexed geometry
+	            BufferUtils
+	            .populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex), meshData.getVertexIndex(primitiveIndex, i, section));
+	        }
+	    }
 
-        return result;
+	    return result;
+	}
+	
+	/*private static QuaternaryTreeNode buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
+	    //TODO
+	    return null;
+	}
+	
+	private static class QuaternaryTreeNode<T> {
+	
+	    private final ArrayList<QuaternaryTreeNode<T>> children;
+	    
+	    private final QuaternaryTreeNode<T> up;
+	    
+	    private final QuaternaryTreeNode<T> right;
+	    
+	    private final QuaternaryTreeNode<T> down;
+	    
+	    private final QuaternaryTreeNode<T> left;
+	    
+	    private final T object;
+	    
+	    private QuaternaryTreeNode(QuaternaryTreeNode<T> up, QuaternaryTreeNode<T> right,
+	            QuaternaryTreeNode<T> down, QuaternaryTreeNode<T> left, T object) {
+	        this.up=up;
+	        this.right=right;
+	        this.down=down;
+	        this.left=left;
+	        this.children=new ArrayList<QuaternaryTreeNode<T>>(4);
+	        this.object=object;
+	    }	    
+	}*/
+	
+	/*static abstract class TreeNode<T>{
+	    
+	    private final Set<? extends TreeNode<T>> linkedNodes;
+	    
+	    private final T object;
+	    
+	    protected TreeNode(final T object){
+	        this.linkedNodes=createSetOfLinkedNodes();
+	        this.object=object;
+	    }
+	    
+	    public final T getObject(){
+	        return(object);
+	    }
+	    
+	    protected abstract Set<? extends TreeNode<T>> createSetOfLinkedNodes();
+	    
+	    
+	}*/
+	
+	/*public static abstract class TreeNodeWithFixedSetOfLinkedNodes<T> extends TreeNode<T>{
+	    
+	
+	}*/
+	
+	public static abstract class Graph<T>{
+	
+	    private final T object;
+	    
+	    private final ArrayList<Graph<T>> children;
+	    
+	    public Graph(T object){
+	        this.object=object;
+	        this.children=new ArrayList<Graph<T>>();
+	    }
+	    
+	    public boolean attachChild(Graph<T> child){
+	        return(!children.contains(child)?children.add(child):false);
+	    }
+	    
+	    public boolean detachChild(Graph<T> child){
+            return(children.contains(child)?children.remove(child):false);
+        }
+	    
+	    public int getChildCount(){
+	        return(children.size());
+	    }
+	    
+	    public Graph<T> getChildAt(int index){
+	        return(index<0||index>=getChildCount()?null:children.get(index));
+	    }
+	    
+	    public final T getObject(){
+            return(object);
+        }
+	}
+	
+	public static abstract class Visitor<U>{
+    
+        public void visit(boolean breadthFirstSearchEnabled,Graph<U> firstElementToVisit){
+            ArrayList<Graph<U>> markedChildrenList=new ArrayList<Graph<U>>();
+            ArrayList<Graph<U>> fileOrStack=new ArrayList<Graph<U>>();
+            markedChildrenList.add(firstElementToVisit);
+            fileOrStack.add(firstElementToVisit);
+            while(!fileOrStack.isEmpty())
+                {//gets the next element (pop operation)
+                 Graph<U> currentlyVisitedElement=fileOrStack.remove(breadthFirstSearchEnabled?0:fileOrStack.size()-1);
+                 performOnCurrentlyVisitedElement(currentlyVisitedElement);
+                 for(int childIndex=0;childIndex<currentlyVisitedElement.getChildCount();childIndex++)
+                     {Graph<U> child=currentlyVisitedElement.getChildAt(childIndex);
+                      if(!markedChildrenList.contains(child))
+                          {//marks the element to avoid traveling it more than once
+                           markedChildrenList.add(child);
+                           //adds a new element to travel (push operation)
+                           fileOrStack.add(child);
+                          }
+                     }
+                }
+        }
+    
+        public abstract void performOnCurrentlyVisitedElement(final Graph<U> currentlyVisitedElement);
     }
 }
