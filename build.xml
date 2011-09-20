@@ -10,11 +10,8 @@
     <property name="basedir" value="."/>
     <property name="srcdir" value="."/>
     <property name="destdir" value="."/>
-	<property name="alias" value="xxxxxxxx"/>
-	<property name="keystore" value="xxx"/>
-	<property name="keypass" value="xxxxxxx"/>
-	<property name="storepass" value="xxxxxxx"/>
-	<property name="dname" value="x"/>
+	<property name="alias" value="gouessej"/>
+	<property name="keystore" value="key"/>
 
     <!-- Allow user to override properties without editing this file -->
     <property file="${user.home}/.ant.properties" />
@@ -163,14 +160,29 @@
     <!-- Clean                                                             -->
     <!-- ================================================================= -->
     <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
-    	<delete>
+    	<delete failonerror="false">
+    		<fileset file="${keystore}" />
     	    <fileset dir="${destdir}" includes="**/*.class" />
+    		<fileset file="${destdir}/tuer.jar" />
+    		<fileset file="${destdir}/jogl.jar"/>
+    		<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
+    		<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
+    		<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
+    		<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
+    		<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
+    		<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
+    		<fileset file="${destdir}/gluegen-rt.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
+    		<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
     	</delete>
     	<delete dir="${destdir}/snap" failonerror="false" />
     	<delete dir="${destdir}/obj" failonerror="false" />
     	<delete dir="${destdir}/xml" failonerror="false" />
     	<delete dir="${destdir}/data" failonerror="false" />
-    	<delete file="${destdir}/tuer.jar" failonerror="false" />
     	<!-- delete only the generated files, not the artworks -->
     	<!-- generated textures -->
     	<delete file="${destdir}/texture/ceilTexture.png" failonerror="false" />
@@ -212,23 +224,56 @@
 			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
 			</manifest>
 		</jar>
+		<copy file="lib/jogl/jogl.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-linux-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-linux-i586.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-macosx-ppc.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-macosx-universal.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-windows-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-natives-windows-i586.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-linux-i586.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/gluegen-rt-natives-windows-i586.jar" todir="${destdir}"/>
 	</target>
 	
 	<!-- ================================================================= -->
 	<!-- Sign                                                              -->
 	<!-- ================================================================= -->
 	<target name="sign" depends="dist" description="Sign the java archive">
-		<exec dir="${destdir}" executable="keytool" os="Linux" failonerror="true">
-		    <arg value="-genkey "/>
-		    <arg value="-alias ${alias} " />
-		    <arg value="-keystore ${keystore} " />
-		    <arg value="-keypass ${keypass} " />
-		    <arg value="-storepass ${storepass} " />
-			<arg value="-dname ${dname} " /> 
-		</exec> 
-		<signjar jar="tuer.jar" alias="${alias}" storepass="${storepass}" keystore="${keystore}" 
-		    verbose="true"
-		/>
+		<input message="Please enter the store pass:" addproperty="storepass"/>
+		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}" >
+		    <dname>
+		        <param name="CN" value="${vendor}"/>
+		        <param name="OU" value="Engineer"/>
+		        <param name="O"  value="FGF"/>
+		        <param name="C"  value="FR"/>
+		        <param name="L"  value="PARIS"/>
+		        <param name="S"  value="FRANCE"/>
+		    </dname>
+		</genkey>
+		<signjar alias="${alias}" storepass="${storepass}" keystore="${keystore}" lazy="false"> 
+		    <path>
+		    	<fileset file="${destdir}/tuer.jar"/>
+		    	<fileset file="${destdir}/jogl.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
+		    	<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
+		    	<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
+		    </path>
+		</signjar>
 	</target>
 	
     <!-- =================================================================== -->
