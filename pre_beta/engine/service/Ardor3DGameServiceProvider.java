@@ -54,6 +54,8 @@ import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 import engine.input.ExtendedAwtKeyboardWrapper;
+import engine.integration.DesktopIntegration;
+import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
 import engine.statemachine.ContentRatingSystemState;
 import engine.statemachine.GameState;
@@ -134,8 +136,27 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     
     public static void main(final String[] args){
-    	//Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
-    	System.setProperty("sun.java2d.noddraw","true");
+        if(DesktopIntegration.getOperatingSystem().equals(OS.Windows))
+            {// Windows-specific workarounds
+             /**
+              * Forces the use of the high precision timer on Windows.
+              * See http://bugs.sun.com/view_bug.do?bug_id=6435126
+              * */
+             new Thread(new Runnable(){                
+                            @Override
+                            public void run(){
+                                while(true) 
+                                    {try{Thread.sleep(Integer.MAX_VALUE);}
+                                     catch(InterruptedException ie)
+                                     {ie.printStackTrace();}
+                                    }
+                            }
+                        }, "Microsoft Windows Sleeper (see bug 6435126)") {
+                        {this.setDaemon(true);}
+             }.start();
+             // Disables DirectDraw under Windows in order to avoid conflicts with OpenGL
+             System.setProperty("sun.java2d.noddraw","true");
+            }    	
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
     }

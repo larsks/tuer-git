@@ -33,7 +33,7 @@ public final class DesktopIntegration {
 	
 	private final String desktopPath;
 	
-	private enum OS{
+	public enum OS{
 		Linux("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use alias file format as it is very complicated to create
 		Mac("sh",new String[]{"javaws "},-1,0),
@@ -432,6 +432,10 @@ public final class DesktopIntegration {
 			         }
 		        }
 		return(success);
+	}
+	
+	public static final OS getOperatingSystem() {
+	    return instance.operatingSystem;
 	}
 
 	public static final void main(String[] args){
