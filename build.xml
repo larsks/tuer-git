@@ -47,6 +47,23 @@
 		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
+	<path id="project.lib.path">
+	    <pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>     
+	    <pathelement location="lib/fettle/fettle-0.4.5.jar"/>
+	    <pathelement location="lib/google-collect/guava-r08.jar"/>
+	    <pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/jogl/jogl.jar"/>
+	    <pathelement location="lib/jogl/gluegen-rt.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/pss/CodecJOrbis.jar"/>
+	    <pathelement location="lib/pss/LibraryJavaSound.jar"/>
+	    <pathelement location="lib/pss/SoundSystem.jar"/>
+	</path>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.6 or higher.">
 		    <condition>
@@ -243,29 +260,17 @@
 				<param name="S"  value="FRANCE"/>
 			</dname>
 		</genkey>
-		<!-- copy these JARs into the local destination directory -->
-		<copy file="lib/fettle/fettle-0.4.5.jar" todir="${destdir}"/>
-		<copy file="lib/google-collect/guava-r08.jar" todir="${destdir}"/>
-		<copy file="lib/mockachino/mockachino-full-0.3.1.jar" todir="${destdir}"/>
-		<copy file="lib/pss/CodecJOrbis.jar" todir="${destdir}"/>
-		<copy file="lib/pss/LibraryJavaSound.jar" todir="${destdir}"/>
-		<copy file="lib/pss/SoundSystem.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar" todir="${destdir}"/>
-		<copy file="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${destdir}"/>
+		<!-- copy these JARs into the local destination directory -->		
+		<copy todir="${destdir}" flatten="true">
+			<path refid="project.lib.path"/>
+		</copy>
 		<!-- copy these JARs to host JOGL and GlueGen on your own server -->
-		<copy file="lib/jogl/jogl.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-linux-amd64.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-linux-i586.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-macosx-ppc.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-macosx-universal.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-windows-amd64.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/jogl-natives-windows-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-linux-i586.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}"/>
