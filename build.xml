@@ -16,6 +16,7 @@
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="alias" value="gouessej"/>
+	<property name="keystore" value="key"/>
 	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
@@ -230,9 +231,9 @@
 				<attribute name="Main-Class" value="${tuer-main-class}"/>
 			</manifest>
 		</jar>
-		<delete file="key" failonerror="false" />
+		<delete file="${keystore}" failonerror="false" />
 		<input message="Please enter the store pass:" addproperty="storepass"/>
-		<genkey alias="${alias}" storepass="${storepass}" keystore="key" >
+		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}" >
 			<dname>
 				<param name="CN" value="${vendor}"/>
 				<param name="OU" value="Engineer"/>
@@ -271,7 +272,7 @@
 		<copy file="lib/jogl/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-windows-i586.jar" todir="${destdir}"/>
-		<signjar alias="${alias}" keystore="key" storepass="${storepass}" lazy="false" >
+		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" >
 		    <path>
 		    	<fileset file="${destdir}/fettle-0.4.5.jar" />
 		    	<fileset file="${destdir}/guava-r08.jar" />
@@ -527,7 +528,7 @@
 	<!-- ================================================================= -->
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
-	  		<fileset file="key" />
+	  		<fileset file="${keystore}" />
 	  		<fileset dir="${deploymentdestdir}" includes="**/*.jar" />
 	  		<fileset file="${deploymentdestdir}/${tuer-jnlp-filename}" />
 	  		<fileset file="${deploymentdestdir}/${jfpsm-jnlp-filename}" />
