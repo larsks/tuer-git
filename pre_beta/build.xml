@@ -6,10 +6,9 @@
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
+	<property name="bindir" value="."/>
 	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
-	<property name="deploymentdestdir" value="target"/>
-	<!-- intermediary directory containing JARs that are going to be signed -->
-	<property name="destdir" value="."/>
+	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="."/>
 	<property name="homepage-url" value="http://tuer.sourceforge.net" />
@@ -28,25 +27,6 @@
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
-	<path id="project.class.path">
-	    <!-- N.B: do not add java.class.path -->
-		<pathelement path="${destdir}"/>
-		<pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>		
-		<pathelement location="lib/fettle/fettle-0.4.5.jar"/>
-		<pathelement location="lib/google-collect/guava-r08.jar"/>
-		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/jogl/jogl.jar"/>
-		<pathelement location="lib/jogl/gluegen-rt.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/pss/CodecJOrbis.jar"/>
-		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
-		<pathelement location="lib/pss/SoundSystem.jar"/>
-	</path>
 	<path id="project.lib.path">
 	    <pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
@@ -63,6 +43,58 @@
 	    <pathelement location="lib/pss/CodecJOrbis.jar"/>
 	    <pathelement location="lib/pss/LibraryJavaSound.jar"/>
 	    <pathelement location="lib/pss/SoundSystem.jar"/>
+	</path>
+	<path id="project.class.path">
+	    <!-- N.B: do not add java.class.path -->
+		<pathelement path="${bindir}"/>
+		<path refid="project.lib.path"/>
+	</path>
+	<path id="gluegen-rt.natives.path">
+		<pathelement location="lib/jogl/gluegen-rt-natives-linux-amd64.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt-natives-linux-i586.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt-natives-macosx-ppc.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt-natives-macosx-universal.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt-natives-windows-amd64.jar"/>
+		<pathelement location="lib/jogl/gluegen-rt-natives-windows-i586.jar"/>
+	</path>
+	<path id="jogl.natives.path">
+		<pathelement location="lib/jogl/jogl-natives-linux-amd64.jar"/>
+		<pathelement location="lib/jogl/jogl-natives-linux-i586.jar"/>
+		<pathelement location="lib/jogl/jogl-natives-macosx-ppc.jar"/>
+		<pathelement location="lib/jogl/jogl-natives-macosx-universal.jar"/>
+		<pathelement location="lib/jogl/jogl-natives-windows-amd64.jar"/>
+		<pathelement location="lib/jogl/jogl-natives-windows-i586.jar"/>
+	</path>
+	<path id="project.sign.jars.path">
+	    <pathelement location="${destdir}/fettle-0.4.5.jar" />
+	    <pathelement location="${destdir}/guava-r08.jar" />
+	    <pathelement location="${destdir}/mockachino-full-0.3.1.jar" />
+	    <pathelement location="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/${tuer-jar-filename}"/>
+	    <pathelement location="${destdir}/${jfpsm-jar-filename}"/>
+	    <pathelement location="${destdir}/CodecJOrbis.jar"/>
+	    <pathelement location="${destdir}/LibraryJavaSound.jar"/>
+	    <pathelement location="${destdir}/SoundSystem.jar"/>
+	    <pathelement location="${destdir}/jogl.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-linux-amd64.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-linux-i586.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-macosx-ppc.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-macosx-universal.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-windows-amd64.jar"/>
+	    <pathelement location="${destdir}/jogl-natives-windows-i586.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
+	    <pathelement location="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.6 or higher.">
@@ -197,7 +229,7 @@
 	<!-- ================================================================= -->
 	<target name="compile" depends="set-jogl-library-path" description="Compiles the source code">
 	    <javac srcdir="${srcdir}"       	   
-	           destdir="${destdir}"
+	           destdir="${bindir}"
 	           debug="on" >
 	    	<classpath refid="project.class.path"/>
 	        <include name="**/*.java"/>
@@ -206,12 +238,12 @@
 	<!-- =================================================================== -->
 	<!-- Build                                                               -->
 	<!-- =================================================================== -->
-	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and create the JAR"/>
+	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and create the JARs"/>
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates and signs the java archives">
-		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${destdir}" 
+	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start and some files for Chrome Web Store">
+		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" 
 			includes="**/*.class" 
 			compress="false">
 			<exclude name="**/gpl.txt" />
@@ -223,7 +255,7 @@
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${destdir}" 
+		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" 
 			includes="**/*.class"
 			compress="false">
 			<include name="**/*.bmp" />
@@ -261,63 +293,17 @@
 			</dname>
 		</genkey>
 		<!-- copy these JARs into the local destination directory -->		
-		<copy todir="${destdir}" flatten="true">
+		<copy todir="${destdir}" flatten="true" overwrite="true">
 			<path refid="project.lib.path"/>
+			<!-- copy these JARs to host JOGL and GlueGen on your own server -->
+			<path refid="gluegen-rt.natives.path"/>
+			<path refid="jogl.natives.path"/>
 		</copy>
-		<!-- copy these JARs to host JOGL and GlueGen on your own server -->
-		<copy file="lib/jogl/jogl-natives-linux-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-linux-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-macosx-ppc.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-macosx-universal.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-windows-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-windows-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-linux-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-windows-i586.jar" todir="${destdir}"/>
-		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" >
-		    <path>
-		    	<fileset file="${destdir}/fettle-0.4.5.jar" />
-		    	<fileset file="${destdir}/guava-r08.jar" />
-		    	<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
-		    	<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
-		    	<fileset file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
-		      	<fileset file="${destdir}/${tuer-jar-filename}"/>
-		        <fileset file="${destdir}/${jfpsm-jar-filename}"/>
-		    	<fileset file="${destdir}/CodecJOrbis.jar"/>
-		    	<fileset file="${destdir}/LibraryJavaSound.jar"/>
-		    	<fileset file="${destdir}/SoundSystem.jar"/>
-		    	<fileset file="${destdir}/jogl.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-		    </path>
+		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}">
+			<path refid="project.sign.jars.path"/>
 		</signjar>
-	</target>
-	<!-- ================================================================= -->
-	<!-- Deploy                                                            -->
-	<!-- ================================================================= -->
-	<target name="deploy" depends="dist" description="Puts all signed JARs and all JNLP files required for the deployment with Java Web Start into the deployment directory">
-		<delete dir="${deploymentdestdir}" includes="**/*.jar" />
 		<!-- generate the JNLP files used by Java Web Start -->
-		<echo file="${deploymentdestdir}/${tuer-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+		<echo file="${destdir}/${tuer-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 			<jnlp spec="1.0+" codebase="${codebase-url}" href="${tuer-jnlp-filename}">
 			  <information>
 			    <title>TUER</title>
@@ -397,7 +383,7 @@
 			</jnlp>
 			]]>
 		</echo>
-		<echo file="${deploymentdestdir}/${jfpsm-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+		<echo file="${destdir}/${jfpsm-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 			<jnlp spec="1.0+" codebase="${codebase-url}" href="${jfpsm-jnlp-filename}">
 			  <information>
 			    <title>JFPSM</title>
@@ -476,7 +462,7 @@
 			]]>
 		</echo>
 		<!-- generate the manifest file for Chrome web store -->
-		<echo file="${deploymentdestdir}/${tuer-chrome-web-store-manifest-filename}"><![CDATA[{
+		<echo file="${destdir}/${tuer-chrome-web-store-manifest-filename}"><![CDATA[{
 			  "name": "TUER",
 			  "description": "small FPS taking place in a museum (alpha version)",
 			  "version": "0.0.0.4",
@@ -494,81 +480,23 @@
 		    ]]>
 		</echo>
 		<!-- generate the ZIP file for Chrome web store -->
-		<zip destFile="${deploymentdestdir}/${tuer-chrome-web-store-zip-filename}" >
-			<zipfileset dir="${deploymentdestdir}" includes="${tuer-chrome-web-store-manifest-filename}" fullpath="myapp/${tuer-chrome-web-store-manifest-filename}" />
-			<zipfileset dir="${deploymentdestdir}" includes="${tuer-chrome-web-store-icon-filename}" fullpath="myapp/${tuer-chrome-web-store-icon-filename}" />
+		<zip destFile="${destdir}/${tuer-chrome-web-store-zip-filename}" >
+			<zipfileset dir="${destdir}" includes="${tuer-chrome-web-store-manifest-filename}" fullpath="myapp/${tuer-chrome-web-store-manifest-filename}" />
+			<zipfileset dir="${destdir}" includes="${tuer-chrome-web-store-icon-filename}" fullpath="myapp/${tuer-chrome-web-store-icon-filename}" />
 		</zip>
-		<copy file="${destdir}/fettle-0.4.5.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/guava-r08.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/mockachino-full-0.3.1.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" todir="${deploymentdestdir}"/>		
-		<copy file="${destdir}/${tuer-jar-filename}" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/${jfpsm-jar-filename}" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/CodecJOrbis.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/LibraryJavaSound.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/SoundSystem.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-linux-amd64.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-linux-i586.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-macosx-ppc.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-macosx-universal.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-windows-amd64.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/jogl-natives-windows-i586.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-linux-amd64.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-linux-i586.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-macosx-ppc.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-macosx-universal.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-windows-amd64.jar" todir="${deploymentdestdir}"/>
-		<copy file="${destdir}/gluegen-rt-natives-windows-i586.jar" todir="${deploymentdestdir}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete>
+	  		<fileset dir="${bindir}" includes="**/*.class" />
 	  		<fileset file="${keystore}" />
-	  		<fileset dir="${deploymentdestdir}" includes="**/*.jar" />
-	  		<fileset file="${deploymentdestdir}/${tuer-jnlp-filename}" />
-	  		<fileset file="${deploymentdestdir}/${jfpsm-jnlp-filename}" />
-	  		<fileset file="${deploymentdestdir}/${tuer-chrome-web-store-manifest-filename}" />
-	  		<fileset file="${deploymentdestdir}/${tuer-chrome-web-store-zip-filename}" />	  		
-	   	    <fileset dir="${destdir}" includes="**/*.class" />	  		
-	  		<fileset file="${destdir}/${tuer-jar-filename}" />
-	  		<fileset file="${destdir}/${jfpsm-jar-filename}" />
-	  		<fileset file="${destdir}/fettle-0.4.5.jar" />
-	  		<fileset file="${destdir}/guava-r08.jar" />
-	  		<fileset file="${destdir}/mockachino-full-0.3.1.jar" />
-	  		<fileset file="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
-	  		<fileset file="${destdir}/CodecJOrbis.jar" />
-	  		<fileset file="${destdir}/LibraryJavaSound.jar" />
-	  		<fileset file="${destdir}/SoundSystem.jar" />
-	  		<fileset file="${destdir}/jogl.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
-	  		<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-	  		<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
+	  		<fileset file="${destdir}/${tuer-jnlp-filename}" />
+	  		<fileset file="${destdir}/${jfpsm-jnlp-filename}" />
+	  		<fileset file="${destdir}/${tuer-chrome-web-store-manifest-filename}" />
+	  		<fileset file="${destdir}/${tuer-chrome-web-store-zip-filename}" />
+	  		<path refid="project.sign.jars.path"/>
 	   	</delete>
 	</target>
 	<!-- =================================================================== -->
@@ -577,7 +505,7 @@
 	<target name="run-jfpsm" depends="set-jogl-library-path" description="Runs JFPSM">
 		<java classname="${jfpsm-main-class}"
 			  fork="true"
-			  dir="${destdir}"
+			  dir="${bindir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
 			<jvmarg value="-Xmx128m"/>
@@ -586,7 +514,7 @@
 	<target name="run-tuer" depends="set-jogl-library-path" description="Runs TUER">
 		<java classname="${tuer-main-class}"
 			  fork="true"
-			  dir="${destdir}"
+			  dir="${bindir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
 		    <jvmarg value="-Xmx256m"/>
