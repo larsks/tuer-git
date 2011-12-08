@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 final class GameFilesGenerator{
 
@@ -316,10 +316,10 @@ final class GameFilesGenerator{
                                     totalTexCoordBufferSize+=buffersGrid[i][j][k][3].capacity();
                                }
                        //create these buffers
-                       totalVertexBuffer=BufferUtil.newFloatBuffer(totalVertexBufferSize);
-                       totalIndexBuffer=BufferUtil.newIntBuffer(totalIndexBufferSize);
-                       totalNormalBuffer=BufferUtil.newFloatBuffer(totalNormalBufferSize);
-                       totalTexCoordBuffer=BufferUtil.newFloatBuffer(totalTexCoordBufferSize);
+                       totalVertexBuffer=Buffers.newDirectFloatBuffer(totalVertexBufferSize);
+                       totalIndexBuffer=Buffers.newDirectIntBuffer(totalIndexBufferSize);
+                       totalNormalBuffer=Buffers.newDirectFloatBuffer(totalNormalBufferSize);
+                       totalTexCoordBuffer=Buffers.newDirectFloatBuffer(totalTexCoordBufferSize);
                        //fill them
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
