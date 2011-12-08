@@ -13,7 +13,6 @@
 */
 package engine.service;
 
-import java.awt.Component;
 import java.awt.DisplayMode;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
@@ -26,15 +25,16 @@ import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.Scene;
-import com.ardor3d.framework.jogl.JoglCanvas;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
+import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
-import com.ardor3d.input.awt.AwtFocusWrapper;
-import com.ardor3d.input.awt.AwtMouseManager;
-import com.ardor3d.input.awt.AwtMouseWrapper;
+import com.ardor3d.input.jogl.JoglNewtFocusWrapper;
+import com.ardor3d.input.jogl.JoglNewtKeyboardWrapper;
+import com.ardor3d.input.jogl.JoglNewtMouseManager;
+import com.ardor3d.input.jogl.JoglNewtMouseWrapper;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
@@ -53,7 +53,6 @@ import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
-import engine.input.ExtendedAwtKeyboardWrapper;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
@@ -210,12 +209,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
         	}
         };
         // Setup a canvas      
-        canvas=new JoglCanvas(canvasRenderer,settings);
+        canvas=new JoglNewtWindow(canvasRenderer,settings);
         canvas.init();
-        mouseManager=new AwtMouseManager((Component)canvas);
+        mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
         // remove the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new ExtendedAwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
+        //physicalLayer=new PhysicalLayer(new ExtendedAwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
+        physicalLayer=new PhysicalLayer(new JoglNewtKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
     }
 
     
@@ -269,7 +269,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         // Done, do cleanup
         soundManager.cleanup();
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
-        canvas.close();
+        //FIXME
+        //canvas.close();
         //necessary for Java Webstart
         System.exit(0);
     }
