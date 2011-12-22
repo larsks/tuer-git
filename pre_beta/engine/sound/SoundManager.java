@@ -18,7 +18,7 @@ import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundSystemException;
 import paulscode.sound.codecs.CodecJOrbis;
-//import paulscode.sound.libraries.LibraryJOAL;
+import paulscode.sound.libraries.LibraryJOAL;
 import paulscode.sound.libraries.LibraryJavaSound;
 
 /**
@@ -35,17 +35,16 @@ public final class SoundManager{
     
     
     public SoundManager(){
-    	try{//FIXME uncomment it when Paul Lamb Sound Library works fine with the latest version of JOAL
-    	    /*try{soundSystem=new SoundSystem(LibraryJOAL.class);}
+        try{try{soundSystem=new SoundSystem(LibraryJOAL.class);}
     	    catch(SoundSystemException sseOpenAL)
-    	    {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);*/
+    	    {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);
     	     try{soundSystem=new SoundSystem(LibraryJavaSound.class);}
     	     catch(SoundSystemException sseJavaSound)
     	     {System.out.println("The initialization of the sound manager (based on JavaSound) failed: "+sseJavaSound);}
-    	    /*}*/
+    	    }
     	    if(soundSystem!=null)
                 SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
-           }
+    	   }
         catch(SoundSystemException sse)
         {System.out.println("The initialization of the sound manager failed: "+sse);}
     }
