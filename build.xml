@@ -52,11 +52,11 @@
 		<path refid="project.lib.path"/>
 	</path>
 	<path id="gluegen-rt.natives.path">
-		<pathelement location="lib/jogl/gluegen-rt-natives-linux-amd64.jar"/>
-		<pathelement location="lib/jogl/gluegen-rt-natives-linux-i586.jar"/>
-		<pathelement location="lib/jogl/gluegen-rt-natives-macosx-universal.jar"/>
-		<pathelement location="lib/jogl/gluegen-rt-natives-windows-amd64.jar"/>
-		<pathelement location="lib/jogl/gluegen-rt-natives-windows-i586.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar"/>
 	</path>
 	<path id="jogl.natives.path">
 		<pathelement location="lib/jogl/jogl-all-natives-linux-amd64.jar"/>
