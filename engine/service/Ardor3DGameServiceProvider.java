@@ -13,8 +13,6 @@
 */
 package engine.service;
 
-import java.awt.DisplayMode;
-import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -53,6 +51,9 @@ import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
+import com.jogamp.newt.Display;
+import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.Screen;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
@@ -195,10 +196,19 @@ public final class Ardor3DGameServiceProvider implements Scene{
         root=new Node("root node of the game");
         stateMachine=new ScenegraphStateMachine(root);
         soundManager=new SoundManager();
+        
+        Display display=NewtFactory.createDisplay(null);
+        Screen screen=NewtFactory.createScreen(display,0);
+        screen.addReference();
+        final int screenWidth=screen.getWidth();
+        final int screenHeight=screen.getHeight();
+        final int bitDepth=screen.getCurrentScreenMode().getMonitorMode().getSurfaceSize().getBitsPerPixel();
+        screen.removeReference();
+        
         // Get the default display mode
-        final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
+        //final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         // Choose the full-screen mode
-        final DisplaySettings settings=new DisplaySettings(defaultMode.getWidth(),defaultMode.getHeight(),defaultMode.getBitDepth(),0,0,24,0,0,true,false);
+        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,true,false);
         // Setup the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new JoglCanvasRenderer(this){
         	@Override
@@ -214,7 +224,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
         mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
         // remove the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        //physicalLayer=new PhysicalLayer(new ExtendedAwtKeyboardWrapper((Component)canvas),new AwtMouseWrapper((Component)canvas,mouseManager),new AwtFocusWrapper((Component)canvas));
         physicalLayer=new PhysicalLayer(new JoglNewtKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
     }
 
@@ -271,7 +280,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         //FIXME
         //canvas.close();
-        //necessary for Java Webstart
+        //necessary for Java Web Start
         System.exit(0);
     }
 
