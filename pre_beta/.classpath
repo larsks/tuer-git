@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/fettle/fettle-0.4.5.jar"/>
 	<classpathentry kind="lib" path="lib/google-collect/guava-r08.jar"/>
 	<classpathentry kind="lib" path="lib/mockachino/mockachino-full-0.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
@@ -19,5 +18,6 @@
 	<classpathentry kind="lib" path="lib/joal/joal.jar"/>
 	<classpathentry kind="lib" path="lib/jogl/jogl.all.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
+	<classpathentry kind="lib" path="lib/fettle/fettle-0.6.1.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

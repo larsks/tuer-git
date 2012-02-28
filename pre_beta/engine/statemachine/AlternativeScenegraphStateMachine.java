@@ -8,28 +8,34 @@ import com.ardor3d.util.ReadOnlyTimer;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
-import se.hiflyer.fettle.BasicStateMachine;
-import se.hiflyer.fettle.ModifiableStateMachine;
+import se.hiflyer.fettle.Fettle;
+import se.hiflyer.fettle.StateMachine;
+import se.hiflyer.fettle.impl.MutableTransitionModelImpl;
 import engine.service.Ardor3DGameServiceProvider.Step;
 
 public class AlternativeScenegraphStateMachine {
 	
 	private static final Action<ScenegraphState,String> defaultAction = new Action<ScenegraphState,String>(){
 		@Override
-		public void perform(ScenegraphState from,ScenegraphState to,String cause,Arguments args){
+		public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args, StateMachine<ScenegraphState,String> stateMachine){
 			from.setEnabled(false);
 			to.setEnabled(true);
 		}
 	};
 
-	private final ModifiableStateMachine<ScenegraphState,String> internalStateMachine;
+	private final StateMachine<ScenegraphState,String> internalStateMachine;
+	
+	private final MutableTransitionModelImpl<ScenegraphState,String> transitionModel;
 	
 	private final StateMachineSwitchNode switchNode;
 	
-	public AlternativeScenegraphStateMachine(final Node parent,final ScenegraphState initialState){
+	public AlternativeScenegraphStateMachine(final Node parent){
 		switchNode=new StateMachineSwitchNode();
 		parent.attachChild(switchNode);
-		internalStateMachine=BasicStateMachine.createStateMachine(initialState);
+		//TODO each state must know which event to fire (see StateMachine.fireEvent(E))
+		final ScenegraphState contentRatingSystemState=null;
+		transitionModel=Fettle.newTransitionModel(ScenegraphState.class,String.class);
+		internalStateMachine=transitionModel.newStateMachine(contentRatingSystemState);
 		
 		//internalStateMachine.addTransition(Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION,"to",BasicConditions.ALWAYS,Collections.<Action<Step,String>>emptyList());
 		//internalStateMachine.addTransition(Step.INITIALIZATION,Step.INTRODUCTION,"to",BasicConditions.ALWAYS,Collections.<Action<Step,String>>emptyList());
@@ -41,9 +47,12 @@ public class AlternativeScenegraphStateMachine {
 		//internalStateMachine.addTransition(Step.GAME,Step.GAME_OVER,"game over",BasicConditions.ALWAYS,Collections.<Action<Step,String>>emptyList());
 	}
 	
-	public void addState(final ScenegraphState state){
-		//internalStateMachine.addEntryAction(state, new DefaultEntryAction());
-		switchNode.attachChild(((ScenegraphState)state).getRoot());
+	private void addState(final ScenegraphState state,Action<ScenegraphState,String> entryAction,Action<ScenegraphState,String> exitAction){
+	    //TODO add the state to the transitional model
+		//TODO add an exit action (the dumb one, see defaultAction)
+	    //TODO add an entry action only for the state that loads the levels
+	    //internalStateMachine.addEntryAction(state, new DefaultEntryAction());
+		switchNode.attachChild(state.getRoot());
 	}
 	
 	
