@@ -49,7 +49,7 @@ public final class Md2ToArdorConverter{
         File sourceFile,imageSourceFile,destFile;
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             spatial=md2Importer.load(arg).getMesh();
+             spatial=md2Importer.load(arg).getScene();
              source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              sourceFile=new File(source.getURL().toURI());
              destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".md2"))+".abin");

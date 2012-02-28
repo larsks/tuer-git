@@ -45,7 +45,7 @@ public class ObjToArdorConverter {
         Spatial objSpatial;
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             objSpatial=objImporter.load(arg).getScenegraph();
+             objSpatial=objImporter.load(arg).getScene();
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              File destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".obj"))+".abin");
