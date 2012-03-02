@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -38,7 +37,6 @@ import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.renderer.ContextCapabilities;
-import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
@@ -57,14 +55,7 @@ import com.jogamp.newt.Screen;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
-import engine.statemachine.ContentRatingSystemState;
-import engine.statemachine.GameState;
-import engine.statemachine.InitializationState;
-import engine.statemachine.IntroductionState;
-import engine.statemachine.LoadingDisplayState;
-import engine.statemachine.MainMenuState;
-import engine.statemachine.ScenegraphState;
-import engine.statemachine.ScenegraphStateMachine;
+import engine.statemachine.AlternativeScenegraphStateMachine;
 import engine.taskmanagement.TaskManager;
 import engine.sound.SoundManager;
 
@@ -74,7 +65,7 @@ import engine.sound.SoundManager;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 
-    /**Our native window, not the gl surface itself*/
+    /**Our native window, not the GL surface itself*/
     private final NativeCanvas canvas;
     
     /**physical layer of the input system*/
@@ -92,15 +83,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**root of our scene*/
     private final Node root;
     
-    /**start time of the state "content system rating"*/
-    private double contentSystemRatingStartTime;
-    
-    /**start time of the state "initialization"*/
-    private double initializationStartTime;
-    
-    /**start time of the state "introduction"*/
-    private double introductionStartTime;
-    
+    //FIXME remove it
     public enum Step{
     	      /**PEGI-equivalent rating*/
               CONTENT_RATING_SYSTEM,
@@ -123,8 +106,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
               /**final scene*/
               GAME_END_DISPLAY};
 
-    /**state machine*/
-    private final ScenegraphStateMachine stateMachine;
+    /**state machine*/    
+    private AlternativeScenegraphStateMachine alternativeStateMachine;
     
     /**sound manager*/
     private final SoundManager soundManager;
@@ -156,6 +139,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
              }.start();
              // Disables DirectDraw under Windows in order to avoid conflicts with OpenGL
              System.setProperty("sun.java2d.noddraw","true");
+             // Disables Direct3D under Windows in order to avoid conflicts with OpenGL
+             System.setProperty("sun.java2d.d3d","false");
             }    	
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
@@ -189,14 +174,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private Ardor3DGameServiceProvider(){
         exit=false;
         taskManager=new TaskManager();
-        contentSystemRatingStartTime=Double.NaN;
-        initializationStartTime=Double.NaN;
-        introductionStartTime=Double.NaN;
         timer=new Timer();
         root=new Node("root node of the game");
-        stateMachine=new ScenegraphStateMachine(root);
         soundManager=new SoundManager();
         
+        //retrieves some parameters of the display
         Display display=NewtFactory.createDisplay(null);
         Screen screen=NewtFactory.createScreen(display,0);
         screen.addReference();
@@ -205,9 +187,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final int bitDepth=screen.getCurrentScreenMode().getMonitorMode().getSurfaceSize().getBitsPerPixel();
         screen.removeReference();
         
-        // Get the default display mode
-        //final DisplayMode defaultMode=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
-        // Choose the full-screen mode
+        //initializes the settings, the full-screen mode is enabled
         final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,true,false);
         // Setup the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new JoglCanvasRenderer(this){
@@ -218,11 +198,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 return(realCaps);
         	}
         };
-        // Setup a canvas      
+        //creates a canvas      
         canvas=new JoglNewtWindow(canvasRenderer,settings);
         canvas.init();
         mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
-        // remove the mouse cursor
+        //removes the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
         physicalLayer=new PhysicalLayer(new JoglNewtKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
     }
@@ -235,7 +215,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private final void start(){
         init();
 
-        // Run in this same thread.
+        //runs in this same thread
         while(!exit)
             {if(canvas.isClosing())
                  {exit=true;
@@ -243,43 +223,17 @@ public final class Ardor3DGameServiceProvider implements Scene{
                  }
              updateLogicalLayer(timer);
              timer.update();
-             if(stateMachine.isEnabled(Step.CONTENT_RATING_SYSTEM.ordinal()))
-                 {if(Double.isNaN(contentSystemRatingStartTime))
-                      contentSystemRatingStartTime=timer.getTimeInSeconds();
-                  if(timer.getTimeInSeconds()-contentSystemRatingStartTime>2)
-                      {stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),false);
-                       stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),true);
-                      }
-                 }
-             if(stateMachine.isEnabled(Step.INITIALIZATION.ordinal()))
-                 {if(Double.isNaN(initializationStartTime))
-                      initializationStartTime=timer.getTimeInSeconds();
-                  if(timer.getTimeInSeconds()-initializationStartTime>5&&
-                	 taskManager.getTaskCount()==0)
-                      {stateMachine.setEnabled(Step.INITIALIZATION.ordinal(),false);
-                       stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),true);       
-                      }
-                 }
-             if(stateMachine.isEnabled(Step.INTRODUCTION.ordinal()))
-                 {if(Double.isNaN(introductionStartTime))
-                      introductionStartTime=timer.getTimeInSeconds();
-                  if(timer.getTimeInSeconds()-introductionStartTime>17)
-                     {stateMachine.setEnabled(Step.INTRODUCTION.ordinal(),false);
-                      stateMachine.setEnabled(Step.MAIN_MENU.ordinal(),true);
-                     }
-                 }
-             //update controllers/render states/transforms/bounds for rootNode.
+             //updates controllers/render states/transforms/bounds for rootNode.
              root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
              //Thread.yield();
             }
+        //drives the context current to perform a final cleanup
         canvas.getCanvasRenderer().makeCurrentContext();
 
-        // Done, do cleanup
+        //done, does the cleanup
         soundManager.cleanup();
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
-        //FIXME
-        //canvas.close();
         //necessary for Java Web Start
         System.exit(0);
     }
@@ -289,16 +243,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
      */
     private final void init(){
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
-        // Create a ZBuffer to display pixels closest to the camera above farther ones.
+        //creates a ZBuffer to display pixels closest to the camera above farther ones.
         final ZBufferState buf=new ZBufferState();
         buf.setEnabled(true);
         buf.setFunction(ZBufferState.TestFunction.LessThanOrEqualTo);
         root.setRenderState(buf);
-        // Add our awt based image loader.
+        //adds our AWT-based image loader.
         AWTImageLoader.registerLoader();
-        // Set the default font
+        //sets the default font
         //UIComponent.setDefaultFont(getFontsList().get(2));
-        // Set the location of our resources.
+        //sets the location of our resources.
         try{SimpleResourceLocator srl=new SimpleResourceLocator(getClass().getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
            } 
@@ -309,52 +263,19 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();
-        final SwitchStepAction fromRatingToInitAction=new SwitchStepAction(stateMachine,Step.CONTENT_RATING_SYSTEM,Step.INITIALIZATION,renderContext);
-        final SwitchStepAction fromInitToIntroAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.INITIALIZATION,Step.INTRODUCTION,taskManager,renderContext);
-        final SwitchStepAction fromIntroToMainMenuAction=new SwitchStepAction(stateMachine,Step.INTRODUCTION,Step.MAIN_MENU,renderContext);
-        final SwitchStepAction fromMainMenuToLoadingDisplayAction=new SwitchStepAction(stateMachine,Step.MAIN_MENU,Step.LEVEL_LOADING_DISPLAY,renderContext);
-        final SwitchStepAction fromLoadingDisplayToGameAction=new SwitchStepOnlyIfTaskQueueEmptyAction(stateMachine,Step.LEVEL_LOADING_DISPLAY,Step.GAME,taskManager,renderContext);
-        
-        final LoadingDisplayState loadingDisplayState;
-        //create one state per step
-        stateMachine.addState(new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,fromRatingToInitAction,soundManager));
-        stateMachine.addState(new InitializationState(canvas,physicalLayer,exitAction,fromInitToIntroAction,soundManager,taskManager));
-        stateMachine.addState(new IntroductionState(canvas,physicalLayer,exitAction,fromIntroToMainMenuAction,soundManager));        
-        stateMachine.addState(new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,fromMainMenuToLoadingDisplayAction,soundManager));
-        stateMachine.addState(loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,fromLoadingDisplayToGameAction,soundManager,taskManager));
-        stateMachine.addState(new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager));
-        stateMachine.addState(new ScenegraphState(soundManager));
-        stateMachine.addState(new ScenegraphState(soundManager));
-        stateMachine.addState(new ScenegraphState(soundManager));
-        stateMachine.addState(new ScenegraphState(soundManager));
-        // enqueue initialization tasks for states that are not in-game states
-        // do not enqueue the task of the first state as it would be called after its display
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.INITIALIZATION.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.INTRODUCTION.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.MAIN_MENU.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_LOADING_DISPLAY.ordinal()));
-        // do not enqueue the game task now as it is the role of the level loading display
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_OVER.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.PAUSE_MENU.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.LEVEL_END_DISPLAY.ordinal()));
-        taskManager.enqueueTask(stateMachine.getStateInitializationTask(Step.GAME_END_DISPLAY.ordinal()));
-        // put the task that loads a level into the level loading state
-        loadingDisplayState.setLevelInitializationTask(stateMachine.getStateInitializationTask(Step.GAME.ordinal()));
-        // enable the first state
-        stateMachine.setEnabled(Step.CONTENT_RATING_SYSTEM.ordinal(),true);
+        alternativeStateMachine=new AlternativeScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,taskManager,exitAction);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
-        // check and execute any input triggers, if we are concerned with input
-        stateMachine.updateLogicalLayer(timer);
+        // checks and executes any input triggers, if we are concerned with input
+        alternativeStateMachine.updateLogicalLayer(timer);
     }
 
     @Override
     public final boolean renderUnto(final Renderer renderer){
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
-            {// Draw the root and all its children.
+            {//draws the root and all its children
              root.onDraw(renderer);
              //executes all update tasks queued by the controllers
              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.UPDATE).execute(renderer);
@@ -366,57 +287,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
 
     @Override
     public final PickResults doPick(final Ray3 pickRay){
-        // Ignore
+        //ignores
         return(null);
-    }
-    
-    
-    private static class SwitchStepAction implements TriggerAction{
-
-        
-        private final ScenegraphStateMachine stateMachine;
-        
-        private final Step sourceStep;
-        
-        private final Step destinationStep;
-        
-        private final RenderContext renderContext;
-               
-        
-        private SwitchStepAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final RenderContext renderContext){
-            this.stateMachine=stateMachine;
-            this.sourceStep=sourceStep;
-            this.destinationStep=destinationStep;
-            this.renderContext=renderContext;
-        }
-        
-        
-        @Override
-        public void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-        	GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
-                @Override
-                public Void call() throws Exception{
-                    stateMachine.setEnabled(sourceStep.ordinal(),false);
-                    stateMachine.setEnabled(destinationStep.ordinal(),true);     
-                    return(null);
-                }
-            });                  
-        }       
-    }
-    
-    private static final class SwitchStepOnlyIfTaskQueueEmptyAction extends SwitchStepAction{
-    	
-    	private final TaskManager taskManager;
-        
-        private SwitchStepOnlyIfTaskQueueEmptyAction(final ScenegraphStateMachine stateMachine,final Step sourceStep,final Step destinationStep,final TaskManager taskManager,final RenderContext renderContext){
-            super(stateMachine,sourceStep,destinationStep,renderContext);
-            this.taskManager=taskManager;
-        }
-        
-        @Override
-        public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-            if(taskManager.getTaskCount()==0)
-                super.perform(source,inputState,tpf);
-        }
     }
 }
