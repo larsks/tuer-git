@@ -82,29 +82,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
 
     /**root of our scene*/
     private final Node root;
-    
-    //FIXME remove it
-    public enum Step{
-    	      /**PEGI-equivalent rating*/
-              CONTENT_RATING_SYSTEM,
-              /**logo (trademark or brandname)*/
-              INITIALIZATION,
-              /**introduction scene*/
-              INTRODUCTION,
-              /**main menu*/
-              MAIN_MENU,
-              /**display of the level loading*/
-              LEVEL_LOADING_DISPLAY,
-              /**in-game display*/
-              GAME,
-              /**display when the player loses*/
-              GAME_OVER,
-              /**pause menu*/
-              PAUSE_MENU,
-              /**display at the end of a level with figures, etc...*/
-              LEVEL_END_DISPLAY,
-              /**final scene*/
-              GAME_END_DISPLAY};
 
     /**state machine*/    
     private AlternativeScenegraphStateMachine alternativeStateMachine;

@@ -42,6 +42,10 @@ import engine.taskmanagement.TaskManager;
  * 
  * @author Julien Gouesse
  *
+ * TODO: add several states: GAME_OVER (display when the player loses), 
+ *                           PAUSE_MENU,
+ *                           LEVEL_END_DISPLAY (display at the end of a level with figures, etc...)
+ *                           GAME_END_DISPLAY (final scene)
  */
 public class AlternativeScenegraphStateMachine {
 	

@@ -29,7 +29,6 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import engine.movement.UniformlyVariableRotationController;
-import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
@@ -46,7 +45,7 @@ public final class InitializationState extends ScenegraphState{
         super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
         taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
-        box=new Box(Step.INITIALIZATION.toString()+"Box",Vector3.ZERO,5,5,5);
+        box=new Box("Initialization Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));       
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
@@ -77,7 +76,7 @@ public final class InitializationState extends ScenegraphState{
         // puts a texture onto the box
         TextureState ts=new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(Step.INITIALIZATION.toString().toLowerCase()+".png",Texture.MinificationFilter.Trilinear,true));
+        ts.setTexture(TextureManager.load("initialization.png",Texture.MinificationFilter.Trilinear,true));
         box.setRenderState(ts);
     }
     

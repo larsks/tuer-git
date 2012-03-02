@@ -22,7 +22,6 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
-//import com.ardor3d.ui.text.BMText;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Spatial;
@@ -30,8 +29,6 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.TextureManager;
-
-import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
@@ -81,7 +78,7 @@ public final class LoadingDisplayState extends ScenegraphState{
             	    }
             }
         });
-        box=new Box(Step.LEVEL_LOADING_DISPLAY.toString()+"Box",Vector3.ZERO,5,5,5);
+        box=new Box("Level Loading Display Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));
         getRoot().attachChild(box);
