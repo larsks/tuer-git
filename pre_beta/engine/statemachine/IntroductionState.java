@@ -39,7 +39,6 @@ import engine.movement.MovementEquation;
 import engine.movement.UniformlyVariableMovementEquation;
 import engine.movement.UniformlyVariableRectilinearTranslationController;
 import engine.service.Ardor3DGameServiceProvider;
-import engine.service.Ardor3DGameServiceProvider.Step;
 import engine.sound.SoundManager;
 
 public final class IntroductionState extends ScenegraphState{
@@ -56,7 +55,7 @@ public final class IntroductionState extends ScenegraphState{
     
     public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction,final SoundManager soundManager){
         super(soundManager);
-        box=new Box(Step.INTRODUCTION.toString()+"Box",Vector3.ZERO,12,9,5);
+        box=new Box("Introduction Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-75));
         //configure the spread effect
