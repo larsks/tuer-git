@@ -40,8 +40,8 @@ public final class ContentRatingSystemState extends ScenegraphState{
         final BMText textNode=new BMText("contentSystemRatingNode",text,Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toInitAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,returnTrigger};
+        //final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toInitAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger/*,returnTrigger*/};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
