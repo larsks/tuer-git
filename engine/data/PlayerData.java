@@ -112,7 +112,8 @@ public final class PlayerData {
             {if(weaponUserData.isPrimary())
                  result=primaryHandWeaponContainer.add(collectible,weapon);
              else
-                 result=secondaryHandWeaponContainer.add(collectible,weapon);
+                 //the weapon must be already in the primary container to be added into the second one
+                 result=primaryHandWeaponContainer.isAvailable(weapon)&&secondaryHandWeaponContainer.add(collectible,weapon);
              if(result&&canChangeOfOwner)
             	 weaponUserData.setOwnerUid(uid);           	              	 
             }
