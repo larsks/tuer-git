@@ -29,14 +29,17 @@ public final class WeaponUserData extends CollectibleUserData{
 	private int ownerUid;
 	/**flag indicating whether a weapon can change of owner*/
 	private boolean digitalWatermarkEnabled;
+	/**flag indicating whether a weapon is primary*/
+    private final boolean primary;
 	
 	
-	public WeaponUserData(final String sourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled){
+	public WeaponUserData(final String sourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
 		super(sourcename,null);
 		this.weapon=weapon;
 		this.rotation=rotation;
 		this.ownerUid=ownerUid;
 		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
+		this.primary=primary;
 		this.ammunitionInMagazine=new AmmunitionContainer(weapon.isForMelee()?0:weapon.getMagazineSize());
 	}
 	
@@ -65,6 +68,14 @@ public final class WeaponUserData extends CollectibleUserData{
 	public final void setDigitalWatermarkEnabled(final boolean digitalWatermarkEnabled){
 		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
 	}
+	
+	/**
+     * tells whether a weapon is primary
+     * @return <code>true</code> if a weapon is primary, otherwise <code>false</code>
+     */
+    public final boolean isPrimary(){
+        return(primary);
+    }
 	
 	public final int getAmmunitionCountInMagazine(){
 		return(ammunitionInMagazine.getAmmunitionCount());

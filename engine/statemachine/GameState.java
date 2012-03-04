@@ -46,7 +46,6 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
-import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
@@ -561,14 +560,14 @@ public final class GameState extends ScenegraphState{
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
-        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
-        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("SMACH",false,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
-        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
-        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
-        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",false,1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
+        weaponFactory.addNewWeapon("PISTOL_9MM",8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
+        weaponFactory.addNewWeapon("PISTOL_10MM",10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
+        weaponFactory.addNewWeapon("MAG_60",30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("UZI",20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("SMACH",35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
+        weaponFactory.addNewWeapon("LASER",15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
+        weaponFactory.addNewWeapon("SHOTGUN",3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
+        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
         return(weaponFactory);
     }
     
@@ -706,7 +705,7 @@ public final class GameState extends ScenegraphState{
             uziNode.setName("an uzi");
             uziNode.setTranslation(111.5,0.15,219);
             uziNode.setScale(0.2);
-            uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false));
+            uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false,true));
             //add some bounding boxes for all objects that can be picked up
             collectibleObjectsList.add(uziNode);
             getRoot().attachChild(uziNode);
@@ -714,7 +713,7 @@ public final class GameState extends ScenegraphState{
             smachNode.setName("a smach");
             smachNode.setTranslation(112.5,0.15,219);
             smachNode.setScale(0.2);
-            smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false));
+            smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(smachNode);
             getRoot().attachChild(smachNode);
             final Node pistolNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
@@ -722,11 +721,11 @@ public final class GameState extends ScenegraphState{
             pistolNode.setTranslation(113.5,0.1,219);
             pistolNode.setScale(0.001);
             pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-            pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
+            pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistolNode);
             getRoot().attachChild(pistolNode);            
             final Node duplicatePistolNode=pistolNode.makeCopy(false);
-            duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false));
+            duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,false));
             duplicatePistolNode.setTranslation(113.5,0.1,217);
             collectibleObjectsList.add(duplicatePistolNode);
             getRoot().attachChild(duplicatePistolNode);
@@ -737,28 +736,28 @@ public final class GameState extends ScenegraphState{
             pistol2Node.setTranslation(114.5,0.1,219);
             pistol2Node.setScale(0.02);
             pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-            pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false));
+            pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistol2Node);
             getRoot().attachChild(pistol2Node);
             final Node pistol3Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
             pistol3Node.setName("a Mag 60");
             pistol3Node.setTranslation(115.5,0.1,219);
             pistol3Node.setScale(0.02);
-            pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false));
+            pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistol3Node);
             getRoot().attachChild(pistol3Node);
             final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
             laserNode.setName("a laser");
             laserNode.setTranslation(116.5,0.1,219);
             laserNode.setScale(0.02);
-            laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false));
+            laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(laserNode);
             getRoot().attachChild(laserNode);
             final Node shotgunNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
             shotgunNode.setName("a shotgun");
             shotgunNode.setTranslation(117.5,0.1,219);
             shotgunNode.setScale(0.1);
-            shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false));
+            shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(shotgunNode);
             getRoot().attachChild(shotgunNode);	  
             
@@ -768,7 +767,7 @@ public final class GameState extends ScenegraphState{
             rocketLauncherNode.setName("a rocket launcher");
             rocketLauncherNode.setTranslation(117.5,0.1,222);
             rocketLauncherNode.setScale(0.08);
-            rocketLauncherNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false));
+            rocketLauncherNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(rocketLauncherNode);
             getRoot().attachChild(rocketLauncherNode);	
 	       }
