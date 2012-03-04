@@ -54,6 +54,8 @@ public final class PlayerData {
 	private final WeaponFactory weaponFactory;
 	/**container of ammunition container*/
 	private final AmmunitionContainerContainer ammoContainerContainer;
+	//FIXME use a state machine
+	//TODO define a duration to select another weapon
 	/**flag indicating whether the player is attacking*/
 	private boolean attackEnabled;
 	
@@ -107,7 +109,10 @@ public final class PlayerData {
 		final boolean digitalWatermarkEnabled=weaponUserData.isDigitalWatermarkEnabled();
 	    final boolean canChangeOfOwner=ownerUid!=uid&&!digitalWatermarkEnabled;
 		if((ownerUid==uid||canChangeOfOwner))
-            {result=primaryHandWeaponContainer.add(collectible,weapon)||(weapon.isTwoHanded() && secondaryHandWeaponContainer.add(collectible,weapon));
+            {if(weaponUserData.isPrimary())
+                 result=primaryHandWeaponContainer.add(collectible,weapon);
+             else
+                 result=secondaryHandWeaponContainer.add(collectible,weapon);
              if(result&&canChangeOfOwner)
             	 weaponUserData.setOwnerUid(uid);           	              	 
             }

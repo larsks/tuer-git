@@ -22,8 +22,6 @@ public final class Weapon implements Comparable<Weapon>{
     private final String identifier;
     /**unique identifier*/
     private final int uid;
-	/**flag indicating whether a weapon can be used in both hands*/
-	private final boolean twoHanded;
 	/**size of the magazine, -1 for melee weapons*/
 	private final int magazineSize;
 	/**ammunition (might be null especially for melee weapons)*/
@@ -32,26 +30,20 @@ public final class Weapon implements Comparable<Weapon>{
 	private final int ammunitionPerShot;
 	/**duration of an attack in milliseconds*/
 	private final int attackDurationInMillis;
+	//TODO store the duration necessary to reload
 	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
-	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int attackDurationInMillis){
+	Weapon(final String identifier,final int magazineSize,
+	        final Ammunition ammunition,final int ammunitionPerShot,
+	        final int attackDurationInMillis){
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
-		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
 		this.ammunition=ammunition;
 		this.ammunitionPerShot=ammunitionPerShot;
 		this.attackDurationInMillis=attackDurationInMillis;
 	}
-	    
-	/**
-	 * tells whether a weapon can be used in both hands
-	 * @return <code>true</code> if a weapon can be used in both hands, otherwise <code>false</code>
-	 */
-	public final boolean isTwoHanded(){
-    	return(twoHanded);
-    }
 	    
 	/**
 	 * gets the size of the magazine
