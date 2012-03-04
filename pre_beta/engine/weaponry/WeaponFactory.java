@@ -28,12 +28,12 @@ public final class WeaponFactory {
 		weaponsIndicesMap=new HashMap<Integer,Weapon>();
 	}	
 	
-	public final boolean addNewWeapon(final String identifier,final int magazineSize,
+	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int attackDurationInMillis){
 		final boolean success=identifier!=null&&!weaponsMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(identifier,magazineSize,ammunition,ammunitionPerShot,attackDurationInMillis);
+			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,attackDurationInMillis);
 			 weaponsMap.put(identifier,weapon);
 			 weaponsIndicesMap.put(weapon.getUid(),weapon);
 			}

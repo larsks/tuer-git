@@ -560,14 +560,14 @@ public final class GameState extends ScenegraphState{
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("PISTOL_9MM",8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
-        weaponFactory.addNewWeapon("PISTOL_10MM",10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
-        weaponFactory.addNewWeapon("MAG_60",30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("UZI",20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("SMACH",35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
-        weaponFactory.addNewWeapon("LASER",15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
-        weaponFactory.addNewWeapon("SHOTGUN",3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
-        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
+        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
+        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
+        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
+        weaponFactory.addNewWeapon("SMACH",true,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
+        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
+        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
+        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",false,1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
         return(weaponFactory);
     }
     

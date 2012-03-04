@@ -35,6 +35,8 @@ public final class WeaponUserData extends CollectibleUserData{
 	
 	public WeaponUserData(final String sourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
 		super(sourcename,null);
+		if(!primary&&!weapon.isTwoHanded())
+		    throw new IllegalArgumentException("The weapon " + weapon + " cannot be used as a secondary weapon");
 		this.weapon=weapon;
 		this.rotation=rotation;
 		this.ownerUid=ownerUid;
