@@ -165,7 +165,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         screen.removeReference();
         
         //initializes the settings, the full-screen mode is enabled
-        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,true,false);
+        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,/*true*/false,false);
         // Setup the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new JoglCanvasRenderer(this){
         	@Override
