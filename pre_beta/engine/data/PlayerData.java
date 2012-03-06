@@ -281,12 +281,12 @@ public final class PlayerData {
 		return(consumedAmmunitionOrKnockCount);
 	}
 	
-	public final void selectNextWeapon(){
-		selectWeapon(true);
+	public final boolean selectNextWeapon(){
+		return(selectWeapon(true));
 	}
 	
-	public final void selectPreviousWeapon(){
-    	selectWeapon(false);
+	public final boolean selectPreviousWeapon(){
+    	return(selectWeapon(false));
 	}
 	
 	public final boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
