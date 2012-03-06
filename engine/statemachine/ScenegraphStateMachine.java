@@ -76,7 +76,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager);
         //sets the initial state
         internalStateMachine.rawSetState(contentRatingSystemState);
-        //adds the state and its actions to the state machine
+        //adds the states and their actions to the state machine
         addState(contentRatingSystemState,null,new TransitionAction());
         addState(initializationState,null,new TransitionAction());
         addState(introductionState,null,new TransitionAction());

@@ -13,28 +13,4 @@
 */
 package engine.statemachine;
 
-
-public class State{
-
-    
-    private boolean enabled;
-    
-    
-    public State(){
-        enabled=false;
-    }
-    
-    
-    public final boolean isEnabled(){
-        return(this.enabled);
-    }
-    
-    public void setEnabled(final boolean enabled){
-        if(this.enabled!=enabled)
-            {this.enabled=enabled;
-             
-            }       
-    }
-    
-    public void init(){}
-}
+public enum PlayerState{IDLE,ATTACKING,RELOADING,SELECTING}
