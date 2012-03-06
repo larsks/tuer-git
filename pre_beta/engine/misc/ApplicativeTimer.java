@@ -13,7 +13,15 @@
 */
 package engine.misc;
 
-public class ApplicativeTimer {
+import com.ardor3d.util.ReadOnlyTimer;
+
+/**
+ * Timer that can be paused. N.B: the frame rate is equal to zero during a pause
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public class ApplicativeTimer implements ReadOnlyTimer{
 	
 	private static final long TIMER_RESOLUTION = 1000000000L;
 	
@@ -33,6 +41,10 @@ public class ApplicativeTimer {
     
     private long latestPauseElapsedTime;
     
+    private double frameRate;
+    
+    private double timePerFrame;
+    
     public ApplicativeTimer(){
     	startTime=getSystemNanoTime();
     	pauseEnabled=false;
@@ -51,9 +63,16 @@ public class ApplicativeTimer {
    			     pauseElapsedTime+=latestPauseElapsedTime;   		 
     	    }
     	if(pauseEnabled)
-    		latestPauseElapsedTime=systemNanoTime-latestPauseStartTime;
+    		{latestPauseElapsedTime=systemNanoTime-latestPauseStartTime;
+    		 timePerFrame=0;
+    		 frameRate=0;
+    		}
     	else   		
-    	    elapsedTime=systemNanoTime-startTime-pauseElapsedTime;
+    	    {final long previousElapsedTime=elapsedTime;
+    	     elapsedTime=systemNanoTime-startTime-pauseElapsedTime;
+    	     timePerFrame=(elapsedTime-previousElapsedTime)*INVERSE_TIMER_RESOLUTION;
+    	     frameRate=1.0/timePerFrame;
+    	    }
     }
     
     public final void setPauseEnabled(final boolean pauseEnabled){
@@ -71,6 +90,31 @@ public class ApplicativeTimer {
         return(elapsedTime);
     }
     
+    @Override
+    public long getTime(){
+        return(getElapsedTimeInNanoseconds());
+    }
+    
+    @Override
+    public double getTimeInSeconds() {
+        return(getElapsedTimeInSeconds());
+    }
+    
+    @Override
+    public long getResolution(){
+        return TIMER_RESOLUTION;
+    }
+    
+    @Override
+    public double getFrameRate() {
+        return frameRate;
+    }
+
+    @Override
+    public double getTimePerFrame() {
+        return timePerFrame;
+    }
+    
     public void reset(){
     	startTime=getSystemNanoTime();
     	pauseEnabled=false;
@@ -80,9 +124,12 @@ public class ApplicativeTimer {
     	latestPauseElapsedTime=0L;
     }
     
+    public boolean isPauseEnabled(){
+        return(pauseEnabled);
+    }
+    
     private final long getSystemNanoTime(){
-    	final long rawSystemNanoTime=System.nanoTime();
-    	
+    	final long rawSystemNanoTime=System.nanoTime();    	
     	return(rawSystemNanoTime);
     }
 }
