@@ -23,10 +23,10 @@ package engine.statemachine;
 public class StateInitializationRunnable implements Runnable{
 
 
-    protected final State state;
+    protected final ScenegraphState state;
 
 
-    public StateInitializationRunnable(final State state){
+    public StateInitializationRunnable(final ScenegraphState state){
         this.state=state;
     }
 
