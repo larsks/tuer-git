@@ -55,7 +55,7 @@ import com.jogamp.newt.Screen;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
-import engine.statemachine.AlternativeScenegraphStateMachine;
+import engine.statemachine.ScenegraphStateMachine;
 import engine.taskmanagement.TaskManager;
 import engine.sound.SoundManager;
 
@@ -83,8 +83,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**root of our scene*/
     private final Node root;
 
-    /**state machine*/    
-    private AlternativeScenegraphStateMachine alternativeStateMachine;
+    /**state machine of the scenegraph*/    
+    private ScenegraphStateMachine scenegraphStateMachine;
     
     /**sound manager*/
     private final SoundManager soundManager;
@@ -240,12 +240,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        alternativeStateMachine=new AlternativeScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,taskManager,exitAction);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,taskManager,exitAction);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
         // checks and executes any input triggers, if we are concerned with input
-        alternativeStateMachine.updateLogicalLayer(timer);
+        scenegraphStateMachine.updateLogicalLayer(timer);
     }
 
     @Override

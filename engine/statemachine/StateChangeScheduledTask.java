@@ -20,9 +20,9 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public class StateChangeScheduledTask {
+public class StateChangeScheduledTask<S> {
 
-    private final State state;
+    private final S state;
 
     private final StateChangeType stateChangeType;
     
@@ -32,7 +32,7 @@ public class StateChangeScheduledTask {
     
     private final int executionCount;
     
-    public StateChangeScheduledTask(final State state,final StateChangeType stateChangeType,
+    public StateChangeScheduledTask(final S state,final StateChangeType stateChangeType,
             final double timeOffsetInSeconds,final Runnable runnable,final int executionCount){
         this.state=state;
         this.stateChangeType=stateChangeType;
@@ -45,7 +45,7 @@ public class StateChangeScheduledTask {
         this.executionCount=executionCount;
     }
     
-    public State getState(){
+    public S getState(){
         return(state);
     }
 
