@@ -1,5 +1,5 @@
-TUER : Truly Unusual Experience of Revolution
-pre-beta version (unstable)
+TUER: Truly Unusual Experience of Revolution
+pre-beta version
 
 Single player first person shooter 
 created by Julien Gouesse (engineer in computer science in a subsidiary of the French institute of petroleum)
