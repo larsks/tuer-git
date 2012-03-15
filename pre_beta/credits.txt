@@ -2,14 +2,14 @@ TUER : Truly Unusual Experience of Revolution
 pre-beta version (unstable)
 
 Single player first person shooter 
-created by Julien Gouesse (alumni of the university of Paris 6)
-largely inspired from "Art Attack" by Vincent Stahl (www.stahlforce.com)
+created by Julien Gouesse (engineer in computer science in a subsidiary of the French institute of petroleum)
+inspired from "Art Attack" by Vincent Stahl (www.stahlforce.com)
 
 project under GPL licence
 
 requires OpenGL 1.3 and Java Runtime Environment 1.6
 
-please report any bug : gouessej@yahoo.fr
+please report any bug: gouessej@orange.fr
 
 
 Special thanks to:
@@ -19,5 +19,5 @@ Yannick Comte (main alpha tester under Linux and Microsoft Windows Vista, author
 Maxime Comte (artist who has drawn one of the pistols)
 Psionic3D (artist who drew most of the weapons)
 Oto the cleaner (artist who drew some outdoor environments)
-Markus Borbély (artist who drew the rocket launcher)
+Markus Borbély (artist who drew the rocket launcher under Creative Commons BY-SA)
 Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons Sampling Plus 1.0 License)
