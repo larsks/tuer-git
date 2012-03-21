@@ -17,18 +17,75 @@ import java.util.Collections;
 import com.ardor3d.util.ReadOnlyTimer;
 import engine.data.PlayerData;
 import se.hiflyer.fettle.Action;
+import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
+import se.hiflyer.fettle.StateMachine;
 
-
+/**
+ * State machine handling player states. All transitions go to and come from the idle state.
+ * 
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,PlayerState>{
+
+    /**
+     * Exit action that adds a scheduled task (starting when we enter another state) to the scheduler in order 
+     * to go back to the idle state after several seconds
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerState>{
+
+        private final Scheduler<PlayerState> scheduler;
+    
+        public TimedTransitionalActionToIdleState(final Scheduler<PlayerState> scheduler){
+            this.scheduler=scheduler;
+        }
+    
+        @Override
+        public void onTransition(PlayerState from,PlayerState to,PlayerState event,Arguments arguments,StateMachine<PlayerState,PlayerState> stateMachine){
+            //this task must be executed only one time
+            final int executionCount=1;
+            //FIXME it should be set elsewhere
+            final double timeOffsetInSeconds=0.2;
+            //builds the runnable that fires the proper event
+            final Runnable runnable=new ToIdleStateRunnable(stateMachine);
+            //creates the task
+            final StateChangeScheduledTask<PlayerState> stateChangeScheduledTask=new StateChangeScheduledTask<PlayerState>(to,StateChangeType.ENTRY,timeOffsetInSeconds,runnable,executionCount);
+            //adds it to the scheduler
+            scheduler.addScheduledTask(stateChangeScheduledTask);
+        }
+    
+        /**
+         * Runnable that fires the idle event to go back to the idle state
+         * 
+         * @author Julien Gouesse
+         *
+         */
+        private static final class ToIdleStateRunnable implements Runnable{
+            
+            private final StateMachine<PlayerState,PlayerState> stateMachine;
+        
+            public ToIdleStateRunnable(StateMachine<PlayerState,PlayerState> stateMachine){
+                this.stateMachine=stateMachine;
+            }
+            
+            @Override
+            public void run(){
+                stateMachine.fireEvent(PlayerState.IDLE);
+            }
+        }
+    }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerState.class);
         //sets the initial state
         internalStateMachine.rawSetState(PlayerState.IDLE);
         //adds the states and their actions to the state machine
-        addState(PlayerState.IDLE,null,null);
-        //TODO: add some entry actions that add scheduled tasks to the scheduler in order to go back to the idle state after several seconds
+        addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
         addState(PlayerState.ATTACKING,null,null);
         addState(PlayerState.RELOADING,null,null);
         addState(PlayerState.SELECTING,null,null);
