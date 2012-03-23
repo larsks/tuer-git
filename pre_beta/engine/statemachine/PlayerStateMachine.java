@@ -94,11 +94,9 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //adds all transitions between states to the transition model
         //no condition is required but an attack may fail (because of a lack of ammo).
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACKING,PlayerState.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());
-        /**
-         * TODO: put a condition into this transition: the weapon factory must not be empty, at least one (not for melee) 
-         * weapon must be selected (see isCurrentWeaponAmmunitionCountDisplayable()) and at least one magazine must not be full
-         */
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOADING,PlayerState.RELOADING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());
+        //creates a condition satisfied when the player can reload his weapon(s)
+        final ReloadPossibleCondition reloadPossibleCondition=new ReloadPossibleCondition(playerData);
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOADING,PlayerState.RELOADING,reloadPossibleCondition,Collections.<Action<PlayerState,PlayerState>>emptyList());
         //TODO: make a distinction between the check and the effective selection
         //TODO: put a condition into this transition: it must be possible to select another weapon
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECTING,PlayerState.SELECTING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());       
