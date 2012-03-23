@@ -78,7 +78,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
                 stateMachine.fireEvent(PlayerState.IDLE);
             }
         }
-    }
+    }    
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerState.class);
@@ -86,15 +86,21 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         internalStateMachine.rawSetState(PlayerState.IDLE);
         //adds the states and their actions to the state machine
         addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
+        //TODO: use an entry action to launch the animation (perhaps with scheduled tasks) and use an exit action to update the data
         addState(PlayerState.ATTACKING,null,null);
         addState(PlayerState.RELOADING,null,null);
         addState(PlayerState.SELECTING,null,null);
+        //TODO: make a distinction between states and transitions
         //adds all transitions between states to the transition model
-        //TODO: put a condition into this transition: the attack must consume some ammo
+        //no condition is required but an attack may fail (because of a lack of ammo).
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACKING,PlayerState.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());
-        //TODO: put a condition into this transition: the weapon factory must not be empty, at least one (not for melee) weapon must be selected and at least one magazine must not be full
+        /**
+         * TODO: put a condition into this transition: the weapon factory must not be empty, at least one (not for melee) 
+         * weapon must be selected (see isCurrentWeaponAmmunitionCountDisplayable()) and at least one magazine must not be full
+         */
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOADING,PlayerState.RELOADING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());
-        //TODO: put a condition into this transition: the weapon factory must not be empty
+        //TODO: make a distinction between the check and the effective selection
+        //TODO: put a condition into this transition: it must be possible to select another weapon
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECTING,PlayerState.SELECTING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());       
     }
     

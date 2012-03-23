@@ -465,10 +465,10 @@ public final class GameState extends ScenegraphState{
             	if(playerData.isCurrentWeaponAmmunitionCountDisplayable())
             		{final StringBuffer text=new StringBuffer();
             		 if(playerData.isDualWeaponUseEnabled())
-            			 {text.append(playerData.getAmmunitionCountInLeftHandedWeapon());
+            			 {text.append(playerData.getAmmunitionCountInSecondaryHandedWeapon());
             			  text.append(" ");
             			 }
-            		 text.append(playerData.getAmmunitionCountInRightHandedWeapon());
+            		 text.append(playerData.getAmmunitionCountInPrimaryHandedWeapon());
             		 text.append(" ");
             		 text.append(playerData.getAmmunitionCountInContainer());
             		 ammoTextLabel.setText(text.toString());
