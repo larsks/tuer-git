@@ -223,7 +223,7 @@ public final class PlayerData {
 		return(weaponInUse!=null&&!weaponInUse.isForMelee());
 	}
 	
-	public final int getAmmunitionCountInLeftHandedWeapon(){
+	public final int getAmmunitionCountInSecondaryHandedWeapon(){
 		final int ammunitionCountInLeftHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
 		    {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
@@ -234,7 +234,7 @@ public final class PlayerData {
 		return(ammunitionCountInLeftHandedWeapon);
 	}
 	
-	public final int getAmmunitionCountInRightHandedWeapon(){
+	public final int getAmmunitionCountInPrimaryHandedWeapon(){
 		final int ammunitionCountInRightHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
 		    {final WeaponUserData rightHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
@@ -294,8 +294,8 @@ public final class PlayerData {
 		/**
 		 * check if:
 		 * - the index is valid (i.e in [0;weaponCount[)
-		 * - the weapon is available in the right hand
-		 * - the weapon is available in the left hand if the player wants to use one weapon per hand
+		 * - the weapon is available in the primary hand
+		 * - the weapon is available in the secondary hand if the player wants to use one weapon per hand
 		 * - the player does not want to use one weapon per hand
 		 */
 		final boolean success=chosenWeapon!=null&&primaryHandWeaponContainer.isAvailable(chosenWeapon)&&((dualWeaponUseWished&&secondaryHandWeaponContainer.isAvailable(chosenWeapon))||!dualWeaponUseWished);		
@@ -355,7 +355,8 @@ public final class PlayerData {
     private final boolean selectWeapon(final boolean next){
     	boolean success=false;
     	final int weaponCount=weaponFactory.getWeaponCount();
-    	if(weaponCount>0)
+    	//checks whether there is at least one weapon in the factory
+    	if(weaponCount>=1)
     	    {//if the player wants to use a single weapon instead of 2
     	     if(!next&&dualWeaponUseEnabled)
     		     success=selectWeapon(weaponInUse.getUid(),false);
@@ -364,12 +365,11 @@ public final class PlayerData {
     		     if(next&&!dualWeaponUseEnabled&&weaponInUse!=null&&secondaryHandWeaponContainer.isAvailable(weaponInUse)&&primaryHandWeaponContainer.isAvailable(weaponInUse))
     			     success=selectWeapon(weaponInUse.getUid(),true);
     		     else
-    		         {int multiplier=next?1:-1;
+    		         {final int multiplier=next?1:-1;
     	              final int firstIndex=weaponInUse!=null?((weaponInUse.getUid()+weaponCount)+multiplier)%weaponCount:0;
-		              for(int i=0,currentIndex;i<weaponCount*2;i++)
+		              for(int i=0,currentIndex;i<weaponCount*2&&!success;i++)
 		                  {currentIndex=(firstIndex+((i/2)*multiplier)+weaponCount)%weaponCount;
-		                   if(success=selectWeapon(currentIndex,next==(i%2==1)))
-              	    	       break;
+		                   success=selectWeapon(currentIndex,next==(i%2==1));
 		                  }
     	             }
     	    }
