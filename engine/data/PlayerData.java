@@ -102,7 +102,7 @@ public final class PlayerData {
 		return(result);
 	}
 	
-	private int collectWeapon(final Node collectible,final WeaponUserData weaponUserData){
+	protected int collectWeapon(final Node collectible,final WeaponUserData weaponUserData){
 		final boolean result;
 		final Weapon weapon=weaponUserData.getWeapon();
 		final int ownerUid=weaponUserData.getOwnerUid();
@@ -122,19 +122,19 @@ public final class PlayerData {
 		return(result?1:0);
 	}
 	
-	private int collectAmmunition(final Node collectible,final AmmunitionUserData ammoUserData){
+	protected int collectAmmunition(final Node collectible,final AmmunitionUserData ammoUserData){
 		final int result;
 		result=ammoContainerContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount());
 		return(result);
 	}
 	
-	private int collectMedikit(Node collectible,final MedikitUserData medikitUserData){
+	protected int collectMedikit(Node collectible,final MedikitUserData medikitUserData){
 		final int result;
 		result=increaseHealth(medikitUserData.getHealth());
 		return(result);
 	}
 	
-	int decreaseHealth(int damage){
+	public int decreaseHealth(int damage){
 		int oldHealth=health;
 		if(!invincible && damage>0)
 			health=Math.max(0,health-damage);
@@ -146,14 +146,14 @@ public final class PlayerData {
 	 * @param amount the suggested increase of health
 	 * @return the real increase of health
 	 */
-	final int increaseHealth(int amount){
+	public int increaseHealth(int amount){
 	    final int oldHealth=health;
 	    if(amount>0)
 	        health=Math.min(maxHealth,health+amount);
 	    return(health-oldHealth);
 	}
 	
-	boolean isAlive(){
+	public boolean isAlive(){
 	    return(this.health>0);
 	}
 	
@@ -161,7 +161,7 @@ public final class PlayerData {
 	    return(health);
 	}
 	
-	void die(){
+	public void die(){
 		if(!isAlive())
 		    {//TODO: change the owner uid (if there is no digital watermark) and detach them from the player
 			 //TODO: empty the container of ammunition container (use WeaponUserData)
@@ -169,7 +169,7 @@ public final class PlayerData {
 		    }
 	}
 	
-	void respawn(){
+	public void respawn(){
 		health=maxHealth;
 		attackEnabled=false;
 		weaponInUse=null;
@@ -179,28 +179,87 @@ public final class PlayerData {
 		secondaryHandWeaponContainer.empty();
 	}
 	
+	/**
+     * Gets the amount of ammo that can be used during a reload of the weapon in the primary hand
+     * 
+     * @return amount of ammo that can be used during a reload of the weapon in the primary hand
+     */
+	public int getReloadableAmmoCountForPrimaryHandWeapon() {
+	    final int reloadableAmmoCount;
+	    if(weaponInUse!=null&&!weaponInUse.isForMelee())
+	        {//gets the size of the magazine of the weapon currently in use
+	         final int magazineSize=weaponInUse.getMagazineSize();
+	         //gets the data about the weapon currently in use
+             final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+             //computes the remaining room for ammo in the magazine
+             final int remainingRoomForAmmoInMagazineForPrimaryHandWeapon=magazineSize-primaryHandWeaponUserData.getAmmunitionCountInMagazine();
+             //gets the amount of available ammo in the container
+	         final int availableAmmoInContainerBeforeReload=getAmmunitionCountInContainer();
+	         //computes the amount of available ammo in the container if the player reloads the weapon currently in use
+	         final int availableAmmoInContainerAfterReload=Math.max(0,availableAmmoInContainerBeforeReload-remainingRoomForAmmoInMagazineForPrimaryHandWeapon);
+	         //computes the amount of available ammo for a single reload
+	         reloadableAmmoCount=availableAmmoInContainerBeforeReload-availableAmmoInContainerAfterReload;
+	        }
+	    else
+	        reloadableAmmoCount=0;
+	    return(reloadableAmmoCount);
+	}
+	
+	/**
+	 * Gets the amount of ammo that can be used during a reload of the weapon in the secondary hand
+	 * 
+	 * @return amount of ammo that can be used during a reload of the weapon in the secondary hand
+	 */
+	public int getReloadableAmmoCountForSecondaryHandWeapon() {
+        final int reloadableAmmoCount;
+        if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
+            {//gets the size of the magazine of the weapon currently in use
+             final int magazineSize=weaponInUse.getMagazineSize();
+             //gets the data about the weapon currently in use
+             final WeaponUserData secondaryHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+             //computes the remaining room for ammo in the magazine
+             final int remainingRoomForAmmoInMagazineForSecondaryHandWeapon=magazineSize-secondaryHandWeaponUserData.getAmmunitionCountInMagazine();
+             //gets the amount of available ammo in the container
+             final int availableAmmoInContainerBeforeReload=getAmmunitionCountInContainer();
+             //computes the amount of available ammo in the container if the player reloads the weapon currently in use
+             final int availableAmmoInContainerAfterReload=Math.max(0,availableAmmoInContainerBeforeReload-remainingRoomForAmmoInMagazineForSecondaryHandWeapon);
+             //computes the amount of available ammo for a single reload
+             reloadableAmmoCount=availableAmmoInContainerBeforeReload-availableAmmoInContainerAfterReload;
+            }
+        else
+            reloadableAmmoCount=0;
+        return(reloadableAmmoCount);
+    }
+	
+	/**
+	 * Performs a reload of weapon(s)
+	 * 
+	 * @return amount of ammo used during the reload
+	 */
 	public final int reload(){
 		int reloadedAmmoCount=0;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
-		    {final Ammunition ammo=weaponInUse.getAmmunition();
-		     final int magazineSize=weaponInUse.getMagazineSize();		     
-			 final WeaponUserData rightHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-			 final int remainingRoomForAmmoInMagazineForRightHandWeapon=magazineSize-rightHandWeaponUserData.getAmmunitionCountInMagazine();
-			 //remove ammo from the container
-			 final int availableAmmoForRightHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForRightHandWeapon);
-			 //add it into the magazine
-			 rightHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForRightHandWeaponReload);
-			 //increase reloaded ammunition count
-			 reloadedAmmoCount+=availableAmmoForRightHandWeaponReload;
+		    {//gets the ammo type
+		     final Ammunition ammo=weaponInUse.getAmmunition();
+		     //gets the data about the weapon currently in use
+			 final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+			 //gets the amount of ammo that can really be used during a reload (depending on the container and the magazine)
+			 final int reloadableAmmoCountForPrimaryHandWeapon=getReloadableAmmoCountForPrimaryHandWeapon();
+			 //removes ammo from the container
+			 final int availableAmmoForPrimaryHandWeaponReload=ammoContainerContainer.remove(ammo,reloadableAmmoCountForPrimaryHandWeapon);
+			 //adds it into the magazine
+			 primaryHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForPrimaryHandWeaponReload);
+			 //increases reloaded ammunition count
+			 reloadedAmmoCount+=availableAmmoForPrimaryHandWeaponReload;
 			 if(dualWeaponUseEnabled)
-			     {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-			      final int remainingRoomForAmmoInMagazineForLeftHandWeapon=magazineSize-leftHandWeaponUserData.getAmmunitionCountInMagazine();
-			      //remove ammo from the container
-			      final int availableAmmoForLeftHandWeaponReload=ammoContainerContainer.remove(ammo,remainingRoomForAmmoInMagazineForLeftHandWeapon);
-			      //add it into the magazine
-			      leftHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForLeftHandWeaponReload);
-			      //increase reloaded ammunition count
-			      reloadedAmmoCount+=availableAmmoForLeftHandWeaponReload;
+			     {final WeaponUserData secondaryHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+			      final int reloadableAmmoCountForSecondaryHandWeapon=getReloadableAmmoCountForSecondaryHandWeapon();
+			      //removes ammo from the container
+			      final int availableAmmoForSecondaryHandWeaponReload=ammoContainerContainer.remove(ammo,reloadableAmmoCountForSecondaryHandWeapon);
+			      //adds it into the magazine
+			      secondaryHandWeaponUserData.addAmmunitionIntoMagazine(availableAmmoForSecondaryHandWeaponReload);
+			      //increases reloaded ammunition count
+			      reloadedAmmoCount+=availableAmmoForSecondaryHandWeaponReload;
 			     }
 		    }		    		
 		return(reloadedAmmoCount);
@@ -208,12 +267,8 @@ public final class PlayerData {
 	
 	public final int getAmmunitionCountInContainer(){
 		final int ammunitionCountInContainer;
-		if(weaponInUse!=null)
-		    {if(!weaponInUse.isForMelee())
-				 ammunitionCountInContainer=ammoContainerContainer.get(weaponInUse.getAmmunition());
-			 else
-				 ammunitionCountInContainer=0;
-		    }
+		if(weaponInUse!=null&&!weaponInUse.isForMelee())
+		    ammunitionCountInContainer=ammoContainerContainer.get(weaponInUse.getAmmunition());
 		else
 			ammunitionCountInContainer=0;
 		return(ammunitionCountInContainer);
