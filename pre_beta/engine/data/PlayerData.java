@@ -236,7 +236,7 @@ public final class PlayerData {
 	 * 
 	 * @return amount of ammo used during the reload
 	 */
-	public final int reload(){
+	public int reload(){
 		int reloadedAmmoCount=0;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
 		    {//gets the ammo type
@@ -265,7 +265,7 @@ public final class PlayerData {
 		return(reloadedAmmoCount);
 	}
 	
-	public final int getAmmunitionCountInContainer(){
+	public int getAmmunitionCountInContainer(){
 		final int ammunitionCountInContainer;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
 		    ammunitionCountInContainer=ammoContainerContainer.get(weaponInUse.getAmmunition());
@@ -274,11 +274,11 @@ public final class PlayerData {
 		return(ammunitionCountInContainer);
 	}
 	
-	public final boolean isCurrentWeaponAmmunitionCountDisplayable(){
+	public boolean isCurrentWeaponAmmunitionCountDisplayable(){
 		return(weaponInUse!=null&&!weaponInUse.isForMelee());
 	}
 	
-	public final int getAmmunitionCountInSecondaryHandedWeapon(){
+	public int getAmmunitionCountInSecondaryHandedWeapon(){
 		final int ammunitionCountInLeftHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
 		    {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
@@ -289,7 +289,7 @@ public final class PlayerData {
 		return(ammunitionCountInLeftHandedWeapon);
 	}
 	
-	public final int getAmmunitionCountInPrimaryHandedWeapon(){
+	public int getAmmunitionCountInPrimaryHandedWeapon(){
 		final int ammunitionCountInRightHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
 		    {final WeaponUserData rightHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
@@ -300,19 +300,20 @@ public final class PlayerData {
 		return(ammunitionCountInRightHandedWeapon);
 	}
 	
-	public final void setAttackEnabled(final boolean attackEnabled){
+	public void setAttackEnabled(final boolean attackEnabled){
 		this.attackEnabled=attackEnabled;
 	}
 	
-	public final boolean isAttackEnabled(){
+	public boolean isAttackEnabled(){
 		return(attackEnabled);
 	}
 	
 	/**
-	 * launch an attack
+	 * Launches an attack
+	 * 
 	 * @return consumed ammunition if the weapon is not a melee weapon, knock count otherwise
 	 */
-	public final int attack(){
+	public int attack(){
 		int consumedAmmunitionOrKnockCount=0;
 		if(weaponInUse!=null)
 		    {if(weaponInUse.isForMelee())
@@ -336,15 +337,15 @@ public final class PlayerData {
 		return(consumedAmmunitionOrKnockCount);
 	}
 	
-	public final boolean selectNextWeapon(){
+	public boolean selectNextWeapon(){
 		return(selectWeapon(true));
 	}
 	
-	public final boolean selectPreviousWeapon(){
+	public boolean selectPreviousWeapon(){
     	return(selectWeapon(false));
 	}
 	
-	public final boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
+	public boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
 		final Weapon chosenWeapon=weaponFactory.getWeapon(index);
 		/**
 		 * check if:
@@ -407,7 +408,7 @@ public final class PlayerData {
 		return(success);
 	}
     
-    private final boolean selectWeapon(final boolean next){
+    protected boolean selectWeapon(final boolean next){
     	boolean success=false;
     	final int weaponCount=weaponFactory.getWeaponCount();
     	//checks whether there is at least one weapon in the factory
@@ -431,11 +432,11 @@ public final class PlayerData {
     	return(success);
 	}
     
-    public final boolean isDualWeaponUseEnabled(){
+    public boolean isDualWeaponUseEnabled(){
     	return(dualWeaponUseEnabled);
     }
     
-    private final void initializeWeaponLocalTransform(Node newWeapon,boolean localizedInThePrimaryHand){
+    protected void initializeWeaponLocalTransform(Node newWeapon,boolean localizedInThePrimaryHand){
     	Matrix3 correctWeaponRotation=new Matrix3();
     	//FIXME: move this half rotation into the user data of the weapon
     	correctWeaponRotation.fromAngles(0, Math.PI, 0).multiplyLocal(((WeaponUserData)newWeapon.getUserData()).getRotation());

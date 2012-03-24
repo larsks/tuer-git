@@ -87,8 +87,11 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //adds the states and their actions to the state machine
         addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
         //TODO: use an entry action to launch the animation (perhaps with scheduled tasks) and use an exit action to update the data
-        addState(PlayerState.ATTACKING,null,null);
-        addState(PlayerState.RELOADING,null,null);
+        final AttackAction attackAction=new AttackAction(playerData);
+        addState(PlayerState.ATTACKING,null,attackAction);
+        final ReloadAction reloadAction=new ReloadAction(playerData);
+        addState(PlayerState.RELOADING,null,reloadAction);
+        
         addState(PlayerState.SELECTING,null,null);
         //TODO: make a distinction between states and transitions
         //adds all transitions between states to the transition model
