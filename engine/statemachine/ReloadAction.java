@@ -14,22 +14,21 @@
 package engine.statemachine;
 
 import engine.data.PlayerData;
+import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
-import se.hiflyer.fettle.Condition;
+import se.hiflyer.fettle.StateMachine;
 
 
-public class ReloadPossibleCondition implements Condition{
+public class ReloadAction implements Action<PlayerState,PlayerState>{
 
     private final PlayerData playerData;
 
-    public ReloadPossibleCondition(final PlayerData playerData){
+    public ReloadAction(final PlayerData playerData){
         this.playerData=playerData;
     }
 
     @Override
-    public boolean isSatisfied(Arguments args){
-        final boolean canReload=playerData.getReloadableAmmoCountForPrimaryHandWeapon()>0||playerData.getReloadableAmmoCountForSecondaryHandWeapon()>0;
-        return(canReload);
+    public void onTransition(PlayerState from,PlayerState to,PlayerState event,Arguments args,StateMachine<PlayerState,PlayerState> stateMachine){
+        playerData.reload();
     }
-
 }
