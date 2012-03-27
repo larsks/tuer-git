@@ -6,7 +6,7 @@ import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
 
-public class AttackAction implements Action<PlayerState,PlayerState>{
+public class AttackAction implements Action<PlayerState,PlayerTransition>{
 
     private final PlayerData playerData;
 
@@ -15,7 +15,7 @@ public class AttackAction implements Action<PlayerState,PlayerState>{
     }
 
     @Override
-    public void onTransition(PlayerState from,PlayerState to,PlayerState event,Arguments args,StateMachine<PlayerState,PlayerState> stateMachine){
+    public void onTransition(PlayerState from,PlayerState to,PlayerTransition event,Arguments args,StateMachine<PlayerState,PlayerTransition> stateMachine){
         playerData.attack();
     }
 }

@@ -28,7 +28,7 @@ import se.hiflyer.fettle.StateMachine;
  * @author Julien Gouesse
  *
  */
-public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,PlayerState>{
+public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,PlayerTransition>{
 
     /**
      * Exit action that adds a scheduled task (starting when we enter another state) to the scheduler in order 
@@ -37,7 +37,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
      * @author Julien Gouesse
      *
      */
-    private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerState>{
+    private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerTransition>{
 
         private final Scheduler<PlayerState> scheduler;
     
@@ -46,7 +46,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         }
     
         @Override
-        public void onTransition(PlayerState from,PlayerState to,PlayerState event,Arguments arguments,StateMachine<PlayerState,PlayerState> stateMachine){
+        public void onTransition(PlayerState from,PlayerState to,PlayerTransition event,Arguments arguments,StateMachine<PlayerState,PlayerTransition> stateMachine){
             //this task must be executed only one time
             final int executionCount=1;
             //FIXME it should be set elsewhere
@@ -67,42 +67,44 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
          */
         private static final class ToIdleStateRunnable implements Runnable{
             
-            private final StateMachine<PlayerState,PlayerState> stateMachine;
+            private final StateMachine<PlayerState,PlayerTransition> stateMachine;
         
-            public ToIdleStateRunnable(StateMachine<PlayerState,PlayerState> stateMachine){
+            public ToIdleStateRunnable(StateMachine<PlayerState,PlayerTransition> stateMachine){
                 this.stateMachine=stateMachine;
             }
             
             @Override
             public void run(){
-                stateMachine.fireEvent(PlayerState.IDLE);
+                stateMachine.fireEvent(PlayerTransition.IDLE);
             }
         }
     }    
 
     public PlayerStateMachine(final PlayerData playerData){
-        super(PlayerState.class,PlayerState.class);
+        super(PlayerState.class,PlayerTransition.class);
         //sets the initial state
         internalStateMachine.rawSetState(PlayerState.IDLE);
         //adds the states and their actions to the state machine
         addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
         //TODO: use an entry action to launch the animation (perhaps with scheduled tasks) and use an exit action to update the data
         final AttackAction attackAction=new AttackAction(playerData);
-        addState(PlayerState.ATTACKING,null,attackAction);
+        addState(PlayerState.ATTACK,null,attackAction);
         final ReloadAction reloadAction=new ReloadAction(playerData);
-        addState(PlayerState.RELOADING,null,reloadAction);
+        addState(PlayerState.RELOAD,null,reloadAction);        
         
-        addState(PlayerState.SELECTING,null,null);
-        //TODO: make a distinction between states and transitions
+        addState(PlayerState.SELECT_NEXT,null,null);
+        
+        addState(PlayerState.SELECT_PREVIOUS,null,null);
         //adds all transitions between states to the transition model
         //no condition is required but an attack may fail (because of a lack of ammo).
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACKING,PlayerState.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACK,PlayerTransition.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerTransition>>emptyList());
         //creates a condition satisfied when the player can reload his weapon(s)
         final ReloadPossibleCondition reloadPossibleCondition=new ReloadPossibleCondition(playerData);
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOADING,PlayerState.RELOADING,reloadPossibleCondition,Collections.<Action<PlayerState,PlayerState>>emptyList());
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOAD,PlayerTransition.RELOADING,reloadPossibleCondition,Collections.<Action<PlayerState,PlayerTransition>>emptyList());
         //TODO: make a distinction between the check and the effective selection
         //TODO: put a condition into this transition: it must be possible to select another weapon
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECTING,PlayerState.SELECTING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerState>>emptyList());       
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECT_NEXT,PlayerTransition.SELECTING_NEXT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerTransition>>emptyList());
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECT_PREVIOUS,PlayerTransition.SELECTING_PREVIOUS,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerTransition>>emptyList());
     }
     
     /**
