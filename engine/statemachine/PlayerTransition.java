@@ -13,4 +13,10 @@
 */
 package engine.statemachine;
 
-public enum PlayerState{IDLE,ATTACK,RELOAD,SELECT_NEXT,SELECT_PREVIOUS}
+/**
+ * Transition of the player's state machine
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public enum PlayerTransition{IDLE,ATTACKING,RELOADING,SELECTING_PREVIOUS,SELECTING_NEXT}
