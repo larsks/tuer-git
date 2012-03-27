@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/google-collect/guava-r08.jar"/>
+	<classpathentry kind="lib" path="lib/google-collect/guava-r09.jar"/>
 	<classpathentry kind="lib" path="lib/mockachino/mockachino-full-0.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
