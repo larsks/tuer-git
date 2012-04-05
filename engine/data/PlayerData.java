@@ -413,21 +413,58 @@ public final class PlayerData {
     	final int weaponCount=weaponFactory.getWeaponCount();
     	//checks whether there is at least one weapon in the factory
     	if(weaponCount>=1)
-    	    {//if the player wants to use a single weapon instead of 2
-    	     if(!next&&dualWeaponUseEnabled)
-    		     success=selectWeapon(weaponInUse.getUid(),false);
+    	    {final int weaponIndexMultiplier;
+    	     //if the player chooses the next weapon, we have to increase the weapon index, otherwise we have to decrease it
+    	     if(next)
+    	    	 weaponIndexMultiplier=1;
     	     else
-    		     //if the player wants to use 2 identical weapons instead of 1
-    		     if(next&&!dualWeaponUseEnabled&&weaponInUse!=null&&secondaryHandWeaponContainer.isAvailable(weaponInUse)&&primaryHandWeaponContainer.isAvailable(weaponInUse))
-    			     success=selectWeapon(weaponInUse.getUid(),true);
-    		     else
-    		         {final int multiplier=next?1:-1;
-    	              final int firstIndex=weaponInUse!=null?((weaponInUse.getUid()+weaponCount)+multiplier)%weaponCount:0;
-		              for(int i=0,currentIndex;i<weaponCount*2&&!success;i++)
-		                  {currentIndex=(firstIndex+((i/2)*multiplier)+weaponCount)%weaponCount;
-		                   success=selectWeapon(currentIndex,next==(i%2==1));
-		                  }
-    	             }
+    	    	 weaponIndexMultiplier=-1;
+    	     final int firstWeaponIndex;
+    	     if(weaponInUse!=null)
+    	    	 {final int firstInitialFactor;
+    	          if(next==dualWeaponUseEnabled)
+    	        	  //tries to use another weapon
+    	    	      firstInitialFactor=1;
+    	          else
+    	        	  //tries to use the same weapon, only changes the number of weapons in use
+    	    	      firstInitialFactor=0;
+    	    	  firstWeaponIndex=((weaponInUse.getUid()+weaponCount)+(weaponIndexMultiplier*firstInitialFactor))%weaponCount;
+    	    	 }
+    	     else
+    	    	 //if the player doesn't use any weapon yet
+    	    	 if(next)
+    	    		 //tries to choose the first one when he wants the next one
+    	    		 firstWeaponIndex=0;
+    	    	 else
+    	    		 //tries to choose the last one when he wants the previous one
+    	    		 firstWeaponIndex=weaponCount-1;
+    	     final boolean firstDualWeaponUseEnabledTested;
+    	     if(weaponInUse!=null)
+    	    	 //tries to use a different number of weapon
+    	    	 firstDualWeaponUseEnabledTested=!dualWeaponUseEnabled;
+    	     else
+    	    	 //if the player doesn't use any weapon yet
+    	    	 //tries to use 2 identical weapons only if he wants the previous one
+    	    	 firstDualWeaponUseEnabledTested=!next;
+    	     //there are 2 iterations per weapon (one for single handed, one for dual handed)
+    	     int iterationIndex=firstWeaponIndex*2;
+    	     //if we start with dual handed weapons, increases the iteration index
+    	     if(firstDualWeaponUseEnabledTested)
+    	    	 iterationIndex++;
+    	     boolean dualWeaponUseEnabledTested;		     
+		     final int maxIterationCount=weaponCount*2;
+		     int iterationCount=0,currentWeaponIndex;
+		     while(iterationCount<maxIterationCount&&!success)
+		         {currentWeaponIndex=iterationIndex/2;
+		          //odd -> dual handed, even -> single handed
+		          dualWeaponUseEnabledTested=iterationIndex%2==1;
+		          success=selectWeapon(currentWeaponIndex,dualWeaponUseEnabledTested);
+		          //prepares the next iteration
+		          //updates the iteration index by using the multiplier
+		          iterationIndex=(iterationIndex+weaponIndexMultiplier+maxIterationCount)%maxIterationCount;
+		          //increases the iteration count
+		          iterationCount++;
+		         }
     	    }
     	return(success);
 	}
