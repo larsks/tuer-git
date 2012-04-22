@@ -13,6 +13,8 @@
 */
 package engine.data;
 
+import java.util.AbstractMap;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
@@ -348,13 +350,13 @@ public final class PlayerData {
 	public boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
 		final Weapon chosenWeapon=weaponFactory.getWeapon(index);
 		/**
-		 * check if:
+		 * checks if:
 		 * - the index is valid (i.e in [0;weaponCount[)
 		 * - the weapon is available in the primary hand
 		 * - the weapon is available in the secondary hand if the player wants to use one weapon per hand
 		 * - the player does not want to use one weapon per hand
 		 */
-		final boolean success=chosenWeapon!=null&&primaryHandWeaponContainer.isAvailable(chosenWeapon)&&((dualWeaponUseWished&&secondaryHandWeaponContainer.isAvailable(chosenWeapon))||!dualWeaponUseWished);		
+		final boolean success=chosenWeapon!=null&&primaryHandWeaponContainer.isAvailable(chosenWeapon)&&(!dualWeaponUseWished||secondaryHandWeaponContainer.isAvailable(chosenWeapon));		
 		if(success)
 			{final Weapon oldWeaponIDInUse=weaponInUse;
 	    	 final boolean oldDualWeaponUse=dualWeaponUseEnabled;
@@ -409,7 +411,29 @@ public final class PlayerData {
 	}
     
     protected boolean selectWeapon(final boolean next){
-    	boolean success=false;
+    	final boolean success;
+    	Entry<Integer,Boolean> selectableWeaponIndexAndDualHandEnabledFlag=getSelectableWeaponIndexAndDualHandEnabledFlag(next);
+    	if(selectableWeaponIndexAndDualHandEnabledFlag!=null)
+    	    {final int selectableWeaponIndex=selectableWeaponIndexAndDualHandEnabledFlag.getKey().intValue();
+    		 final boolean dualHandEnabledFlag=selectableWeaponIndexAndDualHandEnabledFlag.getValue().booleanValue();
+    		 success=selectWeapon(selectableWeaponIndex, dualHandEnabledFlag);
+    	    }
+    	else
+    		success=false;
+    	return(success);
+	}
+    
+    
+    /**
+     * Returns the index of the weapon that can be selected if any and a flag indicating whether it must be used in both hands, 
+     * otherwise null
+     * 
+     * @param next flag indicating whether the returned weapon is the next one
+     * @return the index of the weapon that can be selected if any and a flag indicating whether it must be used in both hands, 
+     * otherwise null
+     */
+    protected Entry<Integer,Boolean> getSelectableWeaponIndexAndDualHandEnabledFlag(final boolean next){
+    	Entry<Integer,Boolean> result=null;
     	final int weaponCount=weaponFactory.getWeaponCount();
     	//checks whether there is at least one weapon in the factory
     	if(weaponCount>=1)
@@ -454,20 +478,32 @@ public final class PlayerData {
     	     boolean dualWeaponUseEnabledTested;		     
 		     final int maxIterationCount=weaponCount*2;
 		     int iterationCount=0,currentWeaponIndex;
-		     while(iterationCount<maxIterationCount&&!success)
+		     Weapon chosenWeapon;
+		     while(iterationCount<maxIterationCount&&result==null)
 		         {currentWeaponIndex=iterationIndex/2;
 		          //odd -> dual handed, even -> single handed
 		          dualWeaponUseEnabledTested=iterationIndex%2==1;
-		          success=selectWeapon(currentWeaponIndex,dualWeaponUseEnabledTested);
-		          //prepares the next iteration
-		          //updates the iteration index by using the multiplier
-		          iterationIndex=(iterationIndex+weaponIndexMultiplier+maxIterationCount)%maxIterationCount;
-		          //increases the iteration count
-		          iterationCount++;
+		          //gets the weapon from the factory
+		          chosenWeapon=weaponFactory.getWeapon(currentWeaponIndex);
+		          /**
+		  		   * checks if:
+		  		   * - the index is valid (i.e in [0;weaponCount[)
+		  		   * - the weapon is available in the primary hand
+		  		   * - the player does not want to use one weapon per hand or the weapon is available in the secondary hand
+		  		   */
+		          if(chosenWeapon!=null&&primaryHandWeaponContainer.isAvailable(chosenWeapon)&&(!dualWeaponUseEnabledTested||secondaryHandWeaponContainer.isAvailable(chosenWeapon)))
+		        	  result=new AbstractMap.SimpleEntry<Integer,Boolean>(Integer.valueOf(currentWeaponIndex),Boolean.valueOf(dualWeaponUseEnabledTested));		        	  
+		          else 
+		              {//prepares the next iteration
+		               //updates the iteration index by using the multiplier
+		               iterationIndex=(iterationIndex+weaponIndexMultiplier+maxIterationCount)%maxIterationCount;
+		               //increases the iteration count
+		               iterationCount++;		        	   
+		              }		          
 		         }
     	    }
-    	return(success);
-	}
+    	return(result);
+    }
     
     public boolean isDualWeaponUseEnabled(){
     	return(dualWeaponUseEnabled);
