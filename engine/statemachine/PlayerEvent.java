@@ -14,9 +14,9 @@
 package engine.statemachine;
 
 /**
- * Transition of the player's state machine
+ * Event of the player's state machine
  * 
  * @author Julien Gouesse
  *
  */
-public enum PlayerTransition{IDLE,ATTACKING,RELOADING,SELECTING_PREVIOUS,SELECTING_NEXT}
+public enum PlayerEvent{IDLE,ATTACKING,RELOADING,SELECTING_PREVIOUS,SELECTING_NEXT}

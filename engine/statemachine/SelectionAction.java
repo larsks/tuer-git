@@ -18,17 +18,21 @@ import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
+public class SelectionAction implements Action<PlayerState,PlayerEvent>{
 
-public class ReloadAction implements Action<PlayerState,PlayerEvent>{
-
-    private final PlayerData playerData;
-
-    public ReloadAction(final PlayerData playerData){
+	private final PlayerData playerData;
+	
+	public SelectionAction(final PlayerData playerData){
         this.playerData=playerData;
     }
-
-    @Override
+	
+	@Override
     public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-        playerData.reload();
-    }
+		if(event.equals(PlayerEvent.SELECTING_NEXT))
+			playerData.selectNextWeapon();
+		else
+			if(event.equals(PlayerEvent.SELECTING_PREVIOUS))
+				playerData.selectPreviousWeapon();
+		//FIXME handle other transitions
+	}
 }
