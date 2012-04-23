@@ -374,19 +374,19 @@ public final class GameState extends ScenegraphState{
 		final TriggerAction reloadWeaponAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.reload();
+				//TODO
 			}
 		};
 		final TriggerAction startAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.setAttackEnabled(true);
+				//playerData.setAttackEnabled(true);
 			}
 		};
 		final TriggerAction stopAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.setAttackEnabled(false);
+				//playerData.setAttackEnabled(false);
 			}
 		};
 		final TriggerAction pauseAction=new TriggerAction(){

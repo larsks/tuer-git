@@ -13,22 +13,26 @@
 */
 package engine.statemachine;
 
+import java.util.Map.Entry;
+
 import engine.data.PlayerData;
-import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
-import se.hiflyer.fettle.StateMachine;
+import se.hiflyer.fettle.Condition;
 
+public class SelectionPossibleCondition implements Condition{
 
-public class ReloadAction implements Action<PlayerState,PlayerEvent>{
-
-    private final PlayerData playerData;
-
-    public ReloadAction(final PlayerData playerData){
-        this.playerData=playerData;
-    }
-
-    @Override
-    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-        playerData.reload();
-    }
+	private final PlayerData playerData;
+	
+	private final boolean next;
+	
+	public SelectionPossibleCondition(final PlayerData playerData,final boolean next){
+		this.next=next;
+		this.playerData=playerData;
+	}
+	
+	@Override
+    public boolean isSatisfied(Arguments args){
+		Entry<Integer,Boolean> selectableWeaponIndexAndDualHandEnabledFlag=playerData.getSelectableWeaponIndexAndDualHandEnabledFlag(next);
+		return(selectableWeaponIndexAndDualHandEnabledFlag!=null);
+	}
 }
