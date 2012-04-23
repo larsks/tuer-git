@@ -118,16 +118,18 @@ public class Scheduler<S>{
         queuedTasks.putAll(updatedQueuedTasks);
         //updates the remaining execution counts of executed tasks if necessary or removes the task(s) from the scheduler
         for(StateChangeScheduledTask<S> executedTask:executedTasks)
-            {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
-             final int currentRemainingExecutionCount=previousRemainingExecutionCount-1;
-             if(currentRemainingExecutionCount==0)
-                 //removes the executed task as it will not be executed anymore
-                 scheduledTasks.remove(executedTask);
-             else
-                 {//keeps this task and updates its remaining execution count
-                  scheduledTasks.put(executedTask,Integer.valueOf(currentRemainingExecutionCount));
-                 }
-            }
+        	//FIXME dirty kludge, the root cause is undefined. Maybe the same task is executed several times
+            if(scheduledTasks.containsKey(executedTask))
+                {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
+                 final int currentRemainingExecutionCount=previousRemainingExecutionCount-1;
+                 if(currentRemainingExecutionCount==0)
+                     //removes the executed task as it will not be executed anymore
+                     scheduledTasks.remove(executedTask);
+                 else
+                     {//keeps this task and updates its remaining execution count
+                      scheduledTasks.put(executedTask,Integer.valueOf(currentRemainingExecutionCount));
+                     }
+                }
         //queues postponed tasks here to avoid mixing them with already queued tasks
         for(StateChangeScheduledTask<S> postponedTask:postponedTasks)
             queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));        

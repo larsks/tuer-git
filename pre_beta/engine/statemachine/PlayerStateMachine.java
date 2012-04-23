@@ -50,7 +50,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
             //this task must be executed only one time
             final int executionCount=1;
             //FIXME it should be set elsewhere
-            final double timeOffsetInSeconds=0.2;
+            final double timeOffsetInSeconds=0.5;
             //builds the runnable that fires the proper event
             final Runnable runnable=new ToIdleStateRunnable(stateMachine);
             //creates the task

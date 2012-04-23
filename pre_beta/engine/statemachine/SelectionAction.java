@@ -28,10 +28,10 @@ public class SelectionAction implements Action<PlayerState,PlayerEvent>{
 	
 	@Override
     public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-		if(event.equals(PlayerEvent.SELECTING_NEXT))
+		if(from.equals(PlayerState.SELECT_NEXT))
 			playerData.selectNextWeapon();
 		else
-			if(event.equals(PlayerEvent.SELECTING_PREVIOUS))
+			if(from.equals(PlayerState.SELECT_PREVIOUS))
 				playerData.selectPreviousWeapon();
 		//FIXME handle other transitions
 	}

@@ -15,6 +15,7 @@ package engine.statemachine;
 
 import com.ardor3d.util.ReadOnlyTimer;
 import se.hiflyer.fettle.Action;
+import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.Fettle;
 import se.hiflyer.fettle.StateMachine;
 import se.hiflyer.fettle.impl.MutableTransitionModelImpl;
@@ -60,5 +61,13 @@ public class StateMachineWithScheduler<S,E>{
         final S currentState=internalStateMachine.getCurrentState();
         scheduler.update(previousState,currentState,timer.getTimePerFrame());
         previousState=currentState;
-    }  
+    }
+    
+    public void fireEvent(E event){
+    	internalStateMachine.fireEvent(event);
+    }
+    
+    public void fireEvent(E event,Arguments args){
+    	internalStateMachine.fireEvent(event,args);
+    }
 }
