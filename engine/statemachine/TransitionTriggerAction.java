@@ -26,16 +26,16 @@ import com.ardor3d.util.GameTaskQueueManager;
  * @author Julien Gouesse
  *
  */
-public class TransitionTriggerAction implements TriggerAction, Runnable{
+public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable{
 
-    protected final StateMachine<ScenegraphState,String> stateMachine;
+    protected final StateMachine<S,E> stateMachine;
     
-    protected final String transitionEvent;
+    protected final E transitionEvent;
     
     protected final RenderContext renderContext;
     
-    public TransitionTriggerAction(StateMachine<ScenegraphState,String> stateMachine, 
-            String transitionEvent, RenderContext renderContext) {
+    public TransitionTriggerAction(StateMachine<S,E> stateMachine, 
+            E transitionEvent, RenderContext renderContext) {
         this.stateMachine=stateMachine;
         this.transitionEvent=transitionEvent;
         this.renderContext=renderContext;

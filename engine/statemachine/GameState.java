@@ -306,6 +306,7 @@ public final class GameState extends ScenegraphState{
                 	{//FIXME: use a separate timer for this state
                 	 playerData.attack();
                 	}*/
+                playerData.updateLogicalLayer(timer);
             }           
         });
     }
@@ -351,30 +352,30 @@ public final class GameState extends ScenegraphState{
         final TriggerAction nextWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.selectNextWeapon();
+				playerData.trySelectNextWeapon();
 			}
 		};
 		final TriggerAction previousWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.selectPreviousWeapon();
+				playerData.trySelectPreviousWeapon();
 			}
 		};
 		final TriggerAction wheelWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the mouse wheel has been rotated up/away from the user
-				if(inputState.getCurrent().getMouseState().getDwheel()<0)
-				    playerData.selectNextWeapon();
+				if(inputState.getCurrent().getMouseState().getDwheel()>0)
+				    playerData.trySelectNextWeapon();
 				else
 					//otherwise the mouse wheel has been rotated down/towards the user
-					playerData.selectPreviousWeapon();
+					playerData.trySelectPreviousWeapon();
 			}
 		};
 		final TriggerAction reloadWeaponAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//TODO
+				playerData.tryReload();
 			}
 		};
 		final TriggerAction startAttackAction=new TriggerAction(){
@@ -425,7 +426,8 @@ public final class GameState extends ScenegraphState{
 		final TriggerAction selectWeaponOneAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.selectWeapon(0,false);
+				//FIXME
+				//playerData.selectWeapon(0,false);
 			}
 		};
         //add some triggers to change weapon, reload and shoot

@@ -62,11 +62,11 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final String mainMenuToLoadingDisplayEvent=getTransitionEvent(MainMenuState.class,LoadingDisplayState.class);
         final String loadingDisplayToGameEvent=getTransitionEvent(LoadingDisplayState.class,GameState.class);
         //creates actions allowing to go to the next state by pressing a key
-        final TransitionTriggerAction contentRatingSystemToInitializationTriggerAction=new TransitionTriggerAction(internalStateMachine,contentRatingSystemToInitializationEvent,renderContext);
-        final TransitionTriggerAction initializationToIntroductionTriggerAction=new TransitionTriggerAction(internalStateMachine,initializationToIntroductionEvent,renderContext);
-        final TransitionTriggerAction introductionToMainMenuTriggerAction=new TransitionTriggerAction(internalStateMachine,introductionToMainMenuEvent,renderContext);
-        final TransitionTriggerAction mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction(internalStateMachine,mainMenuToLoadingDisplayEvent,renderContext);
-        final TransitionTriggerAction loadingDisplayToGameTriggerAction=new TransitionTriggerAction(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
+        final TransitionTriggerAction<ScenegraphState,String> contentRatingSystemToInitializationTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,contentRatingSystemToInitializationEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> initializationToIntroductionTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,initializationToIntroductionEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> introductionToMainMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,introductionToMainMenuEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToLoadingDisplayEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
         //creates states
         final ScenegraphState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
         final ScenegraphState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
