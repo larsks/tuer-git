@@ -30,6 +30,13 @@ import engine.weaponry.Weapon;
 import engine.weaponry.WeaponContainer;
 import engine.weaponry.WeaponFactory;
 
+/**
+ * 
+ * 
+ * @author Julien Gouesse
+ * 
+ * FIXME move all dependencies on the state machine into a separate class
+ */
 public final class PlayerData {
     
 	/**maximum health*/

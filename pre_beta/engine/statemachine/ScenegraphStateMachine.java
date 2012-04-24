@@ -43,11 +43,13 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     /**switch node used to show only the nodes of a single state*/
     private final StateMachineSwitchNode switchNode;
     
+    private final TaskManager taskManager;
+    
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-            final SoundManager soundManager,final TaskManager taskManager,
-            final TriggerAction exitAction){
+            final SoundManager soundManager, final TriggerAction exitAction){
         super(ScenegraphState.class,String.class);
+        this.taskManager=new TaskManager();
         // creates a condition only satisfied when the task manager has no pending task
         final NoPendingTaskCondition noPendingTaskCondition=new NoPendingTaskCondition(taskManager);
         //gets the render context used further to put some actions onto the rendering queue    

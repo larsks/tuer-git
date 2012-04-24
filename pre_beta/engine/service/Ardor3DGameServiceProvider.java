@@ -56,7 +56,6 @@ import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
 import engine.statemachine.ScenegraphStateMachine;
-import engine.taskmanagement.TaskManager;
 import engine.sound.SoundManager;
 
 /**
@@ -86,13 +85,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**state machine of the scenegraph*/    
     private ScenegraphStateMachine scenegraphStateMachine;
     
-    /**sound manager*/
+    /**
+     * sound manager
+     * 
+     * @deprecated this field should be moved into the state machine of the scenegraph
+     * */
+    @Deprecated
     private final SoundManager soundManager;
     
     /**list of bitmap fonts*/
     private static ArrayList<BMFont> fontsList;
-    
-    private final TaskManager taskManager;
     
     
     public static void main(final String[] args){
@@ -123,7 +125,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
         application.start();
     }
 
-    
+    /**
+     * Creates font lists
+     * 
+     * @return font lists
+     * @deprecated this service should be moved to the state machine of the scenegraph
+     */
+    @Deprecated
     private final static ArrayList<BMFont> createFontsList(){
         final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
         try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
@@ -138,6 +146,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
         return(fontsList);
     }
     
+    /**
+     * Returns font lists
+     * 
+     * @return font lists
+     * @deprecated this service should be moved to the state machine of the scenegraph
+     */
+    @Deprecated
     public static final List<BMFont> getFontsList(){
         if(fontsList==null)
             fontsList=createFontsList();
@@ -150,7 +165,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
      */
     private Ardor3DGameServiceProvider(){
         exit=false;
-        taskManager=new TaskManager();
         timer=new Timer();
         root=new Node("root node of the game");
         soundManager=new SoundManager();
@@ -240,7 +254,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,taskManager,exitAction);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,exitAction);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
