@@ -13,11 +13,7 @@
 */
 package engine.service;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -40,7 +36,6 @@ import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
-import com.ardor3d.ui.text.BMFont;
 import com.ardor3d.util.ContextGarbageCollector;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -48,7 +43,6 @@ import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
-import com.ardor3d.util.resource.URLResourceSource;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
@@ -93,9 +87,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
     @Deprecated
     private final SoundManager soundManager;
     
-    /**list of bitmap fonts*/
-    private static ArrayList<BMFont> fontsList;
-    
     
     public static void main(final String[] args){
         if(DesktopIntegration.getOperatingSystem().equals(OS.Windows))
@@ -124,41 +115,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
     }
-
-    /**
-     * Creates font lists
-     * 
-     * @return font lists
-     * @deprecated this service should be moved to the state machine of the scenegraph
-     */
-    @Deprecated
-    private final static ArrayList<BMFont> createFontsList(){
-        final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
-        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(Ardor3DGameServiceProvider.class.getResource("/fonts/arial-16-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        return(fontsList);
-    }
-    
-    /**
-     * Returns font lists
-     * 
-     * @return font lists
-     * @deprecated this service should be moved to the state machine of the scenegraph
-     */
-    @Deprecated
-    public static final List<BMFont> getFontsList(){
-        if(fontsList==null)
-            fontsList=createFontsList();
-        return(Collections.unmodifiableList(fontsList));
-    }
-    
     
     /**
      * Constructs the example class, also creating the native window and GL surface.

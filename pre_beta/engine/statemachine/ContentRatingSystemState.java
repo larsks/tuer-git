@@ -37,7 +37,7 @@ public final class ContentRatingSystemState extends ScenegraphState{
 	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager){
         super(soundManager);
         this.mouseManager=mouseManager;
-        final BMText textNode=new BMText("contentSystemRatingNode",text,Ardor3DGameServiceProvider.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("contentSystemRatingNode",text,ScenegraphStateMachine.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         //final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toInitAction);

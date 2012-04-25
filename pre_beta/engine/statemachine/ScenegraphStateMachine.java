@@ -13,16 +13,19 @@
 */
 package engine.statemachine;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.List;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.ui.text.BMFont;
 import com.ardor3d.util.ReadOnlyTimer;
-
+import com.ardor3d.util.resource.URLResourceSource;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.BasicConditions;
 import engine.sound.SoundManager;
@@ -44,6 +47,13 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     private final StateMachineSwitchNode switchNode;
     
     private final TaskManager taskManager;
+    
+    /**
+     * list of bitmap fonts
+     * @deprecated this field should be moved to a separate font store
+     * */
+    @Deprecated
+    private static ArrayList<BMFont> fontsList;
     
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
@@ -130,5 +140,39 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     public void updateLogicalLayer(final ReadOnlyTimer timer){
         internalStateMachine.getCurrentState().getLogicalLayer().checkTriggers(timer.getTimePerFrame());
         super.updateLogicalLayer(timer);
+    }
+    
+    /**
+     * Creates font lists
+     * 
+     * @return font lists
+     * @deprecated this service should be moved to a separate font store
+     */
+    @Deprecated
+    private final static ArrayList<BMFont> createFontsList(){
+        final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
+        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold-regular.fnt")),false));}
+        catch(IOException ioe)
+        {ioe.printStackTrace();}
+        return(fontsList);
+    }
+    
+    /**
+     * Returns font lists
+     * 
+     * @return font lists
+     * @deprecated this service should be moved to a separate font store
+     */
+    @Deprecated
+    public static final List<BMFont> getFontsList(){
+        if(fontsList==null)
+            fontsList=createFontsList();
+        return(Collections.unmodifiableList(fontsList));
     }
 }
