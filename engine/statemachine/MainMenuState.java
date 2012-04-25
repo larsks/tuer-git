@@ -87,7 +87,7 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         // add some text
-        final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",Ardor3DGameServiceProvider.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));

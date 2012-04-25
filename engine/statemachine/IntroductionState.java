@@ -75,7 +75,7 @@ public final class IntroductionState extends ScenegraphState{
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
         getRoot().attachChild(box);       
         // show the game title as text
-        final BMText textNode=new BMText("gameTitleNode","TUER",Ardor3DGameServiceProvider.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gameTitleNode","TUER",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(6);
         textNode.setTextColor(ColorRGBA.BLACK);
         textNode.setTranslation(0,0,-75);
