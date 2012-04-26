@@ -17,10 +17,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.ui.text.BMFont;
@@ -40,6 +43,10 @@ import engine.taskmanagement.TaskManager;
  *                           PAUSE_MENU,
  *                           LEVEL_END_DISPLAY (display at the end of a level with figures, etc...)
  *                           GAME_END_DISPLAY (final scene)
+ *                           
+ *       move the sound manager here
+ *       
+ *       add an accepting state to this machine to handle the cleanup 
  */
 public class ScenegraphStateMachine extends StateMachineWithScheduler<ScenegraphState,String>{
 
@@ -55,11 +62,25 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     @Deprecated
     private static ArrayList<BMFont> fontsList;
     
+    /**
+     * sound manager used to play sound samples and music
+     * */    
+    private final SoundManager soundManager;
+    
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-            final SoundManager soundManager, final TriggerAction exitAction){
+            final TriggerAction serviceExitAction){
         super(ScenegraphState.class,String.class);
-        this.taskManager=new TaskManager();
+        taskManager=new TaskManager();
+        soundManager=new SoundManager();
+        final TriggerAction exitAction=new TriggerAction() {
+			
+			@Override
+			public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
+				serviceExitAction.perform(source,inputState,tpf);
+				soundManager.cleanup();
+			}
+		};
         // creates a condition only satisfied when the task manager has no pending task
         final NoPendingTaskCondition noPendingTaskCondition=new NoPendingTaskCondition(taskManager);
         //gets the render context used further to put some actions onto the rendering queue    

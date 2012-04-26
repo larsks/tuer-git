@@ -50,7 +50,6 @@ import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.ReliableContextCapabilities;
 import engine.statemachine.ScenegraphStateMachine;
-import engine.sound.SoundManager;
 
 /**
  * General entry point of an application created by JFPSM
@@ -78,14 +77,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
 
     /**state machine of the scenegraph*/    
     private ScenegraphStateMachine scenegraphStateMachine;
-    
-    /**
-     * sound manager
-     * 
-     * @deprecated this field should be moved into the state machine of the scenegraph
-     * */
-    @Deprecated
-    private final SoundManager soundManager;
     
     
     public static void main(final String[] args){
@@ -123,7 +114,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
         exit=false;
         timer=new Timer();
         root=new Node("root node of the game");
-        soundManager=new SoundManager();
         
         //retrieves some parameters of the display
         Display display=NewtFactory.createDisplay(null);
@@ -165,13 +155,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
         //runs in this same thread
         while(!exit)
             {if(canvas.isClosing())
-                 {exit=true;
-                  return;
+                 exit=true;
+             else
+                 {timer.update();
+                  updateLogicalLayer(timer);
+                  //updates controllers/render states/transforms/bounds for rootNode.
+                  root.updateGeometricState(timer.getTimePerFrame(),true);
                  }
-             updateLogicalLayer(timer);
-             timer.update();
-             //updates controllers/render states/transforms/bounds for rootNode.
-             root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
              //Thread.yield();
             }
@@ -179,7 +169,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
         canvas.getCanvasRenderer().makeCurrentContext();
 
         //done, does the cleanup
-        soundManager.cleanup();
         ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         //necessary for Java Web Start
         System.exit(0);
@@ -210,7 +199,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,soundManager,exitAction);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
