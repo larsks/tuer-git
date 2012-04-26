@@ -33,12 +33,10 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.movement.CircularSpreadTextureUpdaterController;
 import engine.movement.MovementEquation;
 import engine.movement.UniformlyVariableMovementEquation;
 import engine.movement.UniformlyVariableRectilinearTranslationController;
-import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
 public final class IntroductionState extends ScenegraphState{

@@ -22,8 +22,6 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.ui.text.BMText;
-
-import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
 public final class ContentRatingSystemState extends ScenegraphState{

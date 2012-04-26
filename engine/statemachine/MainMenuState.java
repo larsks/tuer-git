@@ -36,9 +36,7 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
-
 import engine.integration.DesktopIntegration;
-import engine.service.Ardor3DGameServiceProvider;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
