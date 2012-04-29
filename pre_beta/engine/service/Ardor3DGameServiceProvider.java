@@ -107,6 +107,42 @@ public final class Ardor3DGameServiceProvider implements Scene{
         application.start();
     }
     
+    private abstract static class DesktopShortcutCreationRunnable implements Runnable{
+    	
+    	protected final String filenameWithoutExtension;
+    	
+    	protected final String url;
+
+    	private DesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
+    		this.filenameWithoutExtension=filenameWithoutExtension;
+    		this.url=url;
+    	}
+    }
+    
+    private static final class LaunchDesktopShortcutCreationRunnable extends DesktopShortcutCreationRunnable{
+    	
+    	private LaunchDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
+    		super(filenameWithoutExtension,url);
+    	}
+    	
+    	@Override
+		public void run() {
+    		DesktopIntegration.createLaunchDesktopShortcut(filenameWithoutExtension,url);
+		}
+    }
+    
+    private static final class UninstallDesktopShortcutCreationRunnable extends DesktopShortcutCreationRunnable{
+    	
+    	private UninstallDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
+    		super(filenameWithoutExtension,url);
+    	}
+    	
+    	@Override
+		public void run() {
+    		DesktopIntegration.createUninstallDesktopShortcut(filenameWithoutExtension,url);
+		}
+    }
+    
     /**
      * Constructs the example class, also creating the native window and GL surface.
      */
@@ -199,7 +235,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction);
+        final LaunchDesktopShortcutCreationRunnable launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+        final UninstallDesktopShortcutCreationRunnable uninstallRunnable=new UninstallDesktopShortcutCreationRunnable("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,launchRunnable,uninstallRunnable,"/credits.txt","/controls.txt");
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {

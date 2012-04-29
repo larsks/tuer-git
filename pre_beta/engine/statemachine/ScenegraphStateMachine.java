@@ -69,7 +69,9 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-            final TriggerAction serviceExitAction){
+            final TriggerAction serviceExitAction,final Runnable launchRunnable,
+            final Runnable uninstallRunnable,
+            final String creditsPath,final String controlsPath){
         super(ScenegraphState.class,String.class);
         taskManager=new TaskManager();
         soundManager=new SoundManager();
@@ -104,7 +106,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final ScenegraphState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
         final ScenegraphState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
         final ScenegraphState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsPath,controlsPath);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager);
         //sets the initial state
