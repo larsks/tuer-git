@@ -36,7 +36,6 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
-import engine.integration.DesktopIntegration;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
@@ -60,15 +59,19 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel loadGamePanel;
     
-    private static final String creditsPath="/credits.txt";
+    private final Runnable launchRunnable;
     
-    private static final String controlsPath="/controls.txt";
+    private final Runnable uninstallRunnable;
     
     
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
-                  final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,final SoundManager soundManager){
+                  final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,
+                  final SoundManager soundManager,final Runnable launchRunnable,
+                  final Runnable uninstallRunnable,final String creditsPath,final String controlsPath){
         super(soundManager);
+        this.launchRunnable=launchRunnable;
+        this.uninstallRunnable=uninstallRunnable;
         this.canvas=canvas;
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
@@ -76,8 +79,8 @@ public final class MainMenuState extends ScenegraphState{
         initialMenuPanel=createInitialMenuPanel(exitAction);       
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
         loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);
-        controlsPanel=createControlsPanel();
-        creditsPanel=createCreditsPanel();
+        controlsPanel=createControlsPanel(controlsPath);
+        creditsPanel=createCreditsPanel(creditsPath);
         // create the main frame
         mainFrame=createMainFrame();
         // create the head-up display
@@ -161,20 +164,22 @@ public final class MainMenuState extends ScenegraphState{
         initialMenuPanel.add(controlsButton);
         initialMenuPanel.add(creditsButton);
         initialMenuPanel.add(exitButton);
-        if(DesktopIntegration.isDesktopShortcutCreationSupported())
+        if(launchRunnable!=null)
             {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
-             addDesktopShortcutButton.addActionListener(new ActionListener(){           
+             addDesktopShortcutButton.addActionListener(new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent event){
-                	DesktopIntegration.createLaunchDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+                	launchRunnable.run();
                 }
              });
              initialMenuPanel.add(addDesktopShortcutButton);
-             final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
-             addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){           
+            }
+        if(uninstallRunnable!=null)
+            {final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
+             addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent event){
-                	DesktopIntegration.createUninstallDesktopShortcut("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+                	uninstallRunnable.run();
                 }
              });
              initialMenuPanel.add(addUninstallDesktopShortcutButton);
@@ -211,11 +216,11 @@ public final class MainMenuState extends ScenegraphState{
         return(startMenuPanel);
     }
     
-    private final UIPanel createCreditsPanel(){
+    private final UIPanel createCreditsPanel(final String creditsPath){
         return(createTextualPanel(creditsPath));
     }
     
-    private final UIPanel createControlsPanel(){
+    private final UIPanel createControlsPanel(final String controlsPath){
         return(createTextualPanel(controlsPath));
     }
     
