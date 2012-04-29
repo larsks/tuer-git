@@ -48,7 +48,7 @@ import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
-import engine.misc.ReliableContextCapabilities;
+import engine.renderer.ReliableContextCapabilities;
 import engine.statemachine.ScenegraphStateMachine;
 
 /**
