@@ -235,8 +235,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 exit=true;
             }
         };
-        final LaunchDesktopShortcutCreationRunnable launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
-        final UninstallDesktopShortcutCreationRunnable uninstallRunnable=new UninstallDesktopShortcutCreationRunnable("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+        final LaunchDesktopShortcutCreationRunnable launchRunnable;
+        final UninstallDesktopShortcutCreationRunnable uninstallRunnable;
+        if(DesktopIntegration.isDesktopShortcutCreationSupported())
+            {launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+        	 uninstallRunnable=new UninstallDesktopShortcutCreationRunnable("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+            }
+        else
+            {launchRunnable=null;
+        	 uninstallRunnable=null;
+            }
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,launchRunnable,uninstallRunnable,"/credits.txt","/controls.txt");
     }
 
