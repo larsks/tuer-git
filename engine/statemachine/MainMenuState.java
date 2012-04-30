@@ -63,7 +63,20 @@ public final class MainMenuState extends ScenegraphState{
     
     private final Runnable uninstallRunnable;
     
-    
+    /**
+     * Constructor
+     * 
+     * @param canvas canvas used to display the menu
+     * @param physicalLayer physical layer for triggers
+     * @param mouseManager mouse manager
+     * @param exitAction action used when exit the menu
+     * @param toLoadingDisplayAction action used to switch to the loading display
+     * @param soundManager sound manager
+     * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
+     * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
+     * @param creditsPath path of the file containing the credits (may be null)
+     * @param controlsPath path of the file containing the controls (may be null)
+     */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
                   final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,
@@ -76,11 +89,17 @@ public final class MainMenuState extends ScenegraphState{
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
         // create the panels
+        if(controlsPath!=null)
+            controlsPanel=createControlsPanel(controlsPath);
+        else
+        	controlsPanel=null;
+        if(creditsPath!=null)
+            creditsPanel=createCreditsPanel(creditsPath);
+        else
+        	creditsPanel=null;
         initialMenuPanel=createInitialMenuPanel(exitAction);       
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
-        loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);
-        controlsPanel=createControlsPanel(controlsPath);
-        creditsPanel=createCreditsPanel(creditsPath);
+        loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);        
         // create the main frame
         mainFrame=createMainFrame();
         // create the head-up display
@@ -139,20 +158,30 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        final UIButton controlsButton=new UIButton("Controls");
-        controlsButton.addActionListener(new ActionListener(){           
-            @Override
-            public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(controlsPanel);
+        final UIButton controlsButton;
+        if(controlsPanel!=null)
+            {controlsButton=new UIButton("Controls");
+             controlsButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(controlsPanel);
+                 }
+             });
             }
-        });
-        final UIButton creditsButton=new UIButton("Credits");
-        creditsButton.addActionListener(new ActionListener(){           
-            @Override
-            public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(creditsPanel);
+        else
+        	controlsButton=null;
+        final UIButton creditsButton;
+        if(creditsPanel!=null)
+            {creditsButton=new UIButton("Credits");
+             creditsButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(creditsPanel);
+                 }
+             });
             }
-        });
+        else
+        	creditsButton=null;
         final UIButton exitButton=new UIButton("Exit");
         exitButton.addActionListener(new ActionListener(){           
             @Override
@@ -161,8 +190,10 @@ public final class MainMenuState extends ScenegraphState{
             }
         });      
         initialMenuPanel.add(startButton);
-        initialMenuPanel.add(controlsButton);
-        initialMenuPanel.add(creditsButton);
+        if(controlsButton!=null)
+            initialMenuPanel.add(controlsButton);
+        if(creditsButton!=null)
+            initialMenuPanel.add(creditsButton);
         initialMenuPanel.add(exitButton);
         if(launchRunnable!=null)
             {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
