@@ -70,8 +70,6 @@ public final class PlayerData {
 	//FIXME use a state machine
 	private final PlayerStateMachine stateMachine;
 	//TODO define a duration to select another weapon
-	/**flag indicating whether the player is attacking*/
-	private boolean attackEnabled;
 	
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
@@ -86,7 +84,6 @@ public final class PlayerData {
 		secondaryHandWeaponContainer=new WeaponContainer(weaponFactory);
 		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
 		stateMachine=new PlayerStateMachine(this);
-		attackEnabled=false;
 		this.rightHanded=rightHanded;
 	}
 	
@@ -180,13 +177,11 @@ public final class PlayerData {
 		if(!isAlive())
 		    {//TODO: change the owner uid (if there is no digital watermark) and detach them from the player
 			 //TODO: empty the container of ammunition container (use WeaponUserData)
-			 attackEnabled=false;
 		    }
 	}
 	
 	public void respawn(){
 		health=maxHealth;
-		attackEnabled=false;
 		weaponInUse=null;
 		ammoContainerContainer.empty();
 		dualWeaponUseEnabled=false;
@@ -317,14 +312,6 @@ public final class PlayerData {
 		else
 			ammunitionCountInRightHandedWeapon=0;
 		return(ammunitionCountInRightHandedWeapon);
-	}
-	
-	public void setAttackEnabled(final boolean attackEnabled){
-		this.attackEnabled=attackEnabled;
-	}
-	
-	public boolean isAttackEnabled(){
-		return(attackEnabled);
 	}
 	
 	/**
