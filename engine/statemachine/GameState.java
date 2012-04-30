@@ -57,6 +57,7 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
@@ -108,6 +109,8 @@ public final class GameState extends ScenegraphState{
     private final CameraNode playerNode;
     /**data of the player*/
     private final PlayerData playerData;
+    /**player object that relies on a state machine*/
+    private final PlayerWithStateMachine playerWithStateMachine;
     /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
     /**list of teleporters*/
@@ -149,6 +152,7 @@ public final class GameState extends ScenegraphState{
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
+        playerWithStateMachine=new PlayerWithStateMachine(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
@@ -306,9 +310,34 @@ public final class GameState extends ScenegraphState{
                 	{//FIXME: use a separate timer for this state
                 	 playerData.attack();
                 	}*/
-                playerData.updateLogicalLayer(timer);
+                playerWithStateMachine.updateLogicalLayer(timer);
             }           
         });
+    }
+    
+    public static final class PlayerWithStateMachine {
+    	
+    	private final PlayerStateMachine stateMachine;
+    	
+    	public PlayerWithStateMachine(final PlayerData playerData){
+    		stateMachine=new PlayerStateMachine(playerData);
+    	}
+    	
+    	public void updateLogicalLayer(final ReadOnlyTimer timer){
+    		stateMachine.updateLogicalLayer(timer);
+    	}
+    	
+    	public void tryReload(){
+    		stateMachine.fireEvent(PlayerEvent.RELOADING);
+    	}
+    	
+    	public void trySelectNextWeapon(){
+    		stateMachine.fireEvent(PlayerEvent.SELECTING_NEXT);
+    	}
+    	
+        public void trySelectPreviousWeapon(){
+        	stateMachine.fireEvent(PlayerEvent.SELECTING_PREVIOUS);
+    	}
     }
     
     private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
@@ -352,13 +381,13 @@ public final class GameState extends ScenegraphState{
         final TriggerAction nextWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.trySelectNextWeapon();
+				playerWithStateMachine.trySelectNextWeapon();
 			}
 		};
 		final TriggerAction previousWeaponAction=new TriggerAction(){		
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.trySelectPreviousWeapon();
+				playerWithStateMachine.trySelectPreviousWeapon();
 			}
 		};
 		final TriggerAction wheelWeaponAction=new TriggerAction(){		
@@ -366,28 +395,26 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the mouse wheel has been rotated up/away from the user
 				if(inputState.getCurrent().getMouseState().getDwheel()>0)
-				    playerData.trySelectNextWeapon();
+					playerWithStateMachine.trySelectNextWeapon();
 				else
 					//otherwise the mouse wheel has been rotated down/towards the user
-					playerData.trySelectPreviousWeapon();
+					playerWithStateMachine.trySelectPreviousWeapon();
 			}
 		};
 		final TriggerAction reloadWeaponAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerData.tryReload();
+				playerWithStateMachine.tryReload();
 			}
 		};
 		final TriggerAction startAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//playerData.setAttackEnabled(true);
 			}
 		};
 		final TriggerAction stopAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//playerData.setAttackEnabled(false);
 			}
 		};
 		final TriggerAction pauseAction=new TriggerAction(){

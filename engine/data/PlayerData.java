@@ -19,10 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
-import com.ardor3d.util.ReadOnlyTimer;
-
-import engine.statemachine.PlayerEvent;
-import engine.statemachine.PlayerStateMachine;
 import engine.weaponry.Ammunition;
 import engine.weaponry.AmmunitionContainerContainer;
 import engine.weaponry.AmmunitionFactory;
@@ -67,8 +63,6 @@ public final class PlayerData {
 	private final WeaponFactory weaponFactory;
 	/**container of ammunition container*/
 	private final AmmunitionContainerContainer ammoContainerContainer;
-	//FIXME use a state machine
-	private final PlayerStateMachine stateMachine;
 	//TODO define a duration to select another weapon
 	
 	
@@ -83,7 +77,6 @@ public final class PlayerData {
 		primaryHandWeaponContainer=new WeaponContainer(weaponFactory);
 		secondaryHandWeaponContainer=new WeaponContainer(weaponFactory);
 		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
-		stateMachine=new PlayerStateMachine(this);
 		this.rightHanded=rightHanded;
 	}
 	
@@ -241,10 +234,6 @@ public final class PlayerData {
         return(reloadableAmmoCount);
     }
 	
-	public void tryReload(){
-		stateMachine.fireEvent(PlayerEvent.RELOADING);
-	}
-	
 	/**
 	 * Performs a reload of weapon(s)
 	 * 
@@ -341,18 +330,6 @@ public final class PlayerData {
 			 //punch & kick
 		    }
 		return(consumedAmmunitionOrKnockCount);
-	}
-	
-	public void updateLogicalLayer(final ReadOnlyTimer timer){
-		stateMachine.updateLogicalLayer(timer);
-	}
-	
-	public void trySelectNextWeapon(){
-		stateMachine.fireEvent(PlayerEvent.SELECTING_NEXT);
-	}
-	
-    public void trySelectPreviousWeapon(){
-    	stateMachine.fireEvent(PlayerEvent.SELECTING_PREVIOUS);
 	}
 	
 	public boolean selectNextWeapon(){
