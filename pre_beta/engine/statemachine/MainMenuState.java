@@ -13,9 +13,6 @@
 */
 package engine.statemachine;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
@@ -74,14 +71,14 @@ public final class MainMenuState extends ScenegraphState{
      * @param soundManager sound manager
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
-     * @param creditsPath path of the file containing the credits (may be null)
-     * @param controlsPath path of the file containing the controls (may be null)
+     * @param creditsContent credits content (may be null)
+     * @param controlsContent controls content (may be null)
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
                   final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
-                  final Runnable uninstallRunnable,final String creditsPath,final String controlsPath){
+                  final Runnable uninstallRunnable,final String creditsContent,final String controlsContent){
         super(soundManager);
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
@@ -89,12 +86,12 @@ public final class MainMenuState extends ScenegraphState{
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
         // create the panels
-        if(controlsPath!=null)
-            controlsPanel=createControlsPanel(controlsPath);
+        if(controlsContent!=null)
+            controlsPanel=createControlsPanel(controlsContent);
         else
         	controlsPanel=null;
-        if(creditsPath!=null)
-            creditsPanel=createCreditsPanel(creditsPath);
+        if(creditsContent!=null)
+            creditsPanel=createCreditsPanel(creditsContent);
         else
         	creditsPanel=null;
         initialMenuPanel=createInitialMenuPanel(exitAction);       
@@ -247,29 +244,31 @@ public final class MainMenuState extends ScenegraphState{
         return(startMenuPanel);
     }
     
-    private final UIPanel createCreditsPanel(final String creditsPath){
-        return(createTextualPanel(creditsPath));
+    /**
+     * 
+     * @param creditsContent credits content (cannot be null)
+     * @return
+     */
+    private final UIPanel createCreditsPanel(final String creditsContent){
+        return(createTextualPanel(creditsContent));
     }
     
-    private final UIPanel createControlsPanel(final String controlsPath){
-        return(createTextualPanel(controlsPath));
+    /**
+     * 
+     * @param controlsContent controls content (cannot be null)
+     * @return
+     */
+    private final UIPanel createControlsPanel(final String controlsContent){
+        return(createTextualPanel(controlsContent));
     }
     
-    private final String getTextFileContent(final String path){
-        BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(path)));
-        String line;
-        StringBuffer textContent=new StringBuffer();
-        try{while((line=bufferedReader.readLine())!=null)
-                textContent.append(line+"\n");
-            bufferedReader.close();
-           }
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        return(textContent.toString());
-    }
-    
-    private final UIPanel createTextualPanel(final String path){
-        final UILabel label=new UILabel(getTextFileContent(path));
+    /**
+     * 
+     * @param content textual content (cannot be null)
+     * @return
+     */
+    private final UIPanel createTextualPanel(final String content){
+        final UILabel label=new UILabel(content);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
         final UIButton backButton=new UIButton("Back");
