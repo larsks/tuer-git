@@ -13,6 +13,10 @@
 */
 package engine.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
@@ -245,7 +249,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
             {launchRunnable=null;
         	 uninstallRunnable=null;
             }
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,launchRunnable,uninstallRunnable,"/credits.txt","/controls.txt");
+        final String creditsContent=getTextFileContent("/credits.txt");
+        final String controlsContent=getTextFileContent("/controls.txt");
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
@@ -271,5 +277,26 @@ public final class Ardor3DGameServiceProvider implements Scene{
     public final PickResults doPick(final Ray3 pickRay){
         //ignores
         return(null);
+    }
+    
+    //TODO move this method into a separate class in order to avoid mixing scene services and file services
+    private final String getTextFileContent(final String path){
+    	final InputStream stream=getClass().getResourceAsStream(path);        
+        final String result;
+        if(stream!=null)
+            {BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream));
+        	 String line;
+             StringBuilder textContent=new StringBuilder();
+        	 try{while((line=bufferedReader.readLine())!=null)
+                     textContent.append(line+"\n");
+                 bufferedReader.close();
+                }
+             catch(IOException ioe)
+             {ioe.printStackTrace();}
+        	 result=textContent.toString();
+            }
+        else
+        	result=null;
+        return(result);
     }
 }
