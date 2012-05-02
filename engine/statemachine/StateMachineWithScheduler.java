@@ -37,7 +37,7 @@ public class StateMachineWithScheduler<S,E>{
     /**tool used to postpone state changes*/
     protected final Scheduler<S> scheduler;
     /**state before the latest logical update*/
-    private S previousState;
+    protected S previousState;
     
     public StateMachineWithScheduler(Class<S> stateClass,Class<E> eventClass){
         //creates the transition model
@@ -58,9 +58,11 @@ public class StateMachineWithScheduler<S,E>{
     }
     
     public void updateLogicalLayer(final ReadOnlyTimer timer){
-        final S currentState=internalStateMachine.getCurrentState();
-        scheduler.update(previousState,currentState,timer.getTimePerFrame());
-        previousState=currentState;
+        final S currentStateBeforeUpdate=internalStateMachine.getCurrentState();
+        scheduler.update(previousState,currentStateBeforeUpdate,timer.getTimePerFrame());
+        //obviously the current state may change during the update
+        final S currentStateAfterUpdate=internalStateMachine.getCurrentState();
+        previousState=currentStateAfterUpdate;
     }
     
     public void fireEvent(E event){
