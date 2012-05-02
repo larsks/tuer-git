@@ -44,7 +44,7 @@ public class Scheduler<S>{
     public void update(final S previousState,final S currentState,final double timePerFrame){
         final ArrayList<StateChangeScheduledTask<S>> executedTasks=new ArrayList<StateChangeScheduledTask<S>>();
         final ArrayList<StateChangeScheduledTask<S>> postponedTasks=new ArrayList<StateChangeScheduledTask<S>>();
-        final ArrayList<StateChangeScheduledTask<S>> unqueuedTasks=new ArrayList<StateChangeScheduledTask<S>>();
+        //final ArrayList<StateChangeScheduledTask<S>> unqueuedTasks=new ArrayList<StateChangeScheduledTask<S>>();
         if(previousState!=currentState)
             {if(previousState!=null)
                  {//looks for a scheduled task waiting for the exit of this state
@@ -82,7 +82,7 @@ public class Scheduler<S>{
                  }
             }
         //removes tasks that cannot be queued anymore because of a state change
-        for(StateChangeScheduledTask<S> queuedTask:queuedTasks.keySet())
+        /*for(StateChangeScheduledTask<S> queuedTask:queuedTasks.keySet())
             {final S state=queuedTask.getState();
              switch(queuedTask.getStateChangeType()){
                  case ENTRY:
@@ -98,12 +98,17 @@ public class Scheduler<S>{
             }
         for(StateChangeScheduledTask<S> unqueuedTask:unqueuedTasks)
             queuedTasks.remove(unqueuedTask);
+        */
         //tries to run tasks whose executions have been postponed
         final HashMap<StateChangeScheduledTask<S>,Double> updatedQueuedTasks=new HashMap<StateChangeScheduledTask<S>,Double>();
         for(Entry<StateChangeScheduledTask<S>,Double> queuedEntry:queuedTasks.entrySet())
-            {StateChangeScheduledTask<S> queuedTask=queuedEntry.getKey();
-             final double previousRemainingTime=queuedEntry.getValue().doubleValue();
-             final double currentRemainingTime=previousRemainingTime-timePerFrame;
+            {//gets a task
+        	 StateChangeScheduledTask<S> queuedTask=queuedEntry.getKey();
+             //gets the previous remaining time before triggering its execution
+        	 final double previousRemainingTime=queuedEntry.getValue().doubleValue();
+             //computes its new remaining time
+        	 final double currentRemainingTime=previousRemainingTime-timePerFrame;
+        	 //if there is no remaining time
              if(currentRemainingTime<=0)
                  {//runs it now
                   queuedTask.getRunnable().run();
@@ -114,22 +119,25 @@ public class Scheduler<S>{
                   updatedQueuedTasks.put(queuedTask,Double.valueOf(currentRemainingTime));
                  }
             }
+        //only keeps updated queued tasks that will be run later, removes executed tasks
+        queuedTasks.clear();
         //updates the queued tasks here (to avoid performing concurrent modifications above)
         queuedTasks.putAll(updatedQueuedTasks);
         //updates the remaining execution counts of executed tasks if necessary or removes the task(s) from the scheduler
         for(StateChangeScheduledTask<S> executedTask:executedTasks)
-        	//FIXME dirty kludge, the root cause is undefined. Maybe the same task is executed several times
-            if(scheduledTasks.containsKey(executedTask))
-                {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
-                 final int currentRemainingExecutionCount=previousRemainingExecutionCount-1;
-                 if(currentRemainingExecutionCount==0)
-                     //removes the executed task as it will not be executed anymore
-                     scheduledTasks.remove(executedTask);
-                 else
-                     {//keeps this task and updates its remaining execution count
-                      scheduledTasks.put(executedTask,Integer.valueOf(currentRemainingExecutionCount));
-                     }
-                }
+            {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
+             final int currentRemainingExecutionCount=previousRemainingExecutionCount-1;
+             if(currentRemainingExecutionCount==0)
+                 {//removes the executed task as it will not be executed anymore
+                  scheduledTasks.remove(executedTask);
+                  //removes it as a queued task too
+                  queuedTasks.remove(executedTask);
+                 }
+             else
+                 {//keeps this task and updates its remaining execution count
+                  scheduledTasks.put(executedTask,Integer.valueOf(currentRemainingExecutionCount));
+                 }
+            }
         //queues postponed tasks here to avoid mixing them with already queued tasks
         for(StateChangeScheduledTask<S> postponedTask:postponedTasks)
             queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));        
