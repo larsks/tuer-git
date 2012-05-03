@@ -19,4 +19,25 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public enum PlayerEvent{IDLE,ATTACKING,RELOADING,SELECTING_PREVIOUS,SELECTING_NEXT}
+public enum PlayerEvent{
+	/**
+	 * event for stopping any operation
+	 */
+	IDLE,
+	/**
+	 * event that may run an attack
+	 */
+	ATTACKING,
+	/**
+	 * event that may run a reload of the current weapon
+	 */
+	RELOADING,
+	/**
+	 * event that may run a switch to the previous weapon
+	 */
+	SELECTING_PREVIOUS,
+	/**
+	 * event that may run a switch to the next weapon
+	 */
+	SELECTING_NEXT
+}

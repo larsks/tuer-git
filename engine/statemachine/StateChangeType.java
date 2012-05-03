@@ -13,4 +13,19 @@
 */
 package engine.statemachine;
 
-public enum StateChangeType{ENTRY,EXIT}
+/**
+ * State change type used with a state during a transition
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public enum StateChangeType{
+	/**
+	 * the state machine enters a state
+	 */
+	ENTRY,
+	/**
+	 * the state machine exits a state
+	 */
+	EXIT
+}

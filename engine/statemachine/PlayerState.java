@@ -13,4 +13,35 @@
 */
 package engine.statemachine;
 
-public enum PlayerState{IDLE,ATTACK,RELOAD,SELECT_NEXT,SELECT_PREVIOUS}
+/**
+ * State of player's state machine
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public enum PlayerState{
+	/**
+	 * no operation currently run
+	 */
+	IDLE,
+	/**
+	 * the current weapon is being put back (possibly before switching to another one)
+	 */
+	PUT_BACK,
+	/**
+	 * the current weapon is being used to attack
+	 */
+	ATTACK,
+	/**
+	 * the current weapon is being reloaded
+	 */
+	RELOAD,
+	/**
+	 * the previous weapon is going to be selected very soon
+	 */
+	SELECT_PREVIOUS,
+	/**
+	 * the next weapon is going to be selected very soon
+	 */
+	SELECT_NEXT
+}

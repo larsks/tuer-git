@@ -48,6 +48,12 @@ public class StateMachineWithScheduler<S,E>{
         scheduler=new Scheduler<S>();
     }
     
+    /**
+     * Adds a state and its actions triggered on transitions into the state machine
+     * @param state added state
+     * @param entryAction action used when the state machine enter the supplied state (can be null)
+     * @param exitAction action used when the state machine exits the supplied state (can be null)
+     */
     protected void addState(S state,Action<S,E> entryAction,Action<S,E> exitAction){
         //adds an entry action to the transition model
         if(entryAction!=null)
@@ -57,6 +63,11 @@ public class StateMachineWithScheduler<S,E>{
             transitionModel.addExitAction(state,exitAction);
     }
     
+    /**
+     * Updates the logical layer by running the scheduler
+     * 
+     * @param timer general timer
+     */
     public void updateLogicalLayer(final ReadOnlyTimer timer){
         final S currentStateBeforeUpdate=internalStateMachine.getCurrentState();
         scheduler.update(previousState,currentStateBeforeUpdate,timer.getTimePerFrame());
@@ -65,10 +76,21 @@ public class StateMachineWithScheduler<S,E>{
         previousState=currentStateAfterUpdate;
     }
     
+    /**
+     * Fires an event that may cause a transition
+     * 
+     * @param event
+     */
     public void fireEvent(E event){
     	internalStateMachine.fireEvent(event);
     }
     
+    /**
+     * Fires an event that may cause a transition and supplies some transitional arguments
+     * 
+     * @param event event that may cause a transition
+     * @param args arguments used in the transition if any
+     */
     public void fireEvent(E event,Arguments args){
     	internalStateMachine.fireEvent(event,args);
     }
