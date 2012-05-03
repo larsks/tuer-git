@@ -15,6 +15,7 @@ package engine.statemachine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 /**
@@ -100,29 +101,28 @@ public class Scheduler<S>{
             queuedTasks.remove(unqueuedTask);
         */
         //tries to run tasks whose executions have been postponed
-        final HashMap<StateChangeScheduledTask<S>,Double> updatedQueuedTasks=new HashMap<StateChangeScheduledTask<S>,Double>();
-        for(Entry<StateChangeScheduledTask<S>,Double> queuedEntry:queuedTasks.entrySet())
-            {//gets a task
-        	 StateChangeScheduledTask<S> queuedTask=queuedEntry.getKey();
+        final Iterator<Entry<StateChangeScheduledTask<S>, Double>> queuedEntriesIterator=queuedTasks.entrySet().iterator();
+        while(queuedEntriesIterator.hasNext())
+            {Entry<StateChangeScheduledTask<S>,Double> queuedEntry=queuedEntriesIterator.next();
+             //gets a task
+       	     StateChangeScheduledTask<S> queuedTask=queuedEntry.getKey();
              //gets the previous remaining time before triggering its execution
-        	 final double previousRemainingTime=queuedEntry.getValue().doubleValue();
+       	     final double previousRemainingTime=queuedEntry.getValue().doubleValue();
              //computes its new remaining time
-        	 final double currentRemainingTime=previousRemainingTime-timePerFrame;
-        	 //if there is no remaining time
+       	     final double currentRemainingTime=previousRemainingTime-timePerFrame;
+       	     //if there is no remaining time
              if(currentRemainingTime<=0)
                  {//runs it now
                   queuedTask.getRunnable().run();
                   executedTasks.add(queuedTask);
+                  //removes it from the queued tasks as it does not need to be queued anymore
+                  queuedEntriesIterator.remove();
                  }
              else
-                 {//runs it later
-                  updatedQueuedTasks.put(queuedTask,Double.valueOf(currentRemainingTime));
+                 {//runs it later, keeps it in the queued tasks, updates its remaining time
+                  queuedEntry.setValue(Double.valueOf(currentRemainingTime));
                  }
             }
-        //only keeps updated queued tasks that will be run later, removes executed tasks
-        queuedTasks.clear();
-        //updates the queued tasks here (to avoid performing concurrent modifications above)
-        queuedTasks.putAll(updatedQueuedTasks);
         //updates the remaining execution counts of executed tasks if necessary or removes the task(s) from the scheduler
         for(StateChangeScheduledTask<S> executedTask:executedTasks)
             {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
