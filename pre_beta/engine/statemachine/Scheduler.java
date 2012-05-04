@@ -45,7 +45,6 @@ public class Scheduler<S>{
     public void update(final S previousState,final S currentState,final double timePerFrame){
         final ArrayList<StateChangeScheduledTask<S>> executedTasks=new ArrayList<StateChangeScheduledTask<S>>();
         final ArrayList<StateChangeScheduledTask<S>> postponedTasks=new ArrayList<StateChangeScheduledTask<S>>();
-        //final ArrayList<StateChangeScheduledTask<S>> unqueuedTasks=new ArrayList<StateChangeScheduledTask<S>>();
         if(previousState!=currentState)
             {if(previousState!=null)
                  {//looks for a scheduled task waiting for the exit of this state
@@ -82,24 +81,6 @@ public class Scheduler<S>{
                           }
                  }
             }
-        //removes tasks that cannot be queued anymore because of a state change
-        /*for(StateChangeScheduledTask<S> queuedTask:queuedTasks.keySet())
-            {final S state=queuedTask.getState();
-             switch(queuedTask.getStateChangeType()){
-                 case ENTRY:
-                     //if we have already switched to another state
-                     if(!state.equals(currentState))
-                         unqueuedTasks.add(queuedTask);
-                     break;
-                 case EXIT:
-                     if(state.equals(currentState))
-                         unqueuedTasks.add(queuedTask);
-                     break;
-             }
-            }
-        for(StateChangeScheduledTask<S> unqueuedTask:unqueuedTasks)
-            queuedTasks.remove(unqueuedTask);
-        */
         //tries to run tasks whose executions have been postponed
         final Iterator<Entry<StateChangeScheduledTask<S>, Double>> queuedEntriesIterator=queuedTasks.entrySet().iterator();
         while(queuedEntriesIterator.hasNext())
