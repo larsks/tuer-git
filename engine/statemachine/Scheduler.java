@@ -27,9 +27,19 @@ import java.util.Map.Entry;
  */
 public class Scheduler<S>{
 
-    /**scheduled tasks*/
+    /**
+     * map associating scheduled tasks with their remaining execution counts (the number of time 
+     * they have to be executed). All tasks manipulated by the scheduler are in this map
+     */
     private final HashMap<StateChangeScheduledTask<S>,Integer> scheduledTasks;
-    /**queued tasks: tasks that are going to be executed once soon*/
+    
+    /**
+     * map associating queued tasks (tasks that are going to be executed after a delay, see 
+     * {@link StateChangeScheduledTask#getTimeOffsetInSeconds()}) with their remaining execution 
+     * times before their executions. Only the tasks that cannot be immediately run are in this 
+     * map. They are removed from this map each time they are executed and they may be put into it
+     * again if a transition justifies their use
+     * */
     private final HashMap<StateChangeScheduledTask<S>,Double> queuedTasks;
 
     public Scheduler(){
@@ -45,6 +55,7 @@ public class Scheduler<S>{
     public void update(final S previousState,final S currentState,final double timePerFrame){
         final ArrayList<StateChangeScheduledTask<S>> executedTasks=new ArrayList<StateChangeScheduledTask<S>>();
         final ArrayList<StateChangeScheduledTask<S>> postponedTasks=new ArrayList<StateChangeScheduledTask<S>>();
+        //if a transition has occurred
         if(previousState!=currentState)
             {if(previousState!=null)
                  {//looks for a scheduled task waiting for the exit of this state
@@ -106,12 +117,14 @@ public class Scheduler<S>{
             }
         //updates the remaining execution counts of executed tasks if necessary or removes the task(s) from the scheduler
         for(StateChangeScheduledTask<S> executedTask:executedTasks)
-            {final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
+            {//gets the previous remaining execution count
+        	 final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
+             //decrements the remaining execution count as this task has just been run earlier
              final int currentRemainingExecutionCount=previousRemainingExecutionCount-1;
              if(currentRemainingExecutionCount==0)
                  {//removes the executed task as it will not be executed anymore
                   scheduledTasks.remove(executedTask);
-                  //removes it as a queued task too
+                  //removes it as a queued task too (it has no effect if the task was not queued)
                   queuedTasks.remove(executedTask);
                  }
              else
