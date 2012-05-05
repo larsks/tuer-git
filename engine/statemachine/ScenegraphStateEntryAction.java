@@ -18,19 +18,15 @@ import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
 /**
- * Action that disables the previous state and that enables the current state during a
- * transition.
+ * Action that enables the next state during a transition
  * 
  * @author Julien Gouesse
  *
  */
-public class ScenegraphTransitionAction implements Action<ScenegraphState,String>{
+public class ScenegraphStateEntryAction implements Action<ScenegraphState,String>{
 
-    @Override
+	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-        if(from!=null)
-            from.setEnabled(false);
-        if(to!=null)
-            to.setEnabled(true);
+        to.setEnabled(true);
     }
 }
