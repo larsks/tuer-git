@@ -112,12 +112,12 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         //sets the initial state
         internalStateMachine.rawSetState(contentRatingSystemState);
         //adds the states and their actions to the state machine
-        addState(contentRatingSystemState,null,new TransitionAction());
-        addState(initializationState,null,new TransitionAction());
-        addState(introductionState,null,new TransitionAction());
-        addState(mainMenuState,null,new TransitionAction());
-        addState(loadingDisplayState,null,new TransitionAction());
-        addState(gameState,null,new TransitionAction());        
+        addState(contentRatingSystemState,null,new ScenegraphTransitionAction());
+        addState(initializationState,null,new ScenegraphTransitionAction());
+        addState(introductionState,null,new ScenegraphTransitionAction());
+        addState(mainMenuState,null,new ScenegraphTransitionAction());
+        addState(loadingDisplayState,null,new ScenegraphTransitionAction());
+        addState(gameState,null,new ScenegraphTransitionAction());        
         //adds all transitions between states to the transition model
         transitionModel.addTransition(contentRatingSystemState,initializationState,contentRatingSystemToInitializationEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(initializationState,introductionState,initializationToIntroductionEvent,noPendingTaskCondition,Collections.<Action<ScenegraphState,String>>emptyList());

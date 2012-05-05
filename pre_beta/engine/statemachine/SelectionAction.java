@@ -28,6 +28,7 @@ public class SelectionAction implements Action<PlayerState,PlayerEvent>{
 	
 	@Override
     public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+		//FIXME if the selection fails, attempt to select the current weapon
 		if(from.equals(PlayerState.SELECT_NEXT))
 			playerData.selectNextWeapon();
 		else
