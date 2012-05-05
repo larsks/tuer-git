@@ -37,7 +37,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
      * @author Julien Gouesse
      *
      */
-    private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerEvent>{
+    /*private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerEvent>{
 
         private final Scheduler<PlayerState> scheduler;
     
@@ -57,44 +57,62 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
             final StateChangeScheduledTask<PlayerState> stateChangeScheduledTask=new StateChangeScheduledTask<PlayerState>(to,StateChangeType.ENTRY,timeOffsetInSeconds,runnable,executionCount);
             //adds it to the scheduler
             scheduler.addScheduledTask(stateChangeScheduledTask);
-        }
-    
-        /**
-         * Runnable that fires the idle event to go back to the idle state
-         * 
-         * @author Julien Gouesse
-         *
-         */
-        private static final class ToIdleStateRunnable implements Runnable{
-            
-            private final StateMachine<PlayerState,PlayerEvent> stateMachine;
+        }    
         
-            public ToIdleStateRunnable(StateMachine<PlayerState,PlayerEvent> stateMachine){
-                this.stateMachine=stateMachine;
-            }
+    }*/
+    
+    /**
+     * Runnable that fires the idle event to go back to the idle state
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    /*private static final class ToIdleStateRunnable implements Runnable{
             
-            @Override
-            public void run(){
-                stateMachine.fireEvent(PlayerEvent.IDLE);
-            }
+        private final StateMachine<PlayerState,PlayerEvent> stateMachine;
+        
+        public ToIdleStateRunnable(StateMachine<PlayerState,PlayerEvent> stateMachine){
+            this.stateMachine=stateMachine;
         }
-    }    
+            
+        @Override
+        public void run(){
+            stateMachine.fireEvent(PlayerEvent.IDLE);
+        }
+    }*/
+    
+    private static final class SelectionTransitionTriggerAction extends TransitionTriggerAction<PlayerState,PlayerEvent>{
+
+		public SelectionTransitionTriggerAction(StateMachine<PlayerState,PlayerEvent> stateMachine){
+			super(stateMachine,null,null);
+		}
+    	
+		@Override
+	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+			this.event=event;
+			super.onTransition(from, to, event, args, stateMachine);
+		}
+    }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class);
         //sets the initial state
         internalStateMachine.rawSetState(PlayerState.IDLE);
         //adds the states and their actions to the state machine
-        addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
+        //addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
         //TODO: use an entry action to launch the animation (perhaps with scheduled tasks)
         //uses an exit action to update the data
+        //TODO add another mechanism into the state machine in order to come back to the idle state after reloading or attacking
+        final TransitionTriggerAction<PlayerState,PlayerEvent> toIdleAction=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.IDLE,null);
         final AttackAction attackAction=new AttackAction(playerData);
-        addState(PlayerState.ATTACK,null,attackAction);
+        addState(PlayerState.ATTACK,toIdleAction,attackAction);
         final ReloadAction reloadAction=new ReloadAction(playerData);
-        addState(PlayerState.RELOAD,null,reloadAction);        
+        addState(PlayerState.RELOAD,toIdleAction,reloadAction);        
         final SelectionAction selectionAction=new SelectionAction(playerData);
-        addState(PlayerState.SELECT_NEXT,null,selectionAction);        
-        addState(PlayerState.SELECT_PREVIOUS,null,selectionAction);
+        final SelectionTransitionTriggerAction selectionTransitionAction=new SelectionTransitionTriggerAction(internalStateMachine);
+        addState(PlayerState.PUT_BACK,selectionTransitionAction,null);
+        addState(PlayerState.SELECT_NEXT,toIdleAction,selectionAction);
+        addState(PlayerState.SELECT_PREVIOUS,toIdleAction,selectionAction);        
         //adds all transitions between states to the transition model
         //no condition is required but an attack may fail (because of a lack of ammo).
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
@@ -104,8 +122,10 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //creates condition satisfied when the player can select another weapon
         final SelectionPossibleCondition nextSelectionPossibleCondition=new SelectionPossibleCondition(playerData,true);
         final SelectionPossibleCondition previousSelectionPossibleCondition=new SelectionPossibleCondition(playerData,false); 
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECT_NEXT,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_NEXT,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
+        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates transitions to the idle state
         transitionModel.addTransition(PlayerState.ATTACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
