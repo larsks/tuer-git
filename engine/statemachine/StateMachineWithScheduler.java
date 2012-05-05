@@ -39,11 +39,22 @@ public class StateMachineWithScheduler<S,E>{
     /**state before the latest logical update*/
     protected S previousState;
     
-    public StateMachineWithScheduler(Class<S> stateClass,Class<E> eventClass){
+    /**
+     * Constructor
+     * 
+     * @param stateClass state class
+     * @param eventClass event class
+     * @param initialState initial state (can be null but a NullPointerException 
+     * will be thrown if StateMachine.forceSetState(S) is called any further)
+     */
+    public StateMachineWithScheduler(Class<S> stateClass,Class<E> eventClass,S initialState){
         //creates the transition model
         transitionModel=Fettle.newTransitionModel(stateClass,eventClass);
-        //creates the state machine used internally, based on Fettle API
-        internalStateMachine=transitionModel.newStateMachine(null);
+        /**
+         * creates the state machine used internally, based on Fettle API. If null is passed, 
+         * any further call of StateMachine.forceSetState(S) will throw a NullPointerException
+         */
+        internalStateMachine=transitionModel.newStateMachine(initialState);
         //creates the scheduler
         scheduler=new Scheduler<S>();
     }
