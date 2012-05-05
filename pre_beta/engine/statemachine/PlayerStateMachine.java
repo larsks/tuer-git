@@ -95,9 +95,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     }
 
     public PlayerStateMachine(final PlayerData playerData){
-        super(PlayerState.class,PlayerEvent.class);
-        //sets the initial state
-        internalStateMachine.rawSetState(PlayerState.IDLE);
+        super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
         //adds the states and their actions to the state machine
         //addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
         //TODO: use an entry action to launch the animation (perhaps with scheduled tasks)
@@ -131,6 +129,8 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        //sets the state
+        internalStateMachine.forceSetState(PlayerState.IDLE);
     }
     
     /**

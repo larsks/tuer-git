@@ -21,6 +21,10 @@ package engine.statemachine;
  */
 public enum PlayerState{
 	/**
+	 * the entity is not yet really available (only used very early as an initial state)
+	 */
+	NOT_YET_AVAILABLE,
+	/**
 	 * no operation currently run
 	 */
 	IDLE,

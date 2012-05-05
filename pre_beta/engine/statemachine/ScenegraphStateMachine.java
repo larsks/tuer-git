@@ -72,7 +72,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             final TriggerAction serviceExitAction,final Runnable launchRunnable,
             final Runnable uninstallRunnable,
             final String creditsContent,final String controlsContent){
-        super(ScenegraphState.class,String.class);
+        super(ScenegraphState.class,String.class,new ScenegraphState());
         taskManager=new TaskManager();
         soundManager=new SoundManager();
         final TriggerAction exitAction=new TriggerAction() {
@@ -137,11 +137,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         scheduler.addScheduledTask(contentRatingSystemToInitializationTask);
         scheduler.addScheduledTask(initializationToIntroductionTask);
         scheduler.addScheduledTask(introductionToMainMenuTask);
-        //FIXME find a cleaner approach to solve this problem, the initial state of the machine should never be null
-        //uses a dumb empty state to avoid a NullPointerException when calling StateMachine.forceSetState(S)
-        final ScenegraphState dumbEmptyState=new ScenegraphState(null);
-        internalStateMachine.rawSetState(dumbEmptyState);
-        //sets the initial state
+        //sets the state
         internalStateMachine.forceSetState(contentRatingSystemState);
     }
     

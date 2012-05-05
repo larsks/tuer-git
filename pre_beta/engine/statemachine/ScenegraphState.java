@@ -29,12 +29,19 @@ public class ScenegraphState{
     /**class used to play some sound samples*/
     private final SoundManager soundManager;
 	
+    public ScenegraphState(){
+    	this(null,null,null);
+    }
 	
 	public ScenegraphState(final SoundManager soundManager){
+		this(soundManager,new LogicalLayer(),new Node());
+	}
+	
+	protected ScenegraphState(final SoundManager soundManager,final LogicalLayer logicalLayer,final Node root){
 		super();
 		this.soundManager=soundManager;
-        this.logicalLayer=new LogicalLayer();
-        root=new Node();
+        this.logicalLayer=logicalLayer;
+        this.root=root;
 	}
 	
 	public void init(){}
@@ -58,10 +65,12 @@ public class ScenegraphState{
     public void setEnabled(final boolean enabled){    	
     	if(this.enabled!=enabled)
     	    {this.enabled=enabled;
-    	     final SwitchNode switchNode=(SwitchNode)root.getParent();
-       	     final int index=switchNode.getChildIndex(root);
-             if(index!=-1)
-                 switchNode.setVisible(index,enabled);
+    	     if(root!=null)
+    	         {final SwitchNode switchNode=(SwitchNode)root.getParent();
+       	          final int index=switchNode.getChildIndex(root);
+                  if(index!=-1)
+                      switchNode.setVisible(index,enabled);
+    	         }    	     
     	    }
     }
 }
