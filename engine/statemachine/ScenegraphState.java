@@ -50,15 +50,15 @@ public class ScenegraphState{
         return(this.enabled);
     }
 
-    final Node getRoot(){
+	public final Node getRoot(){
         return(root);
     }
 
-    final LogicalLayer getLogicalLayer(){
+	public final LogicalLayer getLogicalLayer(){
         return(logicalLayer);
     }
 
-    final SoundManager getSoundManager(){
+	public final SoundManager getSoundManager(){
 	    return(soundManager);
     }
     
@@ -69,7 +69,11 @@ public class ScenegraphState{
     	         {final SwitchNode switchNode=(SwitchNode)root.getParent();
        	          final int index=switchNode.getChildIndex(root);
                   if(index!=-1)
+                	  //shows only this child node
                       switchNode.setVisible(index,enabled);
+                  else
+                	  //shows no child node
+                	  switchNode.setAllNonVisible();
     	         }    	     
     	    }
     }

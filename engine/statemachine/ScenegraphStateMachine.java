@@ -79,8 +79,9 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
 			
 			@Override
 			public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-				serviceExitAction.perform(source,inputState,tpf);
+				//FIXME rather come back to the initial state
 				soundManager.cleanup();
+				serviceExitAction.perform(source,inputState,tpf);
 			}
 		};
         // creates a condition only satisfied when the task manager has no pending task
@@ -91,6 +92,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         switchNode=new StateMachineSwitchNode();
         parent.attachChild(switchNode);
         //creates events
+        final String initialScenegraphStateToContentRatingSystemEvent=getTransitionEvent(ScenegraphState.class,ContentRatingSystemState.class);
         final String contentRatingSystemToInitializationEvent=getTransitionEvent(ContentRatingSystemState.class,InitializationState.class);
         final String initializationToIntroductionEvent=getTransitionEvent(InitializationState.class,IntroductionState.class);
         final String introductionToMainMenuEvent=getTransitionEvent(IntroductionState.class,MainMenuState.class);
@@ -103,6 +105,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToLoadingDisplayEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
         //creates states
+        final ScenegraphState initialState=internalStateMachine.getCurrentState();
         final ScenegraphState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
         final ScenegraphState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
         final ScenegraphState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
@@ -110,6 +113,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager);
         //adds the states and their actions to the state machine
+        //FIXME put all cleanup code into the entry action of the initial state
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(initializationState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(introductionState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
@@ -117,6 +121,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         addState(loadingDisplayState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(gameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         //adds all transitions between states to the transition model
+        transitionModel.addTransition(initialState,contentRatingSystemState,initialScenegraphStateToContentRatingSystemEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(contentRatingSystemState,initializationState,contentRatingSystemToInitializationEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(initializationState,introductionState,initializationToIntroductionEvent,noPendingTaskCondition,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(introductionState,mainMenuState,introductionToMainMenuEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
@@ -137,8 +142,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         scheduler.addScheduledTask(contentRatingSystemToInitializationTask);
         scheduler.addScheduledTask(initializationToIntroductionTask);
         scheduler.addScheduledTask(introductionToMainMenuTask);
-        //sets the state
-        internalStateMachine.forceSetState(contentRatingSystemState);
+        //goes to the content rating system state
+        internalStateMachine.fireEvent(initialScenegraphStateToContentRatingSystemEvent);
     }
     
     @Override
