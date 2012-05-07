@@ -33,7 +33,7 @@ import com.ardor3d.util.GameTaskQueueManager;
 public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Action<S,E>{
 
 	/**state machine to which events are fired*/
-    protected final StateMachine<S,E> stateMachine;
+    protected StateMachine<S,E> stateMachine;
     
     /**event fired in this state machine*/
     protected E event;
@@ -44,7 +44,7 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     /**
      * Constructor
      * 
-     * @param stateMachine state machine to which events are fired (must not be null)
+     * @param stateMachine state machine to which events are fired
      * @param event event fired in this state machine
      * @param renderContext render context if the event must be fired on the update queue, otherwise null
      */
@@ -67,7 +67,7 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     
     @Override
     public void run(){
-    	if(event!=null)
+    	if(event!=null&&stateMachine!=null)
     	    {if(renderContext!=null)
                  //this operation must be done on the update queue
                  GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){

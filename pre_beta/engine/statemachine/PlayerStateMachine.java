@@ -83,13 +83,14 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     
     private static final class SelectionTransitionTriggerAction extends TransitionTriggerAction<PlayerState,PlayerEvent>{
 
-		public SelectionTransitionTriggerAction(StateMachine<PlayerState,PlayerEvent> stateMachine){
-			super(stateMachine,null,null);
+		public SelectionTransitionTriggerAction(){
+			super(null,null,null);
 		}
     	
 		@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			this.event=event;
+			this.stateMachine=stateMachine;
+			this.event=event;			
 			super.onTransition(from, to, event, args, stateMachine);
 		}
     }
@@ -107,11 +108,13 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final ReloadAction reloadAction=new ReloadAction(playerData);
         addState(PlayerState.RELOAD,toIdleAction,reloadAction);        
         final SelectionAction selectionAction=new SelectionAction(playerData);
-        final SelectionTransitionTriggerAction selectionTransitionAction=new SelectionTransitionTriggerAction(internalStateMachine);
+        //FIXME use a timed transitional action
+        final SelectionTransitionTriggerAction selectionTransitionAction=new SelectionTransitionTriggerAction();
         addState(PlayerState.PUT_BACK,selectionTransitionAction,null);
         addState(PlayerState.SELECT_NEXT,toIdleAction,selectionAction);
         addState(PlayerState.SELECT_PREVIOUS,toIdleAction,selectionAction);        
         //adds all transitions between states to the transition model
+        transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates a condition satisfied when the player can reload his weapon(s)
@@ -129,8 +132,8 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        //sets the state
-        internalStateMachine.forceSetState(PlayerState.IDLE);
+        //drives the player available
+        internalStateMachine.fireEvent(PlayerEvent.AVAILABLE);
     }
     
     /**
