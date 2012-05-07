@@ -110,7 +110,7 @@ public final class GameState extends ScenegraphState{
     /**data of the player*/
     private final PlayerData playerData;
     /**player object that relies on a state machine*/
-    private final PlayerWithStateMachine playerWithStateMachine;
+    private final LogicalPlayer playerWithStateMachine;
     /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
     /**list of teleporters*/
@@ -152,7 +152,7 @@ public final class GameState extends ScenegraphState{
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
-        playerWithStateMachine=new PlayerWithStateMachine(playerData);
+        playerWithStateMachine=new LogicalPlayer(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
@@ -315,16 +315,26 @@ public final class GameState extends ScenegraphState{
         });
     }
     
-    public static final class PlayerWithStateMachine {
+    public static final class LogicalPlayer {
     	
     	private final PlayerStateMachine stateMachine;
     	
-    	public PlayerWithStateMachine(final PlayerData playerData){
-    		stateMachine=new PlayerStateMachine(playerData);
+    	private final PlayerData playerData;
+    	
+    	public LogicalPlayer(final PlayerData playerData){
+    		this.playerData=playerData;
+    		this.stateMachine=new PlayerStateMachine(playerData);
     	}
     	
     	public void updateLogicalLayer(final ReadOnlyTimer timer){
     		stateMachine.updateLogicalLayer(timer);
+    		/**
+    		 * TODO:
+    		 * get the previous state
+    		 * get the current state
+    		 * update the amount of time since last transition
+    		 * update the player data from the player state machine and this amount of time
+    		 */
     	}
     	
     	public void tryReload(){

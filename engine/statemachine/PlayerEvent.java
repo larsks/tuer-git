@@ -21,6 +21,10 @@ package engine.statemachine;
  */
 public enum PlayerEvent{
 	/**
+	 * event that drives the entity available
+	 */
+	AVAILABLE,
+	/**
 	 * event for stopping any operation
 	 */
 	IDLE,
