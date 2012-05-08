@@ -20,27 +20,11 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  * @param <S> state class
- * @deprecated rather directly use ScheduledTask + StateChangeScheduledTaskCondition
  */
-@Deprecated
 public class StateChangeScheduledTask<S> extends ScheduledTask<S>{
-
-    private final S state;
-
-    private final StateChangeType stateChangeType;
     
     public StateChangeScheduledTask(final S state,final StateChangeType stateChangeType,
             final double timeOffsetInSeconds,final Runnable runnable,final int executionCount){
         super(timeOffsetInSeconds,runnable,executionCount,new StateChangeScheduledTaskCondition<S>(state,stateChangeType));
-    	this.state=state;
-        this.stateChangeType=stateChangeType;        
-    }
-    
-    public S getState(){
-        return(state);
-    }
-
-    public StateChangeType getStateChangeType(){
-        return(stateChangeType);
     }
 }

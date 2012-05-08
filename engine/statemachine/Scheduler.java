@@ -55,59 +55,21 @@ public class Scheduler<S>{
     public void update(final S previousState,final S currentState,final double timePerFrame){
         final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
         final ArrayList<ScheduledTask<S>> postponedTasks=new ArrayList<ScheduledTask<S>>();
-        //TODO redesign this part of the source code to handle state changes as a particular kind of condition
-        //if a transition has occurred
-        if(previousState!=currentState)
-            {if(previousState!=null)
-                 {//looks for a scheduled task waiting for the exit of this state
-                  for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-                      {StateChangeScheduledTask<S> stateChangeScheduledTask=(StateChangeScheduledTask<S>)scheduledTask;
-                	   if(stateChangeScheduledTask.getStateChangeType().equals(StateChangeType.EXIT))
-                           {final S state=stateChangeScheduledTask.getState();
-                            if(state.equals(previousState))
-                                if(scheduledTask.getTimeOffsetInSeconds()==0)
-                                    {//runs it now
-                                     scheduledTask.getRunnable().run();
-                                     executedTasks.add(scheduledTask);
-                                    }
-                                else
-                                    {//runs it later
-                                     postponedTasks.add(scheduledTask);
-                                    }
-                           }
-                      }
-                 }
-             if(currentState!=null)
-                 {//looks for a scheduled task waiting for the entry of this state
-                  for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-                      {StateChangeScheduledTask<S> stateChangeScheduledTask=(StateChangeScheduledTask<S>)scheduledTask;
-                       if(stateChangeScheduledTask.getStateChangeType().equals(StateChangeType.ENTRY))
-                           {final S state=stateChangeScheduledTask.getState();
-                            if(state.equals(currentState))
-                                if(scheduledTask.getTimeOffsetInSeconds()==0)
-                                    {//runs it now
-                                     scheduledTask.getRunnable().run();
-                                     executedTasks.add(scheduledTask);
-                                    }
-                                else
-                                    {//runs it later
-                                     postponedTasks.add(scheduledTask);                                    
-                                    }
-                           }
-                      }
-                 }
-            }
-        //FIXME the code below causes a regression on timed transitions
-        /*for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-        	if(scheduledTask.isSatisfied(previousState, currentState))
-        	    {//runs it now
-                 scheduledTask.getRunnable().run();
-                 executedTasks.add(scheduledTask);
-                }
-            else
-                {//runs it later
-                 postponedTasks.add(scheduledTask);                                    
-                }*/
+        //checks all scheduled tasks
+        for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
+        	//if its condition is satisfied
+        	if(scheduledTask.isSatisfied(previousState,currentState))
+        	    {//if it can be run immediately
+        		 if(scheduledTask.getTimeOffsetInSeconds()==0)
+        	         {//runs it now
+                      scheduledTask.getRunnable().run();
+                      executedTasks.add(scheduledTask);
+                     }
+                 else
+                     {//runs it later
+                      postponedTasks.add(scheduledTask);                                    
+                     }
+        	    }        	    
         //tries to run tasks whose executions have been postponed
         final Iterator<Entry<ScheduledTask<S>, Double>> queuedEntriesIterator=queuedTasks.entrySet().iterator();
         while(queuedEntriesIterator.hasNext())
