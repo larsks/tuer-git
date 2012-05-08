@@ -183,6 +183,26 @@ public final class PlayerData {
 	}
 	
 	/**
+	 * Puts back the current weapon(s) if any
+	 * 
+	 * @param elapsedTimeSincePutBackStartInNanos elapsed time since the start of the "put back" 
+	 * step expressed in nanoseconds
+	 */
+	public void putBack(final long elapsedTimeSincePutBackStartInNanos){
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+            {final long putBackDurationInNanos=200000;
+			 //computes the progress of the "put back" step (in the interval [0;1])
+			 final double putBackStepProgress=Math.max(0,Math.min(1,elapsedTimeSincePutBackStartInNanos/putBackDurationInNanos));
+			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+	         
+		     if(isDualWeaponUseEnabled())
+		         {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
+			      
+		         }
+            }
+	}
+	
+	/**
      * Gets the amount of ammo that can be used during a reload of the weapon in the primary hand
      * 
      * @return amount of ammo that can be used during a reload of the weapon in the primary hand
