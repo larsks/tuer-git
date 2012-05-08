@@ -33,10 +33,10 @@ import com.ardor3d.util.GameTaskQueueManager;
 public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Action<S,E>{
 
 	/**state machine to which events are fired*/
-    protected StateMachine<S,E> stateMachine;
+    protected final StateMachine<S,E> stateMachine;
     
     /**event fired in this state machine*/
-    protected E event;
+    protected final E event;
     
     /**render context if the event must be fired on the update queue, otherwise null*/
     protected final RenderContext renderContext;
@@ -44,8 +44,8 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     /**
      * Constructor
      * 
-     * @param stateMachine state machine to which events are fired
-     * @param event event fired in this state machine
+     * @param stateMachine state machine to which events are fired (must not be null)
+     * @param event event fired in this state machine (must not be null)
      * @param renderContext render context if the event must be fired on the update queue, otherwise null
      */
     public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,
@@ -67,19 +67,17 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     
     @Override
     public void run(){
-    	if(event!=null&&stateMachine!=null)
-    	    {if(renderContext!=null)
-                 //this operation must be done on the update queue
-                 GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
-                 @Override
-                     public Void call() throws Exception{
-                         //fires the event in the state machine to cause the transition
-                         stateMachine.fireEvent(event);
-                         return(null);
-                     }
-                 });
-    	     else
-    		     stateMachine.fireEvent(event);
-    	    }
+    	if(renderContext!=null)
+            //this operation must be done on the update queue
+            GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
+                @Override
+                public Void call() throws Exception{
+                    //fires the event in the state machine to cause the transition
+                    stateMachine.fireEvent(event);
+                    return(null);
+                }
+            });
+    	else
+    		stateMachine.fireEvent(event);
     }
 }

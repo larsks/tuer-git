@@ -14,35 +14,26 @@
 package engine.statemachine;
 
 /**
- * Task scheduled to be executed some time after a state change. It is not focused on a given 
+ * Scheduled task whose condition is on a state change. It is not focused on a given 
  * transition but rather on the entry or the exit from a state.
  * 
  * @author Julien Gouesse
  *
+ * @param <S> state class
+ * @deprecated rather directly use ScheduledTask + StateChangeScheduledTaskCondition
  */
-public class StateChangeScheduledTask<S> {
+@Deprecated
+public class StateChangeScheduledTask<S> extends ScheduledTask<S>{
 
     private final S state;
 
     private final StateChangeType stateChangeType;
     
-    private final double timeOffsetInSeconds;
-    
-    private final Runnable runnable;
-    
-    private final int executionCount;
-    
     public StateChangeScheduledTask(final S state,final StateChangeType stateChangeType,
             final double timeOffsetInSeconds,final Runnable runnable,final int executionCount){
-        this.state=state;
-        this.stateChangeType=stateChangeType;
-        if(timeOffsetInSeconds<0)
-            throw new IllegalArgumentException("The time offset must be positive");
-        this.timeOffsetInSeconds=timeOffsetInSeconds;
-        this.runnable=runnable;
-        if(executionCount<=0)
-            throw new IllegalArgumentException("The execution count must be strictly positive");
-        this.executionCount=executionCount;
+        super(timeOffsetInSeconds,runnable,executionCount,new StateChangeScheduledTaskCondition<S>(state,stateChangeType));
+    	this.state=state;
+        this.stateChangeType=stateChangeType;        
     }
     
     public S getState(){
@@ -51,17 +42,5 @@ public class StateChangeScheduledTask<S> {
 
     public StateChangeType getStateChangeType(){
         return(stateChangeType);
-    }
-
-    public double getTimeOffsetInSeconds(){
-        return(timeOffsetInSeconds);
-    }
-    
-    public Runnable getRunnable(){
-        return(runnable);
-    }
-    
-    public int getExecutionCount(){
-        return(executionCount);
     }
 }
