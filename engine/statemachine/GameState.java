@@ -187,12 +187,14 @@ public final class GameState extends ScenegraphState{
         	
         	private long previouslyMeasuredElapsedTime=-1;
         	
+        	private long elapsedTimeSinceLatestTransition=0;
+        	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//update the timer
             	timer.update();
             	final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
-            	final long elapsedTimeSinceLastCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
+            	final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
             	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;
                 //synchronizes the camera node with the camera
                 playerNode.updateFromCamera();
@@ -304,13 +306,35 @@ public final class GameState extends ScenegraphState{
                 //if the player is not on any teleporter
                 if(!hasCollision)
                 	wasBeingTeleported=false;
-                //attacks if this feature is enabled
-                //FIXME: wrong approach: no attack is launched when the button is pressed during less time than the duration of a time
-                /*if(playerData.isAttackEnabled())
-                	{//FIXME: use a separate timer for this state
-                	 playerData.attack();
-                	}*/
+                //gets the previous state of the player
+                final PlayerState previousPlayerState=playerWithStateMachine.getPreviousState();
+                //updates its state
                 playerWithStateMachine.updateLogicalLayer(timer);
+                //gets its current state (as is after the update)
+                final PlayerState currentPlayerState=playerWithStateMachine.getPreviousState();
+                //updates the amount of time since the latest transition
+                if(previousPlayerState!=currentPlayerState)
+                	elapsedTimeSinceLatestTransition=0;
+                else
+                	elapsedTimeSinceLatestTransition+=elapsedTimeSinceLatestCallInNanos;
+                //updates the player data from its state machine and the elapsed time since the latest transition
+                if(currentPlayerState.equals(PlayerState.PUT_BACK))                	
+                switch(currentPlayerState)
+                    {case PUT_BACK:
+                         {playerData.putBack(elapsedTimeSinceLatestTransition);
+                          break;
+                         }
+                     case SELECT_NEXT:
+                         {
+                          break;
+                         }
+                     case SELECT_PREVIOUS:
+                         {
+                          break;
+                         }
+                     default:
+                         {}
+                    }
             }           
         });
     }
@@ -319,22 +343,12 @@ public final class GameState extends ScenegraphState{
     	
     	private final PlayerStateMachine stateMachine;
     	
-    	private final PlayerData playerData;
-    	
     	public LogicalPlayer(final PlayerData playerData){
-    		this.playerData=playerData;
     		this.stateMachine=new PlayerStateMachine(playerData);
     	}
     	
     	public void updateLogicalLayer(final ReadOnlyTimer timer){
     		stateMachine.updateLogicalLayer(timer);
-    		/**
-    		 * TODO:
-    		 * get the previous state
-    		 * get the current state
-    		 * update the amount of time since last transition
-    		 * update the player data from the player state machine and this amount of time
-    		 */
     	}
     	
     	public void tryReload(){
@@ -348,6 +362,10 @@ public final class GameState extends ScenegraphState{
         public void trySelectPreviousWeapon(){
         	stateMachine.fireEvent(PlayerEvent.SELECTING_PREVIOUS);
     	}
+        
+        public PlayerState getPreviousState(){
+        	return(stateMachine.previousState);
+        }
     }
     
     private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
