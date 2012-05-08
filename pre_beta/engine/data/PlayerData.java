@@ -192,14 +192,30 @@ public final class PlayerData {
 		if(isCurrentWeaponAmmunitionCountDisplayable())
             {final long putBackDurationInNanos=200000;
 			 //computes the progress of the "put back" step (in the interval [0;1])
-			 final double putBackStepProgress=Math.max(0,Math.min(1,elapsedTimeSincePutBackStartInNanos/putBackDurationInNanos));
+			 final double putBackStepProgress=Math.max(0,Math.min(1.0,elapsedTimeSincePutBackStartInNanos/putBackDurationInNanos));
 			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
-	         
+	         //TODO modify the ordinate of the primary weapon
 		     if(isDualWeaponUseEnabled())
 		         {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
-			      
+		          //TODO modify the ordinate of the secondary weapon
 		         }
             }
+	}
+	
+	/**
+	 * Returns whether the "put back" is complete
+	 * 
+	 * @return <code>true</code> if the "put back is complete", otherwise <code>false</code>
+	 */
+	public boolean isPutBackComplete(){
+		final boolean isPutBackComplete;
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {//TODO measure the progress of the process (use the ordinate of the weapons), return true only when it is complete
+			 isPutBackComplete=false;
+		    }
+		else
+			isPutBackComplete=true;
+		return(isPutBackComplete);
 	}
 	
 	/**

@@ -81,34 +81,28 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         }
     }*/
     
-    private static final class SelectionTransitionTriggerAction extends TransitionTriggerAction<PlayerState,PlayerEvent>{
+    private static final class SelectionTransitionTriggerAction implements Action<PlayerState,PlayerEvent>{
 
 		public SelectionTransitionTriggerAction(){
-			super(null,null,null);
 		}
     	
 		@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			this.stateMachine=stateMachine;
-			this.event=event;			
-			super.onTransition(from, to, event, args, stateMachine);
+			stateMachine.fireEvent(event);
 		}
     }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
         //adds the states and their actions to the state machine
-        //addState(PlayerState.IDLE,null,new TimedTransitionalActionToIdleState(scheduler));
-        //TODO: use an entry action to launch the animation (perhaps with scheduled tasks)
         //uses an exit action to update the data
-        //TODO add another mechanism into the state machine in order to come back to the idle state after reloading or attacking
         final TransitionTriggerAction<PlayerState,PlayerEvent> toIdleAction=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.IDLE,null);
         final AttackAction attackAction=new AttackAction(playerData);
         addState(PlayerState.ATTACK,toIdleAction,attackAction);
         final ReloadAction reloadAction=new ReloadAction(playerData);
         addState(PlayerState.RELOAD,toIdleAction,reloadAction);        
         final SelectionAction selectionAction=new SelectionAction(playerData);
-        //FIXME use a timed transitional action
+        //TODO use a conditional transitional action that puts a conditional scheduled task into the scheduler and fires an event when the condition is satisfied
         final SelectionTransitionTriggerAction selectionTransitionAction=new SelectionTransitionTriggerAction();
         addState(PlayerState.PUT_BACK,selectionTransitionAction,null);
         addState(PlayerState.SELECT_NEXT,toIdleAction,selectionAction);

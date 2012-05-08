@@ -31,7 +31,7 @@ public class Scheduler<S>{
      * map associating scheduled tasks with their remaining execution counts (the number of time 
      * they have to be executed). All tasks manipulated by the scheduler are in this map
      */
-    private final HashMap<StateChangeScheduledTask<S>,Integer> scheduledTasks;
+    private final HashMap<ScheduledTask<S>,Integer> scheduledTasks;
     
     /**
      * map associating queued tasks (tasks that are going to be executed after a delay, see 
@@ -40,64 +40,80 @@ public class Scheduler<S>{
      * map. They are removed from this map each time they are executed and they may be put into it
      * again if a transition justifies their use
      * */
-    private final HashMap<StateChangeScheduledTask<S>,Double> queuedTasks;
+    private final HashMap<ScheduledTask<S>,Double> queuedTasks;
 
     public Scheduler(){
-        scheduledTasks=new HashMap<StateChangeScheduledTask<S>,Integer>();
-        queuedTasks=new HashMap<StateChangeScheduledTask<S>,Double>();
+        scheduledTasks=new HashMap<ScheduledTask<S>,Integer>();
+        queuedTasks=new HashMap<ScheduledTask<S>,Double>();
     }
     
-    public void addScheduledTask(StateChangeScheduledTask<S> scheduledTask){
+    public void addScheduledTask(ScheduledTask<S> scheduledTask){
         final Integer initialRemainingExecutionCount=Integer.valueOf(scheduledTask.getExecutionCount());
         scheduledTasks.put(scheduledTask,initialRemainingExecutionCount);
     }
 
     public void update(final S previousState,final S currentState,final double timePerFrame){
-        final ArrayList<StateChangeScheduledTask<S>> executedTasks=new ArrayList<StateChangeScheduledTask<S>>();
-        final ArrayList<StateChangeScheduledTask<S>> postponedTasks=new ArrayList<StateChangeScheduledTask<S>>();
+        final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
+        final ArrayList<ScheduledTask<S>> postponedTasks=new ArrayList<ScheduledTask<S>>();
+        //TODO redesign this part of the source code to handle state changes as a particular kind of condition
         //if a transition has occurred
         if(previousState!=currentState)
             {if(previousState!=null)
                  {//looks for a scheduled task waiting for the exit of this state
-                  for(StateChangeScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-                      if(scheduledTask.getStateChangeType().equals(StateChangeType.EXIT))
-                          {final S state=scheduledTask.getState();
-                           if(state.equals(previousState))
-                               if(scheduledTask.getTimeOffsetInSeconds()==0)
-                                   {//runs it now
-                                    scheduledTask.getRunnable().run();
-                                    executedTasks.add(scheduledTask);
-                                   }
-                               else
-                                   {//runs it later
-                                    postponedTasks.add(scheduledTask);
-                                   }
-                          }                      
+                  for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
+                      {StateChangeScheduledTask<S> stateChangeScheduledTask=(StateChangeScheduledTask<S>)scheduledTask;
+                	   if(stateChangeScheduledTask.getStateChangeType().equals(StateChangeType.EXIT))
+                           {final S state=stateChangeScheduledTask.getState();
+                            if(state.equals(previousState))
+                                if(scheduledTask.getTimeOffsetInSeconds()==0)
+                                    {//runs it now
+                                     scheduledTask.getRunnable().run();
+                                     executedTasks.add(scheduledTask);
+                                    }
+                                else
+                                    {//runs it later
+                                     postponedTasks.add(scheduledTask);
+                                    }
+                           }
+                      }
                  }
              if(currentState!=null)
                  {//looks for a scheduled task waiting for the entry of this state
-                  for(StateChangeScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-                      if(scheduledTask.getStateChangeType().equals(StateChangeType.ENTRY))
-                          {final S state=scheduledTask.getState();
-                           if(state.equals(currentState))
-                               if(scheduledTask.getTimeOffsetInSeconds()==0)
-                                   {//runs it now
-                                    scheduledTask.getRunnable().run();
-                                    executedTasks.add(scheduledTask);
-                                   }
-                               else
-                                   {//runs it later
-                                    postponedTasks.add(scheduledTask);                                    
-                                   }
-                          }
+                  for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
+                      {StateChangeScheduledTask<S> stateChangeScheduledTask=(StateChangeScheduledTask<S>)scheduledTask;
+                       if(stateChangeScheduledTask.getStateChangeType().equals(StateChangeType.ENTRY))
+                           {final S state=stateChangeScheduledTask.getState();
+                            if(state.equals(currentState))
+                                if(scheduledTask.getTimeOffsetInSeconds()==0)
+                                    {//runs it now
+                                     scheduledTask.getRunnable().run();
+                                     executedTasks.add(scheduledTask);
+                                    }
+                                else
+                                    {//runs it later
+                                     postponedTasks.add(scheduledTask);                                    
+                                    }
+                           }
+                      }
                  }
             }
+        //FIXME the code below causes a regression on timed transitions
+        /*for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
+        	if(scheduledTask.isSatisfied(previousState, currentState))
+        	    {//runs it now
+                 scheduledTask.getRunnable().run();
+                 executedTasks.add(scheduledTask);
+                }
+            else
+                {//runs it later
+                 postponedTasks.add(scheduledTask);                                    
+                }*/
         //tries to run tasks whose executions have been postponed
-        final Iterator<Entry<StateChangeScheduledTask<S>, Double>> queuedEntriesIterator=queuedTasks.entrySet().iterator();
+        final Iterator<Entry<ScheduledTask<S>, Double>> queuedEntriesIterator=queuedTasks.entrySet().iterator();
         while(queuedEntriesIterator.hasNext())
-            {Entry<StateChangeScheduledTask<S>,Double> queuedEntry=queuedEntriesIterator.next();
+            {Entry<ScheduledTask<S>,Double> queuedEntry=queuedEntriesIterator.next();
              //gets a task
-       	     StateChangeScheduledTask<S> queuedTask=queuedEntry.getKey();
+       	     ScheduledTask<S> queuedTask=queuedEntry.getKey();
              //gets the previous remaining time before triggering its execution
        	     final double previousRemainingTime=queuedEntry.getValue().doubleValue();
              //computes its new remaining time
@@ -116,7 +132,7 @@ public class Scheduler<S>{
                  }
             }
         //updates the remaining execution counts of executed tasks if necessary or removes the task(s) from the scheduler
-        for(StateChangeScheduledTask<S> executedTask:executedTasks)
+        for(ScheduledTask<S> executedTask:executedTasks)
             {//gets the previous remaining execution count
         	 final int previousRemainingExecutionCount=scheduledTasks.get(executedTask).intValue();
              //decrements the remaining execution count as this task has just been run earlier
@@ -133,7 +149,7 @@ public class Scheduler<S>{
                  }
             }
         //queues postponed tasks here to avoid mixing them with already queued tasks
-        for(StateChangeScheduledTask<S> postponedTask:postponedTasks)
+        for(ScheduledTask<S> postponedTask:postponedTasks)
             queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));        
     }
 }
