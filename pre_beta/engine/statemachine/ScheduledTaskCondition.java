@@ -21,8 +21,16 @@ public abstract class ScheduledTaskCondition<S> implements Condition{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isSatisfied(Arguments args){
-		final S previousState=(S)args.getFirst();
-		final S currentState=(S)args.getArgument(1);
+		final S previousState;
+		final S currentState;
+		if(args!=null&&args!=Arguments.NO_ARGS&&args.getNumberOfArguments()==2)
+		    {previousState=(S)args.getFirst();
+		     currentState=(S)args.getArgument(1);
+		    }
+		else
+		    {previousState=null;
+		     currentState=null;
+		    }
 		return isSatisfied(previousState,currentState);
 	}
 

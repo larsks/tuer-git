@@ -19,6 +19,7 @@ import engine.data.PlayerData;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
+import se.hiflyer.fettle.Condition;
 import se.hiflyer.fettle.StateMachine;
 
 /**
@@ -49,9 +50,9 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	
 		@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			stateMachine.fireEvent(event);
+			//stateMachine.fireEvent(event);
 			//FIXME uncomment the lines below when the "put back" test is really working
-			/*if(event.equals(PlayerEvent.SELECTING_NEXT)||event.equals(PlayerEvent.SELECTING_PREVIOUS))
+			if(event.equals(PlayerEvent.SELECTING_NEXT)||event.equals(PlayerEvent.SELECTING_PREVIOUS))
 			    {//creates the runnable that will fire the proper player event later
 			     final Runnable toSelectStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,event,null);
 				 //creates the condition satisfied when the "put back" is complete
@@ -60,7 +61,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 			     final ScheduledTask<PlayerState> putBackToSelectTask=new ScheduledTask<PlayerState>(putBackCompleteCondition,1,toSelectStateRunnable,0);
 			     //adds this task into the scheduler
 			     scheduler.addScheduledTask(putBackToSelectTask);
-			    }*/
+			    }
 		}
     }
 
@@ -87,11 +88,15 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.RELOAD,PlayerEvent.RELOADING,reloadPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates condition satisfied when the player can select another weapon
         final SelectionPossibleCondition nextSelectionPossibleCondition=new SelectionPossibleCondition(playerData,true);
-        final SelectionPossibleCondition previousSelectionPossibleCondition=new SelectionPossibleCondition(playerData,false); 
+        final SelectionPossibleCondition previousSelectionPossibleCondition=new SelectionPossibleCondition(playerData,false);
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_NEXT,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
-        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        //allows the selection of another weapon only when the "put back" has ended
+        final Condition putBackCompleteCondition=new PutBackCompleteCondition(playerData);
+        final Condition nextSelectionPossibleAfterPutBackCondition=BasicConditions.and(nextSelectionPossibleCondition,putBackCompleteCondition);
+        final Condition previousSelectionPossibleAfterPutBackCondition=BasicConditions.and(previousSelectionPossibleCondition,putBackCompleteCondition);
+        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_NEXT,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleAfterPutBackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
+        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleAfterPutBackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates transitions to the idle state
         transitionModel.addTransition(PlayerState.ATTACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
