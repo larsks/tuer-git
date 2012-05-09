@@ -20,42 +20,59 @@ package engine.statemachine;
  *
  */
 public class ScheduledTask<S>{
-
+	/**condition that triggers the execution of this task*/
+    protected final ScheduledTaskCondition<S> condition;
+	/**number of times this task has to be executed*/
+	protected final int executionCount;
+	/**operation run by this task*/
+    protected final Runnable runnable;   
+    /**delay between the satisfaction of the condition and the execution of this task*/
     protected final double timeOffsetInSeconds;
     
-    protected final Runnable runnable;
     
-    protected final int executionCount;
-    
-    protected final ScheduledTaskCondition<S> condition;
-    
-    public ScheduledTask(final double timeOffsetInSeconds,final Runnable runnable,
-    		final int executionCount,final ScheduledTaskCondition<S> condition){
+    /**
+     * 
+     * @param timeOffsetInSeconds
+     * @param runnable
+     * @param executionCount
+     * @param condition
+     */
+    public ScheduledTask(final ScheduledTaskCondition<S> condition,final int executionCount,
+    		final Runnable runnable,final double timeOffsetInSeconds){
+    	if(condition==null)
+        	throw new IllegalArgumentException("The condition must not be null");
+    	if(executionCount<=0)
+            throw new IllegalArgumentException("The execution count must be strictly positive");
+    	if(runnable==null)
+    		throw new IllegalArgumentException("The runnable must not be null");
     	if(timeOffsetInSeconds<0)
             throw new IllegalArgumentException("The time offset must be positive");
-        this.timeOffsetInSeconds=timeOffsetInSeconds;
-        this.runnable=runnable;
-        if(executionCount<=0)
-            throw new IllegalArgumentException("The execution count must be strictly positive");
-        this.executionCount=executionCount;
-        if(condition==null)
-        	throw new IllegalArgumentException("The condition must not be null");
         this.condition=condition;
+        this.executionCount=executionCount;
+        this.runnable=runnable;
+        this.timeOffsetInSeconds=timeOffsetInSeconds;
     }
     
-    public boolean isSatisfied(S previousState,S currentState){
-    	return(condition.isSatisfied(previousState,currentState));
+    public int getExecutionCount(){
+        return(executionCount);
+    }   
+    
+    public Runnable getRunnable(){
+        return(runnable);
     }
     
     public double getTimeOffsetInSeconds(){
         return(timeOffsetInSeconds);
     }
     
-    public Runnable getRunnable(){
-        return(runnable);
-    }
-    
-    public int getExecutionCount(){
-        return(executionCount);
-    }
+    /**
+     * Tells whether the condition is satisfied
+     * 
+     * @param previousState previous state of the machine
+     * @param currentState current state of the machine
+     * @return <code>true</code> if the condition is satisfied, otherwise <code>false</code>
+     */
+    public boolean isConditionSatisfied(S previousState,S currentState){
+    	return(condition.isSatisfied(previousState,currentState));
+    }    
 }
