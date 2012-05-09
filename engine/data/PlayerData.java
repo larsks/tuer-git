@@ -27,11 +27,10 @@ import engine.weaponry.WeaponContainer;
 import engine.weaponry.WeaponFactory;
 
 /**
- * 
+ * Data model of the player. It contains some operations for these data too.
  * 
  * @author Julien Gouesse
  * 
- * FIXME move all dependencies on the state machine into a separate class
  */
 public final class PlayerData {
     
@@ -63,7 +62,8 @@ public final class PlayerData {
 	private final WeaponFactory weaponFactory;
 	/**container of ammunition container*/
 	private final AmmunitionContainerContainer ammoContainerContainer;
-	//TODO define a duration to select another weapon
+	/**duration of a "put back" operation in nanoseconds*/
+	private static final long PUT_BACK_DURATION_IN_NANOSECONDS=200000000;
 	
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
@@ -168,8 +168,10 @@ public final class PlayerData {
 	
 	public void die(){
 		if(!isAlive())
-		    {//TODO: change the owner uid (if there is no digital watermark) and detach them from the player
-			 //TODO: empty the container of ammunition container (use WeaponUserData)
+		    {/**
+			  * TODO change the owner uid (if there is no digital watermark) and detach them from the player
+			  *      empty the container of ammunition container (use WeaponUserData)
+			  */
 		    }
 	}
 	
@@ -187,17 +189,24 @@ public final class PlayerData {
 	 * 
 	 * @param elapsedTimeSincePutBackStartInNanos elapsed time since the start of the "put back" 
 	 * step expressed in nanoseconds
+	 * 
+	 * TODO take into account the elapsed time since the start of the latest selection if it is interrupted
 	 */
 	public void putBack(final long elapsedTimeSincePutBackStartInNanos){
 		if(isCurrentWeaponAmmunitionCountDisplayable())
-            {final long putBackDurationInNanos=200000;
-			 //computes the progress of the "put back" step (in the interval [0;1])
-			 final double putBackStepProgress=Math.max(0,Math.min(1.0,elapsedTimeSincePutBackStartInNanos/putBackDurationInNanos));
+            {//computes the progress of the "put back" step (in the interval [0;1])
+			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePutBackStartInNanos/(double)PUT_BACK_DURATION_IN_NANOSECONDS));
+			 final double putBackYStart=-0.01787068206435081;
+			 final double putBackYEnd=10*putBackYStart;
+			 //computes the ordinate with the progress
+			 final double putBackYCurrent=putBackYStart+((putBackYEnd-putBackYStart)*putBackStepProgress);
 			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
-	         //TODO modify the ordinate of the primary weapon
+	         //modifies the ordinate of the primary weapon
+			 primaryWeaponNode.setTranslation(primaryWeaponNode.getTranslation().getX(),putBackYCurrent,primaryWeaponNode.getTranslation().getZ());
 		     if(isDualWeaponUseEnabled())
 		         {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
-		          //TODO modify the ordinate of the secondary weapon
+		          //modifies the ordinate of the secondary weapon
+		          secondaryWeaponNode.setTranslation(secondaryWeaponNode.getTranslation().getX(),putBackYCurrent,secondaryWeaponNode.getTranslation().getZ());
 		         }
             }
 	}
@@ -210,8 +219,11 @@ public final class PlayerData {
 	public boolean isPutBackComplete(){
 		final boolean isPutBackComplete;
 		if(isCurrentWeaponAmmunitionCountDisplayable())
-		    {//TODO measure the progress of the process (use the ordinate of the weapons), return true only when it is complete
-			 isPutBackComplete=false;
+		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+			 final double putBackYStart=-0.01787068206435081;
+			 final double putBackYEnd=10*putBackYStart;
+			 //checks if the operation has completed
+			 isPutBackComplete=primaryWeaponNode.getTranslation().getY()==putBackYEnd;
 		    }
 		else
 			isPutBackComplete=true;
@@ -396,23 +408,23 @@ public final class PlayerData {
     		      if(oldWeaponIDInUse!=weaponInUse)
     	              {//if at least one weapon was used previously
     		    	   if(oldWeaponIDInUse!=null)
-    		    	       {//drop the right hand weapon
+    		    	       {//drops the right hand weapon
     		    		    oldWeapon=primaryHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    		    oldWeapon.clearControllers();
     		    		    cameraNode.detachChild(oldWeapon);
     		    		    if(oldDualWeaponUse)
-    		    		        {//drop the left hand weapon
+    		    		        {//drops the left hand weapon
     		    			     oldWeapon=secondaryHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    			     oldWeapon.clearControllers();
     		    			     cameraNode.detachChild(oldWeapon);
     		    		        }
     		    	       }
-    		    	   //add the right hand weapon
+    		    	   //adds the right hand weapon
     		    	   newWeapon=primaryHandWeaponContainer.getNode(weaponInUse);
     		    	   initializeWeaponLocalTransform(newWeapon,true);
     		    	   cameraNode.attachChild(newWeapon);
     		    	   if(dualWeaponUseEnabled)
-    		    	       {//add the left hand weapon
+    		    	       {//adds the left hand weapon
     		    		    newWeapon=secondaryHandWeaponContainer.getNode(weaponInUse);
     		    		    initializeWeaponLocalTransform(newWeapon,false);
     		    		    cameraNode.attachChild(newWeapon);
@@ -420,15 +432,18 @@ public final class PlayerData {
     	              }
     		      else
     		    	  //only the dual use has changed
-    		          {if(dualWeaponUseEnabled)
-    		               {//add the left hand weapon
+    		          {//FIXME dirty kludge, forces the ordinate of the right weapon
+    		           newWeapon=primaryHandWeaponContainer.getNode(weaponInUse);
+       		    	   initializeWeaponLocalTransform(newWeapon,true);
+    		    	   if(dualWeaponUseEnabled)
+    		               {//adds the left hand weapon
     		    	        newWeapon=secondaryHandWeaponContainer.getNode(weaponInUse);
     		    	        initializeWeaponLocalTransform(newWeapon,false);
     		    	        cameraNode.attachChild(newWeapon);
     		               }
     		           else
     		    	       if(oldWeaponIDInUse!=null)
-    		    	           {//drop the left hand weapon
+    		    	           {//drops the left hand weapon
     		    		        oldWeapon=secondaryHandWeaponContainer.getNode(oldWeaponIDInUse);
     		    		        oldWeapon.clearControllers();
     		    		        cameraNode.detachChild(oldWeapon);
