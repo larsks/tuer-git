@@ -23,8 +23,17 @@ package engine.statemachine;
  */
 public class StateChangeScheduledTask<S> extends ScheduledTask<S>{
     
-    public StateChangeScheduledTask(final S state,final StateChangeType stateChangeType,
-            final double timeOffsetInSeconds,final Runnable runnable,final int executionCount){
-        super(timeOffsetInSeconds,runnable,executionCount,new StateChangeScheduledTaskCondition<S>(state,stateChangeType));
+	/**
+	 * Constructor
+	 * 
+	 * @param executionCount condition that triggers the execution of this task
+	 * @param runnable operation run by this task
+	 * @param timeOffsetInSeconds delay between the satisfaction of the condition and the execution of this task
+	 * @param state listened state
+	 * @param stateChangeType listened change type
+	 */
+    public StateChangeScheduledTask(final int executionCount,final Runnable runnable,final double timeOffsetInSeconds,
+    		final S state,final StateChangeType stateChangeType){
+        super(new StateChangeScheduledTaskCondition<S>(state,stateChangeType),executionCount,runnable,timeOffsetInSeconds);
     }
 }

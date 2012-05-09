@@ -135,9 +135,9 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         //puts the task that loads a level into the level loading state
         loadingDisplayState.setLevelInitializationTask(new StateInitializationRunnable(gameState));
         //creates the scheduled tasks
-        final ScheduledTask<ScenegraphState> contentRatingSystemToInitializationTask=new StateChangeScheduledTask<ScenegraphState>(contentRatingSystemState,StateChangeType.ENTRY,2,contentRatingSystemToInitializationTriggerAction,Integer.MAX_VALUE);
-        final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(initializationState,StateChangeType.ENTRY,5,initializationToIntroductionTriggerAction,Integer.MAX_VALUE);
-        final ScheduledTask<ScenegraphState> introductionToMainMenuTask=new StateChangeScheduledTask<ScenegraphState>(introductionState,StateChangeType.ENTRY,17,introductionToMainMenuTriggerAction,Integer.MAX_VALUE);
+        final ScheduledTask<ScenegraphState> contentRatingSystemToInitializationTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,contentRatingSystemToInitializationTriggerAction,2.0,contentRatingSystemState,StateChangeType.ENTRY);
+        final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,initializationToIntroductionTriggerAction,5.0,initializationState,StateChangeType.ENTRY);
+        final ScheduledTask<ScenegraphState> introductionToMainMenuTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,introductionToMainMenuTriggerAction,17.0,introductionState,StateChangeType.ENTRY);
         //adds the scheduled tasks to the scheduler
         scheduler.addScheduledTask(contentRatingSystemToInitializationTask);
         scheduler.addScheduledTask(initializationToIntroductionTask);

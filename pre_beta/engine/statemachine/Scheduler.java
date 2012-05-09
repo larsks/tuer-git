@@ -19,8 +19,9 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 /**
- * Tool able to handle scheduled tasks by detecting state changes and executing these tasks by 
- * taking into account their time offsets.
+ * Tool executing scheduled tasks by taking into account their conditions, their delays and their execution count. It postpones the 
+ * execution of a task when it should not be executed immediately. This tool relies on a state machine that feeds it with its state 
+ * changes and on a timer that provides the time elapsed since the last frame.
  * 
  * @author Julien Gouesse
  *
@@ -28,13 +29,13 @@ import java.util.Map.Entry;
 public class Scheduler<S>{
 
     /**
-     * map associating scheduled tasks with their remaining execution counts (the number of time 
+     * Map associating scheduled tasks with their remaining execution counts (the number of time 
      * they have to be executed). All tasks manipulated by the scheduler are in this map
      */
     private final HashMap<ScheduledTask<S>,Integer> scheduledTasks;
     
     /**
-     * map associating queued tasks (tasks that are going to be executed after a delay, see 
+     * Map associating queued tasks (tasks that are going to be executed after a delay, see 
      * {@link StateChangeScheduledTask#getTimeOffsetInSeconds()}) with their remaining execution 
      * times before their executions. Only the tasks that cannot be immediately run are in this 
      * map. They are removed from this map each time they are executed and they may be put into it
@@ -42,23 +43,38 @@ public class Scheduler<S>{
      * */
     private final HashMap<ScheduledTask<S>,Double> queuedTasks;
 
+    /**
+     * Constructor
+     */
     public Scheduler(){
         scheduledTasks=new HashMap<ScheduledTask<S>,Integer>();
         queuedTasks=new HashMap<ScheduledTask<S>,Double>();
     }
     
+    /**
+     * Adds a scheduled task into this scheduler
+     * 
+     * @param scheduledTask scheduled task
+     */
     public void addScheduledTask(ScheduledTask<S> scheduledTask){
         final Integer initialRemainingExecutionCount=Integer.valueOf(scheduledTask.getExecutionCount());
         scheduledTasks.put(scheduledTask,initialRemainingExecutionCount);
     }
 
+    /**
+     * Updates this scheduler by using the supplied states and the elapsed time since the last frame
+     * 
+     * @param previousState previous state of a state machine
+     * @param currentState current state of a state machine
+     * @param timePerFrame elapsed time since the last frame
+     */
     public void update(final S previousState,final S currentState,final double timePerFrame){
         final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
         final ArrayList<ScheduledTask<S>> postponedTasks=new ArrayList<ScheduledTask<S>>();
         //checks all scheduled tasks
         for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
         	//if its condition is satisfied
-        	if(scheduledTask.isSatisfied(previousState,currentState))
+        	if(scheduledTask.isConditionSatisfied(previousState,currentState))
         	    {//if it can be run immediately
         		 if(scheduledTask.getTimeOffsetInSeconds()==0)
         	         {//runs it now
