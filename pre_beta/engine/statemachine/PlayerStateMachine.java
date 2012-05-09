@@ -31,64 +31,36 @@ import se.hiflyer.fettle.StateMachine;
 public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,PlayerEvent>{
 
     /**
-     * Exit action that adds a scheduled task (starting when we enter another state) to the scheduler in order 
-     * to go back to the idle state after several seconds
+     * Conditional transitional action that puts a (conditional) scheduled task into the scheduler and fires an event when the condition is satisfied
      * 
      * @author Julien Gouesse
      *
      */
-    /*private static final class TimedTransitionalActionToIdleState implements Action<PlayerState,PlayerEvent>{
+    private static final class PutBackToSelectionTransitionAction implements Action<PlayerState,PlayerEvent>{
 
-        private final Scheduler<PlayerState> scheduler;
-    
-        public TimedTransitionalActionToIdleState(final Scheduler<PlayerState> scheduler){
-            this.scheduler=scheduler;
-        }
-    
-        @Override
-        public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments arguments,StateMachine<PlayerState,PlayerEvent> stateMachine){
-            //this task must be executed only one time
-            final int executionCount=1;
-            //FIXME it should be set elsewhere
-            final double timeOffsetInSeconds=0.2;
-            //builds the runnable that fires the proper event
-            final Runnable runnable=new ToIdleStateRunnable(stateMachine);
-            //creates the task
-            final StateChangeScheduledTask<PlayerState> stateChangeScheduledTask=new StateChangeScheduledTask<PlayerState>(to,StateChangeType.ENTRY,timeOffsetInSeconds,runnable,executionCount);
-            //adds it to the scheduler
-            scheduler.addScheduledTask(stateChangeScheduledTask);
-        }    
-        
-    }*/
-    
-    /**
-     * Runnable that fires the idle event to go back to the idle state
-     * 
-     * @author Julien Gouesse
-     *
-     */
-    /*private static final class ToIdleStateRunnable implements Runnable{
-            
-        private final StateMachine<PlayerState,PlayerEvent> stateMachine;
-        
-        public ToIdleStateRunnable(StateMachine<PlayerState,PlayerEvent> stateMachine){
-            this.stateMachine=stateMachine;
-        }
-            
-        @Override
-        public void run(){
-            stateMachine.fireEvent(PlayerEvent.IDLE);
-        }
-    }*/
-    
-    private static final class SelectionTransitionTriggerAction implements Action<PlayerState,PlayerEvent>{
-
-		public SelectionTransitionTriggerAction(){
+    	private final PlayerData playerData;
+    	
+    	private final Scheduler<PlayerState> scheduler;
+    	
+		public PutBackToSelectionTransitionAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+			this.playerData=playerData;
+			this.scheduler=scheduler;
 		}
     	
 		@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
 			stateMachine.fireEvent(event);
+			//FIXME uncomment the lines below when the "put back" test is really working
+			/*if(event.equals(PlayerEvent.SELECTING_NEXT)||event.equals(PlayerEvent.SELECTING_PREVIOUS))
+			    {//creates the runnable that will fire the proper player event later
+			     final Runnable toSelectStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,event,null);
+				 //creates the condition satisfied when the "put back" is complete
+			     final ScheduledTaskCondition<PlayerState> putBackCompleteCondition=new PutBackCompleteCondition(playerData);
+			     //creates the scheduled task using the condition and the runnable above
+			     final ScheduledTask<PlayerState> putBackToSelectTask=new ScheduledTask<PlayerState>(putBackCompleteCondition,1,toSelectStateRunnable,0);
+			     //adds this task into the scheduler
+			     scheduler.addScheduledTask(putBackToSelectTask);
+			    }*/
 		}
     }
 
@@ -102,8 +74,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final ReloadAction reloadAction=new ReloadAction(playerData);
         addState(PlayerState.RELOAD,toIdleAction,reloadAction);        
         final SelectionAction selectionAction=new SelectionAction(playerData);
-        //TODO use a conditional transitional action that puts a conditional scheduled task into the scheduler and fires an event when the condition is satisfied
-        final SelectionTransitionTriggerAction selectionTransitionAction=new SelectionTransitionTriggerAction();
+        final PutBackToSelectionTransitionAction selectionTransitionAction=new PutBackToSelectionTransitionAction(playerData,scheduler);
         addState(PlayerState.PUT_BACK,selectionTransitionAction,null);
         addState(PlayerState.SELECT_NEXT,toIdleAction,selectionAction);
         addState(PlayerState.SELECT_PREVIOUS,toIdleAction,selectionAction);        
