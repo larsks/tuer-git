@@ -18,6 +18,6 @@
 	<classpathentry kind="lib" path="lib/joal/joal.jar"/>
 	<classpathentry kind="lib" path="lib/jogl/jogl.all.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
-	<classpathentry kind="lib" path="lib/fettle/fettle-0.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/fettle/fettle-0.7.0.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
