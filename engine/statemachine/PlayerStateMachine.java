@@ -50,8 +50,6 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	
 		@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			//stateMachine.fireEvent(event);
-			//FIXME uncomment the lines below when the "put back" test is really working
 			if(event.equals(PlayerEvent.SELECTING_NEXT)||event.equals(PlayerEvent.SELECTING_PREVIOUS))
 			    {//creates the runnable that will fire the proper player event later
 			     final Runnable toSelectStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,event,null);
@@ -64,6 +62,55 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 			    }
 		}
     }
+    
+    /**
+     * Conditional transitional action that puts a (conditional) scheduled task into the scheduler and fires an event when the condition is satisfied
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    private static final class SelectionAndPullOutAction implements Action<PlayerState,PlayerEvent>{
+    	
+        private final PlayerData playerData;
+    	
+    	private final Scheduler<PlayerState> scheduler;
+    	
+		public SelectionAndPullOutAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+			this.playerData=playerData;
+			this.scheduler=scheduler;
+		}
+    	
+    	@Override
+	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+    		if(event.equals(PlayerEvent.SELECTING_NEXT)||event.equals(PlayerEvent.SELECTING_PREVIOUS))
+    		    {final boolean isSelectionSuccessful;
+    			 if(event.equals(PlayerEvent.SELECTING_NEXT))
+    				 isSelectionSuccessful=playerData.selectNextWeapon();
+    			 else
+    				 if(event.equals(PlayerEvent.SELECTING_PREVIOUS))
+    					 isSelectionSuccessful=playerData.selectPreviousWeapon();
+    				 else
+    					 isSelectionSuccessful=false;
+    			 //if another weapon has been successfully selected
+    			 if(isSelectionSuccessful)
+    			     {//creates the runnable that will fire the proper player event later
+    				  final Runnable toIdleStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.IDLE,null);
+    				  //creates the condition satisfied when the "pull out" is complete
+    				  final ScheduledTaskCondition<PlayerState> pullOutCompleteCondition=new PullOutCompleteCondition(playerData);
+    				  //creates the scheduled task using the condition and the runnable above
+    				  final ScheduledTask<PlayerState> selectToIdleTask=new ScheduledTask<PlayerState>(pullOutCompleteCondition,1,toIdleStateRunnable,0);
+    				  //adds this task into the scheduler
+    				  scheduler.addScheduledTask(selectToIdleTask);
+    			     }
+    			 else
+    			     {if(playerData.isCurrentWeaponAmmunitionCountDisplayable())
+    				      {//FIXME try to pull out the current weapon
+    					   
+    				      }
+    			     }
+    		    }
+    	}    	
+    }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
@@ -73,12 +120,13 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final AttackAction attackAction=new AttackAction(playerData);
         addState(PlayerState.ATTACK,toIdleAction,attackAction);
         final ReloadAction reloadAction=new ReloadAction(playerData);
-        addState(PlayerState.RELOAD,toIdleAction,reloadAction);        
-        final SelectionAction selectionAction=new SelectionAction(playerData);
-        final PutBackToSelectionTransitionAction selectionTransitionAction=new PutBackToSelectionTransitionAction(playerData,scheduler);
-        addState(PlayerState.PUT_BACK,selectionTransitionAction,null);
-        addState(PlayerState.SELECT_NEXT,toIdleAction,selectionAction);
-        addState(PlayerState.SELECT_PREVIOUS,toIdleAction,selectionAction);        
+        addState(PlayerState.RELOAD,toIdleAction,reloadAction);
+        final PutBackToSelectionTransitionAction putBackToSelectionTransitionAction=new PutBackToSelectionTransitionAction(playerData,scheduler);
+        addState(PlayerState.PUT_BACK,putBackToSelectionTransitionAction,null);
+        //uses an entry action to select the weapon, to pull it out and to go back to the idle state
+        final SelectionAndPullOutAction selectionAndPullOutAction=new SelectionAndPullOutAction(playerData,scheduler);
+        addState(PlayerState.SELECT_NEXT,selectionAndPullOutAction,null);
+        addState(PlayerState.SELECT_PREVIOUS,selectionAndPullOutAction,null);        
         //adds all transitions between states to the transition model
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).

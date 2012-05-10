@@ -64,6 +64,8 @@ public final class PlayerData {
 	private final AmmunitionContainerContainer ammoContainerContainer;
 	/**duration of a "put back" operation in nanoseconds*/
 	private static final long PUT_BACK_DURATION_IN_NANOSECONDS=200000000;
+	/**duration of a "pull out" operation in nanoseconds*/
+	private static final long PULL_OUT_DURATION_IN_NANOSECONDS=200000000;
 	
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
@@ -199,7 +201,14 @@ public final class PlayerData {
 			 final double putBackYStart=-0.01787068206435081;
 			 final double putBackYEnd=10*putBackYStart;
 			 //computes the ordinate with the progress
-			 final double putBackYCurrent=putBackYStart+((putBackYEnd-putBackYStart)*putBackStepProgress);
+			 final double putBackYCurrent;
+			 if(putBackStepProgress==0)
+				 putBackYCurrent=putBackYStart;
+			 else
+				 if(putBackStepProgress==1)
+					 putBackYCurrent=putBackYEnd;
+				 else
+					 putBackYCurrent=putBackYStart+((putBackYEnd-putBackYStart)*putBackStepProgress);
 			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
 	         //modifies the ordinate of the primary weapon
 			 primaryWeaponNode.setTranslation(primaryWeaponNode.getTranslation().getX(),putBackYCurrent,primaryWeaponNode.getTranslation().getZ());
@@ -212,9 +221,41 @@ public final class PlayerData {
 	}
 	
 	/**
+	 * Pulls out the current weapon(s) if any
+	 * 
+	 * @param elapsedTimeSincePullOutStartInNanos elapsed time since the start of the "pull out" 
+	 * step expressed in nanoseconds
+	 */
+	public void pullOut(final long elapsedTimeSincePullOutStartInNanos){
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {//computes the progress of the "pull out" step (in the interval [0;1])
+			 final double pullOutStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePullOutStartInNanos/(double)PULL_OUT_DURATION_IN_NANOSECONDS));
+			 final double pullOutYEnd=-0.01787068206435081;
+			 final double pullOutYStart=10*pullOutYEnd;
+			 //computes the ordinate with the progress
+			 final double pullOutYCurrent;
+			 if(pullOutStepProgress==0)
+				 pullOutYCurrent=pullOutYStart;
+			 else
+				 if(pullOutStepProgress==1)
+					 pullOutYCurrent=pullOutYEnd;
+				 else
+					 pullOutYCurrent=pullOutYStart+((pullOutYEnd-pullOutYStart)*pullOutStepProgress);
+			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+	         //modifies the ordinate of the primary weapon
+			 primaryWeaponNode.setTranslation(primaryWeaponNode.getTranslation().getX(),pullOutYCurrent,primaryWeaponNode.getTranslation().getZ());
+		     if(isDualWeaponUseEnabled())
+		         {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
+		          //modifies the ordinate of the secondary weapon
+		          secondaryWeaponNode.setTranslation(secondaryWeaponNode.getTranslation().getX(),pullOutYCurrent,secondaryWeaponNode.getTranslation().getZ());
+		         }
+		    }
+	}
+	
+	/**
 	 * Returns whether the "put back" is complete
 	 * 
-	 * @return <code>true</code> if the "put back is complete", otherwise <code>false</code>
+	 * @return <code>true</code> if the "put back" is complete, otherwise <code>false</code>
 	 */
 	public boolean isPutBackComplete(){
 		final boolean isPutBackComplete;
@@ -228,6 +269,23 @@ public final class PlayerData {
 		else
 			isPutBackComplete=true;
 		return(isPutBackComplete);
+	}
+	
+	/**
+	 * Returns whether the "pull out" is complete
+	 * 
+	 * @return <code>true</code> if the "pull out" is complete, otherwise <code>false</code>
+	 */
+	public boolean isPullOutComplete(){
+		final boolean isPullOutComplete;
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+		     final double pullOutYEnd=-0.01787068206435081;
+			 isPullOutComplete=primaryWeaponNode.getTranslation().getY()==pullOutYEnd;
+		    }
+		else
+			isPullOutComplete=true;
+		return(isPullOutComplete);
 	}
 	
 	/**
@@ -558,9 +616,11 @@ public final class PlayerData {
     	//FIXME: move this half rotation into the user data of the weapon
     	correctWeaponRotation.fromAngles(0, Math.PI, 0).multiplyLocal(((WeaponUserData)newWeapon.getUserData()).getRotation());
     	newWeapon.setRotation(correctWeaponRotation);
+    	final double pullOutYEnd=-0.01787068206435081;
+		final double pullOutYStart=10*pullOutYEnd;
     	if(localizedInThePrimaryHand==rightHanded)
-    		newWeapon.setTranslation(-0.17870682064350812,-0.01787068206435081,0.35741364128701625);
+    		newWeapon.setTranslation(-0.17870682064350812,pullOutYStart,0.35741364128701625);
     	else
-    		newWeapon.setTranslation(0.17870682064350812,-0.01787068206435081,0.35741364128701625);
+    		newWeapon.setTranslation(0.17870682064350812,pullOutYStart,0.35741364128701625);
     }
 }

@@ -318,39 +318,37 @@ public final class GameState extends ScenegraphState{
                 else
                 	elapsedTimeSinceLatestTransition+=elapsedTimeSinceLatestCallInNanos;
                 //updates the player data from its state machine and the elapsed time since the latest transition
-                if(currentPlayerState.equals(PlayerState.PUT_BACK))
-                    {switch(currentPlayerState)
-                         {case NOT_YET_AVAILABLE:
-                              {//there is nothing to do
-                               break;
-                              }
-                          case IDLE:
-                              {
-                               break;
-                              }
-                          case ATTACK:
-                              {
-                               break;
-                              }
-                          case RELOAD:
-                              {
-                               break;
-                              }
-                          case PUT_BACK:
-                              {playerData.putBack(elapsedTimeSinceLatestTransition);
-                               break;
-                              }
-                          case SELECT_NEXT:
-                              {
-                               break;
-                              }
-                          case SELECT_PREVIOUS:
-                              {
-                               break;
-                              }
-                          default:
-                              //it should never happen
+                switch(currentPlayerState)
+                    {case NOT_YET_AVAILABLE:
+                         {//there is nothing to do
+                          break;
                          }
+                     case IDLE:
+                         {
+                          break;
+                         }
+                     case ATTACK:
+                         {
+                          break;
+                         }
+                     case RELOAD:
+                         {
+                          break;
+                         }
+                     case PUT_BACK:
+                         {playerData.putBack(elapsedTimeSinceLatestTransition);
+                          break;
+                         }
+                     case SELECT_NEXT:
+                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
+                          break;
+                         }
+                     case SELECT_PREVIOUS:
+                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
+                          break;
+                         }
+                     default:
+                          //it should never happen
                     }
             }           
         });
