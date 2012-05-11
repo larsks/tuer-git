@@ -966,7 +966,7 @@ public final class GameState extends ScenegraphState{
                  {previousFrustumNear=cam.getFrustumNear();
                   previousFrustumFar=cam.getFrustumFar();
                   previousCamLocation.set(cam.getLocation());
-                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.2,200);
+                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.1,200);
                   cam.setLocation(currentCamLocation);
                  }
              else
