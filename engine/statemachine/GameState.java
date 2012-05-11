@@ -367,15 +367,16 @@ public final class GameState extends ScenegraphState{
     	}
     	
     	public void tryReload(){
+    		//FIXME rather use PlayerEvent.PUTTING_BACK_BEFORE_RELOADING
     		stateMachine.fireEvent(PlayerEvent.RELOADING);
     	}
     	
     	public void trySelectNextWeapon(){
-    		stateMachine.fireEvent(PlayerEvent.SELECTING_NEXT);
+    		stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_NEXT);
     	}
     	
         public void trySelectPreviousWeapon(){
-        	stateMachine.fireEvent(PlayerEvent.SELECTING_PREVIOUS);
+        	stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_PREVIOUS);
     	}
         
         public PlayerState getPreviousState(){

@@ -37,6 +37,18 @@ public enum PlayerEvent{
 	 */
 	RELOADING,
 	/**
+	 * event that may lead to a switch to the previous weapon but that runs the "put back" first
+	 */
+	PUTTING_BACK_BEFORE_SELECTING_PREVIOUS,
+	/**
+	 * event that may lead to a switch to the next weapon but that runs the "put back" first
+	 */
+	PUTTING_BACK_BEFORE_SELECTING_NEXT,
+	/**
+	 * event that may lead to a reload of the current weapon but that runs the "put back" first
+	 */
+	PUTTING_BACK_BEFORE_RELOADING,
+	/**
 	 * event that may run a switch to the previous weapon
 	 */
 	SELECTING_PREVIOUS,
