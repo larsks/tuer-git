@@ -49,6 +49,10 @@ public enum PlayerEvent{
 	 */
 	PUTTING_BACK_BEFORE_RELOADING,
 	/**
+	 * event that runs the "pull out" of the current weapon
+	 */
+	PULLING_OUT,
+	/**
 	 * event that may run a switch to the previous weapon
 	 */
 	SELECTING_PREVIOUS,
