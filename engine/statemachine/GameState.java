@@ -332,7 +332,7 @@ public final class GameState extends ScenegraphState{
                           break;
                          }
                      case RELOAD:
-                         {
+                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
                           break;
                          }
                      case PUT_BACK:
@@ -367,8 +367,7 @@ public final class GameState extends ScenegraphState{
     	}
     	
     	public void tryReload(){
-    		//FIXME rather use PlayerEvent.PUTTING_BACK_BEFORE_RELOADING
-    		stateMachine.fireEvent(PlayerEvent.RELOADING);
+    		stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_RELOADING);
     	}
     	
     	public void trySelectNextWeapon(){
@@ -461,6 +460,9 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 			}
 		};
+		/**
+		 * TODO implement these actions when the state machine is ready to handle them
+		 */
 		final TriggerAction pauseAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
@@ -473,31 +475,26 @@ public final class GameState extends ScenegraphState{
 		final TriggerAction crouchAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//TODO: crouch down
 			}
 		};
 		final TriggerAction activateAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//TODO: activate
 			}
 		};
 		final TriggerAction startRunningAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//TODO: start running
 			}
 		};
 		final TriggerAction stopRunningAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//TODO: stop running
 			}
 		};
 		final TriggerAction selectWeaponOneAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//FIXME
 				//playerData.selectWeapon(0,false);
 			}
 		};

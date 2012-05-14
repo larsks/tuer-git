@@ -48,4 +48,5 @@ public enum PlayerState{
 	 * the next weapon is going to be selected very soon
 	 */
 	SELECT_NEXT
+	//TODO put the "pull out" step into a separate state
 }
