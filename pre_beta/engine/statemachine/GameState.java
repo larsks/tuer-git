@@ -189,6 +189,8 @@ public final class GameState extends ScenegraphState{
         	
         	private long elapsedTimeSinceLatestTransition=0;
         	
+        	private double initialLatestPutBackProgress=0;
+        	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//update the timer
@@ -340,7 +342,9 @@ public final class GameState extends ScenegraphState{
                           break;
                          }
                      case PUT_BACK:
-                         {playerData.putBack(elapsedTimeSinceLatestTransition);
+                         {if(elapsedTimeSinceLatestTransition==0)
+                        	  initialLatestPutBackProgress=playerData.computePutBackProgress();
+                          playerData.putBack(elapsedTimeSinceLatestTransition,initialLatestPutBackProgress);
                           break;
                          }
                      case SELECT_NEXT:

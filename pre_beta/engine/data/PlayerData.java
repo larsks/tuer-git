@@ -190,17 +190,41 @@ public final class PlayerData {
 	}
 	
 	/**
+	 * Returns the progress of the "put back"
+	 * 
+	 * @return a value in the interval [0;1] representing the progress of the "put back" according to the current ordinate of the weapon
+	 */
+	public double computePutBackProgress(){
+		final double putBackProgress;
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+		     final double y=primaryWeaponNode.getTranslation().getY();
+			 final double putBackYStart=PULLED_OUT_WEAPON_ORDINATE;
+		     final double putBackYEnd=PUT_BACK_WEAPON_ORDINATE;
+			 if(y==putBackYStart)
+				 putBackProgress=0;
+			 else
+				 if(y==putBackYEnd)
+					 putBackProgress=1;
+				 else
+				     putBackProgress=Math.max(0,Math.min(1.0d,(y-putBackYStart)/(putBackYEnd-putBackYStart)));
+		    }
+		else
+			putBackProgress=1.0;		
+		return(putBackProgress);
+	}
+	
+	/**
 	 * Puts back the current weapon(s) if any
 	 * 
 	 * @param elapsedTimeSincePutBackStartInNanos elapsed time since the start of the "put back" 
 	 * step expressed in nanoseconds
-	 * 
-	 * TODO take into account the elapsed time since the start of the latest selection if it is interrupted
+	 * @param initialPutBackProgress initial progress of the "put back"
 	 */
-	public void putBack(final long elapsedTimeSincePutBackStartInNanos){
+	public void putBack(final long elapsedTimeSincePutBackStartInNanos,final double initialPutBackProgress){
 		if(isCurrentWeaponAmmunitionCountDisplayable())
             {//computes the progress of the "put back" step (in the interval [0;1])
-			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePutBackStartInNanos/(double)PUT_BACK_DURATION_IN_NANOSECONDS));
+			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,initialPutBackProgress+(elapsedTimeSincePutBackStartInNanos/(double)PUT_BACK_DURATION_IN_NANOSECONDS)));
 			 final double putBackYStart=PULLED_OUT_WEAPON_ORDINATE;
 			 final double putBackYEnd=PUT_BACK_WEAPON_ORDINATE;
 			 //computes the ordinate with the progress
