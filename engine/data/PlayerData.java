@@ -66,7 +66,10 @@ public final class PlayerData {
 	private static final long PUT_BACK_DURATION_IN_NANOSECONDS=200000000;
 	/**duration of a "pull out" operation in nanoseconds*/
 	private static final long PULL_OUT_DURATION_IN_NANOSECONDS=200000000;
-	
+	/**ordinate of the weapon when it is ready to be used*/
+	private static final double PULLED_OUT_WEAPON_ORDINATE=-0.01787068206435081;
+	/**ordinate of the weapon when it has been put away (not ready to be used)*/
+	private static final double PUT_BACK_WEAPON_ORDINATE=10*PULLED_OUT_WEAPON_ORDINATE;
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
 		this.uid=autoIncrementalIndex.getAndIncrement();
@@ -198,8 +201,8 @@ public final class PlayerData {
 		if(isCurrentWeaponAmmunitionCountDisplayable())
             {//computes the progress of the "put back" step (in the interval [0;1])
 			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePutBackStartInNanos/(double)PUT_BACK_DURATION_IN_NANOSECONDS));
-			 final double putBackYStart=-0.01787068206435081;
-			 final double putBackYEnd=10*putBackYStart;
+			 final double putBackYStart=PULLED_OUT_WEAPON_ORDINATE;
+			 final double putBackYEnd=PUT_BACK_WEAPON_ORDINATE;
 			 //computes the ordinate with the progress
 			 final double putBackYCurrent;
 			 if(putBackStepProgress==0)
@@ -230,8 +233,8 @@ public final class PlayerData {
 		if(isCurrentWeaponAmmunitionCountDisplayable())
 		    {//computes the progress of the "pull out" step (in the interval [0;1])
 			 final double pullOutStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePullOutStartInNanos/(double)PULL_OUT_DURATION_IN_NANOSECONDS));
-			 final double pullOutYEnd=-0.01787068206435081;
-			 final double pullOutYStart=10*pullOutYEnd;
+			 final double pullOutYEnd=PULLED_OUT_WEAPON_ORDINATE;
+			 final double pullOutYStart=PUT_BACK_WEAPON_ORDINATE;
 			 //computes the ordinate with the progress
 			 final double pullOutYCurrent;
 			 if(pullOutStepProgress==0)
@@ -261,8 +264,7 @@ public final class PlayerData {
 		final boolean isPutBackComplete;
 		if(isCurrentWeaponAmmunitionCountDisplayable())
 		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
-			 final double putBackYStart=-0.01787068206435081;
-			 final double putBackYEnd=10*putBackYStart;
+			 final double putBackYEnd=PUT_BACK_WEAPON_ORDINATE;
 			 //checks if the operation has completed
 			 isPutBackComplete=primaryWeaponNode.getTranslation().getY()==putBackYEnd;
 		    }
@@ -280,7 +282,8 @@ public final class PlayerData {
 		final boolean isPullOutComplete;
 		if(isCurrentWeaponAmmunitionCountDisplayable())
 		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
-		     final double pullOutYEnd=-0.01787068206435081;
+		     final double pullOutYEnd=PULLED_OUT_WEAPON_ORDINATE;
+		     //checks if the operation has completed
 			 isPullOutComplete=primaryWeaponNode.getTranslation().getY()==pullOutYEnd;
 		    }
 		else
@@ -616,11 +619,9 @@ public final class PlayerData {
     	//FIXME: move this half rotation into the user data of the weapon
     	correctWeaponRotation.fromAngles(0, Math.PI, 0).multiplyLocal(((WeaponUserData)newWeapon.getUserData()).getRotation());
     	newWeapon.setRotation(correctWeaponRotation);
-    	final double pullOutYEnd=-0.01787068206435081;
-		final double pullOutYStart=10*pullOutYEnd;
     	if(localizedInThePrimaryHand==rightHanded)
-    		newWeapon.setTranslation(-0.17870682064350812,pullOutYStart,0.35741364128701625);
+    		newWeapon.setTranslation(-0.17870682064350812,PUT_BACK_WEAPON_ORDINATE,0.35741364128701625);
     	else
-    		newWeapon.setTranslation(0.17870682064350812,pullOutYStart,0.35741364128701625);
+    		newWeapon.setTranslation(0.17870682064350812,PUT_BACK_WEAPON_ORDINATE,0.35741364128701625);
     }
 }

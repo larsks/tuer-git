@@ -332,6 +332,10 @@ public final class GameState extends ScenegraphState{
                           break;
                          }
                      case RELOAD:
+                         {
+                          break;
+                         }
+                     case PULL_OUT:
                          {playerData.pullOut(elapsedTimeSinceLatestTransition);
                           break;
                          }
@@ -340,11 +344,11 @@ public final class GameState extends ScenegraphState{
                           break;
                          }
                      case SELECT_NEXT:
-                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
+                         {
                           break;
                          }
                      case SELECT_PREVIOUS:
-                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
+                         {
                           break;
                          }
                      default:

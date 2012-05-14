@@ -92,34 +92,18 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	
         private final PlayerData playerData;
     	
-    	private final Scheduler<PlayerState> scheduler;
-    	
-		public SelectionAndPullOutAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+		public SelectionAndPullOutAction(final PlayerData playerData){
 			this.playerData=playerData;
-			this.scheduler=scheduler;
 		}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		final boolean isSelectionSuccessful;
     		if(event.equals(PlayerEvent.SELECTING_NEXT))
-    		    isSelectionSuccessful=playerData.selectNextWeapon();
+    		    playerData.selectNextWeapon();
     		else
     		    if(event.equals(PlayerEvent.SELECTING_PREVIOUS))
-    			    isSelectionSuccessful=playerData.selectPreviousWeapon();
-    			else
-    			    isSelectionSuccessful=false;
-    		//if another weapon has been successfully selected or if there is a current weapon
-    		if(isSelectionSuccessful||playerData.isCurrentWeaponAmmunitionCountDisplayable())
-    		    {//creates the runnable that will fire the proper player event later
-    		     final Runnable toIdleStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.IDLE,null);
-    		     //creates the condition satisfied when the "pull out" is complete
-    		     final ScheduledTaskCondition<PlayerState> pullOutCompleteCondition=new PullOutCompleteCondition(playerData);
-    		     //creates the scheduled task using the condition and the runnable above
-    		     final ScheduledTask<PlayerState> selectToIdleTask=new ScheduledTask<PlayerState>(pullOutCompleteCondition,1,toIdleStateRunnable,0);
-    		     //adds this task into the scheduler
-    		     scheduler.addScheduledTask(selectToIdleTask);
-    		    }
+    			    playerData.selectPreviousWeapon();
+    		stateMachine.fireEvent(PlayerEvent.PULLING_OUT);
     	}
     }
     
@@ -127,43 +111,58 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 
     	private final PlayerData playerData;
     	
+		public ReloadAndPullOutAction(final PlayerData playerData){
+			this.playerData=playerData;
+		}
+    	
+    	@Override
+	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+    		playerData.reload();
+    		stateMachine.fireEvent(PlayerEvent.PULLING_OUT);
+    	}
+    }
+    
+    public static final class FromPullOutToIdleAction implements Action<PlayerState,PlayerEvent>{
+    	
+        private final PlayerData playerData;
+    	
     	private final Scheduler<PlayerState> scheduler;
     	
-		public ReloadAndPullOutAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+    	public FromPullOutToIdleAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
 			this.playerData=playerData;
 			this.scheduler=scheduler;
 		}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		playerData.reload();    		
     		//creates the runnable that will fire the proper player event later
     		final Runnable toIdleStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.IDLE,null);
     		//creates the condition satisfied when the "pull out" is complete
     		final ScheduledTaskCondition<PlayerState> pullOutCompleteCondition=new PullOutCompleteCondition(playerData);
     		//creates the scheduled task using the condition and the runnable above
-    		final ScheduledTask<PlayerState> reloadToIdleTask=new ScheduledTask<PlayerState>(pullOutCompleteCondition,1,toIdleStateRunnable,0);
+    		final ScheduledTask<PlayerState> toIdleTask=new ScheduledTask<PlayerState>(pullOutCompleteCondition,1,toIdleStateRunnable,0);
     		//adds this task into the scheduler
-    		scheduler.addScheduledTask(reloadToIdleTask);
+    		scheduler.addScheduledTask(toIdleTask);
     	}
     }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
-        //adds the states and their actions to the state machine
-        //uses an exit action to update the data
+        //adds the states and their actions to the state machine        
         final TransitionTriggerAction<PlayerState,PlayerEvent> toIdleAction=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.IDLE,null);
+        //uses an exit action to update the data
         final AttackAction attackAction=new AttackAction(playerData);
         addState(PlayerState.ATTACK,toIdleAction,attackAction);
-        //final ReloadAction reloadAction=new ReloadAction(playerData);
-        final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData,scheduler);
-        addState(PlayerState.RELOAD,reloadAndPullOutAction,null/*reloadAction*/);
-        final FromPutBackTransitionAction putBackToSelectionTransitionAction=new FromPutBackTransitionAction(playerData,scheduler);
-        addState(PlayerState.PUT_BACK,putBackToSelectionTransitionAction,null);
-        //uses an entry action to select the weapon, to pull it out and to go back to the idle state
-        final SelectionAndPullOutAction selectionAndPullOutAction=new SelectionAndPullOutAction(playerData,scheduler);
+        final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData);
+        addState(PlayerState.RELOAD,reloadAndPullOutAction,null);
+        final FromPutBackTransitionAction fromPutBackTransitionAction=new FromPutBackTransitionAction(playerData,scheduler);
+        addState(PlayerState.PUT_BACK,fromPutBackTransitionAction,null);
+        //uses an entry action to select the weapon and to pull it out
+        final SelectionAndPullOutAction selectionAndPullOutAction=new SelectionAndPullOutAction(playerData);
         addState(PlayerState.SELECT_NEXT,selectionAndPullOutAction,null);
-        addState(PlayerState.SELECT_PREVIOUS,selectionAndPullOutAction,null);        
+        addState(PlayerState.SELECT_PREVIOUS,selectionAndPullOutAction,null);
+        final FromPullOutToIdleAction fromPullOutToIdleAction=new FromPullOutToIdleAction(playerData,scheduler);
+        addState(PlayerState.PULL_OUT,fromPullOutToIdleAction,null);
         //adds all transitions between states to the transition model
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).
@@ -186,9 +185,14 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleAfterPutBackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates transitions to the idle state
         transitionModel.addTransition(PlayerState.ATTACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.RELOAD,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.RELOAD,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        /**
+         * TODO it must be possible to interrupt the "pull out", PUTTING_BACK_BEFORE_RELOADING, PUTTING_BACK_BEFORE_SELECTING_NEXT 
+         * and PUTTING_BACK_BEFORE_SELECTING_PREVIOUS should lead to the "put back" state
+         */
         //drives the player available
         internalStateMachine.fireEvent(PlayerEvent.AVAILABLE);
     }

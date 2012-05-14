@@ -29,9 +29,13 @@ public enum PlayerState{
 	 */
 	IDLE,
 	/**
-	 * the current weapon is being put back (possibly before switching to another one)
+	 * the current weapon is being put back
 	 */
 	PUT_BACK,
+	/**
+	 * the current weapon is being pulled out
+	 */
+	PULL_OUT,
 	/**
 	 * the current weapon is being used to attack
 	 */
@@ -48,5 +52,4 @@ public enum PlayerState{
 	 * the next weapon is going to be selected very soon
 	 */
 	SELECT_NEXT
-	//TODO put the "pull out" step into a separate state
 }
