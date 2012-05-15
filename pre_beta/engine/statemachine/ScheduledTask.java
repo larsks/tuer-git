@@ -41,7 +41,7 @@ public class ScheduledTask<S>{
     		final Runnable runnable,final double timeOffsetInSeconds){
     	if(condition==null)
         	throw new IllegalArgumentException("The condition must not be null");
-    	if(executionCount<=0)
+    	if(executionCount<0)
             throw new IllegalArgumentException("The execution count must be strictly positive");
     	if(runnable==null)
     		throw new IllegalArgumentException("The runnable must not be null");
