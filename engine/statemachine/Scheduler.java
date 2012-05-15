@@ -60,6 +60,10 @@ public class Scheduler<S>{
         final Integer initialRemainingExecutionCount=Integer.valueOf(scheduledTask.getExecutionCount());
         scheduledTasks.put(scheduledTask,initialRemainingExecutionCount);
     }
+    
+    public void removeScheduledTask(ScheduledTask<S> scheduledTask){
+    	scheduledTasks.remove(scheduledTask);
+    }
 
     /**
      * Updates this scheduler by using the supplied states and the elapsed time since the last frame
