@@ -185,19 +185,15 @@ public final class GameState extends ScenegraphState{
         	
         	private boolean wasBeingTeleported=false;
         	
-        	private long previouslyMeasuredElapsedTime=-1;
-        	
-        	private long elapsedTimeSinceLatestTransition=0;
-        	
-        	private double initialLatestPutBackProgress=0;
+        	//private long previouslyMeasuredElapsedTime=-1;
         	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//update the timer
             	timer.update();
-            	final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
+            	/*final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
             	final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
-            	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;
+            	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;*/
                 //synchronizes the camera node with the camera
                 playerNode.updateFromCamera();
                 //temporary avoids to move on Y
@@ -308,70 +304,85 @@ public final class GameState extends ScenegraphState{
                 //if the player is not on any teleporter
                 if(!hasCollision)
                 	wasBeingTeleported=false;
-                //gets the previous state of the player
-                final PlayerState previousPlayerState=playerWithStateMachine.getPreviousState();
-                //updates its state
+                
                 playerWithStateMachine.updateLogicalLayer(timer);
-                //gets its current state (as is after the update)
-                final PlayerState currentPlayerState=playerWithStateMachine.getPreviousState();
-                //updates the amount of time since the latest transition
-                if(previousPlayerState!=currentPlayerState)
-                	elapsedTimeSinceLatestTransition=0;
-                else
-                	elapsedTimeSinceLatestTransition+=elapsedTimeSinceLatestCallInNanos;
-                //updates the player data from its state machine and the elapsed time since the latest transition
-                switch(currentPlayerState)
-                    {case NOT_YET_AVAILABLE:
-                         {//there is nothing to do
-                          break;
-                         }
-                     case IDLE:
-                         {
-                          break;
-                         }
-                     case ATTACK:
-                         {
-                          break;
-                         }
-                     case RELOAD:
-                         {
-                          break;
-                         }
-                     case PULL_OUT:
-                         {playerData.pullOut(elapsedTimeSinceLatestTransition);
-                          break;
-                         }
-                     case PUT_BACK:
-                         {if(elapsedTimeSinceLatestTransition==0)
-                        	  initialLatestPutBackProgress=playerData.computePutBackProgress();
-                          playerData.putBack(elapsedTimeSinceLatestTransition,initialLatestPutBackProgress);
-                          break;
-                         }
-                     case SELECT_NEXT:
-                         {
-                          break;
-                         }
-                     case SELECT_PREVIOUS:
-                         {
-                          break;
-                         }
-                     default:
-                          //it should never happen
-                    }
             }           
         });
     }
     
-    public static final class LogicalPlayer {
+    /**
+     * logical entity allowing to manipulate a player used as a link between
+     * the state machine and the player data
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    public static final class LogicalPlayer{
     	
     	private final PlayerStateMachine stateMachine;
     	
+    	private final PlayerData playerData;
+    	
+    	private double elapsedTimeSinceLatestTransitionInSeconds=0;
+    	
+    	private double initialLatestPutBackProgress=0;
+    	
     	public LogicalPlayer(final PlayerData playerData){
+    		this.playerData=playerData;
     		this.stateMachine=new PlayerStateMachine(playerData);
     	}
     	
     	public void updateLogicalLayer(final ReadOnlyTimer timer){
+    		//gets the previous state of the player
+            final PlayerState previousPlayerState=getPreviousState();
+            //updates its state
     		stateMachine.updateLogicalLayer(timer);
+    		//gets its current state (as is after the update)
+            final PlayerState currentPlayerState=getPreviousState();
+            //updates the amount of time since the latest transition
+            if(previousPlayerState!=currentPlayerState)
+            	elapsedTimeSinceLatestTransitionInSeconds=0;
+            else
+            	elapsedTimeSinceLatestTransitionInSeconds+=timer.getTimePerFrame();
+            //updates the player data from its state machine and the elapsed time since the latest transition
+            switch(currentPlayerState)
+                {case NOT_YET_AVAILABLE:
+                     {//there is nothing to do
+                      break;
+                     }
+                 case IDLE:
+                     {
+                      break;
+                     }
+                 case ATTACK:
+                     {
+                      break;
+                     }
+                 case RELOAD:
+                     {
+                      break;
+                     }
+                 case PULL_OUT:
+                     {playerData.pullOut(elapsedTimeSinceLatestTransitionInSeconds);
+                      break;
+                     }
+                 case PUT_BACK:
+                     {if(elapsedTimeSinceLatestTransitionInSeconds==0)
+                    	  initialLatestPutBackProgress=playerData.computePutBackProgress();
+                      playerData.putBack(elapsedTimeSinceLatestTransitionInSeconds,initialLatestPutBackProgress);
+                      break;
+                     }
+                 case SELECT_NEXT:
+                     {
+                      break;
+                     }
+                 case SELECT_PREVIOUS:
+                     {
+                      break;
+                     }
+                 default:
+                      //it should never happen
+                }
     	}
     	
     	public void tryReload(){
