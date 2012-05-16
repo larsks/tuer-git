@@ -62,10 +62,10 @@ public final class PlayerData {
 	private final WeaponFactory weaponFactory;
 	/**container of ammunition container*/
 	private final AmmunitionContainerContainer ammoContainerContainer;
-	/**duration of a "put back" operation in nanoseconds*/
-	private static final long PUT_BACK_DURATION_IN_NANOSECONDS=200000000;
-	/**duration of a "pull out" operation in nanoseconds*/
-	private static final long PULL_OUT_DURATION_IN_NANOSECONDS=200000000;
+	/**duration of a "put back" operation in seconds*/
+	private static final double PUT_BACK_DURATION_IN_SECONDS=/*200000000*/0.2;
+	/**duration of a "pull out" operation in seconds*/
+	private static final double PULL_OUT_DURATION_IN_SECONDS=/*200000000*/0.2;
 	/**ordinate of the weapon when it is ready to be used*/
 	private static final double PULLED_OUT_WEAPON_ORDINATE=-0.01787068206435081;
 	/**ordinate of the weapon when it has been put away (not ready to be used)*/
@@ -217,14 +217,14 @@ public final class PlayerData {
 	/**
 	 * Puts back the current weapon(s) if any
 	 * 
-	 * @param elapsedTimeSincePutBackStartInNanos elapsed time since the start of the "put back" 
-	 * step expressed in nanoseconds
+	 * @param elapsedTimeSincePutBackStartInSeconds elapsed time since the start of the "put back" 
+	 * step expressed in seconds
 	 * @param initialPutBackProgress initial progress of the "put back"
 	 */
-	public void putBack(final long elapsedTimeSincePutBackStartInNanos,final double initialPutBackProgress){
+	public void putBack(final double elapsedTimeSincePutBackStartInSeconds,final double initialPutBackProgress){
 		if(isCurrentWeaponAmmunitionCountDisplayable())
             {//computes the progress of the "put back" step (in the interval [0;1])
-			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,initialPutBackProgress+(elapsedTimeSincePutBackStartInNanos/(double)PUT_BACK_DURATION_IN_NANOSECONDS)));
+			 final double putBackStepProgress=Math.max(0,Math.min(1.0d,initialPutBackProgress+(elapsedTimeSincePutBackStartInSeconds/PUT_BACK_DURATION_IN_SECONDS)));
 			 final double putBackYStart=PULLED_OUT_WEAPON_ORDINATE;
 			 final double putBackYEnd=PUT_BACK_WEAPON_ORDINATE;
 			 //computes the ordinate with the progress
@@ -250,13 +250,13 @@ public final class PlayerData {
 	/**
 	 * Pulls out the current weapon(s) if any
 	 * 
-	 * @param elapsedTimeSincePullOutStartInNanos elapsed time since the start of the "pull out" 
-	 * step expressed in nanoseconds
+	 * @param elapsedTimeSincePullOutStartInSeconds elapsed time since the start of the "pull out" 
+	 * step expressed in seconds
 	 */
-	public void pullOut(final long elapsedTimeSincePullOutStartInNanos){
+	public void pullOut(final double elapsedTimeSincePullOutStartInSeconds){
 		if(isCurrentWeaponAmmunitionCountDisplayable())
 		    {//computes the progress of the "pull out" step (in the interval [0;1])
-			 final double pullOutStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePullOutStartInNanos/(double)PULL_OUT_DURATION_IN_NANOSECONDS));
+			 final double pullOutStepProgress=Math.max(0,Math.min(1.0d,elapsedTimeSincePullOutStartInSeconds/PULL_OUT_DURATION_IN_SECONDS));
 			 final double pullOutYEnd=PULLED_OUT_WEAPON_ORDINATE;
 			 final double pullOutYStart=PUT_BACK_WEAPON_ORDINATE;
 			 //computes the ordinate with the progress

@@ -25,7 +25,7 @@ public enum PlayerEvent{
 	 */
 	AVAILABLE,
 	/**
-	 * event for stopping any operation
+	 * event that may allow to come back to a state allowing to start any operation
 	 */
 	IDLE,
 	/**
