@@ -16,7 +16,7 @@ package engine.misc;
 import com.ardor3d.util.ReadOnlyTimer;
 
 /**
- * Timer that can be paused. N.B: the frame rate is equal to zero during a pause
+ * Timer that can be paused
  * 
  * @author Julien Gouesse
  *
@@ -26,25 +26,28 @@ public class ApplicativeTimer implements ReadOnlyTimer{
 	private static final long TIMER_RESOLUTION = 1000000000L;
 	
     private static final double INVERSE_TIMER_RESOLUTION = 1.0 / TIMER_RESOLUTION;
-
+    /**internal absolute time reference used as the start of this timer*/
     private long startTime;
-    
+    /**internal absolute time reference used as the start of the latest pause*/
     private long latestPauseStartTime;
-    
+    /**flag indicating whether the pause was enabled at the previous update of this timer*/
     private boolean pausePreviouslyEnabled;
-    
-    private boolean pauseEnabled;
-    
+    /**flag indicating whether the pause is enabled*/
+    private boolean pauseEnabled;    
+    /**elapsed time in nanoseconds*/
     private long elapsedTime;
-    
+    /**elapsed time during all pauses since the start in nanoseconds*/
     private long pauseElapsedTime;
-    
+    /**elapsed time during the latest pause in nanoseconds*/
     private long latestPauseElapsedTime;
-    
+    /**frequency in Hz (frame per second)*/
     private double frameRate;
-    
+    /**period for the latest frame in seconds*/
     private double timePerFrame;
     
+    /**
+     * Default constructor, starts this timer immediately
+     */
     public ApplicativeTimer(){
     	startTime=getSystemNanoTime();
     	pauseEnabled=false;
@@ -54,6 +57,9 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     	latestPauseElapsedTime=0L;
     }
     
+    /**
+     * Update should be called once per frame to correctly update the variable about the pause(s), the elapsed time, the time per frame and the frame rate
+     */
     public final void update(){
     	final long systemNanoTime=getSystemNanoTime();
     	if(this.pausePreviouslyEnabled!=this.pauseEnabled)
@@ -75,6 +81,12 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     	    }
     }
     
+    /**
+     * Enables or disables the pause. When this mechanism is enabled, the time per 
+     * frame and the frame rate are equals to zero, the elapsed time is not updated
+     * 
+     * @param pauseEnabled flag indicating whether the pause has to be enabled
+     */
     public final void setPauseEnabled(final boolean pauseEnabled){
     	if(this.pauseEnabled!=pauseEnabled)
     	    {this.pausePreviouslyEnabled=this.pauseEnabled;
@@ -82,39 +94,87 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     	    }
     }
     
-    public double getElapsedTimeInSeconds() {
+    /**
+     * Gets the elapsed time in seconds since this timer was created or reset
+     * 
+     * @see #getTime()
+     * 
+     * @return Time in seconds
+     */
+    public double getElapsedTimeInSeconds(){
         return(elapsedTime*INVERSE_TIMER_RESOLUTION);
     }
 
-    public long getElapsedTimeInNanoseconds() {
+    /**
+     * Gets the elapsed time in nanoseconds since this timer was created or reset
+     * 
+     * @see #getResolution()
+     * @see #getTimeInSeconds()
+     * 
+     * @return Time in nanoseconds
+     */
+    public long getElapsedTimeInNanoseconds(){
         return(elapsedTime);
     }
     
+    /**
+     * Gets the elapsed time in nanoseconds since this timer was created or reset
+     * 
+     * @see #getResolution()
+     * @see #getTimeInSeconds()
+     * 
+     * @return Time in nanoseconds
+     */
     @Override
     public long getTime(){
         return(getElapsedTimeInNanoseconds());
     }
     
+    /**
+     * Gets the elapsed time in seconds since this timer was created or reset
+     * 
+     * @see #getTime()
+     * 
+     * @return Time in seconds
+     */
     @Override
     public double getTimeInSeconds() {
         return(getElapsedTimeInSeconds());
     }
     
+    /**
+     * Gets the resolution used by this timer (10^9 for nanosecond resolution used by this implementation)
+     * 
+     * @return Timer resolution
+     */
     @Override
     public long getResolution(){
         return TIMER_RESOLUTION;
     }
     
+    /**
+     * Gets the current number of frames per second
+     * 
+     * @return Current frames per second
+     */
     @Override
     public double getFrameRate() {
         return frameRate;
     }
 
+    /**
+     * Gets the time elapsed between the latest two frames, in seconds
+     * 
+     * @return Time between frames, in seconds
+     */
     @Override
     public double getTimePerFrame() {
         return timePerFrame;
     }
     
+    /**
+     * Resets this timer, so that the elapsed time reflects the time spent from this call
+     */
     public void reset(){
     	startTime=getSystemNanoTime();
     	pauseEnabled=false;
@@ -124,6 +184,11 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     	latestPauseElapsedTime=0L;
     }
     
+    /**
+     * Tells whether the pause is enabled
+     * 
+     * @return <code>true</code> if the pause is enabled, otherwise <code>false</code>
+     */
     public boolean isPauseEnabled(){
         return(pauseEnabled);
     }
