@@ -23,6 +23,7 @@ import javax.imageio.ImageIO;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
+import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
@@ -52,6 +53,7 @@ import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
@@ -70,6 +72,7 @@ import engine.data.TeleporterUserData;
 import engine.data.WeaponUserData;
 import engine.input.ExtendedFirstPersonControl;
 import engine.misc.ApplicativeTimer;
+import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManager;
@@ -875,12 +878,20 @@ public final class GameState extends ScenegraphState{
         getRoot().attachChild(bullet9mmAmmoNode);
     }
     
-    private final void loadEnemies(){
+    @SuppressWarnings("unchecked")
+	private final void loadEnemies(){
 	    try{final Mesh agentNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/agent.abin"));
             agentNode.setName("an agent");
             agentNode.setTranslation(118.5,0.4,219);
             agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
             agentNode.setScale(0.015);
+            final KeyframeController<Mesh> keyframeController=(KeyframeController<Mesh>)agentNode.getController(0);
+            //loops on all frames of the set in the supplied time frame
+            keyframeController.setRepeatType(RepeatType.WRAP);
+            //uses the "stand" animation
+            keyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+            keyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+            keyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
             getRoot().attachChild(agentNode);
 	       }
 	    catch(IOException ioe)
