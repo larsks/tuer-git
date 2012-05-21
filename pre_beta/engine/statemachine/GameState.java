@@ -880,19 +880,19 @@ public final class GameState extends ScenegraphState{
     
     @SuppressWarnings("unchecked")
 	private final void loadEnemies(){
-	    try{final Mesh agentNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/agent.abin"));
-            agentNode.setName("an agent");
-            agentNode.setTranslation(118.5,0.4,219);
-            agentNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));            
-            agentNode.setScale(0.015);
-            final KeyframeController<Mesh> keyframeController=(KeyframeController<Mesh>)agentNode.getController(0);
+	    try{final Mesh soldierNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/soldier.abin"));
+            soldierNode.setName("a soldier");
+            soldierNode.setTranslation(118.5,0.4,219);
+            soldierNode.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+            soldierNode.setScale(0.015);
+            final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
             //loops on all frames of the set in the supplied time frame
-            keyframeController.setRepeatType(RepeatType.WRAP);
+            soldierKeyframeController.setRepeatType(RepeatType.WRAP);
             //uses the "stand" animation
-            keyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-            keyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-            keyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-            getRoot().attachChild(agentNode);
+            soldierKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+            soldierKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+            soldierKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+            getRoot().attachChild(soldierNode);
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("enemies loading failed",ioe);}
