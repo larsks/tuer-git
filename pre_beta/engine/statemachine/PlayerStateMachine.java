@@ -202,14 +202,33 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     		return(nextEvent);
     	}
     }
+	
+	/**
+     * Conditional transitional action that puts a (conditional) scheduled task into the scheduler and fires an event when the condition is satisfied
+     * 
+     * @author Julien Gouesse
+     *
+     */
+	public static final class FromPressTriggerTransitionAction extends ConditionalCancellableTransitionEntryAction{
+    	
+		public FromPressTriggerTransitionAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+			super(scheduler,new PressTriggerCompleteCondition(playerData));
+		}
+		
+		@Override
+		protected PlayerEvent getNextEvent(PlayerEvent event){
+    		return(PlayerEvent.ATTACKING);
+    	}
+    }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
-        //adds the states and their actions to the state machine        
-        final TransitionTriggerAction<PlayerState,PlayerEvent> toIdleAction=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.IDLE,null);
-        //uses an exit action to update the data
-        final AttackAction attackAction=new AttackAction(playerData);
-        addState(PlayerState.ATTACK,toIdleAction,attackAction);
+        //adds the states and their actions to the state machine
+        final FromPressTriggerTransitionAction fromPressTriggerTransitionAction=new FromPressTriggerTransitionAction(playerData,scheduler);
+        final ConditionalTransitionCancellerExitAction afterPressTriggerActionCancellerIfRequiredAction=new ConditionalTransitionCancellerExitAction(scheduler,fromPressTriggerTransitionAction);
+        addState(PlayerState.PRESS_TRIGGER,fromPressTriggerTransitionAction,afterPressTriggerActionCancellerIfRequiredAction);
+        //TODO add the attack state with an entry action to attack and switch to the "release trigger" state (use a condition as some weapons can allow multiple consecutive attacks by keeping the trigger pressed)
+        //TODO add the "release trigger" state with an entry action to release the trigger and switch to the idle state and an exit action to cancel this last transition if necessary
         final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData);
         addState(PlayerState.RELOAD,reloadAndPullOutAction,null);
         final FromPutBackTransitionAction fromPutBackTransitionAction=new FromPutBackTransitionAction(playerData,scheduler);
@@ -225,7 +244,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //adds all transitions between states to the transition model
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        //TODO add the transitions for the attacks
         final Condition putBackCompleteCondition=new PutBackCompleteCondition(playerData);
         //creates a condition satisfied when the player can reload his weapon(s)
         final ReloadPossibleCondition reloadPossibleCondition=new ReloadPossibleCondition(playerData);
@@ -245,7 +264,6 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_NEXT,PlayerEvent.SELECTING_NEXT,nextSelectionPossibleAfterPutBackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.SELECT_PREVIOUS,PlayerEvent.SELECTING_PREVIOUS,previousSelectionPossibleAfterPutBackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //creates transitions to the idle state
-        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());

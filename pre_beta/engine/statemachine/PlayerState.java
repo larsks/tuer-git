@@ -37,6 +37,14 @@ public enum PlayerState{
 	 */
 	PULL_OUT,
 	/**
+	 * the trigger of the current weapon is being pressed
+	 */
+	PRESS_TRIGGER,
+	/**
+	 * the trigger of the current weapon is being released
+	 */
+	RELEASE_TRIGGER,
+	/**
 	 * the current weapon is being used to attack
 	 */
 	ATTACK,

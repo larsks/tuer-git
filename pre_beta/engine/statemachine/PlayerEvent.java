@@ -29,6 +29,14 @@ public enum PlayerEvent{
 	 */
 	IDLE,
 	/**
+	 * event that may lead to press the trigger of the current weapon
+	 */
+	PRESSING_TRIGGER,
+	/**
+	 * event that may lead to release the trigger of the current weapon
+	 */
+	RELEASING_TRIGGER,
+	/**
 	 * event that may run an attack
 	 */
 	ATTACKING,
