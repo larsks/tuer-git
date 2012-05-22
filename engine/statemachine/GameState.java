@@ -403,6 +403,14 @@ public final class GameState extends ScenegraphState{
         public PlayerState getPreviousState(){
         	return(stateMachine.previousState);
         }
+        
+        public void tryStartAttacking(){
+        	stateMachine.fireEvent(PlayerEvent.PRESSING_TRIGGER);
+        }
+        
+        public void tryStopAttacking(){
+        	stateMachine.fireEvent(PlayerEvent.RELEASING_TRIGGER);
+        }
     }
     
     private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
@@ -475,11 +483,13 @@ public final class GameState extends ScenegraphState{
 		final TriggerAction startAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerWithStateMachine.tryStartAttacking();
 			}
 		};
 		final TriggerAction stopAttackAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerWithStateMachine.tryStopAttacking();
 			}
 		};
 		/**
