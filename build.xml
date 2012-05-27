@@ -160,6 +160,7 @@
 			<exclude name="**/dae/*" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
+			<exclude name="**/*.py" />
 			<manifest>
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
 			</manifest>
@@ -183,6 +184,7 @@
 			<exclude name="**/gpl.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
+			<exclude name="**/*.py" />
 			<!-- miscellaneous libraries -->
 			<exclude name="**/lib/**" />
 			<manifest>
