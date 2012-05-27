@@ -28,8 +28,7 @@ public class ReloadPossibleCondition implements Condition{
 
     @Override
     public boolean isSatisfied(Arguments args){
-        final boolean canReload=playerData.getReloadableAmmoCountForPrimaryHandWeapon()>0||playerData.getReloadableAmmoCountForSecondaryHandWeapon()>0;
-        return(canReload);
+        return(playerData.canReload());
     }
 
 }

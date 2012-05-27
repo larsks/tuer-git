@@ -31,7 +31,7 @@ public class ReleaseTriggerCompleteCondition extends ScheduledTaskCondition<Play
 	
 	@Override
 	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		//TODO
+		//TODO check whether the trigger is completely released
 		return(true);
 	}
 
