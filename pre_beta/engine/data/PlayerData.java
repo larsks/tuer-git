@@ -465,6 +465,34 @@ public final class PlayerData {
 		return(consumedAmmunitionOrKnockCount);
 	}
 	
+	/**
+	 * Tells whether this player can attack
+	 * 
+	 * @return <code>true</code> if the player can attack with his current weapon, otherwise <code>false</code>
+	 */
+	public boolean canAttack(){
+		final boolean canAttack;
+		if(weaponInUse!=null)
+		    {if(weaponInUse.isForMelee())
+		    	 canAttack=true;
+		     else
+		    	 canAttack=getAmmunitionCountInPrimaryHandedWeapon()>0||getAmmunitionCountInSecondaryHandedWeapon()>0;
+		    }
+		else
+			canAttack=true;
+		return(canAttack);
+	}
+	
+	/**
+	 * Tells whether this player can reload
+	 * 
+	 * @return <code>true</code> if the player can reload his current weapon, otherwise <code>false</code>
+	 */
+	public boolean canReload(){
+		final boolean canReload=getReloadableAmmoCountForPrimaryHandWeapon()>0||getReloadableAmmoCountForSecondaryHandWeapon()>0;
+        return(canReload);
+	}
+	
 	public boolean selectNextWeapon(){
 		return(selectWeapon(true));
 	}
