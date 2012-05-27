@@ -56,7 +56,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	}
     }
     
-    private static final class ReloadAndPullOutAction implements Action<PlayerState,PlayerEvent>{
+	public static final class ReloadAndPullOutAction implements Action<PlayerState,PlayerEvent>{
 
     	private final PlayerData playerData;
     	
@@ -71,31 +71,53 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	}
     }
     
+	/**
+	 * 
+	 * @author Julien Gouesse
+	 * 
+	 * TODO use a ConditionalCancellableScheduledTaskEntryAction
+	 */
+	public static final class AttackAndReleaseTriggerAction implements Action<PlayerState,PlayerEvent>{
+
+    	private final PlayerData playerData;
+    	
+		public AttackAndReleaseTriggerAction(final PlayerData playerData){
+			this.playerData=playerData;
+		}
+    	
+    	@Override
+	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+    		playerData.attack();
+    		/**
+    		 * TODO if the weapon doesn't allow multiple consecutive attacks by keeping the trigger pressed, the trigger will be released, otherwise
+    		 * another runnable will be pushed to perform another attack later
+    		 */
+    		stateMachine.fireEvent(PlayerEvent.RELEASING_TRIGGER);
+    	}
+    }
+    
     /**
      * exit action that cancels a conditional transition if its condition cannot be satisfied anymore because of an interruption caused by an event
      * 
      * @author Julien Gouesse
      *
      */
-    public static class ConditionalTransitionCancellerExitAction implements Action<PlayerState,PlayerEvent>{
+    public static class CancellableScheduledTaskCancellerExitAction implements Action<PlayerState,PlayerEvent>{
     	
     	protected final Scheduler<PlayerState> scheduler;
     	
-    	protected final ConditionalCancellableTransitionEntryAction conditionalTransitionEntryAction;
+    	protected final CancellableScheduledTaskEntryAction cancellableEntryAction;
     	
-    	public ConditionalTransitionCancellerExitAction(final Scheduler<PlayerState> scheduler,final ConditionalCancellableTransitionEntryAction conditionalTransitionEntryAction){
+    	public CancellableScheduledTaskCancellerExitAction(final Scheduler<PlayerState> scheduler,final CancellableScheduledTaskEntryAction conditionalTransitionEntryAction){
     		this.scheduler=scheduler;
-    		this.conditionalTransitionEntryAction=conditionalTransitionEntryAction;
+    		this.cancellableEntryAction=conditionalTransitionEntryAction;
     	}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		//gets the event expected when the operation has been completed without any interruption
-    		final PlayerEvent nextExpectedEvent=conditionalTransitionEntryAction.getNextEvent();
-    		//if another event has caused the exit from this state (because of an interruption)
-    		if(!event.equals(nextExpectedEvent))
+    		if(cancellableEntryAction.isCancellable(from,to,event,args,stateMachine))
     		    {//tries to get the transition task
-    			 final ScheduledTask<PlayerState> transitionTask=conditionalTransitionEntryAction.getTransitionScheduledTask();
+    			 final ScheduledTask<PlayerState> transitionTask=cancellableEntryAction.getScheduledTask();
     			 //if there is a transition task
     			 if(transitionTask!=null)
     				 //removes it from the scheduler as this transition must not be done
@@ -111,47 +133,66 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
      * @author Julien Gouesse
      *
      */
-    public static abstract class ConditionalCancellableTransitionEntryAction implements Action<PlayerState,PlayerEvent>{
-    	
-        protected final Scheduler<PlayerState> scheduler;
-        
-        protected final ScheduledTaskCondition<PlayerState> condition;
-        
-        protected ScheduledTask<PlayerState> transitionScheduledTask;
+    public static abstract class ConditionalCancellableTransitionScheduledTaskEntryAction extends CancellableScheduledTaskEntryAction{
         
         protected PlayerEvent nextEvent;
         
-        public ConditionalCancellableTransitionEntryAction(final Scheduler<PlayerState> scheduler,final ScheduledTaskCondition<PlayerState> condition){
-			this.scheduler=scheduler;
-			this.condition=condition;
-			transitionScheduledTask=null;
+        public ConditionalCancellableTransitionScheduledTaskEntryAction(final Scheduler<PlayerState> scheduler,final ScheduledTaskCondition<PlayerState> condition){
+        	super(scheduler,condition);
 			nextEvent=null;
         }
         
         protected abstract PlayerEvent getNextEvent(PlayerEvent event);
         
-        public PlayerEvent getNextEvent(){
-        	return(nextEvent);
+        @Override
+        public boolean isCancellable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+        	//if the supplied event isn't the expected next event, then the task can be cancelled
+        	return(!event.equals(nextEvent));
         }
+        
+        @Override
+        public Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+        	//gets the event used in the next transition if there is no interruption
+    		nextEvent=getNextEvent(event);
+    		//creates the runnable that will fire the proper player event later
+    		final Runnable transitionRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,nextEvent,null);
+    		return(transitionRunnable);
+        }
+    }
+    
+    public static abstract class CancellableScheduledTaskEntryAction implements Action<PlayerState,PlayerEvent>{
+    	
+        protected final Scheduler<PlayerState> scheduler;
+        
+        protected final ScheduledTaskCondition<PlayerState> condition;
+        
+        protected ScheduledTask<PlayerState> scheduledTask;
+        
+        public CancellableScheduledTaskEntryAction(final Scheduler<PlayerState> scheduler,final ScheduledTaskCondition<PlayerState> condition){
+			this.scheduler=scheduler;
+			this.condition=condition;
+			scheduledTask=null;
+        }
+        
+        public abstract boolean isCancellable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine);
+        
+        public abstract Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine);
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		//gets the event used in the next transition if there is no interruption
-    		nextEvent=getNextEvent(event);
-    		//creates the runnable that will fire the proper player event later
-    		final Runnable toIdleStateRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,nextEvent,null);
+    		final Runnable runnable=createCancellableRunnable(from,to,event,args,stateMachine);
     		//creates the scheduled task using the condition and the runnable above
-    		transitionScheduledTask=new ScheduledTask<PlayerState>(condition,1,toIdleStateRunnable,0);
+    		scheduledTask=new ScheduledTask<PlayerState>(condition,1,runnable,0);
     		//adds this task into the scheduler
-    		scheduler.addScheduledTask(transitionScheduledTask);
+    		scheduler.addScheduledTask(scheduledTask);
     	}
     	
-    	public ScheduledTask<PlayerState> getTransitionScheduledTask(){
-    		return(transitionScheduledTask);
+    	public ScheduledTask<PlayerState> getScheduledTask(){
+    		return(scheduledTask);
     	}
     }
     
-    public static final class FromPullOutToIdleAction extends ConditionalCancellableTransitionEntryAction{
+    public static final class FromPullOutToIdleAction extends ConditionalCancellableTransitionScheduledTaskEntryAction{
     	
     	public FromPullOutToIdleAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
     		//creates the condition satisfied when the "pull out" is complete
@@ -170,7 +211,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
      * @author Julien Gouesse
      *
      */
-	public static final class FromPutBackTransitionAction extends ConditionalCancellableTransitionEntryAction{
+	public static final class FromPutBackTransitionAction extends ConditionalCancellableTransitionScheduledTaskEntryAction{
     	
 		public FromPutBackTransitionAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
 			super(scheduler,new PutBackCompleteCondition(playerData));
@@ -209,7 +250,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
      * @author Julien Gouesse
      *
      */
-	public static final class FromPressTriggerTransitionAction extends ConditionalCancellableTransitionEntryAction{
+	public static final class FromPressTriggerTransitionAction extends ConditionalCancellableTransitionScheduledTaskEntryAction{
     	
 		public FromPressTriggerTransitionAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
 			super(scheduler,new PressTriggerCompleteCondition(playerData));
@@ -220,26 +261,42 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     		return(PlayerEvent.ATTACKING);
     	}
     }
+	
+    public static final class FromReleaseTriggerTransitionAction extends ConditionalCancellableTransitionScheduledTaskEntryAction{
+    	
+		public FromReleaseTriggerTransitionAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+			super(scheduler,new ReleaseTriggerCompleteCondition(playerData));
+		}
+		
+		@Override
+		protected PlayerEvent getNextEvent(PlayerEvent event){
+    		return(PlayerEvent.IDLE);
+    	}
+    }
 
     public PlayerStateMachine(final PlayerData playerData){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
         //adds the states and their actions to the state machine
         final FromPressTriggerTransitionAction fromPressTriggerTransitionAction=new FromPressTriggerTransitionAction(playerData,scheduler);
-        final ConditionalTransitionCancellerExitAction afterPressTriggerActionCancellerIfRequiredAction=new ConditionalTransitionCancellerExitAction(scheduler,fromPressTriggerTransitionAction);
+        final CancellableScheduledTaskCancellerExitAction afterPressTriggerActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromPressTriggerTransitionAction);
         addState(PlayerState.PRESS_TRIGGER,fromPressTriggerTransitionAction,afterPressTriggerActionCancellerIfRequiredAction);
-        //TODO add the attack state with an entry action to attack and switch to the "release trigger" state (use a condition as some weapons can allow multiple consecutive attacks by keeping the trigger pressed)
-        //TODO add the "release trigger" state with an entry action to release the trigger and switch to the idle state and an exit action to cancel this last transition if necessary
+        final AttackAndReleaseTriggerAction attackAndReleaseTriggerAction=new AttackAndReleaseTriggerAction(playerData);
+        //TODO use a CancellableScheduledTaskCancellerExitAction
+        addState(PlayerState.ATTACK,attackAndReleaseTriggerAction,null);
+        final FromReleaseTriggerTransitionAction fromReleaseTriggerTransitionAction=new FromReleaseTriggerTransitionAction(playerData,scheduler);
+        final CancellableScheduledTaskCancellerExitAction afterReleaseTriggerActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromReleaseTriggerTransitionAction);
+        addState(PlayerState.RELEASE_TRIGGER,fromReleaseTriggerTransitionAction,afterReleaseTriggerActionCancellerIfRequiredAction);
         final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData);
         addState(PlayerState.RELOAD,reloadAndPullOutAction,null);
         final FromPutBackTransitionAction fromPutBackTransitionAction=new FromPutBackTransitionAction(playerData,scheduler);
-        final ConditionalTransitionCancellerExitAction afterPutBackActionCancellerIfRequiredAction=new ConditionalTransitionCancellerExitAction(scheduler,fromPutBackTransitionAction);
+        final CancellableScheduledTaskCancellerExitAction afterPutBackActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromPutBackTransitionAction);
         addState(PlayerState.PUT_BACK,fromPutBackTransitionAction,afterPutBackActionCancellerIfRequiredAction);
         //uses an entry action to select the weapon and to pull it out
         final SelectionAndPullOutAction selectionAndPullOutAction=new SelectionAndPullOutAction(playerData);
         addState(PlayerState.SELECT_NEXT,selectionAndPullOutAction,null);
         addState(PlayerState.SELECT_PREVIOUS,selectionAndPullOutAction,null);
         final FromPullOutToIdleAction fromPullOutToIdleAction=new FromPullOutToIdleAction(playerData,scheduler);
-        final ConditionalTransitionCancellerExitAction toIdleActionCancellerIfRequiredAction=new ConditionalTransitionCancellerExitAction(scheduler,fromPullOutToIdleAction);
+        final CancellableScheduledTaskCancellerExitAction toIdleActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromPullOutToIdleAction);
         addState(PlayerState.PULL_OUT,fromPullOutToIdleAction,toIdleActionCancellerIfRequiredAction);
         //adds all transitions between states to the transition model
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
@@ -248,8 +305,6 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //TODO use a condition to prevent an attack where the magazine of the current weapon is empty
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PRESS_TRIGGER,PlayerEvent.PRESSING_TRIGGER,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        //TODO use a condition to attack anew only when no attack needs to be completed and when the current weapon is allowed to be used immediately without releasing the trigger
-        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //TODO use a condition to check whether the previous attack is complete
         transitionModel.addTransition(PlayerState.ATTACK,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         //TODO add a condition for this transition to check whether the release of the trigger is complete
@@ -276,8 +331,8 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.RELOAD,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_NEXT,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.SELECT_PREVIOUS,PlayerState.PULL_OUT,PlayerEvent.PULLING_OUT,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
-        //TODO add a condition for this transition to check whether the "pull out" is complete
-        transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        final PullOutCompleteCondition pullOutCompleteCondition=new PullOutCompleteCondition(playerData);
+        transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.IDLE,PlayerEvent.IDLE,pullOutCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.PUT_BACK,PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.PUT_BACK,PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         transitionModel.addTransition(PlayerState.PULL_OUT,PlayerState.PUT_BACK,PlayerEvent.PUTTING_BACK_BEFORE_RELOADING,reloadPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
