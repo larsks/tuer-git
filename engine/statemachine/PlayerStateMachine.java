@@ -81,22 +81,16 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	private final PlayerData playerData;
     	
 		public AttackAndReleaseTriggerAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
-			super(scheduler,new AttackPossibleCondition(playerData));
+			super(scheduler,/*BasicScheduledTaskConditions.and(new AttackPossibleCondition(playerData),*/new AttackCompleteCondition(playerData)/*)*/);
 			this.playerData=playerData;
 		}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+    		//performs the attack, it may consume some ammunition
     		playerData.attack();
-    		//TODO use a getter to know whether the current weapon allows multiple consecutive attacks by keeping the trigger pressed
-    		if(false)
-    		    {//multiple consecutive attacks may be performed until the player explicitly releases the trigger of his current weapon
-    			 super.onTransition(from,to,event,args,stateMachine);
-    		    }
-    		else
-    		    {//the trigger is going to be released as the current weapon doesn't allow multiple consecutive attacks
-    			 stateMachine.fireEvent(PlayerEvent.RELEASING_TRIGGER);
-    		    }
+    		//releases the trigger or prepares the next attack
+    		super.onTransition(from,to,event,args,stateMachine);
     	}
 
 		@Override
@@ -106,33 +100,54 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		
 		@Override
 		protected int getScheduledTaskExecutionCount(){
-        	return(Integer.MAX_VALUE);
+			final int scheduledTaskExecutionCount;
+			/*if(playerData.isCurrentWeaponFullyAutomatic())
+			    {*///the real execution count is not known
+				 scheduledTaskExecutionCount=Integer.MAX_VALUE;
+			    /*}
+			else
+			    {//the trigger has to be released once
+				 scheduledTaskExecutionCount=1;
+			    }*/
+        	return(scheduledTaskExecutionCount);
         }
 		
 		@Override
 		protected double getScheduledTaskTimeOffsetInSeconds(){
-			//TODO it should depend on the current weapon
-        	return(Double.MIN_VALUE);
+        	return(0);
         }
 
 		@Override
 		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event, Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			final AttackRunnable attackRunnable=new AttackRunnable(playerData);
-			return(attackRunnable);
+			//TODO use the "wait for trigger release" state
+			final Runnable runnableToWaitForTriggerRelease=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.RELEASING_TRIGGER,null);
+			final Runnable runnable=new AttackOrWaitForTriggerReleaseRunnable(playerData,runnableToWaitForTriggerRelease);
+			return(runnable);
 		}
     }
 	
-	public static class AttackRunnable implements Runnable{
+	public static class AttackOrWaitForTriggerReleaseRunnable implements Runnable{
 		
 		private final PlayerData playerData;
 		
-		public AttackRunnable(final PlayerData playerData){
+		private final Runnable runnableToWaitForTriggerRelease;
+		
+		public AttackOrWaitForTriggerReleaseRunnable(final PlayerData playerData,final Runnable runnableToWaitForTriggerRelease){
 			this.playerData=playerData;
+			this.runnableToWaitForTriggerRelease=runnableToWaitForTriggerRelease;
 		}
 		
 		@Override
 		public void run(){
-			playerData.attack();
+			if(playerData.isCurrentWeaponFullyAutomatic()&&playerData.canAttack())
+			    {//multiple consecutive attacks may be performed until the player explicitly releases the trigger of his current weapon
+				 playerData.attack();
+			    }
+			else
+				/*if(playerData.isAttackComplete())
+			        {*///waits for the trigger release as the current weapon doesn't allow multiple consecutive attacks or there is not enough ammunition
+				     runnableToWaitForTriggerRelease.run();
+			        /*}*/
 		}
 	}
     
@@ -360,10 +375,13 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).
         transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        final AttackPossibleCondition attackCondition=new AttackPossibleCondition(playerData);
-        transitionModel.addTransition(PlayerState.IDLE,PlayerState.PRESS_TRIGGER,PlayerEvent.PRESSING_TRIGGER,attackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.ATTACK,PlayerEvent.ATTACKING,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
+        final AttackPossibleCondition pressTriggerCondition=new AttackPossibleCondition(playerData);
+        transitionModel.addTransition(PlayerState.IDLE,PlayerState.PRESS_TRIGGER,PlayerEvent.PRESSING_TRIGGER,pressTriggerCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        final PressTriggerCompleteCondition pressTriggerCompleteCondition=new PressTriggerCompleteCondition(playerData);
+        final Condition attackCondition=BasicConditions.and(pressTriggerCondition,pressTriggerCompleteCondition);
+        transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.ATTACK,PlayerEvent.ATTACKING,attackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        final AttackCompleteCondition attackCompleteCondition=new AttackCompleteCondition(playerData);
+        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,attackCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         final ReleaseTriggerCompleteCondition releaseTriggerCompleteCondition=new ReleaseTriggerCompleteCondition(playerData);
         transitionModel.addTransition(PlayerState.RELEASE_TRIGGER,PlayerState.IDLE,PlayerEvent.IDLE,releaseTriggerCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final Condition putBackCompleteCondition=new PutBackCompleteCondition(playerData);
@@ -405,5 +423,12 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     @Override
     public void updateLogicalLayer(final ReadOnlyTimer timer){
         super.updateLogicalLayer(timer);
+    }
+    
+    public void releaseTriggerAsSoonAsPossible(final PlayerData playerData){
+    	final Runnable runnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.RELEASING_TRIGGER,null);
+    	final AttackCompleteCondition attackCompleteCondition=new AttackCompleteCondition(playerData);
+    	final ScheduledTask<PlayerState> scheduledTask=new ScheduledTask<PlayerState>(attackCompleteCondition,1,runnable,0);
+    	scheduler.addScheduledTask(scheduledTask);
     }
 }

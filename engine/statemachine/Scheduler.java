@@ -95,7 +95,7 @@ public class Scheduler<S>{
         while(queuedEntriesIterator.hasNext())
             {Entry<ScheduledTask<S>,Double> queuedEntry=queuedEntriesIterator.next();
              //gets a task
-       	     ScheduledTask<S> queuedTask=queuedEntry.getKey();
+       	     final ScheduledTask<S> queuedTask=queuedEntry.getKey();
              //gets the previous remaining time before triggering its execution
        	     final double previousRemainingTime=queuedEntry.getValue().doubleValue();
              //computes its new remaining time

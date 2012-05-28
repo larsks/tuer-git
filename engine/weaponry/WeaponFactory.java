@@ -30,10 +30,10 @@ public final class WeaponFactory {
 	
 	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
-	        final int attackDurationInMillis){
+	        final int attackDurationInMillis,final boolean fullyAutomatic){
 		final boolean success=identifier!=null&&!weaponsMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,attackDurationInMillis);
+			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,attackDurationInMillis,fullyAutomatic);
 			 weaponsMap.put(identifier,weapon);
 			 weaponsIndicesMap.put(weapon.getUid(),weapon);
 			}

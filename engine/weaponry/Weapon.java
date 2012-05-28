@@ -32,13 +32,19 @@ public final class Weapon implements Comparable<Weapon>{
 	private final int ammunitionPerShot;
 	/**duration of an attack in milliseconds*/
 	private final int attackDurationInMillis;
+	/**
+	 * flag indicating whether this weapon is fully automatic, which continues to 
+	 * load and fire ammunition until the trigger (or other activating device) is 
+	 * released, the ammunition is exhausted, or the firearm is jammed
+	 * */
+	private final boolean fullyAutomatic;
 	//TODO store the duration necessary to reload
 	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
 	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
-	        final int attackDurationInMillis){
+	        final int attackDurationInMillis,final boolean fullyAutomatic){
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
 		this.twoHanded=twoHanded;
@@ -46,6 +52,7 @@ public final class Weapon implements Comparable<Weapon>{
 		this.ammunition=ammunition;
 		this.ammunitionPerShot=ammunitionPerShot;
 		this.attackDurationInMillis=attackDurationInMillis;
+		this.fullyAutomatic=fullyAutomatic;
 	}
 	
 	/**
@@ -54,6 +61,10 @@ public final class Weapon implements Comparable<Weapon>{
      */
     public final boolean isTwoHanded(){
         return(twoHanded);
+    }
+    
+    public final boolean isFullyAutomatic(){
+    	return(fullyAutomatic);
     }
 	    
 	/**
