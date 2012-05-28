@@ -86,12 +86,13 @@ public final class PlayerData {
 	}
 	
 	/**
-	 * collects a collectible object if possible
+	 * Collects a collectible object if possible
+	 * 
 	 * @param collectible
 	 * @return count of collected sub elements
 	 */
 	public int collect(final Node collectible){
-		//check if the collectible can be collected
+		//checks if the collectible can be collected
 		final int result;
 		final Object userData=collectible.getUserData();
 		if(userData!=null&&userData instanceof CollectibleUserData)
@@ -103,7 +104,7 @@ public final class PlayerData {
 		    	 else
 		    		 if(userData instanceof AmmunitionUserData)
 		    			 result=collectAmmunition(collectible,(AmmunitionUserData)userData);
-		    	         //TODO: handle here the other kinds of collectible objects
+		    	         //handles here the other kinds of collectible objects
 		    	     else
 		    		     result=0;
 		    }
@@ -315,6 +316,33 @@ public final class PlayerData {
 		return(isPullOutComplete);
 	}
 	
+	public boolean isPressTriggerComplete(){
+		//TODO
+		return(true);
+	}
+	
+	public boolean isReleaseTriggerComplete(){
+		//TODO
+		return(true);
+	}
+	
+	public boolean isAttackComplete(){
+		//TODO
+		return(true);
+	}
+	
+	public void pressTrigger(final double elapsedTimeSincePullOutStartInSeconds){
+		//TODO
+	}
+	
+	public void attack(final double elapsedTimeSincePullOutStartInSeconds){
+		//TODO
+	}
+	
+	public void releaseTrigger(final double elapsedTimeSincePullOutStartInSeconds){
+		//TODO
+	}
+	
 	/**
      * Gets the amount of ammo that can be used during a reload of the weapon in the primary hand
      * 
@@ -412,6 +440,10 @@ public final class PlayerData {
 	
 	public boolean isCurrentWeaponAmmunitionCountDisplayable(){
 		return(weaponInUse!=null&&!weaponInUse.isForMelee());
+	}
+	
+	public boolean isCurrentWeaponFullyAutomatic(){
+		return(weaponInUse!=null&&!weaponInUse.isForMelee()&&weaponInUse.isFullyAutomatic());
 	}
 	
 	public int getAmmunitionCountInSecondaryHandedWeapon(){

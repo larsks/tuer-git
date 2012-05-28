@@ -15,19 +15,17 @@ package engine.statemachine;
 
 import engine.data.PlayerData;
 
-public class AttackPossibleCondition extends ScheduledTaskCondition<PlayerState>{
-
+public class AttackCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+	
 	private final PlayerData playerData;
 
-	public AttackPossibleCondition(final PlayerData playerData){
+	public AttackCompleteCondition(final PlayerData playerData){
 		super();
 		this.playerData=playerData;
 	}
 
 	@Override
 	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		//TODO check whether there is no incomplete attack
-		return(playerData.canAttack());
+		return(playerData.isAttackComplete());
 	}
-
 }

@@ -357,8 +357,16 @@ public final class GameState extends ScenegraphState{
                      {
                       break;
                      }
+                 case PRESS_TRIGGER:
+                     {playerData.pressTrigger(elapsedTimeSinceLatestTransitionInSeconds);
+                      break;
+                     }
                  case ATTACK:
-                     {
+                     {playerData.attack(elapsedTimeSinceLatestTransitionInSeconds);
+                      break;
+                     }
+                 case RELEASE_TRIGGER:
+                     {playerData.releaseTrigger(elapsedTimeSinceLatestTransitionInSeconds);
                       break;
                      }
                  case RELOAD:
@@ -409,7 +417,7 @@ public final class GameState extends ScenegraphState{
         }
         
         public void tryStopAttacking(){
-        	stateMachine.fireEvent(PlayerEvent.RELEASING_TRIGGER);
+        	stateMachine.releaseTriggerAsSoonAsPossible(playerData);
         }
     }
     
@@ -662,14 +670,14 @@ public final class GameState extends ScenegraphState{
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500);
-        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500);
-        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100);
-        weaponFactory.addNewWeapon("SMACH",true,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100);
-        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000);
-        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500);
-        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",false,1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000);
+        weaponFactory.addNewWeapon("PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500,true);
+        weaponFactory.addNewWeapon("PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500,true);
+        weaponFactory.addNewWeapon("MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("SMACH",true,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100,true);
+        weaponFactory.addNewWeapon("LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000,false);
+        weaponFactory.addNewWeapon("SHOTGUN",false,3,ammunitionFactory.getAmmunition("CARTRIDGE"),1,1500,false);
+        weaponFactory.addNewWeapon("ROCKET_LAUNCHER",false,1,ammunitionFactory.getAmmunition("ANTI_TANK_ROCKET_105MM"),1,2000,false);
         return(weaponFactory);
     }
     
