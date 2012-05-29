@@ -26,13 +26,12 @@ public class ReleaseTriggerCompleteCondition extends ScheduledTaskCondition<Play
 	private final PlayerData playerData;
 	
 	public ReleaseTriggerCompleteCondition(final PlayerData playerData){
+		super();
 		this.playerData=playerData;
 	}
 	
 	@Override
 	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		//TODO check whether the trigger is completely released
-		return(true);
+		return(playerData.isReleaseTriggerComplete());
 	}
-
 }

@@ -41,6 +41,11 @@ public enum PlayerState{
 	 */
 	PRESS_TRIGGER,
 	/**
+	 * the magazine of the current weapon is empty or the attack with a non fully automatic 
+	 * weapon has ended (therefore the trigger should be released)
+	 */
+	WAIT_FOR_TRIGGER_RELEASE,
+	/**
 	 * the trigger of the current weapon is being released
 	 */
 	RELEASE_TRIGGER,

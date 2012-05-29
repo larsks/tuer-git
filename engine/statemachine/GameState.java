@@ -369,6 +369,10 @@ public final class GameState extends ScenegraphState{
                      {playerData.releaseTrigger(elapsedTimeSinceLatestTransitionInSeconds);
                       break;
                      }
+                 case WAIT_FOR_TRIGGER_RELEASE:
+                     {playerData.waitForTriggerRelease(elapsedTimeSinceLatestTransitionInSeconds);
+                      break;
+                     }
                  case RELOAD:
                      {
                       break;

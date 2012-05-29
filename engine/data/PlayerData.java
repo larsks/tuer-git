@@ -331,6 +331,11 @@ public final class PlayerData {
 		return(true);
 	}
 	
+	public boolean isWaitForTriggerReleaseComplete(){
+		//TODO
+		return(true);
+	}
+	
 	public void pressTrigger(final double elapsedTimeSincePullOutStartInSeconds){
 		//TODO
 	}
@@ -340,6 +345,10 @@ public final class PlayerData {
 	}
 	
 	public void releaseTrigger(final double elapsedTimeSincePullOutStartInSeconds){
+		//TODO
+	}
+	
+	public void waitForTriggerRelease(final double elapsedTimeSincePullOutStartInSeconds){
 		//TODO
 	}
 	
