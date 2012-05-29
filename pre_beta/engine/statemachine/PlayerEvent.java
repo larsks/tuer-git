@@ -33,6 +33,11 @@ public enum PlayerEvent{
 	 */
 	PRESSING_TRIGGER,
 	/**
+	 * event that may lead to wait for the trigger release when the magazine of the current 
+	 * weapon is empty or the attack with a non fully automatic weapon has ended)
+	 */
+	WAITING_FOR_TRIGGER_RELEASE,
+	/**
 	 * event that may lead to release the trigger of the current weapon
 	 */
 	RELEASING_TRIGGER,
