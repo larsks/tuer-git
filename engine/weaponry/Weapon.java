@@ -30,8 +30,8 @@ public final class Weapon implements Comparable<Weapon>{
 	private final Ammunition ammunition;
 	/**ammo per shot, -1 for melee weapons*/
 	private final int ammunitionPerShot;
-	/**duration of an attack in milliseconds*/
-	private final int attackDurationInMillis;
+	/**duration of a blow or a shot in milliseconds*/
+	private final int blowOrShotDurationInMillis;
 	/**
 	 * flag indicating whether this weapon is fully automatic, which continues to 
 	 * load and fire ammunition until the trigger (or other activating device) is 
@@ -44,14 +44,14 @@ public final class Weapon implements Comparable<Weapon>{
 	    
 	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
-	        final int attackDurationInMillis,final boolean fullyAutomatic){
+	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
 		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
 		this.ammunition=ammunition;
 		this.ammunitionPerShot=ammunitionPerShot;
-		this.attackDurationInMillis=attackDurationInMillis;
+		this.blowOrShotDurationInMillis=blowOrShotDurationInMillis;
 		this.fullyAutomatic=fullyAutomatic;
 	}
 	
@@ -124,7 +124,7 @@ public final class Weapon implements Comparable<Weapon>{
 		return(identifier);
 	}
 	
-	public final int getAttackDurationInMillis(){
-		return(attackDurationInMillis);
+	public final int getBlowOrShotDurationInMillis(){
+		return(blowOrShotDurationInMillis);
 	}
 }
