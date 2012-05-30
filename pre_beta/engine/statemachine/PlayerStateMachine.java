@@ -114,7 +114,8 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		
 		@Override
 		protected double getScheduledTaskTimeOffsetInSeconds(){
-        	return(0);
+			//TODO use Weapon.getBlowOrShotDurationInMillis()
+        	return(Double.MIN_VALUE);
         }
 
 		@Override
