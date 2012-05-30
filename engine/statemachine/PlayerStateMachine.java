@@ -125,39 +125,6 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		}
     }
 	
-	public static final class WaitForTriggerReleaseAndReleaseTriggerAction extends CancellableScheduledTaskEntryAction{
-    	
-		public WaitForTriggerReleaseAndReleaseTriggerAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
-			super(scheduler,new WaitForTriggerReleaseCompleteCondition(playerData));
-		}
-    	
-    	@Override
-	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		super.onTransition(from,to,event,args,stateMachine);
-    	}
-
-		@Override
-		public boolean isCancellable(PlayerState from,PlayerState to,PlayerEvent event, Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			return(!to.equals(PlayerState.WAIT_FOR_TRIGGER_RELEASE)||!event.equals(PlayerEvent.WAITING_FOR_TRIGGER_RELEASE));
-		}
-		
-		@Override
-		protected int getScheduledTaskExecutionCount(){
-        	return(Integer.MAX_VALUE);
-        }
-		
-		@Override
-		protected double getScheduledTaskTimeOffsetInSeconds(){
-        	return(0);
-        }
-
-		@Override
-		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event, Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			final Runnable runnableToReleaseTrigger=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.RELEASING_TRIGGER,null);
-			return(runnableToReleaseTrigger);
-		}
-    }
-	
 	public static class AttackOrWaitForTriggerReleaseRunnable implements Runnable{
 		
 		private final PlayerData playerData;
@@ -388,9 +355,6 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final AttackAndWaitForTriggerReleaseAction attackAndWaitForTriggerReleaseAction=new AttackAndWaitForTriggerReleaseAction(playerData,scheduler);
         final CancellableScheduledTaskCancellerExitAction attackCanceller=new CancellableScheduledTaskCancellerExitAction(scheduler,attackAndWaitForTriggerReleaseAction);
         addState(PlayerState.ATTACK,attackAndWaitForTriggerReleaseAction,attackCanceller);
-        final WaitForTriggerReleaseAndReleaseTriggerAction waitForTriggerReleaseAndReleaseTriggerAction=new WaitForTriggerReleaseAndReleaseTriggerAction(playerData,scheduler);
-        final CancellableScheduledTaskCancellerExitAction waitCanceller=new CancellableScheduledTaskCancellerExitAction(scheduler,waitForTriggerReleaseAndReleaseTriggerAction);
-        addState(PlayerState.WAIT_FOR_TRIGGER_RELEASE,waitForTriggerReleaseAndReleaseTriggerAction,waitCanceller);
         final FromReleaseTriggerTransitionAction fromReleaseTriggerTransitionAction=new FromReleaseTriggerTransitionAction(playerData,scheduler);
         final CancellableScheduledTaskCancellerExitAction afterReleaseTriggerActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromReleaseTriggerTransitionAction);
         addState(PlayerState.RELEASE_TRIGGER,fromReleaseTriggerTransitionAction,afterReleaseTriggerActionCancellerIfRequiredAction);
