@@ -42,6 +42,16 @@ public class Scheduler<S>{
      * again if a transition justifies their use
      * */
     private final HashMap<ScheduledTask<S>,Double> queuedTasks;
+    
+    /**
+     * list of tasks that are going to be added into the map of scheduled tasks (used to avoid concurrent modification)
+     */
+    private final ArrayList<ScheduledTask<S>> unschedulableTasks;
+    
+    /**
+     * list of tasks that are going to be removed from the map of scheduled tasks (used to avoid concurrent modification)
+     */
+    private final ArrayList<ScheduledTask<S>> schedulableTasks;
 
     /**
      * Constructor
@@ -49,6 +59,8 @@ public class Scheduler<S>{
     public Scheduler(){
         scheduledTasks=new HashMap<ScheduledTask<S>,Integer>();
         queuedTasks=new HashMap<ScheduledTask<S>,Double>();
+        unschedulableTasks=new ArrayList<ScheduledTask<S>>();
+        schedulableTasks=new ArrayList<ScheduledTask<S>>();
     }
     
     /**
@@ -57,12 +69,11 @@ public class Scheduler<S>{
      * @param scheduledTask scheduled task
      */
     public void addScheduledTask(ScheduledTask<S> scheduledTask){
-        final Integer initialRemainingExecutionCount=Integer.valueOf(scheduledTask.getExecutionCount());
-        scheduledTasks.put(scheduledTask,initialRemainingExecutionCount);
+    	schedulableTasks.add(scheduledTask);
     }
     
     public void removeScheduledTask(ScheduledTask<S> scheduledTask){
-    	scheduledTasks.remove(scheduledTask);
+    	unschedulableTasks.add(scheduledTask);
     }
 
     /**
@@ -73,6 +84,19 @@ public class Scheduler<S>{
      * @param timePerFrame elapsed time since the last frame
      */
     public void update(final S previousState,final S currentState,final double timePerFrame){
+    	//adds all tasks that should be scheduled
+        for(ScheduledTask<S> schedulableTask:schedulableTasks)
+            {final Integer initialRemainingExecutionCount=Integer.valueOf(schedulableTask.getExecutionCount());
+             scheduledTasks.put(schedulableTask,initialRemainingExecutionCount);        	 
+            }
+        schedulableTasks.clear();
+        //removes all tasks that should not be scheduled anymore
+        for(ScheduledTask<S> unschedulableTask:unschedulableTasks)
+            {scheduledTasks.remove(unschedulableTask);
+             //removes it as a queued task too (it has no effect if the task was not queued)
+             queuedTasks.remove(unschedulableTask);             
+            }
+        unschedulableTasks.clear();
         final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
         final ArrayList<ScheduledTask<S>> postponedTasks=new ArrayList<ScheduledTask<S>>();
         //checks all scheduled tasks
@@ -132,6 +156,6 @@ public class Scheduler<S>{
             }
         //queues postponed tasks here to avoid mixing them with already queued tasks
         for(ScheduledTask<S> postponedTask:postponedTasks)
-            queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));        
+            queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));
     }
 }
