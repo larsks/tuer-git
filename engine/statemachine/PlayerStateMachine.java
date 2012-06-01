@@ -81,7 +81,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	private final PlayerData playerData;
     	
 		public AttackAndWaitForTriggerReleaseAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
-			super(scheduler,/*BasicScheduledTaskConditions.and(new AttackPossibleCondition(playerData),*/new AttackCompleteCondition(playerData)/*)*/);
+			super(scheduler,new AttackCompleteCondition(playerData));
 			this.playerData=playerData;
 		}
     	
@@ -100,22 +100,12 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		
 		@Override
 		protected int getScheduledTaskExecutionCount(){
-			final int scheduledTaskExecutionCount;
-			/*if(playerData.isCurrentWeaponFullyAutomatic())
-			    {*///the real execution count is not known
-				 scheduledTaskExecutionCount=Integer.MAX_VALUE;
-			    /*}
-			else
-			    {//the trigger has to be released once
-				 scheduledTaskExecutionCount=1;
-			    }*/
-        	return(scheduledTaskExecutionCount);
+        	return(Integer.MAX_VALUE);
         }
 		
 		@Override
 		protected double getScheduledTaskTimeOffsetInSeconds(){
-			//TODO use Weapon.getBlowOrShotDurationInMillis()
-        	return(Double.MIN_VALUE);
+        	return((double)playerData.getCurrentWeaponBlowOrShotDurationInMillis()/1000.0);
         }
 
 		@Override
@@ -144,10 +134,8 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 				 playerData.attack();
 			    }
 			else
-				/*if(playerData.isAttackComplete())
-			        {*///waits for the trigger release as the current weapon doesn't allow multiple consecutive attacks or there is not enough ammunition
-				     runnableToWaitForTriggerRelease.run();
-			        /*}*/
+				//waits for the trigger release as the current weapon doesn't allow multiple consecutive attacks or there is not enough ammunition
+				runnableToWaitForTriggerRelease.run();
 		}
 	}
     
