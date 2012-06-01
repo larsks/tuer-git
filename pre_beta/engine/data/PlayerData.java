@@ -455,6 +455,19 @@ public final class PlayerData {
 		return(weaponInUse!=null&&!weaponInUse.isForMelee()&&weaponInUse.isFullyAutomatic());
 	}
 	
+	public int getCurrentWeaponBlowOrShotDurationInMillis(){
+		final int currentWeaponBlowOrShotDurationInMillis;
+		if(weaponInUse!=null)
+		    {//uses the real duration
+			 currentWeaponBlowOrShotDurationInMillis=weaponInUse.getBlowOrShotDurationInMillis();
+		    }
+		else
+		    {//uses the duration of a punch
+			 currentWeaponBlowOrShotDurationInMillis=1000;
+		    }
+		return(currentWeaponBlowOrShotDurationInMillis);
+	}
+	
 	public int getAmmunitionCountInSecondaryHandedWeapon(){
 		final int ammunitionCountInLeftHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)

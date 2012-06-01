@@ -98,11 +98,10 @@ public class Scheduler<S>{
             }
         unschedulableTasks.clear();
         final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
-        final ArrayList<ScheduledTask<S>> postponedTasks=new ArrayList<ScheduledTask<S>>();
         //checks all scheduled tasks
         for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
-        	//if its condition is satisfied
-        	if(scheduledTask.isConditionSatisfied(previousState,currentState))
+        	//if it is not yet in the queue and if its condition is satisfied
+        	if(!queuedTasks.containsKey(scheduledTask)&&scheduledTask.isConditionSatisfied(previousState,currentState))
         	    {//if it can be run immediately
         		 if(scheduledTask.getTimeOffsetInSeconds()==0)
         	         {//runs it now
@@ -111,7 +110,7 @@ public class Scheduler<S>{
                      }
                  else
                      {//runs it later
-                      postponedTasks.add(scheduledTask);                                    
+                      queuedTasks.put(scheduledTask,Double.valueOf(scheduledTask.getTimeOffsetInSeconds()));
                      }
         	    }        	    
         //tries to run tasks whose executions have been postponed
@@ -131,6 +130,7 @@ public class Scheduler<S>{
                   executedTasks.add(queuedTask);
                   //removes it from the queued tasks as it does not need to be queued anymore
                   queuedEntriesIterator.remove();
+                  //FIXME if currentRemainingTime is negative, the next execution should be done earlier
                  }
              else
                  {//runs it later, keeps it in the queued tasks, updates its remaining time
@@ -154,8 +154,5 @@ public class Scheduler<S>{
                   scheduledTasks.put(executedTask,Integer.valueOf(currentRemainingExecutionCount));
                  }
             }
-        //queues postponed tasks here to avoid mixing them with already queued tasks
-        for(ScheduledTask<S> postponedTask:postponedTasks)
-            queuedTasks.put(postponedTask,Double.valueOf(postponedTask.getTimeOffsetInSeconds()));
     }
 }
