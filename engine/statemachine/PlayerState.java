@@ -54,6 +54,10 @@ public enum PlayerState{
 	 */
 	ATTACK,
 	/**
+	 * the latest attack is ending
+	 */
+	WAIT_FOR_ATTACK_END,
+	/**
 	 * the current weapon is being reloaded
 	 */
 	RELOAD,
