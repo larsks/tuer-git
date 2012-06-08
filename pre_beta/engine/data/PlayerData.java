@@ -63,13 +63,17 @@ public final class PlayerData {
 	/**container of ammunition container*/
 	private final AmmunitionContainerContainer ammoContainerContainer;
 	/**duration of a "put back" operation in seconds*/
-	private static final double PUT_BACK_DURATION_IN_SECONDS=/*200000000*/0.2;
+	private static final double PUT_BACK_DURATION_IN_SECONDS=0.2;
+	/**duration of a "wait for attack end" operation in seconds*/
+	private static final double ATTACK_END_DURATION_IN_SECONDS=0.1;
 	/**duration of a "pull out" operation in seconds*/
-	private static final double PULL_OUT_DURATION_IN_SECONDS=/*200000000*/0.2;
+	private static final double PULL_OUT_DURATION_IN_SECONDS=0.2;
 	/**ordinate of the weapon when it is ready to be used*/
 	private static final double PULLED_OUT_WEAPON_ORDINATE=-0.01787068206435081;
 	/**ordinate of the weapon when it has been put away (not ready to be used)*/
 	private static final double PUT_BACK_WEAPON_ORDINATE=10*PULLED_OUT_WEAPON_ORDINATE;
+	
+	private static final double ATTACK_WEAPON_MAXIMUM_ORDINATE=/*-PULLED_OUT_WEAPON_ORDINATE*/0;
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
 		this.uid=autoIncrementalIndex.getAndIncrement();
@@ -216,6 +220,31 @@ public final class PlayerData {
 	}
 	
 	/**
+	 * Returns the progress of the attack ending
+	 * 
+	 * @return a value in the interval [0;1] representing the progress of the attack ending according to the current ordinate of the weapon
+	 */
+	public double computeEndAttackProgress(){
+		final double endAttackProgress;
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+		     final double y=primaryWeaponNode.getTranslation().getY();
+			 final double endAttackYStart=ATTACK_WEAPON_MAXIMUM_ORDINATE;
+		     final double endAttackYEnd=PULLED_OUT_WEAPON_ORDINATE;
+			 if(y==endAttackYStart)
+				 endAttackProgress=0;
+			 else
+				 if(y==endAttackYEnd)
+					 endAttackProgress=1;
+				 else
+					 endAttackProgress=Math.max(0,Math.min(1.0d,(y-endAttackYStart)/(endAttackYEnd-endAttackYStart)));
+		    }
+		else
+			endAttackProgress=1.0;		
+		return(endAttackProgress);
+	}
+	
+	/**
 	 * Puts back the current weapon(s) if any
 	 * 
 	 * @param elapsedTimeSincePutBackStartInSeconds elapsed time since the start of the "put back" 
@@ -327,8 +356,16 @@ public final class PlayerData {
 	}
 	
 	public boolean isAttackComplete(){
-		//TODO
-		return(true);
+		final boolean isAttackComplete;
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+		    {final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+		     final double attackYEnd=PULLED_OUT_WEAPON_ORDINATE;
+		     //checks if the operation has completed
+		     isAttackComplete=primaryWeaponNode.getTranslation().getY()==attackYEnd;
+		    }
+		else
+			isAttackComplete=true;
+		return(isAttackComplete);
 	}
 	
 	public boolean isWaitForTriggerReleaseComplete(){
@@ -336,20 +373,84 @@ public final class PlayerData {
 		return(true);
 	}
 	
-	public void pressTrigger(final double elapsedTimeSincePullOutStartInSeconds){
+	public void pressTrigger(final double elapsedTimeSincePressTriggerStartInSeconds){
 		//TODO
 	}
 	
-	public void attack(final double elapsedTimeSincePullOutStartInSeconds){
+	public void attack(final double elapsedTimeSinceAttackStartInSeconds){
+		final double currentWeaponBlowOrShotDurationInSeconds=getCurrentWeaponBlowOrShotDurationInMillis()/1000.0;
+		final double attackStepProgress=Math.max(0,Math.min(1.0,(elapsedTimeSinceAttackStartInSeconds/currentWeaponBlowOrShotDurationInSeconds)%1.0));
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+			{//TODO sparks?
+			 /*if(attackStepProgress<1.0)
+		         {
+			      
+		         }
+		     else
+		         {
+			      
+		         }*/
+			 final double attackVariationPercentage=Math.sin(attackStepProgress*Math.PI);
+			 final double attackYEnd=ATTACK_WEAPON_MAXIMUM_ORDINATE;
+			 final double attackYStart=PULLED_OUT_WEAPON_ORDINATE;
+			  //computes the ordinate with the progress
+			 final double attackYCurrent;
+			 if(attackStepProgress==0)
+				 attackYCurrent=attackYStart;
+			 else
+				 if(attackStepProgress==1)
+					 attackYCurrent=attackYStart;
+				 else
+					 attackYCurrent=attackYStart+((attackYEnd-attackYStart)*attackVariationPercentage);
+			 if(attackYCurrent<PULLED_OUT_WEAPON_ORDINATE)
+				 System.out.println("pb: " + attackYCurrent + " attackVariationPercentage: " + attackVariationPercentage);
+			 final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+	         //modifies the ordinate of the primary weapon
+			 primaryWeaponNode.setTranslation(primaryWeaponNode.getTranslation().getX(),attackYCurrent,primaryWeaponNode.getTranslation().getZ());
+		     if(isDualWeaponUseEnabled())
+		         {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
+		          //modifies the ordinate of the secondary weapon
+		          secondaryWeaponNode.setTranslation(secondaryWeaponNode.getTranslation().getX(),attackYCurrent,secondaryWeaponNode.getTranslation().getZ());
+		         }
+			}
+		else
+		    {
+			 
+		    }
+	}
+	
+	public void releaseTrigger(final double elapsedTimeSinceReleaseTriggerStartInSeconds){
 		//TODO
 	}
 	
-	public void releaseTrigger(final double elapsedTimeSincePullOutStartInSeconds){
+	public void waitForTriggerRelease(final double elapsedTimeSinceWaitForTriggerReleaseStartInSeconds){
 		//TODO
 	}
 	
-	public void waitForTriggerRelease(final double elapsedTimeSincePullOutStartInSeconds){
-		//TODO
+	public void waitForAttackEnd(final double elapsedTimeSinceWaitForAttackEndStartInSeconds,final double initialEndAttackProgress){
+		if(isCurrentWeaponAmmunitionCountDisplayable())
+            {//computes the progress of the "put back" step (in the interval [0;1])
+		     final double endAttackStepProgress=Math.max(0,Math.min(1.0d,initialEndAttackProgress+(elapsedTimeSinceWaitForAttackEndStartInSeconds/ATTACK_END_DURATION_IN_SECONDS)));
+		     final double endAttackYStart=ATTACK_WEAPON_MAXIMUM_ORDINATE;
+		     final double endAttackYEnd=PULLED_OUT_WEAPON_ORDINATE;
+		     //computes the ordinate with the progress
+		     final double endAttackYCurrent;
+		     if(endAttackStepProgress==0)
+		    	 endAttackYCurrent=endAttackYStart;
+		     else
+			     if(endAttackStepProgress==1)
+			    	 endAttackYCurrent=endAttackYEnd;
+			     else
+			    	 endAttackYCurrent=endAttackYStart+((endAttackYEnd-endAttackYStart)*endAttackStepProgress);
+		     final Node primaryWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+             //modifies the ordinate of the primary weapon
+		     primaryWeaponNode.setTranslation(primaryWeaponNode.getTranslation().getX(),endAttackYCurrent,primaryWeaponNode.getTranslation().getZ());
+	         if(isDualWeaponUseEnabled())
+	             {final Node secondaryWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
+	              //modifies the ordinate of the secondary weapon
+	              secondaryWeaponNode.setTranslation(secondaryWeaponNode.getTranslation().getX(),endAttackYCurrent,secondaryWeaponNode.getTranslation().getZ());
+	             }
+        }
 	}
 	
 	/**

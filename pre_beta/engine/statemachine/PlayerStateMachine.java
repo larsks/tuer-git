@@ -71,6 +71,35 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	}
     }
     
+	public static final class EndAttackEntryAction extends CancellableScheduledTaskEntryAction{
+		
+		public EndAttackEntryAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+			super(scheduler,new AttackCompleteCondition(playerData));
+		}
+		
+		@Override
+		public boolean isCancellable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+			return(!to.equals(PlayerState.WAIT_FOR_ATTACK_END));
+		}
+
+		@Override
+		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState, PlayerEvent> stateMachine){
+			final Runnable runnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,event,null);
+			return(runnable);
+		}
+
+		@Override
+		protected int getScheduledTaskExecutionCount(){
+			return(1);
+		}
+
+		@Override
+		protected double getScheduledTaskTimeOffsetInSeconds(){
+			return(0);
+		}
+		
+	}
+	
 	/**
 	 * 
 	 * 
@@ -81,7 +110,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	private final PlayerData playerData;
     	
 		public AttackAndWaitForTriggerReleaseAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
-			super(scheduler,new AttackCompleteCondition(playerData));
+			super(scheduler,BasicScheduledTaskConditions.<PlayerState>always());
 			this.playerData=playerData;
 		}
     	
@@ -368,11 +397,16 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final PressTriggerCompleteCondition pressTriggerCompleteCondition=new PressTriggerCompleteCondition(playerData);
         final Condition attackCondition=BasicConditions.and(pressTriggerCondition,pressTriggerCompleteCondition);
         transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.ATTACK,PlayerEvent.ATTACKING,attackCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        final EndAttackEntryAction endAttackEntryAction=new EndAttackEntryAction(playerData,scheduler);
+        final CancellableScheduledTaskCancellerExitAction endAttackExitAction=new CancellableScheduledTaskCancellerExitAction(scheduler,endAttackEntryAction);
+        addState(PlayerState.WAIT_FOR_ATTACK_END,endAttackEntryAction,endAttackExitAction);
         final AttackCompleteCondition attackCompleteCondition=new AttackCompleteCondition(playerData);
-        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,attackCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.WAIT_FOR_ATTACK_END,PlayerEvent.RELEASING_TRIGGER,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.WAIT_FOR_ATTACK_END,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,attackCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final ReleaseTriggerCompleteCondition releaseTriggerCompleteCondition=new ReleaseTriggerCompleteCondition(playerData);
         transitionModel.addTransition(PlayerState.RELEASE_TRIGGER,PlayerState.IDLE,PlayerEvent.IDLE,releaseTriggerCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
-        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.WAIT_FOR_TRIGGER_RELEASE,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,attackCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.ATTACK,PlayerState.WAIT_FOR_ATTACK_END,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        transitionModel.addTransition(PlayerState.WAIT_FOR_ATTACK_END,PlayerState.WAIT_FOR_TRIGGER_RELEASE,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,attackCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final WaitForTriggerReleaseCompleteCondition waitForTriggerReleaseCompleteCondition=new WaitForTriggerReleaseCompleteCondition(playerData);
         transitionModel.addTransition(PlayerState.WAIT_FOR_TRIGGER_RELEASE,PlayerState.RELEASE_TRIGGER,PlayerEvent.RELEASING_TRIGGER,waitForTriggerReleaseCompleteCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final Condition putBackCompleteCondition=new PutBackCompleteCondition(playerData);
@@ -414,12 +448,5 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     @Override
     public void updateLogicalLayer(final ReadOnlyTimer timer){
         super.updateLogicalLayer(timer);
-    }
-    
-    public void releaseTriggerAsSoonAsPossible(final PlayerData playerData){
-    	final Runnable runnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(internalStateMachine,PlayerEvent.RELEASING_TRIGGER,null);
-    	final AttackCompleteCondition attackCompleteCondition=new AttackCompleteCondition(playerData);
-    	final ScheduledTask<PlayerState> scheduledTask=new ScheduledTask<PlayerState>(attackCompleteCondition,1,runnable,0);
-    	scheduler.addScheduledTask(scheduledTask);
     }
 }

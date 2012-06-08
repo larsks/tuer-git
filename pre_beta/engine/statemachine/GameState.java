@@ -328,7 +328,7 @@ public final class GameState extends ScenegraphState{
     	
     	private double elapsedTimeSinceLatestTransitionInSeconds=0;
     	
-    	private double initialLatestPutBackProgress=0;
+    	private double initialLatestPutBackProgress=0,initialEndAttackProgress=0;
     	
     	public LogicalPlayer(final PlayerData playerData){
     		this.playerData=playerData;
@@ -364,6 +364,11 @@ public final class GameState extends ScenegraphState{
                  case ATTACK:
                      {playerData.attack(elapsedTimeSinceLatestTransitionInSeconds);
                       break;
+                     }
+                 case WAIT_FOR_ATTACK_END:
+                     {if(elapsedTimeSinceLatestTransitionInSeconds==0)
+                    	 initialEndAttackProgress=playerData.computeEndAttackProgress();
+                      playerData.waitForAttackEnd(elapsedTimeSinceLatestTransitionInSeconds,initialEndAttackProgress);                      
                      }
                  case RELEASE_TRIGGER:
                      {playerData.releaseTrigger(elapsedTimeSinceLatestTransitionInSeconds);
@@ -421,7 +426,7 @@ public final class GameState extends ScenegraphState{
         }
         
         public void tryStopAttacking(){
-        	stateMachine.releaseTriggerAsSoonAsPossible(playerData);
+        	stateMachine.fireEvent(PlayerEvent.RELEASING_TRIGGER);
         }
     }
     
