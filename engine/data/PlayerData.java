@@ -569,26 +569,37 @@ public final class PlayerData {
 		return(currentWeaponBlowOrShotDurationInMillis);
 	}
 	
-	public int getAmmunitionCountInSecondaryHandedWeapon(){
-		final int ammunitionCountInLeftHandedWeapon;
-		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
-		    {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-		     ammunitionCountInLeftHandedWeapon=leftHandWeaponUserData.getAmmunitionCountInMagazine();
+	public String getCurrentWeaponBlowOrShotSourcename(){
+		final String blowOrShotSourcename;
+		if(weaponInUse!=null)
+		    {final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+		     blowOrShotSourcename=primaryHandWeaponUserData.getBlowOrShotSourcename();
 		    }
 		else
-			ammunitionCountInLeftHandedWeapon=0;
-		return(ammunitionCountInLeftHandedWeapon);
+			blowOrShotSourcename=null;
+		return(blowOrShotSourcename);
+	}
+	
+	public int getAmmunitionCountInSecondaryHandedWeapon(){
+		final int ammunitionCountInSecondaryHandedWeapon;
+		if(weaponInUse!=null&&!weaponInUse.isForMelee()&&dualWeaponUseEnabled)
+		    {final WeaponUserData secondaryHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+		     ammunitionCountInSecondaryHandedWeapon=secondaryHandWeaponUserData.getAmmunitionCountInMagazine();
+		    }
+		else
+			ammunitionCountInSecondaryHandedWeapon=0;
+		return(ammunitionCountInSecondaryHandedWeapon);
 	}
 	
 	public int getAmmunitionCountInPrimaryHandedWeapon(){
-		final int ammunitionCountInRightHandedWeapon;
+		final int ammunitionCountInPrimaryHandedWeapon;
 		if(weaponInUse!=null&&!weaponInUse.isForMelee())
-		    {final WeaponUserData rightHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-		     ammunitionCountInRightHandedWeapon=rightHandWeaponUserData.getAmmunitionCountInMagazine();
+		    {final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+		     ammunitionCountInPrimaryHandedWeapon=primaryHandWeaponUserData.getAmmunitionCountInMagazine();
 		    }
 		else
-			ammunitionCountInRightHandedWeapon=0;
-		return(ammunitionCountInRightHandedWeapon);
+			ammunitionCountInPrimaryHandedWeapon=0;
+		return(ammunitionCountInPrimaryHandedWeapon);
 	}
 	
 	/**

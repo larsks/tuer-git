@@ -96,6 +96,10 @@ public final class GameState extends ScenegraphState{
     private static String pickupWeaponSourcename;
     /**path of the sound sample played when picking up a weapon*/
     private static final String pickupWeaponSoundSamplePath="/sounds/pickup_weapon.ogg";
+    /**source name of the sound played when shooting with a mag 60*/
+    private static String mag60WeaponShotSourcename;
+    /**path of the sound sample played when shooting with a mag 60*/
+    private static final String mag60WeaponShotSoundSamplePath="/sounds/mag60_shot.ogg";
     /**source name of the sound played when entering a teleporter*/
     private static String teleporterUseSourcename;
     /**path of the sound sample played when entering a teleporter*/
@@ -155,7 +159,7 @@ public final class GameState extends ScenegraphState{
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
-        playerWithStateMachine=new LogicalPlayer(playerData);
+        playerWithStateMachine=new LogicalPlayer(playerData,soundManager);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
@@ -330,9 +334,9 @@ public final class GameState extends ScenegraphState{
     	
     	private double initialLatestPutBackProgress=0,initialEndAttackProgress=0;
     	
-    	public LogicalPlayer(final PlayerData playerData){
+    	public LogicalPlayer(final PlayerData playerData,final SoundManager soundManager){
     		this.playerData=playerData;
-    		this.stateMachine=new PlayerStateMachine(playerData);
+    		this.stateMachine=new PlayerStateMachine(playerData,soundManager);
     	}
     	
     	public void updateLogicalLayer(final ReadOnlyTimer timer){
@@ -710,7 +714,7 @@ public final class GameState extends ScenegraphState{
     	// load the sound
         URL sampleUrl=GameState.class.getResource(pickupWeaponSoundSamplePath);
         if(sampleUrl!=null&&pickupWeaponSourcename==null)
-            pickupWeaponSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);                     
+            pickupWeaponSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
         else
         	pickupWeaponSourcename=null;           
         pickupAmmoSourcename=pickupWeaponSourcename;
@@ -719,6 +723,11 @@ public final class GameState extends ScenegraphState{
         	teleporterUseSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
         else
         	teleporterUseSourcename=null;
+        sampleUrl=GameState.class.getResource(mag60WeaponShotSoundSamplePath);
+        if(sampleUrl!=null&&mag60WeaponShotSourcename==null)
+        	mag60WeaponShotSourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
+        else
+        	mag60WeaponShotSourcename=null;
     }
     
     private final void loadLevelModel(){
@@ -824,7 +833,7 @@ public final class GameState extends ScenegraphState{
             uziNode.setName("an uzi");
             uziNode.setTranslation(111.5,0.15,219);
             uziNode.setScale(0.2);
-            uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false,true));
+            uziNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false,true));
             //add some bounding boxes for all objects that can be picked up
             collectibleObjectsList.add(uziNode);
             getRoot().attachChild(uziNode);
@@ -832,7 +841,7 @@ public final class GameState extends ScenegraphState{
             smachNode.setName("a smach");
             smachNode.setTranslation(112.5,0.15,219);
             smachNode.setScale(0.2);
-            smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false,true));
+            smachNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(smachNode);
             getRoot().attachChild(smachNode);
             final Node pistolNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
@@ -840,11 +849,11 @@ public final class GameState extends ScenegraphState{
             pistolNode.setTranslation(113.5,0.1,219);
             pistolNode.setScale(0.001);
             pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-            pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,true));
+            pistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistolNode);
             getRoot().attachChild(pistolNode);            
             final Node duplicatePistolNode=pistolNode.makeCopy(false);
-            duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,false));
+            duplicatePistolNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,false));
             duplicatePistolNode.setTranslation(113.5,0.1,217);
             collectibleObjectsList.add(duplicatePistolNode);
             getRoot().attachChild(duplicatePistolNode);
@@ -855,28 +864,28 @@ public final class GameState extends ScenegraphState{
             pistol2Node.setTranslation(114.5,0.1,219);
             pistol2Node.setScale(0.02);
             pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-            pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false,true));
+            pistol2Node.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistol2Node);
             getRoot().attachChild(pistol2Node);
             final Node pistol3Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
             pistol3Node.setName("a Mag 60");
             pistol3Node.setTranslation(115.5,0.1,219);
             pistol3Node.setScale(0.02);
-            pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false,true));
+            pistol3Node.setUserData(new WeaponUserData(pickupWeaponSourcename,mag60WeaponShotSourcename,weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistol3Node);
             getRoot().attachChild(pistol3Node);
             final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
             laserNode.setName("a laser");
             laserNode.setTranslation(116.5,0.1,219);
             laserNode.setScale(0.02);
-            laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false,true));
+            laserNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(laserNode);
             getRoot().attachChild(laserNode);
             final Node shotgunNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
             shotgunNode.setName("a shotgun");
             shotgunNode.setTranslation(117.5,0.1,219);
             shotgunNode.setScale(0.1);
-            shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false,true));
+            shotgunNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(shotgunNode);
             getRoot().attachChild(shotgunNode);	  
             
@@ -886,7 +895,7 @@ public final class GameState extends ScenegraphState{
             rocketLauncherNode.setName("a rocket launcher");
             rocketLauncherNode.setTranslation(117.5,0.1,222);
             rocketLauncherNode.setScale(0.08);
-            rocketLauncherNode.setUserData(new WeaponUserData(pickupWeaponSourcename,weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
+            rocketLauncherNode.setUserData(new WeaponUserData(pickupWeaponSourcename,null,weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(rocketLauncherNode);
             getRoot().attachChild(rocketLauncherNode);	
 	       }
