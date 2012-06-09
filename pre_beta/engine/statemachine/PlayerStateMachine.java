@@ -16,6 +16,7 @@ package engine.statemachine;
 import java.util.Collections;
 import com.ardor3d.util.ReadOnlyTimer;
 import engine.data.PlayerData;
+import engine.sound.SoundManager;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
@@ -109,15 +110,23 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 
     	private final PlayerData playerData;
     	
-		public AttackAndWaitForTriggerReleaseAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler){
+    	private final SoundManager soundManager;
+    	
+		public AttackAndWaitForTriggerReleaseAction(final PlayerData playerData,final Scheduler<PlayerState> scheduler,final SoundManager soundManager){
 			super(scheduler,BasicScheduledTaskConditions.<PlayerState>always());
 			this.playerData=playerData;
+			this.soundManager=soundManager;
 		}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
     		//performs the attack, it may consume some ammunition
-    		playerData.attack();
+    		final int blowOrShotCount=playerData.attack();
+    		if(blowOrShotCount==1)
+    			{final String sourcename=playerData.getCurrentWeaponBlowOrShotSourcename();
+    			 if(sourcename!=null)
+    			     soundManager.play(sourcename);
+    			}
     		//releases the trigger or prepares the next attack
     		super.onTransition(from,to,event,args,stateMachine);
     	}
@@ -140,7 +149,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		@Override
 		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event, Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
 			final Runnable runnableToWaitForTriggerRelease=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,null);
-			final Runnable runnable=new AttackOrWaitForTriggerReleaseRunnable(playerData,runnableToWaitForTriggerRelease);
+			final Runnable runnable=new AttackOrWaitForTriggerReleaseRunnable(playerData,runnableToWaitForTriggerRelease,soundManager);
 			return(runnable);
 		}
     }
@@ -151,16 +160,24 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 		
 		private final Runnable runnableToWaitForTriggerRelease;
 		
-		public AttackOrWaitForTriggerReleaseRunnable(final PlayerData playerData,final Runnable runnableToWaitForTriggerRelease){
+		private final SoundManager soundManager;
+		
+		public AttackOrWaitForTriggerReleaseRunnable(final PlayerData playerData,final Runnable runnableToWaitForTriggerRelease,final SoundManager soundManager){
 			this.playerData=playerData;
 			this.runnableToWaitForTriggerRelease=runnableToWaitForTriggerRelease;
+			this.soundManager=soundManager;
 		}
 		
 		@Override
 		public void run(){
 			if(playerData.isCurrentWeaponFullyAutomatic()&&playerData.canAttack())
 			    {//multiple consecutive attacks may be performed until the player explicitly releases the trigger of his current weapon
-				 playerData.attack();
+				 final int blowOrShotCount=playerData.attack();
+	    		 if(blowOrShotCount==1)
+	    			 {final String sourcename=playerData.getCurrentWeaponBlowOrShotSourcename();
+	    			  if(sourcename!=null)
+	    			      soundManager.play(sourcename);
+	    			 }
 			    }
 			else
 				//waits for the trigger release as the current weapon doesn't allow multiple consecutive attacks or there is not enough ammunition
@@ -364,13 +381,13 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     	}
     }
 
-    public PlayerStateMachine(final PlayerData playerData){
+    public PlayerStateMachine(final PlayerData playerData,final SoundManager soundManager){
         super(PlayerState.class,PlayerEvent.class,PlayerState.NOT_YET_AVAILABLE);
         //adds the states and their actions to the state machine
         final FromPressTriggerTransitionAction fromPressTriggerTransitionAction=new FromPressTriggerTransitionAction(playerData,scheduler);
         final CancellableScheduledTaskCancellerExitAction afterPressTriggerActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromPressTriggerTransitionAction);
         addState(PlayerState.PRESS_TRIGGER,fromPressTriggerTransitionAction,afterPressTriggerActionCancellerIfRequiredAction);
-        final AttackAndWaitForTriggerReleaseAction attackAndWaitForTriggerReleaseAction=new AttackAndWaitForTriggerReleaseAction(playerData,scheduler);
+        final AttackAndWaitForTriggerReleaseAction attackAndWaitForTriggerReleaseAction=new AttackAndWaitForTriggerReleaseAction(playerData,scheduler,soundManager);
         final CancellableScheduledTaskCancellerExitAction attackCanceller=new CancellableScheduledTaskCancellerExitAction(scheduler,attackAndWaitForTriggerReleaseAction);
         addState(PlayerState.ATTACK,attackAndWaitForTriggerReleaseAction,attackCanceller);
         final FromReleaseTriggerTransitionAction fromReleaseTriggerTransitionAction=new FromReleaseTriggerTransitionAction(playerData,scheduler);

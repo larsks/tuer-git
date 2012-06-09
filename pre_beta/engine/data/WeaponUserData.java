@@ -31,10 +31,13 @@ public final class WeaponUserData extends CollectibleUserData{
 	private boolean digitalWatermarkEnabled;
 	/**flag indicating whether a weapon is primary*/
     private final boolean primary;
+    /**source name of the sound played when shooting*/
+    private final String blowOrShotSourcename;
 	
 	
-	public WeaponUserData(final String sourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
+	public WeaponUserData(final String sourcename,final String blowOrShotSourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
 		super(sourcename,null);
+		this.blowOrShotSourcename=blowOrShotSourcename;
 		if(!primary&&!weapon.isTwoHanded())
 		    throw new IllegalArgumentException("The weapon " + weapon + " cannot be used as a secondary weapon");
 		this.weapon=weapon;
@@ -48,6 +51,10 @@ public final class WeaponUserData extends CollectibleUserData{
 	
 	public final Weapon getWeapon(){
 		return(weapon);
+	}
+	
+	public final String getBlowOrShotSourcename(){
+		return(blowOrShotSourcename);
 	}
 	
 	public final ReadOnlyMatrix3 getRotation(){
