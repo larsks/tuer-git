@@ -19,6 +19,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
+
+import engine.data.common.userdata.AmmunitionUserData;
+import engine.data.common.userdata.CollectibleUserData;
+import engine.data.common.userdata.MedikitUserData;
+import engine.data.common.userdata.WeaponUserData;
 import engine.weaponry.Ammunition;
 import engine.weaponry.AmmunitionContainerContainer;
 import engine.weaponry.AmmunitionFactory;
@@ -569,15 +574,22 @@ public final class PlayerData {
 		return(currentWeaponBlowOrShotDurationInMillis);
 	}
 	
-	public String getCurrentWeaponBlowOrShotSourcename(){
+	public String getCurrentWeaponBlowOrShotSoundSampleSourcename(){
 		final String blowOrShotSourcename;
 		if(weaponInUse!=null)
-		    {final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-		     blowOrShotSourcename=primaryHandWeaponUserData.getBlowOrShotSourcename();
-		    }
+		    blowOrShotSourcename=weaponInUse.getBlowOrShotSoundSampleSourcename();
 		else
 			blowOrShotSourcename=null;
 		return(blowOrShotSourcename);
+	}
+	
+	public String getCurrentWeaponReloadSoundSampleSourcename(){
+		final String reloadSourcename;
+		if(weaponInUse!=null)
+			reloadSourcename=weaponInUse.getReloadSoundSampleSourcename();
+		else
+			reloadSourcename=null;
+		return(reloadSourcename);
 	}
 	
 	public int getAmmunitionCountInSecondaryHandedWeapon(){
@@ -757,7 +769,7 @@ public final class PlayerData {
      */
     public Entry<Integer,Boolean> getSelectableWeaponIndexAndDualHandEnabledFlag(final boolean next){
     	Entry<Integer,Boolean> result=null;
-    	final int weaponCount=weaponFactory.getWeaponCount();
+    	final int weaponCount=weaponFactory.getSize();
     	//checks whether there is at least one weapon in the factory
     	if(weaponCount>=1)
     	    {final int weaponIndexMultiplier;

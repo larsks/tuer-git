@@ -11,28 +11,26 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.data;
+package engine.data.common.userdata;
 
-import engine.weaponry.Ammunition;
+import com.ardor3d.math.Vector3;
+import engine.data.common.Teleporter;
 
-public final class AmmunitionUserData extends CollectibleUserData{
+public final class TeleporterUserData extends CollectibleUserData<Teleporter>{
 	
+	private final Vector3 destination;
 	
-	private final Ammunition ammunition;
-	
-	private final int ammunitionCount;
-	
-	public AmmunitionUserData(final String sourcename,final Ammunition ammunition,final int ammunitionCount){
-		super(sourcename,ammunition.getLabel());
-		this.ammunition=ammunition;
-		this.ammunitionCount=ammunitionCount;
+	public TeleporterUserData(final Teleporter teleporter,final Vector3 destination){
+		super(teleporter,null);
+		this.destination=destination;
 	}
 	
-	public final Ammunition getAmmunition(){
-		return(ammunition);
+	public final Vector3 getDestination(){
+		return(destination);
 	}
 	
-	public final int getAmmunitionCount(){
-		return(ammunitionCount);
+	@Override
+	public String getPickingUpSoundSampleSourcename(){
+		return(collectible.getPickingUpSoundSampleSourcename());
 	}
 }

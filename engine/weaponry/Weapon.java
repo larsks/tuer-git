@@ -14,10 +14,19 @@
 package engine.weaponry;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import engine.data.common.Collectible;
 
-public final class Weapon implements Comparable<Weapon>{
+public final class Weapon extends Collectible implements Comparable<Weapon>{
 	
     private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
+    /**path of the sound sample played during a shot or a blow*/
+    private final String blowOrShotSoundSamplePath;
+    /**source name of the sound sample played during a shot or a blow*/
+    private String blowOrShotSoundSampleSourcename;
+    /**path of the sound sample played during a reload*/
+    private final String reloadSoundSamplePath;
+    /**source name of the sound sample played during a reload*/
+    private String reloadSoundSampleSourcename;
     /**unique name*/
     private final String identifier;
     /**unique identifier*/
@@ -42,9 +51,12 @@ public final class Weapon implements Comparable<Weapon>{
 	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
-	Weapon(final String identifier,final boolean twoHanded,final int magazineSize,
+	public Weapon(final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
+		super(pickingUpSoundSamplePath);
+		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
+		this.reloadSoundSamplePath=reloadSoundSamplePath;
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
 		this.twoHanded=twoHanded;
@@ -66,7 +78,31 @@ public final class Weapon implements Comparable<Weapon>{
     public final boolean isFullyAutomatic(){
     	return(fullyAutomatic);
     }
+    
+    public final String getBlowOrShotSoundSamplePath(){
+    	return(blowOrShotSoundSamplePath);
+    }
 	    
+	public String getBlowOrShotSoundSampleSourcename(){
+		return(blowOrShotSoundSampleSourcename);
+	}
+
+	public void setBlowOrShotSoundSampleSourcename(String blowOrShotSoundSampleSourcename){
+		this.blowOrShotSoundSampleSourcename=blowOrShotSoundSampleSourcename;
+	}
+	
+	public final String getReloadSoundSamplePath(){
+    	return(reloadSoundSamplePath);
+    }
+	    
+	public String getReloadSoundSampleSourcename(){
+		return(reloadSoundSampleSourcename);
+	}
+
+	public void setReloadSoundSampleSourcename(String reloadSoundSampleSourcename){
+		this.reloadSoundSampleSourcename=reloadSoundSampleSourcename;
+	}
+
 	/**
 	 * gets the size of the magazine
 	 * @return size of the magazine

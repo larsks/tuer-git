@@ -28,10 +28,10 @@ public final class AmmunitionFactory {
 		ammunitionsIndicesMap=new HashMap<Integer,Ammunition>();
 	}	
 	
-	public final boolean addNewAmmunition(final String identifier,final String label){
+	public final boolean addNewAmmunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
 		final boolean success=identifier!=null&&!ammunitionsMap.containsKey(identifier);
 		if(success)
-			{final Ammunition ammunition=new Ammunition(identifier,label);
+			{final Ammunition ammunition=new Ammunition(pickingUpSoundSamplePath,identifier,label);
 			 ammunitionsMap.put(identifier,ammunition);
 			 ammunitionsIndicesMap.put(ammunition.getUid(),ammunition);
 			}

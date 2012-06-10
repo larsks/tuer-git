@@ -11,16 +11,13 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.data;
+package engine.data.common.userdata;
 
 import com.ardor3d.math.type.ReadOnlyMatrix3;
 import engine.weaponry.AmmunitionContainer;
 import engine.weaponry.Weapon;
 
-public final class WeaponUserData extends CollectibleUserData{
-	
-	
-	private final Weapon weapon;
+public final class WeaponUserData extends CollectibleUserData<Weapon>{
 	
 	private final ReadOnlyMatrix3 rotation;
 	
@@ -31,16 +28,12 @@ public final class WeaponUserData extends CollectibleUserData{
 	private boolean digitalWatermarkEnabled;
 	/**flag indicating whether a weapon is primary*/
     private final boolean primary;
-    /**source name of the sound played when shooting*/
-    private final String blowOrShotSourcename;
 	
 	
-	public WeaponUserData(final String sourcename,final String blowOrShotSourcename,final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
-		super(sourcename,null);
-		this.blowOrShotSourcename=blowOrShotSourcename;
+	public WeaponUserData(final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
+		super(weapon,null);
 		if(!primary&&!weapon.isTwoHanded())
 		    throw new IllegalArgumentException("The weapon " + weapon + " cannot be used as a secondary weapon");
-		this.weapon=weapon;
 		this.rotation=rotation;
 		this.ownerUid=ownerUid;
 		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
@@ -50,11 +43,16 @@ public final class WeaponUserData extends CollectibleUserData{
 	
 	
 	public final Weapon getWeapon(){
-		return(weapon);
+		return(collectible);
+	}
+	
+	@Override
+	public String getPickingUpSoundSampleSourcename(){
+		return(collectible.getPickingUpSoundSampleSourcename());
 	}
 	
 	public final String getBlowOrShotSourcename(){
-		return(blowOrShotSourcename);
+		return(collectible.getBlowOrShotSoundSampleSourcename());
 	}
 	
 	public final ReadOnlyMatrix3 getRotation(){
