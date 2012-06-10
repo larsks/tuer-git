@@ -61,13 +61,21 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 
     	private final PlayerData playerData;
     	
-		public ReloadAndPullOutAction(final PlayerData playerData){
+    	private final SoundManager soundManager;
+    	
+		public ReloadAndPullOutAction(final PlayerData playerData,final SoundManager soundManager){
 			this.playerData=playerData;
+			this.soundManager=soundManager;
 		}
     	
     	@Override
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-    		playerData.reload();
+    		final int reloadedAmmoCount=playerData.reload();
+    		if(reloadedAmmoCount>0)
+    		    {final String sourcename=playerData.getCurrentWeaponReloadSoundSampleSourcename();
+    		     if(sourcename!=null)
+   			         soundManager.play(sourcename);
+    		    }
     		stateMachine.fireEvent(PlayerEvent.PULLING_OUT);
     	}
     }
@@ -123,7 +131,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     		//performs the attack, it may consume some ammunition
     		final int blowOrShotCount=playerData.attack();
     		if(blowOrShotCount==1)
-    			{final String sourcename=playerData.getCurrentWeaponBlowOrShotSourcename();
+    			{final String sourcename=playerData.getCurrentWeaponBlowOrShotSoundSampleSourcename();
     			 if(sourcename!=null)
     			     soundManager.play(sourcename);
     			}
@@ -174,7 +182,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 			    {//multiple consecutive attacks may be performed until the player explicitly releases the trigger of his current weapon
 				 final int blowOrShotCount=playerData.attack();
 	    		 if(blowOrShotCount==1)
-	    			 {final String sourcename=playerData.getCurrentWeaponBlowOrShotSourcename();
+	    			 {final String sourcename=playerData.getCurrentWeaponBlowOrShotSoundSampleSourcename();
 	    			  if(sourcename!=null)
 	    			      soundManager.play(sourcename);
 	    			 }
@@ -393,7 +401,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         final FromReleaseTriggerTransitionAction fromReleaseTriggerTransitionAction=new FromReleaseTriggerTransitionAction(playerData,scheduler);
         final CancellableScheduledTaskCancellerExitAction afterReleaseTriggerActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromReleaseTriggerTransitionAction);
         addState(PlayerState.RELEASE_TRIGGER,fromReleaseTriggerTransitionAction,afterReleaseTriggerActionCancellerIfRequiredAction);
-        final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData);
+        final ReloadAndPullOutAction reloadAndPullOutAction=new ReloadAndPullOutAction(playerData,soundManager);
         addState(PlayerState.RELOAD,reloadAndPullOutAction,null);
         final FromPutBackTransitionAction fromPutBackTransitionAction=new FromPutBackTransitionAction(playerData,scheduler);
         final CancellableScheduledTaskCancellerExitAction afterPutBackActionCancellerIfRequiredAction=new CancellableScheduledTaskCancellerExitAction(scheduler,fromPutBackTransitionAction);

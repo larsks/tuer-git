@@ -11,19 +11,18 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.data;
+package engine.data.common;
 
-import com.ardor3d.math.Vector3;
+public class Medikit extends Collectible{
 
-public final class TeleporterUserData{
+	private final int health;
 	
-	private final Vector3 destination;
-	
-	public TeleporterUserData(final Vector3 destination){
-		this.destination=destination;
+	public Medikit(final String pickingUpSoundSamplePath,final int health){
+		super(pickingUpSoundSamplePath);
+		this.health=health;
 	}
 	
-	public final Vector3 getDestination(){
-		return(destination);
+	public int getHealth(){
+		return(health);
 	}
 }

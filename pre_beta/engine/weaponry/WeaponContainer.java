@@ -28,7 +28,7 @@ public final class WeaponContainer {
 	
     public WeaponContainer(final WeaponFactory weaponFactory){
     	this.weaponFactory=weaponFactory;
-    	final int weaponCount=weaponFactory.getWeaponCount();
+    	final int weaponCount=weaponFactory.getSize();
     	this.weaponsAvailabilities=new boolean[weaponCount];
     	this.weaponsNodes=new Node[weaponCount];
     	Arrays.fill(weaponsAvailabilities,false);
@@ -37,7 +37,7 @@ public final class WeaponContainer {
     
     private final void ensureWeaponCountChangeDetection(){
     	final int previousWeaponCount=weaponsAvailabilities.length;
-    	final int currentWeaponCount=weaponFactory.getWeaponCount();
+    	final int currentWeaponCount=weaponFactory.getSize();
     	if(currentWeaponCount>previousWeaponCount)
     	    {weaponsAvailabilities=Arrays.copyOf(weaponsAvailabilities,currentWeaponCount);
     	     weaponsNodes=Arrays.copyOf(weaponsNodes,currentWeaponCount);

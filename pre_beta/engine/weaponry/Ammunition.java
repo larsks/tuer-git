@@ -14,8 +14,9 @@
 package engine.weaponry;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import engine.data.common.Collectible;
 
-public class Ammunition implements Comparable<Ammunition>{
+public class Ammunition extends Collectible implements Comparable<Ammunition>{
     
 	private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
 	/**unique name (cannot contain any space)*/
@@ -25,7 +26,8 @@ public class Ammunition implements Comparable<Ammunition>{
     /**unique identifier*/
     private final int uid;
 	
-    Ammunition(final String identifier,final String label){
+    Ammunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
+    	super(pickingUpSoundSamplePath);
     	this.uid=autoIncrementalIndex.getAndIncrement();
     	this.identifier=identifier;
     	this.label=label;

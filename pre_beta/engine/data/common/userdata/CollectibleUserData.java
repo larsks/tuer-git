@@ -11,24 +11,27 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.data;
+package engine.data.common.userdata;
 
-public abstract class CollectibleUserData{
-	/**source name of the sound played when picking up this kind of object*/
-	private final String sourcename;
+import engine.data.common.Collectible;
+
+public abstract class CollectibleUserData<T extends Collectible>{
+	
+	protected final T collectible;
+	
 	/**name of elements contained by this object, can be null if it is not a container*/
 	private final String subElementName;
 	
-	public CollectibleUserData(final String sourcename,final String subElementName){
-		this.sourcename=sourcename;
+	public CollectibleUserData(final T collectible,final String subElementName){
+		this.collectible=collectible;
 		this.subElementName=subElementName;
 	}
 	
-	public final String getSourcename(){
-		return(sourcename);
+	public String getPickingUpSoundSampleSourcename(){
+		return(collectible.getPickingUpSoundSampleSourcename());
 	}
 	
-	public final String getSubElementName(){
+	public String getSubElementName(){
 		return(subElementName);
 	}
 }

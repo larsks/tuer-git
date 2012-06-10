@@ -11,19 +11,22 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.data;
+package engine.data.common.userdata;
 
-public final class MedikitUserData extends CollectibleUserData{
+import engine.data.common.Medikit;
+
+public final class MedikitUserData extends CollectibleUserData<Medikit>{
 	
-	private final int health;
-	
-	public MedikitUserData(final int health){
-		//TODO: add a source name
-		super(null,"points of health");
-		this.health=health;
+	public MedikitUserData(final Medikit medikit){
+		super(medikit,"points of health");
 	}
 	
-	public final int getHealth(){
-		return(health);
+	public int getHealth(){
+		return(collectible.getHealth());
+	}
+	
+	@Override
+	public String getPickingUpSoundSampleSourcename(){
+		return(collectible.getPickingUpSoundSampleSourcename());
 	}
 }

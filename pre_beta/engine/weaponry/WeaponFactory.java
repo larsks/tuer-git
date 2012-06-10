@@ -15,7 +15,7 @@ package engine.weaponry;
 
 import java.util.HashMap;
 
-public final class WeaponFactory {
+public final class WeaponFactory{
 
 	
 	private final HashMap<String,Weapon> weaponsMap;
@@ -28,12 +28,13 @@ public final class WeaponFactory {
 		weaponsIndicesMap=new HashMap<Integer,Weapon>();
 	}	
 	
-	public final boolean addNewWeapon(final String identifier,final boolean twoHanded,final int magazineSize,
-	        final Ammunition ammunition,final int ammunitionPerShot,
+	public final boolean addNewWeapon(final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,
+			final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,
+			final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		final boolean success=identifier!=null&&!weaponsMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
+			{final Weapon weapon=new Weapon(pickingUpSoundSamplePath,blowOrShotSoundSamplePath,reloadSoundSamplePath,identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
 			 weaponsMap.put(identifier,weapon);
 			 weaponsIndicesMap.put(weapon.getUid(),weapon);
 			}
@@ -41,14 +42,14 @@ public final class WeaponFactory {
 	}
 	
 	public final Weapon getWeapon(final int index){
-		return(0<=index&&index<getWeaponCount()?weaponsIndicesMap.get(Integer.valueOf(index)):null);
+		return(0<=index&&index<getSize()?weaponsIndicesMap.get(Integer.valueOf(index)):null);
 	}
 	
 	public final Weapon getWeapon(final String identifier){
 		return(weaponsMap.get(identifier));
 	}
 	
-	public final int getWeaponCount(){
+	public final int getSize(){
 		return(weaponsMap.size());
 	}
 }
