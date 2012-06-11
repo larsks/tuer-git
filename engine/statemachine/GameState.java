@@ -692,8 +692,7 @@ public final class GameState extends ScenegraphState{
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"PISTOL_9MM",true,8,ammunitionFactory.getAmmunition("BULLET_9MM"),1,500,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"PISTOL_10MM",true,10,ammunitionFactory.getAmmunition("BULLET_10MM"),1,500,true);
-        //TODO set the path of the sound sample for the reload
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg",null,"MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg","MAG_60",true,30,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"UZI",true,20,ammunitionFactory.getAmmunition("BULLET_9MM"),1,100,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"SMACH",true,35,ammunitionFactory.getAmmunition("BULLET_5_56MM"),1,100,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"LASER",true,15,ammunitionFactory.getAmmunition("ENERGY_CELL"),1,1000,false);
