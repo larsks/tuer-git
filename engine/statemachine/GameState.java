@@ -879,7 +879,7 @@ public final class GameState extends ScenegraphState{
             uziNode.setTranslation(111.5,0.15,219);
             uziNode.setScale(0.2);
             uziNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false,true));
-            //add some bounding boxes for all objects that can be picked up
+            //adds some bounding boxes for all objects that can be picked up
             collectibleObjectsList.add(uziNode);
             getRoot().attachChild(uziNode);
             final Node smachNode=(Node)binaryImporter.load(getClass().getResource("/abin/smach.abin"));
@@ -904,7 +904,7 @@ public final class GameState extends ScenegraphState{
             getRoot().attachChild(duplicatePistolNode);
             final Node pistol2Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
             pistol2Node.setName("a pistol (9mm)");
-            //remove the bullet as it is not necessary now
+            //removes the bullet as it is not necessary now
             ((Node)pistol2Node.getChild(0)).detachChildAt(2);
             pistol2Node.setTranslation(114.5,0.1,219);
             pistol2Node.setScale(0.02);
@@ -935,11 +935,12 @@ public final class GameState extends ScenegraphState{
             getRoot().attachChild(shotgunNode);	  
             
             final Node rocketLauncherNode=(Node)binaryImporter.load(getClass().getResource("/abin/rocketlauncher.abin"));
-            //remove the scope
+            //removes the scope
             rocketLauncherNode.detachChildAt(0);
             rocketLauncherNode.setName("a rocket launcher");
             rocketLauncherNode.setTranslation(117.5,0.1,222);
             rocketLauncherNode.setScale(0.08);
+            rocketLauncherNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
             rocketLauncherNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(rocketLauncherNode);
             getRoot().attachChild(rocketLauncherNode);	
