@@ -416,7 +416,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         //adds all transitions between states to the transition model
         transitionModel.addTransition(PlayerState.NOT_YET_AVAILABLE,PlayerState.IDLE,PlayerEvent.AVAILABLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //no condition is required but an attack may fail (because of a lack of ammo).
-        transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        //transitionModel.addTransition(PlayerState.PRESS_TRIGGER,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final AttackPossibleCondition pressTriggerCondition=new AttackPossibleCondition(playerData);
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PRESS_TRIGGER,PlayerEvent.PRESSING_TRIGGER,pressTriggerCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         final PressTriggerCompleteCondition pressTriggerCompleteCondition=new PressTriggerCompleteCondition(playerData);
@@ -446,7 +446,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_NEXT,nextSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());        
         transitionModel.addTransition(PlayerState.IDLE,PlayerState.PUT_BACK,PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_PREVIOUS,previousSelectionPossibleCondition,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //allows to interrupt the "put back" (not yet used, maybe later when the player has just died)
-        transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
+        //transitionModel.addTransition(PlayerState.PUT_BACK,PlayerState.IDLE,PlayerEvent.IDLE,BasicConditions.ALWAYS,Collections.<Action<PlayerState,PlayerEvent>>emptyList());
         //allows the selection of another weapon only when the "put back" has ended        
         final Condition nextSelectionPossibleAfterPutBackCondition=BasicConditions.and(nextSelectionPossibleCondition,putBackCompleteCondition);
         final Condition previousSelectionPossibleAfterPutBackCondition=BasicConditions.and(previousSelectionPossibleCondition,putBackCompleteCondition);
