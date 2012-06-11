@@ -17,10 +17,12 @@ package engine.misc;
  * set regrouping the first frame, the last frame and the frame rate of a typical MD2 animation
  * reference: http://tfc.duke.free.fr/old/models/md2.htm (special thanks to David Henry)
  * 
+ * N.B: Blender does not show the frame whose index is zero, you have to modify its import script to show all frames (with a shift)
+ * 
  * @author Julien Gouesse
  *
  */
-public enum MD2FrameSet {
+public enum MD2FrameSet{
 
 	STAND(0,39,9),
 	RUN(40,45,10),
@@ -31,7 +33,7 @@ public enum MD2FrameSet {
 	JUMP(66,71,7),
 	FLIP(72,83,7),
 	SALUTE(84,94,7),
-	FALLBACK(95,111,10),
+	FALLBACK(95,111,10),//taunt?
 	WAVE(112,122,7),
 	POINT(123,134,6),
 	CROUCH_STAND(135,153,10),
@@ -42,8 +44,7 @@ public enum MD2FrameSet {
 	DEATH_FALLBACK(178,183,7),
 	DEATH_FALLFORWARD(184,189,7),
 	DEATH_FALLBACKSLOW(190,197,7),
-	BOOM(198,198,5)
-	;
+	BOOM(198,198,5);
 	
 	private final int firstFrameIndex;
 	
