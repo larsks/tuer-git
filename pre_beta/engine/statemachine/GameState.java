@@ -154,10 +154,35 @@ public final class GameState extends ScenegraphState{
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        //FIXME handle sound samples here by extending PlayerData
         //FIXME handle collision detection between bullet(s) and enemies here too
-        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
-        playerWithStateMachine=new LogicalPlayer(playerData,soundManager);
+        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
+        	@Override
+        	public int attack(){
+        		final int consumedAmmunitionOrKnockCount=super.attack();
+        		final String identifier=getCurrentWeaponBlowOrShotSoundSampleIdentifier();        		
+        		    for(int index=0;index<consumedAmmunitionOrKnockCount;index++)
+        		    	{if(isCurrentWeaponAmmunitionCountDisplayable())
+        		    	     {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
+        		    		  //      store them for further use
+        		    	     }
+        		    	 if(identifier!=null)
+        		    	     soundManager.play(false,identifier);
+        		    	}
+        		return(consumedAmmunitionOrKnockCount);
+        	}
+        	
+        	@Override
+        	public int reload(){
+        		final int reloadedAmmoCount=super.reload();
+        		if(reloadedAmmoCount>0)
+    		        {final String identifier=getCurrentWeaponReloadSoundSampleIdentifier();
+    		         if(identifier!=null)
+   			             soundManager.play(false,identifier);
+    		        }
+        		return(reloadedAmmoCount);
+        	}
+        };
+        playerWithStateMachine=new LogicalPlayer(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
@@ -241,28 +266,28 @@ public final class GameState extends ScenegraphState{
                 previousPosition.set(playerNode.getTranslation());
                 cam.setLocation(playerNode.getTranslation());
                 //checks if any object is collected
-                Node collectible;
+                Node collectibleNode;
                 String subElementName;
                 for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
-                    {collectible=collectibleObjectsList.get(i);
-                	 PickingUtil.findCollisions(collectible,playerNode,collisionResults);
+                    {collectibleNode=collectibleObjectsList.get(i);
+                	 PickingUtil.findCollisions(collectibleNode,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
                 	     {//tries to collect the object (update the player model (MVC))
-                		  collectedSubElementsCount=playerData.collect(collectible);
+                		  collectedSubElementsCount=playerData.collect(collectibleNode);
                 		  //if it succeeds, detach the object from the root later
                 		  if(collectedSubElementsCount>0)
                 	          {//remove it from the list of collectible objects
                 			   collectibleObjectsList.remove(i);
-                			   if(collectible.getParent()!=null)
+                			   if(collectibleNode.getParent()!=null)
                 				   //detach this object from its parent so that it is no more visible
-                				   collectible.getParent().detachChild(collectible);
-                			   CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectible.getUserData();
+                				   collectibleNode.getParent().detachChild(collectibleNode);
+                			   CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectibleNode.getUserData();
                 			   //display a message when the player picked up something
                 			   subElementName=collectibleUserData.getSubElementName();
                 			   if(subElementName!=null && !subElementName.equals(""))
                 				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
                 			   else
-                			       headUpDisplayLabel.setText("picked up "+collectible.getName());               	           
+                			       headUpDisplayLabel.setText("picked up "+collectibleNode.getName());               	           
                 	           //play a sound if available
                 	           if(collectibleUserData.getPickingUpSoundSampleIdentifier()!=null)
                                    getSoundManager().play(false,collectibleUserData.getPickingUpSoundSampleIdentifier());
@@ -332,9 +357,9 @@ public final class GameState extends ScenegraphState{
     	
     	private double initialLatestPutBackProgress=0,initialEndAttackProgress=0;
     	
-    	public LogicalPlayer(final PlayerData playerData,final SoundManager soundManager){
+    	public LogicalPlayer(final PlayerData playerData){
     		this.playerData=playerData;
-    		this.stateMachine=new PlayerStateMachine(playerData,soundManager);
+    		this.stateMachine=new PlayerStateMachine(playerData);
     	}
     	
     	public void updateLogicalLayer(final ReadOnlyTimer timer){

@@ -37,7 +37,7 @@ import engine.weaponry.WeaponFactory;
  * @author Julien Gouesse
  * 
  */
-public final class PlayerData {
+public class PlayerData {
     
 	/**maximum health*/
 	private static final int maxHealth=100;
@@ -62,7 +62,7 @@ public final class PlayerData {
 	/**weapon currently in use*/
 	protected Weapon weaponInUse;
 	/**node representing the camera*/
-	private CameraNode cameraNode;
+	protected CameraNode cameraNode;
 	/**factory that creates weapons*/
 	private final WeaponFactory weaponFactory;
 	/**container of ammunition container*/
@@ -618,6 +618,7 @@ public final class PlayerData {
 	 * Launches an attack
 	 * 
 	 * @return consumed ammunition if the weapon is not a melee weapon, knock count otherwise
+	 * FIXME return the consumed ammunition by each weapon
 	 */
 	public int attack(){
 		int consumedAmmunitionOrKnockCount=0;
