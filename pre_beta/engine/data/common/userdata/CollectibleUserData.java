@@ -27,8 +27,8 @@ public abstract class CollectibleUserData<T extends Collectible>{
 		this.subElementName=subElementName;
 	}
 	
-	public String getPickingUpSoundSampleSourcename(){
-		return(collectible.getPickingUpSoundSampleSourcename());
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 	
 	public String getSubElementName(){

@@ -14,6 +14,8 @@
 package engine.sound;
 
 import java.net.URL;
+import java.util.LinkedList;
+
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundSystemException;
@@ -29,16 +31,30 @@ import paulscode.sound.libraries.LibraryJavaSound;
  */
 public final class SoundManager{
 
+	private static class ExtendedSoundSystem extends SoundSystem{
+		
+		@SuppressWarnings("rawtypes")
+		private ExtendedSoundSystem(Class libraryClass) throws SoundSystemException{
+			super(libraryClass);
+		}
+		
+		private void stop(){
+			LinkedList<String> sourcenames=soundLibrary.getAllSourcenames();
+			for(String sourcename:sourcenames)
+			    stop(sourcename);
+			removeTemporarySources();
+		}
+	}	
 	
     /**underlying sound system written by Paul Lamb*/
-    private SoundSystem soundSystem;
+    private ExtendedSoundSystem soundSystem;
     
     
     public SoundManager(){
-        try{try{soundSystem=new SoundSystem(LibraryJOAL.class);}
+        try{try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
     	    catch(SoundSystemException sseOpenAL)
     	    {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);
-    	     try{soundSystem=new SoundSystem(LibraryJavaSound.class);}
+    	     try{soundSystem=new ExtendedSoundSystem(LibraryJavaSound.class);}
     	     catch(SoundSystemException sseJavaSound)
     	     {System.out.println("The initialization of the sound manager (based on JavaSound) failed: "+sseJavaSound);}
     	    }
@@ -49,36 +65,46 @@ public final class SoundManager{
         {System.out.println("The initialization of the sound manager failed: "+sse);}
     }
     
-    public final String preloadSoundSample(final URL url,final boolean backgroundMusic){
-        final String path=url.getPath();
-        final String identifier=path.substring(path.lastIndexOf("/"));
-        final String sourcename=identifier.substring(0,identifier.lastIndexOf("."));
-        final boolean priority;
-        final int attenuationModel;
-        final float rollOffFactor;
-        if(backgroundMusic)
-            {priority=true;
-             attenuationModel=SoundSystemConfig.ATTENUATION_NONE;
-             rollOffFactor=0;
+    public final String loadSound(final URL url){
+    	final String identifier;
+        if(soundSystem!=null)
+            {final String path=url.getPath();
+             identifier=path.substring(path.lastIndexOf("/"));
+             soundSystem.loadSound(url,identifier);
             }
         else
-            {priority=false;
-             attenuationModel=SoundSystemConfig.ATTENUATION_ROLLOFF;
-             rollOffFactor=SoundSystemConfig.getDefaultRolloff();
-            }
-        if(soundSystem!=null)
-            soundSystem.newSource(priority,sourcename,url,identifier,false,0,0,0,attenuationModel,rollOffFactor);
-        return(sourcename);
+        	identifier=null;
+        return(identifier);
+    }   
+    
+    public final void play(final boolean backgroundMusic,final String identifier,float x,float y,float z){
+    	if(soundSystem!=null)
+    	    {final boolean priority,toLoop;
+             final int attenuationModel;
+             final float rollOffFactor;
+    		 if(backgroundMusic)
+                 {priority=true;
+                  toLoop=true;
+                  attenuationModel=SoundSystemConfig.ATTENUATION_NONE;
+                  rollOffFactor=0;
+                 }
+             else
+                 {priority=false;
+                  toLoop=false;
+                  attenuationModel=SoundSystemConfig.ATTENUATION_ROLLOFF;
+                  rollOffFactor=SoundSystemConfig.getDefaultRolloff();
+                 }
+    		 soundSystem.quickPlay(priority,null,identifier,toLoop,x,y,z,attenuationModel,rollOffFactor);
+    	    }
     }
     
-    public final void play(String sourcename){
-        if(soundSystem!=null)
-            soundSystem.play(sourcename);
+    public final void play(final boolean backgroundMusic,final String identifier){
+    	play(backgroundMusic,identifier,0,0,0);
     }
     
-    public final void stop(String sourcename){
+    public final void stop(){
         if(soundSystem!=null)
-            soundSystem.stop(sourcename);
+        	soundSystem.stop();
     }
     
     public final void cleanup(){

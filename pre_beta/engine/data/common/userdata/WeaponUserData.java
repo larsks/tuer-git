@@ -47,12 +47,12 @@ public final class WeaponUserData extends CollectibleUserData<Weapon>{
 	}
 	
 	@Override
-	public String getPickingUpSoundSampleSourcename(){
-		return(collectible.getPickingUpSoundSampleSourcename());
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 	
 	public final String getBlowOrShotSourcename(){
-		return(collectible.getBlowOrShotSoundSampleSourcename());
+		return(collectible.getBlowOrShotSoundSampleIdentifier());
 	}
 	
 	public final ReadOnlyMatrix3 getRotation(){

@@ -46,7 +46,7 @@ public final class IntroductionState extends ScenegraphState{
     
     private static final String textureFilePath="/images/introduction.png";
     
-    private String sourcename;
+    private String soundIdentifier;
     
     private final Box box;
 
@@ -96,9 +96,9 @@ public final class IntroductionState extends ScenegraphState{
         // load the music
         final URL sampleUrl=IntroductionState.class.getResource(soundSamplePath);
         if(sampleUrl!=null)
-            sourcename=getSoundManager().preloadSoundSample(sampleUrl,true);
+        	soundIdentifier=getSoundManager().loadSound(sampleUrl);
         else
-            sourcename=null;
+        	soundIdentifier=null;
         // puts a texture onto the box
         final TextureState ts=new TextureState();
         ts.setEnabled(true);
@@ -112,12 +112,12 @@ public final class IntroductionState extends ScenegraphState{
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 {if(sourcename!=null)
-                      getSoundManager().play(sourcename);
+                 {if(soundIdentifier!=null)
+                      getSoundManager().play(true,soundIdentifier);
                  }
              else
-                 {if(sourcename!=null)
-                      getSoundManager().stop(sourcename);
+                 {if(soundIdentifier!=null)
+                      getSoundManager().stop();
                  }
             }
     }

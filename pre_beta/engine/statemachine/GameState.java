@@ -154,6 +154,8 @@ public final class GameState extends ScenegraphState{
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         // create a node that follows the camera
         playerNode=new CameraNode("player",cam);
+        //FIXME handle sound samples here by extending PlayerData
+        //FIXME handle collision detection between bullet(s) and enemies here too
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true);
         playerWithStateMachine=new LogicalPlayer(playerData,soundManager);
         this.previousCamLocation=new Vector3(cam.getLocation());
@@ -262,8 +264,8 @@ public final class GameState extends ScenegraphState{
                 			   else
                 			       headUpDisplayLabel.setText("picked up "+collectible.getName());               	           
                 	           //play a sound if available
-                	           if(collectibleUserData.getPickingUpSoundSampleSourcename()!=null)
-                                   getSoundManager().play(collectibleUserData.getPickingUpSoundSampleSourcename());
+                	           if(collectibleUserData.getPickingUpSoundSampleIdentifier()!=null)
+                                   getSoundManager().play(false,collectibleUserData.getPickingUpSoundSampleIdentifier());
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -299,8 +301,8 @@ public final class GameState extends ScenegraphState{
                                 //synchronizes the camera with the camera node
                                 cam.setLocation(teleporterDestination);
                                 //play a sound if available
-                 	            if(teleporterUserData.getPickingUpSoundSampleSourcename()!=null)
-                                    getSoundManager().play(teleporterUserData.getPickingUpSoundSampleSourcename());
+                 	            if(teleporterUserData.getPickingUpSoundSampleIdentifier()!=null)
+                                    getSoundManager().play(false,teleporterUserData.getPickingUpSoundSampleIdentifier());
                 	           }
                 	      }                          
                     }
@@ -723,9 +725,9 @@ public final class GameState extends ScenegraphState{
   	    if(teleporterSoundSamplePath!=null)
   	        {final URL teleporterSoundSampleUrl=GameState.class.getResource(teleporterSoundSamplePath);
   		     if(teleporterSoundSampleUrl!=null)
-  		         {final String teleporterSoundSampleSourcename=getSoundManager().preloadSoundSample(teleporterSoundSampleUrl,false);
-  		          if(teleporterSoundSampleSourcename!=null)
-  			     	  teleporter.setPickingUpSoundSampleSourcename(teleporterSoundSampleSourcename);
+  		         {final String teleporterSoundSampleIdentifier=getSoundManager().loadSound(teleporterSoundSampleUrl);
+  		          if(teleporterSoundSampleIdentifier!=null)
+  			     	  teleporter.setPickingUpSoundSampleIdentifier(teleporterSoundSampleIdentifier);
   		         }
   	        }
         final int ammoCount=ammunitionFactory.getSize();
@@ -735,9 +737,9 @@ public final class GameState extends ScenegraphState{
        	     if(pickingUpSoundSamplePath!=null)
        	         {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
        		      if(pickingUpSoundSampleUrl!=null)
-       		          {final String pickingUpSoundSampleSourcename=getSoundManager().preloadSoundSample(pickingUpSoundSampleUrl,false);
-       			       if(pickingUpSoundSampleSourcename!=null)
-       				       ammo.setPickingUpSoundSampleSourcename(pickingUpSoundSampleSourcename);
+       		          {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
+       			       if(pickingUpSoundSampleIdentifier!=null)
+       				       ammo.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
        		          }
        	         }
             }
@@ -748,27 +750,27 @@ public final class GameState extends ScenegraphState{
         	 if(pickingUpSoundSamplePath!=null)
         	     {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
         		  if(pickingUpSoundSampleUrl!=null)
-        		      {final String pickingUpSoundSampleSourcename=getSoundManager().preloadSoundSample(pickingUpSoundSampleUrl,false);
+        		      {final String pickingUpSoundSampleSourcename=getSoundManager().loadSound(pickingUpSoundSampleUrl);
         			   if(pickingUpSoundSampleSourcename!=null)
-        				   weapon.setPickingUpSoundSampleSourcename(pickingUpSoundSampleSourcename);
+        				   weapon.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleSourcename);
         		      }
         	     }
         	 final String blowOrShotSoundSamplePath=weapon.getBlowOrShotSoundSamplePath();
         	 if(blowOrShotSoundSamplePath!=null)
         	     {final URL blowOrShotSoundSampleUrl=GameState.class.getResource(blowOrShotSoundSamplePath);
         		  if(blowOrShotSoundSampleUrl!=null)
-        		      {final String blowOrShotSoundSampleSourcename=getSoundManager().preloadSoundSample(blowOrShotSoundSampleUrl,false);
-        			   if(blowOrShotSoundSampleSourcename!=null)
-        				   weapon.setBlowOrShotSoundSampleSourcename(blowOrShotSoundSampleSourcename);
+        		      {final String blowOrShotSoundSampleIdentifier=getSoundManager().loadSound(blowOrShotSoundSampleUrl);
+        			   if(blowOrShotSoundSampleIdentifier!=null)
+        				   weapon.setBlowOrShotSoundSampleIdentifier(blowOrShotSoundSampleIdentifier);
         		      }
         	     }
         	 final String reloadSoundSamplePath=weapon.getReloadSoundSamplePath();
         	 if(reloadSoundSamplePath!=null)
         	     {final URL reloadSoundSampleUrl=GameState.class.getResource(reloadSoundSamplePath);
         		  if(reloadSoundSampleUrl!=null)
-        		      {final String reloadSoundSampleSourcename=getSoundManager().preloadSoundSample(reloadSoundSampleUrl,false);
-        			   if(reloadSoundSampleSourcename!=null)
-        				   weapon.setReloadSoundSampleSourcename(reloadSoundSampleSourcename);
+        		      {final String reloadSoundSampleIdentifier=getSoundManager().loadSound(reloadSoundSampleUrl);
+        			   if(reloadSoundSampleIdentifier!=null)
+        				   weapon.setReloadSoundSampleIdentifier(reloadSoundSampleIdentifier);
         		      }
         	     }
             }

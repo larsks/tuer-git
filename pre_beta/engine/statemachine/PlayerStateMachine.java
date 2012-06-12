@@ -72,9 +72,9 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 	    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
     		final int reloadedAmmoCount=playerData.reload();
     		if(reloadedAmmoCount>0)
-    		    {final String sourcename=playerData.getCurrentWeaponReloadSoundSampleSourcename();
-    		     if(sourcename!=null)
-   			         soundManager.play(sourcename);
+    		    {final String identifier=playerData.getCurrentWeaponReloadSoundSampleIdentifier();
+    		     if(identifier!=null)
+   			         soundManager.play(false,identifier);
     		    }
     		stateMachine.fireEvent(PlayerEvent.PULLING_OUT);
     	}
@@ -131,9 +131,9 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     		//performs the attack, it may consume some ammunition
     		final int blowOrShotCount=playerData.attack();
     		if(blowOrShotCount==1)
-    			{final String sourcename=playerData.getCurrentWeaponBlowOrShotSoundSampleSourcename();
-    			 if(sourcename!=null)
-    			     soundManager.play(sourcename);
+    			{final String identifier=playerData.getCurrentWeaponBlowOrShotSoundSampleIdentifier();
+    			 if(identifier!=null)
+    			     soundManager.play(false,identifier);
     			}
     		//releases the trigger or prepares the next attack
     		super.onTransition(from,to,event,args,stateMachine);
@@ -182,9 +182,9 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 			    {//multiple consecutive attacks may be performed until the player explicitly releases the trigger of his current weapon
 				 final int blowOrShotCount=playerData.attack();
 	    		 if(blowOrShotCount==1)
-	    			 {final String sourcename=playerData.getCurrentWeaponBlowOrShotSoundSampleSourcename();
-	    			  if(sourcename!=null)
-	    			      soundManager.play(sourcename);
+	    			 {final String identifier=playerData.getCurrentWeaponBlowOrShotSoundSampleIdentifier();
+	    			  if(identifier!=null)
+	    			      soundManager.play(false,identifier);
 	    			 }
 			    }
 			else

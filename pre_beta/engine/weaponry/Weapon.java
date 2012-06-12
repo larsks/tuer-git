@@ -22,11 +22,11 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
     /**path of the sound sample played during a shot or a blow*/
     private final String blowOrShotSoundSamplePath;
     /**source name of the sound sample played during a shot or a blow*/
-    private String blowOrShotSoundSampleSourcename;
+    private String blowOrShotSoundSampleIdentifier;
     /**path of the sound sample played during a reload*/
     private final String reloadSoundSamplePath;
     /**source name of the sound sample played during a reload*/
-    private String reloadSoundSampleSourcename;
+    private String reloadSoundSampleIdentifier;
     /**unique name*/
     private final String identifier;
     /**unique identifier*/
@@ -83,24 +83,24 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
     	return(blowOrShotSoundSamplePath);
     }
 	    
-	public String getBlowOrShotSoundSampleSourcename(){
-		return(blowOrShotSoundSampleSourcename);
+	public String getBlowOrShotSoundSampleIdentifier(){
+		return(blowOrShotSoundSampleIdentifier);
 	}
 
-	public void setBlowOrShotSoundSampleSourcename(String blowOrShotSoundSampleSourcename){
-		this.blowOrShotSoundSampleSourcename=blowOrShotSoundSampleSourcename;
+	public void setBlowOrShotSoundSampleIdentifier(String blowOrShotSoundSampleIdentifier){
+		this.blowOrShotSoundSampleIdentifier=blowOrShotSoundSampleIdentifier;
 	}
 	
 	public final String getReloadSoundSamplePath(){
     	return(reloadSoundSamplePath);
     }
 	    
-	public String getReloadSoundSampleSourcename(){
-		return(reloadSoundSampleSourcename);
+	public String getReloadSoundSampleIdentifier(){
+		return(reloadSoundSampleIdentifier);
 	}
 
-	public void setReloadSoundSampleSourcename(String reloadSoundSampleSourcename){
-		this.reloadSoundSampleSourcename=reloadSoundSampleSourcename;
+	public void setReloadSoundSampleIdentifier(String reloadSoundSampleIdentifier){
+		this.reloadSoundSampleIdentifier=reloadSoundSampleIdentifier;
 	}
 
 	/**

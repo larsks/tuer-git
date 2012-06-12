@@ -30,7 +30,7 @@ public final class TeleporterUserData extends CollectibleUserData<Teleporter>{
 	}
 	
 	@Override
-	public String getPickingUpSoundSampleSourcename(){
-		return(collectible.getPickingUpSoundSampleSourcename());
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 }
