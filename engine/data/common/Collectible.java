@@ -17,7 +17,7 @@ public abstract class Collectible{
 	
 	protected String pickingUpSoundSamplePath;
 	/**source name of the sound played when picking up this kind of object*/
-	protected String pickingUpSoundSampleSourcename;
+	protected String pickingUpSoundSampleIdentifier;
 	
 	public Collectible(String pickingUpSoundSamplePath){
 		this.pickingUpSoundSamplePath=pickingUpSoundSamplePath;
@@ -31,11 +31,11 @@ public abstract class Collectible{
 		this.pickingUpSoundSamplePath=pickingUpSoundSamplePath;
 	}
 	
-	public String getPickingUpSoundSampleSourcename(){
-		return(pickingUpSoundSampleSourcename);
+	public String getPickingUpSoundSampleIdentifier(){
+		return(pickingUpSoundSampleIdentifier);
 	}
 	
-	public void setPickingUpSoundSampleSourcename(String pickingUpSoundSampleSourcename){
-		this.pickingUpSoundSampleSourcename=pickingUpSoundSampleSourcename;
+	public void setPickingUpSoundSampleIdentifier(String pickingUpSoundSampleIdentifier){
+		this.pickingUpSoundSampleIdentifier=pickingUpSoundSampleIdentifier;
 	}	
 }

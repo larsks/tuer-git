@@ -25,8 +25,8 @@ public final class AmmunitionUserData extends CollectibleUserData<Ammunition>{
 	}
 	
 	@Override
-	public String getPickingUpSoundSampleSourcename(){
-		return(collectible.getPickingUpSoundSampleSourcename());
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 	
 	public final Ammunition getAmmunition(){

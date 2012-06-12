@@ -60,7 +60,7 @@ public final class PlayerData {
 	/**weapon container of the left hand (right-handed) or in the right hand (left-handed)*/
 	private final WeaponContainer secondaryHandWeaponContainer;
 	/**weapon currently in use*/
-	private Weapon weaponInUse;
+	protected Weapon weaponInUse;
 	/**node representing the camera*/
 	private CameraNode cameraNode;
 	/**factory that creates weapons*/
@@ -78,7 +78,7 @@ public final class PlayerData {
 	/**ordinate of the weapon when it has been put away (not ready to be used)*/
 	private static final double PUT_BACK_WEAPON_ORDINATE=10*PULLED_OUT_WEAPON_ORDINATE;
 	
-	private static final double ATTACK_WEAPON_MAXIMUM_ORDINATE=/*-PULLED_OUT_WEAPON_ORDINATE*/0;
+	private static final double ATTACK_WEAPON_MAXIMUM_ORDINATE=0;
 	
 	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
 		this.uid=autoIncrementalIndex.getAndIncrement();
@@ -574,22 +574,22 @@ public final class PlayerData {
 		return(currentWeaponBlowOrShotDurationInMillis);
 	}
 	
-	public String getCurrentWeaponBlowOrShotSoundSampleSourcename(){
-		final String blowOrShotSourcename;
+	public String getCurrentWeaponBlowOrShotSoundSampleIdentifier(){
+		final String blowOrShotIdentifier;
 		if(weaponInUse!=null)
-		    blowOrShotSourcename=weaponInUse.getBlowOrShotSoundSampleSourcename();
+		    blowOrShotIdentifier=weaponInUse.getBlowOrShotSoundSampleIdentifier();
 		else
-			blowOrShotSourcename=null;
-		return(blowOrShotSourcename);
+			blowOrShotIdentifier=null;
+		return(blowOrShotIdentifier);
 	}
 	
-	public String getCurrentWeaponReloadSoundSampleSourcename(){
-		final String reloadSourcename;
+	public String getCurrentWeaponReloadSoundSampleIdentifier(){
+		final String reloadIdentifier;
 		if(weaponInUse!=null)
-			reloadSourcename=weaponInUse.getReloadSoundSampleSourcename();
+			reloadIdentifier=weaponInUse.getReloadSoundSampleIdentifier();
 		else
-			reloadSourcename=null;
-		return(reloadSourcename);
+			reloadIdentifier=null;
+		return(reloadIdentifier);
 	}
 	
 	public int getAmmunitionCountInSecondaryHandedWeapon(){

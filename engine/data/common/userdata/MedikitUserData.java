@@ -26,7 +26,7 @@ public final class MedikitUserData extends CollectibleUserData<Medikit>{
 	}
 	
 	@Override
-	public String getPickingUpSoundSampleSourcename(){
-		return(collectible.getPickingUpSoundSampleSourcename());
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 }
