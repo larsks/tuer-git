@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Map;
+
 import javax.imageio.ImageIO;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
@@ -157,18 +159,30 @@ public final class GameState extends ScenegraphState{
         //FIXME handle collision detection between bullet(s) and enemies here too
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
         	@Override
-        	public int attack(){
-        		final int consumedAmmunitionOrKnockCount=super.attack();
-        		final String identifier=getCurrentWeaponBlowOrShotSoundSampleIdentifier();        		
-        		    for(int index=0;index<consumedAmmunitionOrKnockCount;index++)
-        		    	{if(isCurrentWeaponAmmunitionCountDisplayable())
-        		    	     {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
-        		    		  //      store them for further use
-        		    	     }
-        		    	 if(identifier!=null)
-        		    	     soundManager.play(false,identifier);
-        		    	}
-        		return(consumedAmmunitionOrKnockCount);
+        	public Map.Entry<Integer,Integer> attack(){
+        		final Map.Entry<Integer,Integer> consumedAmmunitionOrKnockCounts=super.attack();
+        		final String identifier=getCurrentWeaponBlowOrShotSoundSampleIdentifier();
+        		//primary hand
+        		for(int index=0;index<consumedAmmunitionOrKnockCounts.getKey().intValue();index++)
+        		    {if(isCurrentWeaponAmmunitionCountDisplayable())
+        		    	 {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
+        		    	  cameraNode.getChild(0).getWorldBound().getCenter();
+        		    	  //      store them for further use
+        		    	 }
+        		     if(identifier!=null)
+        		    	 soundManager.play(false,identifier);
+        		    }
+        		//secondary hand
+        		for(int index=0;index<consumedAmmunitionOrKnockCounts.getValue().intValue();index++)
+    		        {if(isCurrentWeaponAmmunitionCountDisplayable())
+    		    	     {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
+    		    	      cameraNode.getChild(1).getWorldBound().getCenter();
+    		    	      //      store them for further use
+    		    	     }
+    		         if(identifier!=null)
+    		    	     soundManager.play(false,identifier);
+    		        }
+        		return(consumedAmmunitionOrKnockCounts);
         	}
         	
         	@Override

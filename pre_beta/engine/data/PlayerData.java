@@ -14,6 +14,7 @@
 package engine.data;
 
 import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.ardor3d.math.Matrix3;
@@ -620,28 +621,26 @@ public class PlayerData {
 	 * @return consumed ammunition if the weapon is not a melee weapon, knock count otherwise
 	 * FIXME return the consumed ammunition by each weapon
 	 */
-	public int attack(){
-		int consumedAmmunitionOrKnockCount=0;
-		if(weaponInUse!=null)
-		    {if(weaponInUse.isForMelee())
-		         {consumedAmmunitionOrKnockCount=dualWeaponUseEnabled?2:1;
-		    	  //melee weapon
-		         }
+	public Map.Entry<Integer,Integer> attack(){
+		final int consumedAmmunitionOrKnockCountWithPrimaryHand,consumedAmmunitionOrKnockCountWithSecondaryHand;
+		if(weaponInUse!=null&&!weaponInUse.isForMelee())
+		    {final int ammoPerShot=weaponInUse.getAmmunitionPerShot();
+		     final WeaponUserData primaryHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+		     consumedAmmunitionOrKnockCountWithPrimaryHand=primaryHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		     if(dualWeaponUseEnabled)
+		         {final WeaponUserData secondaryHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
+		          consumedAmmunitionOrKnockCountWithSecondaryHand=secondaryHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
+		    	 }
 		     else
-		         {final int ammoPerShot=weaponInUse.getAmmunitionPerShot();
-		          final WeaponUserData rightHandWeaponUserData=(WeaponUserData)primaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-		          consumedAmmunitionOrKnockCount+=rightHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		          if(dualWeaponUseEnabled)
-		              {final WeaponUserData leftHandWeaponUserData=(WeaponUserData)secondaryHandWeaponContainer.getNode(weaponInUse).getUserData();
-		    	       consumedAmmunitionOrKnockCount+=leftHandWeaponUserData.removeAmmunitionFromMagazine(ammoPerShot);
-		    	      }
-		         }
+		    	 consumedAmmunitionOrKnockCountWithSecondaryHand=0;
 		    }
 		else
-		    {consumedAmmunitionOrKnockCount=1;
-			 //punch & kick
+		    {consumedAmmunitionOrKnockCountWithPrimaryHand=1;
+		     consumedAmmunitionOrKnockCountWithSecondaryHand=dualWeaponUseEnabled?1:0;
+			 //punch & kick or melee weapon(s)
 		    }
-		return(consumedAmmunitionOrKnockCount);
+		final Map.Entry<Integer,Integer> consumedAmmunitionOrKnockCounts=new AbstractMap.SimpleEntry<Integer,Integer>(Integer.valueOf(consumedAmmunitionOrKnockCountWithPrimaryHand),Integer.valueOf(consumedAmmunitionOrKnockCountWithSecondaryHand));
+		return(consumedAmmunitionOrKnockCounts);
 	}
 	
 	/**
