@@ -619,7 +619,6 @@ public class PlayerData {
 	 * Launches an attack
 	 * 
 	 * @return consumed ammunition if the weapon is not a melee weapon, knock count otherwise
-	 * FIXME return the consumed ammunition by each weapon
 	 */
 	public Map.Entry<Integer,Integer> attack(){
 		final int consumedAmmunitionOrKnockCountWithPrimaryHand,consumedAmmunitionOrKnockCountWithSecondaryHand;

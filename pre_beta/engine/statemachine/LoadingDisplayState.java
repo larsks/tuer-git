@@ -39,7 +39,7 @@ public final class LoadingDisplayState extends ScenegraphState{
     
     private final TaskManagementProgressionNode taskNode;
     
-    private Runnable levelInitializationTask;
+    private GameStateInitializationRunnable levelInitializationTask;
     
     private final TaskManager taskManager;
     
@@ -48,6 +48,8 @@ public final class LoadingDisplayState extends ScenegraphState{
     private final Texture[] textures;
     
     private final String[] texturesPaths;
+    
+    private final BasicText levelTextLabel;
 
     
     public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager){
@@ -62,13 +64,13 @@ public final class LoadingDisplayState extends ScenegraphState{
         // execute tasks
         taskNode.addController(new SpatialController<Spatial>(){
         	
-        	boolean oneSkipDone=false;
+        	private boolean oneSkipDone=false;
         	
-        	boolean firstTaskOk=false;
+        	private boolean firstTaskOk=false;
         	
-        	int textureIndex=0;
+        	private int textureIndex=0;
         	
-        	int taskCount=0;
+        	private int taskCount=0;
         	
             @Override
             public final void update(final double time,final Spatial caller){
@@ -77,7 +79,9 @@ public final class LoadingDisplayState extends ScenegraphState{
        	        textureState.setTexture(textures[textureIndex]);
             	//performs the long task only at the second update to display the task node correctly
             	if(!oneSkipDone)
-            		oneSkipDone=true;
+            		{oneSkipDone=true;
+            		 levelTextLabel.setText("Level " + levelInitializationTask.getLevelIndex());
+            		}
             	else
             	    {if(taskManager.getTaskCount()>0)
             		     {taskManager.executeFirstTask();
@@ -87,11 +91,18 @@ public final class LoadingDisplayState extends ScenegraphState{
             		           taskNode.reset();
             		           taskCount=taskManager.getTaskCount();
             		          }
+            		      //updates the texture index
             		      if(taskManager.getTaskCount()>0)
             		    	  textureIndex=(int)Math.floor(((taskCount-taskManager.getTaskCount())/(double)taskCount)*textures.length);
+            		      else
+            		    	  textureIndex=textures.length-1;
             		     }
             	     else
-                         toGameAction.perform(null,null,-1);
+                         {toGameAction.perform(null,null,-1);
+                          oneSkipDone=false;
+                          firstTaskOk=false;
+                          textureIndex=0;
+                         }            	    
             	    }            	
             }
         });
@@ -99,8 +110,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));
         getRoot().attachChild(box);
-        //FIXME: add a mechanism to update the text
-        final BasicText levelTextLabel=BasicText.createDefaultTextLabel("Level","Level 0: The museum");
+        levelTextLabel=BasicText.createDefaultTextLabel("Level","");
         levelTextLabel.setTranslation(cam.getWidth()/2,cam.getHeight()/2,0);
         getRoot().attachChild(levelTextLabel);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
@@ -112,17 +122,17 @@ public final class LoadingDisplayState extends ScenegraphState{
     
     @Override
     public final void init(){
-    	// puts a texture onto the box
+    	//puts a texture onto the box
         TextureState ts=new TextureState();
         ts.setEnabled(true);
-        //ts.setTexture(TextureManager.load("communism.png",Texture.MinificationFilter.Trilinear,true));
         box.setRenderState(ts);
+        //loads all textures displayed while loading a level
         for(int textureIndex=0;textureIndex<texturesPaths.length;textureIndex++)
         	textures[textureIndex]=TextureManager.load(texturesPaths[textureIndex],Texture.MinificationFilter.Trilinear,true);
     }
     
-    public final void setLevelInitializationTask(final Runnable levelInitializationTask){
-        this.levelInitializationTask=levelInitializationTask;
+    public final void setLevelInitializationTask(final GameStateInitializationRunnable levelInitializationTask){
+    	this.levelInitializationTask=levelInitializationTask;
     }
     
     @Override
