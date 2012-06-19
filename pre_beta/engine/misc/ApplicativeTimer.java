@@ -44,6 +44,8 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     private double frameRate;
     /**period for the latest frame in seconds*/
     private double timePerFrame;
+    /**internal absolute time reference modified during the latest update of this timer, in nanoseconds*/
+    private long absoluteTimeReferenceInNanoseconds;
     
     /**
      * Default constructor, starts this timer immediately
@@ -58,24 +60,42 @@ public class ApplicativeTimer implements ReadOnlyTimer{
     }
     
     /**
-     * Update should be called once per frame to correctly update the variable about the pause(s), the elapsed time, the time per frame and the frame rate
+     * This method should be called once per frame to correctly update the variable about the pause(s), the elapsed time, the time per frame and the frame rate
      */
     public final void update(){
     	final long systemNanoTime=getSystemNanoTime();
+    	update(systemNanoTime);
+    }
+    
+    /**
+     * Gets the absolute time reference in nanoseconds
+     * @return absolute time reference in nanoseconds
+     */
+    public final long getAbsoluteTimeReferenceInNanoseconds(){
+    	return(absoluteTimeReferenceInNanoseconds);
+    }
+    
+    /**
+     * Updates this timer by using the supplied absolute time reference
+     * 
+     * @param absoluteTimeReferenceInNanoseconds absolute time reference in nanoseconds
+     */
+    public final void update(final long absoluteTimeReferenceInNanoseconds){
+    	this.absoluteTimeReferenceInNanoseconds=absoluteTimeReferenceInNanoseconds;
     	if(this.pausePreviouslyEnabled!=this.pauseEnabled)
     	    {if(pauseEnabled)
-   		         latestPauseStartTime=systemNanoTime;
+   		         latestPauseStartTime=absoluteTimeReferenceInNanoseconds;
    		     else   		     
    			     pauseElapsedTime+=latestPauseElapsedTime;   		 
     	    }
     	if(pauseEnabled)
-    		{latestPauseElapsedTime=systemNanoTime-latestPauseStartTime;
+    		{latestPauseElapsedTime=absoluteTimeReferenceInNanoseconds-latestPauseStartTime;
     		 timePerFrame=0;
     		 frameRate=0;
     		}
     	else   		
     	    {final long previousElapsedTime=elapsedTime;
-    	     elapsedTime=systemNanoTime-startTime-pauseElapsedTime;
+    	     elapsedTime=absoluteTimeReferenceInNanoseconds-startTime-pauseElapsedTime;
     	     timePerFrame=(elapsedTime-previousElapsedTime)*INVERSE_TIMER_RESOLUTION;
     	     frameRate=1.0/timePerFrame;
     	    }
@@ -115,6 +135,14 @@ public class ApplicativeTimer implements ReadOnlyTimer{
      */
     public long getElapsedTimeInNanoseconds(){
         return(elapsedTime);
+    }
+    
+    /**
+     * Gets the internal absolute time reference in nanoseconds used as the start of this timer
+     * @return Internal absolute time reference in nanoseconds
+     */
+    public long getStartTimeInNanoseconds(){
+    	return(startTime);
     }
     
     /**
