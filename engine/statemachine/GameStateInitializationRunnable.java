@@ -14,24 +14,17 @@
 package engine.statemachine;
 
 /**
- * Runnable that runs the init() method of a state. N.B: the caller should use this runnable
- * when the OpenGL context is current.
  * 
  * @author Julien Gouesse
  *
  */
-public class StateInitializationRunnable<S extends ScenegraphState> implements Runnable{
+public class GameStateInitializationRunnable extends StateInitializationRunnable<GameState>{
 
-
-    protected final S state;
-
-
-    public StateInitializationRunnable(final S state){
-        this.state=state;
-    }
-
-    @Override
-    public final void run(){
-        state.init();
-    }
+	public GameStateInitializationRunnable(final GameState gameState){
+		super(gameState);
+	}
+	
+	public int getLevelIndex(){
+		return(state.getLevelIndex());
+	}
 }

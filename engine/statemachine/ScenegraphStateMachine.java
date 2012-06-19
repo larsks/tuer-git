@@ -106,9 +106,9 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
         //creates states
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
-        final ScenegraphState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
-        final ScenegraphState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
-        final ScenegraphState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
+        final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
+        final InitializationState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
+        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
         final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager);
@@ -128,12 +128,12 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         transitionModel.addTransition(mainMenuState,loadingDisplayState,mainMenuToLoadingDisplayEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(loadingDisplayState,gameState,loadingDisplayToGameEvent,noPendingTaskCondition,Collections.<Action<ScenegraphState,String>>emptyList());
         //enqueues other tasks except the first one and in-game tasks
-        taskManager.enqueueTask(new StateInitializationRunnable(initializationState));
-        taskManager.enqueueTask(new StateInitializationRunnable(introductionState));
-        taskManager.enqueueTask(new StateInitializationRunnable(mainMenuState));
-        taskManager.enqueueTask(new StateInitializationRunnable(loadingDisplayState));
+        taskManager.enqueueTask(new StateInitializationRunnable<InitializationState>(initializationState));
+        taskManager.enqueueTask(new StateInitializationRunnable<IntroductionState>(introductionState));
+        taskManager.enqueueTask(new StateInitializationRunnable<MainMenuState>(mainMenuState));
+        taskManager.enqueueTask(new StateInitializationRunnable<LoadingDisplayState>(loadingDisplayState));
         //puts the task that loads a level into the level loading state
-        loadingDisplayState.setLevelInitializationTask(new StateInitializationRunnable(gameState));
+        loadingDisplayState.setLevelInitializationTask(new GameStateInitializationRunnable(gameState));
         //creates the scheduled tasks
         final ScheduledTask<ScenegraphState> contentRatingSystemToInitializationTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,contentRatingSystemToInitializationTriggerAction,2.0,contentRatingSystemState,StateChangeType.ENTRY);
         final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,initializationToIntroductionTriggerAction,5.0,initializationState,StateChangeType.ENTRY);

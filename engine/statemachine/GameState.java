@@ -89,12 +89,15 @@ import engine.weaponry.WeaponFactory;
  * State used during the game, the party.
  * @author Julien Gouesse
  *
+ * TODO store statistics in a way that cannot cause memory leak
+ * TODO store projectiles (mesh, bounding volume, originator, direction, initial location, initial speed, initial acceleration)
+ * TODO split the frame update into several physics updates (allow the timer to perform partial updates)
  */
 public final class GameState extends ScenegraphState{
     
     /**index of the level*/
     private int levelIndex;
-    /**Our native window, not the gl surface itself*/
+    /**Our native window, not the OpenGL surface itself*/
     private final NativeCanvas canvas;
     /**previous (before entering this state) frustum far value*/
     private double previousFrustumNear;
@@ -333,7 +336,7 @@ public final class GameState extends ScenegraphState{
                       		    wasBeingTeleported=true;
                       		    TeleporterUserData teleporterUserData=(TeleporterUserData)teleporterNode.getUserData();
                       		    Vector3 teleporterDestination=teleporterUserData.getDestination();
-                      		    //then move him
+                      		    //then moves him
                       		    playerNode.setTranslation(teleporterDestination);
                       		    //updates the previous location to avoid any problem when detecting the collisions
                                 previousPosition.set(teleporterDestination);
@@ -754,8 +757,12 @@ public final class GameState extends ScenegraphState{
 		{ioe.printStackTrace();}
     }
     
-    final void setLevelIndex(final int levelIndex){
+    protected void setLevelIndex(final int levelIndex){
         this.levelIndex=levelIndex;
+    }
+    
+    public int getLevelIndex(){
+    	return(levelIndex);
     }
     
     private final void loadSounds(){
