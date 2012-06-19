@@ -28,7 +28,7 @@ import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
-import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
@@ -49,7 +49,7 @@ public final class LoadingDisplayState extends ScenegraphState{
     
     private final String[] texturesPaths;
     
-    private final BasicText levelTextLabel;
+    private final BMText levelTextLabel;
 
     
     public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager){
@@ -110,8 +110,8 @@ public final class LoadingDisplayState extends ScenegraphState{
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));
         getRoot().attachChild(box);
-        levelTextLabel=BasicText.createDefaultTextLabel("Level","");
-        levelTextLabel.setTranslation(cam.getWidth()/2,cam.getHeight()/2,0);
+        levelTextLabel=new BMText("Level Index Text","",ScenegraphStateMachine.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        levelTextLabel.setTranslation(levelTextLabel.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(levelTextLabel);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
