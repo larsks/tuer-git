@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import com.ardor3d.bounding.BoundingBox;
@@ -42,11 +45,13 @@ import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
+import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
+import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.Renderer;
@@ -67,6 +72,8 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 import engine.data.PlayerData;
+import engine.data.ProjectileController;
+import engine.data.ProjectileData;
 import engine.data.common.Medikit;
 import engine.data.common.Teleporter;
 import engine.data.common.userdata.AmmunitionUserData;
@@ -90,8 +97,6 @@ import engine.weaponry.WeaponFactory;
  * @author Julien Gouesse
  *
  * TODO store statistics in a way that cannot cause memory leak
- * TODO store projectiles (mesh, bounding volume, originator, direction, initial location, initial speed, initial acceleration)
- * TODO split the frame update into several physics updates (allow the timer to perform partial updates)
  */
 public final class GameState extends ScenegraphState{
     
@@ -142,24 +147,29 @@ public final class GameState extends ScenegraphState{
     
     private final BinaryImporter binaryImporter;
     
+    private final Map<Node,ProjectileData> projectilesMap;
+    
+    private final Random random;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
+        random=new Random();
         this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<Node>();
+        projectilesMap=new HashMap<Node,ProjectileData>();
         teleportersList=new ArrayList<Node>();        
         teleporter=initializeTeleporter();
         medikit=initializeMedikit();
-        //initialize the factories, the build-in ammo and the build-in weapons       
+        //initializes the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=initializeAmmunitionFactory();
         weaponFactory=initializeWeaponFactory();
         readCollisionMap();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
-        // create a node that follows the camera
+        //creates a node that follows the camera
         playerNode=new CameraNode("player",cam);
-        //FIXME handle collision detection between bullet(s) and enemies here too
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
         	@Override
         	public Map.Entry<Integer,Integer> attack(){
@@ -168,9 +178,8 @@ public final class GameState extends ScenegraphState{
         		//primary hand
         		for(int index=0;index<consumedAmmunitionOrKnockCounts.getKey().intValue();index++)
         		    {if(isCurrentWeaponAmmunitionCountDisplayable())
-        		    	 {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
-        		    	  cameraNode.getChild(0).getWorldBound().getCenter();
-        		    	  //      store them for further use
+        		    	 {//creates a new projectile launched by the primary hand
+        		    	  createProjectile(cameraNode.getChild(0));
         		    	 }
         		     if(identifier!=null)
         		    	 soundManager.play(false,identifier);
@@ -178,14 +187,41 @@ public final class GameState extends ScenegraphState{
         		//secondary hand
         		for(int index=0;index<consumedAmmunitionOrKnockCounts.getValue().intValue();index++)
     		        {if(isCurrentWeaponAmmunitionCountDisplayable())
-    		    	     {//FIXME use the world bound(s) of the weapon(s) to compute the initial position(s) of the shot(s)
-    		    	      cameraNode.getChild(1).getWorldBound().getCenter();
-    		    	      //      store them for further use
+    		    	     {//creates a new projectile launched by the secondary hand
+    		        	  createProjectile(cameraNode.getChild(1));
     		    	     }
     		         if(identifier!=null)
     		    	     soundManager.play(false,identifier);
     		        }
         		return(consumedAmmunitionOrKnockCounts);
+        	}
+        	
+        	private final void createProjectile(final Spatial weaponSpatial){
+        		//uses the world bound of the primary weapon to compute the initial position of the shot
+		    	final Vector3 initialLocation=new Vector3(weaponSpatial.getWorldBound().getCenter());
+		    	final String originator=this.toString();
+		    	final double initialSpeed=350.0/1000000000.0;
+		    	final double initialAcceleration=0;
+		    	final Vector3 initialDirection=weaponSpatial.getWorldTransform().getMatrix().getColumn(2,null);
+		    	final long initialTimeInNanos=timer.getElapsedTimeInNanoseconds();
+		    	final ProjectileData projectileData=new ProjectileData(originator,initialLocation,initialSpeed,initialAcceleration,
+		    	initialDirection,initialTimeInNanos);
+		    	final Node projectileNode=new Node(projectileData.toString());
+		    	NodeHelper.setModelBound(projectileNode,BoundingBox.class);
+		    	projectileNode.setTransform(weaponSpatial.getWorldTransform());
+		    	projectileNode.setTranslation(initialLocation);        		    	  
+		    	Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
+		        MeshData projectileMeshData=new MeshData();
+		        FloatBuffer projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
+		        projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
+		        projectileMeshData.setVertexBuffer(projectileVertexBuffer);
+		        projectileMesh.setMeshData(projectileMeshData);
+		        projectileNode.attachChild(projectileMesh);
+		    	projectileNode.addController(new ProjectileController(timer,projectileData));
+		    	projectileNode.setUserData(new BoundingBox());
+		    	//stores it for a further use
+		    	projectilesMap.put(projectileNode,projectileData);
+		    	getRoot().attachChild(projectileNode);
         	}
         	
         	@Override
@@ -203,7 +239,7 @@ public final class GameState extends ScenegraphState{
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
         initializeInput(exitAction,cam,physicalLayer);
-        //initialize all text displays
+        //initializes all text displays
         ammoTextLabel=initializeAmmunitionTextLabel();
         fpsTextLabel=initializeFpsTextLabel();
         healthTextLabel=initializeHealthTextLabel();
@@ -212,9 +248,9 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void initializeCollisionSystem(final Camera cam){
-    	// configure the collision system
+    	//configures the collision system
         CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);       
-        //add a mesh with an invisible mesh data
+        //adds a mesh with an invisible mesh data
         Mesh playerMesh=new Mesh("player");
         MeshData playerMeshData=new MeshData();
         FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
@@ -222,7 +258,7 @@ public final class GameState extends ScenegraphState{
         playerMeshData.setVertexBuffer(playerVertexBuffer);
         playerMesh.setMeshData(playerMeshData);
         playerNode.attachChild(playerMesh);
-        //add a bounding box to the camera node
+        //adds a bounding box to the camera node
         NodeHelper.setModelBound(playerNode,BoundingBox.class);
         playerNode.addController(new SpatialController<Spatial>(){
         	
@@ -236,7 +272,7 @@ public final class GameState extends ScenegraphState{
         	
             @Override
             public void update(double timeSinceLastCall,Spatial caller){
-            	//update the timer
+            	//updates the timer
             	timer.update();
             	/*final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
             	final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
@@ -293,19 +329,19 @@ public final class GameState extends ScenegraphState{
                 		  collectedSubElementsCount=playerData.collect(collectibleNode);
                 		  //if it succeeds, detach the object from the root later
                 		  if(collectedSubElementsCount>0)
-                	          {//remove it from the list of collectible objects
+                	          {//removes it from the list of collectible objects
                 			   collectibleObjectsList.remove(i);
                 			   if(collectibleNode.getParent()!=null)
                 				   //detach this object from its parent so that it is no more visible
                 				   collectibleNode.getParent().detachChild(collectibleNode);
                 			   CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectibleNode.getUserData();
-                			   //display a message when the player picked up something
+                			   //displays a message when the player picked up something
                 			   subElementName=collectibleUserData.getSubElementName();
                 			   if(subElementName!=null && !subElementName.equals(""))
                 				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
                 			   else
                 			       headUpDisplayLabel.setText("picked up "+collectibleNode.getName());               	           
-                	           //play a sound if available
+                	           //plays a sound if available
                 	           if(collectibleUserData.getPickingUpSoundSampleIdentifier()!=null)
                                    getSoundManager().play(false,collectibleUserData.getPickingUpSoundSampleIdentifier());
                 	          }
@@ -351,7 +387,65 @@ public final class GameState extends ScenegraphState{
                 //if the player is not on any teleporter
                 if(!hasCollision)
                 	wasBeingTeleported=false;
-                
+                //handles the collisions between enemies and projectiles
+                ArrayList<Node> projectilesToRemove=new ArrayList<Node>();
+                for(Entry<Node,ProjectileData> projectileEntry:projectilesMap.entrySet())
+                    {final Node projectileNode=projectileEntry.getKey();
+                	 final ProjectileData projectileData=projectileEntry.getValue();
+                	 hasCollision=false;
+                	 for(Spatial child:getRoot().getChildren())
+                	     {final String childname=child.getName();
+                		  //prevents an enemy from committing a suicide
+                		  if(childname!=null&&!projectileData.getOriginator().equals(childname)&&childname.equals("a soldier"))
+                              {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
+                               BoundingPickResults results=new BoundingPickResults();
+                               PickingUtil.findPick(child,ray,results);
+                               hasCollision=results.getNumber()>0;
+                               results.clear();                                   
+                               if(hasCollision)
+                                   {//attempts to kill this enemy
+                            	    final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
+                            	    //if this enemy is not already dead
+                            	    if(soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLFORWARD.getFirstFrameIndex()&&
+                            	       soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLBACK.getFirstFrameIndex()&&
+                            	       soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLBACKSLOW.getFirstFrameIndex())
+                            	        {//stops at the last frame of the set in the supplied time frame
+                                         soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                         //selects randomly the death kind
+                                         final int deathIndex=random.nextInt(3);
+                                         final MD2FrameSet deathFrameSet;
+                                         switch(deathIndex)
+                                         {
+                                             case 0:
+                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLFORWARD;
+                                            	 break;
+                                             case 1:
+                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLBACK;
+                                            	 break;
+                                             case 2:
+                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
+                                            	 break;
+                                        	 default:
+                                        	     deathFrameSet=null;	  
+                                         }
+                                         if(deathFrameSet!=null)
+                                             {soldierKeyframeController.setSpeed(deathFrameSet.getFramesPerSecond());
+                                              soldierKeyframeController.setCurTime(deathFrameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMinTime(deathFrameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMaxTime(deathFrameSet.getLastFrameIndex());                                       	  
+                                             }
+                            	        }
+                            	    
+                                    projectilesToRemove.add(projectileNode);
+                            	    break;
+                                   }
+                              }
+                	     }
+                    }
+                for(Node projectileToRemove:projectilesToRemove)
+                    {projectilesMap.remove(projectileToRemove);
+                	 getRoot().detachChild(projectileToRemove);
+                    }
                 playerWithStateMachine.updateLogicalLayer(timer);
             }           
         });
@@ -476,10 +570,10 @@ public final class GameState extends ScenegraphState{
     
     private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
     	final Vector3 worldUp=new Vector3(0,1,0);              
-        // drag only at false to remove the need of pressing a button to move
+        //sets "drag only" to false to remove the need of pressing a button to move
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
-        //create a text node that asks the user to confirm or not the exit
+        //creates a text node that asks the user to confirm or not the exit
         final BasicText exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
         final InputTrigger exitPromptTrigger=new InputTrigger(new KeyReleasedCondition(Key.ESCAPE),new TriggerAction(){
@@ -495,9 +589,9 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the player has just been prompted
         		if(getRoot().hasChild(exitPromptTextLabel))
-				    {//remove the prompt message
+				    {//removes the prompt message
         			 getRoot().detachChild(exitPromptTextLabel);
-        			 //quit the program
+        			 //quits the program
         			 exitAction.perform(source,inputState,tpf);
 				    }
 			}
@@ -507,7 +601,7 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the player has just been prompted
         		if(getRoot().hasChild(exitPromptTextLabel))
-				    {//remove the prompt message
+				    {//removes the prompt message
         			 getRoot().detachChild(exitPromptTextLabel);
 				    }
 			}
