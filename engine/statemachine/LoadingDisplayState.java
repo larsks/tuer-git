@@ -38,11 +38,11 @@ public final class LoadingDisplayState extends ScenegraphState{
     
     
     private final TaskManagementProgressionNode taskNode;
-    
+    /**task used to initialize the game level*/
     private GameStateInitializationRunnable levelInitializationTask;
     
     private final TaskManager taskManager;
-    
+    /**box on which the textures are displayed*/
     private final Box box;
     
     private final Texture[] textures;
@@ -61,7 +61,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         getRoot().attachChild(taskNode);
         texturesPaths=new String[]{"communism.png","venimus_vidimus_vicimus.png"};
         textures=new Texture[texturesPaths.length];
-        // execute tasks
+        //executes tasks
         taskNode.addController(new SpatialController<Spatial>(){
         	
         	private boolean oneSkipDone=false;
