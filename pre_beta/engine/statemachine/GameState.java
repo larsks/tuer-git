@@ -270,7 +270,8 @@ public final class GameState extends ScenegraphState{
         	
         	//private long previouslyMeasuredElapsedTime=-1;
         	
-            @Override
+            @SuppressWarnings("unchecked")
+			@Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//updates the timer
             	timer.update();
@@ -283,7 +284,7 @@ public final class GameState extends ScenegraphState{
                 playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
                 //synchronizes the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
-                //FIXME: remove this temporary system
+                //FIXME remove this temporary system
                 double playerStartX=previousPosition.getX();
                 double playerStartZ=previousPosition.getZ();
                 double playerEndX=playerNode.getTranslation().getX();
@@ -939,7 +940,7 @@ public final class GameState extends ScenegraphState{
     	collectibleObjectsList.clear();
         // Remove all previously attached children
         getRoot().detachAllChildren();
-        //FIXME: it should not be hard-coded
+        //FIXME it should not be hard-coded
         currentCamLocation.set(115,0.5,223);
         //attach the player itself
         getRoot().attachChild(playerNode);
@@ -1015,7 +1016,8 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadWeapons(){
-	    try{final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
+    	//N.B: only show working weapons
+	    try{/*final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
             uziNode.setName("an uzi");
             uziNode.setTranslation(111.5,0.15,219);
             uziNode.setScale(0.2);
@@ -1042,7 +1044,7 @@ public final class GameState extends ScenegraphState{
             duplicatePistolNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,false));
             duplicatePistolNode.setTranslation(113.5,0.1,217);
             collectibleObjectsList.add(duplicatePistolNode);
-            getRoot().attachChild(duplicatePistolNode);
+            getRoot().attachChild(duplicatePistolNode);*/
             final Node pistol2Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
             pistol2Node.setName("a pistol (9mm)");
             //removes the bullet as it is not necessary now
@@ -1060,7 +1062,7 @@ public final class GameState extends ScenegraphState{
             pistol3Node.setUserData(new WeaponUserData(weaponFactory.getWeapon("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(pistol3Node);
             getRoot().attachChild(pistol3Node);
-            final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
+            /*final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
             laserNode.setName("a laser");
             laserNode.setTranslation(116.5,0.1,219);
             laserNode.setScale(0.02);
@@ -1084,7 +1086,7 @@ public final class GameState extends ScenegraphState{
             rocketLauncherNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
             rocketLauncherNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
             collectibleObjectsList.add(rocketLauncherNode);
-            getRoot().attachChild(rocketLauncherNode);	
+            getRoot().attachChild(rocketLauncherNode);*/
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("weapons loading failed",ioe);}
