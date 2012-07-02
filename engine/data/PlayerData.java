@@ -155,6 +155,11 @@ public class PlayerData {
 		return(result);
 	}
 	
+	/**
+	 * decreases the health
+	 * @param damage the suggested decrease of health
+	 * @return the real decrease of health
+	 */
 	public int decreaseHealth(int damage){
 		int oldHealth=health;
 		if(!invincible && damage>0)
