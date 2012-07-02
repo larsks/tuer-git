@@ -71,6 +71,8 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
+import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
 import engine.data.ProjectileData;
@@ -151,9 +153,12 @@ public final class GameState extends ScenegraphState{
     
     private final Random random;
     
+    private final HashMap<Mesh,EnemyData> enemiesDataMap;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         random=new Random();
+        enemiesDataMap=new HashMap<Mesh,EnemyData>();
         this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
@@ -390,6 +395,7 @@ public final class GameState extends ScenegraphState{
                 	wasBeingTeleported=false;
                 //handles the collisions between enemies and projectiles
                 ArrayList<Node> projectilesToRemove=new ArrayList<Node>();
+                ArrayList<EnemyData> editedEnemiesData=new ArrayList<EnemyData>();
                 for(Entry<Node,ProjectileData> projectileEntry:projectilesMap.entrySet())
                     {final Node projectileNode=projectileEntry.getKey();
                 	 final ProjectileData projectileData=projectileEntry.getValue();
@@ -404,45 +410,82 @@ public final class GameState extends ScenegraphState{
                                hasCollision=results.getNumber()>0;
                                results.clear();                                   
                                if(hasCollision)
-                                   {//attempts to kill this enemy
+                                   {/**
+                                     * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
+                                     *      As a first step, it should be very limited. On the long term, it will have to be homogeneous with the 
+                                     *      data model used for the player so that any enemy can behave like a bot in the arena mode
+                                     *      - Create another controller to modify the view depending on the changes in the data model
+                                     */
+                            	    //attempts to kill this enemy
+                            	    final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
+                            	    editedEnemiesData.add(soldierData);
                             	    final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
-                            	    //if this enemy is not already dead
-                            	    if(soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLFORWARD.getFirstFrameIndex()&&
-                            	       soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLBACK.getFirstFrameIndex()&&
-                            	       soldierKeyframeController.getMinTime()!=MD2FrameSet.DEATH_FALLBACKSLOW.getFirstFrameIndex())
-                            	        {//stops at the last frame of the set in the supplied time frame
+                            	    if(soldierData.isAlive())
+                            	    	{soldierData.decreaseHealth(25);
+                            	         //stops at the last frame of the set in the supplied time frame
                                          soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
                                          //selects randomly the death kind
-                                         final int deathIndex=random.nextInt(3);
-                                         final MD2FrameSet deathFrameSet;
-                                         switch(deathIndex)
+                                         final int localFrameIndex;
+                                         if(soldierData.isAlive())
+                                             localFrameIndex=3+random.nextInt(3);
+                             	         else
+                             	             localFrameIndex=random.nextInt(3);
+                                         final MD2FrameSet frameSet;
+                                         switch(localFrameIndex)
                                          {
                                              case 0:
-                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLFORWARD;
-                                            	 break;
+                                       	         frameSet=MD2FrameSet.DEATH_FALLFORWARD;
+                                       	         break;
                                              case 1:
-                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLBACK;
-                                            	 break;
+                                       	         frameSet=MD2FrameSet.DEATH_FALLBACK;
+                                       	         break;
                                              case 2:
-                                            	 deathFrameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
-                                            	 break;
-                                        	 default:
-                                        	     deathFrameSet=null;	  
+                                       	         frameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
+                                       	         break;
+                                             case 3:
+                                                 frameSet=MD2FrameSet.PAIN_A;
+                                                 break;
+                                             case 4:
+                                                 frameSet=MD2FrameSet.PAIN_B;
+                                                 break;
+                                             case 5:
+                                                 frameSet=MD2FrameSet.PAIN_C;
+                                                 break;
+                                   	         default:
+                                   	             frameSet=null;	  
                                          }
-                                         if(deathFrameSet!=null)
-                                             {soldierKeyframeController.setSpeed(deathFrameSet.getFramesPerSecond());
-                                              soldierKeyframeController.setCurTime(deathFrameSet.getFirstFrameIndex());
-                                              soldierKeyframeController.setMinTime(deathFrameSet.getFirstFrameIndex());
-                                              soldierKeyframeController.setMaxTime(deathFrameSet.getLastFrameIndex());                                       	  
+                                         if(frameSet!=null)
+                                             {soldierKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                              soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
                                              }
-                            	        }
-                            	    
+                                        }
                                     projectilesToRemove.add(projectileNode);
                             	    break;
                                    }
                               }
                 	     }
                     }
+                //FIXME move this logic into a state machine
+                for(Entry<Mesh,EnemyData> enemyEntry:enemiesDataMap.entrySet()){
+                	{EnemyData enemyData=enemyEntry.getValue();
+                	 if(!editedEnemiesData.contains(enemyData)&&enemyData.isAlive())
+                	     {final Mesh enemyMesh=enemyEntry.getKey();
+                		  final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyMesh.getController(0);
+                		  if(enemyKeyframeController.isRepeatTypeClamp()&&
+                			 enemyKeyframeController.getMaxTime()!=MD2FrameSet.STAND.getLastFrameIndex()&&
+                			 enemyKeyframeController.getCurTime()>enemyKeyframeController.getMaxTime())
+                			  {enemyKeyframeController.setRepeatType(RepeatType.WRAP);
+                			   //uses the "stand" animation
+                			   enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                			   enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			   enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			   enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                			  }
+                	     }
+                	}
+                }
                 for(Node projectileToRemove:projectilesToRemove)
                     {projectilesMap.remove(projectileToRemove);
                 	 getRoot().detachChild(projectileToRemove);
@@ -1115,9 +1158,12 @@ public final class GameState extends ScenegraphState{
             soldierKeyframeController.setRepeatType(RepeatType.WRAP);
             //uses the "stand" animation
             soldierKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+            soldierKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
             soldierKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
             soldierKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
             getRoot().attachChild(soldierNode);
+            final EnemyData soldierData=new EnemyData();
+            enemiesDataMap.put(soldierNode,soldierData);
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("enemies loading failed",ioe);}
