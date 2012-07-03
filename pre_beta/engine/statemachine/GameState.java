@@ -155,6 +155,10 @@ public final class GameState extends ScenegraphState{
     
     private final HashMap<Mesh,EnemyData> enemiesDataMap;
     
+    private static final String pain1soundSamplePath = "/sounds/pain1.ogg";
+    
+    private static String pain1soundSampleIdentifier = null;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         random=new Random();
@@ -460,6 +464,8 @@ public final class GameState extends ScenegraphState{
                                               soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
                                               soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
                                              }
+                                         //plays a sound if the enemy is not dead
+                                         getSoundManager().play(false,pain1soundSampleIdentifier);
                                         }
                                     projectilesToRemove.add(projectileNode);
                             	    break;
@@ -903,8 +909,10 @@ public final class GameState extends ScenegraphState{
     	return(levelIndex);
     }
     
+    /**
+     * loads the sound samples
+     */
     private final void loadSounds(){
-    	//loads the sound samples
         final String teleporterSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
   	    if(teleporterSoundSamplePath!=null)
   	        {final URL teleporterSoundSampleUrl=GameState.class.getResource(teleporterSoundSamplePath);
@@ -957,6 +965,11 @@ public final class GameState extends ScenegraphState{
         				   weapon.setReloadSoundSampleIdentifier(reloadSoundSampleIdentifier);
         		      }
         	     }
+            }
+        if(pain1soundSamplePath!=null&&pain1soundSampleIdentifier==null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain1soundSamplePath);
+        	 if(pain1SoundSampleUrl!=null)
+        	     pain1soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
             }
     }
     
