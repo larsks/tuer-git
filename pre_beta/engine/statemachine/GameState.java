@@ -483,6 +483,12 @@ public final class GameState extends ScenegraphState{
                                               soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
                                               soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
                                               soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                              final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
+                                              final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
+                                              soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                              soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                              soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                              soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
                                              }
                                          //plays a sound if the enemy is not dead
                                          if(soldierData.getHealth()<=17)
@@ -513,7 +519,9 @@ public final class GameState extends ScenegraphState{
                 	{EnemyData enemyData=enemyEntry.getValue();
                 	 if(!editedEnemiesData.contains(enemyData)&&enemyData.isAlive())
                 	     {final Mesh enemyMesh=enemyEntry.getKey();
+                	      final Mesh enemyWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(enemyMesh)+1));
                 		  final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyMesh.getController(0);
+                		  final KeyframeController<Mesh> enemyWeaponKeyframeController=(KeyframeController<Mesh>)enemyWeaponMesh.getController(0);
                 		  if(enemyKeyframeController.isRepeatTypeClamp()&&
                 			 enemyKeyframeController.getMaxTime()!=MD2FrameSet.STAND.getLastFrameIndex()&&
                 			 enemyKeyframeController.getCurTime()>enemyKeyframeController.getMaxTime())
@@ -523,6 +531,12 @@ public final class GameState extends ScenegraphState{
                 			   enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
                 			   enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
                 			   enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                			   
+                			   enemyWeaponKeyframeController.setRepeatType(RepeatType.WRAP);
+                			   enemyWeaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                			   enemyWeaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			   enemyWeaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			   enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
                 			  }
                 	     }
                 	}
@@ -1237,6 +1251,20 @@ public final class GameState extends ScenegraphState{
             getRoot().attachChild(soldierNode);
             final EnemyData soldierData=new EnemyData();
             enemiesDataMap.put(soldierNode,soldierData);
+            final Mesh weaponNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
+            weaponNode.setName("soldier's weapon");
+            weaponNode.setTranslation(118.5,0.4,219);
+            weaponNode.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+            weaponNode.setScale(0.015);            
+            final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
+            //loops on all frames of the set in the supplied time frame
+            weaponKeyframeController.setRepeatType(RepeatType.WRAP);
+            //uses the "stand" animation
+            weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+            weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+            weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+            weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+            getRoot().attachChild(weaponNode);
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("enemies loading failed",ioe);}
