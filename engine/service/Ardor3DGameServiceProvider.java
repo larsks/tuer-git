@@ -219,6 +219,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
      */
     private final void init(){
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
+        //disables vertical synchronization for tests
+        canvas.setVSyncEnabled(false);
         //creates a ZBuffer to display pixels closest to the camera above farther ones.
         final ZBufferState buf=new ZBufferState();
         buf.setEnabled(true);
