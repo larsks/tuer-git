@@ -445,7 +445,6 @@
 			<classpath refid="project.class.path"/>
 		    <jvmarg value="-Xmx256m"/>
 		    <jvmarg value="-XX:MaxDirectMemorySize=128M"/>
-			<jvmarg value="-Djogl.enable.ANGLE=false"/>
 	    </java>
 	</target>
 </project>
