@@ -69,7 +69,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-            final TriggerAction serviceExitAction,final Runnable launchRunnable,
+            final TriggerAction serviceExitAction,final TriggerAction toggleScreenModeAction,
+            final Runnable launchRunnable,
             final Runnable uninstallRunnable,
             final String creditsContent,final String controlsContent){
         super(ScenegraphState.class,String.class,new ScenegraphState());
@@ -111,7 +112,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
         final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager);
-        final GameState gameState=new GameState(canvas,physicalLayer,exitAction,soundManager,taskManager);
+        final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager);
         //adds the states and their actions to the state machine
         //FIXME put all cleanup code into the entry action of the initial state
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
