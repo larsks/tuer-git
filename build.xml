@@ -15,7 +15,7 @@
 
 <!-- ===================================================================== -->
 <!-- TUER                                                                  -->
-<!-- Ant 1.5 build file                                                    -->
+<!-- Ant 1.8 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
@@ -445,6 +445,7 @@
 			<classpath refid="project.class.path"/>
 		    <jvmarg value="-Xmx256m"/>
 		    <jvmarg value="-XX:MaxDirectMemorySize=128M"/>
+			<jvmarg value="-Djogl.enable.ANGLE=false"/>
 	    </java>
 	</target>
 </project>
