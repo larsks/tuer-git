@@ -179,7 +179,7 @@ public final class GameState extends ScenegraphState{
     
     private static String pain6soundSampleIdentifier = null;
     
-    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final SoundManager soundManager,final TaskManager taskManager){
+    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         random=new Random();
         enemiesDataMap=new HashMap<Mesh,EnemyData>();
@@ -267,7 +267,7 @@ public final class GameState extends ScenegraphState{
         playerWithStateMachine=new LogicalPlayer(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
-        initializeInput(exitAction,cam,physicalLayer);
+        initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
         //initializes all text displays
         ammoTextLabel=initializeAmmunitionTextLabel();
         fpsTextLabel=initializeFpsTextLabel();
@@ -667,7 +667,7 @@ public final class GameState extends ScenegraphState{
         }
     }
     
-    private final void initializeInput(final TriggerAction exitAction,final Camera cam,final PhysicalLayer physicalLayer){
+    private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	final Vector3 worldUp=new Vector3(0,1,0);              
         //sets "drag only" to false to remove the need of pressing a button to move
         ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
@@ -801,8 +801,9 @@ public final class GameState extends ScenegraphState{
         final InputTrigger stopRunningRightTrigger=new InputTrigger(new KeyReleasedCondition(Key.RSHIFT),stopRunningAction);
         final InputTrigger startRunningLeftTrigger=new InputTrigger(new KeyPressedCondition(Key.LSHIFT),startRunningAction);
         final InputTrigger stopRunningLeftTrigger=new InputTrigger(new KeyReleasedCondition(Key.LSHIFT),stopRunningAction);
-        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);       
-        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
+        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);
+        final InputTrigger toggleScreenModeTrigger=new InputTrigger(new KeyReleasedCondition(Key.F11),toggleScreenModeAction);
+        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,toggleScreenModeTrigger,
         		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger,reloadWeaponTrigger,
         		reloadWeaponMouseButtonTrigger,startAttackTrigger,startAttackMouseButtonTrigger,pauseTrigger,crouchTrigger,
         		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,startRunningLeftTrigger,

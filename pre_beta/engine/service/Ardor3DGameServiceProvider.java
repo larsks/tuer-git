@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+
+import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
@@ -50,6 +52,8 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
+import com.jogamp.newt.opengl.GLWindow;
+
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.renderer.ReliableContextCapabilities;
@@ -108,7 +112,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
              System.setProperty("sun.java2d.d3d","false");
              // Disables ANGLE (Direct3D OpenGL-ES 2.0 emulation)
              System.setProperty("jogl.enable.ANGLE","false");
-             
             }    	
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
@@ -148,6 +151,20 @@ public final class Ardor3DGameServiceProvider implements Scene{
 		public void run() {
     		DesktopIntegration.createUninstallDesktopShortcut(filenameWithoutExtension,url);
 		}
+    }
+    
+    private static final class ToggleScreenModeAction implements TriggerAction{
+
+		@Override
+		@MainThread
+		public void perform(Canvas source, TwoInputStates inputStates, double tpf) {
+			final JoglNewtWindow joglNewtWindow=(JoglNewtWindow)source;
+			final GLWindow glWindow=joglNewtWindow.getNewtWindow();
+			final boolean fullscreenOn=glWindow.isFullscreen();
+			glWindow.setFullscreen(!fullscreenOn);
+			glWindow.setUndecorated(!fullscreenOn);
+		}
+    	
     }
     
     /**
@@ -256,7 +273,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         final String creditsContent=getTextFileContent("/credits.txt");
         final String controlsContent=getTextFileContent("/controls.txt");
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
+        final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,toggleScreenModeAction,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
