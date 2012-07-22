@@ -56,23 +56,23 @@ public final class IntroductionState extends ScenegraphState{
         box=new Box("Introduction Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-75));
-        //configure the spread effect
+        //configures the spread effect
         final Point spreadCenter=new Point(205,265);     
         HashMap<Color,Color> colorSubstitutionTable=new HashMap<Color,Color>();
         colorSubstitutionTable.put(Color.BLUE,Color.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
-        //set a controller that modifies the image
+        //sets a controller that modifies the image
         /**
          * TODO: replace this controller by another one that simply switches the textures because the current
          * one modifies the unique texture at runtime which is very slow on Intel graphics cards and on-board chips
          * */
         box.addController(new CircularSpreadTextureUpdaterController(textureFilePath,equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
-        //set a controller that moves the image
+        //sets a controller that moves the image
         LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
         getRoot().attachChild(box);       
-        // show the game title as text
+        //shows the game title as text
         final BMText textNode=new BMText("gameTitleNode","TUER",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(6);
         textNode.setTextColor(ColorRGBA.BLACK);
@@ -81,11 +81,11 @@ public final class IntroductionState extends ScenegraphState{
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(8));
         textNode.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
         getRoot().attachChild(textNode);
-        // add the triggers
+        //adds the triggers
         final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,toMainMenuTrigger};
-        // bind the physical layer to the logical layer
+        //binds the physical layer to the logical layer
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
