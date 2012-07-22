@@ -101,7 +101,15 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final String loadingDisplayToGameEvent=getTransitionEvent(LoadingDisplayState.class,GameState.class);
         //creates actions allowing to go to the next state by pressing a key
         final TransitionTriggerAction<ScenegraphState,String> contentRatingSystemToInitializationTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,contentRatingSystemToInitializationEvent,renderContext);
+        //the initialization state must be left only once there is no pending task
         final TransitionTriggerAction<ScenegraphState,String> initializationToIntroductionTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,initializationToIntroductionEvent,renderContext);
+        final Runnable initializationToIntroductionRunnable= new Runnable(){
+        	@Override
+        	public void run(){
+        		final ScheduledTask<ScenegraphState> goToIntroductionWhenNoPendingTask = new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,initializationToIntroductionTriggerAction,0);
+        		scheduler.addScheduledTask(goToIntroductionWhenNoPendingTask);
+        	}
+        };
         final TransitionTriggerAction<ScenegraphState,String> introductionToMainMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,introductionToMainMenuEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToLoadingDisplayEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
@@ -137,7 +145,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         loadingDisplayState.setLevelInitializationTask(new GameStateInitializationRunnable(gameState));
         //creates the scheduled tasks
         final ScheduledTask<ScenegraphState> contentRatingSystemToInitializationTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,contentRatingSystemToInitializationTriggerAction,2.0,contentRatingSystemState,StateChangeType.ENTRY);
-        final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,initializationToIntroductionTriggerAction,5.0,initializationState,StateChangeType.ENTRY);
+        final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,initializationToIntroductionRunnable,5.0,initializationState,StateChangeType.ENTRY);
         final ScheduledTask<ScenegraphState> introductionToMainMenuTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,introductionToMainMenuTriggerAction,17.0,introductionState,StateChangeType.ENTRY);
         //adds the scheduled tasks to the scheduler
         scheduler.addScheduledTask(contentRatingSystemToInitializationTask);

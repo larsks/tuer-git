@@ -13,8 +13,6 @@
 */
 package engine.statemachine;
 
-import se.hiflyer.fettle.Arguments;
-import se.hiflyer.fettle.Condition;
 import engine.taskmanagement.TaskManager;
 
 /**
@@ -23,7 +21,7 @@ import engine.taskmanagement.TaskManager;
  * @author Julien Gouesse
  *
  */
-public class NoPendingTaskCondition implements Condition {
+public class NoPendingTaskCondition extends ScheduledTaskCondition<ScenegraphState>{
 
     protected final TaskManager taskManager;
 
@@ -32,8 +30,7 @@ public class NoPendingTaskCondition implements Condition {
     }
 
     @Override
-    public boolean isSatisfied(Arguments args){
+    public boolean isSatisfied(final ScenegraphState previousState,final ScenegraphState currentState){
         return taskManager.getTaskCount()==0;
     }
-    
 }
