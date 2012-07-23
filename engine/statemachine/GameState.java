@@ -211,7 +211,7 @@ public final class GameState extends ScenegraphState{
         		    	  createProjectile(cameraNode.getChild(0));
         		    	 }
         		     if(identifier!=null)
-        		    	 soundManager.play(false,identifier);
+        		    	 soundManager.play(false,false,identifier);
         		    }
         		//secondary hand
         		for(int index=0;index<consumedAmmunitionOrKnockCounts.getValue().intValue();index++)
@@ -220,7 +220,7 @@ public final class GameState extends ScenegraphState{
     		        	  createProjectile(cameraNode.getChild(1));
     		    	     }
     		         if(identifier!=null)
-    		    	     soundManager.play(false,identifier);
+    		    	     soundManager.play(false,false,identifier);
     		        }
         		return(consumedAmmunitionOrKnockCounts);
         	}
@@ -259,7 +259,7 @@ public final class GameState extends ScenegraphState{
         		if(reloadedAmmoCount>0)
     		        {final String identifier=getCurrentWeaponReloadSoundSampleIdentifier();
     		         if(identifier!=null)
-   			             soundManager.play(false,identifier);
+   			             soundManager.play(false,false,identifier);
     		        }
         		return(reloadedAmmoCount);
         	}
@@ -373,7 +373,7 @@ public final class GameState extends ScenegraphState{
                 			       headUpDisplayLabel.setText("picked up "+collectibleNode.getName());               	           
                 	           //plays a sound if available
                 	           if(collectibleUserData.getPickingUpSoundSampleIdentifier()!=null)
-                                   getSoundManager().play(false,collectibleUserData.getPickingUpSoundSampleIdentifier());
+                                   getSoundManager().play(false,false,collectibleUserData.getPickingUpSoundSampleIdentifier());
                 	          }
                 	     }
                 	 collisionResults.clear();
@@ -410,7 +410,7 @@ public final class GameState extends ScenegraphState{
                                 cam.setLocation(teleporterDestination);
                                 //play a sound if available
                  	            if(teleporterUserData.getPickingUpSoundSampleIdentifier()!=null)
-                                    getSoundManager().play(false,teleporterUserData.getPickingUpSoundSampleIdentifier());
+                                    getSoundManager().play(false,false,teleporterUserData.getPickingUpSoundSampleIdentifier());
                 	           }
                 	      }                          
                     }
@@ -492,21 +492,21 @@ public final class GameState extends ScenegraphState{
                                              }
                                          //plays a sound if the enemy is not dead
                                          if(soldierData.getHealth()<=17)
-                                             getSoundManager().play(false,pain6soundSampleIdentifier);
+                                             getSoundManager().play(false,false,pain6soundSampleIdentifier);
                                          else
                                         	 if(soldierData.getHealth()<=33)
-                                                 getSoundManager().play(false,pain5soundSampleIdentifier);
+                                                 getSoundManager().play(false,false,pain5soundSampleIdentifier);
                                         	 else
                                         		 if(soldierData.getHealth()<=50)
-                                                     getSoundManager().play(false,pain4soundSampleIdentifier);
+                                                     getSoundManager().play(false,false,pain4soundSampleIdentifier);
                                         		 else
                                         			 if(soldierData.getHealth()<=67)
-                                                         getSoundManager().play(false,pain3soundSampleIdentifier);
+                                                         getSoundManager().play(false,false,pain3soundSampleIdentifier);
                                     	             else
                                     	            	 if(soldierData.getHealth()<=83)
-                                                             getSoundManager().play(false,pain2soundSampleIdentifier);
+                                                             getSoundManager().play(false,false,pain2soundSampleIdentifier);
                                                          else
-                                                        	 getSoundManager().play(false,pain1soundSampleIdentifier);
+                                                        	 getSoundManager().play(false,false,pain1soundSampleIdentifier);
                                         }
                                     projectilesToRemove.add(projectileNode);
                             	    break;

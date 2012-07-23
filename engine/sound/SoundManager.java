@@ -77,20 +77,18 @@ public final class SoundManager{
         return(identifier);
     }   
     
-    public final void play(final boolean backgroundMusic,final String identifier,float x,float y,float z){
+    public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier,float x,float y,float z){
     	if(soundSystem!=null)
-    	    {final boolean priority,toLoop;
+    	    {final boolean priority;
              final int attenuationModel;
              final float rollOffFactor;
     		 if(backgroundMusic)
                  {priority=true;
-                  toLoop=true;
                   attenuationModel=SoundSystemConfig.ATTENUATION_NONE;
                   rollOffFactor=0;
                  }
              else
                  {priority=false;
-                  toLoop=false;
                   attenuationModel=SoundSystemConfig.ATTENUATION_ROLLOFF;
                   rollOffFactor=SoundSystemConfig.getDefaultRolloff();
                  }
@@ -98,8 +96,8 @@ public final class SoundManager{
     	    }
     }
     
-    public final void play(final boolean backgroundMusic,final String identifier){
-    	play(backgroundMusic,identifier,0,0,0);
+    public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier){
+    	play(backgroundMusic,toLoop,identifier,0,0,0);
     }
     
     public final void stop(){

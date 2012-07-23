@@ -113,7 +113,7 @@ public final class IntroductionState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {if(soundIdentifier!=null)
-                      getSoundManager().play(true,soundIdentifier);
+                      getSoundManager().play(true,false,soundIdentifier);
                  }
              else
                  {if(soundIdentifier!=null)
