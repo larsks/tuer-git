@@ -242,13 +242,18 @@ public final class Ardor3DGameServiceProvider implements Scene{
              canvas.draw(null);
              //Thread.yield();
             }
-        //drives the context current to perform a final cleanup
-        canvas.getCanvasRenderer().makeCurrentContext();
-
-        //done, does the cleanup
-        ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
-        //necessary for Java Web Start
-        System.exit(0);
+        try{
+        	//drives the context current to perform a final cleanup
+            canvas.getCanvasRenderer().makeCurrentContext();
+            //done, does the cleanup
+            ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
+        }
+        finally
+        {//necessary for Java Web Start
+         System.exit(0);
+        }
+        
+        
     }
 
     /**
