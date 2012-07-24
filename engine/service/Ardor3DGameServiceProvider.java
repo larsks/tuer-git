@@ -211,6 +211,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
                     }
                 return(realCaps);
         	}
+        	
+        	@Override
+        	public void makeCurrentContext(){}
+        	
+        	@Override
+        	public void releaseCurrentContext(){}
         };
         //creates a canvas      
         canvas=new JoglNewtWindow(canvasRenderer,settings);
@@ -244,7 +250,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         try{
         	//drives the context current to perform a final cleanup
-            canvas.getCanvasRenderer().makeCurrentContext();
+            //canvas.getCanvasRenderer().makeCurrentContext();
             //done, does the cleanup
             ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
         }
@@ -309,7 +315,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final boolean isOpen=!canvas.isClosing();
         if(isOpen)
             {//draws the root and all its children
-             root.onDraw(renderer);
+             renderer.draw(root);
              //executes all update tasks queued by the controllers
              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.UPDATE).execute(renderer);
              //executes all rendering tasks queued by the controllers
