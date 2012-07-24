@@ -228,7 +228,7 @@ public final class ProjectSet extends JFPSMUserObject{
     }
     
     /**
-     * load a project from a file
+     * loads a project from a file
      * @param projectFile project file
      * @return the newly loaded project or the previous one if it had been already loaded
      */
@@ -237,73 +237,87 @@ public final class ProjectSet extends JFPSMUserObject{
         Project project=null;
         if(projectFile.getName().endsWith(Project.getFileExtension()))
             {int nameLength=fullname.length();
-             String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());     
-             try{ZipFile zipFile=new ZipFile(projectFile);
-                 Enumeration<? extends ZipEntry> entries=zipFile.entries();
+             String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());
+             ZipFile zipFile=null;
+             try{zipFile=new ZipFile(projectFile);
                  ZipEntry entry;
-                 BufferedImage imageMap;
-                 String[] path;
-                 int textureIndex;
-                 String textureIndexString;
-                 while(entries.hasMoreElements())
-                     {entry=entries.nextElement();
-                      if(entry.getName().equals("project.xml"))
-                          {CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry));
-                           project=(Project)decoder.readObject();
-                           decoder.close();
-                          }
-                      else
-                          {if(!entry.isDirectory())
-                               {path=entry.getName().split("/");
-                                if(path.length==4&&path[0].equals("levelset"))
-                                    {//find the floor that should contain this map
-                                     for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
-                             	         for(Floor floor:floorSet.getFloorsList())
-                                             if(path[1].equals(floorSet.getName())&&path[2].equals(floor.getName()))
-                                                 {imageMap=ImageIO.read(zipFile.getInputStream(entry));
-                                                  for(MapType type:MapType.values())
-                                                      if(path[3].equals(type.getFilename()))
-                                                          {floor.getMap(type).setImage(imageMap);
-                                                           break;
-                                                          }                                              
-                                                  break;
-                                                 }
-                                    }
-                                else
-                                    if(path.length==2&&path[0].equals("tileset"))
-                                        {//find the tile that should contain this file
-                                         for(Tile tile:project.getTileSet().getTilesList())
-                                             if(path[1].startsWith(tile.getName())&&path[1].endsWith(".png"))
-                                                 {textureIndex=-1;
-                                                  textureIndexString=path[1].substring(tile.getName().length(),path[1].lastIndexOf(".png"));
-                                                  try{textureIndex=Integer.parseInt(textureIndexString);}
-                                                  catch(NumberFormatException nfe)
-                                                  {//ignore this exception as it might happen and it is not a problem                                                  
+                 //at first, gets the file project.xml to build the project object as soon as possible
+                 entry=zipFile.getEntry("project.xml");
+                 if(entry!=null)
+                     {CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry));
+                      Object decodedObject=decoder.readObject();
+                      decoder.close();
+                      if(decodedObject!=null&&decodedObject instanceof Project)
+                          {project=(Project)decodedObject;
+                           Enumeration<? extends ZipEntry> entries=zipFile.entries();
+                           BufferedImage imageMap;
+                           String[] path;
+                           int textureIndex;
+                           String textureIndexString;
+                           while(entries.hasMoreElements())
+                               {entry=entries.nextElement();
+                                if(!entry.getName().equals("project.xml"))
+                                    {if(!entry.isDirectory())
+                                         {path=entry.getName().split("/");
+                                          if(path.length==4&&path[0].equals("levelset"))
+                                              {//finds the floor that should contain this map
+                                               for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
+                                      	           for(Floor floor:floorSet.getFloorsList())
+                                                       if(path[1].equals(floorSet.getName())&&path[2].equals(floor.getName()))
+                                                           {imageMap=ImageIO.read(zipFile.getInputStream(entry));
+                                                            for(MapType type:MapType.values())
+                                                                if(path[3].equals(type.getFilename()))
+                                                                    {floor.getMap(type).setImage(imageMap);
+                                                                     break;
+                                                                    }
+                                                            break;
+                                                           }
+                                              }
+                                          else
+                                              if(path.length==2&&path[0].equals("tileset"))
+                                                  {//find the tile that should contain this file
+                                                   for(Tile tile:project.getTileSet().getTilesList())
+                                                       if(path[1].startsWith(tile.getName())&&path[1].endsWith(".png"))
+                                                           {textureIndex=-1;
+                                                            textureIndexString=path[1].substring(tile.getName().length(),path[1].lastIndexOf(".png"));
+                                                            try{textureIndex=Integer.parseInt(textureIndexString);}
+                                                            catch(NumberFormatException nfe)
+                                                            {//ignore this exception as it might happen and it is not a problem                                                  
+                                                            }
+                                                            if(textureIndex!=-1)
+                                                     	        tile.setTexture(textureIndex,ImageIO.read(zipFile.getInputStream(entry)));                     
+                                                           }
                                                   }
-                                                  if(textureIndex!=-1)
-                                            	      tile.setTexture(textureIndex,ImageIO.read(zipFile.getInputStream(entry)));                     
-                                                 }
+                                         }
+                                    }
+                               }
+                           //if the project was already loaded, return 
+                           //the project previously created with this name
+                           if(!addProject(project))
+                               {for(Project existingProject:projectsList)
+                                    if(existingProject.getName().equals(projectName))
+                                        {//FIXME: handle conflicts
+                                         project=existingProject;
                                         }
                                }
                           }
-                     }
-                 zipFile.close();
-                 if(project!=null)
-                     {//if the project was already loaded, return 
-                      //the project previously created with this name
-                      if(!addProject(project))
-                          {for(Project existingProject:projectsList)
-                               if(existingProject.getName().equals(projectName))
-                                   {//FIXME: handle conflicts
-                                    project=existingProject;
-                                   }
-                          }
+                      else
+                    	  throw new IllegalArgumentException("The file named \"project.xml\" does not contain a valid project!");
                      }
                  else
                      throw new IllegalArgumentException("The project file "+fullname+" does not contain any file named \"project.xml\"!");
+                 
+                 
                 } 
              catch(Throwable throwable)
-             {throw new RuntimeException("The project "+projectName+" cannot be loaded!",throwable);}            
+             {throw new RuntimeException("The project "+projectName+" cannot be loaded!",throwable);}
+             finally
+             {if(zipFile!=null)
+				  try{zipFile.close();}
+                  catch (IOException ioe) 
+				  {//ignores this exception
+				  }
+             }
             }
         else
             throw new IllegalArgumentException("The file "+fullname+" is not a JFPSM project file!");
