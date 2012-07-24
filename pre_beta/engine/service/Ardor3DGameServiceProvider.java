@@ -113,7 +113,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
              // Disables Direct3D under Windows in order to avoid conflicts with OpenGL
              System.setProperty("sun.java2d.d3d","false");
              // Disables ANGLE (Direct3D OpenGL-ES 2.0 emulation)
-             System.setProperty("jogl.enable.ANGLE","false");
+             //System.setProperty("jogl.enable.ANGLE","false");
             }    	
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
