@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-
+import java.util.concurrent.Callable;
 import javax.imageio.ImageIO;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
@@ -54,6 +54,7 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
@@ -66,12 +67,13 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.util.GameTaskQueue;
+import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -515,7 +517,7 @@ public final class GameState extends ScenegraphState{
                 	     }
                     }
                 //FIXME move this logic into a state machine
-                for(Entry<Mesh,EnemyData> enemyEntry:enemiesDataMap.entrySet()){
+                for(Entry<Mesh,EnemyData> enemyEntry:enemiesDataMap.entrySet())
                 	{EnemyData enemyData=enemyEntry.getValue();
                 	 if(!editedEnemiesData.contains(enemyData)&&enemyData.isAlive())
                 	     {final Mesh enemyMesh=enemyEntry.getKey();
@@ -540,7 +542,6 @@ public final class GameState extends ScenegraphState{
                 			  }
                 	     }
                 	}
-                }
                 for(Node projectileToRemove:projectilesToRemove)
                     {projectilesMap.remove(projectileToRemove);
                 	 getRoot().detachChild(projectileToRemove);
@@ -1050,7 +1051,6 @@ public final class GameState extends ScenegraphState{
     
     private final void loadLevelModel(){
     	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
-            NodeHelper.setBackCullState(levelNode);
             getRoot().attachChild(levelNode);
     	   }
     	catch(IOException ioe)
@@ -1273,10 +1273,15 @@ public final class GameState extends ScenegraphState{
     
     private final void preloadTextures(){
     	final CanvasRenderer canvasRenderer=canvas.getCanvasRenderer();
-    	final Renderer renderer=canvasRenderer.getRenderer();   	
-    	canvasRenderer.makeCurrentContext();
-    	TextureManager.preloadCache(renderer);
-    	canvasRenderer.releaseCurrentContext();
+    	final RenderContext renderContext=canvasRenderer.getRenderContext();
+    	final Renderer renderer=canvasRenderer.getRenderer();
+    	GameTaskQueueManager.getManager(renderContext).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				TextureManager.preloadCache(renderer);
+				return null;
+			}
+    	});
     }
     
     @Override
