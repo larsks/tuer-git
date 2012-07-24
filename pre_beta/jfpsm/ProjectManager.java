@@ -282,7 +282,7 @@ public final class ProjectManager extends JPanel{
 	}
 	
 	/**
-	 * get project names
+	 * Gets the project names as they are in the graphical user interface
 	 * @return all project names in the tree
 	 */
 	private final ArrayList<String> getAllProjectNames(){
@@ -298,7 +298,7 @@ public final class ProjectManager extends JPanel{
     }
     
     /**
-     * save all projects of the current projects set
+     * saves all projects of the current projects set
      */
     final void saveCurrentWorkspace(){
     	//check if the tree has been fully created
@@ -330,7 +330,7 @@ public final class ProjectManager extends JPanel{
     }
     
     /**
-     * load existing projects, skips already loaded projects
+     * loads existing projects, skips already loaded projects
      */
     final void loadExistingProjects(){
         ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)projectsTree.getModel().getRoot()).getUserObject();
@@ -353,21 +353,21 @@ public final class ProjectManager extends JPanel{
                      }
              //if it is in the file system          
              if(projectFile!=null)
-                 //load it into the workspace
+                 //loads it into the workspace
                  project=workspace.loadProject(projectFile);
              else
-                 {//create the project
+                 {//creates the project
                   project=new Project(name);
-                  //add it into the workspace
+                  //adds it into the workspace
                   workspace.addProject(project);
                  }
              //now the project is the workspace
-             //put it into the tree
+             //puts it into the tree
              DefaultTreeModel treeModel=(DefaultTreeModel)projectsTree.getModel();
              DefaultMutableTreeNode projectsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
              DefaultMutableTreeNode projectRootNode=new DefaultMutableTreeNode(project);
              treeModel.insertNodeInto(projectRootNode,projectsRoot,projectsRoot.getChildCount());
-             //add the level set
+             //adds the level set
              LevelSet levelSet=project.getLevelSet();
              DefaultMutableTreeNode levelSetNode=new DefaultMutableTreeNode(levelSet);
              treeModel.insertNodeInto(levelSetNode,projectRootNode,projectRootNode.getChildCount());
@@ -375,11 +375,11 @@ public final class ProjectManager extends JPanel{
              for(FloorSet floorSet:levelSet.getFloorSetsList())
                  {floorSetRootNode=new DefaultMutableTreeNode(floorSet);
                   treeModel.insertNodeInto(floorSetRootNode,levelSetNode,levelSetNode.getChildCount());
-                  //add the floors
+                  //adds the floors
                   for(Floor floor:floorSet.getFloorsList())
                       {DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
                        treeModel.insertNodeInto(floorNode,floorSetRootNode,floorSetRootNode.getChildCount());
-                       //add each node of a map
+                       //adds each node of a map
                        DefaultMutableTreeNode mapNode;
                        for(MapType type:MapType.values())
                            {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
@@ -396,11 +396,11 @@ public final class ProjectManager extends JPanel{
              TreePath levelSetPath=new TreePath(treeModel.getPathToRoot(levelSetNode));
              if(!projectsTree.isExpanded(levelSetPath))
                  projectsTree.expandPath(levelSetPath);
-             //add the tile set
+             //adds the tile set
              TileSet tileSet=project.getTileSet();
              DefaultMutableTreeNode tilesRootNode=new DefaultMutableTreeNode(tileSet);
              treeModel.insertNodeInto(tilesRootNode,projectRootNode,projectRootNode.getChildCount());
-             //add the tiles
+             //adds the tiles
              for(Tile tile:tileSet.getTilesList())
                  {DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
                   treeModel.insertNodeInto(tileNode,tilesRootNode,tilesRootNode.getChildCount());                 
@@ -409,7 +409,7 @@ public final class ProjectManager extends JPanel{
              if(!projectsTree.isExpanded(tileSetPath))
                  projectsTree.expandPath(tileSetPath);
              TreePath rootPath=new TreePath(projectsRoot);
-             //expand the root path if it is not already expanded
+             //expands the root path if it is not already expanded
              if(!projectsTree.isExpanded(rootPath))
                  projectsTree.expandPath(rootPath);
              TreePath projectPath=new TreePath(new Object[]{projectsRoot,projectRootNode});
@@ -448,14 +448,14 @@ public final class ProjectManager extends JPanel{
              //if the name is correct and not already in use => not null
     		 if(name!=null)
     		     {if(userObject instanceof ProjectSet)
-    		         newlyCreatedEntity=addProject(name);
+    		          newlyCreatedEntity=addProject(name);
     		      else
     		    	  if(userObject instanceof FloorSet)
     		    	      {Floor floor=new Floor(name);
                            ((FloorSet)userObject).addFloor(floor);
                            DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
                            ((DefaultTreeModel)projectsTree.getModel()).insertNodeInto(floorNode,selectedNode,selectedNode.getChildCount());
-                           //add each node of a map
+                           //adds each node of a map
                            DefaultMutableTreeNode mapNode;
                            for(MapType type:MapType.values())
                                {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
@@ -565,14 +565,13 @@ public final class ProjectManager extends JPanel{
              fileChooser.setFileFilter(new FileNameExtensionFilter("JFPSM Projects","jfpsm.zip"));
              int result=fileChooser.showOpenDialog(mainWindow.getApplicativeFrame());
              if(result==JFileChooser.APPROVE_OPTION)
-                 {String fullname=fileChooser.getSelectedFile().getName();
-                  String projectName=fullname.substring(0,fullname.length()-Project.getFileExtension().length());
+                 {String projectName=Project.getProjectNameFromFile(fileChooser.getSelectedFile());
                   ProjectSet workspace=(ProjectSet)userObject;
                   boolean confirmLoad=true;
                   if(Arrays.asList(workspace.getProjectNames()).contains(projectName))
-                      {//prompt the user
+                      {//prompts the user
                        confirmLoad=JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),"Overwrite project \""+projectName+"\""+"?","Overwrite project",JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION;
-                       //if he confirms, delete the project
+                       //if he confirms, deletes the project
                        if(confirmLoad)
                            {final int count=selectedNode.getChildCount();
                             DefaultMutableTreeNode projectNode=null;
@@ -582,20 +581,20 @@ public final class ProjectManager extends JPanel{
                                      break;
                                     }
                             Project project=(Project)projectNode.getUserObject();  
-                            //remove all its entities from the entity viewer
+                            //removes all its entities from the entity viewer
                             for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
                             	for(Floor floor:floorSet.getFloorsList())
                             		mainWindow.getEntityViewer().closeEntityView(floor);
                             for(Tile tile:project.getTileSet().getTilesList())
                                 mainWindow.getEntityViewer().closeEntityView(tile);
-                            //remove the project from the project set and the file system
+                            //removes the project from the project set and the file system
                             workspace.removeProject(project);
-                            //remove it from the tree
+                            //removes it from the tree
                             ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(projectNode);                            
                            }
                       }
                   if(confirmLoad)
-                      {//copy the file into the workspace
+                      {//copies the file into the workspace
                        File projectFile=new File(workspace.createProjectPath(projectName));
                        boolean success=true;
                        try{success=projectFile.createNewFile();
@@ -610,7 +609,7 @@ public final class ProjectManager extends JPanel{
                                 bos.close();
                                }
                           } 
-                       catch (Throwable throwable)
+                       catch(Throwable throwable)
                        {displayErrorMessage(throwable,false);
                         success=false;
                        }
@@ -644,9 +643,9 @@ public final class ProjectManager extends JPanel{
     private final void importImageForSelectedMap(Floor floor,Map map){
         BufferedImage imageMap=openFileAndLoadImage();
         if(imageMap!=null)
-            {//put the image map into the floor
+            {//puts the image map into the floor
              map.setImage(imageMap);
-             //compute the max size
+             //computes the max size
              int maxWidth=0,maxHeight=0,rgb;
              Map currentMap;
              BufferedImage nextImageMap;
@@ -655,7 +654,7 @@ public final class ProjectManager extends JPanel{
                   maxWidth=Math.max(currentMap.getWidth(),maxWidth);
                   maxHeight=Math.max(currentMap.getHeight(),maxHeight);
                  }
-             //resize each map that is too small
+             //resizes each map that is too small
              for(MapType currentType:MapType.values())
                  {currentMap=floor.getMap(currentType);
                   if(currentMap.getWidth()!=maxWidth||maxHeight!=currentMap.getHeight())
@@ -671,7 +670,7 @@ public final class ProjectManager extends JPanel{
                        floor.getMap(currentType).setImage(nextImageMap);
                       }
                  }
-             //update the display
+             //updates the display
              mainWindow.getEntityViewer(). repaint();
             }
     }
@@ -700,7 +699,7 @@ public final class ProjectManager extends JPanel{
              else
                  if(userObject instanceof Floor)
                      {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent().getParent()).getUserObject();                                 
-                      //open a tab view for this entity
+                      //opens a tab view for this entity
                       ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                       
                      }
             }
@@ -715,7 +714,7 @@ public final class ProjectManager extends JPanel{
              userObject=selectedNode.getUserObject();
              if(userObject instanceof Project||userObject instanceof  LevelSet||userObject instanceof FloorSet||userObject instanceof TileSet||userObject instanceof Floor)
                  {projectsTree.collapsePath(path);
-                  //close the tab views of their children
+                  //closes the tab views of their children
                   if(userObject instanceof LevelSet)
                       {for(FloorSet floorSet:((LevelSet)userObject).getFloorSetsList())
                     	  for(Floor floor:floorSet.getFloorsList())
@@ -742,7 +741,7 @@ public final class ProjectManager extends JPanel{
                 		          }
                  }             
              if(userObject instanceof Floor||userObject instanceof Tile)
-            	 //close the tab view of this entity
+            	 //closes the tab view of this entity
                  mainWindow.getEntityViewer().closeEntityView((Namable)userObject);
             }
     }
@@ -772,7 +771,7 @@ public final class ProjectManager extends JPanel{
              enterNameDialog.dispose();
 		     if(name!=null)
 		         {userObject.setName(name);
-		          //rename the entity view opened on this entity if any
+		          //renames the entity view opened on this entity if any
 		          mainWindow.getEntityViewer().renameEntityView(userObject);
 		         }
 		    }
@@ -786,7 +785,7 @@ public final class ProjectManager extends JPanel{
         for(TreePath path:paths)
             {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              userObject=selectedNode.getUserObject();
-             //check if the node is a tile and if this tile comes from the project
+             //checks if the node is a tile and if this tile comes from the project
              if(userObject instanceof Tile&&((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject()==project)
             	 {color=((Tile)userObject).getColor();
             	  break;
@@ -829,7 +828,7 @@ public final class ProjectManager extends JPanel{
                  entitiesBuffer.append(", \""+tilesTrashList.get(index).getUserObject().toString()+"\"");
              for(int index=0;index<projectsTrashList.size();index++)
                  entitiesBuffer.append(", \""+projectsTrashList.get(index).getUserObject().toString()+"\"");
-             //delete the useless string ", " at the beginning
+             //deletes the useless string ", " at the beginning
              entitiesBuffer.delete(0,2);
              String questionStart;
              final boolean noFloor=floorsTrashList.isEmpty();
@@ -849,7 +848,7 @@ public final class ProjectManager extends JPanel{
                              questionStart="Delete level";
                          else
                              questionStart="Delete element";
-             //check if a plural is needed
+             //checks if a plural is needed
              if(elementsCount>1)
                  questionStart+="s";
              String windowTitle="Confirm "+questionStart.toLowerCase();             
@@ -858,11 +857,11 @@ public final class ProjectManager extends JPanel{
             	  for(DefaultMutableTreeNode node:tilesTrashList)
                       {TileSet tileSet=(TileSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();   
                        Tile tile=(Tile)node.getUserObject();
-                       //remove the tile from the entity viewer by closing its tab view
+                       //removes the tile from the entity viewer by closing its tab view
                        mainWindow.getEntityViewer().closeEntityView(tile);
-                       //remove the tile from the workspace and from the file if any
+                       //removes the tile from the workspace and from the file if any
                        tileSet.removeTile(tile);
-                       //remove the tile from the tree
+                       //removes the tile from the tree
                        treeModel.removeNodeFromParent(node);
                       }
                   for(DefaultMutableTreeNode node:floorsTrashList)
@@ -884,7 +883,7 @@ public final class ProjectManager extends JPanel{
                   for(DefaultMutableTreeNode node:projectsTrashList)
                       {Project project=(Project)node.getUserObject();
                        ProjectSet projectSet=(ProjectSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();
-                       //remove all its entities from the entity viewer
+                       //removes all its entities from the entity viewer
                        for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
                        	   for(Floor floor:floorSet.getFloorsList())
                        		   mainWindow.getEntityViewer().closeEntityView(floor);
@@ -911,7 +910,7 @@ public final class ProjectManager extends JPanel{
     }
     
     /**
-     * generate level files one by one
+     * generates level files one by one
      */
     final void generateGameFiles(){
         TreePath path=projectsTree.getSelectionPath();
@@ -952,7 +951,7 @@ public final class ProjectManager extends JPanel{
     	
     	@Override
     	protected final ArrayList<String> doInBackground(){
-    		//prevent the user from leaving the application during an export
+    		//prevents the user from leaving the application during an export
     		projectManager.setQuitEnabled(false);
     		ArrayList<String> filenamesList=new ArrayList<String>();
     		File levelFile,levelCollisionFile;
@@ -984,7 +983,7 @@ public final class ProjectManager extends JPanel{
     	
     	@Override
         protected final void done(){
-    		//allow the user to leave the application
+    		//allows the user to leave the application
    	        projectManager.setQuitEnabled(true);
    	        dialog.setVisible(false);
    	        dialog.reset();

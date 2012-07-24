@@ -13,6 +13,12 @@
 */
 package jfpsm;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
 import misc.SerializationHelper;
 
 /**
@@ -91,6 +97,44 @@ public final class Project extends JFPSMUserObject{
     
     public static final String getFileExtension(){
     	return(fileExtension);
+    }
+    
+    /**
+     * Gets the name of the project in this file if any
+     * 
+     * @param projectFile project file
+     * @return project name from this file if it is a project file, otherwise <code>null</code>
+     */
+    public static final String getProjectNameFromFile(File projectFile){
+    	/*String fullname=projectFile.getName();
+    	String projectName=fullname.substring(0,fullname.length()-Project.getFileExtension().length());
+    	return(projectName);*/
+    	String projectName=null;
+    	ZipFile zipFile=null;
+    	try{zipFile=new ZipFile(projectFile);
+    		ZipEntry entry=zipFile.getEntry("project.xml");
+    		if(entry!=null)
+    		    {CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry));
+                 Object decodedObject=decoder.readObject();
+                 decoder.close();
+                 if(decodedObject!=null&&decodedObject instanceof Project)
+                     {Project project=(Project)decodedObject;
+                      projectName=project.getName();
+                     }
+    		    }
+    	}
+    	catch(ZipException ze)
+    	{}
+    	catch(IOException ioe)
+    	{}
+    	finally
+        {if(zipFile!=null)
+		     try{zipFile.close();}
+             catch (IOException ioe) 
+			 {//ignores this exception
+			 }
+        }
+        return(projectName);
     }
     
     @Override

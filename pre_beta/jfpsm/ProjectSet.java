@@ -80,14 +80,16 @@ public final class ProjectSet extends JFPSMUserObject{
     final void removeProject(Project project){
         if(projectsList.remove(project))
             {dirty=true;
+             //FIXME rather use getProjectFileFromName, delete the file only if the previous method returns a non null result
              final File projectFile=new File(createProjectPath(project.getName()));
-             //delete the corresponding file if any
+             //deletes the corresponding file if any
              if(projectFile.exists())
            	     projectFile.delete();
             }
     }
     
     final void saveProject(Project project){
+    	//FIXME rather use getProjectFileFromName, use createProjectPath only if the previous method returns null
         final String projectPath=createProjectPath(project.getName());
         final File projectFile=new File(projectPath);
         saveProject(project,projectFile);
@@ -219,11 +221,8 @@ public final class ProjectSet extends JFPSMUserObject{
     final String[] getProjectNames(){
         File[] files=getProjectFiles();
         String[] names=new String[files.length];
-        String fullname;
         for(int i=0;i<names.length;i++)
-            {fullname=files[i].getName();
-             names[i]=fullname.substring(0,fullname.length()-Project.getFileExtension().length());
-            }
+            names[i]=Project.getProjectNameFromFile(files[i]);
         return(names);
     }
     
