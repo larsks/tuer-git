@@ -77,61 +77,90 @@ public final class ProjectSet extends JFPSMUserObject{
         return(workspaceDirectory.getAbsolutePath()+System.getProperty("file.separator")+name);
     }
     
+    /**
+     * Gets the project file (in the workspace) whose name is the supplied name
+     * 
+     * @param projectName name of the project whose file is searched
+     * @return project file
+     */
+    final File getProjectFileFromName(String projectName){
+    	//File projectFile=new File(createProjectPath(projectName));
+    	File projectFile=null;
+    	File[] files=getProjectFiles();
+    	if(projectName!=null)
+    	    for(int i=0;i<files.length&&projectFile==null;i++)
+                {final String currentProjectName=Project.getProjectNameFromFile(files[i]);
+                 if(projectName.equals(currentProjectName))
+            	     projectFile=files[i];
+                }
+    	return(projectFile);
+    }
+    
     final void removeProject(Project project){
         if(projectsList.remove(project))
             {dirty=true;
-             //FIXME rather use getProjectFileFromName, delete the file only if the previous method returns a non null result
-             final File projectFile=new File(createProjectPath(project.getName()));
+             final File projectFile=getProjectFileFromName(project.getName());
              //deletes the corresponding file if any
-             if(projectFile.exists())
+             if(projectFile!=null&&projectFile.exists())
            	     projectFile.delete();
             }
     }
     
     final void saveProject(Project project){
-    	//FIXME rather use getProjectFileFromName, use createProjectPath only if the previous method returns null
-        final String projectPath=createProjectPath(project.getName());
+    	/*final String projectPath=createProjectPath(project.getName());
         final File projectFile=new File(projectPath);
         saveProject(project,projectFile);
+        */
+    	File projectFile=getProjectFileFromName(project.getName());
+    	//if there is not yet a project file for this project
+    	if(projectFile==null)
+    	    {//creates a new file with the default filename
+    		 final String projectPath=createProjectPath(project.getName());
+    		 projectFile=new File(projectPath);
+    		 //FIXME do not overwrite
+    	    }
+    	saveProject(project,projectFile);
     }
     
     final void saveProject(Project project,final File file){
         if(projectsList.contains(project))
     	    {//this should be tested rather in the GUI
-    	     //check if the internal project has unsaved modifications or 
+    	     //checks if the internal project has unsaved modifications or 
     	     //if it is an external (exported) project
     		 if(project.isDirty()||!file.getParentFile().equals(workspaceDirectory))
-    	         {//save the project (project.xml and image files have to be put into a ZIP file)
+    	         {ZipOutputStream zoStream=null;
+    	          File tmpFile=null;
+    	          FileInputStream fis=null;
+    			  //saves the project (project.xml and image files have to be put into a ZIP file)
           	      try{if(!file.exists())
           	              {if(!file.createNewFile())
           	                   throw new IOException("cannot create file "+file.getAbsolutePath());
           	              }
-          	          //create a temporary file used as a buffer before putting the data into the archive
-          	          File tmpFile=File.createTempFile("JFPSM",".tmp");
-          	          ZipOutputStream zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+          	          //creates a temporary file used as a buffer before putting the data into the archive
+          	          tmpFile=File.createTempFile("JFPSM",".tmp");
+          	          zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
           	          zoStream.setMethod(ZipOutputStream.DEFLATED);
-          	          //create a ZipEntry for the XML file
+          	          //creates a ZipEntry for the XML file
           	          ZipEntry projectXMLEntry=new ZipEntry("project.xml");
           	          projectXMLEntry.setMethod(ZipEntry.DEFLATED);
-          	          //put it into the ZipOutputStream
+          	          //puts it into the ZipOutputStream
           	          zoStream.putNextEntry(projectXMLEntry);
-          	          //create, use and close an XMLEncoder
+          	          //creates, uses and closes an XMLEncoder
           	          CustomXMLEncoder encoder=new CustomXMLEncoder(new BufferedOutputStream(new FileOutputStream(tmpFile)));
           	          encoder.writeObject(project);
           	          encoder.close();
-          	          //copy the temporary file into the zip entry         	          
+          	          //copies the temporary file into the zip entry         	          
           	          int bytesIn;
           	          byte[] readBuffer=new byte[1024];
-          	          FileInputStream fis=new FileInputStream(tmpFile);
+          	          fis=new FileInputStream(tmpFile);
           	          while((bytesIn=fis.read(readBuffer))!=-1) 
-          	              zoStream.write(readBuffer,0,bytesIn);         	          
-          	          fis.close();    
+          	              zoStream.write(readBuffer,0,bytesIn);
           	          ZipEntry entry;
           	          String floorDirectory;
           	          for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
           	        	  for(Floor floor:floorSet.getFloorsList())
           	                  {floorDirectory="levelset/"+floorSet.getName()+"/"+floor.getName()+"/";
-          	                   //save each map
+          	                   //saves each map
           	                   for(MapType type:MapType.values())
           	                       {entry=new ZipEntry(floorDirectory+type.getFilename());
               	                    entry.setMethod(ZipEntry.DEFLATED);
@@ -148,13 +177,25 @@ public final class ProjectSet extends JFPSMUserObject{
                                    zoStream.putNextEntry(entry);
                                    ImageIO.write(tile.getTexture(textureIndex),"png",zoStream);
           	                      }
-          	          //close the ZipOutputStream
-          	          zoStream.close();
-          	          //delete the temporary file
-          	          tmpFile.delete();
           	         }
           	      catch(IOException ioe)
           	      {throw new RuntimeException("The project "+project.getName()+" cannot be saved!",ioe);}
+          	      finally
+          	      {if(fis!=null)
+          	    	   try{fis.close();}
+          	           catch(IOException ioe)
+   	                   {//does nothing
+   	                   }
+          	       //closes the ZipOutputStream
+          	       if(zoStream!=null)
+          	           try{zoStream.close();}
+          	           catch(IOException ioe)
+          	           {//does nothing
+          	           }
+          	       //deletes the temporary file
+          	       if(tmpFile!=null)
+          	           tmpFile.delete();
+          	      }
     	         }   		 
     	    }
     	else
@@ -207,7 +248,7 @@ public final class ProjectSet extends JFPSMUserObject{
     
     /**
      * 
-     * @return files of the projects in the file system
+     * @return files of the projects in the file system (in the workspace)
      */
     final File[] getProjectFiles(){
         File[] files=workspaceDirectory.listFiles(projectFileFilter);
