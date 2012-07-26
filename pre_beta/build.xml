@@ -52,7 +52,7 @@
 	    <pathelement location="lib/google-collect/guava-r09.jar"/>	    
 	    <pathelement location="lib/gluegen-rt/gluegen-rt.jar"/>
 		<pathelement location="lib/joal/joal.jar"/>
-	    <pathelement location="lib/jogl/jogl.all.jar"/>
+	    <pathelement location="lib/jogl/jogl-all.jar"/>
 		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
 	    <pathelement location="lib/pss/CodecJOrbis.jar"/>
 	    <pathelement location="lib/pss/LibraryJavaSound.jar"/>
@@ -102,7 +102,7 @@
 	    <pathelement location="${destdir}/LibraryJavaSound.jar"/>
 		<pathelement location="${destdir}/LibraryJOAL.jar"/>
 	    <pathelement location="${destdir}/SoundSystem.jar"/>
-	    <pathelement location="${destdir}/jogl.all.jar"/>
+	    <pathelement location="${destdir}/jogl-all.jar"/>
 	    <pathelement location="${destdir}/jogl-all-natives-linux-amd64.jar"/>
 	    <pathelement location="${destdir}/jogl-all-natives-linux-i586.jar"/>
 	    <pathelement location="${destdir}/jogl-all-natives-macosx-universal.jar"/>
@@ -251,7 +251,7 @@
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>			    
 			    <jar href="gluegen-rt.jar" download="eager" main="false"/>
 			    <jar href="joal.jar" download="eager" main="false"/>
-			    <jar href="jogl.all.jar" download="eager" main="false"/>
+			    <jar href="jogl-all.jar" download="eager" main="false"/>
 			  </resources>			  
 			  <resources os="Linux" arch="i386">
 			    <nativelib href = "joal-natives-linux-i586.jar" />
@@ -336,7 +336,7 @@
 			    <jar href="SoundSystem.jar" download="eager" main="false"/>			    
 			    <jar href="gluegen-rt.jar" download="eager" main="false"/>
 			    <jar href="joal.jar" download="eager" main="false"/>
-			    <jar href="jogl.all.jar" download="eager" main="false"/>
+			    <jar href="jogl-all.jar" download="eager" main="false"/>
 			  </resources>
 			  <resources os="Linux" arch="i386">
 			    <nativelib href = "joal-natives-linux-i586.jar" />
