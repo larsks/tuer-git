@@ -16,8 +16,8 @@
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/joal/joal.jar"/>
-	<classpathentry kind="lib" path="lib/jogl/jogl.all.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
 	<classpathentry kind="lib" path="lib/fettle/fettle-0.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/jogl/jogl-all.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
