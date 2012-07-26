@@ -97,27 +97,34 @@ public final class ProjectSet extends JFPSMUserObject{
     }
     
     final void removeProject(Project project){
-        if(projectsList.remove(project))
-            {dirty=true;
-             final File projectFile=getProjectFileFromName(project.getName());
-             //deletes the corresponding file if any
-             if(projectFile!=null&&projectFile.exists())
-           	     projectFile.delete();
-            }
+    	if(project==null)
+    		throw new IllegalArgumentException("A null project cannot be removed!");
+    	else
+    	    {if(projectsList.remove(project))
+                 {dirty=true;
+                  final File projectFile=getProjectFileFromName(project.getName());
+                  //deletes the corresponding file if any
+                  if(projectFile!=null&&projectFile.exists())
+           	          projectFile.delete();
+                 }
+    	    }
     }
     
     final void saveProject(Project project){
-    	/*final String projectPath=createProjectPath(project.getName());
-        final File projectFile=new File(projectPath);
-        saveProject(project,projectFile);
-        */
-    	File projectFile=getProjectFileFromName(project.getName());
+    	final String projectName=project.getName();
+    	File projectFile=getProjectFileFromName(projectName);
     	//if there is not yet a project file for this project
     	if(projectFile==null)
     	    {//creates a new file with the default filename
-    		 final String projectPath=createProjectPath(project.getName());
+    		 final String projectPath=createProjectPath(projectName);
     		 projectFile=new File(projectPath);
-    		 //FIXME do not overwrite
+    		 //attempts to avoid overwriting an existing file
+    		 for(int index=0;index<Integer.MAX_VALUE&&projectFile.exists();index++)
+    			 {final String tmpPath=createProjectPath(projectName+"_"+Integer.toString(index));
+    			  projectFile=new File(tmpPath);
+    			 }
+    		 if(projectFile.exists())
+    			 throw new RuntimeException("The project "+project.getName()+" cannot be saved!");
     	    }
     	saveProject(project,projectFile);
     }
@@ -127,7 +134,8 @@ public final class ProjectSet extends JFPSMUserObject{
     	    {//this should be tested rather in the GUI
     	     //checks if the internal project has unsaved modifications or 
     	     //if it is an external (exported) project
-    		 if(project.isDirty()||!file.getParentFile().equals(workspaceDirectory))
+    		 final File parentFile=file.getParentFile();
+        	 if(project.isDirty()||parentFile==null||!parentFile.equals(workspaceDirectory))
     	         {ZipOutputStream zoStream=null;
     	          File tmpFile=null;
     	          FileInputStream fis=null;
@@ -146,6 +154,11 @@ public final class ProjectSet extends JFPSMUserObject{
           	          //puts it into the ZipOutputStream
           	          zoStream.putNextEntry(projectXMLEntry);
           	          //creates, uses and closes an XMLEncoder
+          	          /**
+          	           * Actually, it "should" be possible to use the existing ZIP output stream to avoid creating a
+          	           * temporary file by flushing the encoder to avoid closing this stream but it throws a 
+          	           * SAX exception. It is necessary to close the XML node by doing zoStream.write("</java> \n".getBytes());
+          	           */
           	          CustomXMLEncoder encoder=new CustomXMLEncoder(new BufferedOutputStream(new FileOutputStream(tmpFile)));
           	          encoder.writeObject(project);
           	          encoder.close();
