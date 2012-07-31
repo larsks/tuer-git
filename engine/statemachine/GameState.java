@@ -1051,6 +1051,8 @@ public final class GameState extends ScenegraphState{
     
     private final void loadLevelModel(){
     	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+    	    if(levelIndex==1)
+    	    	levelNode.setTranslation(109,0,208);
             getRoot().attachChild(levelNode);
     	   }
     	catch(IOException ioe)
@@ -1058,79 +1060,83 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void loadOutdoor(){
-    	try{final Node outdoorPartLevelNode=(Node)binaryImporter.load(getClass().getResource("/abin/wildhouse_action.abin"));
-            outdoorPartLevelNode.setTranslation(-128, -6, -128);
-            getRoot().attachChild(outdoorPartLevelNode);   		
-    	   }
-    	catch(IOException ioe)
-    	{throw new RuntimeException("outdoor loading failed",ioe);}
+    	if(levelIndex==0)
+    	    try{final Node outdoorPartLevelNode=(Node)binaryImporter.load(getClass().getResource("/abin/wildhouse_action.abin"));
+                outdoorPartLevelNode.setTranslation(-128,-6,-128);
+                getRoot().attachChild(outdoorPartLevelNode);   		
+    	       }
+    	    catch(IOException ioe)
+    	    {throw new RuntimeException("outdoor loading failed",ioe);}
     }
     
     private final void performInitialBasicSetup(){
-    	// clear the list of objects that can be picked up
+    	//clears the list of objects that can be picked up
     	collectibleObjectsList.clear();
-        // Remove all previously attached children
+        //removes all previously attached children
         getRoot().detachAllChildren();
         //FIXME it should not be hard-coded
         currentCamLocation.set(115,0.5,223);
-        //attach the player itself
+        //attaches the player itself
         getRoot().attachChild(playerNode);
-        //attach the ammunition display node
+        //attaches the ammunition display node
         getRoot().attachChild(ammoTextLabel);
-        //attach the FPS display node
+        //attaches the FPS display node
         getRoot().attachChild(fpsTextLabel);
-        //attach the health display node
+        //attaches the health display node
         getRoot().attachChild(healthTextLabel);
-        //attach the HUD node
+        //attaches the HUD node
         getRoot().attachChild(headUpDisplayLabel);
     }
     
     private final void performTerminalBasicSetup(){
-    	//add a bounding box to each collectible object
+    	//adds a bounding box to each collectible object
         for(Node collectible:collectibleObjectsList)
-       	 NodeHelper.setModelBound(collectible,BoundingBox.class);
+       	    NodeHelper.setModelBound(collectible,BoundingBox.class);
         for(Node teleporter:teleportersList)
-       	 NodeHelper.setModelBound(teleporter,BoundingBox.class);
-        //reset the timer at the end of all long operations performed while loading
+       	    NodeHelper.setModelBound(teleporter,BoundingBox.class);
+        //resets the timer at the end of all long operations performed while loading
         timer.reset();
     }
     
     private final void loadSkybox(){
-	    final Skybox skyboxNode=new Skybox("skybox",64,64,64);
-	    skyboxNode.setTranslation(-128,0,-128);
-	    final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-	    final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-	    final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-	    final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-	    final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-	    final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
-	    skyboxNode.setTexture(Skybox.Face.North,north);
-	    skyboxNode.setTexture(Skybox.Face.West,west);
-	    skyboxNode.setTexture(Skybox.Face.South,south);
-	    skyboxNode.setTexture(Skybox.Face.East,east);
-	    skyboxNode.setTexture(Skybox.Face.Up,up);
-	    skyboxNode.setTexture(Skybox.Face.Down,down);            
-	    getRoot().attachChild(skyboxNode);
-	       
+    	if(levelIndex==0)
+    	    {final Skybox skyboxNode=new Skybox("skybox",64,64,64);
+    	     skyboxNode.setTranslation(-128,0,-128);
+    	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+    	     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+    	     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+    	     final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+    	     final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
+    	     final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
+    	     skyboxNode.setTexture(Skybox.Face.North,north);
+    	     skyboxNode.setTexture(Skybox.Face.West,west);
+    	     skyboxNode.setTexture(Skybox.Face.South,south);
+    	     skyboxNode.setTexture(Skybox.Face.East,east);
+    	     skyboxNode.setTexture(Skybox.Face.Up,up);
+    	     skyboxNode.setTexture(Skybox.Face.Down,down);            
+    	     getRoot().attachChild(skyboxNode);
+    	    }
     }
     
     private final void loadTeleporters(){
-	    final Node teleporterNode=new Node("a teleporter");
-        final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-        teleporterBox.setRandomColors();
-        teleporterNode.setTranslation(112.5,0,221.5);
-        teleporterNode.attachChild(teleporterBox);
-        teleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(-132,0.5,-102)));
-        teleportersList.add(teleporterNode);
-        getRoot().attachChild(teleporterNode);            
-        final Node secondTeleporterNode=new Node("another teleporter");
-        final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-        secondTeleporterBox.setRandomColors();
-        secondTeleporterNode.setTranslation(-132,0,-102);
-        secondTeleporterNode.attachChild(secondTeleporterBox);
-        secondTeleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(112.5,0.5,221.5)));
-        teleportersList.add(secondTeleporterNode);
-        getRoot().attachChild(secondTeleporterNode);
+    	if(levelIndex==0)
+    	    {final Node teleporterNode=new Node("a teleporter");
+             final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+             teleporterBox.setRandomColors();
+             teleporterNode.setTranslation(112.5,0,221.5);
+             teleporterNode.attachChild(teleporterBox);
+             teleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(-132,0.5,-102)));
+             teleportersList.add(teleporterNode);
+             getRoot().attachChild(teleporterNode);            
+             final Node secondTeleporterNode=new Node("another teleporter");
+             final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+             secondTeleporterBox.setRandomColors();
+             secondTeleporterNode.setTranslation(-132,0,-102);
+             secondTeleporterNode.attachChild(secondTeleporterBox);
+             secondTeleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(112.5,0.5,221.5)));
+             teleportersList.add(secondTeleporterNode);
+             getRoot().attachChild(secondTeleporterNode);
+    	    }
     }
     
     private final void loadMedikits(){

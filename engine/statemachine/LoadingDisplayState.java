@@ -135,6 +135,10 @@ public final class LoadingDisplayState extends ScenegraphState{
     	this.levelInitializationTask=levelInitializationTask;
     }
     
+    public final GameStateInitializationRunnable getLevelInitializationTask(){
+    	return(levelInitializationTask);
+    }
+    
     @Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
