@@ -65,6 +65,11 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     	run();
     }
     
+    protected void doFireEvent(){
+    	//fires the event in the state machine to cause the transition
+        stateMachine.fireEvent(event);
+    }
+    
     @Override
     public void run(){
     	if(renderContext!=null)
@@ -72,12 +77,11 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
             GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
                 @Override
                 public Void call() throws Exception{
-                    //fires the event in the state machine to cause the transition
-                    stateMachine.fireEvent(event);
+                	doFireEvent();
                     return(null);
                 }
             });
     	else
-    		stateMachine.fireEvent(event);
+    		doFireEvent();
     }
 }

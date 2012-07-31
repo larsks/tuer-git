@@ -56,6 +56,8 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel loadGamePanel;
     
+    private final UIPanel newGamePanel;
+    
     private final Runnable launchRunnable;
     
     private final Runnable uninstallRunnable;
@@ -76,7 +78,7 @@ public final class MainMenuState extends ScenegraphState{
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
-                  final TriggerAction exitAction,final TriggerAction toLoadingDisplayAction,
+                  final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
                   final Runnable uninstallRunnable,final String creditsContent,final String controlsContent){
         super(soundManager);
@@ -85,7 +87,7 @@ public final class MainMenuState extends ScenegraphState{
         this.canvas=canvas;
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
-        // create the panels
+        //creates the panels
         if(controlsContent!=null)
             controlsPanel=createControlsPanel(controlsContent);
         else
@@ -96,24 +98,78 @@ public final class MainMenuState extends ScenegraphState{
         	creditsPanel=null;
         initialMenuPanel=createInitialMenuPanel(exitAction);       
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
-        loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);        
-        // create the main frame
+        loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);
+        newGamePanel=createNewGamePanel(toLoadingDisplayAction);
+        //creates the main frame
         mainFrame=createMainFrame();
-        // create the head-up display
+        //creates the head-up display
         final UIHud hud=createHud();        
         hud.add(mainFrame);
         getRoot().attachChild(hud);
-        // add some text
+        //adds some text
         final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(textNode);
-        // setup the keyboard trigger(s)
+        //setups the keyboard trigger(s)
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    private static final class LevelTransitionTriggerAction extends TransitionTriggerAction<ScenegraphState,String>{
+    	
+    	private final int levelIndex;
+    	
+    	private LevelTransitionTriggerAction(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
+    			final int levelIndex){
+    		super(toLoadingDisplayAction.stateMachine,toLoadingDisplayAction.event,toLoadingDisplayAction.renderContext);
+    		this.levelIndex=levelIndex;
+    	}
+    	
+    	@Override
+    	protected void doFireEvent(){
+    		super.doFireEvent();
+    		LoadingDisplayState loadingDisplayState=(LoadingDisplayState)stateMachine.getCurrentState();
+    		loadingDisplayState.getLevelInitializationTask().setLevelIndex(levelIndex);
+    	}
+    }
+    
+    private final UIPanel createNewGamePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
+        final UIPanel newGamePanel=new UIPanel(new RowLayout(false));
+        final UIButton level0Button=new UIButton("Level 0");
+        level0Button.addActionListener(new ActionListener(){
+        	
+        	private final LevelTransitionTriggerAction levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
+        	
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	levelTransitionTriggerAction.perform(null,null,-1);
+            }
+        });
+        final UIButton perfTestButton=new UIButton("Performance Test");
+        perfTestButton.addActionListener(new ActionListener(){
+        	
+        	private final LevelTransitionTriggerAction levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
+        	
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	levelTransitionTriggerAction.perform(null,null,-1);
+            }
+        });
+        final UIButton backButton=new UIButton("Back");
+        backButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(startMenuPanel);
+            }
+        });
+        newGamePanel.add(level0Button);
+        newGamePanel.add(perfTestButton);
+        newGamePanel.add(backButton);
+        return(newGamePanel);
     }
     
     private final UIPanel createLoadGamePanel(final TriggerAction toLoadingDisplayAction){
@@ -137,7 +193,7 @@ public final class MainMenuState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
-                  // show the initial menu
+                  //shows the initial menu
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else
@@ -221,7 +277,7 @@ public final class MainMenuState extends ScenegraphState{
         newGameButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                toLoadingDisplayAction.perform(null,null,-1);
+                showPanelInMainFrame(newGamePanel);
             }
         });
         final UIButton loadGameButton=new UIButton("Load game");
@@ -288,7 +344,7 @@ public final class MainMenuState extends ScenegraphState{
         getRoot().addController(new SpatialController<Node>(){
             @Override
             public final void update(final double time,final Node caller){               
-                // update the triggers of the hud
+                //updates the triggers of the hud
                 hud.getLogicalLayer().checkTriggers(time);
             }
         });

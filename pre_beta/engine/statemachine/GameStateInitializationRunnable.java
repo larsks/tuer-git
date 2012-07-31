@@ -27,4 +27,8 @@ public class GameStateInitializationRunnable extends StateInitializationRunnable
 	public int getLevelIndex(){
 		return(state.getLevelIndex());
 	}
+	
+	public void setLevelIndex(final int levelIndex){
+		state.setLevelIndex(levelIndex);
+	}
 }
