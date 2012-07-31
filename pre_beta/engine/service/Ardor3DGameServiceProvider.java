@@ -90,13 +90,17 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     
     public static void main(final String[] args){
+    	//there is no need of hardware acceleration for Java2D as I don't use it anymore
+    	System.setProperty("sun.java2d.opengl","false");
+    	//disables OpenGL-ES
+        System.setProperty("jogl.disable.opengles","true");
         if(DesktopIntegration.getOperatingSystem().equals(OS.Windows))
-            {// Windows-specific workarounds
+            {//Windows-specific workarounds
              /**
               * Forces the use of the high precision timer on Windows.
               * See http://bugs.sun.com/view_bug.do?bug_id=6435126
               * */
-             new Thread(new Runnable(){                
+             new Thread(new Runnable(){
                             @Override
                             public void run(){
                                 while(true) 
@@ -108,12 +112,10 @@ public final class Ardor3DGameServiceProvider implements Scene{
                         }, "Microsoft Windows Sleeper (see bug 6435126)") {
                         {this.setDaemon(true);}
              }.start();
-             // Disables DirectDraw under Windows in order to avoid conflicts with OpenGL
+             //disables DirectDraw under Windows in order to avoid conflicts with OpenGL
              System.setProperty("sun.java2d.noddraw","true");
-             // Disables Direct3D under Windows in order to avoid conflicts with OpenGL
+             //disables Direct3D under Windows in order to avoid conflicts with OpenGL
              System.setProperty("sun.java2d.d3d","false");
-             // Disables ANGLE (Direct3D OpenGL-ES 2.0 emulation)
-             //System.setProperty("jogl.enable.ANGLE","false");
             }    	
         final Ardor3DGameServiceProvider application=new Ardor3DGameServiceProvider();
         application.start();
