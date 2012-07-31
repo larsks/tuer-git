@@ -842,9 +842,23 @@ public final class GameState extends ScenegraphState{
     	final BasicText fpsTextLabel=BasicText.createDefaultTextLabel("FPS display","");
     	fpsTextLabel.setTranslation(new Vector3(0,20,0));
         fpsTextLabel.addController(new SpatialController<Spatial>(){
+        	
+        	private double period;
+        	
+        	private int frameCount;
+        	
             @Override
             public final void update(double timePerFrame,Spatial caller){
-                fpsTextLabel.setText(" "+Math.round(timePerFrame>0?1/timePerFrame:0)+" FPS");
+            	if(period>1)
+            	    {final int framesPerSecond=(int)Math.round(frameCount>0&&period>0?frameCount/period:0);
+            	     fpsTextLabel.setText(" "+ framesPerSecond +" FPS");
+            		 period=timePerFrame;
+            		 frameCount=1;
+            	    }
+            	else
+            		{period+=timePerFrame;
+            		 frameCount++;
+            		}
             }           
         });
     	return(fpsTextLabel);
