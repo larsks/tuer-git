@@ -578,6 +578,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	
 	}*/
 	
+	//TODO add null checks to detachChild() and attachChild()
+	//TODO switch to a "graph node" approach
+	/**
+	 * TODO implement a specialization for tree nodes: 
+	 * - prevent "this" from being attached
+	 * - prevent an ancestor of this node from being attached
+	 * - detach the new child from its previous parent if it is not the new one during attaching
+	 * - set the new parent during attaching
+	 * - add it to the list of children
+	 */
+	
 	public static abstract class Graph<T>{
 	
 	    private final T object;
