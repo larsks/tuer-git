@@ -45,4 +45,20 @@ public class DirectedRootedKaryTree<V,E> extends DirectedRootedTree<V,E>{
 	public final int getK(){
 		return(k);
 	}
+	
+	@Override
+	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
+		boolean result=super.isEdgeAdditionValid(edge,vertices);
+		if(result)
+		    {final V firstVertex=vertices.getFirst();
+		     final int outgoingEdgesCount;
+		     //vertices cannot have more than k children
+		     if(containsVertex(firstVertex))
+		    	 outgoingEdgesCount=internalGetOutgoingEdges(firstVertex).size();
+		     else
+		    	 outgoingEdgesCount=0;
+		     result=outgoingEdgesCount<k;
+		    }
+		return(result);
+	}
 }

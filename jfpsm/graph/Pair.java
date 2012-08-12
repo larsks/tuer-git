@@ -14,6 +14,8 @@
 package jfpsm.graph;
 
 /**
+ * Pair of objects
+ * 
  * @author Julien Gouesse
  *
  */
@@ -30,6 +32,9 @@ public class Pair<E>{
 	 * @param second second element
 	 */
 	public Pair(final E first,final E second){
+		if(first==null||second==null)
+		    throw new IllegalArgumentException(
+		    		"A pair cannot contain null values");
 		this.first=first;
 		this.second=second;
 	}
@@ -40,5 +45,56 @@ public class Pair<E>{
 	
 	public final E getSecond(){
 		return(second);
+	}
+	
+	public boolean equals(Object o){
+		boolean result;
+		if(o==null||!(o instanceof Pair))
+			result=false;
+		else
+			if(o==this)
+			    result=true;
+			else
+		        {Pair<?> p=(Pair<?>)o;
+			     if(first==null&&p.getFirst()!=null)
+				     result=false;
+			     else
+				     if(second==null&&p.getSecond()!=null)
+					     result=false;
+				     else
+					     if(first!=null&&p.getFirst()==null)
+						     result=false;
+					     else
+						     if(second!=null&&p.getSecond()==null)
+							     result=false;
+						     else
+							     {final boolean firstEquals,secondEquals;
+							      if(first==p.getFirst())
+								      firstEquals=true;
+							      else
+								      firstEquals=first.equals(p.getFirst());
+							      if(second==p.getSecond())
+							          secondEquals=true;
+							      else
+						              secondEquals=second.equals(p.getSecond());
+						          result=firstEquals&&secondEquals;
+							     }
+		    }
+		return(result);
+	}
+	
+	@Override
+    public int hashCode(){
+    	int hashCode = 1;
+	    hashCode = 31*hashCode + (first==null ? 0 : first.hashCode());
+	    hashCode = 31*hashCode + (second==null ? 0 : second.hashCode());
+    	return(hashCode);
+    }
+	
+	@Override
+	public String toString(){
+		final String firstString=(first==null)?"null":first.toString();
+		final String secondString=(second==null)?"null":second.toString();
+		return("<"+firstString+";"+secondString+">");
 	}
 }

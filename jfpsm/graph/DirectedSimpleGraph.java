@@ -22,7 +22,7 @@ package jfpsm.graph;
  * @param <V> vertex class
  * @param <E> edge class
  */
-public class DirectedSimpleGraph<V,E> extends DirectedGraph<V,E>{
+public class DirectedSimpleGraph<V,E> extends DirectedGraphWithoutMultiEdge<V,E>{
 
 	/**
 	 * Constructor
@@ -34,4 +34,18 @@ public class DirectedSimpleGraph<V,E> extends DirectedGraph<V,E>{
 		super(ordered);
 	}
 
+	/* (non-Javadoc)
+	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
+	 */
+	@Override
+	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
+		boolean valid=super.isEdgeAdditionValid(edge,vertices);
+		if(valid)
+		    {final V firstVertex=vertices.getFirst();
+		     final V secondVertex=vertices.getSecond();
+		     //does not allow self-loops
+			 valid=!firstVertex.equals(secondVertex);
+		    }
+		return(valid);
+	}
 }
