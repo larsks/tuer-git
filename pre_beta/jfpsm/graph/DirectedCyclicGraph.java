@@ -21,7 +21,7 @@ package jfpsm.graph;
  * @param <V> vertex class
  * @param <E> edge class
  */
-public class DirectedCyclicGraph<V,E> extends DirectedMultiGraph<V,E>{
+public class DirectedCyclicGraph<V,E> extends DirectedGraphWithoutMultiEdge<V,E>{
 
 	/**
 	 * Constructor
@@ -32,4 +32,12 @@ public class DirectedCyclicGraph<V,E> extends DirectedMultiGraph<V,E>{
 	public DirectedCyclicGraph(final boolean ordered) {
 		super(ordered);
 	}
+	
+	//TODO when adding a vertex, create a synthetic edge to link the first vertex and the last vertex if necessary
+	
+	//TODO when adding an edge, create a synthetic edge to link the first vertex and the last vertex if necessary
+	
+	//TODO when removing a vertex, create a synthetic edge to link the first vertex and the last vertex if necessary
+	
+	//TODO when removing an edge, create a synthetic edge to link the first vertex and the last vertex if necessary
 }

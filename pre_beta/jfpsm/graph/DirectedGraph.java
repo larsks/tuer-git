@@ -34,11 +34,11 @@ public abstract class DirectedGraph<V,E>{
 	/**
 	 * map of vertices with their adjacency sets (incoming, outgoing)
 	 */
-	protected Map<V,Pair<Set<E>>> vertices;
+	protected final Map<V,Pair<Set<E>>> vertices;
 	/**
 	 * map of edges with their incident vertices (start point, end point)
 	 */
-	protected Map<E,Pair<V>> edges;
+	protected final Map<E,Pair<V>> edges;
     
 	/**
 	 * Constructor
@@ -57,8 +57,78 @@ public abstract class DirectedGraph<V,E>{
 		    }
 	}
 	
+	public boolean addEdge(E e,V v){
+		return(addEdge(e,new Pair<V>(v,v)));
+	}
+	
+	public boolean addEdge(E e,V v1,V v2){
+		return(addEdge(e,new Pair<V>(v1,v2)));
+	}
+	
+	public boolean addEdge(E edge,Pair<? extends V> vertices){
+        Pair<V> newVertices=getValidatedVertices(edge,vertices);
+        final boolean success=newVertices!=null&&
+        		isEdgeAdditionValid(edge,newVertices);
+        if(success)
+            {edges.put(edge,newVertices);
+        
+             V source = newVertices.getFirst();
+             V dest = newVertices.getSecond();
+
+             if(!containsVertex(source))
+                 this.addVertex(source);
+        
+             if(!containsVertex(dest))
+                 this.addVertex(dest);
+        
+             internalGetIncomingEdges(dest).add(edge);
+             internalGetOutgoingEdges(source).add(edge);
+            }
+        return(success);
+	}
+	
+	public boolean addVertex(V vertex){
+    	if(vertex==null)
+    		throw new IllegalArgumentException("vertex must not be null");
+    	final boolean success=!containsVertex(vertex);
+        if (success)
+            vertices.put(vertex,new Pair<Set<E>>(new HashSet<E>(),
+            		                             new HashSet<E>()));
+        return(success);
+    }
+	
 	public Collection<E> getEdges(){
         return(Collections.unmodifiableCollection(edges.keySet()));
+    }
+	
+	/**
+	 * Checks that the supplied edge is not already in this graph and returns
+	 * a validated pair of the appropriate type
+	 * 
+	 * @param edge
+	 * @param vertices
+	 * @return
+	 */
+	protected Pair<V> getValidatedVertices(E edge,Pair<? extends V> vertices){
+        if(edge==null)
+            throw new IllegalArgumentException("input edge must not be null");
+        
+        if(vertices==null)
+            throw new IllegalArgumentException("endpoints must not be null");
+        
+        Pair<V> newVertices=new Pair<V>(vertices.getFirst(),
+        		                        vertices.getSecond());
+        if(containsEdge(edge))
+            {Pair<V> existingVertices = getVertices(edge);
+             if(!existingVertices.equals(newVertices))
+                 throw new IllegalArgumentException("edge " + edge + 
+                        " already exists in this graph with vertices " + 
+                		 existingVertices + 
+                		 " and cannot be added with vertices " + vertices);
+             else
+            	 newVertices=null;
+            }
+        return(newVertices);
     }
 
     public Collection<V> getVertices(){
@@ -89,7 +159,7 @@ public abstract class DirectedGraph<V,E>{
         return(vertices.get(vertex).getFirst());
     }
     
-    protected Collection<E> getInternalOutgoingEdges(V vertex){
+    protected Collection<E> internalGetOutgoingEdges(V vertex){
         return(vertices.get(vertex).getSecond());
     }
     
@@ -108,7 +178,7 @@ public abstract class DirectedGraph<V,E>{
     	if (!containsVertex(vertex))
     		result=null;
     	else
-    		result=Collections.unmodifiableCollection(getInternalOutgoingEdges(
+    		result=Collections.unmodifiableCollection(internalGetOutgoingEdges(
     				vertex));
     	return(result);
     }
@@ -132,7 +202,7 @@ public abstract class DirectedGraph<V,E>{
         	result=null;
         else
             {Set<V> succs=new HashSet<V>();
-             for(E edge:getInternalOutgoingEdges(vertex))
+             for(E edge:internalGetOutgoingEdges(vertex))
                  succs.add(this.getDest(edge));
              result=Collections.unmodifiableCollection(succs);
             }
@@ -147,7 +217,7 @@ public abstract class DirectedGraph<V,E>{
             {Collection<V> neighbors=new HashSet<V>();
              for(E edge:internalGetIncomingEdges(vertex))
                  neighbors.add(this.getSource(edge));
-             for(E edge:getInternalOutgoingEdges(vertex))
+             for(E edge:internalGetOutgoingEdges(vertex))
                  neighbors.add(this.getDest(edge));
              result=Collections.unmodifiableCollection(neighbors);
             }
@@ -161,7 +231,7 @@ public abstract class DirectedGraph<V,E>{
     	else
     	    {incident = new HashSet<E>();
              incident.addAll(internalGetIncomingEdges(vertex));
-             incident.addAll(getInternalOutgoingEdges(vertex));
+             incident.addAll(internalGetOutgoingEdges(vertex));
     	    }
         return incident;
     }
@@ -169,7 +239,7 @@ public abstract class DirectedGraph<V,E>{
     public E findEdge(V v1,V v2){
     	E foundEdge=null;
         if(containsVertex(v1)&&containsVertex(v2))
-            for(E edge:getInternalOutgoingEdges(v1))
+            for(E edge:internalGetOutgoingEdges(v1))
                 if(this.getDest(edge).equals(v2))
             	    {foundEdge=edge;
             	     break;
@@ -205,5 +275,45 @@ public abstract class DirectedGraph<V,E>{
     	final boolean result=containsEdge(edge)&&containsVertex(vertex)&&
     			vertex.equals(this.getVertices(edge).getSecond());
         return(result);
+    }
+    
+    /**
+     * Tells whether this edge addition is valid for this kind of graph
+     * 
+     * @param edge
+     * @param vertices
+     * @return
+     */
+    protected abstract boolean isEdgeAdditionValid(E edge,Pair<V> vertices);
+    
+    public boolean removeEdge(E edge){
+    	final boolean success=containsEdge(edge);
+        if(success)
+            {Pair<V> vertices=this.getVertices(edge);
+             V source=vertices.getFirst();
+             V dest=vertices.getSecond();
+             
+             //removes edge from incident vertices' adjacency sets
+             internalGetOutgoingEdges(source).remove(edge);
+             internalGetIncomingEdges(dest).remove(edge);
+             
+             edges.remove(edge);
+            }
+        return(success);
+    }
+    
+    public boolean removeVertex(V vertex){
+    	final boolean success=containsVertex(vertex);
+        if(success)
+            {//copies to avoid concurrent modification in removeEdge
+             Set<E> incident = new HashSet<E>(internalGetIncomingEdges(vertex));
+             incident.addAll(internalGetOutgoingEdges(vertex));
+        
+             for(E edge:incident)
+                 removeEdge(edge);
+        
+             vertices.remove(vertex);
+            }
+        return(success);
     }
 }

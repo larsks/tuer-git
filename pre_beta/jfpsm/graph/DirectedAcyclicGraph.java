@@ -33,4 +33,33 @@ public class DirectedAcyclicGraph<V,E> extends DirectedSimpleGraph<V,E>{
 	public DirectedAcyclicGraph(final boolean ordered){
 		super(ordered);
 	}
+	
+	@Override
+	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
+		boolean result=super.isEdgeAdditionValid(edge,vertices);
+		if(result)
+		    {final V firstVertex=vertices.getFirst();
+			 final V secondVertex=vertices.getSecond();
+			 /**
+			  * checks that it would not create a short cycle between two 
+			  * vertices
+			  */
+			 result=findEdge(secondVertex,firstVertex)==null;
+			 //checks that it would not create a cycle
+			 if(result&&containsVertex(firstVertex)&&
+					    containsVertex(secondVertex))
+			     {final int incomingEdgesCount=
+			              internalGetIncomingEdges(firstVertex).size();
+				  final int outgoingEdgesCount=
+						  internalGetOutgoingEdges(secondVertex).size();
+				  if(incomingEdgesCount>0&&outgoingEdgesCount>0)
+				      {/**
+					    * TODO use a visitor (BFS), start from the second 
+					    * vertex and try to find the first vertex
+					    */
+				      }
+			     }
+		    }
+		return(result);
+	}
 }
