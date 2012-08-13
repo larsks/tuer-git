@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Graph composed of vertices and directed edges
+ * Graph composed of vertices and directed edges (inspired of JUNG 2.0)
  * 
  * @author Julien Gouesse
  *
@@ -57,15 +57,38 @@ public abstract class DirectedGraph<V,E>{
 		    }
 	}
 	
+	/**
+	 * Adds a self-loop to this graph
+	 * 
+	 * @param e edge
+	 * @param v vertex
+	 * @return <code>true</code> if the addition is successful, otherwise 
+	 * <code>false</code>
+	 */
 	public boolean addEdge(E e,V v){
 		return(addEdge(e,new Pair<V>(v,v)));
 	}
 	
+	/**
+	 * 
+	 * @param e
+	 * @param v1
+	 * @param v2
+	 * @return
+	 */
 	public boolean addEdge(E e,V v1,V v2){
 		return(addEdge(e,new Pair<V>(v1,v2)));
 	}
 	
+	/**
+	 * 
+	 * @param edge
+	 * @param vertices
+	 * @return
+	 */
 	public boolean addEdge(E edge,Pair<? extends V> vertices){
+		if(edge==null)
+			throw new IllegalArgumentException("edge must not be null");
         Pair<V> newVertices=getValidatedVertices(edge,vertices);
         final boolean success=newVertices!=null&&
         		isEdgeAdditionValid(edge,newVertices);
@@ -87,6 +110,11 @@ public abstract class DirectedGraph<V,E>{
         return(success);
 	}
 	
+	/**
+	 * 
+	 * @param vertex
+	 * @return
+	 */
 	public boolean addVertex(V vertex){
     	if(vertex==null)
     		throw new IllegalArgumentException("vertex must not be null");
@@ -97,6 +125,10 @@ public abstract class DirectedGraph<V,E>{
         return(success);
     }
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public Collection<E> getEdges(){
         return(Collections.unmodifiableCollection(edges.keySet()));
     }
@@ -131,38 +163,80 @@ public abstract class DirectedGraph<V,E>{
         return(newVertices);
     }
 
+	/**
+	 * 
+	 * @return
+	 */
     public Collection<V> getVertices(){
         return(Collections.unmodifiableCollection(vertices.keySet()));
     }
 
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public boolean containsVertex(V vertex){
     	return(vertices.keySet().contains(vertex));
     }
     
+    /**
+     * 
+     * @param edge
+     * @return
+     */
     public boolean containsEdge(E edge){
     	return(edges.keySet().contains(edge));
     }
     
+    /**
+     * 
+     * @param edge
+     * @return
+     */
     public Pair<V> getVertices(E edge){
     	return(edges.get(edge));
     }
     
+    /**
+     * 
+     * @return
+     */
     public int getEdgeCount(){
 		return(edges.size());
 	}
 
+    /**
+     * 
+     * @return
+     */
 	public int getVertexCount(){
 		return(vertices.size());
 	}
 	
+	/**
+	 * 
+	 * @param vertex
+	 * @return
+	 */
 	protected Collection<E> internalGetIncomingEdges(V vertex){
         return(vertices.get(vertex).getFirst());
     }
     
+	/**
+	 * 
+	 * @param vertex
+	 * @return
+	 */
     protected Collection<E> internalGetOutgoingEdges(V vertex){
         return(vertices.get(vertex).getSecond());
     }
     
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<E> getIncomingEdges(V vertex) {
     	final Collection<E> result;
     	if(!containsVertex(vertex))
@@ -173,6 +247,11 @@ public abstract class DirectedGraph<V,E>{
     	return(result);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<E> getOutgoingEdges(V vertex) {
     	final Collection<E> result;
     	if (!containsVertex(vertex))
@@ -183,6 +262,11 @@ public abstract class DirectedGraph<V,E>{
     	return(result);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<V> getPredecessors(V vertex){
     	final Collection<V> result;
         if(!containsVertex(vertex))
@@ -196,6 +280,11 @@ public abstract class DirectedGraph<V,E>{
         return(result);
     }
     
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<V> getSuccessors(V vertex){
     	final Collection<V> result;
         if(!containsVertex(vertex))
@@ -209,6 +298,11 @@ public abstract class DirectedGraph<V,E>{
         return(result);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<V> getNeighbors(V vertex){
     	final Collection<V> result;
         if(!containsVertex(vertex))
@@ -224,6 +318,11 @@ public abstract class DirectedGraph<V,E>{
         return(result);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public Collection<E> getIncidentEdges(V vertex){
     	final Collection<E> incident;
     	if(!containsVertex(vertex))
@@ -236,6 +335,12 @@ public abstract class DirectedGraph<V,E>{
         return incident;
     }
 
+    /**
+     * 
+     * @param v1
+     * @param v2
+     * @return
+     */
     public E findEdge(V v1,V v2){
     	E foundEdge=null;
         if(containsVertex(v1)&&containsVertex(v2))
@@ -247,6 +352,11 @@ public abstract class DirectedGraph<V,E>{
         return(foundEdge);
     }
     
+    /**
+     * 
+     * @param edge
+     * @return
+     */
     public V getSource(E edge){
     	final V sourceVertex;
         if(!containsEdge(edge))
@@ -256,6 +366,11 @@ public abstract class DirectedGraph<V,E>{
         return(sourceVertex);
     }
 
+    /**
+     * 
+     * @param edge
+     * @return
+     */
     public V getDest(E edge){
     	final V destinationVertex;
         if(!containsEdge(edge))
@@ -265,12 +380,24 @@ public abstract class DirectedGraph<V,E>{
         return(destinationVertex);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @param edge
+     * @return
+     */
     public boolean isSource(V vertex,E edge){
     	final boolean result=containsEdge(edge)&&containsVertex(vertex)&&
     			vertex.equals(this.getVertices(edge).getFirst());
         return(result);
     }
 
+    /**
+     * 
+     * @param vertex
+     * @param edge
+     * @return
+     */
     public boolean isDest(V vertex,E edge){
     	final boolean result=containsEdge(edge)&&containsVertex(vertex)&&
     			vertex.equals(this.getVertices(edge).getSecond());
@@ -302,6 +429,11 @@ public abstract class DirectedGraph<V,E>{
         return(success);
     }
     
+    /**
+     * 
+     * @param vertex
+     * @return
+     */
     public boolean removeVertex(V vertex){
     	final boolean success=containsVertex(vertex);
         if(success)

@@ -447,7 +447,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     {Plane plane=entry.getKey();
 				  //for each list of adjacent triangles
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
-			          {//builds a quaternary tree from the list of triangles
+			          {//builds a quad tree from the list of triangles
 				       /*QuaternaryTreeNode quadTree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
 				       if(quadTree!=null)
 				           {*/int width=0;
@@ -523,63 +523,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	    return result;
 	}
 	
-	/*private static QuaternaryTreeNode buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
+	/*private static QuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
 	    //TODO
 	    return null;
-	}
-	
-	private static class QuaternaryTreeNode<T> {
-	
-	    private final ArrayList<QuaternaryTreeNode<T>> children;
-	    
-	    private final QuaternaryTreeNode<T> up;
-	    
-	    private final QuaternaryTreeNode<T> right;
-	    
-	    private final QuaternaryTreeNode<T> down;
-	    
-	    private final QuaternaryTreeNode<T> left;
-	    
-	    private final T object;
-	    
-	    private QuaternaryTreeNode(QuaternaryTreeNode<T> up, QuaternaryTreeNode<T> right,
-	            QuaternaryTreeNode<T> down, QuaternaryTreeNode<T> left, T object) {
-	        this.up=up;
-	        this.right=right;
-	        this.down=down;
-	        this.left=left;
-	        this.children=new ArrayList<QuaternaryTreeNode<T>>(4);
-	        this.object=object;
-	    }	    
 	}*/
 	
-	/*static abstract class TreeNode<T>{
-	    
-	    private final Set<? extends TreeNode<T>> linkedNodes;
-	    
-	    private final T object;
-	    
-	    protected TreeNode(final T object){
-	        this.linkedNodes=createSetOfLinkedNodes();
-	        this.object=object;
-	    }
-	    
-	    public final T getObject(){
-	        return(object);
-	    }
-	    
-	    protected abstract Set<? extends TreeNode<T>> createSetOfLinkedNodes();
-	    
-	    
-	}*/
-	
-	/*public static abstract class TreeNodeWithFixedSetOfLinkedNodes<T> extends TreeNode<T>{
-	    
-	
-	}*/
-	
-	//TODO add null checks to detachChild() and attachChild()
-	//TODO switch to a "graph node" approach
 	/**
 	 * TODO implement a specialization for tree nodes: 
 	 * - prevent "this" from being attached

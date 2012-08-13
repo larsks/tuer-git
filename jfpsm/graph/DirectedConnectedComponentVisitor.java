@@ -13,7 +13,7 @@
 */
 package jfpsm.graph;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Object used to traverse the connected component of a directed graph
@@ -21,7 +21,8 @@ import java.util.ArrayList;
  * @author Julien Gouesse
  *
  */
-public abstract class DirectedConnectedComponentVisitor<V,E>{
+public abstract class DirectedConnectedComponentVisitor<V,E> extends 
+                      Visitor<V,E>{
 
 	/**
 	 * Constructor
@@ -30,31 +31,9 @@ public abstract class DirectedConnectedComponentVisitor<V,E>{
 		super();
 	}
 	
-	public boolean visit(final DirectedGraph<V,E> graph,
-			final V firstElementToVisit,
-			final boolean breadthFirstSearchEnabled){
-        final ArrayList<V> markedChildrenList=new ArrayList<V>();
-        final ArrayList<V> queueOrStack=new ArrayList<V>();
-        markedChildrenList.add(firstElementToVisit);
-        queueOrStack.add(firstElementToVisit);
-        boolean mustGoOn=true;
-        while(!queueOrStack.isEmpty())
-            {//gets the next element (pop operation)
-             final V currentlyVisitedElement=queueOrStack.remove(breadthFirstSearchEnabled?0:queueOrStack.size()-1);
-             //performs the main operation and tells whether the traversal must go on
-             if(mustGoOn=performOnCurrentlyVisitedElement(currentlyVisitedElement))
-                 for(V successor:graph.getSuccessors(currentlyVisitedElement))
-                     {if(!markedChildrenList.contains(successor))
-                          {//marks the element to avoid traveling it more than once
-                           markedChildrenList.add(successor);
-                           //adds a new element to traverse (push operation)
-                           queueOrStack.add(successor);
-                          }
-                     }
-            }
-        return(mustGoOn);
-    }
-
-    public abstract boolean performOnCurrentlyVisitedElement(final V currentlyVisitedElement);
-
+	@Override
+	protected Collection<V> getNextTraversableVertices(final DirectedGraph<V,E> graph,final V currentlyVisitedElement){
+		final Collection<V> successors=graph.getSuccessors(currentlyVisitedElement);
+		return(successors);
+	}
 }
