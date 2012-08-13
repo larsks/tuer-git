@@ -14,31 +14,30 @@
 package jfpsm.graph;
 
 /**
- * Graph composed of vertices and directed edges, that allows self-loops and 
- * parallel edges
+ * Object used to traverse the connected component of a directed graph until a 
+ * supplied vertex is found
  * 
  * @author Julien Gouesse
  *
- * @param <V> vertex class
- * @param <E> edge class
  */
-public class DirectedMultiGraph<V,E> extends DirectedGraph<V,E>{
+public class DirectedConnectedComponentSearchVisitor<V, E> extends
+		DirectedConnectedComponentVisitor<V, E> {
 
+	private final V searchedVertex;
+	
 	/**
 	 * Constructor
-	 * 
-	 * @param ordered flag indicating whether the vertices and the edges are 
-	 * stored in a way that preserves the order by insertion time
 	 */
-	public DirectedMultiGraph(final boolean ordered){
-		super(ordered);
+	public DirectedConnectedComponentSearchVisitor(final V searchedVertex){
+		super();
+		this.searchedVertex=searchedVertex;
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
+	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(java.lang.Object)
 	 */
 	@Override
-	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
-		return(true);
+	protected boolean performOnCurrentlyVisitedVertex(V currentlyVisitedVertex){
+		return(!currentlyVisitedVertex.equals(searchedVertex));
 	}
 }

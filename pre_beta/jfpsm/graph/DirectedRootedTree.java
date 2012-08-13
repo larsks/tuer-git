@@ -42,6 +42,9 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
 	
 	//TODO add a method to get the root
 	
+	/* (non-Javadoc)
+	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
+	 */
 	@Override
 	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
 		boolean result=super.isEdgeAdditionValid(edge,vertices);
