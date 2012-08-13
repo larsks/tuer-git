@@ -28,6 +28,8 @@ import java.util.Collection;
  */
 public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
 
+	protected V root;
+	
 	/**
 	 * Constructor
 	 * 
@@ -38,9 +40,11 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
 		super(ordered);
 	}
 	
-	//TODO add a method to create a tree with a subset of vertices
+	public V getRoot(){
+		return(root);
+	}
 	
-	//TODO add a method to get the root
+	//TODO add a method to create a tree with a subset of vertices
 	
 	/* (non-Javadoc)
 	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
@@ -126,7 +130,8 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
              V dest = newVertices.getSecond();
 
              if(!containsVertex(source))
-                 super.addVertex(source);
+                 if(super.addVertex(source))
+                	 root=source;
         
              if(!containsVertex(dest))
                  super.addVertex(dest);
@@ -151,6 +156,8 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
 			 /**
 			  * if it works, this vertex becomes the root
 			  */
+			 if(success)
+				 root=vertex;
 		    }
 		else
 			{/**
@@ -199,6 +206,7 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
         	     {//this vertex is the root, the tree must be emptied
         		  edges.clear();
         		  vertices.clear();
+        		  root=null;
         	     }
             }
         return(success);
