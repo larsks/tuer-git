@@ -34,6 +34,9 @@ public class DirectedAcyclicGraph<V,E> extends DirectedSimpleGraph<V,E>{
 		super(ordered);
 	}
 	
+	/* (non-Javadoc)
+	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
+	 */
 	@Override
 	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
 		boolean result=super.isEdgeAdditionValid(edge,vertices);
@@ -54,9 +57,17 @@ public class DirectedAcyclicGraph<V,E> extends DirectedSimpleGraph<V,E>{
 						  internalGetOutgoingEdges(secondVertex).size();
 				  if(incomingEdgesCount>0&&outgoingEdgesCount>0)
 				      {/**
-					    * TODO use a visitor (BFS), start from the second 
-					    * vertex and try to find the first vertex
+					    * uses a visitor (BFS), starts from the second 
+					    * vertex and tries to find the first vertex
 					    */
+					   final DirectedConnectedComponentSearchVisitor<V,E> 
+					   visitor=new DirectedConnectedComponentSearchVisitor<V,E>(
+							   firstVertex);
+					   /**
+					    * the visitor returns true if the first vertex cannot 
+					    * be reached from the second vertex
+					    */
+					   result=visitor.visit(this,secondVertex,true);
 				      }
 			     }
 		    }
