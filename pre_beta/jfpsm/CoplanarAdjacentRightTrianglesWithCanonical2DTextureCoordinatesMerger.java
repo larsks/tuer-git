@@ -18,6 +18,10 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import jfpsm.graph.DirectedRootedKaryTree;
+import jfpsm.graph.Pair;
+
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -448,9 +452,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  //for each list of adjacent triangles
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
 			          {//builds a quad tree from the list of triangles
-				       /*QuaternaryTreeNode quadTree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
-				       if(quadTree!=null)
-				           {*/int width=0;
+				       LocalQuadTree tree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
+				       if(tree!=null)
+				           {int width=0;
 				            int height=0;
 				            //TODO compute the maximum size of the 2D array of adjacent triangles
 				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
@@ -465,7 +469,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                }
 				            adjacentTrisArraysListsList.add(adjacentTrisArraysList);
 				           }
-			          /*}*/		  
+			          }		  
 			     }
 			 //TODO: sixth step: create these bigger rectangles (update their texture coordinates (use coordinates greater 
 			 //than 1) in order to use texture repeat)
@@ -523,10 +527,25 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	    return result;
 	}
 	
-	/*private static QuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
-	    //TODO
-	    return null;
-	}*/
+	private enum QuadTreeElementOrientationEdge{
+		LEFT,
+		RIGHT,
+		TOP,
+		BOTTOM
+	};
+	
+	private static final class LocalQuadTree extends DirectedRootedKaryTree<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
+
+		private LocalQuadTree(){
+			super(false,4);
+		}
+	}
+	
+	private static LocalQuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
+	    final LocalQuadTree tree=new LocalQuadTree();
+		//TODO
+	    return(tree);
+	}
 	
 	/**
 	 * TODO implement a specialization for tree nodes: 
