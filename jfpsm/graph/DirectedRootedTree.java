@@ -39,7 +39,7 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
 	 * @param ordered flag indicating whether the vertices and the edges are 
 	 * stored in a way that preserves the order by insertion time
 	 */
-	public DirectedRootedTree(boolean ordered){
+	public DirectedRootedTree(final boolean ordered){
 		super(ordered);
 	}
 	
