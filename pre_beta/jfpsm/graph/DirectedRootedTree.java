@@ -13,7 +13,10 @@
 */
 package jfpsm.graph;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Weakly connected graph composed of directed edges and vertices that have 
@@ -187,20 +190,31 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
             {Collection<E> incomingEdges=internalGetIncomingEdges(vertex);
         	 if(!incomingEdges.isEmpty())
         	     {//this vertex is not the root
-        		  //gets its parent
-        		  final E edgeFromParent=incomingEdges.iterator().next();
-        	      //removes all its successors and so on...
         	      /**
-        	       * TODO use a visitor (BFS) to get its direct and indirect 
-        	       * successors, start using this set by the end. For each 
-        	       * vertex, remove its unique incoming edge 
-        	       * (super.removeEdge(incomingEdge)) and remove it 
-        	       * (vertices.remove(vertex))
+        	       * uses a visitor (BFS) to get its direct and indirect 
+        	       * successors
         	       */
-        		  //removes the edge coming from its parent
-        	      super.removeEdge(edgeFromParent);
-        	      //removes this vertex
-        	      vertices.remove(vertex);
+        		  final DirectedConnectedComponentVisitorWithHistory<V,E> 
+        		  visitor=new DirectedConnectedComponentVisitorWithHistory<V,E>();
+        		  visitor.visit(this,vertex,true);
+        		  final List<V> directAndIndirectsuccessors=new ArrayList<V>();
+        		  directAndIndirectsuccessors.addAll(visitor.getVisitedVertices());
+        		  /**
+        		   * starts using this set by the end, reverses the order of 
+        		   * the vertices
+        		   */
+        		  Collections.reverse(directAndIndirectsuccessors);
+        		  //removes all its successors and so on...
+        		  for(V vertexToRemove:directAndIndirectsuccessors)
+        		      {//gets the incoming edges (there should be only one)
+        			   incomingEdges=internalGetIncomingEdges(vertexToRemove);
+        			   //gets the edge coming from its parent
+        			   final E edgeFromParent=incomingEdges.iterator().next();
+        			   //removes the edge coming from its parent
+        			   super.removeEdge(edgeFromParent);
+        			   //removes the vertex
+            	       vertices.remove(vertexToRemove);
+        		      }
         	     }
         	 else
         	     {//this vertex is the root, the tree must be emptied
