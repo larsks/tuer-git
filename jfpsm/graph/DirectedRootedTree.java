@@ -194,8 +194,8 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
         	       * uses a visitor (BFS) to get its direct and indirect 
         	       * successors
         	       */
-        		  final DirectedConnectedComponentVisitorWithHistory<V,E> 
-        		  visitor=new DirectedConnectedComponentVisitorWithHistory<V,E>();
+        		  final DirectedConnectedComponentVisitorWithHistory<V,E,DirectedRootedTree<V,E>> 
+        		  visitor=new DirectedConnectedComponentVisitorWithHistory<V,E,DirectedRootedTree<V,E>>();
         		  visitor.visit(this,vertex,true);
         		  final List<V> directAndIndirectsuccessors=new ArrayList<V>();
         		  directAndIndirectsuccessors.addAll(visitor.getVisitedVertices());

@@ -22,7 +22,7 @@ import java.util.Collection;
  * @author Julien Gouesse
  *
  */
-public abstract class Visitor<V,E>{
+public abstract class Visitor<V,E,G extends DirectedGraph<V,E>>{
 
 	/**
 	 * Constructor
@@ -43,7 +43,7 @@ public abstract class Visitor<V,E>{
 	 * (see {@link Visitor#performOnCurrentlyVisitedVertex(Object)}), 
 	 * otherwise <code>false</code>
 	 */
-	public boolean visit(final DirectedGraph<V,E> graph,
+	public boolean visit(final G graph,
 			final V firstVertexToVisit,
 			final boolean breadthFirstSearchEnabled){
         final ArrayList<V> markedChildrenList=new ArrayList<V>();
@@ -77,7 +77,7 @@ public abstract class Visitor<V,E>{
 	 * @return the next vertices to traverse
 	 */
 	protected abstract Collection<V> getNextTraversableVertices(
-			final DirectedGraph<V,E> graph,final V currentlyVisitedVertex);
+			final G graph,final V currentlyVisitedVertex);
 
 	/**
 	 * Performs an operation on the currently visited vertex
@@ -88,5 +88,5 @@ public abstract class Visitor<V,E>{
 	 * <code>false</code> if it must be interrupted
 	 */
 	protected abstract boolean performOnCurrentlyVisitedVertex(
-			final DirectedGraph<V,E> graph,final V currentlyVisitedVertex);
+			final G graph,final V currentlyVisitedVertex);
 }

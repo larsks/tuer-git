@@ -20,8 +20,8 @@ package jfpsm.graph;
  * @author Julien Gouesse
  *
  */
-public class DirectedConnectedComponentSearchVisitor<V, E> extends
-		DirectedConnectedComponentVisitor<V, E> {
+public class DirectedConnectedComponentSearchVisitor<V,E,G extends DirectedGraph<V,E>> extends
+		DirectedConnectedComponentVisitor<V,E,G> {
 
 	private final V searchedVertex;
 	
@@ -34,11 +34,11 @@ public class DirectedConnectedComponentSearchVisitor<V, E> extends
 	}
 
 	/* (non-Javadoc)
-	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(java.lang.Object)
+	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(jfpsm.graph.DirectedGraph, java.lang.Object)
 	 */
 	@Override
 	protected boolean performOnCurrentlyVisitedVertex(
-			final DirectedGraph<V,E> graph,final V currentlyVisitedVertex){
+			final G graph,final V currentlyVisitedVertex){
 		return(!currentlyVisitedVertex.equals(searchedVertex));
 	}
 }

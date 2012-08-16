@@ -21,8 +21,8 @@ import java.util.Collection;
  * @author Julien Gouesse
  *
  */
-public abstract class DirectedConnectedComponentVisitor<V,E> extends 
-                      Visitor<V,E>{
+public abstract class DirectedConnectedComponentVisitor<V,E,G extends DirectedGraph<V,E>> extends 
+                      Visitor<V,E,G>{
 
 	/**
 	 * Constructor
@@ -32,7 +32,7 @@ public abstract class DirectedConnectedComponentVisitor<V,E> extends
 	}
 	
 	@Override
-	protected Collection<V> getNextTraversableVertices(final DirectedGraph<V,E> graph,final V currentlyVisitedElement){
+	protected Collection<V> getNextTraversableVertices(final G graph,final V currentlyVisitedElement){
 		final Collection<V> successors=graph.getSuccessors(currentlyVisitedElement);
 		return(successors);
 	}
