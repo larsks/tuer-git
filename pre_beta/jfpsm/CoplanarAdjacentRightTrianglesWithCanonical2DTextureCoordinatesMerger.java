@@ -15,10 +15,13 @@ package jfpsm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import jfpsm.graph.DirectedConnectedComponentVisitor;
+import jfpsm.graph.DirectedGraph;
 import jfpsm.graph.DirectedRootedKaryTree;
 import jfpsm.graph.Pair;
 
@@ -454,9 +457,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			          {//builds a quad tree from the list of triangles
 				       LocalQuadTree tree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
 				       if(tree!=null)
-				           {int width=0;
-				            int height=0;
-				            //TODO compute the maximum size of the 2D array of adjacent triangles
+				           {//computes the maximum size of the 2D array of adjacent triangles
+				    	    final int[] tree2dDimension=computeTree2dDimension(tree);
+				    	    final int width=tree2dDimension[0];
+				            final int height=tree2dDimension[1];
+				            //creates the 2D array with the appropriate size
 				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
 				            //TODO fill this array
 				            ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
@@ -527,12 +532,21 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	    return result;
 	}
 	
-	private enum QuadTreeElementOrientationEdge{
+	private enum QuadTreeElementOrientation{
 		LEFT,
 		RIGHT,
 		TOP,
 		BOTTOM
 	};
+	
+	private static final class QuadTreeElementOrientationEdge{
+		
+		private final QuadTreeElementOrientation orientation;
+		
+		private QuadTreeElementOrientationEdge(final QuadTreeElementOrientation orientation){
+			this.orientation=orientation;
+		}
+	}
 	
 	private static final class LocalQuadTree extends DirectedRootedKaryTree<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
 
@@ -541,10 +555,70 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
-	private static LocalQuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
+	private static final LocalQuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
 	    final LocalQuadTree tree=new LocalQuadTree();
-		//TODO
+	    if(!trisList.isEmpty())
+	        {//TODO use the 2 shortest edges of the first triangle and their normal as a base
+	    	 
+	        }
 	    return(tree);
+	}
+	
+	private static final class LocalQuadTree2dDimensionCalculator extends DirectedConnectedComponentVisitor<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
+
+		private int i,j,leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex;
+		
+		@Override
+		protected final boolean performOnCurrentlyVisitedVertex(
+				DirectedGraph<RightTriangleInfo[], QuadTreeElementOrientationEdge> graph,
+				RightTriangleInfo[] currentlyVisitedVertex){
+			final LocalQuadTree tree=(LocalQuadTree)graph;
+			if(tree.getRoot()!=currentlyVisitedVertex)
+			    {final Collection<QuadTreeElementOrientationEdge> incomingEdges=tree.getIncomingEdges(currentlyVisitedVertex);
+			     final QuadTreeElementOrientationEdge edgeFromParent=incomingEdges.iterator().next();
+			     switch(edgeFromParent.orientation)
+			     {case LEFT:
+			          {i--;
+			           leftMostIndex=Math.min(leftMostIndex,i);
+			           break;
+			          }
+			      case RIGHT:
+			          {i++;
+		               rightMostIndex=Math.max(rightMostIndex,i);
+		               break;
+		              }
+			      case TOP:
+			          {j--;
+			           topMostIndex=Math.min(topMostIndex,j);
+			           break;
+			          }
+			      case BOTTOM:
+			          {j++;
+			           bottomMostIndex=Math.max(bottomMostIndex,j);
+			           break;
+			          }
+			     }
+			    }
+			return(true);
+		}
+
+		private final int[] get2dDimension(){
+			final int width=Math.abs(rightMostIndex-leftMostIndex)+1;
+			final int height=Math.abs(bottomMostIndex-topMostIndex)+1;
+			return(new int[]{width,height});
+		}
+	}
+	
+	private static final int[] computeTree2dDimension(LocalQuadTree tree){
+		final int[] dimension;
+		if(tree.getVertexCount()>0)
+            {final LocalQuadTree2dDimensionCalculator visitor=new LocalQuadTree2dDimensionCalculator();
+             visitor.visit(tree,tree.getRoot(),true);
+             dimension=visitor.get2dDimension();
+            }
+		else
+			dimension=new int[]{0,0};
+		return(dimension);
 	}
 	
 	/**

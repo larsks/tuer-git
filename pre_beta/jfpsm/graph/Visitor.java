@@ -55,7 +55,7 @@ public abstract class Visitor<V,E>{
             {//gets the next vertex (pop operation)
              final V currentlyVisitedVertex=queueOrStack.remove(breadthFirstSearchEnabled?0:queueOrStack.size()-1);
              //performs the main operation and tells whether the traversal must go on
-             if(mustGoOn=performOnCurrentlyVisitedVertex(currentlyVisitedVertex))
+             if(mustGoOn=performOnCurrentlyVisitedVertex(graph,currentlyVisitedVertex))
                  for(V successor:getNextTraversableVertices(graph,currentlyVisitedVertex))
                      {if(!markedChildrenList.contains(successor))
                           {//marks the vertex to avoid traveling it more than once
@@ -72,7 +72,7 @@ public abstract class Visitor<V,E>{
 	 * Gets the next vertices linked to the currently visited vertex that are 
 	 * going to be traversed
 	 * 
-	 * @param graph the traversed graph 
+	 * @param graph the traversed graph
 	 * @param currentlyVisitedVertex the currently visited vertex
 	 * @return the next vertices to traverse
 	 */
@@ -82,10 +82,11 @@ public abstract class Visitor<V,E>{
 	/**
 	 * Performs an operation on the currently visited vertex
 	 * 
+	 * @param graph the traversed graph
 	 * @param currentlyVisitedVertex currently visited vertex
 	 * @return <code>true</code> if the traversal must go on, 
 	 * <code>false</code> if it must be interrupted
 	 */
 	protected abstract boolean performOnCurrentlyVisitedVertex(
-    		final V currentlyVisitedVertex);
+			final DirectedGraph<V,E> graph,final V currentlyVisitedVertex);
 }

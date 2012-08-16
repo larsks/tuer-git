@@ -41,7 +41,8 @@ public class DirectedConnectedComponentVisitorWithHistory<V, E> extends
 	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(java.lang.Object)
 	 */
 	@Override
-	protected boolean performOnCurrentlyVisitedVertex(V currentlyVisitedVertex){
+	protected boolean performOnCurrentlyVisitedVertex(
+			final DirectedGraph<V,E> graph,final V currentlyVisitedVertex){
 		visitedVertices.add(currentlyVisitedVertex);
 		return(true);
 	}
