@@ -564,15 +564,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	    return(tree);
 	}
 	
-	private static final class LocalQuadTree2dDimensionCalculator extends DirectedConnectedComponentVisitor<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
+	private static final class LocalQuadTree2dDimensionCalculator extends DirectedConnectedComponentVisitor<RightTriangleInfo[],QuadTreeElementOrientationEdge,LocalQuadTree>{
 
 		private int i,j,leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex;
 		
 		@Override
 		protected final boolean performOnCurrentlyVisitedVertex(
-				DirectedGraph<RightTriangleInfo[], QuadTreeElementOrientationEdge> graph,
-				RightTriangleInfo[] currentlyVisitedVertex){
-			final LocalQuadTree tree=(LocalQuadTree)graph;
+				final LocalQuadTree tree,
+				final RightTriangleInfo[] currentlyVisitedVertex){
 			if(tree.getRoot()!=currentlyVisitedVertex)
 			    {final Collection<QuadTreeElementOrientationEdge> incomingEdges=tree.getIncomingEdges(currentlyVisitedVertex);
 			     final QuadTreeElementOrientationEdge edgeFromParent=incomingEdges.iterator().next();

@@ -60,8 +60,8 @@ public class DirectedAcyclicGraph<V,E> extends DirectedSimpleGraph<V,E>{
 					    * uses a visitor (BFS), starts from the second 
 					    * vertex and tries to find the first vertex
 					    */
-					   final DirectedConnectedComponentSearchVisitor<V,E> 
-					   visitor=new DirectedConnectedComponentSearchVisitor<V,E>(
+					   final DirectedConnectedComponentSearchVisitor<V,E,DirectedAcyclicGraph<V,E>> 
+					   visitor=new DirectedConnectedComponentSearchVisitor<V,E,DirectedAcyclicGraph<V,E>>(
 							   firstVertex);
 					   /**
 					    * the visitor returns true if the first vertex cannot 
