@@ -19,12 +19,8 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
-
 import jfpsm.graph.DirectedConnectedComponentVisitor;
-import jfpsm.graph.DirectedGraph;
 import jfpsm.graph.DirectedRootedKaryTree;
-import jfpsm.graph.Pair;
-
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -61,6 +57,28 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			this.primitiveIndex=primitiveIndex;
 			this.sectionIndex=sectionIndex;
 			this.sideIndexOfHypotenuse=sideIndexOfHypotenuse;
+		}
+		
+		@Override
+		public final boolean equals(Object o){
+			final boolean result;
+			if(o==null||!(o instanceof RightTriangleInfo))
+			    result=false;
+			else
+			    {RightTriangleInfo r=(RightTriangleInfo)o;
+				 if(r==this)
+					 result=true;
+				 else
+				     result=primitiveIndex==r.primitiveIndex&&
+				            sectionIndex==r.sectionIndex&&
+				            sideIndexOfHypotenuse==r.sideIndexOfHypotenuse;
+			    }
+			return(result);
+		}
+		
+		@Override
+		public int hashCode(){
+			return((sideIndexOfHypotenuse&0xff)|(sectionIndex&0xff<<8)|(primitiveIndex&0xffff<<16));
 		}
 	}
 	
@@ -175,13 +193,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						               * and if their opposite sides have the same length (i.e it is a parallelogram).
 						               * As a parallelogram with 2 right angles is necessarily a rectangle, such a shape is a rectangle.
 						               * */
-						              boolean sameHypotenuseOppositeSidesOfSameLengthSameWinding=tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
+						              boolean sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder=tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
 							             tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
 							             tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
 							             tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3])&&
 							             tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
 							             tri2Vertices[tri2.sideIndexOfHypotenuse].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]);
-						              boolean sameHypotenuseOppositeSidesOfSameLengthReverseWinding=!sameHypotenuseOppositeSidesOfSameLengthSameWinding&&
+						              boolean sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder=!sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder&&
 						    		     (tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3])&&
 									      tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2Vertices[tri2.sideIndexOfHypotenuse])&&
 							              tri1Vertices[tri1.sideIndexOfHypotenuse].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
@@ -189,19 +207,19 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 							              tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3].distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3])==
 							              tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3].distanceSquared(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]));
 						              //checks if their vertices at their right angles are different
-						              boolean sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles=(sameHypotenuseOppositeSidesOfSameLengthSameWinding||
-						    		     sameHypotenuseOppositeSidesOfSameLengthReverseWinding)&&
+						              boolean sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles=(sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder||
+						            		  sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder)&&
 						    		     !tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]);
-						              //N.B: triangles must have different winding to have the same normal
+						              //N.B: triangles must have different vertex orders to have the same normal
 						              if(sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles&&
-						            	 sameHypotenuseOppositeSidesOfSameLengthReverseWinding)
+						            	 sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder)
 						                  {//checks the texture coordinates
 						    	           boolean texCoordsMatch=true;
 						    	           for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&texCoordsMatch;textureIndex++)
 						                       {tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,textureIndex,tri1TextureCoords);
 						                        tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,textureIndex,tri2TextureCoords);
 						                        //checks if the vertices of the hypotenuse must have the same texture coordinates in both triangles
-						                        if(sameHypotenuseOppositeSidesOfSameLengthSameWinding)
+						                        if(sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder)
 						                            {texCoordsMatch=tri1TextureCoords[tri1.sideIndexOfHypotenuse].equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse])&&
 						                		                    tri1TextureCoords[(tri1.sideIndexOfHypotenuse+1)%3].equals(tri2TextureCoords[(tri2.sideIndexOfHypotenuse+1)%3]);
 						                            }
@@ -298,16 +316,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            tri4=rightTrianglesByPairs.get(triIndex34+1);				            
 				            tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
 				            tri4Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
-				            boolean oneCommonSideCorrectWinding2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				            
-				            boolean oneCommonSideCorrectWinding2oppositeSidesOfSameLength=false;
-				            boolean oneCommonSideCorrectWinding=false;
+				            boolean oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=false;				            
+				            boolean oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength=false;
+				            boolean oneCommonSideCorrectVertexOrder=false;
 				            boolean oneCommonSide=false;
 				            boolean oneCommonVertex=false;
 				            /**
 				             * checks if both rectangles have exactly one common side, i.e if one vertex is common to 2 triangles 
 				             * from 2 different rectangles but not on any hypotenuse and if another vertex is common to 2 triangles
 				             * from 2 different rectangles but on the both hypotenuse.
-				             * Then, it checks if the winding of the rectangles is the same
+				             * Then, it checks if the vertex order of the rectangles is the same
 				             * After that, it checks if the orthogonal sides adjacent with this common side have the same length.
 				             * Finally, it checks if both rectangles have the same texture coordinates.
 				             * */
@@ -315,7 +333,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            tris[1]=tri2;
 				            tris[2]=tri3;
 				            tris[3]=tri4;
-				            for(int i=0,ti0,ti1,ti2,ti3;i<4&&!oneCommonSideCorrectWinding2oppositeSidesOfSameLength;i++)
+				            for(int i=0,ti0,ti1,ti2,ti3;i<4&&!oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength;i++)
 				                {//{0;1}
 				            	 ti0=i/2;
 				            	 Vector3[] tv0=trisVertices[ti0];
@@ -338,13 +356,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                              {for(int k=0;k<2&&!oneCommonSide;k++)
 				                        	       if(tv0[(tr0.sideIndexOfHypotenuse+k)%3].equals(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
 				                                       {oneCommonSide=true;
-				                                        //checks if the winding is correct
-				                                        oneCommonSideCorrectWinding=j!=k;
-				                                        if(oneCommonSideCorrectWinding)
+				                                        //checks if the vertex order is correct
+				                                        oneCommonSideCorrectVertexOrder=j!=k;
+				                                        if(oneCommonSideCorrectVertexOrder)
 				                                            {//checks if the orthogonal sides adjacent with this common side have the same length
 					                                         if(tv0[(tr0.sideIndexOfHypotenuse+((k+1)%2))%3].distanceSquared(tv0[(tr0.sideIndexOfHypotenuse+2)%3])==
 									                            tv1[(tr1.sideIndexOfHypotenuse+((j+1)%2))%3].distanceSquared(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
-							                        	         {oneCommonSideCorrectWinding2oppositeSidesOfSameLength=true;	                        	          
+							                        	         {oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength=true;	                        	          
 							                        	          //checks the texture coordinates
 									            				  boolean texCoordsMatch=true;				            				   
 									            				  //for each texture unit
@@ -358,7 +376,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            					   texCoordsMatch&=trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse+((k+1)%2))%3].equals(trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse+j)%3]);
 									            					   texCoordsMatch&=trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse+((j+1)%2))%3].equals(trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse+k)%3]);
 									            				      }
-									            				  oneCommonSideCorrectWinding2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
+									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 							                        	         }				                                        	 
 				                                            }				                                        
 				                                       }
@@ -367,13 +385,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                              {for(int k=0;k<4&&!oneCommonSide;k++)
 				                        	       if(tv0[(tr0.sideIndexOfHypotenuse+(k/2))%3].equals(tv1[(tr1.sideIndexOfHypotenuse+(k%2))%3]))
 				                        	           {oneCommonSide=true;
-				                        	            //checks if the winding is correct
-				                        	            oneCommonSideCorrectWinding=(k/2)!=(k%2);
-				                        	            if(oneCommonSideCorrectWinding)
+				                        	            //checks if the vertex order is correct
+				                        	            oneCommonSideCorrectVertexOrder=(k/2)!=(k%2);
+				                        	            if(oneCommonSideCorrectVertexOrder)
 				                        	                {//checks if the orthogonal sides adjacent with this common side have the same length
 					                                         if(tv0[(tr0.sideIndexOfHypotenuse+(((k/2)+1)%2))%3].distanceSquared(tv0[(tr0.sideIndexOfHypotenuse+2)%3])==
 							                        	        tv1[(tr1.sideIndexOfHypotenuse+((k+1)%2))%3].distanceSquared(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
-							                        	         {oneCommonSideCorrectWinding2oppositeSidesOfSameLength=true;
+							                        	         {oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength=true;
 							                        	          //checks the texture coordinates
 									            				  boolean texCoordsMatch=true;				            				   
 									            				  //for each texture unit
@@ -387,14 +405,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            					   texCoordsMatch&=trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse+(k%2))%3].equals(trisTextureCoords[ti2][(tr2.sideIndexOfHypotenuse+2)%3]);
 									            					   texCoordsMatch&=trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse+(k/2))%3].equals(trisTextureCoords[ti3][(tr3.sideIndexOfHypotenuse+2)%3]);
 									            				      }
-									            				  oneCommonSideCorrectWinding2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
+									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 							                        	         }				                        	            	 
 				                        	                }				                        	            
 				                        	           }
 				                              }
 				                         }
 			                    }
-				            if(oneCommonSideCorrectWinding2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
+				            if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 			        	        {ArrayList<RightTriangleInfo> previousListOfTris=null;
 				                 //if the list of lists for this plane does not exist
 						    	 if(listOfListsOfTris==null)
@@ -464,9 +482,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            //creates the 2D array with the appropriate size
 				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
 				            //fills this array
-				            fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[3],tree2dDimension[4],tree2dDimension[5],adjacentTrisArray,tree);
+				            fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[4],adjacentTrisArray,tree);
 				            ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
 				            //TODO compute a list of arrays of adjacent triangles which could be merged to make bigger rectangles
+				            
 				            //puts the new list into the map
 				            ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
 				            if(adjacentTrisArraysListsList==null)
@@ -556,11 +575,80 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
+	private static final class LocalQuadTreeFiller extends DirectedConnectedComponentVisitor<RightTriangleInfo[],QuadTreeElementOrientationEdge,LocalQuadTree>{
+		
+		private final RightTriangleInfo[] triPairToInsert;
+		
+		private LocalQuadTreeFiller(final RightTriangleInfo[] triPairToInsert){
+			this.triPairToInsert=triPairToInsert;
+		}
+		
+		@Override
+		protected final boolean performOnCurrentlyVisitedVertex(
+				final LocalQuadTree tree,
+				final RightTriangleInfo[] currentlyVisitedVertex){
+			boolean triPairInsertionEnabled=false;
+			final Collection<QuadTreeElementOrientationEdge> outgoingEdges=tree.getOutgoingEdges(currentlyVisitedVertex);
+			for(QuadTreeElementOrientation orientation:QuadTreeElementOrientation.values())
+			    {boolean isOrientationAvailable=true;
+			     //checks if this orientation is not already in use
+			     for(QuadTreeElementOrientationEdge outgoingEdge:outgoingEdges)
+			    	 if(outgoingEdge.orientation.equals(orientation))
+			             {isOrientationAvailable=false;
+			    	      break;
+			             }
+			     if(isOrientationAvailable)
+			         {switch(orientation)
+			          {/**
+			            * TODO if this edge of the current triangle is equal to 
+			            * one edge of triPairToInsert, set 
+			            * triPairInsertionEnabled to true
+			            */
+			           case LEFT:
+			               {
+			            	break;
+			               }
+			           case RIGHT:
+			               {
+			            	break;
+			               }
+			           case BOTTOM:
+			               {
+			            	break;
+			               }
+			           case TOP:
+			               {
+			            	break;
+			               }
+			          }
+			    	  if(triPairInsertionEnabled)
+			    	      {//adds a new edge with the proper orientation into the tree
+			    		   final QuadTreeElementOrientationEdge edge=new QuadTreeElementOrientationEdge(orientation);
+			    		   tree.addEdge(edge,triPairToInsert);
+			    		   break;
+			    	      }
+			         }
+			    }
+			return(triPairInsertionEnabled);
+		}
+	}
+	
 	private static final LocalQuadTree buildQuaternaryTreeNodeFromTrianglesList(ArrayList<RightTriangleInfo> trisList) {
 	    final LocalQuadTree tree=new LocalQuadTree();
-	    if(!trisList.isEmpty())
-	        {//TODO use the 2 shortest edges of the first triangle and their normal as a base
-	    	 
+	    if(trisList.size()>=2)
+	        {//builds a list of pairs
+	    	 ArrayList<RightTriangleInfo[]> triPairsList=new ArrayList<RightTriangleInfo[]>();
+	    	 for(int triIndex=0,size=trisList.size();triIndex<size-1;triIndex+=2)
+	    	     {RightTriangleInfo[] tris=new RightTriangleInfo[]{trisList.get(triIndex),trisList.get(triIndex+1)};
+	    	      triPairsList.add(tris);
+	    	     }
+	    	 //puts the first pair of triangles into the root
+	    	 tree.addVertex(triPairsList.remove(0));
+	    	 for(RightTriangleInfo[] tris:triPairsList)
+	    	     if(!tree.containsVertex(tris))
+	    	         {final LocalQuadTreeFiller visitor=new LocalQuadTreeFiller(tris);
+	    	          visitor.visit(tree,tree.getRoot(),true);
+	    	         }
 	        }
 	    return(tree);
 	}
@@ -627,16 +715,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		
 		private final RightTriangleInfo[][][] adjacentTrisArray;
 		
-		private final int leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex;
+		private final int leftMostIndex,topMostIndex;
 		
 		private LocalQuadTreeTo2dArrayFiller(final int leftMostIndex,
-				final int rightMostIndex,final int topMostIndex,
-				final int bottomMostIndex,
+				final int topMostIndex,
 				final RightTriangleInfo[][][] adjacentTrisArray){
 			this.leftMostIndex=leftMostIndex;
-			this.rightMostIndex=rightMostIndex;
 			this.topMostIndex=topMostIndex;
-			this.bottomMostIndex=bottomMostIndex;
 			this.adjacentTrisArray=adjacentTrisArray;
 		}
 		
@@ -674,13 +759,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
-	private static void fill2dArrayFromQuadTree(final int leftMostIndex,
-			final int rightMostIndex,final int topMostIndex,
-			final int bottomMostIndex,
+	private static void fill2dArrayFromQuadTree(final int leftMostIndex,final int topMostIndex,
 			final RightTriangleInfo[][][] adjacentTrisArray,LocalQuadTree tree){
 		final LocalQuadTreeTo2dArrayFiller visitor=new LocalQuadTreeTo2dArrayFiller(
-				leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex,
-				adjacentTrisArray);
+				leftMostIndex,topMostIndex,adjacentTrisArray);
 		visitor.visit(tree,tree.getRoot(),true);
 	}
 	
