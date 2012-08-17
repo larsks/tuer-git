@@ -463,7 +463,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            final int height=tree2dDimension[1];
 				            //creates the 2D array with the appropriate size
 				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
-				            //TODO fill this array
+				            //fills this array
+				            fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[3],tree2dDimension[4],tree2dDimension[5],adjacentTrisArray,tree);
 				            ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
 				            //TODO compute a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				            //puts the new list into the map
@@ -604,7 +605,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		private final int[] get2dDimension(){
 			final int width=Math.abs(rightMostIndex-leftMostIndex)+1;
 			final int height=Math.abs(bottomMostIndex-topMostIndex)+1;
-			return(new int[]{width,height});
+			return(new int[]{width,height,leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex});
 		}
 	}
 	
@@ -618,6 +619,69 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		else
 			dimension=new int[]{0,0};
 		return(dimension);
+	}
+	
+	private static final class LocalQuadTreeTo2dArrayFiller extends DirectedConnectedComponentVisitor<RightTriangleInfo[],QuadTreeElementOrientationEdge,LocalQuadTree>{
+
+		private int i,j;
+		
+		private final RightTriangleInfo[][][] adjacentTrisArray;
+		
+		private final int leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex;
+		
+		private LocalQuadTreeTo2dArrayFiller(final int leftMostIndex,
+				final int rightMostIndex,final int topMostIndex,
+				final int bottomMostIndex,
+				final RightTriangleInfo[][][] adjacentTrisArray){
+			this.leftMostIndex=leftMostIndex;
+			this.rightMostIndex=rightMostIndex;
+			this.topMostIndex=topMostIndex;
+			this.bottomMostIndex=bottomMostIndex;
+			this.adjacentTrisArray=adjacentTrisArray;
+		}
+		
+		@Override
+		protected final boolean performOnCurrentlyVisitedVertex(
+				final LocalQuadTree tree,
+				final RightTriangleInfo[] currentlyVisitedVertex){
+			if(tree.getRoot()!=currentlyVisitedVertex)
+			    {final Collection<QuadTreeElementOrientationEdge> incomingEdges=tree.getIncomingEdges(currentlyVisitedVertex);
+			     final QuadTreeElementOrientationEdge edgeFromParent=incomingEdges.iterator().next();
+			     switch(edgeFromParent.orientation)
+			     {case LEFT:
+			          {i--;
+			           break;
+			          }
+			      case RIGHT:
+			          {i++;
+		               break;
+		              }
+			      case TOP:
+			          {j--;
+			           break;
+			          }
+			      case BOTTOM:
+			          {j++;
+			           break;
+			          }
+			     }
+			    }
+			final int zeroBasedI=i-leftMostIndex;
+			final int zeroBasedJ=j-topMostIndex;
+			adjacentTrisArray[zeroBasedI][zeroBasedJ][0]=currentlyVisitedVertex[0];
+			adjacentTrisArray[zeroBasedI][zeroBasedJ][1]=currentlyVisitedVertex[1];
+			return(true);
+		}
+	}
+	
+	private static void fill2dArrayFromQuadTree(final int leftMostIndex,
+			final int rightMostIndex,final int topMostIndex,
+			final int bottomMostIndex,
+			final RightTriangleInfo[][][] adjacentTrisArray,LocalQuadTree tree){
+		final LocalQuadTreeTo2dArrayFiller visitor=new LocalQuadTreeTo2dArrayFiller(
+				leftMostIndex,rightMostIndex,topMostIndex,bottomMostIndex,
+				adjacentTrisArray);
+		visitor.visit(tree,tree.getRoot(),true);
 	}
 	
 	/**
