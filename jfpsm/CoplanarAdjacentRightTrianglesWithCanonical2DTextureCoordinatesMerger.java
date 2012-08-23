@@ -460,7 +460,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			               }
 			          }
 			     }
-			 //TODO: fifth step: create lists of adjacent rectangles in the same planes usable to make bigger rectangles
+			 //fifth step: creates lists of adjacent rectangles in the same planes usable to make bigger rectangles
 			 /**
 			  * Each entry handles the triangles of a plane. Each entry contains several lists of groups of adjacent triangles.
 			  * Each group of adjacent triangles is a list of arrays of adjacent triangles which could be merged to make bigger 
@@ -472,29 +472,29 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     {Plane plane=entry.getKey();
 				  //for each list of adjacent triangles
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
-			          {//builds a quad tree from the list of triangles
-				       LocalQuadTree tree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
-				       if(tree!=null)
-				           {//computes the maximum size of the 2D array of adjacent triangles
-				    	    final int[] tree2dDimension=computeTree2dDimension(tree);
-				    	    final int width=tree2dDimension[0];
-				            final int height=tree2dDimension[1];
-				            //creates the 2D array with the appropriate size
-				            RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
-				            //fills this array
-				            fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[4],adjacentTrisArray,tree);
-				            ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
-				            //TODO compute a list of arrays of adjacent triangles which could be merged to make bigger rectangles
-				            
-				            //puts the new list into the map
-				            ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
-				            if(adjacentTrisArraysListsList==null)
-				                {adjacentTrisArraysListsList=new ArrayList<ArrayList<RightTriangleInfo[][][]>>();
-				                 mapOfListsOfListsOfArraysOfMergeableTris.put(plane,adjacentTrisArraysListsList);
-				                }
-				            adjacentTrisArraysListsList.add(adjacentTrisArraysList);
-				           }
-			          }		  
+					  if(!trisList.isEmpty())
+			              {/*//builds a quad tree from the list of triangles
+				           final LocalQuadTree tree=buildQuaternaryTreeNodeFromTrianglesList(trisList);	   
+				           //computes the maximum size of the 2D array of adjacent triangles
+				           final int[] tree2dDimension=computeTree2dDimension(tree);
+				           final int width=tree2dDimension[0];
+				           final int height=tree2dDimension[1];
+				           //creates the 2D array with the appropriate size
+				           final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[width][height][2];
+				           //fills this array
+				           fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[4],adjacentTrisArray,tree);*/
+						   //builds the 2D array from the list of triangles
+						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList);
+				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
+				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
+				           //puts the new list into the map
+				           ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
+				           if(adjacentTrisArraysListsList==null)
+				               {adjacentTrisArraysListsList=new ArrayList<ArrayList<RightTriangleInfo[][][]>>();
+				                mapOfListsOfListsOfArraysOfMergeableTris.put(plane,adjacentTrisArraysListsList);
+				               }
+				           adjacentTrisArraysListsList.add(adjacentTrisArraysList);
+			              }		  
 			     }
 			 //TODO: sixth step: create these bigger rectangles (update their texture coordinates (use coordinates greater 
 			 //than 1) in order to use texture repeat)
@@ -502,6 +502,42 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 		    }
 		return result;
+	}
+	
+	private static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
+			final ArrayList<RightTriangleInfo> trisList){
+		/**
+		 * computes an overestimated size to be sure not to use an index out of 
+		 * the bounds, uses the list size as all pairs of triangles represent 
+		 * quads and some room is needed in all directions
+		 */
+		final int overestimatedSize=trisList.size();
+		
+		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[overestimatedSize][overestimatedSize][2];
+		if(overestimatedSize>0)
+		    {/**
+		      * this initial index ensures there is enough room in all directions for 
+		      * other triangles
+		      */
+			 final int initialIndex=(overestimatedSize/2)-1;
+			 adjacentTrisArray[initialIndex][initialIndex][0]=trisList.get(0);
+			 adjacentTrisArray[initialIndex][initialIndex][1]=trisList.get(1);
+			 for(int trisIndex=2;trisIndex<overestimatedSize-1;trisIndex++)
+			     {final RightTriangleInfo tri0=trisList.get(trisIndex);
+			      final RightTriangleInfo tri1=trisList.get(trisIndex);
+				  boolean trisPairAdded=false;
+				  for(int j=0;j<overestimatedSize&&!trisPairAdded;j++)
+					  for(int i=0;i<overestimatedSize&&!trisPairAdded;i++)
+					      {/**
+					        * TODO: use the following convention: 0 -> left, 1 
+					        * -> top, 2 -> right, 3 -> bottom. Check whether an 
+					        * edge of the pair of triangles is equal to an edge 
+					        * of adjacentTrisArray[i][j]
+						    */
+					      }
+			     }
+		    }
+		return(adjacentTrisArray);
 	}
 	
 	/**
@@ -767,11 +803,15 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	/**
-	 * TODO implement a specialization for tree nodes: 
-	 * - prevent "this" from being attached
-	 * - prevent an ancestor of this node from being attached
-	 * - detach the new child from its previous parent if it is not the new one during attaching
-	 * - set the new parent during attaching
-	 * - add it to the list of children
+	 * Compute a list of arrays of adjacent triangles which could be merged to 
+	 * make bigger rectangles
+	 * 
+	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
+	 * @return list of 2D arrays of adjacent mergeable triangles
 	 */
+	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(RightTriangleInfo[][][] adjacentTrisArray){
+		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
+		//TODO
+		return(adjacentTrisArraysList);
+	}
 }
