@@ -377,6 +377,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            					   texCoordsMatch&=trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse+((j+1)%2))%3].equals(trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse+k)%3]);
 									            				      }
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
+									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
+								                                      {//TODO store tr0, tr1, tr2, tr3, ti0, ti1, ti2, ti3 and indices for further uses
+								                        	           
+								                                      }
 							                        	         }				                                        	 
 				                                            }				                                        
 				                                       }
@@ -406,6 +410,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            					   texCoordsMatch&=trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse+(k/2))%3].equals(trisTextureCoords[ti3][(tr3.sideIndexOfHypotenuse+2)%3]);
 									            				      }
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
+									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
+									                                  {//TODO store tr0, tr1, tr2, tr3, ti0, ti1, ti2, ti3 and indices for further uses
+									                        	       
+									                                  }
 							                        	         }				                        	            	 
 				                        	                }				                        	            
 				                        	           }
@@ -484,7 +492,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				           //fills this array
 				           fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[4],adjacentTrisArray,tree);*/
 						   //builds the 2D array from the list of triangles
-						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList);
+						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,meshData);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
 				           //puts the new list into the map
@@ -504,16 +512,25 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		return result;
 	}
 	
+	/**
+	 * Computes a 2D array of adjacent triangles in the same plane by using 
+	 * their relative location in this plane
+	 * 
+	 * @param trisList list of adjacent triangles
+	 * @param meshData mesh data
+	 * @return
+	 */
 	private static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
-			final ArrayList<RightTriangleInfo> trisList){
+			final ArrayList<RightTriangleInfo> trisList,final MeshData meshData){
 		/**
 		 * computes an overestimated size to be sure not to use an index out of 
 		 * the bounds, uses the list size as all pairs of triangles represent 
 		 * quads and some room is needed in all directions
 		 */
 		final int overestimatedSize=trisList.size();
-		
+		//creates the 2D array
 		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[overestimatedSize][overestimatedSize][2];
+		//if this array can contain something
 		if(overestimatedSize>0)
 		    {/**
 		      * this initial index ensures there is enough room in all directions for 
@@ -522,20 +539,49 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 final int initialIndex=(overestimatedSize/2)-1;
 			 adjacentTrisArray[initialIndex][initialIndex][0]=trisList.get(0);
 			 adjacentTrisArray[initialIndex][initialIndex][1]=trisList.get(1);
+			 /**
+			  * TODO: use the following convention: 0 -> left, 1 
+			  * -> top, 2 -> right, 3 -> bottom. Check whether an 
+			  * edge of the pair of triangles is equal to an edge 
+			  * of adjacentTrisArray[i][j]
+			  */
+			 /**
+			  * TODO reuse the information stored in the previous step, start 
+			  * from the first pair, find it in the supplied information, find 
+			  * which side is concerned, add it into the 2D array, mark the 
+			  * piece of information and so on...
+			  */
+			 /*Vector3[] tri0Vertices=new Vector3[3];
+			 Vector3[] tri1Vertices=new Vector3[3];
+			 Vector3[] tri2Vertices=new Vector3[3];
+			 Vector3[] tri3Vertices=new Vector3[3];
 			 for(int trisIndex=2;trisIndex<overestimatedSize-1;trisIndex++)
 			     {final RightTriangleInfo tri0=trisList.get(trisIndex);
 			      final RightTriangleInfo tri1=trisList.get(trisIndex);
+			      //gets the vertices of the both triangles
+				  tri0Vertices=meshData.getPrimitiveVertices(tri0.primitiveIndex,tri0.sectionIndex,tri0Vertices);
+				  tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+				  final Vector3[][] insertedSides=new Vector3[][]{{tri0Vertices[(tri0.sideIndexOfHypotenuse+1)%3],tri0Vertices[(tri0.sideIndexOfHypotenuse+2)%3]},
+						                                          {tri0Vertices[(tri0.sideIndexOfHypotenuse+2)%3],tri0Vertices[(tri0.sideIndexOfHypotenuse+0)%3]},
+						                                          {tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3],tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3]},
+						                                          {tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3],tri1Vertices[(tri1.sideIndexOfHypotenuse+0)%3]}};
 				  boolean trisPairAdded=false;
 				  for(int j=0;j<overestimatedSize&&!trisPairAdded;j++)
 					  for(int i=0;i<overestimatedSize&&!trisPairAdded;i++)
-					      {/**
-					        * TODO: use the following convention: 0 -> left, 1 
-					        * -> top, 2 -> right, 3 -> bottom. Check whether an 
-					        * edge of the pair of triangles is equal to an edge 
-					        * of adjacentTrisArray[i][j]
-						    */
+					      {final RightTriangleInfo tri2=adjacentTrisArray[i][j][0];
+					       final RightTriangleInfo tri3=adjacentTrisArray[i][j][1];
+					       if(tri2!=null&&tri3!=null)
+						       {tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+						        tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
+						        
+						        final Vector3[][] testedSides=new Vector3[][]{{tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3],tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]},
+                                                                              {tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3],tri2Vertices[(tri2.sideIndexOfHypotenuse+0)%3]},
+                                                                              {tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3],tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]},
+                                                                              {tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3],tri3Vertices[(tri3.sideIndexOfHypotenuse+0)%3]}};
+						        
+						       }
 					      }
-			     }
+			     }*/
 		    }
 		return(adjacentTrisArray);
 	}
