@@ -157,6 +157,8 @@ public final class GameState extends ScenegraphState{
     
     private final HashMap<Mesh,EnemyData> enemiesDataMap;
     
+    private long latestDetection0;
+    
     private static final String pain1soundSamplePath = "/sounds/pain1.ogg";
     
     private static final String pain2soundSamplePath = "/sounds/pain2.ogg";
@@ -188,6 +190,7 @@ public final class GameState extends ScenegraphState{
         this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
+        latestDetection0=timer.getElapsedTimeInNanoseconds();
         collectibleObjectsList=new ArrayList<Node>();
         projectilesMap=new HashMap<Node,ProjectileData>();
         teleportersList=new ArrayList<Node>();        
@@ -306,8 +309,8 @@ public final class GameState extends ScenegraphState{
             public void update(double timeSinceLastCall,Spatial caller){
             	//updates the timer
             	timer.update();
-            	/*final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
-            	final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
+            	final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
+            	/*final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
             	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;*/
                 //synchronizes the camera node with the camera
                 playerNode.updateFromCamera();
@@ -524,22 +527,49 @@ public final class GameState extends ScenegraphState{
                 	      final Mesh enemyWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(enemyMesh)+1));
                 		  final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyMesh.getController(0);
                 		  final KeyframeController<Mesh> enemyWeaponKeyframeController=(KeyframeController<Mesh>)enemyWeaponMesh.getController(0);
-                		  if(enemyKeyframeController.isRepeatTypeClamp()&&
-                			 enemyKeyframeController.getMaxTime()!=MD2FrameSet.STAND.getLastFrameIndex()&&
-                			 enemyKeyframeController.getCurTime()>enemyKeyframeController.getMaxTime())
-                			  {enemyKeyframeController.setRepeatType(RepeatType.WRAP);
-                			   //uses the "stand" animation
-                			   enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                			   enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                			   enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                			   enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                			   
-                			   enemyWeaponKeyframeController.setRepeatType(RepeatType.WRAP);
-                			   enemyWeaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                			   enemyWeaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                			   enemyWeaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                			   enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                			  }
+                		  //if this enemy is not yet idle and if he has finished his latest animation
+                		  if(/*enemyKeyframeController.isRepeatTypeClamp()&&*/
+                			 enemyKeyframeController.getMaxTime()!=MD2FrameSet.STAND.getLastFrameIndex())
+                		      {if(enemyKeyframeController.getCurTime()>enemyKeyframeController.getMaxTime())
+                			       {enemyKeyframeController.setRepeatType(RepeatType.WRAP);
+                			        //uses the "stand" animation
+                			        enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                			        enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			        enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			        enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                			        
+                			        enemyWeaponKeyframeController.setRepeatType(RepeatType.WRAP);
+                			        enemyWeaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                			        enemyWeaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			        enemyWeaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                			        enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                			       }
+                		      }
+                		  else
+                		      {if(absoluteElapsedTimeInNanoseconds-latestDetection0>=1000000000)
+                		           {latestDetection0=absoluteElapsedTimeInNanoseconds;
+                		            //checks whether the player is in front of this enemy
+                		            Ray3 ray=new Ray3(playerNode.getTranslation(),playerNode.getTransform().getMatrix().getColumn(2,null));
+                                    BoundingPickResults results=new BoundingPickResults();
+                                    PickingUtil.findPick(enemyMesh,ray,results);
+                                    hasCollision=results.getNumber()>0;
+                                    results.clear();
+                                    if(hasCollision)
+                                        {enemyKeyframeController.setRepeatType(RepeatType.CLAMP);
+                    			         //uses the "attack" animation
+                    			         enemyKeyframeController.setSpeed(MD2FrameSet.ATTACK.getFramesPerSecond());
+                    			         enemyKeyframeController.setCurTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
+                    			         enemyKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
+                    			         enemyKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
+                    			         
+                    			         enemyWeaponKeyframeController.setRepeatType(RepeatType.CLAMP);
+                    			         enemyWeaponKeyframeController.setSpeed(MD2FrameSet.ATTACK.getFramesPerSecond());
+                    			         enemyWeaponKeyframeController.setCurTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
+                    			         enemyWeaponKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
+                    			         enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
+                                        }
+                		           }
+                		      }
                 	     }
                 	}
                 for(Node projectileToRemove:projectilesToRemove)
