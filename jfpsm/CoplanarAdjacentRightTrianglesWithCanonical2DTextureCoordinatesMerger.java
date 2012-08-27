@@ -13,14 +13,18 @@
 */
 package jfpsm;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import jfpsm.graph.DirectedConnectedComponentVisitor;
 import jfpsm.graph.DirectedRootedKaryTree;
+import jfpsm.graph.Pair;
+
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -283,6 +287,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     }
 			 //fourth step: creates lists containing all adjacent rectangles in the same planes
 			 HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo>>> mapOfListsOfTrianglesByPlanes=new HashMap<Plane, ArrayList<ArrayList<RightTriangleInfo>>>();
+			 HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>> commonSidesInfosMap=new HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>>();
 			 Vector3[] tri3Vertices=new Vector3[3];
 			 Vector3[] tri4Vertices=new Vector3[3];
 			 RightTriangleInfo tri3,tri4;
@@ -334,7 +339,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				            tris[2]=tri3;
 				            tris[3]=tri4;
 				            for(int i=0,ti0,ti1,ti2,ti3;i<4&&!oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength;i++)
-				                {//{0;1}
+				                {Entry<RightTriangleInfo[],int[]> commonSideInfo=null;
+				            	 //{0;1}
 				            	 ti0=i/2;
 				            	 Vector3[] tv0=trisVertices[ti0];
 				            	 RightTriangleInfo tr0=tris[ti0];
@@ -378,8 +384,24 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				      }
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
-								                                      {//TODO store tr0, tr1, tr2, tr3, ti0, ti1, ti2, ti3 and indices for further uses
-								                        	           
+								                                      {//stores tr0, tr1, tr2, tr3 and the indices for further uses
+									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
+									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
+									            							   (tr1.sideIndexOfHypotenuse+j)%3,
+									            							   (tr0.sideIndexOfHypotenuse+k)%3,
+									            							   (tr1.sideIndexOfHypotenuse+2)%3});
+									            					   ArrayList<Entry<RightTriangleInfo[],int[]>> commonSidesInfosEntriesList=commonSidesInfosMap.get(tr0);
+									            					   if(commonSidesInfosEntriesList==null)
+									            						   {commonSidesInfosEntriesList=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+									            						    commonSidesInfosMap.put(tr0,commonSidesInfosEntriesList);
+									            						   }
+									            					   commonSidesInfosEntriesList.add(commonSideInfo);
+									            					   commonSidesInfosEntriesList=commonSidesInfosMap.get(tr1);
+									            					   if(commonSidesInfosEntriesList==null)
+									            						   {commonSidesInfosEntriesList=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+									            						    commonSidesInfosMap.put(tr1,commonSidesInfosEntriesList);
+									            						   }
+									            					   commonSidesInfosEntriesList.add(commonSideInfo);
 								                                      }
 							                        	         }				                                        	 
 				                                            }				                                        
@@ -411,8 +433,24 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				      }
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
-									                                  {//TODO store tr0, tr1, tr2, tr3, ti0, ti1, ti2, ti3 and indices for further uses
-									                        	       
+									                                  {//stores tr0, tr1, tr2, tr3 and the indices for further uses
+									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
+									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
+									            							   (tr1.sideIndexOfHypotenuse+j)%3,
+									            							   (tr0.sideIndexOfHypotenuse+(k/2))%3,
+									            							   (tr1.sideIndexOfHypotenuse+(k%2))%3});
+									            					   ArrayList<Entry<RightTriangleInfo[],int[]>> commonSidesInfosEntriesList=commonSidesInfosMap.get(tr0);
+									            					   if(commonSidesInfosEntriesList==null)
+									            						   {commonSidesInfosEntriesList=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+									            						    commonSidesInfosMap.put(tr0,commonSidesInfosEntriesList);
+									            						   }
+									            					   commonSidesInfosEntriesList.add(commonSideInfo);
+									            					   commonSidesInfosEntriesList=commonSidesInfosMap.get(tr1);
+									            					   if(commonSidesInfosEntriesList==null)
+									            						   {commonSidesInfosEntriesList=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+									            						    commonSidesInfosMap.put(tr1,commonSidesInfosEntriesList);
+									            						   }
+									            					   commonSidesInfosEntriesList.add(commonSideInfo);
 									                                  }
 							                        	         }				                        	            	 
 				                        	                }				                        	            
@@ -449,7 +487,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						    	     }
 						    	 else
 						    	     {//if tri3 and tri4 are not already in this list, adds them into it
-						    	      if(previousListOfTris!=listOfTris)
+						    	      if(previousListOfTris!=null&&previousListOfTris!=listOfTris)
 						    	          {listOfTris.add(tri3);
 									       listOfTris.add(tri4);
 						    	          }
@@ -492,7 +530,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				           //fills this array
 				           fill2dArrayFromQuadTree(tree2dDimension[2],tree2dDimension[4],adjacentTrisArray,tree);*/
 						   //builds the 2D array from the list of triangles
-						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,meshData);
+						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap,meshData);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
 				           //puts the new list into the map
@@ -521,7 +559,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @return
 	 */
 	private static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
-			final ArrayList<RightTriangleInfo> trisList,final MeshData meshData){
+			final ArrayList<RightTriangleInfo> trisList,
+			final HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>> commonSidesInfosMap,
+			final MeshData meshData){
 		/**
 		 * computes an overestimated size to be sure not to use an index out of 
 		 * the bounds, uses the list size as all pairs of triangles represent 
@@ -551,6 +591,74 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			  * which side is concerned, add it into the 2D array, mark the 
 			  * piece of information and so on...
 			  */
+			 final HashMap<RightTriangleInfo,int[]> arrayMap=new HashMap<RightTriangleInfo,int[]>();
+			 arrayMap.put(trisList.get(0),new int[]{initialIndex,initialIndex});
+			 arrayMap.put(trisList.get(1),new int[]{initialIndex,initialIndex});
+			 final ArrayList<Entry<RightTriangleInfo[],int[]>> infosQueue=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+			 for(ArrayList<Entry<RightTriangleInfo[], int[]>> commonSidesInfos:commonSidesInfosMap.values())
+				 infosQueue.addAll(commonSidesInfos);
+			 int infosQueueIndex=0;
+			 while(!infosQueue.isEmpty())
+			     {boolean inserted=false;
+			      final Entry<RightTriangleInfo[],int[]> info=infosQueue.get(infosQueueIndex);
+			      final RightTriangleInfo[] tris=info.getKey();
+			      //if the array already contains the first triangle
+				  if(arrayMap.containsKey(tris[0]))
+					  {//if the array already contains the second triangle
+					   if(arrayMap.containsKey(tris[1]))
+						   inserted=true;
+					   else
+					       {final int[] arrayIndices=arrayMap.get(tris[0]);
+						    //TODO find which side is common and update arrayIndices
+						    //updates the array
+					        final int tri1index=trisList.indexOf(tris[1]);
+					        if(tri1index%2==0)
+					            {
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[1];
+								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri1index+1);
+					            }
+					        else
+					            {
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri1index-1);
+								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[1];
+					            }
+						    //updates the map as tris[1] has been found
+						    arrayMap.put(tris[1],arrayIndices);
+						    inserted=true;
+					       }
+					  }
+				  else
+				      {//if the array already contains the second triangle
+					   if(arrayMap.containsKey(tris[1]))
+			               {final int[] arrayIndices=arrayMap.get(tris[1]);
+				    	    //TODO find which side is common and update arrayIndices
+						    //updates the array
+			                final int tri0index=trisList.indexOf(tris[0]);
+					        if(tri0index%2==0)
+					            {
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[0];
+								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri0index+1);
+					            }
+					        else
+					            {
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri0index-1);
+								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[0];
+					            }
+				    	    //updates the map as tris[0] has been found
+				    	    arrayMap.put(tris[0],arrayIndices);
+				    	    inserted=true;
+			               }
+			           else
+			        	   inserted=false;
+			          }
+			      if(inserted)
+			    	  {infosQueue.remove(infosQueueIndex);
+			    	   if(infosQueueIndex==infosQueue.size())
+			    		   infosQueueIndex=0;
+			    	  }
+			      else
+			    	  infosQueueIndex=(infosQueueIndex+1)%infosQueue.size();
+			     }
 			 /*Vector3[] tri0Vertices=new Vector3[3];
 			 Vector3[] tri1Vertices=new Vector3[3];
 			 Vector3[] tri2Vertices=new Vector3[3];
@@ -650,7 +758,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
-	private static final class LocalQuadTree extends DirectedRootedKaryTree<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
+	/*private static final class LocalQuadTree extends DirectedRootedKaryTree<RightTriangleInfo[],QuadTreeElementOrientationEdge>{
 
 		private LocalQuadTree(){
 			super(false,4);
@@ -686,7 +794,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			            * one edge of triPairToInsert, set 
 			            * triPairInsertionEnabled to true
 			            */
-			           case LEFT:
+			           /*case LEFT:
 			               {
 			            	break;
 			               }
@@ -841,12 +949,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
-	private static void fill2dArrayFromQuadTree(final int leftMostIndex,final int topMostIndex,
+	/*private static void fill2dArrayFromQuadTree(final int leftMostIndex,final int topMostIndex,
 			final RightTriangleInfo[][][] adjacentTrisArray,LocalQuadTree tree){
 		final LocalQuadTreeTo2dArrayFiller visitor=new LocalQuadTreeTo2dArrayFiller(
 				leftMostIndex,topMostIndex,adjacentTrisArray);
 		visitor.visit(tree,tree.getRoot(),true);
-	}
+	}*/
 	
 	/**
 	 * Compute a list of arrays of adjacent triangles which could be merged to 
