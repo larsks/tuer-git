@@ -157,7 +157,7 @@ public final class GameState extends ScenegraphState{
     
     private final HashMap<Mesh,EnemyData> enemiesDataMap;
     
-    private long latestDetection0;
+    private final HashMap<EnemyData,Long> enemiesLatestDetection;
     
     private static final String pain1soundSamplePath = "/sounds/pain1.ogg";
     
@@ -187,10 +187,10 @@ public final class GameState extends ScenegraphState{
         super(soundManager);
         random=new Random();
         enemiesDataMap=new HashMap<Mesh,EnemyData>();
+        enemiesLatestDetection=new HashMap<EnemyData,Long>();
         this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
-        latestDetection0=timer.getElapsedTimeInNanoseconds();
         collectibleObjectsList=new ArrayList<Node>();
         projectilesMap=new HashMap<Node,ProjectileData>();
         teleportersList=new ArrayList<Node>();        
@@ -546,9 +546,10 @@ public final class GameState extends ScenegraphState{
                 			       }
                 		      }
                 		  else
-                		      {if(absoluteElapsedTimeInNanoseconds-latestDetection0>=1000000000)
-                		           {latestDetection0=absoluteElapsedTimeInNanoseconds;
-                		            //checks whether the player is in front of this enemy
+                		      {Long latestDetectionObj=enemiesLatestDetection.get(enemyData);
+                			   if(latestDetectionObj==null||absoluteElapsedTimeInNanoseconds-latestDetectionObj.longValue()>=1000000000)
+                		           {enemiesLatestDetection.put(enemyData,Long.valueOf(absoluteElapsedTimeInNanoseconds));
+                		            //checks whether the player is in front of this enemy (defensive behavior)
                 		            Ray3 ray=new Ray3(playerNode.getTranslation(),playerNode.getTransform().getMatrix().getColumn(2,null));
                                     BoundingPickResults results=new BoundingPickResults();
                                     PickingUtil.findPick(enemyMesh,ray,results);
