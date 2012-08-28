@@ -580,45 +580,60 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 adjacentTrisArray[initialIndex][initialIndex][0]=trisList.get(0);
 			 adjacentTrisArray[initialIndex][initialIndex][1]=trisList.get(1);
 			 /**
-			  * TODO: use the following convention: 0 -> left, 1 
-			  * -> top, 2 -> right, 3 -> bottom. Check whether an 
+			  * uses the following convention: 0 -> left, 1 
+			  * -> top, 2 -> right, 3 -> bottom. Checks whether an 
 			  * edge of the pair of triangles is equal to an edge 
 			  * of adjacentTrisArray[i][j]
-			  */
-			 /**
-			  * TODO reuse the information stored in the previous step, start 
-			  * from the first pair, find it in the supplied information, find 
-			  * which side is concerned, add it into the 2D array, mark the 
-			  * piece of information and so on...
 			  */
 			 final HashMap<RightTriangleInfo,int[]> arrayMap=new HashMap<RightTriangleInfo,int[]>();
 			 arrayMap.put(trisList.get(0),new int[]{initialIndex,initialIndex});
 			 arrayMap.put(trisList.get(1),new int[]{initialIndex,initialIndex});
 			 final ArrayList<Entry<RightTriangleInfo[],int[]>> infosQueue=new ArrayList<Entry<RightTriangleInfo[],int[]>>();
+			 /**
+			  * reuses the information stored in the previous step, copies them 
+			  * into a list
+			  */
 			 for(ArrayList<Entry<RightTriangleInfo[], int[]>> commonSidesInfos:commonSidesInfosMap.values())
 				 infosQueue.addAll(commonSidesInfos);
 			 int infosQueueIndex=0;
+			 //loops while this list is not empty
 			 while(!infosQueue.isEmpty())
 			     {boolean inserted=false;
+			      //gets the information from the list
 			      final Entry<RightTriangleInfo[],int[]> info=infosQueue.get(infosQueueIndex);
 			      final RightTriangleInfo[] tris=info.getKey();
+			      final int[] commonSidesIndices=info.getValue();
 			      //if the array already contains the first triangle
 				  if(arrayMap.containsKey(tris[0]))
 					  {//if the array already contains the second triangle
 					   if(arrayMap.containsKey(tris[1]))
 						   inserted=true;
 					   else
-					       {final int[] arrayIndices=arrayMap.get(tris[0]);
-						    //TODO find which side is common and update arrayIndices
-						    //updates the array
+					       {//retrieves the indices of the triangle in the 2D array
+						    final int[] arrayIndices=new int[]{arrayMap.get(tris[0])[0],arrayMap.get(tris[0])[1]};
+						    //finds which sides are common updates the array
 					        final int tri1index=trisList.indexOf(tris[1]);
 					        if(tri1index%2==0)
-					            {
+					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
+			                         {//to right
+				            	      arrayIndices[0]++;
+			                         }
+			                     else
+			                         {//to bottom
+			                	      arrayIndices[1]++;
+			                         }
 					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[1];
 								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri1index+1);
 					            }
 					        else
-					            {
+					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
+				                     {//to left
+				            	      arrayIndices[0]--;
+				                     }
+				                 else
+				                     {//to top
+				            	      arrayIndices[1]--;
+				                     }
 					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri1index-1);
 								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[1];
 					            }
@@ -630,17 +645,31 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  else
 				      {//if the array already contains the second triangle
 					   if(arrayMap.containsKey(tris[1]))
-			               {final int[] arrayIndices=arrayMap.get(tris[1]);
-				    	    //TODO find which side is common and update arrayIndices
-						    //updates the array
+			               {//retrieves the indices of the triangle in the 2D array
+						    final int[] arrayIndices=arrayMap.get(tris[1]);
+				    	    //finds which sides are common and updates the array
 			                final int tri0index=trisList.indexOf(tris[0]);
 					        if(tri0index%2==0)
-					            {
+					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
+					                 {//to left
+					            	  arrayIndices[0]--;
+					                 }
+					             else
+					                 {//to top
+					            	  arrayIndices[1]--;
+					                 }
 					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[0];
 								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri0index+1);
 					            }
 					        else
-					            {
+					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
+				                     {//to right
+					            	  arrayIndices[0]++;
+				                     }
+				                 else
+				                     {//to bottom
+				                	  arrayIndices[1]++;
+				                     }
 					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri0index-1);
 								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[0];
 					            }
@@ -652,44 +681,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			        	   inserted=false;
 			          }
 			      if(inserted)
-			    	  {infosQueue.remove(infosQueueIndex);
+			    	  {//removes the information we used
+			    	   infosQueue.remove(infosQueueIndex);
+			    	   //resets the index if it is out of the bounds
 			    	   if(infosQueueIndex==infosQueue.size())
 			    		   infosQueueIndex=0;
 			    	  }
 			      else
-			    	  infosQueueIndex=(infosQueueIndex+1)%infosQueue.size();
+			    	  {//uses the next index, does not go out of the bounds
+			    	   infosQueueIndex=(infosQueueIndex+1)%infosQueue.size();
+			    	  }
 			     }
-			 /*Vector3[] tri0Vertices=new Vector3[3];
-			 Vector3[] tri1Vertices=new Vector3[3];
-			 Vector3[] tri2Vertices=new Vector3[3];
-			 Vector3[] tri3Vertices=new Vector3[3];
-			 for(int trisIndex=2;trisIndex<overestimatedSize-1;trisIndex++)
-			     {final RightTriangleInfo tri0=trisList.get(trisIndex);
-			      final RightTriangleInfo tri1=trisList.get(trisIndex);
-			      //gets the vertices of the both triangles
-				  tri0Vertices=meshData.getPrimitiveVertices(tri0.primitiveIndex,tri0.sectionIndex,tri0Vertices);
-				  tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
-				  final Vector3[][] insertedSides=new Vector3[][]{{tri0Vertices[(tri0.sideIndexOfHypotenuse+1)%3],tri0Vertices[(tri0.sideIndexOfHypotenuse+2)%3]},
-						                                          {tri0Vertices[(tri0.sideIndexOfHypotenuse+2)%3],tri0Vertices[(tri0.sideIndexOfHypotenuse+0)%3]},
-						                                          {tri1Vertices[(tri1.sideIndexOfHypotenuse+1)%3],tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3]},
-						                                          {tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3],tri1Vertices[(tri1.sideIndexOfHypotenuse+0)%3]}};
-				  boolean trisPairAdded=false;
-				  for(int j=0;j<overestimatedSize&&!trisPairAdded;j++)
-					  for(int i=0;i<overestimatedSize&&!trisPairAdded;i++)
-					      {final RightTriangleInfo tri2=adjacentTrisArray[i][j][0];
-					       final RightTriangleInfo tri3=adjacentTrisArray[i][j][1];
-					       if(tri2!=null&&tri3!=null)
-						       {tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
-						        tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
-						        
-						        final Vector3[][] testedSides=new Vector3[][]{{tri2Vertices[(tri2.sideIndexOfHypotenuse+1)%3],tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3]},
-                                                                              {tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3],tri2Vertices[(tri2.sideIndexOfHypotenuse+0)%3]},
-                                                                              {tri3Vertices[(tri3.sideIndexOfHypotenuse+1)%3],tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3]},
-                                                                              {tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3],tri3Vertices[(tri3.sideIndexOfHypotenuse+0)%3]}};
-						        
-						       }
-					      }
-			     }*/
 		    }
 		return(adjacentTrisArray);
 	}
