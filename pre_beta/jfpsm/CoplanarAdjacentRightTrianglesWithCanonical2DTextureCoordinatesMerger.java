@@ -735,7 +735,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	/**
-	 * Compute a list of arrays of adjacent triangles which could be merged to 
+	 * Computes a list of arrays of adjacent triangles which could be merged to 
 	 * make bigger rectangles
 	 * 
 	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
@@ -743,7 +743,41 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 */
 	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(RightTriangleInfo[][][] adjacentTrisArray){
 		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
-		//TODO
+		final int width=adjacentTrisArray.length;
+		final int height=width==0?0:adjacentTrisArray[0].length;
+		//removes the isolated quads from the array
+		for(int i=0;i<width;i++)
+			for(int j=0;j<height;j++)
+		        {RightTriangleInfo[] quad=adjacentTrisArray[i][j];
+			     if(quad!=null)
+			         {if(i-1>=0)
+			              {if(i+1<width)
+			                   {if(adjacentTrisArray[i-1][j]==null&&
+			                	   adjacentTrisArray[i+1][j]==null)
+			                	    adjacentTrisArray[i][j]=null;
+			                   }
+			               else
+			                   {if(adjacentTrisArray[i-1][j]==null)
+			                	    adjacentTrisArray[i][j]=null;
+			                   }
+			              }
+			          else
+			              {if(i+1<width)
+		                       {if(adjacentTrisArray[i+1][j]==null)
+		                    	    adjacentTrisArray[i][j]=null;
+		                       }
+		                   else
+		                	   adjacentTrisArray[i][j]=null;
+			              }
+			         }
+		        }
+		for(int j=0;j<height;j++)
+		    for(int i=0;i<width;i++)
+		        {
+			     
+		        }
+		//TODO treat all other groups of quads with ascending sizes until the remaining ones have all the same size
+		//TODO merge the remaining groups of quads with the same size into a single quad
 		return(adjacentTrisArraysList);
 	}
 }
