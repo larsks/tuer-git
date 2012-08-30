@@ -16,15 +16,9 @@ package jfpsm;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
-import jfpsm.graph.DirectedConnectedComponentVisitor;
-import jfpsm.graph.DirectedRootedKaryTree;
-import jfpsm.graph.Pair;
-
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
