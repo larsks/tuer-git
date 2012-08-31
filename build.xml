@@ -44,6 +44,8 @@
 	    <pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-math-0.8-SNAPSHOT.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-savable-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
@@ -92,6 +94,8 @@
 	    <pathelement location="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
 	    <pathelement location="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
 	    <pathelement location="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
+		<pathelement location="${destdir}/ardor3d-math-0.8-SNAPSHOT.jar" />
+		<pathelement location="${destdir}/ardor3d-savable-0.8-SNAPSHOT.jar" />
 	    <pathelement location="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
 	    <pathelement location="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
 	    <pathelement location="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
@@ -238,6 +242,8 @@
 			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-math-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-savable-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-extras-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
@@ -324,6 +330,8 @@
 			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-math-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+				<jar href="ardor3d-savable-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
