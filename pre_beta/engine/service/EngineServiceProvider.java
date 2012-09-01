@@ -30,7 +30,10 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.Savable;
+import com.ardor3d.util.export.binary.BinaryClassObject;
 import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.export.binary.BinaryIdContentPair;
+import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.resource.URLResourceSource;
 
 /**
@@ -41,10 +44,17 @@ import com.ardor3d.util.resource.URLResourceSource;
  */
 public final class EngineServiceProvider implements I3DServiceProvider{
     
+    private static final class DirectBinaryExporter extends BinaryExporter{
+        protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
+            return pair;
+        }
+    }
+    
     /**unique instance of the engine service provider (design pattern "singleton")*/
     private static final EngineServiceProvider instance=new EngineServiceProvider();
     
-    private BinaryExporter binaryExporter=new BinaryExporter();
+    private BinaryExporter binaryExporter=new DirectBinaryExporter();
     
     private EngineServiceProvider(){
         // Add our awt based image loader.

@@ -298,12 +298,12 @@ final class GameFilesGenerator{
                            {/*computeMergedStructuresWithAdjacentFaces(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices,
                         		isMergeOfAdjacentFacesEnabled,grid,buffersGrid,newIndexOffsetArray,newOtherIndexOffsetArray,indexArrayOffsetIndicesList,j);*/
                            }
-                       //regroup all buffers of a single floor using the same volume parameter
+                       //regroups all buffers of a single floor using the same volume parameter
                        totalVertexBufferSize=0;
                        totalIndexBufferSize=0;
                        totalNormalBufferSize=0;
                        totalTexCoordBufferSize=0;
-                       //compute the size of the buffers resulting of the grouping
+                       //computes the size of the buffers resulting of the grouping
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
                                {if(buffersGrid[i][j][k][0]!=null)
@@ -315,12 +315,12 @@ final class GameFilesGenerator{
                                 if(buffersGrid[i][j][k][3]!=null)
                                     totalTexCoordBufferSize+=buffersGrid[i][j][k][3].capacity();
                                }
-                       //create these buffers
-                       totalVertexBuffer=Buffers.newDirectFloatBuffer(totalVertexBufferSize);
-                       totalIndexBuffer=Buffers.newDirectIntBuffer(totalIndexBufferSize);
-                       totalNormalBuffer=Buffers.newDirectFloatBuffer(totalNormalBufferSize);
-                       totalTexCoordBuffer=Buffers.newDirectFloatBuffer(totalTexCoordBufferSize);
-                       //fill them
+                       //creates these buffers
+                       totalVertexBuffer=FloatBuffer.allocate(totalVertexBufferSize);
+                       totalIndexBuffer=IntBuffer.allocate(totalIndexBufferSize);
+                       totalNormalBuffer=FloatBuffer.allocate(totalNormalBufferSize);
+                       totalTexCoordBuffer=FloatBuffer.allocate(totalTexCoordBufferSize);
+                       //fills them
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
                                {if(buffersGrid[i][j][k][0]!=null)
@@ -332,7 +332,7 @@ final class GameFilesGenerator{
                                 if(buffersGrid[i][j][k][3]!=null)
                                     totalTexCoordBuffer.put((FloatBuffer)buffersGrid[i][j][k][3]);
                                }                      
-                       //put null values into the grid of buffers
+                       //puts null values into the grid of buffers
                        //because it has to be emptied before using another volume parameter
                        for(int i=0;i<grid.getLogicalWidth();i++)
                            for(int k=0;k<grid.getLogicalDepth();k++)
@@ -351,12 +351,12 @@ final class GameFilesGenerator{
                         * 
                         * It should use only one set of buffers per kind of face (use all textures)
                         * */
-                       //create a mesh for this floor and for the volume parameter currently in use
+                       //creates a mesh for this floor and for the volume parameter currently in use
                        meshName=floorNodeName+"CID"+meshIndex;
                        volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
                        tilePath=destFile.getParent()+System.getProperty("file.separator")+tileNameTable.get(key)+".png";
-                       //create a file containing the texture of the tile because it 
+                       //creates a file containing the texture of the tile because it 
                        //is necessary to attach a texture to a mesh (the URL cannot 
                        //point to a file that does not exist)
                        tileFile=new File(tilePath);
@@ -371,18 +371,18 @@ final class GameFilesGenerator{
                        EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
                        //this file is now useless, delete it
                        tileFile.delete();
-                       //attach the newly created mesh to its floor
+                       //attaches the newly created mesh to its floor
                        EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }
-                  //attach the floor to its level
+                  //attaches the floor to its level
                   EngineServiceSeeker.getInstance().attachChildToNode(levelNode,floorNode);
-                  //look at the next floor
+                  //looks at the next floor
                   j++;
                  }
              System.out.println("[INFO] level node successfully created");
              System.out.println("[INFO] JFPSM attempts to write the level into the file "+destFile.getName());
-             //write the level into a file
+             //writes the level into a file
              success=EngineServiceSeeker.getInstance().writeSavableInstanceIntoFile(levelNode,destFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destFile.getName()+" successful");
@@ -391,7 +391,7 @@ final class GameFilesGenerator{
              else
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
              System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
-             //write the bounding boxes of the level into a file
+             //writes the bounding boxes of the level into a file
              success=EngineServiceSeeker.getInstance().writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
