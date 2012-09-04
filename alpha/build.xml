@@ -213,7 +213,6 @@
 			<exclude name="**/texture/worldmap.gif" />
 			<!-- MD3 loader -->
 			<exclude name="**/md3/*.*" />
-			<exclude name="**/lara/*.*" />
 			<!-- documentation and license-->
 			<exclude name="**/contents.txt" />
 			<exclude name="**/gpl.txt" />
