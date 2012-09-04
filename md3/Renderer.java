@@ -76,10 +76,10 @@ class Renderer implements KeyListener, GLEventListener{
             }
         catch (IOException ioe)
         {System.err.println("Failed to load model data.");}*/
-	/*try {*/g_Model.loadModel("lara","lara");/*
+	/*try {*/g_Model.loadModel("****","****");/*
              // Load the gun and attach it to our character
              */
-	     g_Model.loadWeapon("lara","railgun");
+	     g_Model.loadWeapon("****","railgun");
             /*}
         catch (IOException ioe)
         {System.err.println("Failed to load model data.");}*/
