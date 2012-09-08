@@ -553,7 +553,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		 */
 		final int overestimatedSize=trisList.size();
 		//creates the 2D array
-		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[overestimatedSize][overestimatedSize][2];
+		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[overestimatedSize][overestimatedSize][];
 		//if this array can contain something
 		if(overestimatedSize>0)
 		    {/**
@@ -561,8 +561,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		      * other triangles
 		      */
 			 final int initialIndex=(overestimatedSize/2)-1;
-			 adjacentTrisArray[initialIndex][initialIndex][0]=trisList.get(0);
-			 adjacentTrisArray[initialIndex][initialIndex][1]=trisList.get(1);
+			 adjacentTrisArray[initialIndex][initialIndex]=new RightTriangleInfo[]{trisList.get(0),trisList.get(1)};
 			 /**
 			  * uses the following convention: 0 -> left, 1 
 			  * -> top, 2 -> right, 3 -> bottom. Checks whether an 
@@ -606,8 +605,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			                         {//to bottom
 			                	      arrayIndices[1]++;
 			                         }
-					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[1];
-								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri1index+1);
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]]=new RightTriangleInfo[]{tris[1],trisList.get(tri1index+1)};
 					            }
 					        else
 					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
@@ -618,8 +616,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                     {//to top
 				            	      arrayIndices[1]--;
 				                     }
-					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri1index-1);
-								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[1];
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]]=new RightTriangleInfo[]{trisList.get(tri1index-1),tris[1]};
 					            }
 						    //updates the map as tris[1] has been found
 						    arrayMap.put(tris[1],arrayIndices);
@@ -642,8 +639,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					                 {//to top
 					            	  arrayIndices[1]--;
 					                 }
-					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=tris[0];
-								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=trisList.get(tri0index+1);
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]]=new RightTriangleInfo[]{tris[0],trisList.get(tri0index+1)};
 					            }
 					        else
 					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
@@ -654,8 +650,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                     {//to bottom
 				                	  arrayIndices[1]++;
 				                     }
-					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][0]=trisList.get(tri0index-1);
-								 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]][1]=tris[0];
+					        	 adjacentTrisArray[arrayIndices[0]][arrayIndices[1]]=new RightTriangleInfo[]{trisList.get(tri0index-1),tris[0]};
 					            }
 				    	    //updates the map as tris[0] has been found
 				    	    arrayMap.put(tris[0],arrayIndices);
@@ -735,43 +730,70 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
 	 * @return list of 2D arrays of adjacent mergeable triangles
 	 */
-	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(RightTriangleInfo[][][] adjacentTrisArray){
+	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
+		//detects empty rows and empty columns in order to skip them later
+		int smallestI=Integer.MAX_VALUE;
+		int biggestI=Integer.MIN_VALUE;
+		int smallestJ=Integer.MAX_VALUE;
+		int biggestJ=Integer.MIN_VALUE;
+		boolean empty=true;
+		for(int i=0;i<adjacentTrisArray.length;i++)
+			for(int j=0;j<adjacentTrisArray[i].length;j++)
+				if(adjacentTrisArray[i][j]!=null)
+			        {empty=false;
+					 smallestI=Math.min(smallestI,i);
+			         biggestI=Math.max(biggestI,i);
+			         smallestJ=Math.min(smallestJ,j);
+			         biggestJ=Math.max(biggestJ,j);
+			        }
 		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
-		final int width=adjacentTrisArray.length;
-		final int height=width==0?0:adjacentTrisArray[0].length;
-		//removes the isolated quads from the array
-		for(int i=0;i<width;i++)
-			for(int j=0;j<height;j++)
-		        {RightTriangleInfo[] quad=adjacentTrisArray[i][j];
-			     if(quad!=null)
-			         {if(i-1>=0)
-			              {if(i+1<width)
-			                   {if(adjacentTrisArray[i-1][j]==null&&
-			                	   adjacentTrisArray[i+1][j]==null)
-			                	    adjacentTrisArray[i][j]=null;
+		if(!empty)
+		    {//creates a copy of the supplied array but without empty columns and rows
+			 final RightTriangleInfo[][][] cleanAdjacentTrisArray=new RightTriangleInfo[biggestI-smallestI+1][biggestJ-smallestJ+1][];
+		     for(int i=0;i<cleanAdjacentTrisArray.length;i++)
+			     for(int j=0;j<cleanAdjacentTrisArray[i].length;j++)
+				     {final int rawI=i+smallestI;
+					  final int rawJ=j+smallestJ;
+					  if(adjacentTrisArray[rawI][rawJ]!=null)
+					      cleanAdjacentTrisArray[i][j]=new RightTriangleInfo[]{adjacentTrisArray[rawI][rawJ][0],adjacentTrisArray[rawI][rawJ][1]};
+				     }
+		     final int width=cleanAdjacentTrisArray.length;
+		     final int height=width==0?0:cleanAdjacentTrisArray[0].length;
+		     //removes the isolated quads from the array
+		     for(int i=0;i<width;i++)
+			     for(int j=0;j<height;j++)
+		             {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
+			          if(quad!=null)
+			              {if(i-1>=0)
+			                   {if(i+1<width)
+			                        {if(cleanAdjacentTrisArray[i-1][j]==null&&
+			                        	cleanAdjacentTrisArray[i+1][j]==null)
+			                        	 //TODO check if there is no single quad above and below
+			                             cleanAdjacentTrisArray[i][j]=null;
+			                        }
+			                    else
+			                        {if(cleanAdjacentTrisArray[i-1][j]==null)
+			                        	 cleanAdjacentTrisArray[i][j]=null;
+			                        }
 			                   }
 			               else
-			                   {if(adjacentTrisArray[i-1][j]==null)
-			                	    adjacentTrisArray[i][j]=null;
+			                   {if(i+1<width)
+		                            {if(cleanAdjacentTrisArray[i+1][j]==null)
+		                            	 cleanAdjacentTrisArray[i][j]=null;
+		                            }
+		                        else
+		                        	cleanAdjacentTrisArray[i][j]=null;
 			                   }
 			              }
-			          else
-			              {if(i+1<width)
-		                       {if(adjacentTrisArray[i+1][j]==null)
-		                    	    adjacentTrisArray[i][j]=null;
-		                       }
-		                   else
-		                	   adjacentTrisArray[i][j]=null;
-			              }
-			         }
-		        }
-		for(int j=0;j<height;j++)
-		    for(int i=0;i<width;i++)
-		        {
-			     
-		        }
-		//TODO treat all other groups of quads with ascending sizes until the remaining ones have all the same size
-		//TODO merge the remaining groups of quads with the same size into a single quad
+		             }
+		     for(int j=0;j<height;j++)
+		         for(int i=0;i<width;i++)
+		             {
+			          
+		             }
+		     //TODO treat all other groups of quads with ascending sizes until the remaining ones have all the same size
+		     //TODO merge the remaining groups of quads with the same size into a single quad
+		    }
 		return(adjacentTrisArraysList);
 	}
 }
