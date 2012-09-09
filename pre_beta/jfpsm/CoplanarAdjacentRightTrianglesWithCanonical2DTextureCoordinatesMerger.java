@@ -764,36 +764,91 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     for(int j=0;j<height;j++)
 		             {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
 			          if(quad!=null)
-			              {if(i-1>=0)
-			                   {if(i+1<width)
-			                        {if(cleanAdjacentTrisArray[i-1][j]==null&&
-			                        	cleanAdjacentTrisArray[i+1][j]==null)
-			                        	 //TODO check if there is no single quad above and below
-			                             cleanAdjacentTrisArray[i][j]=null;
-			                        }
-			                    else
-			                        {if(cleanAdjacentTrisArray[i-1][j]==null)
-			                        	 cleanAdjacentTrisArray[i][j]=null;
-			                        }
-			                   }
-			               else
-			                   {if(i+1<width)
-		                            {if(cleanAdjacentTrisArray[i+1][j]==null)
-		                            	 cleanAdjacentTrisArray[i][j]=null;
-		                            }
-		                        else
-		                        	cleanAdjacentTrisArray[i][j]=null;
-			                   }
+			              {if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,true))
+			        	       {
+			        		    
+			        	       }
 			              }
 		             }
 		     for(int j=0;j<height;j++)
 		         for(int i=0;i<width;i++)
-		             {
-			          
+		             {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
+			          if(quad!=null)
+		                  {if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,false))
+		        	           {
+		        		        
+		        	           }
+		                  }
 		             }
 		     //TODO treat all other groups of quads with ascending sizes until the remaining ones have all the same size
 		     //TODO merge the remaining groups of quads with the same size into a single quad
 		    }
 		return(adjacentTrisArraysList);
+	}
+	
+	private static boolean areTrianglesLocallyIsolated(final RightTriangleInfo[][][] cleanAdjacentTrisArray,
+			final int width,final int height,final int i,final int j,
+			final boolean testOnLineIsolationEnabled){
+		RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
+		final boolean isolated;
+        if(quad!=null)
+            {if(testOnLineIsolationEnabled)
+                 {if(i-1>=0)
+                      {if(i+1<width)
+                           {if(cleanAdjacentTrisArray[i-1][j]==null&&
+                      	       cleanAdjacentTrisArray[i+1][j]==null)
+                    	        isolated=true;
+                            else
+                    	        isolated=false;
+                           }
+                       else
+                           {if(cleanAdjacentTrisArray[i-1][j]==null)
+                    	        isolated=true;
+                            else
+                    	        isolated=false;
+                           }
+                      }
+                  else
+                      {if(i+1<width)
+                           {if(cleanAdjacentTrisArray[i+1][j]==null)
+                    	        isolated=true;
+                            else
+                    	        isolated=false;
+                           }
+                       else
+                	       isolated=true;
+                      }
+                 }
+             else
+                 {if(j-1>=0)
+            	      {if(j+1<height)
+            	           {if(cleanAdjacentTrisArray[i][j-1]==null&&
+            	               cleanAdjacentTrisArray[i][j+1]==null)
+            	    	        isolated=true;
+            	    	    else
+            	    	        isolated=false;
+            	           }
+            	       else
+            	           {if(cleanAdjacentTrisArray[i][j-1]==null)
+            	    	        isolated=true;
+            	    	    else
+            	    	        isolated=false;
+            	           }
+            	      }
+            	  else
+            	      {if(j+1<height)
+           	               {if(cleanAdjacentTrisArray[i][j+1]==null)
+            	    	        isolated=true;
+            	    	    else
+            	    	        isolated=false;
+           	               }
+           	           else
+           	               isolated=true;
+            	      }
+                 }
+            }
+        else
+        	isolated=false;
+        return(isolated);
 	}
 }
