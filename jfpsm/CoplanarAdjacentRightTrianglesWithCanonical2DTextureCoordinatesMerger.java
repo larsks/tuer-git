@@ -765,8 +765,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		             {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
 			          if(quad!=null)
 			              {if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,true)&&
-			            	  (j-1<0||areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j-1,true))&&
-			            	  (j+1>=height||areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j+1,true)))
+			            	  (j-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j-1,true))&&
+			            	  (j+1>=height||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j+1,true)))
 			        	       {//does not add it to the list as an isolated quad cannot be used for a merge
 			            	    //removes it from the array as it has just been treated
 			            	    cleanAdjacentTrisArray[i][j]=null;
@@ -778,8 +778,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		             {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
 			          if(quad!=null)
 		                  {if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,false)&&
-		                	  (i-1<0||areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i-1,j,false))&&
-		                	  (i+1>=width||areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i+1,j,false)))
+		                	  (i-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i-1,j,false))&&
+		                	  (i+1>=width||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i+1,j,false)))
 		        	           {//does not add it to the list as an isolated quad cannot be used for a merge
 			            	    //removes it from the array as it has just been treated
 		                	    cleanAdjacentTrisArray[i][j]=null;
