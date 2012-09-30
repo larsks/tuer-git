@@ -323,7 +323,7 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>  
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>  
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
@@ -442,7 +442,8 @@
 			  dir="${bindir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
-			<jvmarg value="-Xmx128m"/>
+			<jvmarg value="-Xmx512m"/>
+			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
