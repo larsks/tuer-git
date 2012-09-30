@@ -25,7 +25,9 @@ import jfpsm.I3DServiceSeeker;
 import jfpsm.MainWindow;
 
 /**
- * Service provider of JFPSM. It allows to separate the concerns, not to mix the editor and the 3D engine
+ * Service provider of JFPSM. It allows to separate the concerns, not to mix 
+ * the editor and the 3D engine
+ * 
  * @author Julien Gouesse
  *
  */
@@ -35,8 +37,8 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     private final engine.service.I3DServiceProvider delegate;
     
     
-    private JFPSMServiceProvider(final engine.service.I3DServiceProvider factory,
-                                 final I3DServiceSeeker seeker){
+    private JFPSMServiceProvider(final engine.service.I3DServiceProvider 
+    		factory,final I3DServiceSeeker seeker){
         delegate=factory;
         bind3DServiceSeeker(seeker);
     }
@@ -48,12 +50,14 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
+    public final boolean writeSavableInstanceIntoFile(final Object savable,
+    		final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+    public final boolean writeSavableInstancesListIntoFile(
+    		final ArrayList<?> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
@@ -71,16 +75,19 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     public final Object createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
-    	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
+    	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,
+    		   normalBuffer,texCoordBuffer));
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,final URL url){
+    public final void attachTextureToSpatial(final Object spatial,
+    		final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
     
     public static final void main(String[] args){
-        //Disable DirectDraw under Windows in order to avoid conflicts with OpenGL
+        //Disables DirectDraw under Windows in order to avoid conflicts with
+    	//OpenGL
         System.setProperty("sun.java2d.noddraw","true");
         new JFPSMServiceProvider(EngineServiceProvider.getInstance(),
                                  EngineServiceSeeker.getInstance());
