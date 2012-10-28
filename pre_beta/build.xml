@@ -71,8 +71,9 @@
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparc.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparcv9.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar"/>
@@ -82,8 +83,9 @@
 		<pathelement location="lib/jogl/jogl-all-natives-linux-i586.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-solaris-amd64.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-solaris-i586.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-solaris-sparc.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-solaris-sparcv9.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="lib/jogl/jogl-all-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="lib/jogl/jogl-all-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="lib/jogl/jogl-all-natives-macosx-universal.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-windows-amd64.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-windows-i586.jar"/>
@@ -91,10 +93,11 @@
 	<path id="joal.natives.path">
 	    <pathelement location="lib/joal/joal-natives-linux-amd64.jar"/>
 	    <pathelement location="lib/joal/joal-natives-linux-i586.jar"/>
-		<pathelement location="lib/jogl/joal-natives-solaris-amd64.jar"/>
-		<pathelement location="lib/jogl/joal-natives-solaris-i586.jar"/>
-		<pathelement location="lib/jogl/joal-natives-solaris-sparc.jar"/>
-		<pathelement location="lib/jogl/joal-natives-solaris-sparcv9.jar"/>
+		<pathelement location="lib/joal/joal-natives-solaris-amd64.jar"/>
+		<pathelement location="lib/joal/joal-natives-solaris-i586.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="lib/joal/joal-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="lib/joal/joal-natives-solaris-sparcv9.jar"/> -->
 	    <pathelement location="lib/joal/joal-natives-macosx-universal.jar"/>
 	    <pathelement location="lib/joal/joal-natives-windows-amd64.jar"/>
 	    <pathelement location="lib/joal/joal-natives-windows-i586.jar"/>
@@ -123,8 +126,9 @@
 	    <pathelement location="${destdir}/jogl-all-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-solaris-sparc.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="${destdir}/jogl-all-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/> -->
 	    <pathelement location="${destdir}/jogl-all-natives-macosx-universal.jar"/>
 	    <pathelement location="${destdir}/jogl-all-natives-windows-amd64.jar"/>
 	    <pathelement location="${destdir}/jogl-all-natives-windows-i586.jar"/>
@@ -133,8 +137,9 @@
 		<pathelement location="${destdir}/joal-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/joal-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/joal-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/joal-natives-solaris-sparc.jar"/>
-		<pathelement location="${destdir}/joal-natives-solaris-sparcv9.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="${destdir}/joal-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="${destdir}/joal-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="${destdir}/joal-natives-macosx-universal.jar"/>
 		<pathelement location="${destdir}/joal-natives-windows-amd64.jar"/>
 		<pathelement location="${destdir}/joal-natives-windows-i586.jar"/>
@@ -143,8 +148,9 @@
 	    <pathelement location="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/>
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <pathelement location="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/> -->
+		<!-- <pathelement location="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
 	    <pathelement location="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
 	    <pathelement location="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
 	    <pathelement location="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
