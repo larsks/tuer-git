@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
-import com.jogamp.common.nio.Buffers;
 
 final class GameFilesGenerator{
 
