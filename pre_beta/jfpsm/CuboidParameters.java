@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map.Entry;
-import com.jogamp.common.nio.Buffers;
-
 import misc.SerializationHelper;
 
 public final class CuboidParameters extends VolumeParameters{
@@ -140,7 +138,7 @@ public final class CuboidParameters extends VolumeParameters{
                      visibleFacesCount++;
         	 if(vertexBuffer==null||vertexBuffer.capacity()!=visibleFacesCount*12)
                  {//6 faces * 4 vertices * 3 coordinates
-                  vertexBuffer=Buffers.newDirectFloatBuffer(visibleFacesCount*12);                 
+                  vertexBuffer=FloatBuffer.allocate(visibleFacesCount*12);
                  }            
              float[] center=new float[3];
              for(int i=0;i<3;i++)
@@ -201,11 +199,11 @@ public final class CuboidParameters extends VolumeParameters{
              vertexBuffer.rewind();
              if(indexBuffer==null||indexBuffer.capacity()!=visibleFacesCount*6)
                  {//6 faces * 2 triangles * 3 indices
-                  indexBuffer=Buffers.newDirectIntBuffer(visibleFacesCount*6);
+                  indexBuffer=IntBuffer.allocate(visibleFacesCount*6);
                  }
              if(mergeableIndexBuffer==null||mergeableIndexBuffer.capacity()!=visibleFacesCount*6)
                  {//6 faces * 2 triangles * 3 indices
-                  mergeableIndexBuffer=Buffers.newDirectIntBuffer(visibleFacesCount*6);
+                  mergeableIndexBuffer=IntBuffer.allocate(visibleFacesCount*6);
                  }
              //fill the index buffer
              indexBuffer.rewind();
@@ -241,7 +239,7 @@ public final class CuboidParameters extends VolumeParameters{
              mergeableIndexBuffer.rewind();
              if(normalBuffer==null||normalBuffer.capacity()!=visibleFacesCount*12)
                  {//6 faces * 4 vertices * 3 coordinates
-                  normalBuffer=Buffers.newDirectFloatBuffer(visibleFacesCount*12);
+                  normalBuffer=FloatBuffer.allocate(visibleFacesCount*12);
                  }            
              //fill the normal buffer
              normalBuffer.rewind();
@@ -291,7 +289,7 @@ public final class CuboidParameters extends VolumeParameters{
              normalBuffer.rewind();
              if(texCoordBuffer==null||texCoordBuffer.capacity()!=visibleFacesCount*8)
                  {//6 faces * 4 vertices * 2 coordinates
-                  texCoordBuffer=Buffers.newDirectFloatBuffer(visibleFacesCount*8);
+                  texCoordBuffer=FloatBuffer.allocate(visibleFacesCount*8);
                  }
              texCoordBuffer.rewind();
              //fill the texture coord buffer
