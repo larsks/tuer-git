@@ -13,11 +13,7 @@
 */
 package engine.statemachine;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.MouseManager;
@@ -26,11 +22,10 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
-import com.ardor3d.ui.text.BMFont;
 import com.ardor3d.util.ReadOnlyTimer;
-import com.ardor3d.util.resource.URLResourceSource;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.BasicConditions;
+import engine.misc.FontStore;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManager;
 
@@ -55,12 +50,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     private final TaskManager taskManager;
     
-    /**
-     * list of bitmap fonts
-     * @deprecated this field should be moved to a separate font store
-     * */
-    @Deprecated
-    private static ArrayList<BMFont> fontsList;
+    private final FontStore fontStore;
     
     /**
      * sound manager used to play sound samples and music
@@ -74,6 +64,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             final Runnable uninstallRunnable,
             final String creditsContent,final String controlsContent){
         super(ScenegraphState.class,String.class,new ScenegraphState());
+        fontStore=new FontStore();
         taskManager=new TaskManager();
         soundManager=new SoundManager();
         final TriggerAction exitAction=new TriggerAction() {
@@ -115,11 +106,11 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
         //creates states
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
-        final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager);
+        final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager,fontStore);
         final InitializationState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
-        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,controlsContent);
-        final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager);
+        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,controlsContent,fontStore);
+        final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager);
         //adds the states and their actions to the state machine
         //FIXME put all cleanup code into the entry action of the initial state
@@ -175,39 +166,5 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     public void updateLogicalLayer(final ReadOnlyTimer timer){
         internalStateMachine.getCurrentState().getLogicalLayer().checkTriggers(timer.getTimePerFrame());
         super.updateLogicalLayer(timer);
-    }
-    
-    /**
-     * Creates font lists
-     * 
-     * @return font lists
-     * @deprecated this service should be moved to a separate font store
-     */
-    @Deprecated
-    private final static ArrayList<BMFont> createFontsList(){
-        final ArrayList<BMFont> fontsList=new ArrayList<BMFont>();
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        return(fontsList);
-    }
-    
-    /**
-     * Returns font lists
-     * 
-     * @return font lists
-     * @deprecated this service should be moved to a separate font store
-     */
-    @Deprecated
-    public static final List<BMFont> getFontsList(){
-        if(fontsList==null)
-            fontsList=createFontsList();
-        return(Collections.unmodifiableList(fontsList));
     }
 }

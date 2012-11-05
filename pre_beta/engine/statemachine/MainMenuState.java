@@ -33,6 +33,8 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
+
+import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
@@ -80,7 +82,8 @@ public final class MainMenuState extends ScenegraphState{
                   final MouseManager mouseManager,
                   final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
-                  final Runnable uninstallRunnable,final String creditsContent,final String controlsContent){
+                  final Runnable uninstallRunnable,final String creditsContent,final String controlsContent,
+      			  final FontStore fontStore){
         super(soundManager);
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
@@ -107,7 +110,7 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));

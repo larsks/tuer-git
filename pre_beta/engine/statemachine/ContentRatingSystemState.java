@@ -22,6 +22,7 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.ui.text.BMText;
+import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 public final class ContentRatingSystemState extends ScenegraphState{
@@ -32,10 +33,12 @@ public final class ContentRatingSystemState extends ScenegraphState{
 	private MouseManager mouseManager;
 	
     
-	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager){
+	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
+			final TriggerAction exitAction,final TriggerAction toInitAction,final SoundManager soundManager,
+			final FontStore fontStore){
         super(soundManager);
         this.mouseManager=mouseManager;
-        final BMText textNode=new BMText("contentSystemRatingNode",text,ScenegraphStateMachine.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("contentSystemRatingNode",text,fontStore.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
         //final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toInitAction);
