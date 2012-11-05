@@ -33,6 +33,7 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.resource.URLResourceSource;
+import engine.misc.FontStore;
 import engine.movement.CircularSpreadTextureUpdaterController;
 import engine.movement.MovementEquation;
 import engine.movement.UniformlyVariableMovementEquation;
@@ -51,7 +52,8 @@ public final class IntroductionState extends ScenegraphState{
     private final Box box;
 
     
-    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toMainMenuAction,final SoundManager soundManager){
+    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,
+    		final TriggerAction toMainMenuAction,final SoundManager soundManager,final FontStore fontStore){
         super(soundManager);
         box=new Box("Introduction Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
@@ -73,7 +75,7 @@ public final class IntroductionState extends ScenegraphState{
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
         getRoot().attachChild(box);       
         //shows the game title as text
-        final BMText textNode=new BMText("gameTitleNode","TUER",ScenegraphStateMachine.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gameTitleNode","TUER",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(6);
         textNode.setTextColor(ColorRGBA.BLACK);
         textNode.setTranslation(0,0,-75);
