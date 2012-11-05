@@ -37,9 +37,6 @@ import javax.swing.WindowConstants;
  * @author Julien Gouesse
  */
 public final class MainWindow{
-
-    
-    private static final long serialVersionUID=1L;
     
     private JFrame applicativeFrame;
     
