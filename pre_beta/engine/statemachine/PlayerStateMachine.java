@@ -16,7 +16,6 @@ package engine.statemachine;
 import java.util.Collections;
 import com.ardor3d.util.ReadOnlyTimer;
 import engine.data.PlayerData;
-import engine.sound.SoundManager;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
