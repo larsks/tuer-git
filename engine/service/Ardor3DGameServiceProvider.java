@@ -165,8 +165,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
 			final JoglNewtWindow joglNewtWindow=(JoglNewtWindow)source;
 			final GLWindow glWindow=joglNewtWindow.getNewtWindow();
 			final boolean fullscreenOn=glWindow.isFullscreen();
+			final int screenWidth=glWindow.getScreen().getWidth();
+			final int screenHeight=glWindow.getScreen().getHeight();
 			glWindow.setFullscreen(!fullscreenOn);
 			glWindow.setUndecorated(!fullscreenOn);
+			glWindow.setTopLevelSize(screenWidth,screenHeight);
+			glWindow.setTopLevelPosition(0,0);
 		}
     	
     }
