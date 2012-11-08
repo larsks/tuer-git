@@ -28,6 +28,7 @@ import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
@@ -83,7 +84,7 @@ public final class MainMenuState extends ScenegraphState{
                   final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
                   final Runnable uninstallRunnable,final String creditsContent,final String controlsContent,
-      			  final FontStore fontStore){
+      			  final FontStore fontStore,final TriggerAction toggleScreenModeAction){
         super(soundManager);
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
@@ -115,9 +116,10 @@ public final class MainMenuState extends ScenegraphState{
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(textNode);
-        //setups the keyboard trigger(s)
+        //setups the keyboard triggers
+        final InputTrigger toggleScreenModeTrigger=new InputTrigger(new KeyReleasedCondition(Key.F11),toggleScreenModeAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
+        final InputTrigger[] triggers=new InputTrigger[]{toggleScreenModeTrigger,exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
     }
