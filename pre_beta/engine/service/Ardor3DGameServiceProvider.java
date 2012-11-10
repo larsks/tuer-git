@@ -174,19 +174,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
 			glWindow.setUndecorated(!fullscreenOn);
 			glWindow.setTopLevelSize(screenWidth,screenHeight);
 			glWindow.setTopLevelPosition(0,0);
-			/**
-			 * The first switch to windowed mode may try to reset the size to its default value 
-			 * that has never been explicitly set as the window has been created and immediately used 
-			 * in full screen mode. The desired size must be set later to avoid being modified by this 
-			 * switch.
-			 */
-			glWindow.invoke(false, new GLRunnable(){
-				@Override
-				public boolean run(GLAutoDrawable glAutoDrawable) {
-					glWindow.setTopLevelSize(screenWidth,screenHeight);
-					return true;
-				}
-			});
 		}
     	
     }
