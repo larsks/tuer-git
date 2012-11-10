@@ -19,8 +19,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLRunnable;
 import javax.swing.JOptionPane;
-
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.DisplaySettings;
@@ -55,7 +56,6 @@ import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.opengl.GLWindow;
-
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.renderer.ReliableContextCapabilities;
@@ -171,6 +171,19 @@ public final class Ardor3DGameServiceProvider implements Scene{
 			glWindow.setUndecorated(!fullscreenOn);
 			glWindow.setTopLevelSize(screenWidth,screenHeight);
 			glWindow.setTopLevelPosition(0,0);
+			/**
+			 * The first switch to windowed mode may try to reset the size to its default value 
+			 * that has never been explicitly set as the window has been created and immediately used 
+			 * in full screen mode. The desired size must be set later to avoid being modified by this 
+			 * switch.
+			 */
+			glWindow.invoke(false, new GLRunnable(){
+				@Override
+				public boolean run(GLAutoDrawable glAutoDrawable) {
+					glWindow.setTopLevelSize(screenWidth,screenHeight);
+					return true;
+				}
+			});
 		}
     	
     }
@@ -273,6 +286,26 @@ public final class Ardor3DGameServiceProvider implements Scene{
      */
     private final void init(){
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
+        //refreshes the frustum when the window is resized
+        /*((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter() {
+			
+			@Override
+			public void windowResized(final WindowEvent e) {
+				final GLWindow newtWindow=((JoglNewtWindow)canvas).getNewtWindow();
+				final CanvasRenderer canvasRenderer=canvas.getCanvasRenderer();
+                newtWindow.invoke(true, new GLRunnable() {
+					
+					@Override
+					public boolean run(GLAutoDrawable glAutoDrawable) {
+						canvasRenderer.getCamera().setFrustumPerspective(canvasRenderer.getCamera().getFovY(),
+		        				(float) newtWindow.getWidth() / (float) newtWindow.getHeight(), 
+		        				canvasRenderer.getCamera().getFrustumNear(), 
+		        				canvasRenderer.getCamera().getFrustumFar());
+						return true;
+					}
+				});
+			}
+		});*/
         //disables vertical synchronization for tests
         canvas.setVSyncEnabled(false);
         //creates a ZBuffer to display pixels closest to the camera above farther ones.
