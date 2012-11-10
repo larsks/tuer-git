@@ -24,6 +24,7 @@ import javax.media.opengl.GLRunnable;
 import javax.swing.JOptionPane;
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
+import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.DisplaySettings;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.Scene;
@@ -55,6 +56,8 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
@@ -287,25 +290,24 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private final void init(){
         canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
         //refreshes the frustum when the window is resized
-        /*((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter() {
-			
+        ((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter(){
 			@Override
-			public void windowResized(final WindowEvent e) {
+			public void windowResized(final WindowEvent e){
 				final GLWindow newtWindow=((JoglNewtWindow)canvas).getNewtWindow();
 				final CanvasRenderer canvasRenderer=canvas.getCanvasRenderer();
-                newtWindow.invoke(true, new GLRunnable() {
-					
+                newtWindow.invoke(true,new GLRunnable(){
 					@Override
 					public boolean run(GLAutoDrawable glAutoDrawable) {
+					    canvasRenderer.getCamera().resize(newtWindow.getWidth(), newtWindow.getHeight());
 						canvasRenderer.getCamera().setFrustumPerspective(canvasRenderer.getCamera().getFovY(),
-		        				(float) newtWindow.getWidth() / (float) newtWindow.getHeight(), 
+		        				(float)newtWindow.getWidth()/(float)newtWindow.getHeight(), 
 		        				canvasRenderer.getCamera().getFrustumNear(), 
 		        				canvasRenderer.getCamera().getFrustumFar());
 						return true;
 					}
 				});
 			}
-		});*/
+		});
         //disables vertical synchronization for tests
         canvas.setVSyncEnabled(false);
         //creates a ZBuffer to display pixels closest to the camera above farther ones.
