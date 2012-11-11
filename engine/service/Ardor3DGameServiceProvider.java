@@ -162,6 +162,30 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     private static final class ToggleScreenModeAction implements TriggerAction{
 
+    	private static GLRunnable resizer=new GLRunnable(){
+			@Override
+			public boolean run(GLAutoDrawable glAutoDrawable){
+				final GLWindow window=(GLWindow)glAutoDrawable;
+				final Screen screen=window.getScreen();
+				final int screenWidth=screen.getWidth();
+				final int screenHeight=screen.getHeight();
+				final int topLevelWidth,topLevelHeight;
+				if(window.isFullscreen())
+				    {topLevelWidth=window.getWidth();
+				     topLevelHeight=window.getHeight();
+				    }
+				else
+				    {topLevelWidth=window.getWidth()+window.getInsets().getTotalWidth();
+				     topLevelHeight=window.getHeight()+window.getInsets().getTopHeight();
+				    }
+				if(topLevelWidth!=screenWidth||topLevelHeight!=screenHeight)
+				    {//modifies the size of the window only when it is necessary
+					 window.setTopLevelSize(screenWidth,screenHeight);
+				    }
+				return true;
+			}
+		};
+    	
 		@Override
 		@MainThread
 		public void perform(Canvas source, TwoInputStates inputStates, double tpf) {
@@ -174,6 +198,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
 			glWindow.setUndecorated(!fullscreenOn);
 			glWindow.setTopLevelSize(screenWidth,screenHeight);
 			glWindow.setTopLevelPosition(0,0);
+			/**
+			 * The very first switch to another mode just after a modification of the resolution may cause 
+			 * a reset to the previous one (which is the default behavior). The desired size must be set 
+			 * later in order to override this mechanism.
+			 */
+			glWindow.invoke(false,resizer);
 		}
     	
     }
