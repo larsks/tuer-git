@@ -6,20 +6,19 @@
 	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gluegen-rt/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/google-collect/guava-r09.jar"/>
-	<classpathentry kind="lib" path="lib/mockachino/mockachino-full-0.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/joal/joal.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
 	<classpathentry kind="lib" path="lib/fettle/fettle-0.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jogl/jogl-all.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-math-0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-0.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/google-collect/guava-13.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-awt-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-math-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.9-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
