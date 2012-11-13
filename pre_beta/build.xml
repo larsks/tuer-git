@@ -33,6 +33,7 @@
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
+	<property name="ardor3d-version" value="0.9-SNAPSHOT" />
 	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your manifest -->
 	<property name="tuer-chrome-web-store-manifest-filename" value="manifest.json" />
 	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your icon -->
@@ -41,21 +42,20 @@
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
 	<path id="project.lib.path">
-	    <pathelement location="lib/ardor3d/ardor3d-animation-0.8-SNAPSHOT.jar"/>
-	    <pathelement location="lib/ardor3d/ardor3d-collada-0.8-SNAPSHOT.jar"/>
-	    <pathelement location="lib/ardor3d/ardor3d-core-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-math-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-savable-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-extras-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-awt-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-jogl-0.8-SNAPSHOT.jar"/>
-		<pathelement location="lib/ardor3d/ardor3d-ui-0.8-SNAPSHOT.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-animation-${ardor3d-version}.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
+	    <pathelement location="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-savable-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-awt-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar"/>
+		<pathelement location="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/fettle/fettle-0.7.0.jar"/>
-	    <pathelement location="lib/google-collect/guava-r09.jar"/>	    
+	    <pathelement location="lib/google-collect/guava-13.0.1.jar"/>	    
 	    <pathelement location="lib/gluegen-rt/gluegen-rt.jar"/>
 		<pathelement location="lib/joal/joal.jar"/>
 	    <pathelement location="lib/jogl/jogl-all.jar"/>
-		<pathelement location="lib/mockachino/mockachino-full-0.3.1.jar"/>
 	    <pathelement location="lib/pss/CodecJOrbis.jar"/>
 	    <pathelement location="lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="lib/pss/LibraryJOAL.jar"/>
@@ -104,17 +104,16 @@
 	</path>
 	<path id="project.sign.jars.path">
 	    <pathelement location="${destdir}/fettle-0.7.0.jar" />
-	    <pathelement location="${destdir}/guava-r09.jar" />
-	    <pathelement location="${destdir}/mockachino-full-0.3.1.jar" />
-	    <pathelement location="${destdir}/ardor3d-animation-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-collada-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-core-0.8-SNAPSHOT.jar" />
-		<pathelement location="${destdir}/ardor3d-math-0.8-SNAPSHOT.jar" />
-		<pathelement location="${destdir}/ardor3d-savable-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-extras-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-awt-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-jogl-0.8-SNAPSHOT.jar" />
-	    <pathelement location="${destdir}/ardor3d-ui-0.8-SNAPSHOT.jar" />
+	    <pathelement location="${destdir}/guava-13.0.1.jar" />
+	    <pathelement location="${destdir}/ardor3d-animation-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-core-${ardor3d-version}.jar" />
+		<pathelement location="${destdir}/ardor3d-math-${ardor3d-version}.jar" />
+		<pathelement location="${destdir}/ardor3d-savable-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-extras-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-awt-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-jogl-${ardor3d-version}.jar" />
+	    <pathelement location="${destdir}/ardor3d-ui-${ardor3d-version}.jar" />
 	    <pathelement location="${destdir}/${tuer-jar-filename}"/>
 	    <pathelement location="${destdir}/${jfpsm-jar-filename}"/>
 	    <pathelement location="${destdir}/CodecJOrbis.jar"/>
@@ -269,18 +268,17 @@
 			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>  
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-math-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-savable-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-extras-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-savable-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-extras-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-			    <jar href="guava-r09.jar" download="eager" main="false"/>
-			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
+			    <jar href="guava-13.0.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="LibraryJOAL.jar" download="eager" main="false"/>
@@ -382,17 +380,16 @@
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-collada-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-core-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-math-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-				<jar href="ardor3d-savable-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-awt-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-jogl-0.8-SNAPSHOT.jar" download="eager" main="false"/>
-			    <jar href="ardor3d-ui-0.8-SNAPSHOT.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
+				<jar href="ardor3d-savable-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-awt-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
+			    <jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-			    <jar href="guava-r09.jar" download="eager" main="false"/>
-			    <jar href="mockachino-full-0.3.1.jar" download="eager" main="false"/>
+			    <jar href="guava-13.0.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="LibraryJOAL.jar" download="eager" main="false"/>
