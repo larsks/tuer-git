@@ -48,6 +48,8 @@ public final class SoundManager{
 	
     /**underlying sound system written by Paul Lamb*/
     private ExtendedSoundSystem soundSystem;
+    /**flag indicating whether the sound is enabled*/
+    private boolean enabled;
     
     
     public SoundManager(){
@@ -63,6 +65,16 @@ public final class SoundManager{
     	   }
         catch(SoundSystemException sse)
         {System.out.println("The initialization of the sound manager failed: "+sse);}
+        finally
+        {enabled=true;}
+    }
+    
+    public final boolean isEnabled(){
+    	return(enabled);
+    }
+    
+    public final void setEnabled(final boolean enabled) {
+    	this.enabled=enabled;
     }
     
     public final String loadSound(final URL url){
@@ -78,7 +90,7 @@ public final class SoundManager{
     }   
     
     public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier,float x,float y,float z){
-    	if(soundSystem!=null)
+    	if(soundSystem!=null&&enabled)
     	    {final boolean priority;
              final int attenuationModel;
              final float rollOffFactor;
