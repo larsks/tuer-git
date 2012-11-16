@@ -28,4 +28,3 @@ NUMERICAL PAD 8: move forward
 NUMERICAL PAD 2: move backward
 NUMERICAL PAD 4: strafe left
 NUMERICAL PAD 6: strafe right
-F11: switch to windowed or fullscreen mode

@@ -13,15 +13,21 @@
 */
 package engine.statemachine;
 
+import java.util.List;
+
 import com.ardor3d.extension.ui.UIButton;
+import com.ardor3d.extension.ui.UIComboBox;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
 import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.event.ActionEvent;
 import com.ardor3d.extension.ui.event.ActionListener;
+import com.ardor3d.extension.ui.event.SelectionListener;
 import com.ardor3d.extension.ui.layout.RowLayout;
+import com.ardor3d.extension.ui.model.DefaultComboBoxModel;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseManager;
@@ -34,6 +40,8 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
+import com.jogamp.newt.Screen;
+import com.jogamp.newt.ScreenMode;
 
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
@@ -52,6 +60,12 @@ public final class MainMenuState extends ScenegraphState{
     private final UIPanel initialMenuPanel;
     
     private final UIPanel startMenuPanel;
+    
+    private final UIPanel optionsMenuPanel;
+    
+    private final UIPanel displaySettingsMenuPanel;
+    
+    private final UIPanel desktopShortcutsMenuPanel;
     
     private final UIPanel controlsPanel;
     
@@ -100,7 +114,10 @@ public final class MainMenuState extends ScenegraphState{
             creditsPanel=createCreditsPanel(creditsContent);
         else
         	creditsPanel=null;
-        initialMenuPanel=createInitialMenuPanel(exitAction);       
+        displaySettingsMenuPanel=createDisplaySettingsMenuPanel(toggleScreenModeAction);
+        desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
+        initialMenuPanel=createInitialMenuPanel(exitAction);
+        optionsMenuPanel=createOptionsMenuPanel();
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
         loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);
         newGamePanel=createNewGamePanel(toLoadingDisplayAction);
@@ -117,9 +134,8 @@ public final class MainMenuState extends ScenegraphState{
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(textNode);
         //setups the keyboard triggers
-        final InputTrigger toggleScreenModeTrigger=new InputTrigger(new KeyReleasedCondition(Key.F11),toggleScreenModeAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
-        final InputTrigger[] triggers=new InputTrigger[]{toggleScreenModeTrigger,exitTrigger};
+        final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
     }
@@ -216,7 +232,53 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        final UIButton controlsButton;
+        final UIButton optionsButton=new UIButton("Options");
+        optionsButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(optionsMenuPanel);
+            }
+        });
+        final UIButton exitButton=new UIButton("Exit");
+        exitButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                exitAction.perform(null,null,-1);
+            }
+        });      
+        initialMenuPanel.add(startButton);
+        initialMenuPanel.add(optionsButton);
+        initialMenuPanel.add(exitButton);
+        return(initialMenuPanel);
+    }
+    
+    private final UIPanel createOptionsMenuPanel(){
+    	final UIPanel optionsMenuPanel=new UIPanel(new RowLayout(false));
+    	final UIButton desktopShortcutsButton;
+    	if(desktopShortcutsMenuPanel!=null)
+    	    {desktopShortcutsButton=new UIButton("Desktop shortcuts");
+    	     desktopShortcutsButton.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					showPanelInMainFrame(desktopShortcutsMenuPanel);
+				}
+			 });
+    	    }
+    	else
+    		desktopShortcutsButton=null;
+    	final UIButton displaySettingsButton;
+    	if(displaySettingsMenuPanel!=null)
+    	    {displaySettingsButton=new UIButton("Display Settings");
+    	     displaySettingsButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(displaySettingsMenuPanel);
+                 }
+             });
+    	    }
+    	else
+    		displaySettingsButton=null;
+    	final UIButton controlsButton;
         if(controlsPanel!=null)
             {controlsButton=new UIButton("Controls");
              controlsButton.addActionListener(new ActionListener(){           
@@ -240,44 +302,111 @@ public final class MainMenuState extends ScenegraphState{
             }
         else
         	creditsButton=null;
-        final UIButton exitButton=new UIButton("Exit");
-        exitButton.addActionListener(new ActionListener(){           
+        final UIButton backButton=new UIButton("Back");
+        backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                exitAction.perform(null,null,-1);
+                showPanelInMainFrame(initialMenuPanel);
             }
-        });      
-        initialMenuPanel.add(startButton);
+        });
+        if(displaySettingsButton!=null)
+        	optionsMenuPanel.add(displaySettingsButton);
+        if(desktopShortcutsButton!=null)
+        	optionsMenuPanel.add(desktopShortcutsButton);
         if(controlsButton!=null)
-            initialMenuPanel.add(controlsButton);
+            optionsMenuPanel.add(controlsButton);
         if(creditsButton!=null)
-            initialMenuPanel.add(creditsButton);
-        initialMenuPanel.add(exitButton);
-        if(launchRunnable!=null)
-            {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
-             addDesktopShortcutButton.addActionListener(new ActionListener(){
-                @Override
-                public void actionPerformed(ActionEvent event){
-                	launchRunnable.run();
-                }
-             });
-             initialMenuPanel.add(addDesktopShortcutButton);
+        	optionsMenuPanel.add(creditsButton);
+        optionsMenuPanel.add(backButton);
+    	return(optionsMenuPanel);
+    }
+    
+    private final UIPanel createDisplaySettingsMenuPanel(final TriggerAction toggleScreenModeAction){
+    	final UIPanel displaySettingsMenuPanel=new UIPanel(new RowLayout(false));
+    	final UILabel screenModesLabel=new UILabel("Display Mode");
+    	final Screen screen=((JoglNewtWindow)canvas).getNewtWindow().getScreen();
+    	final ScreenMode currentScreenMode=screen.getCurrentScreenMode();
+    	final List<ScreenMode> screenModes=screen.getScreenModes();
+    	int selectedScreenModeIndex=-1,screenModeIndex=0;
+    	for(ScreenMode screenMode:screenModes)
+    		{if(screenMode==currentScreenMode)
+    	         {selectedScreenModeIndex=screenModeIndex;
+    			  break;
+    	         }
+    		 screenModeIndex++;
+    		}
+    	final Object[] screenModesArray=screenModes.toArray();
+    	final DefaultComboBoxModel displayModesModel=new DefaultComboBoxModel(screenModesArray);
+    	final UIComboBox displayModesCombo=new UIComboBox(displayModesModel);
+    	if(selectedScreenModeIndex!=-1)
+    		displayModesCombo.setSelectedIndex(selectedScreenModeIndex,false);
+    	displayModesCombo.addSelectionListener(new SelectionListener<UIComboBox>(){
+			@Override
+			public void selectionChanged(final UIComboBox component,final Object newValue) {
+				screen.setCurrentScreenMode((ScreenMode)newValue);
+			}
+		});
+    	final UIButton windowingModeButton=new UIButton("Switch to windowed mode or full screen mode");
+    	windowingModeButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	toggleScreenModeAction.perform(canvas,null,Double.NaN);
             }
-        if(uninstallRunnable!=null)
-            {final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
-             addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){
-                @Override
-                public void actionPerformed(ActionEvent event){
-                	uninstallRunnable.run();
-                }
-             });
-             initialMenuPanel.add(addUninstallDesktopShortcutButton);
+        });
+    	final UIButton backButton=new UIButton("Back");
+        backButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(optionsMenuPanel);
             }
-        return(initialMenuPanel);
+        });
+        displaySettingsMenuPanel.add(windowingModeButton);
+        displaySettingsMenuPanel.add(screenModesLabel);
+        displaySettingsMenuPanel.add(displayModesCombo);
+        displaySettingsMenuPanel.add(backButton);
+    	return(displaySettingsMenuPanel);
+    }
+    
+    private final UIPanel createDesktopShortcutsMenuPanel(){
+    	final UIPanel desktopShortcutsMenuPanel;
+    	if(launchRunnable!=null||uninstallRunnable!=null)
+    	    {desktopShortcutsMenuPanel=new UIPanel(new RowLayout(false));
+    	     if(launchRunnable!=null)
+                 {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
+                  addDesktopShortcutButton.addActionListener(new ActionListener(){
+                      @Override
+                      public void actionPerformed(ActionEvent event){
+           	              launchRunnable.run();
+                      }
+                  });
+                  desktopShortcutsMenuPanel.add(addDesktopShortcutButton);
+                 }
+             if(uninstallRunnable!=null)
+                 {final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
+                  addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){
+                      @Override
+                      public void actionPerformed(ActionEvent event){
+           	              uninstallRunnable.run();
+                      }
+                  });
+                  desktopShortcutsMenuPanel.add(addUninstallDesktopShortcutButton);
+                 }
+             final UIButton backButton=new UIButton("Back");
+             backButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(optionsMenuPanel);
+                 }
+             });
+             desktopShortcutsMenuPanel.add(backButton);
+    	    }
+    	else
+    		desktopShortcutsMenuPanel=null;
+    	return(desktopShortcutsMenuPanel);
     }
     
     private final UIPanel createStartMenuPanel(final TriggerAction toLoadingDisplayAction){
-        final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));       
+        final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
         final UIButton newGameButton=new UIButton("New game");
         newGameButton.addActionListener(new ActionListener(){           
             @Override
@@ -311,7 +440,18 @@ public final class MainMenuState extends ScenegraphState{
      * @return
      */
     private final UIPanel createCreditsPanel(final String creditsContent){
-        return(createTextualPanel(creditsContent));
+    	final UILabel label=new UILabel(creditsContent);
+        final UIPanel textualPanel=new UIPanel(new RowLayout(false));
+        textualPanel.add(label);
+        final UIButton backButton=new UIButton("Back");
+        backButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(optionsMenuPanel);
+            }
+        });
+        textualPanel.add(backButton);
+        return(textualPanel);
     }
     
     /**
@@ -320,23 +460,14 @@ public final class MainMenuState extends ScenegraphState{
      * @return
      */
     private final UIPanel createControlsPanel(final String controlsContent){
-        return(createTextualPanel(controlsContent));
-    }
-    
-    /**
-     * 
-     * @param content textual content (cannot be null)
-     * @return
-     */
-    private final UIPanel createTextualPanel(final String content){
-        final UILabel label=new UILabel(content);
+    	final UILabel label=new UILabel(controlsContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
         final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(initialMenuPanel);
+                showPanelInMainFrame(optionsMenuPanel);
             }
         });
         textualPanel.add(backButton);
