@@ -188,7 +188,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     	
 		@Override
 		@MainThread
-		public void perform(Canvas source, TwoInputStates inputStates, double tpf) {
+		public void perform(Canvas source,TwoInputStates inputStates,double tpf){
 			final JoglNewtWindow joglNewtWindow=(JoglNewtWindow)source;
 			final GLWindow glWindow=joglNewtWindow.getNewtWindow();
 			final boolean fullscreenOn=glWindow.isFullscreen();

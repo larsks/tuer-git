@@ -15,6 +15,7 @@ package engine.statemachine;
 
 import java.util.List;
 
+import com.ardor3d.annotation.MainThread;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
 import com.ardor3d.extension.ui.UIFrame;
@@ -26,6 +27,7 @@ import com.ardor3d.extension.ui.event.ActionListener;
 import com.ardor3d.extension.ui.event.SelectionListener;
 import com.ardor3d.extension.ui.layout.RowLayout;
 import com.ardor3d.extension.ui.model.DefaultComboBoxModel;
+import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.input.GrabbedState;
@@ -34,15 +36,14 @@ import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
-import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.ScreenMode;
-
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
@@ -64,6 +65,8 @@ public final class MainMenuState extends ScenegraphState{
     private final UIPanel optionsMenuPanel;
     
     private final UIPanel displaySettingsMenuPanel;
+    
+    private final UIPanel soundSettingsMenuPanel;
     
     private final UIPanel desktopShortcutsMenuPanel;
     
@@ -92,6 +95,8 @@ public final class MainMenuState extends ScenegraphState{
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
      * @param creditsContent credits content (may be null)
      * @param controlsContent controls content (may be null)
+     * @param fontStore store that contains fonts
+     * @param toggleScreenModeAction action allowing to modify the windowing mode
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
@@ -115,6 +120,7 @@ public final class MainMenuState extends ScenegraphState{
         else
         	creditsPanel=null;
         displaySettingsMenuPanel=createDisplaySettingsMenuPanel(toggleScreenModeAction);
+        soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(exitAction);
         optionsMenuPanel=createOptionsMenuPanel();
@@ -256,7 +262,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UIPanel optionsMenuPanel=new UIPanel(new RowLayout(false));
     	final UIButton desktopShortcutsButton;
     	if(desktopShortcutsMenuPanel!=null)
-    	    {desktopShortcutsButton=new UIButton("Desktop shortcuts");
+    	    {desktopShortcutsButton=new UIButton("Shortcuts");
     	     desktopShortcutsButton.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent event) {
@@ -268,7 +274,7 @@ public final class MainMenuState extends ScenegraphState{
     		desktopShortcutsButton=null;
     	final UIButton displaySettingsButton;
     	if(displaySettingsMenuPanel!=null)
-    	    {displaySettingsButton=new UIButton("Display Settings");
+    	    {displaySettingsButton=new UIButton("Display");
     	     displaySettingsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -278,6 +284,18 @@ public final class MainMenuState extends ScenegraphState{
     	    }
     	else
     		displaySettingsButton=null;
+    	final UIButton soundSettingsButton;
+    	if(soundSettingsMenuPanel!=null)
+	        {soundSettingsButton=new UIButton("Sound");
+	         soundSettingsButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(soundSettingsMenuPanel);
+                 }
+             });
+	        }
+	    else
+	    	soundSettingsButton=null;
     	final UIButton controlsButton;
         if(controlsPanel!=null)
             {controlsButton=new UIButton("Controls");
@@ -311,6 +329,8 @@ public final class MainMenuState extends ScenegraphState{
         });
         if(displaySettingsButton!=null)
         	optionsMenuPanel.add(displaySettingsButton);
+        if(soundSettingsButton!=null)
+        	optionsMenuPanel.add(soundSettingsButton);
         if(desktopShortcutsButton!=null)
         	optionsMenuPanel.add(desktopShortcutsButton);
         if(controlsButton!=null)
@@ -365,6 +385,48 @@ public final class MainMenuState extends ScenegraphState{
         displaySettingsMenuPanel.add(displayModesCombo);
         displaySettingsMenuPanel.add(backButton);
     	return(displaySettingsMenuPanel);
+    }
+    
+    private static final class ToggleSoundManagerAction implements TriggerAction{
+    	
+    	private final SoundManager soundManager;
+    	
+    	private ToggleSoundManagerAction(final SoundManager soundManager){
+    		this.soundManager=soundManager;
+    	}
+    	
+    	@Override
+		@MainThread
+		public void perform(Canvas source,TwoInputStates inputStates,double tpf){
+    		soundManager.setEnabled(!soundManager.isEnabled());
+    	}
+    }
+    
+    private final UIPanel createSoundSettingsMenuPanel(final SoundManager soundManager){
+    	final UIPanel soundSettingsMenuPanel;
+    	if(soundManager!=null)
+    	    {final TriggerAction toggleSoundManagerAction=new ToggleSoundManagerAction(soundManager);
+    		 soundSettingsMenuPanel=new UIPanel(new RowLayout(false));
+    	     final UIButton toggleSoundButton=new UIButton("Switch sound on/off");
+    	     toggleSoundButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                	 toggleSoundManagerAction.perform(canvas,null,Double.NaN);
+                 }
+             });
+    	     final UIButton backButton=new UIButton("Back");
+             backButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(optionsMenuPanel);
+                 }
+             });
+             soundSettingsMenuPanel.add(toggleSoundButton);
+             soundSettingsMenuPanel.add(backButton);
+    	    }
+    	else
+    		soundSettingsMenuPanel=null;
+    	return(soundSettingsMenuPanel);
     }
     
     private final UIPanel createDesktopShortcutsMenuPanel(){
