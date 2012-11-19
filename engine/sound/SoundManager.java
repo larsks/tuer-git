@@ -73,8 +73,16 @@ public final class SoundManager{
     	return(enabled);
     }
     
-    public final void setEnabled(final boolean enabled) {
+    public final void setEnabled(final boolean enabled){
     	this.enabled=enabled;
+    	if(enabled)
+    	    {//TODO 
+    		 
+    	    }
+    	else
+    	    {//TODO mute
+    		 
+    	    }
     }
     
     public final String loadSound(final URL url){
@@ -90,7 +98,7 @@ public final class SoundManager{
     }   
     
     public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier,float x,float y,float z){
-    	if(soundSystem!=null&&enabled)
+    	if(soundSystem!=null)
     	    {final boolean priority;
              final int attenuationModel;
              final float rollOffFactor;

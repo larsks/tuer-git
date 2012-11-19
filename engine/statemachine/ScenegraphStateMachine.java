@@ -44,7 +44,7 @@ import engine.taskmanagement.TaskManager;
  *       add an accepting state to this machine to handle the cleanup 
  */
 public class ScenegraphStateMachine extends StateMachineWithScheduler<ScenegraphState,String>{
-
+	
     /**switch node used to show only the nodes of a single state*/
     private final StateMachineSwitchNode switchNode;
     
