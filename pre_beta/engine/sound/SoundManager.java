@@ -51,6 +51,8 @@ public final class SoundManager{
     /**flag indicating whether the sound is enabled*/
     private boolean enabled;
     
+    private float latestMasterVolume;
+    
     
     public SoundManager(){
         try{try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
@@ -76,12 +78,13 @@ public final class SoundManager{
     public final void setEnabled(final boolean enabled){
     	this.enabled=enabled;
     	if(enabled)
-    	    {//TODO 
-    		 
+    	    {//resets the volume to its latest non null value
+    		 soundSystem.setMasterVolume(latestMasterVolume);
     	    }
     	else
-    	    {//TODO mute
-    		 
+    	    {//gets the current volume before muting
+    		 latestMasterVolume=soundSystem.getMasterVolume();
+    		 soundSystem.setMasterVolume(0);
     	    }
     }
     
