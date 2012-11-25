@@ -723,6 +723,39 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	    return result;
 	}
 	
+	private static void testComputeAdjacentMergeableTrisArraysList(){
+		//TODO put the real test values below
+		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{}}};
+		System.out.println("Input:");
+		for(int i=0;i<adjacentTrisArray.length;i++)
+			{for(int j=0;j<adjacentTrisArray[i].length;j++)
+				 if(adjacentTrisArray[i][j]!=null)
+		             System.out.print("[1]");
+				 else
+					 System.out.print("[0]");
+			 System.out.println("");
+			}
+		System.out.println("");
+		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
+		System.out.println("Output:");
+		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
+			{for(int i=0;i<resultingAdjacentTrisArray.length;i++)
+			     {for(int j=0;j<resultingAdjacentTrisArray[i].length;j++)
+				      if(resultingAdjacentTrisArray[i][j]!=null)
+		                  System.out.print("[1]");
+				      else
+					      System.out.print("[0]");
+			      System.out.println("");
+			     }
+			 System.out.println("");
+			}
+	}
+	
+	public static final void main(String[] args){
+		testComputeAdjacentMergeableTrisArraysList();
+	}
+	
 	/**
 	 * Computes a list of arrays of adjacent triangles which could be merged to 
 	 * make bigger rectangles
