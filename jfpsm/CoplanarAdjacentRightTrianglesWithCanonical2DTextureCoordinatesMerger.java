@@ -724,16 +724,22 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	private static void testComputeAdjacentMergeableTrisArraysList(){
-		//TODO put the real test values below
-		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{},new RightTriangleInfo[]{}}};
+		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
+		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}}};
 		System.out.println("Input:");
 		for(int i=0;i<adjacentTrisArray.length;i++)
 			{for(int j=0;j<adjacentTrisArray[i].length;j++)
-				 if(adjacentTrisArray[i][j]!=null)
-		             System.out.print("[1]");
+				 if(adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
+		             System.out.print("[X]");
 				 else
-					 System.out.print("[0]");
+					 System.out.print("[ ]");
 			 System.out.println("");
 			}
 		System.out.println("");
@@ -742,10 +748,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
 			{for(int i=0;i<resultingAdjacentTrisArray.length;i++)
 			     {for(int j=0;j<resultingAdjacentTrisArray[i].length;j++)
-				      if(resultingAdjacentTrisArray[i][j]!=null)
-		                  System.out.print("[1]");
+				      if(resultingAdjacentTrisArray[i][j][0]!=null&&resultingAdjacentTrisArray[i][j][1]!=null)
+		                  System.out.print("[X]");
 				      else
-					      System.out.print("[0]");
+					      System.out.print("[ ]");
 			      System.out.println("");
 			     }
 			 System.out.println("");
@@ -772,7 +778,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		boolean empty=true;
 		for(int i=0;i<adjacentTrisArray.length;i++)
 			for(int j=0;j<adjacentTrisArray[i].length;j++)
-				if(adjacentTrisArray[i][j]!=null)
+				if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j].length>=2&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
 			        {empty=false;
 					 smallestI=Math.min(smallestI,i);
 			         biggestI=Math.max(biggestI,i);
@@ -872,14 +878,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                  {isolated=true;
                   for(int ii=Math.max(0,i-1);ii<=i+primarySize&&ii<width&&isolated;ii++)
                       for(int jj=Math.max(0,j);jj<j+secondarySize&&jj<height&&isolated;jj++)
-                	      if((((ii==i-1)||(ii==i+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null))||((i-1<ii)&&(ii<i+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null)))
+                	      if((((ii==i-1)||(ii==i+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null&&cleanAdjacentTrisArray[ii][jj].length>=2&&cleanAdjacentTrisArray[ii][jj][0]!=null&&cleanAdjacentTrisArray[ii][jj][1]!=null))||((i-1<ii)&&(ii<i+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null||cleanAdjacentTrisArray[ii][jj].length<2||cleanAdjacentTrisArray[ii][jj][0]==null||cleanAdjacentTrisArray[ii][jj][1]==null)))
                 	    	  isolated=false;
                  }
              else
                  {isolated=true;
                   for(int jj=Math.max(0,j-1);jj<=j+primarySize&&jj<height&&isolated;jj++)
                 	  for(int ii=Math.max(0,i);ii<=i+secondarySize&&ii<width&&isolated;ii++)
-                		  if((((jj==j-1)||(jj==j+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null))||((j-1<jj)&&(jj<j+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null)))
+                		  if((((jj==j-1)||(jj==j+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null&&cleanAdjacentTrisArray[ii][jj].length>=2&&cleanAdjacentTrisArray[ii][jj][0]!=null&&cleanAdjacentTrisArray[ii][jj][1]!=null))||((j-1<jj)&&(jj<j+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null||cleanAdjacentTrisArray[ii][jj].length<2||cleanAdjacentTrisArray[ii][jj][0]==null||cleanAdjacentTrisArray[ii][jj][1]==null)))
                 	    	  isolated=false;
                  }
             }
