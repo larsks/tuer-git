@@ -851,8 +851,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 			                	  //adds it into the returned list
 	 			                	  adjacentTrisArraysList.add(adjacentTrisSubArray);
 	 			                	  //copies the triangles of the chunk into the sub-array and removes them from the 2D array
-	 			                	  for(int jj=j;jj<j+validChunkSize;jj++)
-	 			                		  for(int ii=i;ii<i+secondarySize;ii++)
+	 			                	  for(int jj=0;jj<validChunkSize;jj++)
+	 			                		  for(int ii=0;ii<secondarySize;ii++)
 	 			                		      {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
 			                		           cleanAdjacentTrisArray[ii+i][jj+j]=null;
 			                		          }
