@@ -727,7 +727,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
 		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
 				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null}},
+				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
 				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
 				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
 				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
@@ -812,7 +812,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		 			            	 for(int chunkSize=1;validChunkSize==0&&chunkSize+i<=width;chunkSize++)
 		 			            		 if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,chunkSize,secondarySize,true)&&
 		 						            (j-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j-1,chunkSize,1,true))&&
-		 						            (j+1>=height||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j+1,chunkSize,1,true)))
+		 						            (j+secondarySize>=height||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j+secondarySize,chunkSize,1,true)))
 		 			            			 validChunkSize=chunkSize;
 		 			            	 //if there is an isolated set of triangles
 		 			                 if(validChunkSize>0)
@@ -843,7 +843,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 			            	     for(int chunkSize=1;validChunkSize==0&&chunkSize+j<=height;chunkSize++)
 	 			            	    	 if(areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i,j,chunkSize,secondarySize,false)&&
 	 			 		                	(i-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i-1,j,chunkSize,1,false))&&
-	 			 		                	(i+1>=width||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i+1,j,chunkSize,1,false)))
+	 			 		                	(i+secondarySize>=width||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,width,height,i+secondarySize,j,chunkSize,1,false)))
 	 			            			     validChunkSize=chunkSize;
 	 			            	 //if there is an isolated set of triangles
 	 			                 if(validChunkSize>0)
