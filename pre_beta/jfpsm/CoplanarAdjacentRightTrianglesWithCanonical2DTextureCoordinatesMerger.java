@@ -804,51 +804,47 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		     //finds the isolated sets of adjacent triangles that could be used to create quads
 		     //the secondary size is the least important size of the chunk
 		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount);secondarySize++)
-		    	 {for(int j=0;j<columnCount;j++)
-		    		  for(int i=0;i<rowCount;i++)
-		    		      {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
-		    		       if(quad!=null&&quad.length>=2&&quad[0]!=null&&quad[1]!=null)
-		    		           {//looks for an isolated set of triangles
-		    		    	    int validChunkSize=0;
-		    		    	    for(int chunkSize=1;validChunkSize==0&&(chunkSize+i<=rowCount||chunkSize+j<=columnCount);chunkSize++)
-		    		    	        {//horizontal checks (rows)
-		    		    	         if(chunkSize+i<=rowCount&&secondarySize<=columnCount&&
-		    		    	            areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,true)&&
-		    		    			   (j-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j-1,chunkSize,1,true))&&
-		    		    			   (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j+secondarySize,chunkSize,1,true)))
-		    		    	        	 {validChunkSize=chunkSize;
-		    		    	              final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[validChunkSize][secondarySize][2];
-		    		    	              //adds it into the returned list
-		    		    	              adjacentTrisArraysList.add(adjacentTrisSubArray);
-		    		    	              //copies the triangles of the chunk into the sub-array and removes them from the 2D array
-		    		    	              for(int ii=0;ii<validChunkSize;ii++)
-		    		    		              for(int jj=0;jj<secondarySize;jj++)
-		    		    		                  {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
-		    		    		                   cleanAdjacentTrisArray[ii+i][jj+j]=null;
-		    		    		                  }
-		    		    	             }
-		    		    	         else
-		    		    	             {//vertical checks (columns)
-		    		    	              if(chunkSize+j<=columnCount&&secondarySize<=rowCount&&
-		    		    	                 areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,false)&&
-		    		 			 		    (i-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i-1,j,chunkSize,1,false))&&
-		    		 			 		    (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i+secondarySize,j,chunkSize,1,false)))
-		    		    	            	  {validChunkSize=chunkSize;
-		    		    	            	   final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[secondarySize][validChunkSize][2];
-		   	 			                	   //adds it into the returned list
-		   	 			                	   adjacentTrisArraysList.add(adjacentTrisSubArray);
-		   	 			                	   //copies the triangles of the chunk into the sub-array and removes them from the 2D array
-		   	 			                	   for(int jj=0;jj<validChunkSize;jj++)
-		   	 			                		   for(int ii=0;ii<secondarySize;ii++)
-		   	 			                		       {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
-		   			                		            cleanAdjacentTrisArray[ii+i][jj+j]=null;
-		   			                		           }
-		    		    	            	  }
-		    		    	             }
-		    		    	        }
-		    		           }
-		    		      }
-		    	 }
+		    	 for(int chunkSize=1;chunkSize<=Math.max(rowCount,columnCount);chunkSize++)
+		             {for(int j=0;j<columnCount;j++)
+		    		      for(int i=0;i<rowCount;i++)
+		    		          {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
+		    		           if(quad!=null&&quad.length>=2&&quad[0]!=null&&quad[1]!=null)
+		    		               {//looks for an isolated set of triangles
+		    		    	        //horizontal checks (rows)
+		    		    	        if(chunkSize+i<=rowCount&&secondarySize<=columnCount&&
+		    		    	           areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,true)&&
+		    		    		      (j-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j-1,chunkSize,1,true))&&
+		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j+secondarySize,chunkSize,1,true)))
+		    		    	            {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[chunkSize][secondarySize][2];
+		    		    	             //adds it into the returned list
+		    		    	             adjacentTrisArraysList.add(adjacentTrisSubArray);
+		    		    	             //copies the triangles of the chunk into the sub-array and removes them from the 2D array
+		    		    	             for(int ii=0;ii<chunkSize;ii++)
+		    		    		             for(int jj=0;jj<secondarySize;jj++)
+		    		    		                 {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
+		    		    		                  cleanAdjacentTrisArray[ii+i][jj+j]=null;
+		    		    		                 }
+		    		    	            }
+		    		    	        else
+		    		    	            {//vertical checks (columns)
+		    		    	             if(chunkSize+j<=columnCount&&secondarySize<=rowCount&&
+		    		    	                areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,false)&&
+		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i-1,j,chunkSize,1,false))&&
+		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i+secondarySize,j,chunkSize,1,false)))
+		    		    	                 {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[secondarySize][chunkSize][2];
+		   	 			                      //adds it into the returned list
+		   	 			                      adjacentTrisArraysList.add(adjacentTrisSubArray);
+		   	 			                      //copies the triangles of the chunk into the sub-array and removes them from the 2D array
+		   	 			                      for(int jj=0;jj<chunkSize;jj++)
+		   	 			                	      for(int ii=0;ii<secondarySize;ii++)
+		   	 			                		      {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
+		   			                		           cleanAdjacentTrisArray[ii+i][jj+j]=null;
+		   			                		          }
+		    		    	                 }
+		    		    	            }
+		    		               }
+		    		          }
+		             }
 		     /*System.out.println("Cleaned array:");
 		     //for each row
 			 for(int i=0;i<cleanAdjacentTrisArray.length;i++)
