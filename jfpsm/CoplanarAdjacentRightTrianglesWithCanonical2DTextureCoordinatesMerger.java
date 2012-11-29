@@ -13,6 +13,7 @@
 */
 package jfpsm;
 
+import java.lang.reflect.Array;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -726,20 +727,20 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	private static void testComputeAdjacentMergeableTrisArraysList(){
 		//N.B: row-major convention
 		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
-		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}},
-				                                                                    new RightTriangleInfo[][]{new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null},new RightTriangleInfo[]{null,null}}};
+		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null},
+				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null},
+				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
+				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null},
+				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
+				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
+				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},null,null,null,null,null},
+				                                                                    new RightTriangleInfo[][]{null,null,null,null,null,null,null,null}};
 		System.out.println("Input:");
 		//for each row
 		for(int i=0;i<adjacentTrisArray.length;i++)
 			{//for each column
 			 for(int j=0;j<adjacentTrisArray[i].length;j++)
-				 if(adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
+				 if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
 		             System.out.print("[X]");
 				 else
 					 System.out.print("[ ]");
@@ -751,7 +752,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
 			{for(int i=0;i<resultingAdjacentTrisArray.length;i++)
 			     {for(int j=0;j<resultingAdjacentTrisArray[i].length;j++)
-				      if(resultingAdjacentTrisArray[i][j][0]!=null&&resultingAdjacentTrisArray[i][j][1]!=null)
+				      if(resultingAdjacentTrisArray[i][j]!=null&&resultingAdjacentTrisArray[i][j][0]!=null&&resultingAdjacentTrisArray[i][j][1]!=null)
 		                  System.out.print("[X]");
 				      else
 					      System.out.print("[ ]");
@@ -773,14 +774,24 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @return list of 2D arrays of adjacent mergeable triangles
 	 */
 	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
+		return(computeFullArraysFromNonFullArray(adjacentTrisArray));
+	}
+	
+	/**
+	 * Creates a list of full arrays from a potentially non full array
+	 * 
+	 * @param array potentially non full array
+	 * @return list of full arrays
+	 */
+	public static <T> ArrayList<T[][]> computeFullArraysFromNonFullArray(final T[][] array){
 		//detects empty rows and empty columns in order to skip them later
 		int smallestI=Integer.MAX_VALUE;
 		int biggestI=Integer.MIN_VALUE;
 		int smallestJ=Integer.MAX_VALUE;
 		int biggestJ=Integer.MIN_VALUE;
-		for(int i=0;i<adjacentTrisArray.length;i++)
-			for(int j=0;j<adjacentTrisArray[i].length;j++)
-				if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j].length>=2&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
+		for(int i=0;i<array.length;i++)
+			for(int j=0;j<array[i].length;j++)
+				if(array[i][j]!=null)
 			        {smallestI=Math.min(smallestI,i);
 			         biggestI=Math.max(biggestI,i);
 			         smallestJ=Math.min(smallestJ,j);
@@ -788,7 +799,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			        }
 		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the array
 		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
-		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
+		ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
 		//if the array is not empty
 		if(rowCount>0&&columnCount>0)
 		    {//creates an occupancy map of the supplied array but without empty columns and rows
@@ -798,15 +809,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			      int localBiggestJ=Integer.MIN_VALUE;
 			      for(int j=0;j<columnCount;j++)
 			          {final int rawJ=j+smallestJ;
-			           if(adjacentTrisArray[rawI][rawJ]!=null&&adjacentTrisArray[rawI][rawJ].length>=2&&adjacentTrisArray[rawI][rawJ][0]!=null&&adjacentTrisArray[rawI][rawJ][1]!=null)
+			           if(array[rawI][rawJ]!=null)
 			        	   localBiggestJ=rawJ;
 			          }
 			      useFlagsArray[i]=new boolean[localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0];
 		    	  for(int j=0;j<useFlagsArray[i].length;j++)
 				      {final int rawJ=j+smallestJ;
-					   useFlagsArray[i][j]=adjacentTrisArray[rawI][rawJ]!=null&&adjacentTrisArray[rawI][rawJ].length>=2&&adjacentTrisArray[rawI][rawJ][0]!=null&&adjacentTrisArray[rawI][rawJ][1]!=null;
+					   useFlagsArray[i][j]=array[rawI][rawJ]!=null;
 				      }
 			     }
+		     final Class<?> arrayComponentType=array.getClass().getComponentType().getComponentType();
 		     //finds the isolated sets of adjacent triangles that could be used to create quads
 		     //the secondary size is the least important size of the chunk
 		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount);secondarySize++)
@@ -820,13 +832,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    		    	           areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,chunkSize,secondarySize,true)&&
 		    		    		      (j-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j-1,chunkSize,1,true))&&
 		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j+secondarySize,chunkSize,1,true)))
-		    		    	            {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[chunkSize][secondarySize][2];
+		    		    	            {@SuppressWarnings("unchecked")
+										 final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,chunkSize,secondarySize);
 		    		    	             //adds it into the returned list
 		    		    	             adjacentTrisArraysList.add(adjacentTrisSubArray);
 		    		    	             //copies the triangles of the chunk into the sub-array and removes them from the 2D array
 		    		    	             for(int ii=0;ii<chunkSize;ii++)
 		    		    		             for(int jj=0;jj<secondarySize;jj++)
-		    		    		                 {adjacentTrisSubArray[ii][jj]=adjacentTrisArray[ii+i+smallestI][jj+j+smallestJ];
+		    		    		                 {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
 		    		    		                  useFlagsArray[ii+i][jj+j]=false;
 		    		    		                 }
 		    		    	            }
@@ -836,13 +849,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    		    	                areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,chunkSize,secondarySize,false)&&
 		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i-1,j,chunkSize,1,false))&&
 		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i+secondarySize,j,chunkSize,1,false)))
-		    		    	                 {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[secondarySize][chunkSize][2];
+		    		    	                 {@SuppressWarnings("unchecked")
+		    		    	            	  final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,chunkSize);
 		   	 			                      //adds it into the returned list
 		   	 			                      adjacentTrisArraysList.add(adjacentTrisSubArray);
 		   	 			                      //copies the triangles of the chunk into the sub-array and removes them from the 2D array
 		   	 			                      for(int jj=0;jj<chunkSize;jj++)
 		   	 			                	      for(int ii=0;ii<secondarySize;ii++)
-		   	 			                		      {adjacentTrisSubArray[ii][jj]=adjacentTrisArray[ii+i+smallestI][jj+j+smallestJ];
+		   	 			                		      {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
 		   			                		           useFlagsArray[ii+i][jj+j]=false;
 		   			                		          }
 		    		    	                 }
@@ -850,18 +864,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    		               }
 		    		          }
 		             }
-		     /*System.out.println("Cleaned array:");
-		     //for each row
-			 for(int i=0;i<cleanAdjacentTrisArray.length;i++)
-				 {//for each column
-				  for(int j=0;j<cleanAdjacentTrisArray[i].length;j++)
-					  if(cleanAdjacentTrisArray[i][j]!=null&&cleanAdjacentTrisArray[i][j][0]!=null&&cleanAdjacentTrisArray[i][j][1]!=null)
-				          System.out.print("[X]");
-					  else
-						  System.out.print("[ ]");
-				  System.out.println("");
-				 }
-			 System.out.println("");*/
 		    }
 		return(adjacentTrisArraysList);
 	}
