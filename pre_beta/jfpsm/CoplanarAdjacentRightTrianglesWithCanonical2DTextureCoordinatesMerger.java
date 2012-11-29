@@ -778,67 +778,65 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		int biggestI=Integer.MIN_VALUE;
 		int smallestJ=Integer.MAX_VALUE;
 		int biggestJ=Integer.MIN_VALUE;
-		boolean empty=true;
 		for(int i=0;i<adjacentTrisArray.length;i++)
 			for(int j=0;j<adjacentTrisArray[i].length;j++)
 				if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j].length>=2&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
-			        {empty=false;
-					 smallestI=Math.min(smallestI,i);
+			        {smallestI=Math.min(smallestI,i);
 			         biggestI=Math.max(biggestI,i);
 			         smallestJ=Math.min(smallestJ,j);
 			         biggestJ=Math.max(biggestJ,j);
 			        }
+		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the array
+		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
 		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<RightTriangleInfo[][][]>();
-		if(!empty)
+		//if the array is not empty
+		if(rowCount>0&&columnCount>0)
 		    {//creates a copy of the supplied array but without empty columns and rows
-			 final int rowCount=biggestI-smallestI+1;//cleanAdjacentTrisArray.length
-			 final int columnCount=biggestJ-smallestJ+1;
-			 final RightTriangleInfo[][][] cleanAdjacentTrisArray=new RightTriangleInfo[rowCount][columnCount][];
-		     for(int i=0;i<cleanAdjacentTrisArray.length;i++)
-			     for(int j=0;j<cleanAdjacentTrisArray[i].length;j++)
-				     {final int rawI=i+smallestI;
-					  final int rawJ=j+smallestJ;
-					  if(adjacentTrisArray[rawI][rawJ]!=null)
-					      cleanAdjacentTrisArray[i][j]=new RightTriangleInfo[]{adjacentTrisArray[rawI][rawJ][0],adjacentTrisArray[rawI][rawJ][1]};
-				     }
+			 final boolean[][] useFlagsArray=new boolean[rowCount][columnCount];
+		     for(int i=0;i<useFlagsArray.length;i++)
+			     {final int rawI=i+smallestI;
+		    	  for(int j=0;j<useFlagsArray[i].length;j++)
+				      {final int rawJ=j+smallestJ;
+					   useFlagsArray[i][j]=adjacentTrisArray[rawI][rawJ]!=null&&adjacentTrisArray[rawI][rawJ].length>=2&&adjacentTrisArray[rawI][rawJ][0]!=null&&adjacentTrisArray[rawI][rawJ][1]!=null;
+				      }
+			     }
 		     //finds the isolated sets of adjacent triangles that could be used to create quads
 		     //the secondary size is the least important size of the chunk
 		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount);secondarySize++)
 		    	 for(int chunkSize=1;chunkSize<=Math.max(rowCount,columnCount);chunkSize++)
-		             {for(int j=0;j<columnCount;j++)
-		    		      for(int i=0;i<rowCount;i++)
-		    		          {RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
-		    		           if(quad!=null&&quad.length>=2&&quad[0]!=null&&quad[1]!=null)
+		             {for(int i=0;i<useFlagsArray.length;i++)
+		    		      for(int j=0;j<useFlagsArray[i].length;j++)
+		    		          {if(useFlagsArray[i][j])
 		    		               {//looks for an isolated set of triangles
 		    		    	        //horizontal checks (rows)
 		    		    	        if(chunkSize+i<=rowCount&&secondarySize<=columnCount&&
-		    		    	           areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,true)&&
-		    		    		      (j-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j-1,chunkSize,1,true))&&
-		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j+secondarySize,chunkSize,1,true)))
+		    		    	           areTrianglesLocallyIsolated(useFlagsArray,i,j,chunkSize,secondarySize,true)&&
+		    		    		      (j-1<0||!areTrianglesLocallyIsolated(useFlagsArray,i,j-1,chunkSize,1,true))&&
+		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(useFlagsArray,i,j+secondarySize,chunkSize,1,true)))
 		    		    	            {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[chunkSize][secondarySize][2];
 		    		    	             //adds it into the returned list
 		    		    	             adjacentTrisArraysList.add(adjacentTrisSubArray);
 		    		    	             //copies the triangles of the chunk into the sub-array and removes them from the 2D array
 		    		    	             for(int ii=0;ii<chunkSize;ii++)
 		    		    		             for(int jj=0;jj<secondarySize;jj++)
-		    		    		                 {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
-		    		    		                  cleanAdjacentTrisArray[ii+i][jj+j]=null;
+		    		    		                 {adjacentTrisSubArray[ii][jj]=adjacentTrisArray[ii+i+smallestI][jj+j+smallestJ];
+		    		    		                  useFlagsArray[ii+i][jj+j]=false;
 		    		    		                 }
 		    		    	            }
 		    		    	        else
 		    		    	            {//vertical checks (columns)
 		    		    	             if(chunkSize+j<=columnCount&&secondarySize<=rowCount&&
-		    		    	                areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i,j,chunkSize,secondarySize,false)&&
-		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i-1,j,chunkSize,1,false))&&
-		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(cleanAdjacentTrisArray,rowCount,columnCount,i+secondarySize,j,chunkSize,1,false)))
+		    		    	                areTrianglesLocallyIsolated(useFlagsArray,i,j,chunkSize,secondarySize,false)&&
+		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(useFlagsArray,i-1,j,chunkSize,1,false))&&
+		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(useFlagsArray,i+secondarySize,j,chunkSize,1,false)))
 		    		    	                 {final RightTriangleInfo[][][] adjacentTrisSubArray=new RightTriangleInfo[secondarySize][chunkSize][2];
 		   	 			                      //adds it into the returned list
 		   	 			                      adjacentTrisArraysList.add(adjacentTrisSubArray);
 		   	 			                      //copies the triangles of the chunk into the sub-array and removes them from the 2D array
 		   	 			                      for(int jj=0;jj<chunkSize;jj++)
 		   	 			                	      for(int ii=0;ii<secondarySize;ii++)
-		   	 			                		      {adjacentTrisSubArray[ii][jj]=cleanAdjacentTrisArray[ii+i][jj+j];
-		   			                		           cleanAdjacentTrisArray[ii+i][jj+j]=null;
+		   	 			                		      {adjacentTrisSubArray[ii][jj]=adjacentTrisArray[ii+i+smallestI][jj+j+smallestJ];
+		   			                		           useFlagsArray[ii+i][jj+j]=false;
 		   			                		          }
 		    		    	                 }
 		    		    	            }
@@ -861,24 +859,23 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		return(adjacentTrisArraysList);
 	}
 	
-	private static boolean areTrianglesLocallyIsolated(final RightTriangleInfo[][][] cleanAdjacentTrisArray,
-			final int rowCount,final int columnCount,final int i,final int j,final int primarySize,final int secondarySize,
+	private static boolean areTrianglesLocallyIsolated(final boolean[][] useFlagsArray,
+			final int i,final int j,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
-		RightTriangleInfo[] quad=cleanAdjacentTrisArray[i][j];
 		boolean isolated;
-        if(quad!=null)
+        if(/*0<=i&&i<useFlagsArray.length&&0<=j&&j<useFlagsArray[i].length&&*/useFlagsArray[i][j])
             {if(testOnRowIsolationEnabled)
                  {isolated=true;
-                  for(int ii=Math.max(0,i-1);ii<=i+primarySize&&ii<rowCount&&isolated;ii++)
-                      for(int jj=Math.max(0,j);jj<j+secondarySize&&jj<columnCount&&isolated;jj++)
-                	      if((((ii==i-1)||(ii==i+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null&&cleanAdjacentTrisArray[ii][jj].length>=2&&cleanAdjacentTrisArray[ii][jj][0]!=null&&cleanAdjacentTrisArray[ii][jj][1]!=null))||((i-1<ii)&&(ii<i+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null||cleanAdjacentTrisArray[ii][jj].length<2||cleanAdjacentTrisArray[ii][jj][0]==null||cleanAdjacentTrisArray[ii][jj][1]==null)))
+                  for(int ii=Math.max(0,i-1);ii<=i+primarySize&&ii<useFlagsArray.length&&isolated;ii++)
+                      for(int jj=Math.max(0,j);jj<j+secondarySize&&jj<useFlagsArray[ii].length&&isolated;jj++)
+                	      if((((ii==i-1)||(ii==i+primarySize))&&(useFlagsArray[ii][jj]))||((i-1<ii)&&(ii<i+primarySize)&&(!useFlagsArray[ii][jj])))
                 	    	  isolated=false;
                  }
              else
                  {isolated=true;
-                  for(int jj=Math.max(0,j-1);jj<=j+primarySize&&jj<columnCount&&isolated;jj++)
-                	  for(int ii=Math.max(0,i);ii<i+secondarySize&&ii<rowCount&&isolated;ii++)
-                		  if((((jj==j-1)||(jj==j+primarySize))&&(cleanAdjacentTrisArray[ii][jj]!=null&&cleanAdjacentTrisArray[ii][jj].length>=2&&cleanAdjacentTrisArray[ii][jj][0]!=null&&cleanAdjacentTrisArray[ii][jj][1]!=null))||((j-1<jj)&&(jj<j+primarySize)&&(cleanAdjacentTrisArray[ii][jj]==null||cleanAdjacentTrisArray[ii][jj].length<2||cleanAdjacentTrisArray[ii][jj][0]==null||cleanAdjacentTrisArray[ii][jj][1]==null)))
+                  for(int ii=Math.max(0,i);ii<i+secondarySize&&ii<useFlagsArray.length&&isolated;ii++)
+                      for(int jj=Math.max(0,j-1);jj<=j+primarySize&&jj<useFlagsArray[ii].length&&isolated;jj++)
+                		  if((((jj==j-1)||(jj==j+primarySize))&&(useFlagsArray[ii][jj]))||((j-1<jj)&&(jj<j+primarySize)&&(!useFlagsArray[ii][jj])))
                 	    	  isolated=false;
                  }
             }
