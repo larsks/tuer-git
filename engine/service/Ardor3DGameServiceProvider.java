@@ -34,7 +34,6 @@ import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.jogl.JoglNewtFocusWrapper;
-import com.ardor3d.input.jogl.JoglNewtKeyboardWrapper;
 import com.ardor3d.input.jogl.JoglNewtMouseManager;
 import com.ardor3d.input.jogl.JoglNewtMouseWrapper;
 import com.ardor3d.input.logical.TriggerAction;
@@ -60,6 +59,7 @@ import com.jogamp.newt.opengl.GLWindow;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.renderer.ReliableCanvasRenderer;
+import engine.renderer.ReliableKeyboardWrapper;
 import engine.statemachine.ScenegraphStateMachine;
 
 /**
@@ -233,7 +233,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
         //removes the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new JoglNewtKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
+        physicalLayer=new PhysicalLayer(new ReliableKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
     }
 
     
@@ -285,7 +285,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
                 newtWindow.invoke(true,new GLRunnable(){
 					@Override
 					public boolean run(GLAutoDrawable glAutoDrawable) {
-					    canvasRenderer.getCamera().resize(newtWindow.getWidth(), newtWindow.getHeight());
+					    canvasRenderer.getCamera().resize(newtWindow.getWidth(),newtWindow.getHeight());
 						canvasRenderer.getCamera().setFrustumPerspective(canvasRenderer.getCamera().getFovY(),
 		        				(float)newtWindow.getWidth()/(float)newtWindow.getHeight(), 
 		        				canvasRenderer.getCamera().getFrustumNear(), 
