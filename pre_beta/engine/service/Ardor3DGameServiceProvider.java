@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
-import javax.swing.JOptionPane;
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
@@ -42,7 +41,6 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.PickResults;
 import com.ardor3d.math.Ray3;
-import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
@@ -61,7 +59,7 @@ import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
-import engine.renderer.ReliableContextCapabilities;
+import engine.renderer.ReliableCanvasRenderer;
 import engine.statemachine.ScenegraphStateMachine;
 
 /**
@@ -228,35 +226,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         //initializes the settings, the full-screen mode is enabled
         final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,true,false);
         //setups the canvas renderer
-        final JoglCanvasRenderer canvasRenderer=new JoglCanvasRenderer(this){
-        	@Override
-        	public final ContextCapabilities createContextCapabilities(){
-        		final ContextCapabilities defaultCaps = super.createContextCapabilities();
-                final ReliableContextCapabilities realCaps = new ReliableContextCapabilities(defaultCaps);
-                if(DesktopIntegration.getOperatingSystem().equals(OS.Windows))
-                    {//gets some information about the OpenGL driver
-                	 final String vendor=realCaps.getDisplayVendor();
-                	 final String renderer=realCaps.getDisplayRenderer();
-                     //checks whether Microsoft’s generic software emulation driver (OpenGL emulation through Direct3D) is installed
-                	 if(vendor!=null&&renderer!=null&&vendor.equalsIgnoreCase("Microsoft Corporation")&&
-                		realCaps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
-                         {//prevents the use of this crap, recommends to the end user to install a proper OpenGL driver
-                		  JOptionPane.showMessageDialog(null,
-                				    "TUER cannot run with your broken OpenGL driver. To resolve this problem, please download and install the very last version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
-                				    "OpenGL driver error",
-                				    JOptionPane.ERROR_MESSAGE);
-                		  System.exit(0);
-                         }
-                    }
-                return(realCaps);
-        	}
-        	
-        	@Override
-        	public void makeCurrentContext(){}
-        	
-        	@Override
-        	public void releaseCurrentContext(){}
-        };
+        final JoglCanvasRenderer canvasRenderer=new ReliableCanvasRenderer(this);
         //creates a canvas      
         canvas=new JoglNewtWindow(canvasRenderer,settings);
         canvas.init();
