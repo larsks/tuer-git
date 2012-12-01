@@ -37,7 +37,7 @@ public class ReliableKeyboardWrapper extends JoglNewtKeyboardWrapper{
 	}
 	
 	@Override
-	public synchronized void keyReleased(final KeyEvent e) {
+	public synchronized void keyReleased(final KeyEvent e){
 		if(!e.isAutoRepeat())
 			super.keyReleased(e);
 	}

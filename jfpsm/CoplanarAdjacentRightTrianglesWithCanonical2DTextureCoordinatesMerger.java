@@ -725,7 +725,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	private static void testComputeAdjacentMergeableTrisArraysList(){
-		//N.B: row-major convention
 		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
 		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null},
 				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null},
@@ -797,47 +796,62 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			         smallestJ=Math.min(smallestJ,j);
 			         biggestJ=Math.max(biggestJ,j);
 			        }
+		//N.B: row-major convention
 		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the array
 		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
-		ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
+		final ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
 		//if the array is not empty
 		if(rowCount>0&&columnCount>0)
 		    {//creates an occupancy map of the supplied array but without empty columns and rows
 			 final boolean[][] useFlagsArray=new boolean[rowCount][];
+			 //for each row
 		     for(int i=0;i<useFlagsArray.length;i++)
-			     {final int rawI=i+smallestI;
+			     {//computes the index in the original array by using the offset
+		    	  final int rawI=i+smallestI;
+		    	  //starts the computation of the biggest index of the current column
 			      int localBiggestJ=Integer.MIN_VALUE;
 			      for(int j=0;j<columnCount;j++)
-			          {final int rawJ=j+smallestJ;
+			          {//computes the index in the original array by using the offset
+			    	   final int rawJ=j+smallestJ;
 			           if(array[rawI][rawJ]!=null)
 			        	   localBiggestJ=rawJ;
 			          }
+			      //allocates the current column of the occupancy map as tightly as possible
 			      useFlagsArray[i]=new boolean[localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0];
+			      //fills the occupancy map (true <-> not null)
 		    	  for(int j=0;j<useFlagsArray[i].length;j++)
 				      {final int rawJ=j+smallestJ;
 					   useFlagsArray[i][j]=array[rawI][rawJ]!=null;
 				      }
 			     }
+		     /**
+		      * As Java is unable to create a generic array by directly using the generic type, 
+		      * it is necessary to retrieve it thanks to the reflection
+		      */
 		     final Class<?> arrayComponentType=array.getClass().getComponentType().getComponentType();
 		     //finds the isolated sets of adjacent triangles that could be used to create quads
 		     //the secondary size is the least important size of the chunk
 		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount);secondarySize++)
-		    	 for(int chunkSize=1;chunkSize<=Math.max(rowCount,columnCount);chunkSize++)
-		             {for(int i=0;i<useFlagsArray.length;i++)
-		    		      for(int j=0;j<useFlagsArray[i].length;j++)
-		    		          {if(useFlagsArray[i][j])
-		    		               {//looks for an isolated set of triangles
+		    	 //the primary size is the most important size of the chunk
+		    	 for(int primarySize=1;primarySize<=Math.max(rowCount,columnCount);primarySize++)
+		             {//for each row
+		    		  for(int i=0;i<useFlagsArray.length;i++)
+		    		      //for each column
+		    			  for(int j=0;j<useFlagsArray[i].length;j++)
+		    		          {//if this element is occupied
+		    				   if(useFlagsArray[i][j])
+		    		               {//looks for an isolated element
 		    		    	        //horizontal checks (rows)
-		    		    	        if(chunkSize+i<=rowCount&&secondarySize<=columnCount&&
-		    		    	           areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,chunkSize,secondarySize,true)&&
-		    		    		      (j-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j-1,chunkSize,1,true))&&
-		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j+secondarySize,chunkSize,1,true)))
+		    		    	        if(primarySize+i<=rowCount&&secondarySize<=columnCount&&
+		    		    	           areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,primarySize,secondarySize,true)&&
+		    		    		      (j-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j-1,primarySize,1,true))&&
+		    		    		      (j+secondarySize>=columnCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j+secondarySize,primarySize,1,true)))
 		    		    	            {@SuppressWarnings("unchecked")
-										 final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,chunkSize,secondarySize);
+										 final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
 		    		    	             //adds it into the returned list
 		    		    	             adjacentTrisArraysList.add(adjacentTrisSubArray);
-		    		    	             //copies the triangles of the chunk into the sub-array and removes them from the 2D array
-		    		    	             for(int ii=0;ii<chunkSize;ii++)
+		    		    	             //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
+		    		    	             for(int ii=0;ii<primarySize;ii++)
 		    		    		             for(int jj=0;jj<secondarySize;jj++)
 		    		    		                 {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
 		    		    		                  useFlagsArray[ii+i][jj+j]=false;
@@ -845,16 +859,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    		    	            }
 		    		    	        else
 		    		    	            {//vertical checks (columns)
-		    		    	             if(chunkSize+j<=columnCount&&secondarySize<=rowCount&&
-		    		    	                areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,chunkSize,secondarySize,false)&&
-		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i-1,j,chunkSize,1,false))&&
-		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i+secondarySize,j,chunkSize,1,false)))
+		    		    	             if(primarySize+j<=columnCount&&secondarySize<=rowCount&&
+		    		    	                areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i,j,primarySize,secondarySize,false)&&
+		    		 			 	       (i-1<0||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i-1,j,primarySize,1,false))&&
+		    		 			 	       (i+secondarySize>=rowCount||!areTrianglesLocallyIsolated(useFlagsArray,rowCount,columnCount,i+secondarySize,j,primarySize,1,false)))
 		    		    	                 {@SuppressWarnings("unchecked")
-		    		    	            	  final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,chunkSize);
+		    		    	            	  final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
 		   	 			                      //adds it into the returned list
 		   	 			                      adjacentTrisArraysList.add(adjacentTrisSubArray);
-		   	 			                      //copies the triangles of the chunk into the sub-array and removes them from the 2D array
-		   	 			                      for(int jj=0;jj<chunkSize;jj++)
+		   	 			                      //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
+		   	 			                      for(int jj=0;jj<primarySize;jj++)
 		   	 			                	      for(int ii=0;ii<secondarySize;ii++)
 		   	 			                		      {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
 		   			                		           useFlagsArray[ii+i][jj+j]=false;
