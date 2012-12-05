@@ -788,16 +788,66 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		int biggestI=Integer.MIN_VALUE;
 		int smallestJ=Integer.MAX_VALUE;
 		int biggestJ=Integer.MIN_VALUE;
-		for(int i=0;i<array.length;i++)
-			for(int j=0;j<array[i].length;j++)
-				if(array[i][j]!=null)
-			        {smallestI=Math.min(smallestI,i);
-			         biggestI=Math.max(biggestI,i);
-			         smallestJ=Math.min(smallestJ,j);
-			         biggestJ=Math.max(biggestJ,j);
-			        }
+		//checks if the array has at least one row
+		if(array.length>0)
+		    {//looks for biggestI
+			 boolean searchStopped=false;
+			 for(int i=array.length-1;i>=0&&!searchStopped;i--)
+		    	 if(array[i].length>0)
+			         for(int j=array[i].length-1;j>=0&&!searchStopped;j--)
+				         if(array[i][j]!=null)
+			                 {//correct value
+				        	  biggestI=i;
+				        	  //candidates
+			                  smallestI=i;
+			                  smallestJ=j;
+			                  biggestJ=j;
+			                  //uses this flag to stop the search
+			                  searchStopped=true;
+			                 }
+		     //checks if the array has at least one non empty row
+		     if(searchStopped)
+		         {//looks for smallestI
+		    	  searchStopped=false;
+		    	  for(int i=0;i<biggestI&&!searchStopped;i++)
+		        	  for(int j=0;j<array[i].length&&!searchStopped;j++)
+		        		  if(array[i][j]!=null)
+		        			  {//correct value
+		        			   smallestI=i;
+		        			   //candidates
+		        			   smallestJ=Math.min(smallestJ,j);
+		  			           biggestJ=Math.max(biggestJ,j);
+		  			           //uses this flag to stop the search
+		  			           searchStopped=true;
+		        			  }
+		    	  //looks for biggestJ
+		    	  searchStopped=false;
+		    	  if(biggestJ<Integer.MAX_VALUE)
+		    	      {for(int i=biggestI-1;i>=smallestI&&!searchStopped;i--)
+		    	    	   if(array[i].length>biggestJ+1)
+		    	    	       {for(int j=array[i].length-1;j>biggestJ&&!searchStopped;j--)
+		    	    	    	    if(array[i][j]!=null)
+		    	    	    	    	biggestJ=j;
+		    	    	        if(biggestJ==Integer.MAX_VALUE)
+		    	    	        	searchStopped=true;
+		    	    	       }
+		    	      }
+		    	  //looks for smallestJ
+		    	  searchStopped=false;
+		    	  if(smallestJ>0)
+		    	      {for(int i=smallestI+1;i<=biggestI&&!searchStopped;i++)
+		    		       if(array[i].length>0)
+		    			       {for(int j=0;j<smallestJ&&!searchStopped;j++)
+		    			    	    if(array[i][j]!=null)
+		    	                        smallestJ=j;
+		    			        if(smallestJ==0)
+		    			        	searchStopped=true;
+		    			       }
+		    	      }
+		         }
+		    }
 		//N.B: row-major convention
-		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the array
+		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the occupancy map
 		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
 		final ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
 		//if the array is not empty
