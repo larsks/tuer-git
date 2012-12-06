@@ -88,9 +88,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 */
 	public static VertMap minimizeVerts(final Mesh mesh){
 		//uses all conditions with GeometryTool
-		final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs, MatchCondition.Normal, MatchCondition.Color);
+		final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
 		//reduces the geometry to avoid duplication of vertices
-		final VertMap result=GeometryTool.minimizeVerts(mesh, conditions);
+		final VertMap result=GeometryTool.minimizeVerts(mesh,conditions);
 		
 		final MeshData meshData=mesh.getMeshData();
 		//if there is a texture buffer for the first texture unit
@@ -527,10 +527,39 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				           adjacentTrisArraysListsList.add(adjacentTrisArraysList);
 			              }		  
 			     }
-			 //TODO: sixth step: create these bigger rectangles (update their texture coordinates (use coordinates greater 
-			 //than 1) in order to use texture repeat)
+			 //sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
+			 //for each plane
+			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> entry:mapOfListsOfListsOfArraysOfMergeableTris.entrySet())
+			     {//Plane plane=entry.getKey();
+			      //for each list of arrays of adjacent triangles which could be merged to make bigger rectangles
+			      for(ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList:entry.getValue())
+			    	  //for each array of adjacent triangles
+			    	  for(RightTriangleInfo[][][] adjacentTrisArray:adjacentTrisArraysList)
+			    	      {//checks if it contains at least one row
+			    		   if(adjacentTrisArray.length>0&&adjacentTrisArray[0]!=null)
+		                       {//checks if this array is full and rectangular (i.e all rows contain the same count of elements)
+		            	        boolean isFull=true;
+		            	        boolean isRectangular=true;
+			    			    for(int rowIndex=0;rowIndex<adjacentTrisArray.length&&isRectangular&&isFull;rowIndex++)
+		            	        	{if(adjacentTrisArray[rowIndex]==null||adjacentTrisArray[rowIndex].length!=adjacentTrisArray[0].length)
+		            	        		 isRectangular=false;
+		            	        	 else
+			    			    	     for(int columnIndex=0;columnIndex<adjacentTrisArray[rowIndex].length&&isFull;columnIndex++)
+		            	        		     if(adjacentTrisArray[rowIndex][columnIndex]==null||adjacentTrisArray[rowIndex][columnIndex].length!=2)
+		            	        	             isFull=false;
+		            	        	}
+			    			    //checks if this array is full, rectangular and if it contains more than one pair of adjacent triangles
+			    			    if(isRectangular&&isFull&&(adjacentTrisArray.length>1||adjacentTrisArray[0].length>1))
+			    			        {//TODO compute the new pair of right adjacent triangles
+			    			    	 //TODO store the couple of old pairs and the new pair in order to remove the former and to add the latter
+			    			        }
+		                       }
+			    	      }
+			     }
 			 //TODO: seventh step: remove the triangles which are no more in the geometry of the mesh
+			 
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
+			 
 		    }
 		return result;
 	}
@@ -793,7 +822,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    {//looks for biggestI
 			 boolean searchStopped=false;
 			 for(int i=array.length-1;i>=0&&!searchStopped;i--)
-		    	 if(array[i].length>0)
+		    	 if(array[i]!=null&&array[i].length>0)
 			         for(int j=array[i].length-1;j>=0&&!searchStopped;j--)
 				         if(array[i][j]!=null)
 			                 {//correct value
@@ -810,21 +839,22 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		         {//looks for smallestI
 		    	  searchStopped=false;
 		    	  for(int i=0;i<biggestI&&!searchStopped;i++)
-		        	  for(int j=0;j<array[i].length&&!searchStopped;j++)
-		        		  if(array[i][j]!=null)
-		        			  {//correct value
-		        			   smallestI=i;
-		        			   //candidates
-		        			   smallestJ=Math.min(smallestJ,j);
-		  			           biggestJ=Math.max(biggestJ,j);
-		  			           //uses this flag to stop the search
-		  			           searchStopped=true;
-		        			  }
+		    		  if(array[i]!=null)
+		        	      for(int j=0;j<array[i].length&&!searchStopped;j++)
+		        		      if(array[i][j]!=null)
+		        			      {//correct value
+		        			       smallestI=i;
+		        			       //candidates
+		        			       smallestJ=Math.min(smallestJ,j);
+		  			               biggestJ=Math.max(biggestJ,j);
+		  			               //uses this flag to stop the search
+		  			               searchStopped=true;
+		        			      }
 		    	  //looks for biggestJ
 		    	  searchStopped=false;
 		    	  if(biggestJ<Integer.MAX_VALUE)
 		    	      {for(int i=biggestI-1;i>=smallestI&&!searchStopped;i--)
-		    	    	   if(array[i].length>biggestJ+1)
+		    	    	   if(array[i]!=null&&array[i].length>biggestJ+1)
 		    	    	       {for(int j=array[i].length-1;j>biggestJ&&!searchStopped;j--)
 		    	    	    	    if(array[i][j]!=null)
 		    	    	    	    	biggestJ=j;
@@ -836,7 +866,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    	  searchStopped=false;
 		    	  if(smallestJ>0)
 		    	      {for(int i=smallestI+1;i<=biggestI&&!searchStopped;i++)
-		    		       if(array[i].length>0)
+		    		       if(array[i]!=null&&array[i].length>0)
 		    			       {for(int j=0;j<smallestJ&&!searchStopped;j++)
 		    			    	    if(array[i][j]!=null)
 		    	                        smallestJ=j;
@@ -858,21 +888,27 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		     for(int i=0;i<useFlagsArray.length;i++)
 			     {//computes the index in the original array by using the offset
 		    	  final int rawI=i+smallestI;
-		    	  //starts the computation of the biggest index of the current column
-			      int localBiggestJ=Integer.MIN_VALUE;
-			      for(int j=0;j<columnCount;j++)
-			          {//computes the index in the original array by using the offset
-			    	   final int rawJ=j+smallestJ;
-			           if(array[rawI][rawJ]!=null)
-			        	   localBiggestJ=rawJ;
-			          }
-			      //allocates the current column of the occupancy map as tightly as possible
-			      useFlagsArray[i]=new boolean[localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0];
-			      //fills the occupancy map (true <-> not null)
-		    	  for(int j=0;j<useFlagsArray[i].length;j++)
-				      {final int rawJ=j+smallestJ;
-					   useFlagsArray[i][j]=array[rawI][rawJ]!=null;
-				      }
+		    	  if(array[rawI]!=null)
+		    	      {//starts the computation of the biggest index of the current column
+			           int localBiggestJ=Integer.MIN_VALUE;
+			           for(int j=0;j<columnCount;j++)
+			               {//computes the index in the original array by using the offset
+			    	        final int rawJ=j+smallestJ;
+			                if(array[rawI][rawJ]!=null)
+			        	        localBiggestJ=rawJ;
+			               }
+			           //allocates the current column of the occupancy map as tightly as possible
+			           useFlagsArray[i]=new boolean[localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0];
+			           //fills the occupancy map (true <-> not null)
+		    	       for(int j=0;j<useFlagsArray[i].length;j++)
+				           {final int rawJ=j+smallestJ;
+					        useFlagsArray[i][j]=array[rawI][rawJ]!=null;
+				           }
+		    	      }
+		    	  else
+		    		  {//uses an empty array (it's easier to handle than null)
+		    		   useFlagsArray[i]=new boolean[0];
+		    		  }
 			     }
 		     /**
 		      * As Java is unable to create a generic array by directly using the generic type, 
