@@ -25,7 +25,171 @@ import java.util.ArrayList;
 public class ArrayHelper{
 
 	public ArrayHelper(){}
+	
+	public static final class OccupancyMap{
+		
+		private final boolean[][] arrayMap;
+		
+		private final int smallestRowIndex;
+		
+		private final int biggestRowIndex;
+		
+		private final int smallestColumnIndex;
+        
+		private final int biggestColumnIndex;
+        
+		private final int rowCount;
+        
+		private final int columnCount;
+		
+		public OccupancyMap(final boolean[][] arrayMap,final int smallestRowIndex,final int biggestRowIndex,
+				            final int smallestColumnIndex,final int biggestColumnIndex,
+				            final int rowCount,final int columnCount){
+			this.arrayMap=arrayMap;
+			this.smallestRowIndex=smallestRowIndex;
+			this.biggestRowIndex=biggestRowIndex;
+			this.smallestColumnIndex=smallestColumnIndex;
+			this.biggestColumnIndex=biggestColumnIndex;
+			this.rowCount=rowCount;
+			this.columnCount=columnCount;
+		}
 
+		public final boolean[][] getArrayMap(){
+			return(arrayMap);
+		}
+
+		public final int getSmallestRowIndex(){
+			return(smallestRowIndex);
+		}
+
+		public final int getBiggestRowIndex(){
+			return(biggestRowIndex);
+		}
+
+		public final int getSmallestColumnIndex(){
+			return(smallestColumnIndex);
+		}
+
+		public final int getBiggestColumnIndex(){
+			return(biggestColumnIndex);
+		}
+
+		public final int getRowCount(){
+			return(rowCount);
+		}
+
+		public final int getColumnCount(){
+			return(columnCount);
+		}
+		
+		public final boolean isEmpty(){
+			return(rowCount==0||columnCount==0);
+		}
+	}
+
+	public <T> OccupancyMap createPackedOccupancyMap(final T[][] array){
+		//detects empty rows and empty columns in order to skip them later
+		int smallestI=Integer.MAX_VALUE;
+		int biggestI=Integer.MIN_VALUE;
+		int smallestJ=Integer.MAX_VALUE;
+		int biggestJ=Integer.MIN_VALUE;
+		//checks if the array has at least one row
+		if(array.length>0)
+			{//looks for biggestI
+			 boolean searchStopped=false;
+			 for(int i=array.length-1;i>=0&&!searchStopped;i--)
+			     if(array[i]!=null&&array[i].length>0)
+			 		 for(int j=array[i].length-1;j>=0&&!searchStopped;j--)
+			 			 if(array[i][j]!=null)
+			 		         {//correct value
+			 			      biggestI=i;
+			 			      //candidates
+			 		          smallestI=i;
+			 		          smallestJ=j;
+			 		          biggestJ=j;
+			 		          //uses this flag to stop the search
+			 		          searchStopped=true;
+			 		         }
+			 //checks if the array has at least one non empty row
+			 if(searchStopped)
+			     {//looks for smallestI
+				  searchStopped=false;
+				  for(int i=0;i<biggestI&&!searchStopped;i++)
+				      if(array[i]!=null)
+				          for(int j=0;j<array[i].length&&!searchStopped;j++)
+				        	  if(array[i][j]!=null)
+				                  {//correct value
+				                   smallestI=i;
+				                   //candidates
+				                   smallestJ=Math.min(smallestJ,j);
+				  			       biggestJ=Math.max(biggestJ,j);
+				  			       //uses this flag to stop the search
+				  			       searchStopped=true;
+				                  }
+				  //looks for biggestJ
+				  searchStopped=false;
+				  if(biggestJ<Integer.MAX_VALUE)
+				      {for(int i=biggestI-1;i>=smallestI&&!searchStopped;i--)
+				           if(array[i]!=null&&array[i].length>biggestJ+1)
+				               {for(int j=array[i].length-1;j>biggestJ&&!searchStopped;j--)
+				                    if(array[i][j]!=null)
+				                        biggestJ=j;
+				                    if(biggestJ==Integer.MAX_VALUE)
+				                        searchStopped=true;
+                               }
+				      }
+				  //looks for smallestJ
+				  searchStopped=false;
+				  if(smallestJ>0)
+				      {for(int i=smallestI+1;i<=biggestI&&!searchStopped;i++)
+				           if(array[i]!=null&&array[i].length>0)
+				               {for(int j=0;j<smallestJ&&!searchStopped;j++)
+				                    if(array[i][j]!=null)
+				                        smallestJ=j;
+				                    if(smallestJ==0)
+				                        searchStopped=true;
+				               }
+				      }
+			     }
+		    }
+		//N.B: row-major convention
+		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the occupancy map
+		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
+		final boolean[][] occupancyMapArray;
+		//if the array is not empty
+		if(rowCount>0&&columnCount>0)
+		    {//creates an occupancy map of the supplied array but without empty columns and rows
+		     occupancyMapArray=new boolean[rowCount][];
+		     //for each row
+			 for(int i=0;i<occupancyMapArray.length;i++)
+				 {//computes the index in the original array by using the offset
+				  final int rawI=i+smallestI;
+				  if(array[rawI]!=null)
+				      {//starts the computation of the biggest index of the current column
+					   int localBiggestJ=Integer.MIN_VALUE;
+					   for(int j=0;j<columnCount;j++)
+					       {//computes the index in the original array by using the offset
+					    	final int rawJ=j+smallestJ;
+					        if(array[rawI][rawJ]!=null)
+					        	localBiggestJ=rawJ;
+					       }
+					   final int localColumnCount=localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0;
+					   //allocates the current column of the occupancy map as tightly as possible
+					   occupancyMapArray[i]=new boolean[localColumnCount];
+					   //fills the occupancy map (true <-> not null)
+				       for(int j=0;j<occupancyMapArray[i].length;j++)
+					       {final int rawJ=j+smallestJ;
+					        occupancyMapArray[i][j]=array[rawI][rawJ]!=null;
+					       }
+				      }
+                 }
+			}
+		else
+			occupancyMapArray=new boolean[0][0];
+		final OccupancyMap occupancyMap=new OccupancyMap(occupancyMapArray,smallestI,biggestI,smallestJ,biggestJ,rowCount,columnCount);
+		return(occupancyMap);
+	}
+	
 	/**
 	 * Creates a list of full arrays from a potentially non full array. It tries to 
 	 * minimize the count of full arrays and to maximize their size.
@@ -34,100 +198,16 @@ public class ArrayHelper{
 	 * @return list of full arrays
 	 */
 	public <T> ArrayList<T[][]> computeFullArraysFromNonFullArray(final T[][] array){
-		//detects empty rows and empty columns in order to skip them later
-		int smallestI=Integer.MAX_VALUE;
-		int biggestI=Integer.MIN_VALUE;
-		int smallestJ=Integer.MAX_VALUE;
-		int biggestJ=Integer.MIN_VALUE;
-		//checks if the array has at least one row
-		if(array.length>0)
-		    {//looks for biggestI
-			 boolean searchStopped=false;
-			 for(int i=array.length-1;i>=0&&!searchStopped;i--)
-		    	 if(array[i]!=null&&array[i].length>0)
-			         for(int j=array[i].length-1;j>=0&&!searchStopped;j--)
-				         if(array[i][j]!=null)
-			                 {//correct value
-				        	  biggestI=i;
-				        	  //candidates
-			                  smallestI=i;
-			                  smallestJ=j;
-			                  biggestJ=j;
-			                  //uses this flag to stop the search
-			                  searchStopped=true;
-			                 }
-		     //checks if the array has at least one non empty row
-		     if(searchStopped)
-		         {//looks for smallestI
-		    	  searchStopped=false;
-		    	  for(int i=0;i<biggestI&&!searchStopped;i++)
-		    		  if(array[i]!=null)
-		        	      for(int j=0;j<array[i].length&&!searchStopped;j++)
-		        		      if(array[i][j]!=null)
-		        			      {//correct value
-		        			       smallestI=i;
-		        			       //candidates
-		        			       smallestJ=Math.min(smallestJ,j);
-		  			               biggestJ=Math.max(biggestJ,j);
-		  			               //uses this flag to stop the search
-		  			               searchStopped=true;
-		        			      }
-		    	  //looks for biggestJ
-		    	  searchStopped=false;
-		    	  if(biggestJ<Integer.MAX_VALUE)
-		    	      {for(int i=biggestI-1;i>=smallestI&&!searchStopped;i--)
-		    	    	   if(array[i]!=null&&array[i].length>biggestJ+1)
-		    	    	       {for(int j=array[i].length-1;j>biggestJ&&!searchStopped;j--)
-		    	    	    	    if(array[i][j]!=null)
-		    	    	    	    	biggestJ=j;
-		    	    	        if(biggestJ==Integer.MAX_VALUE)
-		    	    	        	searchStopped=true;
-		    	    	       }
-		    	      }
-		    	  //looks for smallestJ
-		    	  searchStopped=false;
-		    	  if(smallestJ>0)
-		    	      {for(int i=smallestI+1;i<=biggestI&&!searchStopped;i++)
-		    		       if(array[i]!=null&&array[i].length>0)
-		    			       {for(int j=0;j<smallestJ&&!searchStopped;j++)
-		    			    	    if(array[i][j]!=null)
-		    	                        smallestJ=j;
-		    			        if(smallestJ==0)
-		    			        	searchStopped=true;
-		    			       }
-		    	      }
-		         }
-		    }
-		//N.B: row-major convention
-		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the occupancy map
-		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
+		//creates an occupancy map that will be updated (instead of modifying the supplied array)
+		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array);
 		final ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
-		//if the array is not empty
-		if(rowCount>0&&columnCount>0)
-		    {//creates an occupancy map of the supplied array but without empty columns and rows
-			 final boolean[][] occupancyMap=new boolean[rowCount][];
-			 //for each row
-		     for(int i=0;i<occupancyMap.length;i++)
-			     {//computes the index in the original array by using the offset
-		    	  final int rawI=i+smallestI;
-		    	  if(array[rawI]!=null)
-		    	      {//starts the computation of the biggest index of the current column
-			           int localBiggestJ=Integer.MIN_VALUE;
-			           for(int j=0;j<columnCount;j++)
-			               {//computes the index in the original array by using the offset
-			    	        final int rawJ=j+smallestJ;
-			                if(array[rawI][rawJ]!=null)
-			        	        localBiggestJ=rawJ;
-			               }
-			           //allocates the current column of the occupancy map as tightly as possible
-			           occupancyMap[i]=new boolean[localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0];
-			           //fills the occupancy map (true <-> not null)
-		    	       for(int j=0;j<occupancyMap[i].length;j++)
-				           {final int rawJ=j+smallestJ;
-					        occupancyMap[i][j]=array[rawI][rawJ]!=null;
-				           }
-		    	      }
-			     }
+		//if the array isn't empty (then the occupancy map isn't empty)
+		if(!occupancyMapObj.isEmpty())
+		    {final int smallestI=occupancyMapObj.getSmallestRowIndex();
+		     final int smallestJ=occupancyMapObj.getSmallestColumnIndex();
+		     final int rowCount=occupancyMapObj.getRowCount();
+		     final int columnCount=occupancyMapObj.getColumnCount();
+			 final boolean[][] occupancyMap=occupancyMapObj.getArrayMap();
 		     /**
 		      * As Java is unable to create a generic array by directly using the generic type, 
 		      * it is necessary to retrieve it thanks to the reflection
