@@ -509,7 +509,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> mapOfListsOfListsOfArraysOfMergeableTris=new HashMap<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>>();
 			 //for each plane
 			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo>>> entry:mapOfListsOfTrianglesByPlanes.entrySet())
-			     {Plane plane=entry.getKey();
+			     {final Plane plane=entry.getKey();
 				  //for each list of adjacent triangles
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
 					  if(!trisList.isEmpty())
@@ -527,9 +527,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			              }		  
 			     }
 			 //sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
+			 HashMap<Plane,HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>> mapOfPreviousAndNextAdjacentTrisMaps=new HashMap<Plane,HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>>();
 			 //for each plane
 			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> entry:mapOfListsOfListsOfArraysOfMergeableTris.entrySet())
-			     {//Plane plane=entry.getKey();
+			     {final Plane plane=entry.getKey();
+			      final HashMap<RightTriangleInfo[][][],RightTriangleInfo[]> previousAndNextAdjacentTrisMaps=new HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>();
+			      mapOfPreviousAndNextAdjacentTrisMaps.put(plane,previousAndNextAdjacentTrisMaps);
 			      //for each list of arrays of adjacent triangles which could be merged to make bigger rectangles
 			      for(ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList:entry.getValue())
 			    	  //for each array of adjacent triangles
@@ -550,7 +553,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    //checks if this array is full, rectangular and if it contains more than one pair of adjacent triangles
 			    			    if(isRectangular&&isFull&&(adjacentTrisArray.length>1||adjacentTrisArray[0].length>1))
 			    			        {//TODO compute the new pair of right adjacent triangles
-			    			    	 //TODO store the couple of old pairs and the new pair in order to remove the former and to add the latter
+			    			    	 final RightTriangleInfo[] mergedAdjacentTris=new RightTriangleInfo[]{};
+			    			    	 //TODO for each pair of triangles in a corner of the array, find its vertex
+			    			    	 //TODO determine the orientation of the new triangles
+			    			    	 //TODO set the vertices
+			    			    	 //TODO replace texture coordinates equal to 1 by texture coordinates equal to a positive integer value greater than 1 
+			    			    	 //stores the couple of old pairs and the new pair in order to remove the former and to add the latter
+			    			    	 previousAndNextAdjacentTrisMaps.put(adjacentTrisArray,mergedAdjacentTris);
 			    			        }
 		                       }
 			    	      }
