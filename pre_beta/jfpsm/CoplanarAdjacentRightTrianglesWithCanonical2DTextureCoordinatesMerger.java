@@ -537,8 +537,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			      for(ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList:entry.getValue())
 			    	  //for each array of adjacent triangles
 			    	  for(RightTriangleInfo[][][] adjacentTrisArray:adjacentTrisArraysList)
-			    	      {//checks if it contains at least one row
-			    		   if(adjacentTrisArray.length>0&&adjacentTrisArray[0]!=null)
+			    	      {//checks if it contains at least one row and if the first row contains at least one element
+			    		   if(adjacentTrisArray.length>=1&&adjacentTrisArray[0]!=null&&adjacentTrisArray[0].length>=1)
 		                       {//checks if this array is full and rectangular (i.e all rows contain the same count of elements)
 		            	        boolean isFull=true;
 		            	        boolean isRectangular=true;
@@ -552,13 +552,74 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		            	        	}
 			    			    //checks if this array is full, rectangular and if it contains more than one pair of adjacent triangles
 			    			    if(isRectangular&&isFull&&(adjacentTrisArray.length>1||adjacentTrisArray[0].length>1))
-			    			        {//TODO compute the new pair of right adjacent triangles
+			    			        {//as this array is rectangular, it has a consistent row count and column count
+			    			    	 final int rowCount=adjacentTrisArray.length;
+			    			    	 final int columnCount=adjacentTrisArray[0].length;
+			    			    	 //computes the new pair of right adjacent triangles
 			    			    	 final RightTriangleInfo[] mergedAdjacentTris=new RightTriangleInfo[]{};
-			    			    	 //TODO for each pair of triangles in a corner of the array, find its vertex
+			    			    	 final Vector3[] mergedAdjacentTrisVertices=new Vector3[4];
+			    			    	 final Vector3[] testedAdjacentTrisVertices=new Vector3[8];
+			    			    	 //for each pair of triangles in a corner of the array
+			    			    	 for(int rowIndex=0;rowIndex<=1;rowIndex++)
+			    			    		 {final int rawRowIndex=rowIndex*(rowCount-1);
+			    			    		  for(int columnIndex=0;columnIndex<=1;columnIndex++)
+			    			    		      {final int rawColumnIndex=columnIndex*(columnCount-1);
+			    			    			   tri1=adjacentTrisArray[rawRowIndex][rawColumnIndex][0];
+			    			    			   tri2=adjacentTrisArray[rawRowIndex][rawColumnIndex][1];
+			    			    			   tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+			    			    			   tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+			    			    			   //retrieves the distinct vertices of the current corner
+			    			    			   //both triangles have reverse vertex orders (see the third step)
+			    			    			   testedAdjacentTrisVertices[0]=tri1Vertices[tri1.sideIndexOfHypotenuse];
+			    			    			   testedAdjacentTrisVertices[1]=tri2Vertices[tri2.sideIndexOfHypotenuse];
+			    			    			   testedAdjacentTrisVertices[2]=tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3];
+			    			    			   testedAdjacentTrisVertices[3]=tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3];
+			    			    			   //looks for the real vertex of the corner
+			    			    			   boolean found=false;
+			    			    			   for(int testedVertexIndex=0;testedVertexIndex<4&&!found;testedVertexIndex++)
+			    			    			       {found=true;
+			    			    				    for(int testedCloseCell1DIndex=1;testedCloseCell1DIndex<=3&&found;testedCloseCell1DIndex++)
+			    			    			            {final int secondaryRawRowIndex=Math.max(0,rawRowIndex+((rowIndex==0?1:-1)*(testedCloseCell1DIndex/2)))%rowCount;
+			    			    			             final int secondaryRawColumnIndex=Math.max(0,rawColumnIndex+((columnIndex==0?1:-1)*(testedCloseCell1DIndex%2)))%columnCount;
+			    			    				    	 tri3=adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][0];
+						    			    			 tri4=adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][1];
+						    			    			 tri3Vertices=meshData.getPrimitiveVertices(tri3.primitiveIndex,tri3.sectionIndex,tri3Vertices);
+						    			    			 tri4Vertices=meshData.getPrimitiveVertices(tri4.primitiveIndex,tri4.sectionIndex,tri4Vertices);
+						    			    			 testedAdjacentTrisVertices[4]=tri3Vertices[tri3.sideIndexOfHypotenuse];
+						    			    			 testedAdjacentTrisVertices[5]=tri4Vertices[tri4.sideIndexOfHypotenuse];
+						    			    			 testedAdjacentTrisVertices[6]=tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3];
+						    			    			 testedAdjacentTrisVertices[7]=tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3];
+						    			    			 for(int secondaryTestedVertexIndex=4;secondaryTestedVertexIndex<8&&found;secondaryTestedVertexIndex++)
+			    			    			            	 found=!testedAdjacentTrisVertices[testedVertexIndex].equals(testedAdjacentTrisVertices[secondaryTestedVertexIndex]);
+			    			    			            }
+			    			    			        if(found)
+			    			    			            {//checks whether this corner is already in use
+			    			    			        	 boolean cornerAlreadyInUse=false;
+			    			    			        	 for(int mergedAdjacentTrisVertexIndex=0;mergedAdjacentTrisVertexIndex<4&&!cornerAlreadyInUse;mergedAdjacentTrisVertexIndex++)
+			    			    			        		 if(mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex]!=null&&
+			    			    			        		    mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex].equals(testedAdjacentTrisVertices[testedVertexIndex]))
+			    			    			        			 cornerAlreadyInUse=true;
+			    			    			        	 //if this corner is already in use, the search must go on
+			    			    			        	 if(cornerAlreadyInUse)
+			    			    			        		 found=false;
+			    			    			        	 else
+			    			    			        		 {mergedAdjacentTrisVertices[(rowIndex/2)+(columnIndex%2)]=testedAdjacentTrisVertices[testedVertexIndex];
+			    			    			        		  //TODO store some additional information (for example whether or not this vertex is on the hypotenuse)
+			    			    			        		 }
+			    			    			            }
+			    			    			        else
+			    			    			    	    System.err.println("missing corner");
+			    			    			       }
+			    			    		      }
+			    			    		 }
 			    			    	 //TODO determine the orientation of the new triangles
+			    			    	 
 			    			    	 //TODO set the vertices
+			    			    	 
 			    			    	 //TODO replace texture coordinates equal to 1 by texture coordinates equal to a positive integer value greater than 1 
+			    			    	 
 			    			    	 //stores the couple of old pairs and the new pair in order to remove the former and to add the latter
+			    			    	 //TODO store the vertices too
 			    			    	 previousAndNextAdjacentTrisMaps.put(adjacentTrisArray,mergedAdjacentTris);
 			    			        }
 		                       }
