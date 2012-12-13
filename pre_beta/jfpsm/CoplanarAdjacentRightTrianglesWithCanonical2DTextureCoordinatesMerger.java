@@ -80,6 +80,21 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
+	private static final class NextQuadInfo{
+		
+		private final Vector3[] vertices;
+		
+		private final Vector2[] textureCoords;
+		
+		private final int[] indices;
+		
+		private NextQuadInfo(final Vector3[] vertices,final Vector2[] textureCoords,final int[] indices){
+			this.vertices=vertices;
+			this.textureCoords=textureCoords;
+			this.indices=indices;
+		}
+	}
+	
 	/**
 	 * 
 	 * @param mesh using the same set of textures (only on texture per unit) for all vertices
@@ -133,7 +148,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 								         }
 							        }	    
 							    if(hasCanonicalTextureCoords)
-							        {//stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
+							        {//FIXME check that all possible pairs of canonical texture coordinates ([0;0], [0;1], [1;0] or [1;1]) are present
+							    	 //stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
 							         RightTriangleInfo rightTriangleInfo=new RightTriangleInfo(trianglePrimitiveIndex,sectionIndex,sideIndexOfHypotenuse);
 							         rightTrianglesWithCanonical2DTextureCoordinatesInfos.add(rightTriangleInfo);
 							        }
@@ -527,11 +543,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			              }		  
 			     }
 			 //sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
-			 HashMap<Plane,HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>> mapOfPreviousAndNextAdjacentTrisMaps=new HashMap<Plane,HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>>();
+			 HashMap<Plane,HashMap<RightTriangleInfo[][][],NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps=new HashMap<Plane,HashMap<RightTriangleInfo[][][],NextQuadInfo>>();
 			 //for each plane
 			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> entry:mapOfListsOfListsOfArraysOfMergeableTris.entrySet())
 			     {final Plane plane=entry.getKey();
-			      final HashMap<RightTriangleInfo[][][],RightTriangleInfo[]> previousAndNextAdjacentTrisMaps=new HashMap<RightTriangleInfo[][][],RightTriangleInfo[]>();
+			      final HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMaps=new HashMap<RightTriangleInfo[][][],NextQuadInfo>();
 			      mapOfPreviousAndNextAdjacentTrisMaps.put(plane,previousAndNextAdjacentTrisMaps);
 			      //for each list of arrays of adjacent triangles which could be merged to make bigger rectangles
 			      for(ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList:entry.getValue())
@@ -556,9 +572,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    	 final int rowCount=adjacentTrisArray.length;
 			    			    	 final int columnCount=adjacentTrisArray[0].length;
 			    			    	 //computes the new pair of right adjacent triangles
-			    			    	 final RightTriangleInfo[] mergedAdjacentTris=new RightTriangleInfo[]{};
 			    			    	 final Vector3[] mergedAdjacentTrisVertices=new Vector3[4];
+			    			    	 final Vector2[] mergedAdjacentTrisTextureCoords=new Vector2[4];
+			    			    	 final int[] tmpLocalIndices=new int[4];
+			    			    	 final int[] mergedAdjacentTrisVerticesIndices=new int[6];
 			    			    	 final Vector3[] testedAdjacentTrisVertices=new Vector3[8];
+			    			    	 final Vector2[] testedAdjacentTrisTextureCoords=new Vector2[4];
 			    			    	 //for each pair of triangles in a corner of the array
 			    			    	 for(int rowIndex=0;rowIndex<=1;rowIndex++)
 			    			    		 {final int rawRowIndex=rowIndex*(rowCount-1);
@@ -574,11 +593,18 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    			   testedAdjacentTrisVertices[1]=tri2Vertices[tri2.sideIndexOfHypotenuse];
 			    			    			   testedAdjacentTrisVertices[2]=tri1Vertices[(tri1.sideIndexOfHypotenuse+2)%3];
 			    			    			   testedAdjacentTrisVertices[3]=tri2Vertices[(tri2.sideIndexOfHypotenuse+2)%3];
+			    			    			   //retrieves the texture coordinates
+			    			    			   tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,0,tri1TextureCoords);
+						                       tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,0,tri2TextureCoords);
+						                       testedAdjacentTrisTextureCoords[0]=tri1TextureCoords[tri1.sideIndexOfHypotenuse];
+						                       testedAdjacentTrisTextureCoords[1]=tri1TextureCoords[tri2.sideIndexOfHypotenuse];
+						                       testedAdjacentTrisTextureCoords[2]=tri1TextureCoords[(tri1.sideIndexOfHypotenuse+2)%3];
+						                       testedAdjacentTrisTextureCoords[3]=tri1TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3];
 			    			    			   //looks for the real vertex of the corner
-			    			    			   boolean found=false;
-			    			    			   for(int testedVertexIndex=0;testedVertexIndex<4&&!found;testedVertexIndex++)
-			    			    			       {found=true;
-			    			    				    for(int testedCloseCell1DIndex=1;testedCloseCell1DIndex<=3&&found;testedCloseCell1DIndex++)
+			    			    			   boolean cornerVertexFound=false;
+			    			    			   for(int testedVertexIndex=0;testedVertexIndex<4&&!cornerVertexFound;testedVertexIndex++)
+			    			    			       {cornerVertexFound=true;
+			    			    				    for(int testedCloseCell1DIndex=1;testedCloseCell1DIndex<=3&&cornerVertexFound;testedCloseCell1DIndex++)
 			    			    			            {final int secondaryRawRowIndex=Math.max(0,rawRowIndex+((rowIndex==0?1:-1)*(testedCloseCell1DIndex/2)))%rowCount;
 			    			    			             final int secondaryRawColumnIndex=Math.max(0,rawColumnIndex+((columnIndex==0?1:-1)*(testedCloseCell1DIndex%2)))%columnCount;
 			    			    				    	 tri3=adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][0];
@@ -589,10 +615,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						    			    			 testedAdjacentTrisVertices[5]=tri4Vertices[tri4.sideIndexOfHypotenuse];
 						    			    			 testedAdjacentTrisVertices[6]=tri3Vertices[(tri3.sideIndexOfHypotenuse+2)%3];
 						    			    			 testedAdjacentTrisVertices[7]=tri4Vertices[(tri4.sideIndexOfHypotenuse+2)%3];
-						    			    			 for(int secondaryTestedVertexIndex=4;secondaryTestedVertexIndex<8&&found;secondaryTestedVertexIndex++)
-			    			    			            	 found=!testedAdjacentTrisVertices[testedVertexIndex].equals(testedAdjacentTrisVertices[secondaryTestedVertexIndex]);
+						    			    			 for(int secondaryTestedVertexIndex=4;secondaryTestedVertexIndex<8&&cornerVertexFound;secondaryTestedVertexIndex++)
+			    			    			            	 cornerVertexFound=!testedAdjacentTrisVertices[testedVertexIndex].equals(testedAdjacentTrisVertices[secondaryTestedVertexIndex]);
 			    			    			            }
-			    			    			        if(found)
+			    			    			        if(cornerVertexFound)
 			    			    			            {//checks whether this corner is already in use
 			    			    			        	 boolean cornerAlreadyInUse=false;
 			    			    			        	 for(int mergedAdjacentTrisVertexIndex=0;mergedAdjacentTrisVertexIndex<4&&!cornerAlreadyInUse;mergedAdjacentTrisVertexIndex++)
@@ -601,26 +627,53 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    			        			 cornerAlreadyInUse=true;
 			    			    			        	 //if this corner is already in use, the search must go on
 			    			    			        	 if(cornerAlreadyInUse)
-			    			    			        		 found=false;
+			    			    			        		 cornerVertexFound=false;
 			    			    			        	 else
-			    			    			        		 {mergedAdjacentTrisVertices[(rowIndex/2)+(columnIndex%2)]=testedAdjacentTrisVertices[testedVertexIndex];
-			    			    			        		  //TODO store some additional information (for example whether or not this vertex is on the hypotenuse)
+			    			    			        		 {final int localIndex=(rowIndex/2)+(columnIndex%2);
+			    			    			        		  //stores the vertex
+			    			    			        		  mergedAdjacentTrisVertices[localIndex]=testedAdjacentTrisVertices[testedVertexIndex];
+			    			    			        		  //stores its texture coordinates
+			    			    			        		  mergedAdjacentTrisTextureCoords[localIndex]=testedAdjacentTrisTextureCoords[testedVertexIndex];
+			    			    			        		  //stores its temporary index in order to know from which triangle it comes and whether it is on the hypotenuse
+			    			    			        		  tmpLocalIndices[localIndex]=testedVertexIndex;
 			    			    			        		 }
 			    			    			            }
-			    			    			        else
-			    			    			    	    System.err.println("missing corner");
 			    			    			       }
+			    			    			   if(!cornerVertexFound)
+			    			    				   System.err.println("missing corner");
 			    			    		      }
 			    			    		 }
-			    			    	 //TODO determine the orientation of the new triangles
-			    			    	 
-			    			    	 //TODO set the vertices
-			    			    	 
-			    			    	 //TODO replace texture coordinates equal to 1 by texture coordinates equal to a positive integer value greater than 1 
-			    			    	 
-			    			    	 //stores the couple of old pairs and the new pair in order to remove the former and to add the latter
-			    			    	 //TODO store the vertices too
-			    			    	 previousAndNextAdjacentTrisMaps.put(adjacentTrisArray,mergedAdjacentTris);
+			    			    	 //keeps the orientation of the previous triangles
+			    			    	 Arrays.fill(mergedAdjacentTrisVerticesIndices,-1);
+			    			    	 for(int localIndex=0;localIndex<4;localIndex++)
+			    			    	     {//if this vertex is not on the hypotenuse
+			    			    		  if(tmpLocalIndices[localIndex]/2==1)
+			    			    	          {if(mergedAdjacentTrisVerticesIndices[2]==-1)
+			    			    	               {if(mergedAdjacentTrisVerticesIndices[5]==-1)
+			    			    	            	    System.err.println("there are too much vertices not on the hypotenuse");
+			    			    	                else
+			    			    	                	mergedAdjacentTrisVerticesIndices[5]=localIndex;
+			    			    	               }
+			    			    	           else
+			    			    	        	   mergedAdjacentTrisVerticesIndices[2]=localIndex;
+			    			    	          }
+			    			    	      else
+			    			    	          {//TODO use the existing texture coordinates
+			    			    	    	   
+			    			    	          } 
+			    			    	     }
+			    			    	 //updates texture coordinates equal to 1
+			    			    	 u=(double)columnCount;
+			    			    	 v=(double)rowCount;
+			    			    	 for(int localIndex=0;localIndex<4;localIndex++)
+			    			    	     {if(mergedAdjacentTrisTextureCoords[localIndex].getX()==1)
+			    			    	    	  mergedAdjacentTrisTextureCoords[localIndex].setX(u);
+			    			    	      if(mergedAdjacentTrisTextureCoords[localIndex].getY()==1)
+			    			    	    	  mergedAdjacentTrisTextureCoords[localIndex].setY(v);
+			    			    	     }
+			    			    	 //stores the couple of old pairs and the new pair (with some information) in order to remove the former and to add the latter
+			    			    	 final NextQuadInfo quadInfo=new NextQuadInfo(mergedAdjacentTrisVertices,mergedAdjacentTrisTextureCoords,mergedAdjacentTrisVerticesIndices);
+			    			    	 previousAndNextAdjacentTrisMaps.put(adjacentTrisArray,quadInfo);
 			    			        }
 		                       }
 			    	      }
@@ -788,38 +841,32 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * 
 	 * @return the texture coordinates of the primitive
 	 */
-	public static Vector2[] getPrimitiveTextureCoords(final MeshData meshData, final int primitiveIndex, final int section, final int textureIndex, final Vector2[] store) {
-	    if (meshData.getTextureBuffer(textureIndex) == null) {
-	        return null;
-	    }
-	    final int count = meshData.getPrimitiveCount(section);
-	    if (primitiveIndex >= count || primitiveIndex < 0) {
-	        throw new IndexOutOfBoundsException("Invalid primitiveIndex '" + primitiveIndex + "'.  Count is " + count);
-	    }
-
-	    final IndexMode mode = meshData.getIndexMode(section);
-	    final int rSize = mode.getVertexCount();
-	    Vector2[] result = store;
-	    if (result == null || result.length < rSize) {
-	        result = new Vector2[rSize];
-	    }
-
-	    for (int i = 0; i < rSize; i++) {
-	        if (result[i] == null) {
-	            result[i] = new Vector2();
-	        }
-	        if (meshData.getIndexBuffer() != null) {
-	            // indexed geometry
-	            BufferUtils.populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex),
+	public static Vector2[] getPrimitiveTextureCoords(final MeshData meshData,final int primitiveIndex,final int section,final int textureIndex,final Vector2[] store){
+		Vector2[] result=null;
+		if(meshData.getTextureBuffer(textureIndex)!=null)
+		    {final int count=meshData.getPrimitiveCount(section);
+	         if(primitiveIndex>=count||primitiveIndex<0)
+	             throw new IndexOutOfBoundsException("Invalid primitiveIndex '"+primitiveIndex+"'.  Count is "+count);
+	         final IndexMode mode = meshData.getIndexMode(section);
+	         final int rSize = mode.getVertexCount();
+	         result=store;
+	         if(result==null||result.length<rSize)
+	             result=new Vector2[rSize];
+	         for(int i=0;i<rSize;i++)
+	             {if(result[i]==null)
+	                  result[i]=new Vector2();
+	              if(meshData.getIndexBuffer()!=null)
+	                  {// indexed geometry
+	                   BufferUtils.populateFromBuffer(result[i],meshData.getTextureBuffer(textureIndex),
 	                    meshData.getIndices().get(meshData.getVertexIndex(primitiveIndex, i, section)));
-	        } else {
-	            // non-indexed geometry
-	            BufferUtils
-	            .populateFromBuffer(result[i], meshData.getTextureBuffer(textureIndex), meshData.getVertexIndex(primitiveIndex, i, section));
+	                  }
+	              else
+	                  {// non-indexed geometry
+	                   BufferUtils.populateFromBuffer(result[i],meshData.getTextureBuffer(textureIndex),meshData.getVertexIndex(primitiveIndex,i,section));
+	                  }
+	             }
 	        }
-	    }
-
-	    return result;
+		return result;
 	}
 	
 	private static void testComputeAdjacentMergeableTrisArraysList(){
