@@ -148,8 +148,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 								         }
 							        }	    
 							    if(hasCanonicalTextureCoords)
-							        {//TODO check that all possible pairs of canonical texture coordinates ([0;0], [0;1], [1;0] or [1;1]) are present
-							    	 //stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
+							        {//stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
 							         RightTriangleInfo rightTriangleInfo=new RightTriangleInfo(trianglePrimitiveIndex,sectionIndex,sideIndexOfHypotenuse);
 							         rightTrianglesWithCanonical2DTextureCoordinatesInfos.add(rightTriangleInfo);
 							        }
