@@ -148,7 +148,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 								         }
 							        }	    
 							    if(hasCanonicalTextureCoords)
-							        {//FIXME check that all possible pairs of canonical texture coordinates ([0;0], [0;1], [1;0] or [1;1]) are present
+							        {//TODO check that all possible pairs of canonical texture coordinates ([0;0], [0;1], [1;0] or [1;1]) are present
 							    	 //stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
 							         RightTriangleInfo rightTriangleInfo=new RightTriangleInfo(trianglePrimitiveIndex,sectionIndex,sideIndexOfHypotenuse);
 							         rightTrianglesWithCanonical2DTextureCoordinatesInfos.add(rightTriangleInfo);
@@ -572,6 +572,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    	 final int rowCount=adjacentTrisArray.length;
 			    			    	 final int columnCount=adjacentTrisArray[0].length;
 			    			    	 //computes the new pair of right adjacent triangles
+			    			    	 final RightTriangleInfo[] mergedAdjacentTris=new RightTriangleInfo[2];
 			    			    	 final Vector3[] mergedAdjacentTrisVertices=new Vector3[4];
 			    			    	 final Vector2[] mergedAdjacentTrisTextureCoords=new Vector2[4];
 			    			    	 final int[] tmpLocalIndices=new int[4];
@@ -597,9 +598,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    			   tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,0,tri1TextureCoords);
 						                       tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,0,tri2TextureCoords);
 						                       testedAdjacentTrisTextureCoords[0]=tri1TextureCoords[tri1.sideIndexOfHypotenuse];
-						                       testedAdjacentTrisTextureCoords[1]=tri1TextureCoords[tri2.sideIndexOfHypotenuse];
+						                       testedAdjacentTrisTextureCoords[1]=tri2TextureCoords[tri2.sideIndexOfHypotenuse];
 						                       testedAdjacentTrisTextureCoords[2]=tri1TextureCoords[(tri1.sideIndexOfHypotenuse+2)%3];
-						                       testedAdjacentTrisTextureCoords[3]=tri1TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3];
+						                       testedAdjacentTrisTextureCoords[3]=tri2TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3];
 			    			    			   //looks for the real vertex of the corner
 			    			    			   boolean cornerVertexFound=false;
 			    			    			   for(int testedVertexIndex=0;testedVertexIndex<4&&!cornerVertexFound;testedVertexIndex++)
@@ -636,6 +637,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    			        		  mergedAdjacentTrisTextureCoords[localIndex]=testedAdjacentTrisTextureCoords[testedVertexIndex];
 			    			    			        		  //stores its temporary index in order to know from which triangle it comes and whether it is on the hypotenuse
 			    			    			        		  tmpLocalIndices[localIndex]=testedVertexIndex;
+			    			    			        		  //if this vertex is not on the hypotenuse
+			    			    			        		  if(testedVertexIndex/2==1)
+			    			    			        		      {//stores its triangle in order to keep the same orientation
+			    			    			        			   if(mergedAdjacentTris[0]==null)
+			    			    			        		    	   mergedAdjacentTris[0]=testedVertexIndex==2?tri1:tri2;
+			    			    			        		       else
+			    			    			        		    	   if(mergedAdjacentTris[1]==null)
+				    			    			        		    	   mergedAdjacentTris[1]=testedVertexIndex==2?tri1:tri2;
+			    			    			        		    	   else
+			    			    			        		    		   System.err.println("there are too much vertices not on the hypotenuse");
+			    			    			        		      }
 			    			    			        		 }
 			    			    			            }
 			    			    			       }
@@ -645,23 +657,41 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    		 }
 			    			    	 //keeps the orientation of the previous triangles
 			    			    	 Arrays.fill(mergedAdjacentTrisVerticesIndices,-1);
-			    			    	 for(int localIndex=0;localIndex<4;localIndex++)
-			    			    	     {//if this vertex is not on the hypotenuse
-			    			    		  if(tmpLocalIndices[localIndex]/2==1)
-			    			    	          {if(mergedAdjacentTrisVerticesIndices[2]==-1)
-			    			    	               {if(mergedAdjacentTrisVerticesIndices[5]==-1)
-			    			    	            	    System.err.println("there are too much vertices not on the hypotenuse");
-			    			    	                else
-			    			    	                	mergedAdjacentTrisVerticesIndices[5]=localIndex;
-			    			    	               }
-			    			    	           else
-			    			    	        	   mergedAdjacentTrisVerticesIndices[2]=localIndex;
-			    			    	          }
-			    			    	      else
-			    			    	          {//TODO use the existing texture coordinates
-			    			    	    	   
-			    			    	          } 
-			    			    	     }
+			    			    	 tri1=mergedAdjacentTris[0];
+			    			    	 tri2=mergedAdjacentTris[1];
+			    			    	 tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,0,tri1TextureCoords);
+				                     tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,0,tri2TextureCoords);
+				                     testedAdjacentTrisTextureCoords[0]=tri1TextureCoords[tri1.sideIndexOfHypotenuse];
+				                     testedAdjacentTrisTextureCoords[1]=tri2TextureCoords[tri2.sideIndexOfHypotenuse];
+				                     testedAdjacentTrisTextureCoords[2]=tri1TextureCoords[(tri1.sideIndexOfHypotenuse+2)%3];
+				                     testedAdjacentTrisTextureCoords[3]=tri2TextureCoords[(tri2.sideIndexOfHypotenuse+2)%3];
+				                     //operates on the vertices not on the hypotenuse first
+				                     for(int localIndex=0;localIndex<4;localIndex++)
+				                    	 {if(mergedAdjacentTrisTextureCoords[localIndex].equals(testedAdjacentTrisTextureCoords[0]))
+				                    		  {if(mergedAdjacentTrisVerticesIndices[0]==-1)
+				                    		       mergedAdjacentTrisVerticesIndices[0]=localIndex;
+				                    		   else
+				                    			   if(mergedAdjacentTrisVerticesIndices[4]==-1)
+				                    				   mergedAdjacentTrisVerticesIndices[4]=localIndex;
+				                    			   else
+				                    				   System.err.println("there are too much vertices with the same texture coordinates");
+				                    		  }
+				                    	  else
+				                    		  if(mergedAdjacentTrisTextureCoords[localIndex].equals(testedAdjacentTrisTextureCoords[1]))
+				                    			  {if(mergedAdjacentTrisVerticesIndices[1]==-1)
+				                    			       mergedAdjacentTrisVerticesIndices[1]=localIndex;
+				                    			   else
+				                    				   if(mergedAdjacentTrisVerticesIndices[3]==-1)
+				                    					   mergedAdjacentTrisVerticesIndices[3]=localIndex;
+				                    				   else
+				                    					   System.err.println("there are too much vertices with the same texture coordinates");
+				                    			  }
+				                    	  if(mergedAdjacentTrisTextureCoords[localIndex].equals(testedAdjacentTrisTextureCoords[2]))
+				                    		  mergedAdjacentTrisVerticesIndices[2]=localIndex;
+				                    	  else
+				                    		  if(mergedAdjacentTrisTextureCoords[localIndex].equals(testedAdjacentTrisTextureCoords[3]))
+				                    		      mergedAdjacentTrisVerticesIndices[5]=localIndex;
+				                    	 }
 			    			    	 //updates texture coordinates equal to 1
 			    			    	 u=(double)columnCount;
 			    			    	 v=(double)rowCount;
