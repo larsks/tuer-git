@@ -266,8 +266,10 @@
 			  <update check="always" policy="always"/>
 			  <resources>
 			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m"/>  
+			    <property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.java2d.d3d" value="false"/>
+			    <property name="sun.java2d.opengl" value="false"/>
 			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
 			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
@@ -377,9 +379,11 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m"/>  
+			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m"/>
+			    <property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.java2d.d3d" value="false"/>
+			    <property name="sun.java2d.opengl" value="false"/>
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
 			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
