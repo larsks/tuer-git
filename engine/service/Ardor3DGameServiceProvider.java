@@ -113,6 +113,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
                         }, "Microsoft Windows Sleeper (see bug 6435126)") {
                         {this.setDaemon(true);}
              }.start();
+             //sets the default maximum direct memory size (to work around a regression in Java 1.7 u9 and Java 1.6 u37 in JNLP parsing)
+             System.setProperty("-XX:MaxDirectMemorySize","128M");
              //disables DirectDraw under Windows in order to avoid conflicts with OpenGL
              System.setProperty("sun.java2d.noddraw","true");
              //disables Direct3D under Windows in order to avoid conflicts with OpenGL
