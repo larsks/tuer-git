@@ -546,8 +546,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 //for each plane
 			 for(Entry<Plane,ArrayList<ArrayList<RightTriangleInfo[][][]>>> entry:mapOfListsOfListsOfArraysOfMergeableTris.entrySet())
 			     {final Plane plane=entry.getKey();
-			      final HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMaps=new HashMap<RightTriangleInfo[][][],NextQuadInfo>();
-			      mapOfPreviousAndNextAdjacentTrisMaps.put(plane,previousAndNextAdjacentTrisMaps);
+			      final HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAdjacentTrisAndNextQuadInfosMaps=new HashMap<RightTriangleInfo[][][],NextQuadInfo>();
+			      mapOfPreviousAndNextAdjacentTrisMaps.put(plane,previousAdjacentTrisAndNextQuadInfosMaps);
 			      //for each list of arrays of adjacent triangles which could be merged to make bigger rectangles
 			      for(ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList:entry.getValue())
 			    	  //for each array of adjacent triangles
@@ -700,15 +700,49 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    	      if(mergedAdjacentTrisTextureCoords[localIndex].getY()==1)
 			    			    	    	  mergedAdjacentTrisTextureCoords[localIndex].setY(v);
 			    			    	     }
-			    			    	 //stores the couple of old pairs and the new pair (with some information) in order to remove the former and to add the latter
+			    			    	 //stores the couple of old pairs and the new pairs (with some information) in order to remove the former and to add the latter
 			    			    	 final NextQuadInfo quadInfo=new NextQuadInfo(mergedAdjacentTrisVertices,mergedAdjacentTrisTextureCoords,mergedAdjacentTrisVerticesIndices);
-			    			    	 previousAndNextAdjacentTrisMaps.put(adjacentTrisArray,quadInfo);
+			    			    	 previousAdjacentTrisAndNextQuadInfosMaps.put(adjacentTrisArray,quadInfo);
 			    			        }
 		                       }
 			    	      }
 			     }
-			 //TODO: seventh step: remove the triangles which are no more in the geometry of the mesh
-			 
+			 //seventh step: removes the triangles which are no more in the geometry of the mesh
+			 //for each plane
+			 for(Entry<Plane,HashMap<RightTriangleInfo[][][],NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry:mapOfPreviousAndNextAdjacentTrisMaps.entrySet())
+			     {//for each couple of old pairs and the new pairs (with some information)
+				  for(Entry<RightTriangleInfo[][][],NextQuadInfo> previousAdjacentTrisAndNextQuadInfosEntry:mapOfPreviousAndNextAdjacentTrisMapsEntry.getValue().entrySet())
+					  {final RightTriangleInfo[][][] previousAdjacentTrisArray=previousAdjacentTrisAndNextQuadInfosEntry.getKey();
+					   for(int rowIndex=0;rowIndex<previousAdjacentTrisArray.length;rowIndex++)
+						   for(int columnIndex=0;columnIndex<previousAdjacentTrisArray[rowIndex].length;columnIndex++)
+						       {//retrieves the vertices
+							    tri1=previousAdjacentTrisArray[rowIndex][columnIndex][0];
+			    			    tri2=previousAdjacentTrisArray[rowIndex][columnIndex][1];
+			    			    tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
+			    			    tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+			    			    if(meshData.getIndexBuffer()==null)
+				                    {//non-indexed geometry
+					                 //TODO do not keep these vertices, mark them as removable
+			    			    	 
+				                    }
+					            else
+					                {//indexed geometry
+						             //TODO if the occurrence count of these vertices is unknown, compute it and store it
+						             //TODO decrease the occurrence count of these vertices
+						             //TODO if it is equal to zero, mark them as removable
+					                }
+						       }
+					  }
+			     }
+			 //removes the useless vertices
+			 if(meshData.getIndexBuffer()==null)
+	             {//non-indexed geometry
+		          //TODO remove vertices marked as removable from the vertex buffer
+	             }
+		     else
+		         {//indexed geometry
+		    	  //TODO remove vertices marked as removable from the vertex buffer and the index buffer
+		         }
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 			 
 		    }
