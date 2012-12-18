@@ -708,6 +708,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    	      }
 			     }
 			 //seventh step: removes the triangles which are no more in the geometry of the mesh
+			 final ArrayList<Integer> verticesIndicesToRemove=new ArrayList<Integer>();
+			 final HashMap<Vector3,Integer> vertexOccurrenceMap=new HashMap<Vector3,Integer>();
+			 int[] tri1Indices=new int[3];
+			 int[] tri2Indices=new int[3];
 			 //for each plane
 			 for(Entry<Plane,HashMap<RightTriangleInfo[][][],NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry:mapOfPreviousAndNextAdjacentTrisMaps.entrySet())
 			     {//for each couple of old pairs and the new pairs (with some information)
@@ -720,16 +724,82 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    tri2=previousAdjacentTrisArray[rowIndex][columnIndex][1];
 			    			    tri1Vertices=meshData.getPrimitiveVertices(tri1.primitiveIndex,tri1.sectionIndex,tri1Vertices);
 			    			    tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
+			    			    tri1Indices=meshData.getPrimitiveIndices(tri1.primitiveIndex,tri1.sectionIndex,tri1Indices);
+			    			    tri2Indices=meshData.getPrimitiveIndices(tri2.primitiveIndex,tri2.sectionIndex,tri2Indices);
 			    			    if(meshData.getIndexBuffer()==null)
 				                    {//non-indexed geometry
-					                 //TODO do not keep these vertices, mark them as removable
-			    			    	 
+					                 //does not keep these vertices, mark them as removable
+			    			    	 for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
+			    			    		 verticesIndicesToRemove.add(tri1Indices[triVertexIndex]);
+			    			    	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
+			    			    		 verticesIndicesToRemove.add(tri2Indices[triVertexIndex]);
 				                    }
 					            else
 					                {//indexed geometry
-						             //TODO if the occurrence count of these vertices is unknown, compute it and store it
-						             //TODO decrease the occurrence count of these vertices
-						             //TODO if it is equal to zero, mark them as removable
+					            	 for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
+					            	     {//tries to get the occurrence count of this vertex
+					            		  Integer vertexOccurrenceRef=vertexOccurrenceMap.get(tri1Vertices[triVertexIndex]);
+					            		  int vertexOccurrence;
+					            		  //if it is unknown
+					            		  if(vertexOccurrenceRef==null)
+					            		      {//computes it
+					            			   vertexOccurrence=0;
+					            			   for(int indexIndex=0;indexIndex<meshData.getIndices().getBufferLimit();indexIndex++)
+					            			       if(meshData.getIndices().get(indexIndex)==tri1Indices[triVertexIndex])
+					            			    	   vertexOccurrence++;
+					            			   //stores it
+					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],vertexOccurrenceRef);
+					            		      }
+					            		  else
+					            			  {//retrieves it from the map
+					            			   vertexOccurrence=vertexOccurrenceRef.intValue();
+					            			  }
+					            		  //decreases this occurrence count
+					            		  vertexOccurrence--;
+					            		  //if there is no remaining occurrence
+					            		  if(vertexOccurrence==0)
+					            		      {//marks it as removable
+					            			   verticesIndicesToRemove.add(tri1Indices[triVertexIndex]);
+					            			   //removes it from the map
+					            			   vertexOccurrenceMap.remove(tri1Vertices[triVertexIndex]);
+					            		      }
+					            		  else
+					            			  {//updates the vertex occurrence stored in the map
+					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
+					            			  }
+					            	     }
+					            	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
+				            	         {//tries to get the occurrence count of this vertex
+					            		  Integer vertexOccurrenceRef=vertexOccurrenceMap.get(tri2Vertices[triVertexIndex]);
+					            		  int vertexOccurrence;
+					            		  //if it is unknown
+					            		  if(vertexOccurrenceRef==null)
+					            		      {//computes it
+					            			   vertexOccurrence=0;
+					            			   for(int indexIndex=0;indexIndex<meshData.getIndices().getBufferLimit();indexIndex++)
+					            			       if(meshData.getIndices().get(indexIndex)==tri2Indices[triVertexIndex])
+					            			    	   vertexOccurrence++;
+					            			   //stores it
+					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],vertexOccurrenceRef);
+					            		      }
+					            		  else
+					            			  {//retrieves it from the map
+					            			   vertexOccurrence=vertexOccurrenceRef.intValue();
+					            			  }
+					            		  //decreases this occurrence count
+					            		  vertexOccurrence--;
+					            		  //if there is no remaining occurrence
+					            		  if(vertexOccurrence==0)
+					            		      {//marks it as removable
+					            			   verticesIndicesToRemove.add(tri2Indices[triVertexIndex]);
+					            			   //removes it from the map
+					            			   vertexOccurrenceMap.remove(tri2Vertices[triVertexIndex]);
+					            		      }
+					            		  else
+					            			  {//updates the vertex occurrence stored in the map
+					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
+					            			  }
+				            	         }
 					                }
 						       }
 					  }
