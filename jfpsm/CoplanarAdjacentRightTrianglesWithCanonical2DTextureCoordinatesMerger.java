@@ -13,6 +13,8 @@
 */
 package jfpsm;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -709,6 +711,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     }
 			 //seventh step: removes the triangles which are no more in the geometry of the mesh
 			 final ArrayList<Integer> verticesIndicesToRemove=new ArrayList<Integer>();
+			 final ArrayList<Integer> indicesToRemove=new ArrayList<Integer>();
 			 final HashMap<Vector3,Integer> vertexOccurrenceMap=new HashMap<Vector3,Integer>();
 			 int[] tri1Indices=new int[3];
 			 int[] tri2Indices=new int[3];
@@ -767,6 +770,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            			  {//updates the vertex occurrence stored in the map
 					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
 					            			  }
+					            		  //FIXME rather use the position of this vertex index in the index buffer
+					            		  indicesToRemove.add(tri1Indices[triVertexIndex]);
 					            	     }
 					            	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
 				            	         {//tries to get the occurrence count of this vertex
@@ -799,22 +804,83 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            			  {//updates the vertex occurrence stored in the map
 					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
 					            			  }
+					            		  //FIXME rather use the position of this vertex index in the index buffer
+					            		  indicesToRemove.add(tri2Indices[triVertexIndex]);
 				            	         }
 					                }
 						       }
 					  }
 			     }
+			 final FloatBuffer nextVertexBuffer;
+			 final IntBuffer nextIndexBuffer;
 			 //removes the useless vertices
 			 if(meshData.getIndexBuffer()==null)
 	             {//non-indexed geometry
-		          //TODO remove vertices marked as removable from the vertex buffer
+				  nextIndexBuffer=null;
+				  //computes the count of added vertices
+				  int addedVerticesCount=0;
+				  for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
+					  {//there are (obviously) two triangles by quad
+					   addedVerticesCount+=previousAndNextAdjacentTrisMap.size()*2;
+					  }
+				  //computes the next vertex count
+				  final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
+				  //creates the next vertex buffer
+				  nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
+		          //does not copy vertices marked as removable into the next vertex buffer, copies the others
+				  for(int vertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
+					  if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
+				          {final int vertexCoordinateIndex=vertexIndex*3;
+				           final float x=meshData.getVertexBuffer().get(vertexCoordinateIndex);
+				           final float y=meshData.getVertexBuffer().get(vertexCoordinateIndex+1);
+				           final float z=meshData.getVertexBuffer().get(vertexCoordinateIndex+2);
+				           nextVertexBuffer.put(x).put(y).put(z);
+				          }
+				  //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
 	             }
 		     else
 		         {//indexed geometry
-		    	  //TODO remove vertices marked as removable from the vertex buffer and the index buffer
+		    	  //TODO compute the count of added vertices and indices (avoid duplication)
+		    	  int addedVerticesCount=0;
+		    	  int addedIndicesCount=0;
+		    	  for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
+				      {
+		    		   
+				      }
+		    	  //computes the next index count
+		    	  final int nextIndexCount=meshData.getIndices().capacity()-indicesToRemove.size()+addedIndicesCount;
+		    	  //computes the next vertex count
+		    	  final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
+		    	  //creates the next vertex buffer
+		    	  nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
+		    	  //creates the next index buffer
+		    	  nextIndexBuffer=IntBuffer.allocate(nextIndexCount);
+		    	  //does not copy vertices marked as removable into the next vertex buffer, copies the others
+				  for(int vertexIndex=0,nextVertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
+					  if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
+				          {final int vertexCoordinateIndex=vertexIndex*3;
+				           final float x=meshData.getVertexBuffer().get(vertexCoordinateIndex);
+				           final float y=meshData.getVertexBuffer().get(vertexCoordinateIndex+1);
+				           final float z=meshData.getVertexBuffer().get(vertexCoordinateIndex+2);
+				           nextVertexBuffer.put(x).put(y).put(z);
+				           //TODO store the mapping between the old index and the new index
+				           
+				           //updates the index of the next vertex
+				           nextVertexIndex++;
+				          }
+				  //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
+		    	  //TODO update the index buffer
 		         }
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 			 
+			 //finally, rewinds the new vertex buffer and sets it
+			 nextVertexBuffer.rewind();
+			 meshData.setVertexBuffer(nextVertexBuffer);
+			 if(meshData.getIndexBuffer()!=null)
+			     {//sets the new index buffer
+				  nextIndexBuffer.rewind();
+				  meshData.setIndexBuffer(nextIndexBuffer);
+			     }
 		    }
 		return result;
 	}
