@@ -338,7 +338,7 @@ public final class GameState extends ScenegraphState{
              	    	for(int x=0;x<2&&!collisionFound;x++)
              	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
              	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
-             	    	     if(0<=tmpX && tmpX<collisionMap.length && 0<=tmpZ && tmpZ<collisionMap[tmpX].length)
+             	    	     if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
              	    		     collisionFound=collisionMap[tmpX][tmpZ];
              	    	     else
              	    	    	 collisionFound=false;
@@ -347,6 +347,42 @@ public final class GameState extends ScenegraphState{
                 		 {correctX=playerX;
                 		  correctZ=playerZ;
                 		 }
+                	 else
+                		 if(stepX!=0&&stepZ!=0)
+                	         {collisionFound=false;
+                	          playerZ=playerStartZ+(stepZ*(i-1));
+                	          for(int z=0;z<2&&!collisionFound;z++)
+                       	    	  for(int x=0;x<2&&!collisionFound;x++)
+                       	    	      {tmpX=(int)(playerX-0.2+(x*0.4));
+                       	    	       tmpZ=(int)(playerZ-0.2+(z*0.4));
+                       	    	       if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                       	    		       collisionFound=collisionMap[tmpX][tmpZ];
+                       	    	       else
+                       	    	    	   collisionFound=false;
+                       	    	      }
+                	          if(!collisionFound)
+                     		      {correctX=playerX;
+                     		       correctZ=playerZ;
+                     		      }
+                     	      else
+                     	          {collisionFound=false;
+                     	    	   playerX=playerStartX+(stepX*(i-1));
+                     	    	   playerZ=playerStartZ+(stepZ*i);
+                     	    	   for(int z=0;z<2&&!collisionFound;z++)
+                           	    	   for(int x=0;x<2&&!collisionFound;x++)
+                           	    	       {tmpX=(int)(playerX-0.2+(x*0.4));
+                           	    	        tmpZ=(int)(playerZ-0.2+(z*0.4));
+                           	    	        if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                           	    		        collisionFound=collisionMap[tmpX][tmpZ];
+                           	    	        else
+                           	    	    	    collisionFound=false;
+                           	    	       }
+                     	    	   if(!collisionFound)
+                     		           {correctX=playerX;
+                     		            correctZ=playerZ;
+                     		           }
+                     	          }
+                	         }
                     }
                 //updates the current location
                 playerNode.setTranslation(correctX,0.5,correctZ);
