@@ -605,6 +605,20 @@ public final class MainMenuState extends ScenegraphState{
             	toggleScreenModeAction.perform(canvas,null,Double.NaN);
             }
         });
+    	final UIButton enableVSyncButton=new UIButton("Enable vertical synchronization");
+    	enableVSyncButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	canvas.setVSyncEnabled(true);
+            }
+        });
+    	final UIButton disableVSyncButton=new UIButton("Disable vertical synchronization");
+    	disableVSyncButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	canvas.setVSyncEnabled(false);
+            }
+        });
     	final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
@@ -613,6 +627,8 @@ public final class MainMenuState extends ScenegraphState{
             }
         });
         displaySettingsMenuPanel.add(windowingModeButton);
+        displaySettingsMenuPanel.add(enableVSyncButton);
+        displaySettingsMenuPanel.add(disableVSyncButton);
         displaySettingsMenuPanel.add(screenModesLabel);
         displaySettingsMenuPanel.add(displayModesCombo);
         displaySettingsMenuPanel.add(backButton);
