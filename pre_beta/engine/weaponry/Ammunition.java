@@ -13,29 +13,24 @@
 */
 package engine.weaponry;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import engine.data.common.Collectible;
 
 public class Ammunition extends Collectible implements Comparable<Ammunition>{
-    
-	private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
+	
 	/**unique name (cannot contain any space)*/
     private final String identifier;
     /**name (can contain space)*/
     private final String label;
-    /**unique identifier*/
-    private final int uid;
 	
     Ammunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
     	super(pickingUpSoundSamplePath);
-    	this.uid=autoIncrementalIndex.getAndIncrement();
     	this.identifier=identifier;
     	this.label=label;
     }
     
     @Override
 	public int hashCode(){
-		return(uid);
+		return(identifier.hashCode());
 	}
 	
 	@Override
@@ -44,17 +39,13 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 		if(o==null||!(o instanceof Ammunition))
 		    result=false;
 		else
-			result=uid==((Ammunition)o).uid;
+			result=hashCode()==((Ammunition)o).hashCode();
 		return(result);
-	}
-	
-	public final int getUid(){
-		return(uid);
 	}
 	
 	@Override
 	public final int compareTo(final Ammunition ammunition){
-		return(uid-ammunition.uid);
+		return(hashCode()-ammunition.hashCode());
 	}
 	
 	@Override

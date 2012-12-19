@@ -13,12 +13,10 @@
 */
 package engine.weaponry;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import engine.data.common.Collectible;
 
 public final class Weapon extends Collectible implements Comparable<Weapon>{
 	
-    private static final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
     /**path of the sound sample played during a shot or a blow*/
     private final String blowOrShotSoundSamplePath;
     /**source name of the sound sample played during a shot or a blow*/
@@ -29,8 +27,6 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
     private String reloadSoundSampleIdentifier;
     /**unique name*/
     private final String identifier;
-    /**unique identifier*/
-    private final int uid;
     /**flag indicating whether a weapon can be used in both hands*/
     private final boolean twoHanded;
 	/**size of the magazine, -1 for melee weapons*/
@@ -57,7 +53,6 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 		super(pickingUpSoundSamplePath);
 		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
 		this.reloadSoundSamplePath=reloadSoundSamplePath;
-		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.identifier=identifier;
 		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
@@ -129,7 +124,7 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 	
 	@Override
 	public int hashCode(){
-		return(uid);
+		return(identifier.hashCode());
 	}
 	
 	@Override
@@ -138,17 +133,13 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 		if(o==null||!(o instanceof Weapon))
 		    result=false;
 		else
-			result=uid==((Weapon)o).uid;
+			result=hashCode()==((Weapon)o).hashCode();
 		return(result);
-	}
-	
-	public final int getUid(){
-		return(uid);
 	}
 	
 	@Override
 	public final int compareTo(final Weapon weapon){
-		return(uid-weapon.uid);
+		return(hashCode()-weapon.hashCode());
 	}
 	
 	@Override

@@ -13,7 +13,7 @@
 */
 package engine.weaponry;
 
-public class AmmunitionContainer {
+public class AmmunitionContainer{
 
 	private int ammunitionCount;
 	

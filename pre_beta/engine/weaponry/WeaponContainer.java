@@ -17,41 +17,25 @@ import java.util.Arrays;
 
 import com.ardor3d.scenegraph.Node;
 
-public final class WeaponContainer {
+public final class WeaponContainer{
 	
-	private boolean[] weaponsAvailabilities;
-	
-	private Node[] weaponsNodes;
+	private final Node[] weaponsNodes;
 	
 	private final WeaponFactory weaponFactory;
-	
 	
     public WeaponContainer(final WeaponFactory weaponFactory){
     	this.weaponFactory=weaponFactory;
     	final int weaponCount=weaponFactory.getSize();
-    	this.weaponsAvailabilities=new boolean[weaponCount];
     	this.weaponsNodes=new Node[weaponCount];
-    	Arrays.fill(weaponsAvailabilities,false);
     	Arrays.fill(weaponsNodes,null);
-    }
-    
-    private final void ensureWeaponCountChangeDetection(){
-    	final int previousWeaponCount=weaponsAvailabilities.length;
-    	final int currentWeaponCount=weaponFactory.getSize();
-    	if(currentWeaponCount>previousWeaponCount)
-    	    {weaponsAvailabilities=Arrays.copyOf(weaponsAvailabilities,currentWeaponCount);
-    	     weaponsNodes=Arrays.copyOf(weaponsNodes,currentWeaponCount);
-    	    }
     }
     
     public final boolean add(final Node weaponNode,final Weapon weapon){
     	final boolean success;
     	if(weaponNode!=null)
-    	    {ensureWeaponCountChangeDetection();
-    	     final int index=weapon.getUid();
-    	     if(!weaponsAvailabilities[index])
-    	         {weaponsAvailabilities[index]=true;
-    	          weaponsNodes[index]=weaponNode;
+    	    {final int index=weaponFactory.getId(weapon);
+    	     if(weaponsNodes[index]==null)
+    	         {weaponsNodes[index]=weaponNode;
     	    	  success=true;
     	         }
     	     else
@@ -63,18 +47,16 @@ public final class WeaponContainer {
     }
     
     public final boolean isAvailable(final Weapon weapon){
-    	ensureWeaponCountChangeDetection();
-    	return(weaponsAvailabilities[weapon.getUid()]);
+    	final int weaponId=weaponFactory.getId(weapon);
+    	return(weaponsNodes[weaponId]!=null);
     }
     
     public final Node getNode(final Weapon weapon){
-    	ensureWeaponCountChangeDetection();
-    	return(weaponsNodes[weapon.getUid()]);
+    	final int weaponId=weaponFactory.getId(weapon);
+    	return(weaponsNodes[weaponId]);
     }
     
     public final void empty(){
-    	Arrays.fill(weaponsAvailabilities,false);
     	Arrays.fill(weaponsNodes,null);
-    	ensureWeaponCountChangeDetection();
     }
 }
