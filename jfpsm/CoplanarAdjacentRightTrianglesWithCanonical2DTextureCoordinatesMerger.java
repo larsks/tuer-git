@@ -733,9 +733,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                    {//non-indexed geometry
 					                 //does not keep these vertices, mark them as removable
 			    			    	 for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
-			    			    		 verticesIndicesToRemove.add(tri1Indices[triVertexIndex]);
+			    			    		 verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
 			    			    	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
-			    			    		 verticesIndicesToRemove.add(tri2Indices[triVertexIndex]);
+			    			    		 verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
 				                    }
 					            else
 					                {//indexed geometry
@@ -762,7 +762,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            		  //if there is no remaining occurrence
 					            		  if(vertexOccurrence==0)
 					            		      {//marks it as removable
-					            			   verticesIndicesToRemove.add(tri1Indices[triVertexIndex]);
+					            			   verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
 					            			   //removes it from the map
 					            			   vertexOccurrenceMap.remove(tri1Vertices[triVertexIndex]);
 					            		      }
@@ -770,8 +770,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            			  {//updates the vertex occurrence stored in the map
 					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
 					            			  }
-					            		  //FIXME rather use the position of this vertex index in the index buffer
-					            		  indicesToRemove.add(tri1Indices[triVertexIndex]);
+					            		  //uses the position of this vertex index in the index buffer
+					            		  indicesToRemove.add(Integer.valueOf(meshData.getVertexIndex(tri1.primitiveIndex,triVertexIndex,tri1.sectionIndex)));
 					            	     }
 					            	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
 				            	         {//tries to get the occurrence count of this vertex
@@ -796,7 +796,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            		  //if there is no remaining occurrence
 					            		  if(vertexOccurrence==0)
 					            		      {//marks it as removable
-					            			   verticesIndicesToRemove.add(tri2Indices[triVertexIndex]);
+					            			   verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
 					            			   //removes it from the map
 					            			   vertexOccurrenceMap.remove(tri2Vertices[triVertexIndex]);
 					            		      }
@@ -804,8 +804,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 					            			  {//updates the vertex occurrence stored in the map
 					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
 					            			  }
-					            		  //FIXME rather use the position of this vertex index in the index buffer
-					            		  indicesToRemove.add(tri2Indices[triVertexIndex]);
+					            		  //uses the position of this vertex index in the index buffer
+					            		  indicesToRemove.add(Integer.valueOf(meshData.getVertexIndex(tri2.primitiveIndex,triVertexIndex,tri2.sectionIndex)));
 				            	         }
 					                }
 						       }
