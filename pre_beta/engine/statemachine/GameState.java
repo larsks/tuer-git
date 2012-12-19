@@ -56,6 +56,7 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
+import com.ardor3d.renderer.queue.RenderBucketType;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -203,7 +204,34 @@ public final class GameState extends ScenegraphState{
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         //creates a node that follows the camera
-        playerNode=new CameraNode("player",cam);
+        /**
+         * draws the content of the player node at last just after clearing the 
+         * depth buffer in order to prevent the weapons from being clipped into 
+         * 3D objects
+         * FIXME detect whether the weapon is close to another 3D object and 
+         * update its position
+         */
+        playerNode=new CameraNode("player",cam){
+        	@Override
+            public void draw(final Renderer renderer){
+        		/**
+        		 * Ardor3D doesn't put nodes without render delegate 
+        		 * into render queues by default, it must be done here
+        		 */
+        		final boolean queued;
+        		if(!renderer.isProcessingQueue())
+        			queued=renderer.checkAndAdd(this);
+        		else
+        			queued=false;
+        		if(!queued)
+                    {//clears the depth buffer
+        			 renderer.clearBuffers(Renderer.BUFFER_DEPTH);
+        			 //renders
+                     super.draw(renderer);
+                    }
+            }
+        };
+        playerNode.getSceneHints().setRenderBucketType(RenderBucketType.PostBucket);
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
         	@Override
         	public Map.Entry<Integer,Integer> attack(){
