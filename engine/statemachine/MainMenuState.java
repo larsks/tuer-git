@@ -44,47 +44,15 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.ScreenMode;
+
+import engine.data.common.MatchType;
+import engine.data.common.MatchTypeFactory;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
 	
-	//TODO move it into a separate class
-    public static enum MatchType{
-    	DEATHMATCH("Deathmatch"),
-    	CAPTURE_THE_FLAG("Capture the flag"),
-    	HOLD_THE_BAG("Hold the bag");
-    	
-    	private final String stringForCombo;
-    	
-    	private final String label;
-    	
-    	private MatchType(final String label){
-    		this.label=label;
-    		if(label.length()>=16)
-    		    this.stringForCombo=label;
-    		else
-    		    {StringBuilder builder=new StringBuilder();
-    		     final int leadingSpacesCount=(16-label.length())/2;
-    		     final int trailingSpacesCount=16-label.length()-leadingSpacesCount;
-    		     final String space=" ";
-    		     for(int i=0;i<leadingSpacesCount;i++)
-    		    	 builder.append(space);
-    		     builder.append(label);
-    		     for(int i=0;i<trailingSpacesCount;i++)
-    		    	 builder.append(space);
-    		     this.stringForCombo=builder.toString();
-    		    }
-    	}
-    	
-    	public String toString(){
-    		return(stringForCombo);
-    	}
-    	
-    	public String getLabel(){
-    		return(label);
-    	}
-    };
+	private final MatchTypeFactory matchTypeFactory;
     
     private static final String NO_LIMIT="No limit";
     
@@ -149,6 +117,10 @@ public final class MainMenuState extends ScenegraphState{
                   final Runnable uninstallRunnable,final String creditsContent,final String controlsContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction){
         super(soundManager);
+        matchTypeFactory=new MatchTypeFactory();
+        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
+        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag");
+        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag");
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
         this.canvas=canvas;
@@ -251,6 +223,7 @@ public final class MainMenuState extends ScenegraphState{
     	matchTypePanel.add(new UILabel("Match type"));
     	final Object[] subModes=getUnlockedMatchTypes();
     	final DefaultComboBoxModel subModesModel=new DefaultComboBoxModel(subModes);
+    	updateMatchTypeModel(subModesModel);
     	final UIComboBox subModeCombo=new UIComboBox(subModesModel);
     	subModeCombo.setSelectedIndex(0);
     	matchTypePanel.add(subModeCombo);
@@ -370,22 +343,28 @@ public final class MainMenuState extends ScenegraphState{
     	return(arenaModePanel);
     }
     
+    private final void updateMatchTypeModel(final DefaultComboBoxModel matchTypeModel){
+    	for(int matchTypeIndex=0;matchTypeIndex<matchTypeFactory.getSize();matchTypeIndex++)
+    		{final MatchType matchType=matchTypeFactory.get(matchTypeIndex);
+    		 final String view=matchTypeFactory.getFormattedStringForCombo(matchType);
+    		 matchTypeModel.setViewAt(matchTypeIndex,view);
+    		}
+    }
+    
     private final void updateVictoryModel(final DefaultComboBoxModel victoryModel,final MatchType matchType){
-    	switch(matchType)
-    	{
-    	    case DEATHMATCH:
-    	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
-    	    	     {final String value=(String)victoryModel.getValueAt(elementIndex);
-    	    	      final String view;
-    	    	      if(elementIndex==0)
-    	    		      view="  Get best score  ";
-    	    	      else
-    	    		      view="   Reach score "+value+"  ";
-    	    	      victoryModel.setViewAt(elementIndex,view);
-    	    	     }
-    	    	 break;
-    	        }
-    	    case CAPTURE_THE_FLAG:
+    	if(matchType==matchTypeFactory.get("DEATHMATCH"))
+    	    {for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
+    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
+    	          final String view;
+    	          if(elementIndex==0)
+    	    	      view="  Get best score  ";
+    	          else
+    	    	      view="   Reach score "+value+"  ";
+    	          victoryModel.setViewAt(elementIndex,view);
+    	         }
+    	    }
+    	else
+    	    if(matchType==matchTypeFactory.get("CAPTURE_THE_FLAG"))
     	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
    	    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
 	    	          final String view;
@@ -395,26 +374,27 @@ public final class MainMenuState extends ScenegraphState{
 	    		          view="Capture "+value+" flag"+((elementIndex==1)?"":"s"+"    ");
 	    	          victoryModel.setViewAt(elementIndex,view);
 	    	         }
-    	    	 break;
     	        }
-    	    case HOLD_THE_BAG:
-    	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
-  	    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
-	    	          final String view;
-	    	          if(elementIndex==0)
-	    		          view=" Hold it the most ";
-	    	          else
-	    		          view=" Hold it "+value+" minute"+((elementIndex==1)?"":"s"+" ");
-	    	          victoryModel.setViewAt(elementIndex,view);
-	    	         }
-    	    	 break;
-    			}
-    	}	    
+    	    else
+    	        if(matchType==matchTypeFactory.get("HOLD_THE_BAG"))
+    	    	    {for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
+  	    	             {final String value=(String)victoryModel.getValueAt(elementIndex);
+	    	              final String view;
+	    	              if(elementIndex==0)
+	    		              view=" Hold it the most ";
+	    	              else
+	    		              view=" Hold it "+value+" minute"+((elementIndex==1)?"":"s"+" ");
+	    	              victoryModel.setViewAt(elementIndex,view);
+	    	             }
+    			    }
     }
     
     private Object[] getUnlockedMatchTypes(){
+    	final Object[] unlockedMatchTypes=new Object[matchTypeFactory.getSize()];
+    	for(int matchTypeIndex=0;matchTypeIndex<matchTypeFactory.getSize();matchTypeIndex++)
+    		unlockedMatchTypes[matchTypeIndex]=matchTypeFactory.get(matchTypeIndex);
     	//FIXME return unlocked match types
-    	return(MatchType.values());
+    	return(unlockedMatchTypes);
     }
     
     private Object[] getUnlockedArenas(){

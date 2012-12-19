@@ -11,21 +11,22 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston,
   MA 02111-1307, USA.
 */
-package engine.weaponry;
+package engine.data.common;
 
-import engine.abstraction.AbstractFactory;
+public class MatchType{
+	
+	private final String label;
 
-public final class AmmunitionFactory extends AbstractFactory<Ammunition>{
+	public MatchType(final String label){
+		this.label=label;
+	}
 	
-	public AmmunitionFactory(){
-	}	
+	@Override
+	public String toString(){
+		return(label);
+	}
 	
-	public final boolean addNewAmmunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-			{final Ammunition ammunition=new Ammunition(pickingUpSoundSamplePath,identifier,label);
-			 success=add(identifier,ammunition);
-			}
-		return(success);
+	public String getLabel(){
+		return(label);
 	}
 }

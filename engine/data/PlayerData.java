@@ -684,7 +684,7 @@ public class PlayerData {
 	}
 	
 	public boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
-		final Weapon chosenWeapon=weaponFactory.getWeapon(index);
+		final Weapon chosenWeapon=weaponFactory.get(index);
 		/**
 		 * checks if:
 		 * - the index is valid (i.e in [0;weaponCount[)
@@ -791,7 +791,8 @@ public class PlayerData {
     	          else
     	        	  //tries to use the same weapon, only changes the number of weapons in use
     	    	      firstInitialFactor=0;
-    	    	  firstWeaponIndex=((weaponInUse.getUid()+weaponCount)+(weaponIndexMultiplier*firstInitialFactor))%weaponCount;
+    	          final int weaponInUseId=weaponFactory.getId(weaponInUse);
+    	    	  firstWeaponIndex=((weaponInUseId+weaponCount)+(weaponIndexMultiplier*firstInitialFactor))%weaponCount;
     	    	 }
     	     else
     	    	 //if the player doesn't use any weapon yet
@@ -823,7 +824,7 @@ public class PlayerData {
 		          //odd -> dual handed, even -> single handed
 		          dualWeaponUseEnabledTested=iterationIndex%2==1;
 		          //gets the weapon from the factory
-		          chosenWeapon=weaponFactory.getWeapon(currentWeaponIndex);
+		          chosenWeapon=weaponFactory.get(currentWeaponIndex);
 		          /**
 		  		   * checks if:
 		  		   * - the index is valid (i.e in [0;weaponCount[)
