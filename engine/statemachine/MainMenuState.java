@@ -48,7 +48,49 @@ import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
+	
+	//TODO move it into a separate class
+    public static enum MatchType{
+    	DEATHMATCH("Deathmatch"),
+    	CAPTURE_THE_FLAG("Capture the flag"),
+    	HOLD_THE_BAG("Hold the bag");
+    	
+    	private final String stringForCombo;
+    	
+    	private final String label;
+    	
+    	private MatchType(final String label){
+    		this.label=label;
+    		if(label.length()>=16)
+    		    this.stringForCombo=label;
+    		else
+    		    {StringBuilder builder=new StringBuilder();
+    		     final int leadingSpacesCount=(16-label.length())/2;
+    		     final int trailingSpacesCount=16-label.length()-leadingSpacesCount;
+    		     final String space=" ";
+    		     for(int i=0;i<leadingSpacesCount;i++)
+    		    	 builder.append(space);
+    		     builder.append(label);
+    		     for(int i=0;i<trailingSpacesCount;i++)
+    		    	 builder.append(space);
+    		     this.stringForCombo=builder.toString();
+    		    }
+    	}
+    	
+    	public String toString(){
+    		return(stringForCombo);
+    	}
+    	
+    	public String getLabel(){
+    		return(label);
+    	}
+    };
     
+    private static final String NO_LIMIT="No limit";
+    
+    private static final String DEFAULT="Default";
+    
+    private static final String CUSTOM="Custom";
     
     private final NativeCanvas canvas;
     
@@ -72,11 +114,13 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel controlsPanel;
     
+    private final UIPanel profilePanel;
+    
     private final UIPanel creditsPanel;
     
-    private final UIPanel loadGamePanel;
+    private final UIPanel storyModePanel;
     
-    private final UIPanel newGamePanel;
+    private final UIPanel arenaModePanel;
     
     private final Runnable launchRunnable;
     
@@ -115,6 +159,7 @@ public final class MainMenuState extends ScenegraphState{
             controlsPanel=createControlsPanel(controlsContent);
         else
         	controlsPanel=null;
+        profilePanel=createProfilePanel();
         if(creditsContent!=null)
             creditsPanel=createCreditsPanel(creditsContent);
         else
@@ -125,8 +170,8 @@ public final class MainMenuState extends ScenegraphState{
         initialMenuPanel=createInitialMenuPanel(exitAction);
         optionsMenuPanel=createOptionsMenuPanel();
         startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
-        loadGamePanel=createLoadGamePanel(toLoadingDisplayAction);
-        newGamePanel=createNewGamePanel(toLoadingDisplayAction);
+        storyModePanel=createStoryModePanel(toLoadingDisplayAction);
+        arenaModePanel=createArenaModePanel();
         //creates the main frame
         mainFrame=createMainFrame();
         //creates the head-up display
@@ -164,8 +209,8 @@ public final class MainMenuState extends ScenegraphState{
     	}
     }
     
-    private final UIPanel createNewGamePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
-        final UIPanel newGamePanel=new UIPanel(new RowLayout(false));
+    private final UIPanel createStoryModePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
+        final UIPanel storyModePanel=new UIPanel(new RowLayout(false));
         final UIButton level0Button=new UIButton("Level 0");
         level0Button.addActionListener(new ActionListener(){
         	
@@ -193,24 +238,212 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        newGamePanel.add(level0Button);
-        newGamePanel.add(perfTestButton);
-        newGamePanel.add(backButton);
-        return(newGamePanel);
+        storyModePanel.add(level0Button);
+        storyModePanel.add(perfTestButton);
+        storyModePanel.add(backButton);
+        return(storyModePanel);
     }
     
-    private final UIPanel createLoadGamePanel(final TriggerAction toLoadingDisplayAction){
-        final UIPanel loadGamePanel=new UIPanel(new RowLayout(false));
-        final UIButton backButton=new UIButton("Back");
+    private final UIPanel createArenaModePanel(){
+    	final UIPanel arenaModePanel=new UIPanel(new RowLayout(false));
+    	
+    	final UIPanel matchTypePanel=new UIPanel(new RowLayout(true));
+    	matchTypePanel.add(new UILabel("Match type"));
+    	final Object[] subModes=getUnlockedMatchTypes();
+    	final DefaultComboBoxModel subModesModel=new DefaultComboBoxModel(subModes);
+    	final UIComboBox subModeCombo=new UIComboBox(subModesModel);
+    	subModeCombo.setSelectedIndex(0);
+    	matchTypePanel.add(subModeCombo);
+    	
+    	final UIPanel playersPanel=new UIPanel(new RowLayout(true));
+    	playersPanel.add(new UILabel("Players"));
+    	final Object[] playersSettingsSuggestions=getAvailablePlayersSettingsFromUnlockedPlayers();
+    	final DefaultComboBoxModel playersSettingsModel=new DefaultComboBoxModel(playersSettingsSuggestions);
+    	final UIComboBox playersCombo=new UIComboBox(playersSettingsModel);
+    	playersCombo.setSelectedIndex(0);
+    	//TODO update the real players settings
+    	playersCombo.addSelectionListener(new SelectionListener<UIComboBox>(){
+			@Override
+			public void selectionChanged(final UIComboBox component,final Object newValue){
+				//TODO update the real players settings
+				if(newValue==CUSTOM)
+			        {//TODO open the GUI
+				     
+			        }
+			}
+    	});
+    	playersPanel.add(playersCombo);
+    	
+    	final UIPanel weaponsPanel=new UIPanel(new RowLayout(true));
+    	weaponsPanel.add(new UILabel("Weapons"));
+    	final Object[] weaponsSettingsSuggestions=getAvailableWeaponsSettingsFromUnlockedWeapons();
+    	final DefaultComboBoxModel weaponsSettingsModel=new DefaultComboBoxModel(weaponsSettingsSuggestions);
+    	final UIComboBox weaponsCombo=new UIComboBox(weaponsSettingsModel);
+    	weaponsCombo.setSelectedIndex(0);
+    	//TODO update the real weapons settings
+    	weaponsCombo.addSelectionListener(new SelectionListener<UIComboBox>(){
+			@Override
+			public void selectionChanged(final UIComboBox component,final Object newValue){
+				//TODO update the real weapons settings
+				if(newValue==CUSTOM)
+				    {//TODO open the GUI
+					 
+				    }
+			}
+    	});
+    	weaponsPanel.add(weaponsCombo);
+    	
+    	final UIPanel victoryPanel=new UIPanel(new RowLayout(true));
+    	victoryPanel.add(new UILabel("Victory"));
+    	final Object[] victorySuggestions=new Object[]{NO_LIMIT,"1","2","3","4","5","10","15","20","25","30","35","40","45","50"};
+    	final DefaultComboBoxModel victoryModel=new DefaultComboBoxModel(victorySuggestions);
+    	updateVictoryModel(victoryModel,(MatchType)subModeCombo.getSelectedValue());
+    	final UIComboBox victoryCombo=new UIComboBox(victoryModel);
+    	victoryCombo.setSelectedIndex(5);
+    	victoryPanel.add(victoryCombo);
+    	
+    	final UIPanel timePanel=new UIPanel(new RowLayout(true));
+    	timePanel.add(new UILabel("Time"));
+    	final Object[] timeSuggestions=new Object[]{NO_LIMIT,"1","2","3","4","5","6","7","8","9","10","15","20","30"};
+    	final DefaultComboBoxModel timeModel=new DefaultComboBoxModel(timeSuggestions);
+    	final UIComboBox timeCombo=new UIComboBox(timeModel);
+    	timeCombo.setSelectedIndex(0);
+    	timePanel.add(timeCombo);
+    	
+    	final UIPanel arenasPanel=new UIPanel(new RowLayout(true));
+    	arenasPanel.add(new UILabel("Arena"));
+    	final Object[] arenas=getUnlockedArenas();
+    	final DefaultComboBoxModel arenasModel=new DefaultComboBoxModel(arenas);
+    	final UIComboBox arenasCombo=new UIComboBox(arenasModel);
+    	arenasCombo.setSelectedIndex(0);
+    	arenasPanel.add(arenasCombo);
+    	
+    	subModeCombo.addSelectionListener(new SelectionListener<UIComboBox>(){
+			@Override
+			public void selectionChanged(final UIComboBox component,final Object newValue){
+				updateVictoryModel(victoryModel,(MatchType)newValue);
+				//forces the update of the combo
+				victoryCombo.setSelectedIndex(victoryCombo.getSelectedIndex());
+				victoryCombo.fireComponentDirty();
+			}
+		});
+    	
+    	final UIButton beginMatchButton=new UIButton("Begin match");
+    	beginMatchButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	final MatchType matchType=(MatchType)subModeCombo.getSelectedValue();
+            	final int victoryLimit;
+            	final String victoryValue=(String)victoryCombo.getSelectedValue();
+            	if(victoryValue.equals(NO_LIMIT))
+            		victoryLimit=-1;
+            	else
+            		victoryLimit=Integer.parseInt(victoryValue);
+            	final int timeLimit;
+            	final String timeValue=(String)timeCombo.getSelectedValue();
+            	if(timeValue.equals(NO_LIMIT))
+            		timeLimit=-1;
+            	else
+            		timeLimit=Integer.parseInt(timeValue);
+            	final String arenaName=(String)arenasCombo.getSelectedValue();
+                //TODO retrieve the selected settings for players and weapons
+            	//TODO begin the match
+            }
+        });
+    	beginMatchButton.setEnabled(false);
+    	
+    	final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        loadGamePanel.add(new UILabel("Feature not yet implemented!"));
-        loadGamePanel.add(backButton);
-        return(loadGamePanel);
+        arenaModePanel.add(matchTypePanel);
+        arenaModePanel.add(playersPanel);
+        arenaModePanel.add(weaponsPanel);
+        arenaModePanel.add(victoryPanel);
+        arenaModePanel.add(timePanel);
+        arenaModePanel.add(arenasPanel);
+        arenaModePanel.add(beginMatchButton);
+        arenaModePanel.add(backButton);
+    	return(arenaModePanel);
+    }
+    
+    private final void updateVictoryModel(final DefaultComboBoxModel victoryModel,final MatchType matchType){
+    	switch(matchType)
+    	{
+    	    case DEATHMATCH:
+    	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
+    	    	     {final String value=(String)victoryModel.getValueAt(elementIndex);
+    	    	      final String view;
+    	    	      if(elementIndex==0)
+    	    		      view="  Get best score  ";
+    	    	      else
+    	    		      view="   Reach score "+value+"  ";
+    	    	      victoryModel.setViewAt(elementIndex,view);
+    	    	     }
+    	    	 break;
+    	        }
+    	    case CAPTURE_THE_FLAG:
+    	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
+   	    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
+	    	          final String view;
+	    	          if(elementIndex==0)
+	    		          view="Capture most flags";
+	    	          else
+	    		          view="Capture "+value+" flag"+((elementIndex==1)?"":"s"+"    ");
+	    	          victoryModel.setViewAt(elementIndex,view);
+	    	         }
+    	    	 break;
+    	        }
+    	    case HOLD_THE_BAG:
+    	    	{for(int elementIndex=0;elementIndex<victoryModel.size();elementIndex++)
+  	    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
+	    	          final String view;
+	    	          if(elementIndex==0)
+	    		          view=" Hold it the most ";
+	    	          else
+	    		          view=" Hold it "+value+" minute"+((elementIndex==1)?"":"s"+" ");
+	    	          victoryModel.setViewAt(elementIndex,view);
+	    	         }
+    	    	 break;
+    			}
+    	}	    
+    }
+    
+    private Object[] getUnlockedMatchTypes(){
+    	//FIXME return unlocked match types
+    	return(MatchType.values());
+    }
+    
+    private Object[] getUnlockedArenas(){
+    	//FIXME return unlocked arenas
+    	return(new Object[]{"Museum","Jail"});
+    }
+    
+    private Object[] getAvailableWeaponsSettingsFromUnlockedWeapons(){
+    	//FIXME return weapons settings composed of unlocked weapons
+    	return(new Object[]{DEFAULT,"Only knives",CUSTOM});
+    }
+    
+    private Object[] getAvailablePlayersSettingsFromUnlockedPlayers(){
+    	//FIXME return players settings composed of unlocked players
+    	return(new Object[]{DEFAULT,CUSTOM});
+    }
+    
+    private final UIPanel createProfilePanel(){
+    	final UIPanel profilePanel=new UIPanel(new RowLayout(false));
+    	final UIButton backButton=new UIButton("Back");
+        backButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(optionsMenuPanel);
+            }
+        });
+        profilePanel.add(new UILabel("Feature not yet implemented!"));
+        profilePanel.add(backButton);
+    	return(profilePanel);
     }
 
     @Override
@@ -220,6 +453,11 @@ public final class MainMenuState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+                  /**
+                   * FIXME the profile might have be modified, update 
+                   * all parts of the GUI that depend on the unlocked 
+                   * items in the profile
+                   */
                   //shows the initial menu
                   showPanelInMainFrame(initialMenuPanel);
                  }
@@ -308,6 +546,18 @@ public final class MainMenuState extends ScenegraphState{
             }
         else
         	controlsButton=null;
+        final UIButton profileButton;
+        if(profilePanel!=null)
+            {profileButton=new UIButton("Profile");
+             profileButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(profilePanel);
+                 }
+             });
+            }
+        else
+        	profileButton=null;
         final UIButton creditsButton;
         if(creditsPanel!=null)
             {creditsButton=new UIButton("Credits");
@@ -335,6 +585,8 @@ public final class MainMenuState extends ScenegraphState{
         	optionsMenuPanel.add(desktopShortcutsButton);
         if(controlsButton!=null)
             optionsMenuPanel.add(controlsButton);
+        if(profileButton!=null)
+        	optionsMenuPanel.add(profileButton);
         if(creditsButton!=null)
         	optionsMenuPanel.add(creditsButton);
         optionsMenuPanel.add(backButton);
@@ -469,18 +721,18 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createStartMenuPanel(final TriggerAction toLoadingDisplayAction){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
-        final UIButton newGameButton=new UIButton("New game");
-        newGameButton.addActionListener(new ActionListener(){           
+        final UIButton storyModeButton=new UIButton("Story mode");
+        storyModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(newGamePanel);
+                showPanelInMainFrame(storyModePanel);
             }
         });
-        final UIButton loadGameButton=new UIButton("Load game");
-        loadGameButton.addActionListener(new ActionListener(){           
+        final UIButton arenaModeButton=new UIButton("Arena mode");
+        arenaModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(loadGamePanel);
+                showPanelInMainFrame(arenaModePanel);
             }
         });
         final UIButton backButton=new UIButton("Back");
@@ -490,8 +742,8 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(initialMenuPanel);
             }
         });
-        startMenuPanel.add(newGameButton);
-        startMenuPanel.add(loadGameButton);
+        startMenuPanel.add(storyModeButton);
+        startMenuPanel.add(arenaModeButton);
         startMenuPanel.add(backButton);
         return(startMenuPanel);
     }

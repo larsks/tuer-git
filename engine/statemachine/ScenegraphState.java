@@ -62,7 +62,7 @@ public class ScenegraphState{
 	    return(soundManager);
     }
     
-    public void setEnabled(final boolean enabled){    	
+    public void setEnabled(final boolean enabled){
     	if(this.enabled!=enabled)
     	    {this.enabled=enabled;
     	     if(root!=null)
