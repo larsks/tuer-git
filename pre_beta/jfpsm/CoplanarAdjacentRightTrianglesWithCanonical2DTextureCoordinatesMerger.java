@@ -14,12 +14,12 @@
 package jfpsm;
 
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
@@ -27,11 +27,12 @@ import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
+import com.ardor3d.scenegraph.FloatBufferData;
+import com.ardor3d.scenegraph.IndexBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.geom.GeometryTool;
-import com.ardor3d.util.geom.VertMap;
 import com.ardor3d.util.geom.GeometryTool.MatchCondition;
 
 
@@ -99,18 +100,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	
 	/**
 	 * 
-	 * @param mesh using the same set of textures (only on texture per unit) for all vertices
+	 * @param mesh using only the first texture unit
 	 * @return
 	 */
-	public static VertMap minimizeVerts(final Mesh mesh){
-		//uses all conditions with GeometryTool
-		final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
-		//reduces the geometry to avoid duplication of vertices
-		final VertMap result=GeometryTool.minimizeVerts(mesh,conditions);
-		
+	public static void optimize(final Mesh mesh){
 		final MeshData meshData=mesh.getMeshData();
-		//if there is a texture buffer for the first texture unit
-		if(meshData.getTextureBuffer(0)!=null)
+		//converts this geometry into non indexed geometry (if necessary) in order to ease further operations
+		final boolean previousGeometryWasIndexed=meshData.getIndexBuffer()!=null;
+		if(previousGeometryWasIndexed)
+		    convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+		//if there is exactly one texture unit and if there is a texture buffer for this first texture unit
+		if(meshData.getNumberOfUnits()==1&&meshData.getTextureBuffer(0)!=null)
 		    {//first step: separates right triangles with canonical 2D texture coordinates from the others
 			 final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos=new ArrayList<RightTriangleInfo>();
 			 //loops on all sections of the mesh data
@@ -140,15 +140,15 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						   if(sideIndexOfHypotenuse!=-1)
 						       {//checks whether its texture coordinates are canonical
 							    hasCanonicalTextureCoords=true;
-							    for(int textureIndex=0;meshData.getTextureBuffer(textureIndex)!=null&&hasCanonicalTextureCoords;textureIndex++)
-							        {triangleTextureCoords=getPrimitiveTextureCoords(meshData,trianglePrimitiveIndex,sectionIndex,textureIndex,triangleTextureCoords);		    
-								     for(int triangleTextureCoordsIndex=0;triangleTextureCoordsIndex<3&&hasCanonicalTextureCoords;triangleTextureCoordsIndex++)
-								         {u=triangleTextureCoords[triangleTextureCoordsIndex].getX();
-								          v=triangleTextureCoords[triangleTextureCoordsIndex].getY();
-								          if((u!=0&&u!=1)||(v!=0&&v!=1))
-								        	  hasCanonicalTextureCoords=false;
-								         }
-							        }	    
+							    //only considers the first texture index
+							    final int textureIndex=0;
+							    triangleTextureCoords=getPrimitiveTextureCoords(meshData,trianglePrimitiveIndex,sectionIndex,textureIndex,triangleTextureCoords);		    
+								for(int triangleTextureCoordsIndex=0;triangleTextureCoordsIndex<3&&hasCanonicalTextureCoords;triangleTextureCoordsIndex++)
+								    {u=triangleTextureCoords[triangleTextureCoordsIndex].getX();
+								     v=triangleTextureCoords[triangleTextureCoordsIndex].getY();
+								     if((u!=0&&u!=1)||(v!=0&&v!=1))
+								         hasCanonicalTextureCoords=false;
+								    }
 							    if(hasCanonicalTextureCoords)
 							        {//stores the side index of its hypotenuse and several indices allowing to retrieve the required data further 
 							         RightTriangleInfo rightTriangleInfo=new RightTriangleInfo(trianglePrimitiveIndex,sectionIndex,sideIndexOfHypotenuse);
@@ -711,8 +711,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			     }
 			 //seventh step: removes the triangles which are no more in the geometry of the mesh
 			 final ArrayList<Integer> verticesIndicesToRemove=new ArrayList<Integer>();
-			 final ArrayList<Integer> indicesToRemove=new ArrayList<Integer>();
-			 final HashMap<Vector3,Integer> vertexOccurrenceMap=new HashMap<Vector3,Integer>();
 			 int[] tri1Indices=new int[3];
 			 int[] tri2Indices=new int[3];
 			 //for each plane
@@ -729,160 +727,151 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    tri2Vertices=meshData.getPrimitiveVertices(tri2.primitiveIndex,tri2.sectionIndex,tri2Vertices);
 			    			    tri1Indices=meshData.getPrimitiveIndices(tri1.primitiveIndex,tri1.sectionIndex,tri1Indices);
 			    			    tri2Indices=meshData.getPrimitiveIndices(tri2.primitiveIndex,tri2.sectionIndex,tri2Indices);
-			    			    if(meshData.getIndexBuffer()==null)
-				                    {//non-indexed geometry
-					                 //does not keep these vertices, mark them as removable
-			    			    	 for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
-			    			    		 verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
-			    			    	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
-			    			    		 verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
-				                    }
-					            else
-					                {//indexed geometry
-					            	 for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
-					            	     {//tries to get the occurrence count of this vertex
-					            		  Integer vertexOccurrenceRef=vertexOccurrenceMap.get(tri1Vertices[triVertexIndex]);
-					            		  int vertexOccurrence;
-					            		  //if it is unknown
-					            		  if(vertexOccurrenceRef==null)
-					            		      {//computes it
-					            			   vertexOccurrence=0;
-					            			   for(int indexIndex=0;indexIndex<meshData.getIndices().getBufferLimit();indexIndex++)
-					            			       if(meshData.getIndices().get(indexIndex)==tri1Indices[triVertexIndex])
-					            			    	   vertexOccurrence++;
-					            			   //stores it
-					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],vertexOccurrenceRef);
-					            		      }
-					            		  else
-					            			  {//retrieves it from the map
-					            			   vertexOccurrence=vertexOccurrenceRef.intValue();
-					            			  }
-					            		  //decreases this occurrence count
-					            		  vertexOccurrence--;
-					            		  //if there is no remaining occurrence
-					            		  if(vertexOccurrence==0)
-					            		      {//marks it as removable
-					            			   verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
-					            			   //removes it from the map
-					            			   vertexOccurrenceMap.remove(tri1Vertices[triVertexIndex]);
-					            		      }
-					            		  else
-					            			  {//updates the vertex occurrence stored in the map
-					            			   vertexOccurrenceMap.put(tri1Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
-					            			  }
-					            		  //uses the position of this vertex index in the index buffer
-					            		  indicesToRemove.add(Integer.valueOf(meshData.getVertexIndex(tri1.primitiveIndex,triVertexIndex,tri1.sectionIndex)));
-					            	     }
-					            	 for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
-				            	         {//tries to get the occurrence count of this vertex
-					            		  Integer vertexOccurrenceRef=vertexOccurrenceMap.get(tri2Vertices[triVertexIndex]);
-					            		  int vertexOccurrence;
-					            		  //if it is unknown
-					            		  if(vertexOccurrenceRef==null)
-					            		      {//computes it
-					            			   vertexOccurrence=0;
-					            			   for(int indexIndex=0;indexIndex<meshData.getIndices().getBufferLimit();indexIndex++)
-					            			       if(meshData.getIndices().get(indexIndex)==tri2Indices[triVertexIndex])
-					            			    	   vertexOccurrence++;
-					            			   //stores it
-					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],vertexOccurrenceRef);
-					            		      }
-					            		  else
-					            			  {//retrieves it from the map
-					            			   vertexOccurrence=vertexOccurrenceRef.intValue();
-					            			  }
-					            		  //decreases this occurrence count
-					            		  vertexOccurrence--;
-					            		  //if there is no remaining occurrence
-					            		  if(vertexOccurrence==0)
-					            		      {//marks it as removable
-					            			   verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
-					            			   //removes it from the map
-					            			   vertexOccurrenceMap.remove(tri2Vertices[triVertexIndex]);
-					            		      }
-					            		  else
-					            			  {//updates the vertex occurrence stored in the map
-					            			   vertexOccurrenceMap.put(tri2Vertices[triVertexIndex],Integer.valueOf(vertexOccurrence));
-					            			  }
-					            		  //uses the position of this vertex index in the index buffer
-					            		  indicesToRemove.add(Integer.valueOf(meshData.getVertexIndex(tri2.primitiveIndex,triVertexIndex,tri2.sectionIndex)));
-				            	         }
-					                }
+			    			    //does not keep these vertices, mark them as removable
+			    			    for(int triVertexIndex=0;triVertexIndex<tri1Vertices.length;triVertexIndex++)
+			    			    	verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
+			    			    for(int triVertexIndex=0;triVertexIndex<tri2Vertices.length;triVertexIndex++)
+			    			    	verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
 						       }
 					  }
 			     }
 			 final FloatBuffer nextVertexBuffer;
-			 final IntBuffer nextIndexBuffer;
-			 //removes the useless vertices
-			 if(meshData.getIndexBuffer()==null)
-	             {//non-indexed geometry
-				  nextIndexBuffer=null;
-				  //computes the count of added vertices
-				  int addedVerticesCount=0;
-				  for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
-					  {//there are (obviously) two triangles by quad
-					   addedVerticesCount+=previousAndNextAdjacentTrisMap.size()*2;
-					  }
-				  //computes the next vertex count
-				  final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
-				  //creates the next vertex buffer
-				  nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
-		          //does not copy vertices marked as removable into the next vertex buffer, copies the others
-				  for(int vertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
-					  if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
-				          {final int vertexCoordinateIndex=vertexIndex*3;
-				           final float x=meshData.getVertexBuffer().get(vertexCoordinateIndex);
-				           final float y=meshData.getVertexBuffer().get(vertexCoordinateIndex+1);
-				           final float z=meshData.getVertexBuffer().get(vertexCoordinateIndex+2);
-				           nextVertexBuffer.put(x).put(y).put(z);
-				          }
-				  //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
-	             }
-		     else
-		         {//indexed geometry
-		    	  //TODO compute the count of added vertices and indices (avoid duplication)
-		    	  int addedVerticesCount=0;
-		    	  int addedIndicesCount=0;
-		    	  for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
-				      {
-		    		   
-				      }
-		    	  //computes the next index count
-		    	  final int nextIndexCount=meshData.getIndices().capacity()-indicesToRemove.size()+addedIndicesCount;
-		    	  //computes the next vertex count
-		    	  final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
-		    	  //creates the next vertex buffer
-		    	  nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
-		    	  //creates the next index buffer
-		    	  nextIndexBuffer=IntBuffer.allocate(nextIndexCount);
-		    	  //does not copy vertices marked as removable into the next vertex buffer, copies the others
-				  for(int vertexIndex=0,nextVertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
-					  if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
-				          {final int vertexCoordinateIndex=vertexIndex*3;
-				           final float x=meshData.getVertexBuffer().get(vertexCoordinateIndex);
-				           final float y=meshData.getVertexBuffer().get(vertexCoordinateIndex+1);
-				           final float z=meshData.getVertexBuffer().get(vertexCoordinateIndex+2);
-				           nextVertexBuffer.put(x).put(y).put(z);
-				           //TODO store the mapping between the old index and the new index
-				           
-				           //updates the index of the next vertex
-				           nextVertexIndex++;
-				          }
-				  //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
-		    	  //TODO update the index buffer
-		         }
+			 //computes the count of added vertices
+			 int addedVerticesCount=0;
+			 for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
+				 {//there are (obviously) two triangles by quad and three vertices by triangle
+				  addedVerticesCount+=previousAndNextAdjacentTrisMap.size()*6;
+				 }
+			 //computes the next vertex count
+			 final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
+			 //creates the next vertex buffer
+			 nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
+		     //does not copy vertices marked as removable into the next vertex buffer, copies the others
+			 for(int vertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
+				 if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
+				     {final int vertexCoordinateIndex=vertexIndex*3;
+				      final float x=meshData.getVertexBuffer().get(vertexCoordinateIndex);
+				      final float y=meshData.getVertexBuffer().get(vertexCoordinateIndex+1);
+				      final float z=meshData.getVertexBuffer().get(vertexCoordinateIndex+2);
+				      nextVertexBuffer.put(x).put(y).put(z);
+				     }
+			 //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 			 
 			 //finally, rewinds the new vertex buffer and sets it
 			 nextVertexBuffer.rewind();
 			 meshData.setVertexBuffer(nextVertexBuffer);
-			 if(meshData.getIndexBuffer()!=null)
-			     {//sets the new index buffer
-				  nextIndexBuffer.rewind();
-				  meshData.setIndexBuffer(nextIndexBuffer);
-			     }
 		    }
-		return result;
+		//if the supplied geometry was indexed
+		if(previousGeometryWasIndexed)
+		    {//converts the new geometry into an indexed geometry
+			 //uses all conditions with GeometryTool
+			 final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
+			 //reduces the geometry to avoid duplication of vertices
+			 GeometryTool.minimizeVerts(mesh,conditions);
+		    }
+	}
+	
+	/**
+	 * Converts an indexed geometry into a non indexed geometry
+	 * 
+	 * @param meshData mesh data
+	 */
+	private static void convertIndexedGeometryIntoNonIndexedGeometry(final MeshData meshData){
+		final IndexBufferData<?> indices=meshData.getIndices();
+		if(indices!=null)
+		    {final FloatBuffer previousVertexBuffer=meshData.getVertexBuffer();
+			 if(previousVertexBuffer!=null)
+			     {final int valuesPerVertexTuple=meshData.getVertexCoords().getValuesPerTuple();
+			      final FloatBuffer nextVertexBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerVertexTuple);
+			      for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+			          {final int vertexIndex=indices.get(indexIndex);
+				       for(int coordIndex=0;coordIndex<valuesPerVertexTuple;coordIndex++)
+				           {final float vertexCoordValue=previousVertexBuffer.get((vertexIndex*valuesPerVertexTuple)+coordIndex);
+					        nextVertexBuffer.put((indexIndex*valuesPerVertexTuple)+coordIndex,vertexCoordValue);
+				           }
+			          }
+			      meshData.setVertexCoords(new FloatBufferData(nextVertexBuffer,valuesPerVertexTuple));
+			     }
+			 final FloatBuffer previousNormalBuffer=meshData.getNormalBuffer();
+			 if(previousNormalBuffer!=null)
+			     {final int valuesPerNormalTuple=meshData.getNormalCoords().getValuesPerTuple();
+			      final FloatBuffer nextNormalBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerNormalTuple);
+				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+			          {final int vertexIndex=indices.get(indexIndex);
+			           for(int coordIndex=0;coordIndex<valuesPerNormalTuple;coordIndex++)
+				           {final float normalCoordValue=previousNormalBuffer.get((vertexIndex*valuesPerNormalTuple)+coordIndex);
+				            nextNormalBuffer.put((indexIndex*valuesPerNormalTuple)+coordIndex,normalCoordValue);
+				           }
+			          }
+				  meshData.setNormalCoords(new FloatBufferData(nextNormalBuffer,valuesPerNormalTuple));
+			     }
+			 final FloatBuffer previousColorBuffer=meshData.getColorBuffer();
+			 if(previousColorBuffer!=null)
+			     {final int valuesPerColorTuple=meshData.getColorCoords().getValuesPerTuple();
+			      final FloatBuffer nextColorBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerColorTuple);
+				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+			          {final int vertexIndex=indices.get(indexIndex);
+			           for(int coordIndex=0;coordIndex<valuesPerColorTuple;coordIndex++)
+				           {final float colorCoordValue=previousColorBuffer.get((vertexIndex*valuesPerColorTuple)+coordIndex);
+				            nextColorBuffer.put((indexIndex*valuesPerColorTuple)+coordIndex,colorCoordValue);
+				           }
+			          }
+				  meshData.setColorCoords(new FloatBufferData(nextColorBuffer,valuesPerColorTuple));
+			     }
+			 final FloatBuffer previousFogBuffer=meshData.getFogBuffer();
+			 if(previousFogBuffer!=null)
+			     {final int valuesPerFogTuple=meshData.getFogCoords().getValuesPerTuple();
+			      final FloatBuffer nextFogBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerFogTuple);
+				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+			          {final int vertexIndex=indices.get(indexIndex);
+			           for(int coordIndex=0;coordIndex<valuesPerFogTuple;coordIndex++)
+				           {final float fogCoordValue=previousFogBuffer.get((vertexIndex*valuesPerFogTuple)+coordIndex);
+				            nextFogBuffer.put((indexIndex*valuesPerFogTuple)+coordIndex,fogCoordValue);
+				           }
+			          }
+				  meshData.setFogCoords(new FloatBufferData(nextFogBuffer,valuesPerFogTuple));
+			     }
+			 final FloatBuffer previousTangentBuffer=meshData.getTangentBuffer();
+			 if(previousTangentBuffer!=null)
+			     {final int valuesPerTangentTuple=meshData.getTangentCoords().getValuesPerTuple();
+			      final FloatBuffer nextTangentBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerTangentTuple);
+				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+			          {final int vertexIndex=indices.get(indexIndex);
+			           for(int coordIndex=0;coordIndex<valuesPerTangentTuple;coordIndex++)
+				           {final float tangentCoordValue=previousTangentBuffer.get((vertexIndex*valuesPerTangentTuple)+coordIndex);
+				            nextTangentBuffer.put((indexIndex*valuesPerTangentTuple)+coordIndex,tangentCoordValue);
+				           }
+			          }
+				  meshData.setTangentCoords(new FloatBufferData(nextTangentBuffer,valuesPerTangentTuple));
+			     }
+			 final int numberOfUnits=meshData.getNumberOfUnits();
+			 if(numberOfUnits>0)
+			     {final List<FloatBufferData> previousTextureCoordsList=meshData.getTextureCoords();
+			      final List<FloatBufferData> nextTextureCoordsList=new ArrayList<FloatBufferData>();
+				  for(int unitIndex=0;unitIndex<numberOfUnits;unitIndex++)
+				      {final FloatBufferData previousTextureCoords=previousTextureCoordsList.get(unitIndex);
+				       if(previousTextureCoords==null)
+				    	   nextTextureCoordsList.add(null);
+				       else
+				           {final FloatBuffer previousTextureBuffer=previousTextureCoords.getBuffer();
+				    	    final int valuesPerTextureTuple=previousTextureCoords.getValuesPerTuple();
+				    	    final FloatBuffer nextTextureBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerTextureTuple);
+				    	    for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
+					            {final int vertexIndex=indices.get(indexIndex);
+					             for(int coordIndex=0;coordIndex<valuesPerTextureTuple;coordIndex++)
+						             {final float textureCoordValue=previousTextureBuffer.get((vertexIndex*valuesPerTextureTuple)+coordIndex);
+						              nextTextureBuffer.put((indexIndex*valuesPerTextureTuple)+coordIndex,textureCoordValue);
+						             }
+					            }
+				    	    nextTextureCoordsList.add(new FloatBufferData(nextTextureBuffer,valuesPerTextureTuple));
+				           }
+				      }
+				  meshData.setTextureCoords(nextTextureCoordsList);
+			     }
+			 //removes the index buffer
+			 meshData.setIndices(null);
+		    }
 	}
 	
 	/**
