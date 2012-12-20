@@ -105,13 +105,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 */
 	public static void optimize(final Mesh mesh){
 		final MeshData meshData=mesh.getMeshData();
-		//converts this geometry into non indexed geometry (if necessary) in order to ease further operations
-		final boolean previousGeometryWasIndexed=meshData.getIndexBuffer()!=null;
-		if(previousGeometryWasIndexed)
-		    convertIndexedGeometryIntoNonIndexedGeometry(meshData);
-		//if there is exactly one texture unit and if there is a texture buffer for this first texture unit
-		if(meshData.getNumberOfUnits()==1&&meshData.getTextureBuffer(0)!=null)
-		    {//first step: separates right triangles with canonical 2D texture coordinates from the others
+		//if there is exactly one texture unit, if there is a texture buffer for this first texture unit
+		//if there are 2 texture coordinates per vertex and 3 vertex coordinates per vertex
+		if(meshData.getNumberOfUnits()==1&&meshData.getTextureBuffer(0)!=null&&
+		   meshData.getTextureCoords(0).getValuesPerTuple()==2&&
+		   meshData.getVertexBuffer()!=null&&meshData.getVertexCoords().getValuesPerTuple()==3)
+		    {//converts this geometry into non indexed geometry (if necessary) in order to ease further operations
+		     final boolean previousGeometryWasIndexed=meshData.getIndexBuffer()!=null;
+		     if(previousGeometryWasIndexed)
+		         convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+			 //first step: separates right triangles with canonical 2D texture coordinates from the others
 			 final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos=new ArrayList<RightTriangleInfo>();
 			 //loops on all sections of the mesh data
 			 Vector3[] triangleVertices=new Vector3[3];
@@ -735,7 +738,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						       }
 					  }
 			     }
-			 final FloatBuffer nextVertexBuffer;
 			 //computes the count of added vertices
 			 int addedVerticesCount=0;
 			 for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
@@ -745,8 +747,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			 //computes the next vertex count
 			 final int nextVertexCount=meshData.getVertexCount()-verticesIndicesToRemove.size()+addedVerticesCount;
 			 //creates the next vertex buffer
-			 nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
-		     //does not copy vertices marked as removable into the next vertex buffer, copies the others
+			 final FloatBuffer nextVertexBuffer=FloatBuffer.allocate(nextVertexCount*3);
+		     //does not copy the vertices marked as removable into the next vertex buffer, copies the others
 			 for(int vertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
 				 if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
 				     {final int vertexCoordinateIndex=vertexIndex*3;
@@ -756,19 +758,35 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				      nextVertexBuffer.put(x).put(y).put(z);
 				     }
 			 //does not modify the position so that this vertex buffer is ready for the addition of the new vertices
+			 //computes the next texture coordinate count
+			 final int nextTextureCoordsCount=nextVertexCount;
+			 //creates the next texture buffer (2D)
+			 final FloatBuffer nextTextureBuffer=FloatBuffer.allocate(nextTextureCoordsCount*2);
+			 //does not copy the texture coordinates of vertices marked as removable into the next vertex buffer, copies the others
+			 for(int vertexIndex=0;vertexIndex<meshData.getVertexCount();vertexIndex++)
+				 if(!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex)))
+				     {final int textureCoordinateIndex=vertexIndex*2;
+				      final float fu=meshData.getVertexBuffer().get(textureCoordinateIndex);
+				      final float fv=meshData.getVertexBuffer().get(textureCoordinateIndex+1);
+				      nextTextureBuffer.put(fu).put(fv);
+				     }
+			 //does not modify the position so that this texture buffer is ready for the addition of the new texture coordinates
 			 //TODO: eighth step: add the new triangles into the geometry of the mesh
 			 
 			 //finally, rewinds the new vertex buffer and sets it
 			 nextVertexBuffer.rewind();
 			 meshData.setVertexBuffer(nextVertexBuffer);
-		    }
-		//if the supplied geometry was indexed
-		if(previousGeometryWasIndexed)
-		    {//converts the new geometry into an indexed geometry
-			 //uses all conditions with GeometryTool
-			 final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
-			 //reduces the geometry to avoid duplication of vertices
-			 GeometryTool.minimizeVerts(mesh,conditions);
+			 //does the same for texture coordinates
+			 nextTextureBuffer.rewind();
+			 meshData.setTextureCoords(new FloatBufferData(nextTextureBuffer,2),0);
+			 //if the supplied geometry was indexed
+		     if(previousGeometryWasIndexed)
+		         {//converts the new geometry into an indexed geometry
+			      //uses all conditions with GeometryTool
+			      final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
+			      //reduces the geometry to avoid duplication of vertices
+			      GeometryTool.minimizeVerts(mesh,conditions);
+		         }
 		    }
 	}
 	
