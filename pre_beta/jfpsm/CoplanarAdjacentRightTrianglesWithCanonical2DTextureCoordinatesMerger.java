@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
@@ -28,11 +27,9 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.scenegraph.FloatBufferData;
-import com.ardor3d.scenegraph.IndexBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.util.geom.BufferUtils;
-import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.geom.GeometryTool.MatchCondition;
 
 
@@ -113,7 +110,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    {//converts this geometry into non indexed geometry (if necessary) in order to ease further operations
 		     final boolean previousGeometryWasIndexed=meshData.getIndexBuffer()!=null;
 		     if(previousGeometryWasIndexed)
-		         convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+		         new GeometryHelper().convertIndexedGeometryIntoNonIndexedGeometry(meshData);
 			 //first step: separates right triangles with canonical 2D texture coordinates from the others
 			 final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos=new ArrayList<RightTriangleInfo>();
 			 //loops on all sections of the mesh data
@@ -800,110 +797,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			      //uses all conditions with GeometryTool
 			      final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
 			      //reduces the geometry to avoid duplication of vertices
-			      GeometryTool.minimizeVerts(mesh,conditions);
+			      new GeometryHelper().minimizeVerts(mesh,conditions);
 		         }
-		    }
-	}
-	
-	/**
-	 * Converts an indexed geometry into a non indexed geometry
-	 * 
-	 * @param meshData mesh data
-	 */
-	private static void convertIndexedGeometryIntoNonIndexedGeometry(final MeshData meshData){
-		final IndexBufferData<?> indices=meshData.getIndices();
-		if(indices!=null)
-		    {final FloatBuffer previousVertexBuffer=meshData.getVertexBuffer();
-			 if(previousVertexBuffer!=null)
-			     {final int valuesPerVertexTuple=meshData.getVertexCoords().getValuesPerTuple();
-			      final FloatBuffer nextVertexBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerVertexTuple);
-			      for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-			          {final int vertexIndex=indices.get(indexIndex);
-				       for(int coordIndex=0;coordIndex<valuesPerVertexTuple;coordIndex++)
-				           {final float vertexCoordValue=previousVertexBuffer.get((vertexIndex*valuesPerVertexTuple)+coordIndex);
-					        nextVertexBuffer.put((indexIndex*valuesPerVertexTuple)+coordIndex,vertexCoordValue);
-				           }
-			          }
-			      meshData.setVertexCoords(new FloatBufferData(nextVertexBuffer,valuesPerVertexTuple));
-			     }
-			 final FloatBuffer previousNormalBuffer=meshData.getNormalBuffer();
-			 if(previousNormalBuffer!=null)
-			     {final int valuesPerNormalTuple=meshData.getNormalCoords().getValuesPerTuple();
-			      final FloatBuffer nextNormalBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerNormalTuple);
-				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-			          {final int vertexIndex=indices.get(indexIndex);
-			           for(int coordIndex=0;coordIndex<valuesPerNormalTuple;coordIndex++)
-				           {final float normalCoordValue=previousNormalBuffer.get((vertexIndex*valuesPerNormalTuple)+coordIndex);
-				            nextNormalBuffer.put((indexIndex*valuesPerNormalTuple)+coordIndex,normalCoordValue);
-				           }
-			          }
-				  meshData.setNormalCoords(new FloatBufferData(nextNormalBuffer,valuesPerNormalTuple));
-			     }
-			 final FloatBuffer previousColorBuffer=meshData.getColorBuffer();
-			 if(previousColorBuffer!=null)
-			     {final int valuesPerColorTuple=meshData.getColorCoords().getValuesPerTuple();
-			      final FloatBuffer nextColorBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerColorTuple);
-				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-			          {final int vertexIndex=indices.get(indexIndex);
-			           for(int coordIndex=0;coordIndex<valuesPerColorTuple;coordIndex++)
-				           {final float colorCoordValue=previousColorBuffer.get((vertexIndex*valuesPerColorTuple)+coordIndex);
-				            nextColorBuffer.put((indexIndex*valuesPerColorTuple)+coordIndex,colorCoordValue);
-				           }
-			          }
-				  meshData.setColorCoords(new FloatBufferData(nextColorBuffer,valuesPerColorTuple));
-			     }
-			 final FloatBuffer previousFogBuffer=meshData.getFogBuffer();
-			 if(previousFogBuffer!=null)
-			     {final int valuesPerFogTuple=meshData.getFogCoords().getValuesPerTuple();
-			      final FloatBuffer nextFogBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerFogTuple);
-				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-			          {final int vertexIndex=indices.get(indexIndex);
-			           for(int coordIndex=0;coordIndex<valuesPerFogTuple;coordIndex++)
-				           {final float fogCoordValue=previousFogBuffer.get((vertexIndex*valuesPerFogTuple)+coordIndex);
-				            nextFogBuffer.put((indexIndex*valuesPerFogTuple)+coordIndex,fogCoordValue);
-				           }
-			          }
-				  meshData.setFogCoords(new FloatBufferData(nextFogBuffer,valuesPerFogTuple));
-			     }
-			 final FloatBuffer previousTangentBuffer=meshData.getTangentBuffer();
-			 if(previousTangentBuffer!=null)
-			     {final int valuesPerTangentTuple=meshData.getTangentCoords().getValuesPerTuple();
-			      final FloatBuffer nextTangentBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerTangentTuple);
-				  for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-			          {final int vertexIndex=indices.get(indexIndex);
-			           for(int coordIndex=0;coordIndex<valuesPerTangentTuple;coordIndex++)
-				           {final float tangentCoordValue=previousTangentBuffer.get((vertexIndex*valuesPerTangentTuple)+coordIndex);
-				            nextTangentBuffer.put((indexIndex*valuesPerTangentTuple)+coordIndex,tangentCoordValue);
-				           }
-			          }
-				  meshData.setTangentCoords(new FloatBufferData(nextTangentBuffer,valuesPerTangentTuple));
-			     }
-			 final int numberOfUnits=meshData.getNumberOfUnits();
-			 if(numberOfUnits>0)
-			     {final List<FloatBufferData> previousTextureCoordsList=meshData.getTextureCoords();
-			      final List<FloatBufferData> nextTextureCoordsList=new ArrayList<FloatBufferData>();
-				  for(int unitIndex=0;unitIndex<numberOfUnits;unitIndex++)
-				      {final FloatBufferData previousTextureCoords=previousTextureCoordsList.get(unitIndex);
-				       if(previousTextureCoords==null)
-				    	   nextTextureCoordsList.add(null);
-				       else
-				           {final FloatBuffer previousTextureBuffer=previousTextureCoords.getBuffer();
-				    	    final int valuesPerTextureTuple=previousTextureCoords.getValuesPerTuple();
-				    	    final FloatBuffer nextTextureBuffer=FloatBuffer.allocate(indices.capacity()*valuesPerTextureTuple);
-				    	    for(int indexIndex=0;indexIndex<indices.capacity();indexIndex++)
-					            {final int vertexIndex=indices.get(indexIndex);
-					             for(int coordIndex=0;coordIndex<valuesPerTextureTuple;coordIndex++)
-						             {final float textureCoordValue=previousTextureBuffer.get((vertexIndex*valuesPerTextureTuple)+coordIndex);
-						              nextTextureBuffer.put((indexIndex*valuesPerTextureTuple)+coordIndex,textureCoordValue);
-						             }
-					            }
-				    	    nextTextureCoordsList.add(new FloatBufferData(nextTextureBuffer,valuesPerTextureTuple));
-				           }
-				      }
-				  meshData.setTextureCoords(nextTextureCoordsList);
-			     }
-			 //removes the index buffer
-			 meshData.setIndices(null);
 		    }
 	}
 	
