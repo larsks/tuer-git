@@ -771,8 +771,23 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				      nextTextureBuffer.put(fu).put(fv);
 				     }
 			 //does not modify the position so that this texture buffer is ready for the addition of the new texture coordinates
-			 //TODO: eighth step: add the new triangles into the geometry of the mesh
-			 
+			 //eighth step: adds the new triangles into the geometry of the mesh
+			 for(HashMap<RightTriangleInfo[][][],NextQuadInfo> previousAndNextAdjacentTrisMap:mapOfPreviousAndNextAdjacentTrisMaps.values())
+			     for(NextQuadInfo nextQuadInfo:previousAndNextAdjacentTrisMap.values())
+			         {//uses the six indices to know which vertices to use in order to build the two triangles
+				      for(int indexIndex=0;indexIndex<nextQuadInfo.indices.length;indexIndex++)
+				          {final int vertexIndex=nextQuadInfo.indices[indexIndex];
+				    	   final Vector3 vertex=nextQuadInfo.vertices[vertexIndex];
+				    	   final Vector2 texCoord=nextQuadInfo.textureCoords[vertexIndex];
+				    	   final float x=vertex.getXf();
+				    	   final float y=vertex.getYf();
+				    	   final float z=vertex.getZf();
+				    	   final float fu=texCoord.getXf();
+				    	   final float fv=texCoord.getYf();
+				    	   nextVertexBuffer.put(x).put(y).put(z);
+				    	   nextTextureBuffer.put(fu).put(fv);
+				          }
+			         }
 			 //finally, rewinds the new vertex buffer and sets it
 			 nextVertexBuffer.rewind();
 			 meshData.setVertexBuffer(nextVertexBuffer);
