@@ -382,6 +382,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                        	       if(tv0[(tr0.sideIndexOfHypotenuse+k)%3].equals(tv1[(tr1.sideIndexOfHypotenuse+2)%3]))
 				                                       {oneCommonSide=true;
 				                                        //checks if the vertex order is correct
+				                                        //FIXME this test seems to be wrong
 				                                        oneCommonSideCorrectVertexOrder=j!=k;
 				                                        if(oneCommonSideCorrectVertexOrder)
 				                                            {//checks if the orthogonal sides adjacent with this common side have the same length
@@ -539,6 +540,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
 					  if(!trisList.isEmpty())
 			              {//builds the 2D array from the list of triangles
+						   //FIXME filter the second argument in order to keep only the information about the triangles in the first argument
 						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
@@ -855,6 +857,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				 infosQueue.addAll(commonSidesInfos);
 			 int infosQueueIndex=0;
 			 //loops while this list is not empty
+			 //FIXME rather loop until all triangles of the list supplied in the first parameter are used
 			 while(!infosQueue.isEmpty())
 			     {boolean inserted=false;
 			      //gets the information from the list
@@ -992,6 +995,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		return result;
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testComputeAdjacentMergeableTrisArraysList(){
 		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
 		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null},
