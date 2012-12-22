@@ -404,6 +404,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 								                                      {//stores tr0, tr1, tr2, tr3 and the indices for further uses
+									            					   //FIXME consider treating tr2 and tr3, omitting them breaks the first part of the fifth step
 									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
 									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
 									            							   (tr1.sideIndexOfHypotenuse+j)%3,
@@ -452,6 +453,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 									                                  {//stores tr0, tr1, tr2, tr3 and the indices for further uses
+									            					   //FIXME consider treating tr2 and tr3, omitting them breaks the first part of the fifth step
 									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
 									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
 									            							   (tr1.sideIndexOfHypotenuse+j)%3,
