@@ -13,6 +13,8 @@
 */
 package jfpsm;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.FloatBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -29,8 +33,12 @@ import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
+import com.ardor3d.scenegraph.Node;
+import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.geom.GeometryTool.MatchCondition;
+import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
 
 
 /**
@@ -531,7 +539,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
 					  if(!trisList.isEmpty())
 			              {//builds the 2D array from the list of triangles
-						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap,meshData);
+						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
 				           //puts the new list into the map
@@ -812,8 +820,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 */
 	private static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
 			final ArrayList<RightTriangleInfo> trisList,
-			final HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>> commonSidesInfosMap,
-			final MeshData meshData){
+			final HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>> commonSidesInfosMap){
 		/**
 		 * computes an overestimated size to be sure not to use an index out of 
 		 * the bounds, uses the list size as all pairs of triangles represent 
@@ -1023,7 +1030,21 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	}
 	
 	public static final void main(String[] args){
-		testComputeAdjacentMergeableTrisArraysList();
+		//testComputeAdjacentMergeableTrisArraysList();
+		AWTImageLoader.registerLoader();
+		try{SimpleResourceLocator srl=new SimpleResourceLocator(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/images"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
+           } 
+        catch(final URISyntaxException urise)
+        {urise.printStackTrace();}
+		try{final Node levelNode=(Node)new BinaryImporter().load(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
+		    final Mesh mesh=(Mesh)((Node)levelNode.getChild(0)).getChild(1);
+		    System.out.println("Input: "+mesh.getMeshData().getVertexCount());
+		    optimize(mesh);
+		    System.out.println("Output: "+mesh.getMeshData().getVertexCount());
+	       }
+	    catch(IOException ioe)
+	    {throw new RuntimeException("level loading failed",ioe);}
 	}
 	
 	/**
