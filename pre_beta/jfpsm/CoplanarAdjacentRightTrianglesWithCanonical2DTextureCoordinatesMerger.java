@@ -383,7 +383,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                                       {oneCommonSide=true;
 				                                        //checks if the vertex order is correct
 				                                        //FIXME this test seems to be wrong
-				                                        oneCommonSideCorrectVertexOrder=j!=k;
+				                                        oneCommonSideCorrectVertexOrder=/*j!=k*/true;
 				                                        if(oneCommonSideCorrectVertexOrder)
 				                                            {//checks if the orthogonal sides adjacent with this common side have the same length
 					                                         if(tv0[(tr0.sideIndexOfHypotenuse+((k+1)%2))%3].distanceSquared(tv0[(tr0.sideIndexOfHypotenuse+2)%3])==
@@ -670,6 +670,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    	 Arrays.fill(mergedAdjacentTrisVerticesIndices,-1);
 			    			    	 tri1=mergedAdjacentTris[0];
 			    			    	 tri2=mergedAdjacentTris[1];
+			    			    	 //FIXME the detection of corners is broken
+			    			    	 if(tri1!=null&&tri2!=null)
+			    			    	     {
 			    			    	 tri1TextureCoords=getPrimitiveTextureCoords(meshData,tri1.primitiveIndex,tri1.sectionIndex,0,tri1TextureCoords);
 				                     tri2TextureCoords=getPrimitiveTextureCoords(meshData,tri2.primitiveIndex,tri2.sectionIndex,0,tri2TextureCoords);
 				                     testedAdjacentTrisTextureCoords[0]=tri1TextureCoords[tri1.sideIndexOfHypotenuse];
@@ -715,6 +718,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			    			    	 //stores the couple of old pairs and the new pairs (with some information) in order to remove the former and to add the latter
 			    			    	 final NextQuadInfo quadInfo=new NextQuadInfo(mergedAdjacentTrisVertices,mergedAdjacentTrisTextureCoords,mergedAdjacentTrisVerticesIndices);
 			    			    	 previousAdjacentTrisAndNextQuadInfosMaps.put(adjacentTrisArray,quadInfo);
+			    			    	     }
 			    			        }
 		                       }
 			    	      }
@@ -853,12 +857,15 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			  * reuses the information stored in the previous step, copies them 
 			  * into a list
 			  */
-			 for(ArrayList<Entry<RightTriangleInfo[], int[]>> commonSidesInfos:commonSidesInfosMap.values())
-				 infosQueue.addAll(commonSidesInfos);
+			 for(ArrayList<Entry<RightTriangleInfo[],int[]>> commonSidesInfos:commonSidesInfosMap.values())
+				 {for(Entry<RightTriangleInfo[],int[]> commonSideInfo:commonSidesInfos)
+					  if(trisList.contains(commonSideInfo.getKey()[0])||trisList.contains(commonSideInfo.getKey()[1]))
+				          infosQueue.add(commonSideInfo);
+				 }
 			 int infosQueueIndex=0;
 			 //loops while this list is not empty
 			 //FIXME rather loop until all triangles of the list supplied in the first parameter are used
-			 while(!infosQueue.isEmpty())
+			 while(/*!infosQueue.isEmpty()*/arrayMap.size()<trisList.size())
 			     {boolean inserted=false;
 			      //gets the information from the list
 			      final Entry<RightTriangleInfo[],int[]> info=infosQueue.get(infosQueueIndex);
@@ -874,6 +881,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						    final int[] arrayIndices=new int[]{arrayMap.get(tris[0])[0],arrayMap.get(tris[0])[1]};
 						    //finds which sides are common updates the array
 					        final int tri1index=trisList.indexOf(tris[1]);
+					        if(tri1index!=-1)
+					            {
 					        if(tri1index%2==0)
 					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
 			                         {//to right
@@ -899,6 +908,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						    //updates the map as tris[1] has been found
 						    arrayMap.put(tris[1],arrayIndices);
 						    inserted=true;
+					            }
 					       }
 					  }
 				  else
@@ -908,6 +918,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 						    final int[] arrayIndices=arrayMap.get(tris[1]);
 				    	    //finds which sides are common and updates the array
 			                final int tri0index=trisList.indexOf(tris[0]);
+			                if(tri0index!=-1)
+			                    {
 					        if(tri0index%2==0)
 					            {if(commonSidesIndices[2]==(tris[0].sideIndexOfHypotenuse+1)%3)
 					                 {//to left
@@ -933,16 +945,39 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				    	    //updates the map as tris[0] has been found
 				    	    arrayMap.put(tris[0],arrayIndices);
 				    	    inserted=true;
+			                    }
 			               }
 			           else
 			        	   inserted=false;
 			          }
 			      if(inserted)
 			    	  {//removes the information we used
-			    	   infosQueue.remove(infosQueueIndex);
+			    	   /*infosQueue.remove(infosQueueIndex);
 			    	   //resets the index if it is out of the bounds
 			    	   if(infosQueueIndex==infosQueue.size())
-			    		   infosQueueIndex=0;
+			    		   infosQueueIndex=0;*/
+			    	   final int tri0localIndex=trisList.indexOf(tris[0]);
+			    	   if(tri0localIndex!=-1)
+			    	       {final int tri2localIndex;
+			    		    if(tri0localIndex%2==0)
+			    	            tri2localIndex=tri0localIndex+1;
+			    	        else
+			    	        	tri2localIndex=tri0localIndex-1;
+			    		    final RightTriangleInfo tri=trisList.get(tri2localIndex);
+			    		    if(!arrayMap.containsKey(tri))
+			    		        arrayMap.put(tri,arrayMap.get(tris[0]));
+			    	       }
+			    	   final int tri1localIndex=trisList.indexOf(tris[1]);
+			    	   if(tri1localIndex!=-1)
+			    	       {final int tri3localIndex;
+			    		    if(tri1localIndex%2==0)
+			    		    	tri3localIndex=tri1localIndex+1;
+			    	        else
+			    	        	tri3localIndex=tri1localIndex-1;
+			    		    final RightTriangleInfo tri=trisList.get(tri3localIndex);
+			    		    if(!arrayMap.containsKey(tri))
+			    		        arrayMap.put(tri,arrayMap.get(tris[1]));
+			    	       }
 			    	  }
 			      else
 			    	  {//uses the next index, does not go out of the bounds
