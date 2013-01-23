@@ -227,7 +227,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
         screen.removeReference();
         
         //initializes the settings, the full-screen mode is enabled
-        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,24,0,0,true,false);
+        /**
+         * do not use 32 bits for the depth buffer as 24 bits are enough and forcing 32 bits might lead to pick a 
+         * slow software renderer with a bad support of OpenGL
+         */
+        final int depthBits=24;
+        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,depthBits,0,0,true,false);
         //setups the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new ReliableCanvasRenderer(this);
         //creates a canvas      
