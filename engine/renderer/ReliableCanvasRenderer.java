@@ -30,6 +30,8 @@ import com.ardor3d.renderer.ContextCapabilities;
  *
  */
 public class ReliableCanvasRenderer extends JoglCanvasRenderer{
+	
+	private boolean initializationMakeCurrentContextCallDone,initializationReleaseCurrentContextDone;
 
 	public ReliableCanvasRenderer(Scene scene){
 		super(scene);
@@ -63,8 +65,18 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 	}
 	
 	@Override
-	public void makeCurrentContext(){}
+	public void makeCurrentContext(){
+		if(!initializationMakeCurrentContextCallDone&&!initializationReleaseCurrentContextDone)
+		    {super.makeCurrentContext();
+			 initializationMakeCurrentContextCallDone=true;
+		    }
+	}
 	
 	@Override
-	public void releaseCurrentContext(){}
+	public void releaseCurrentContext(){
+		if(initializationMakeCurrentContextCallDone&&!initializationReleaseCurrentContextDone)
+		    {super.releaseCurrentContext();
+			 initializationReleaseCurrentContextDone=true;
+		    }
+	}
 }
