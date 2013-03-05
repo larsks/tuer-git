@@ -376,10 +376,13 @@ public final class Ardor3DGameServiceProvider implements Scene{
              StringBuilder textContent=new StringBuilder();
         	 try{while((line=bufferedReader.readLine())!=null)
                      textContent.append(line+"\n");
-                 bufferedReader.close();
                 }
              catch(IOException ioe)
              {ioe.printStackTrace();}
+        	 finally
+        	 {try{bufferedReader.close();}
+        	  catch(IOException ioe){}
+        	 }
         	 result=textContent.toString();
             }
         else
