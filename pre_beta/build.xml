@@ -34,10 +34,6 @@
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
 	<property name="ardor3d-version" value="0.9-SNAPSHOT" />
-	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your manifest -->
-	<property name="tuer-chrome-web-store-manifest-filename" value="manifest.json" />
-	<!-- DO NOT CHANGE THIS NAME or Chrome web store won't find your icon -->
-	<property name="tuer-chrome-web-store-icon-filename" value="icon_128.png" />
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
@@ -184,7 +180,7 @@
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start and some files for Chrome Web Store">
+	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start">
 		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -478,29 +474,6 @@
 			</jnlp>
 			]]>
 		</echo>
-		<!-- generate the manifest file for Chrome web store -->
-		<echo file="${destdir}/${tuer-chrome-web-store-manifest-filename}"><![CDATA[{
-			  "name": "TUER",
-			  "description": "small FPS taking place in a museum (alpha version)",
-			  "version": "0.0.0.4",
-			  "app": {			    
-			    "launch": {
-			      "web_url": "${homepage-url}"
-			    }
-			  },
-			  "icons": {
-			    "128": "${tuer-chrome-web-store-icon-filename}"
-			  },
-			  "permissions": [
-			  ]
-			}		    
-		    ]]>
-		</echo>
-		<!-- generate the ZIP file for Chrome web store -->
-		<zip destFile="${destdir}/${tuer-chrome-web-store-zip-filename}" >
-			<zipfileset dir="${destdir}" includes="${tuer-chrome-web-store-manifest-filename}" fullpath="myapp/${tuer-chrome-web-store-manifest-filename}" />
-			<zipfileset dir="${destdir}" includes="${tuer-chrome-web-store-icon-filename}" fullpath="myapp/${tuer-chrome-web-store-icon-filename}" />
-		</zip>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
@@ -511,8 +484,6 @@
 	  		<fileset file="${keystore}" />
 	  		<fileset file="${destdir}/${tuer-jnlp-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jnlp-filename}" />
-	  		<fileset file="${destdir}/${tuer-chrome-web-store-manifest-filename}" />
-	  		<fileset file="${destdir}/${tuer-chrome-web-store-zip-filename}" />
 	  		<path refid="project.sign.jars.path"/>
 	   	</delete>
 	</target>
