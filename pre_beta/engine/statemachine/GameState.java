@@ -13,7 +13,6 @@
 */
 package engine.statemachine;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -1050,11 +1049,15 @@ public final class GameState extends ScenegraphState{
     
     @Deprecated
     private final void readCollisionMap(){
-    	try{BufferedImage map=ImageIO.read(GameState.class.getResource("/images/containermap.png"));
+    	//TODO use JOGL TextureData to remove this dependency
+    	try{//TODO uncomment the lines below when JOGL supports indexed PNGs
+    		//final TextureData textureData=TextureIO.newTextureData(null,GameState.class.getResource("/images/containermap.png"),false,"PNG");
+    	    //textureData.getBuffer();
+    	    BufferedImage map=ImageIO.read(GameState.class.getResource("/images/containermap.png"));
     	    collisionMap=new boolean[map.getWidth()][map.getHeight()];
     	    for(int y=0;y<map.getHeight();y++)
     	    	for(int x=0;x<map.getWidth();x++)
-    	    		collisionMap[x][y]=(map.getRGB(x, y)==Color.BLUE.getRGB());
+    	    		collisionMap[x][y]=(map.getRGB(x,y)==ColorRGBA.BLUE.asIntARGB());
     	   }
     	catch(IOException ioe)
 		{ioe.printStackTrace();}
