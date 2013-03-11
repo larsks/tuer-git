@@ -13,11 +13,12 @@
 */
 package engine.movement;
 
-import java.awt.Color;
-import java.awt.Point;
+import javax.media.nativewindow.util.Point;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 
@@ -33,18 +34,18 @@ public final class CircularSpreadTextureUpdaterController extends TextureUpdater
 
     public CircularSpreadTextureUpdaterController(String imageResourceName,
             MovementEquation equation,
-            HashMap<Color, Color> colorSubstitutionTable,
+            HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable,
             final Point spreadCenter,final Renderer renderer,final RenderContext renderContext){
         super(imageResourceName,equation,colorSubstitutionTable,renderer,renderContext);
         this.spreadCenter=spreadCenter;
     }
 
     @Override
-    protected Comparator<Entry<Point, Color>> getColoredPointComparator() {
+    protected Comparator<Entry<Point,ReadOnlyColorRGBA>> getColoredPointComparator() {
         return(new CenteredColoredPointComparator(spreadCenter));
     }
     
-    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point,Color>>{
+    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point,ReadOnlyColorRGBA>>{
         
         private final Point spreadCenter;
         
@@ -54,14 +55,20 @@ public final class CircularSpreadTextureUpdaterController extends TextureUpdater
         
         
         @Override
-        public final int compare(final Entry<Point, Color> o1,
-                                 final Entry<Point, Color> o2){
+        public final int compare(final Entry<Point,ReadOnlyColorRGBA> o1,
+                                 final Entry<Point,ReadOnlyColorRGBA> o2){
             final Point p1=o1.getKey();
             final Point p2=o2.getKey();
-            double d1=p1.distance(spreadCenter);
-            double d2=p2.distance(spreadCenter);
+            double d1=distance(p1, spreadCenter);
+            double d2=distance(p2, spreadCenter);
             return(d1==d2?0:d1<d2?-1:1);
         } 
+    }
+    
+    private static double distance(final Point p1,final Point p2) {
+    	double abscissaSub=p2.getX()-p1.getX();
+    	double ordinateSub=p2.getY()-p1.getY();
+    	return Math.sqrt((abscissaSub*abscissaSub)+(ordinateSub*ordinateSub));
     }
 
     public final Point getSpreadCenter(){

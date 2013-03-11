@@ -13,8 +13,7 @@
 */
 package engine.statemachine;
 
-import java.awt.Color;
-import java.awt.Point;
+import javax.media.nativewindow.util.Point;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,6 +27,7 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
@@ -60,8 +60,8 @@ public final class IntroductionState extends ScenegraphState{
         box.setTranslation(new Vector3(0,0,-75));
         //configures the spread effect
         final Point spreadCenter=new Point(205,265);     
-        HashMap<Color,Color> colorSubstitutionTable=new HashMap<Color,Color>();
-        colorSubstitutionTable.put(Color.BLUE,Color.RED);
+        HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA>();
+        colorSubstitutionTable.put(ColorRGBA.BLUE,ColorRGBA.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //sets a controller that modifies the image
         /**
