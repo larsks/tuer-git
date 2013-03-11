@@ -13,8 +13,9 @@
 */
 package engine.renderer;
 
-import javax.swing.JOptionPane;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.media.opengl.GLProfile;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.renderer.ContextCapabilities;
@@ -53,11 +54,29 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
              //checks whether Microsoft’s generic software emulation driver (OpenGL emulation through Direct3D) is installed
         	 if(vendor!=null&&renderer!=null&&vendor.equalsIgnoreCase("Microsoft Corporation")&&
         		realCaps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
-                 {//prevents the use of this crap, recommends to the end user to install a proper OpenGL driver
-        		  JOptionPane.showMessageDialog(null,
-        				    "TUER cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
-        				    "OpenGL driver error",
-        				    JOptionPane.ERROR_MESSAGE);
+                 {if(GLProfile.isAWTAvailable())
+                      {//uses Java Reflection to remove this dependency at runtime
+                	   try{final Class<?> jOptionPaneClass=Class.forName("javax.swing.JOptionPane");
+                	       final Class<?> componentClass=Class.forName("java.awt.Component");
+                	       final Method showMessageDialogMethod=jOptionPaneClass.getMethod("showMessageDialog",componentClass,Object.class,String.class,int.class);
+                	       //prevents the use of this crap, recommends to the end user to install a proper OpenGL driver
+                	       showMessageDialogMethod.invoke(null,null,
+               				    "TUER cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
+            				    "OpenGL driver error",0);
+					      }
+                	   catch(ClassNotFoundException cnfe)
+                	   {cnfe.printStackTrace();} 
+                	   catch(SecurityException se)
+                	   {se.printStackTrace();}
+                	   catch(NoSuchMethodException nsme)
+                	   {nsme.printStackTrace();}
+                	   catch(IllegalArgumentException iae)
+                	   {iae.printStackTrace();}
+                	   catch(IllegalAccessException e)
+                	   {e.printStackTrace();}
+                	   catch(InvocationTargetException ite)
+                	   {ite.printStackTrace();}
+                      }
         		  System.exit(0);
                  }
             }
