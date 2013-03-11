@@ -13,8 +13,7 @@
 */
 package engine.movement;
 
-import java.awt.Color;
-import java.awt.Point;
+import javax.media.nativewindow.util.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -33,6 +32,8 @@ import misc.SerializationHelper;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
 import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.math.ColorRGBA;
+import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.scenegraph.Spatial;
@@ -71,10 +72,10 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
     private transient boolean inited;
     
     /**table matching source colors and destination colors*/
-    private HashMap<Color,Color> colorSubstitutionTable;
+    private HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable;
 	
     /**sorted (chronological update order) list of vertices*/
-	private transient ArrayList<Entry<Point,Color>> coloredVerticesList;
+	private transient ArrayList<Entry<Point,ReadOnlyColorRGBA>> coloredVerticesList;
 	
 	private transient int updateX,updateY,updateWidth,updateHeight;
 	
@@ -91,7 +92,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	
 	public TextureUpdaterController(final String imageResourceName,
 	        final MovementEquation equation,
-	        final HashMap<Color,Color> colorSubstitutionTable,
+	        final HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable,
 	        final Renderer renderer,final RenderContext renderContext){
         this.imageResourceName=imageResourceName;
 	    this.equation=equation;
@@ -105,46 +106,46 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	
     private final void init(){
         ResourceSource resourceSource=new URLResourceSource(getClass().getResource(imageResourceName));
-        //create texture from resource name
+        //creates texture from resource name
         texture=(Texture2D)TextureManager.load(resourceSource,Texture.MinificationFilter.Trilinear,true);
-        //load the image
+        //loads the image
         try{originalImage=ImageIO.read(resourceSource.openStream());}
         catch(IOException ioe)
         {ioe.printStackTrace();}
-        //flip the image
+        //flips the image
         AffineTransform flipVerticallyTr=AffineTransform.getScaleInstance(1,-1);
         flipVerticallyTr.translate(0,-originalImage.getHeight());
         AffineTransformOp flipVerticallyOp=new AffineTransformOp(flipVerticallyTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         originalImage=flipVerticallyOp.filter(originalImage,null);
-        //scale image if needed
+        //scales image if needed
         if(originalImage.getWidth()!=texture.getImage().getWidth()||originalImage.getHeight()!=texture.getImage().getHeight())
             {final AffineTransform scaleTr=AffineTransform.getScaleInstance((double)texture.getImage().getWidth()/originalImage.getWidth(),(double)texture.getImage().getHeight()/originalImage.getHeight());
              final AffineTransformOp scaleOp=new AffineTransformOp(scaleTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
              originalImage=scaleOp.filter(originalImage,null);
             }
-        //create the buffer
+        //creates the buffer
         final byte[] data=AWTImageLoader.asByteArray(originalImage);
         imageBuffer=BufferUtils.createByteBuffer(data.length);
         bytesPerPixel=data.length/(originalImage.getWidth()*originalImage.getHeight());
-        //fill the buffer with the data
+        //fills the buffer with the data
         imageBuffer.put(data);
         imageBuffer.rewind();
-        //compute effect (compute sorted vertices with color substitution)
-        coloredVerticesList=new ArrayList<Entry<Point,Color>>();
-        //fill
-        Color sourceColor,destinationColor;
+        //computes effect (compute sorted vertices with color substitution)
+        coloredVerticesList=new ArrayList<Entry<Point,ReadOnlyColorRGBA>>();
+        //fills
+        ReadOnlyColorRGBA sourceColor,destinationColor;
         for(int y=0;y<originalImage.getHeight();y++)
             for(int x=0;x<originalImage.getWidth();x++)
-                {sourceColor=new Color(originalImage.getRGB(x,y));
+                {sourceColor=new ColorRGBA().fromIntARGB(originalImage.getRGB(x,y));
                  destinationColor=colorSubstitutionTable.get(sourceColor);
                  if(destinationColor!=null)
-                     coloredVerticesList.add(new AbstractMap.SimpleEntry<Point,Color>(new Point(x,y),destinationColor));
+                     coloredVerticesList.add(new AbstractMap.SimpleEntry<Point,ReadOnlyColorRGBA>(new Point(x,y),destinationColor));
                 }
-        //sort
+        //sorts
         Collections.sort(coloredVerticesList,getColoredPointComparator());
     }
     
-    protected abstract Comparator<Entry<Point,Color>> getColoredPointComparator();
+    protected abstract Comparator<Entry<Point,ReadOnlyColorRGBA>> getColoredPointComparator();
 
 	/**
 	 * 
@@ -173,13 +174,13 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
              Point updatedVertex;
              int rgbVal,bufferIndex,minX=originalImage.getWidth(),minY=originalImage.getHeight(),maxX=-1,maxY=-1;
              for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
-                 {rgbVal=coloredVerticesList.get(i).getValue().getRGB();
+                 {rgbVal=coloredVerticesList.get(i).getValue().asIntARGB();
                   updatedVertex=coloredVerticesList.get(i).getKey();
-                  minX=Math.min(minX,updatedVertex.x);
-                  minY=Math.min(minY,updatedVertex.y);
-                  maxX=Math.max(maxX,updatedVertex.x);
-                  maxY=Math.max(maxY,updatedVertex.y);
-                  bufferIndex=bytesPerPixel*(updatedVertex.x+(updatedVertex.y*originalImage.getWidth()));
+                  minX=Math.min(minX,updatedVertex.getX());
+                  minY=Math.min(minY,updatedVertex.getY());
+                  maxX=Math.max(maxX,updatedVertex.getX());
+                  maxY=Math.max(maxY,updatedVertex.getY());
+                  bufferIndex=bytesPerPixel*(updatedVertex.getX()+(updatedVertex.getY()*originalImage.getWidth()));
                   switch(bytesPerPixel)
                   {case 1:
                    {imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
@@ -255,11 +256,11 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         this.equation=equation;
     }
 
-    public final HashMap<Color, Color> getColorSubstitutionTable(){
+    public final HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> getColorSubstitutionTable(){
         return(colorSubstitutionTable);
     }
 
-    public final void setColorSubstitutionTable(final HashMap<Color,Color> colorSubstitutionTable){
+    public final void setColorSubstitutionTable(final HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable){
         this.colorSubstitutionTable=colorSubstitutionTable;
     }
 
