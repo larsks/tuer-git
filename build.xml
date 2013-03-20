@@ -166,7 +166,7 @@
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
 	<target name="compile" description="Compiles the source code">
-	    <javac srcdir="${srcdir}"       	   
+	    <javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
 	           debug="on" >
 	    	<classpath refid="project.class.path"/>
