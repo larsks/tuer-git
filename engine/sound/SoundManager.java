@@ -58,12 +58,9 @@ public final class SoundManager{
         try{try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
     	    catch(SoundSystemException sseOpenAL)
     	    {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);
-    	     sseOpenAL.printStackTrace();
     	     try{soundSystem=new ExtendedSoundSystem(LibraryJavaSound.class);}
     	     catch(SoundSystemException sseJavaSound)
-    	     {System.out.println("The initialization of the sound manager (based on JavaSound) failed: "+sseJavaSound);
-    	      sseJavaSound.printStackTrace();
-    	     }
+    	     {System.out.println("The initialization of the sound manager (based on JavaSound) failed: "+sseJavaSound);}
     	    }
     	    if(soundSystem!=null)
                 SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
