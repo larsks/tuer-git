@@ -157,10 +157,36 @@
 		            <or>
 		                <equals arg1="${ant.java.version}" arg2="1.6" />
 		                <equals arg1="${ant.java.version}" arg2="1.7" />
+		            	<equals arg1="${ant.java.version}" arg2="1.8" />
 		            </or>		                		            
 		        </not>
 		    </condition>
         </fail>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Upgrade JogAmp                                                    -->
+	<!-- ================================================================= -->
+	<target name="upgrade-jogamp" description="Upgrades JogAmp, uses the latest aggregated build">
+		<!-- TODO download the latest aggregated build and update the local files -->
+		<!-- downloads the binaries of OpenAL-Soft for Windows as they aren't bundled with JOAL yet -->
+		<get src="http://kcat.strangesoft.net/openal-soft-1.15.1-bin.zip" dest="lib/joal" verbose="true" usetimestamp="true" />
+		<!-- extracts the DLLs of OpenAL-Soft for Windows 32 bits & 64 bits -->
+		<unzip src="lib/joal/openal-soft-1.15.1-bin.zip" dest="lib/joal">
+			<patternset>
+			    <include name="**/soft_oal.dll"/>
+			</patternset>
+		</unzip>
+		<!-- deletes the ZIP archive -->
+		<delete file="lib/joal/openal-soft-1.15.1-bin.zip" />
+		<!-- puts these DLLs into JOAL JARs containing native libraries for Windows -->
+		<jar destfile="lib/joal/joal-natives-windows-i586.jar" update="true">
+			<fileset file="lib/joal/openal-soft-1.15.1-bin/Win32/soft_oal.dll" />
+		</jar>
+		<jar destfile="lib/joal/joal-natives-windows-amd64.jar" update="true">
+			<fileset file="lib/joal/openal-soft-1.15.1-bin/Win64/soft_oal.dll" />
+		</jar>
+		<!-- deletes the extracted DLLs -->
+		<delete dir="lib/joal/openal-soft-1.15.1-bin" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
@@ -479,11 +505,13 @@
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
 	<target name="clean" description="Deletes the java archive and the .class files">
-	  	<delete>
+	  	<delete failonerror="false">
 	  		<fileset dir="${bindir}" includes="**/*.class" />
 	  		<fileset file="${keystore}" />
 	  		<fileset file="${destdir}/${tuer-jnlp-filename}" />
 	  		<fileset file="${destdir}/${jfpsm-jnlp-filename}" />
+	  		<fileset file="lib/joal/openal-soft-1.15.1-bin.zip" />
+	  		<dirset dir="lib/joal/openal-soft-1.15.1-bin" />
 	  		<path refid="project.sign.jars.path"/>
 	   	</delete>
 	</target>
