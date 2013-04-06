@@ -404,7 +404,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 								                                      {//stores tr0, tr1, tr2, tr3 and the indices for further uses
-									            					   //FIXME consider treating tr2 and tr3, omitting them breaks the first part of the fifth step
 									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
 									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
 									            							   (tr1.sideIndexOfHypotenuse+j)%3,
@@ -453,7 +452,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 									            				  oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound=texCoordsMatch;
 									            				  if(oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound)
 									                                  {//stores tr0, tr1, tr2, tr3 and the indices for further uses
-									            					   //FIXME consider treating tr2 and tr3, omitting them breaks the first part of the fifth step
 									            					   commonSideInfo=new SimpleEntry<RightTriangleInfo[],int[]>(new RightTriangleInfo[]{tr0,tr1,tr0,tr1},
 									            							   new int[]{(tr0.sideIndexOfHypotenuse+2)%3,
 									            							   (tr1.sideIndexOfHypotenuse+j)%3,
@@ -540,7 +538,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				  for(ArrayList<RightTriangleInfo> trisList:entry.getValue())
 					  if(!trisList.isEmpty())
 			              {//builds the 2D array from the list of triangles
-						   //FIXME filter the second argument in order to keep only the information about the triangles in the first argument
 						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
 				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
@@ -864,7 +861,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				 }
 			 int infosQueueIndex=0;
 			 //loops while this list is not empty
-			 //FIXME rather loop until all triangles of the list supplied in the first parameter are used
 			 while(/*!infosQueue.isEmpty()*/arrayMap.size()<trisList.size())
 			     {boolean inserted=false;
 			      //gets the information from the list
