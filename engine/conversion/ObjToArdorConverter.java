@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import com.ardor3d.extension.model.obj.ObjImporter;
-import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
@@ -28,7 +28,7 @@ public class ObjToArdorConverter {
 
 	
 	public static final void main(String[] args) throws IOException, URISyntaxException{
-        AWTImageLoader.registerLoader();
+        JoglImageLoader.registerLoader();
         BinaryExporter binaryExporter=new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);

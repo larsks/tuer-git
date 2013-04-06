@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import com.ardor3d.extension.model.md2.Md2Importer;
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.TextureManager;
@@ -31,7 +31,7 @@ public final class Md2ToArdorConverter{
 
     
     public static final void main(String[] args) throws IOException, URISyntaxException{
-        AWTImageLoader.registerLoader();
+        JoglImageLoader.registerLoader();
         BinaryExporter binaryExporter=new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(Md2ToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);

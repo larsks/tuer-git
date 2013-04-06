@@ -29,7 +29,7 @@ import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
-import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
@@ -310,8 +310,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         buf.setEnabled(true);
         buf.setFunction(ZBufferState.TestFunction.LessThanOrEqualTo);
         root.setRenderState(buf);
-        //adds our AWT-based image loader.
-        AWTImageLoader.registerLoader();
+        //adds our image loader.
+        JoglImageLoader.registerLoader();
         //sets the default font
         //UIComponent.setDefaultFont(getFontsList().get(2));
         //sets the location of our resources.
