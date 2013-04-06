@@ -507,11 +507,15 @@
 	<target name="clean" description="Deletes the java archive and the .class files">
 	  	<delete failonerror="false">
 	  		<fileset dir="${bindir}" includes="**/*.class" />
-	  		<fileset file="${keystore}" />
-	  		<fileset file="${destdir}/${tuer-jnlp-filename}" />
-	  		<fileset file="${destdir}/${jfpsm-jnlp-filename}" />
-	  		<fileset file="lib/joal/openal-soft-1.15.1-bin.zip" />
+	  	</delete>
+		<delete file="${keystore}" failonerror="false" />
+		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
+		<delete file="${destdir}/${jfpsm-jnlp-filename}" failonerror="false" />
+		<delete file="lib/joal/openal-soft-1.15.1-bin.zip" failonerror="false" />
+		<delete failonerror="false">
 	  		<dirset dir="lib/joal/openal-soft-1.15.1-bin" />
+		</delete>
+		<delete failonerror="false">
 	  		<path refid="project.sign.jars.path"/>
 	   	</delete>
 	</target>

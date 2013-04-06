@@ -22,7 +22,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.util.AWTImageLoader;
+import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -57,8 +57,7 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     private BinaryExporter binaryExporter=new DirectBinaryExporter();
     
     private EngineServiceProvider(){
-        // Add our awt based image loader.
-        AWTImageLoader.registerLoader();
+        JoglImageLoader.registerLoader();
     }
     
     
