@@ -14,10 +14,6 @@
 package engine.movement;
 
 import javax.media.nativewindow.util.Point;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
@@ -27,13 +23,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import javax.imageio.ImageIO;
 import misc.SerializationHelper;
-
+import com.ardor3d.image.Image;
 import com.ardor3d.image.ImageDataFormat;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
-import com.ardor3d.image.util.AWTImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.RenderContext;
@@ -57,7 +51,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	private String imageResourceName;
 	
     /**unchanged image*/
-    private transient BufferedImage originalImage;
+    private transient Image originalImage;
 	
 	/**buffer containing the modified data of the image*/
 	private transient ByteBuffer imageBuffer;
@@ -110,36 +104,45 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         ResourceSource resourceSource=new URLResourceSource(getClass().getResource(imageResourceName));
         //creates texture from resource name
         texture=(Texture2D)TextureManager.load(resourceSource,Texture.MinificationFilter.Trilinear,true);
-        //loads the image
-        try{originalImage=ImageIO.read(resourceSource.openStream());}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        //flips the image
-        AffineTransform flipVerticallyTr=AffineTransform.getScaleInstance(1,-1);
-        flipVerticallyTr.translate(0,-originalImage.getHeight());
-        AffineTransformOp flipVerticallyOp=new AffineTransformOp(flipVerticallyTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        originalImage=flipVerticallyOp.filter(originalImage,null);
-        //scales image if needed
-        if(originalImage.getWidth()!=texture.getImage().getWidth()||originalImage.getHeight()!=texture.getImage().getHeight())
-            {final AffineTransform scaleTr=AffineTransform.getScaleInstance((double)texture.getImage().getWidth()/originalImage.getWidth(),(double)texture.getImage().getHeight()/originalImage.getHeight());
-             final AffineTransformOp scaleOp=new AffineTransformOp(scaleTr,AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-             originalImage=scaleOp.filter(originalImage,null);
-            }
+        //copies the image
+        final Image currentImage = texture.getImage();
+        final ByteBuffer originalImageData = BufferUtils.createByteBuffer(currentImage.getData(0).capacity());
+        originalImageData.put(currentImage.getData(0)).rewind();
+        currentImage.getData(0).rewind();
+        originalImage=new Image(currentImage.getDataFormat(),currentImage.getDataType(),currentImage.getWidth(),currentImage.getHeight(),originalImageData,null);
         //creates the buffer
-        final ByteBuffer imageData = texture.getImage().getData(0);
-        imageBuffer=BufferUtils.createByteBuffer(imageData.capacity());
+        imageBuffer=BufferUtils.createByteBuffer(originalImageData.capacity());
         bytesPerPixel=imageBuffer.capacity()/(texture.getImage().getWidth()*texture.getImage().getHeight());
         //fills the buffer with the data
-        imageBuffer.put(imageData);
-        imageBuffer.rewind();
-        imageData.rewind();
+        imageBuffer.put(originalImageData).rewind();
+        originalImageData.rewind();
         //computes effect (compute sorted vertices with color substitution)
         coloredVerticesList=new ArrayList<Entry<Point,ReadOnlyColorRGBA>>();
         //fills
         ReadOnlyColorRGBA sourceColor,destinationColor;
         for(int y=0;y<originalImage.getHeight();y++)
             for(int x=0;x<originalImage.getWidth();x++)
-                {sourceColor=new ColorRGBA().fromIntARGB(originalImage.getRGB(x,y));
+                {final int index=bytesPerPixel*(x+(y*originalImage.getWidth()));
+                 sourceColor=new ColorRGBA();
+                 final int argb;
+                 switch(originalImage.getDataFormat())
+                 {case RGB:
+                	  argb=(imageBuffer.get(index)<<16)|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2))|(0xFF<<24);
+               	      break;
+                  case BGR:
+                	  argb=(imageBuffer.get(index))|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2)<<16)|(0xFF<<24);
+                	  break;
+                  case RGBA:
+                	  argb=(imageBuffer.get(index)<<16)|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2))|(imageBuffer.get(index+3)<<24);
+                	  break;
+                  case BGRA:
+                	  argb=(imageBuffer.get(index))|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2)<<16)|(imageBuffer.get(index+3)<<24);
+                	  break;
+                  default:
+                	  argb=0;
+                 }
+                 sourceColor=new ColorRGBA().fromIntARGB(argb);
+                 ColorRGBA.BLUE.asIntARGB();
                  destinationColor=colorSubstitutionTable.get(sourceColor);
                  if(destinationColor!=null)
                      coloredVerticesList.add(new AbstractMap.SimpleEntry<Point,ReadOnlyColorRGBA>(new Point(x,y),destinationColor));
@@ -213,10 +216,10 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                         }
                     else
                         {if(texture.getImage().getDataFormat()==ImageDataFormat.BGRA)
-                            {imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>16)&0xFF));
-                             imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>8)&0xFF));
-                             imageBuffer.put(bufferIndex+1,(byte)(rgbVal&0xFF));
-                             imageBuffer.put(bufferIndex,(byte)((rgbVal>>24)&0xFF));
+                            {imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>16)&0xFF));
+                             imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
+                             imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
+                             imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>24)&0xFF));
                             }
                         }
                     break;
@@ -256,10 +259,10 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	public final void reset(){
 	    elapsedTime=0;
 	    //put the data of the original image back into the buffer
-	    final byte[] data=AWTImageLoader.asByteArray(originalImage);
+	    final ByteBuffer originalImageData=originalImage.getData(0);
 	    imageBuffer.rewind();
-        imageBuffer.put(data);
-        imageBuffer.rewind();
+        imageBuffer.put(originalImageData).rewind();
+        originalImageData.rewind();
 	}
 
     public final String getImageResourceName(){
