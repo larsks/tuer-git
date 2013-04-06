@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import javax.imageio.ImageIO;
 import misc.SerializationHelper;
+
+import com.ardor3d.image.ImageDataFormat;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
 import com.ardor3d.image.util.AWTImageLoader;
@@ -124,12 +126,13 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
              originalImage=scaleOp.filter(originalImage,null);
             }
         //creates the buffer
-        final byte[] data=AWTImageLoader.asByteArray(originalImage);
-        imageBuffer=BufferUtils.createByteBuffer(data.length);
-        bytesPerPixel=data.length/(originalImage.getWidth()*originalImage.getHeight());
+        final ByteBuffer imageData = texture.getImage().getData(0);
+        imageBuffer=BufferUtils.createByteBuffer(imageData.capacity());
+        bytesPerPixel=imageBuffer.capacity()/(texture.getImage().getWidth()*texture.getImage().getHeight());
         //fills the buffer with the data
-        imageBuffer.put(data);
+        imageBuffer.put(imageData);
         imageBuffer.rewind();
+        imageData.rewind();
         //computes effect (compute sorted vertices with color substitution)
         coloredVerticesList=new ArrayList<Entry<Point,ReadOnlyColorRGBA>>();
         //fills
@@ -187,16 +190,35 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                     break;
                    }
                    case 3:
-                   {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
-                    imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                    imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
+                   {if(texture.getImage().getDataFormat()==ImageDataFormat.RGB)
+                	    {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
+                         imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
+                         imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
+                	    }
+                    else
+                        {if(texture.getImage().getDataFormat()==ImageDataFormat.BGR)
+                             {imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>16)&0xFF));
+                              imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
+                              imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
+                             }
+                        }
                     break;
                    }
                    case 4:
-                   {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
-                    imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                    imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
-                    imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>24)&0xFF));
+                   {if(texture.getImage().getDataFormat()==ImageDataFormat.RGBA)
+                        {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
+                         imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
+                         imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
+                         imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>24)&0xFF));
+                        }
+                    else
+                        {if(texture.getImage().getDataFormat()==ImageDataFormat.BGRA)
+                            {imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>16)&0xFF));
+                             imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>8)&0xFF));
+                             imageBuffer.put(bufferIndex+1,(byte)(rgbVal&0xFF));
+                             imageBuffer.put(bufferIndex,(byte)((rgbVal>>24)&0xFF));
+                            }
+                        }
                     break;
                    }
                   }
