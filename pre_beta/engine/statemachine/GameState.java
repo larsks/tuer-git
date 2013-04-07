@@ -13,7 +13,6 @@
 */
 package engine.statemachine;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import javax.imageio.ImageIO;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -31,7 +29,9 @@ import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
+import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseButton;
 import com.ardor3d.input.PhysicalLayer;
@@ -87,6 +87,7 @@ import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.input.ExtendedFirstPersonControl;
 import engine.misc.ApplicativeTimer;
+import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
@@ -1049,18 +1050,16 @@ public final class GameState extends ScenegraphState{
     
     @Deprecated
     private final void readCollisionMap(){
-    	//TODO use JOGL TextureData to remove this dependency
-    	try{//TODO uncomment the lines below when JOGL supports indexed PNGs
-    		//final TextureData textureData=TextureIO.newTextureData(null,GameState.class.getResource("/images/containermap.png"),false,"PNG");
-    	    //textureData.getBuffer();
-    	    BufferedImage map=ImageIO.read(GameState.class.getResource("/images/containermap.png"));
-    	    collisionMap=new boolean[map.getWidth()][map.getHeight()];
-    	    for(int y=0;y<map.getHeight();y++)
-    	    	for(int x=0;x<map.getWidth();x++)
-    	    		collisionMap[x][y]=(map.getRGB(x,y)==ColorRGBA.BLUE.asIntARGB());
-    	   }
-    	catch(IOException ioe)
-		{ioe.printStackTrace();}
+    	final URL mapUrl=GameState.class.getResource("/images/containermap.png");
+    	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
+    	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
+    	collisionMap=new boolean[map.getWidth()][map.getHeight()];
+    	final ImageHelper imgHelper=new ImageHelper();
+    	for(int y=0;y<map.getHeight();y++)
+	    	for(int x=0;x<map.getWidth();x++)
+	    		{final int argb=imgHelper.getARGB(map,x,y);
+	    		 collisionMap[x][y]=(argb==ColorRGBA.BLUE.asIntARGB());
+	    		}
     }
     
     protected void setLevelIndex(final int levelIndex){
