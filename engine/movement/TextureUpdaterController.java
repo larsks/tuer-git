@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import misc.SerializationHelper;
 import com.ardor3d.image.Image;
-import com.ardor3d.image.ImageDataFormat;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
 import com.ardor3d.math.ColorRGBA;
@@ -39,6 +38,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.ResourceSource;
 import com.ardor3d.util.resource.URLResourceSource;
+import engine.misc.ImageHelper;
 
 public abstract class TextureUpdaterController implements Serializable,SpatialController<Spatial>{
 
@@ -52,9 +52,9 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	
     /**unchanged image*/
     private transient Image originalImage;
-	
-	/**buffer containing the modified data of the image*/
-	private transient ByteBuffer imageBuffer;
+    
+    /**modified image*/
+    private transient Image modifiedImage;
 	
 	/**texture modified at runtime*/
 	private transient Texture2D texture;
@@ -74,8 +74,6 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	private transient ArrayList<Entry<Point,ReadOnlyColorRGBA>> coloredVerticesList;
 	
 	private transient int updateX,updateY,updateWidth,updateHeight;
-	
-	private transient int bytesPerPixel;
 	
 	private transient Renderer renderer;
 	
@@ -110,39 +108,20 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         originalImageData.put(currentImage.getData(0)).rewind();
         currentImage.getData(0).rewind();
         originalImage=new Image(currentImage.getDataFormat(),currentImage.getDataType(),currentImage.getWidth(),currentImage.getHeight(),originalImageData,null);
-        //creates the buffer
-        imageBuffer=BufferUtils.createByteBuffer(originalImageData.capacity());
-        bytesPerPixel=imageBuffer.capacity()/(texture.getImage().getWidth()*texture.getImage().getHeight());
-        //fills the buffer with the data
-        imageBuffer.put(originalImageData).rewind();
-        originalImageData.rewind();
+        //copies the image again, for the modifications
+        final ByteBuffer modifiedImageData = BufferUtils.createByteBuffer(currentImage.getData(0).capacity());
+        modifiedImageData.put(currentImage.getData(0)).rewind();
+        currentImage.getData(0).rewind();
+        modifiedImage=new Image(currentImage.getDataFormat(),currentImage.getDataType(),currentImage.getWidth(),currentImage.getHeight(),modifiedImageData,null);
         //computes effect (compute sorted vertices with color substitution)
         coloredVerticesList=new ArrayList<Entry<Point,ReadOnlyColorRGBA>>();
         //fills
         ReadOnlyColorRGBA sourceColor,destinationColor;
+        final ImageHelper imgHelper=new ImageHelper();
         for(int y=0;y<originalImage.getHeight();y++)
             for(int x=0;x<originalImage.getWidth();x++)
-                {final int index=bytesPerPixel*(x+(y*originalImage.getWidth()));
-                 sourceColor=new ColorRGBA();
-                 final int argb;
-                 switch(originalImage.getDataFormat())
-                 {case RGB:
-                	  argb=(imageBuffer.get(index)<<16)|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2))|(0xFF<<24);
-               	      break;
-                  case BGR:
-                	  argb=(imageBuffer.get(index))|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2)<<16)|(0xFF<<24);
-                	  break;
-                  case RGBA:
-                	  argb=(imageBuffer.get(index)<<16)|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2))|(imageBuffer.get(index+3)<<24);
-                	  break;
-                  case BGRA:
-                	  argb=(imageBuffer.get(index))|(imageBuffer.get(index+1)<<8)|(imageBuffer.get(index+2)<<16)|(imageBuffer.get(index+3)<<24);
-                	  break;
-                  default:
-                	  argb=0;
-                 }
+                {final int argb=imgHelper.getARGB(originalImage,x,y);
                  sourceColor=new ColorRGBA().fromIntARGB(argb);
-                 ColorRGBA.BLUE.asIntARGB();
                  destinationColor=colorSubstitutionTable.get(sourceColor);
                  if(destinationColor!=null)
                      coloredVerticesList.add(new AbstractMap.SimpleEntry<Point,ReadOnlyColorRGBA>(new Point(x,y),destinationColor));
@@ -178,7 +157,8 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         if(updatablePixelsCount>0)
             {//modify the buffer
              Point updatedVertex;
-             int rgbVal,bufferIndex,minX=originalImage.getWidth(),minY=originalImage.getHeight(),maxX=-1,maxY=-1;
+             final ImageHelper imgHelper=new ImageHelper();
+             int rgbVal,minX=originalImage.getWidth(),minY=originalImage.getHeight(),maxX=-1,maxY=-1;
              for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
                  {rgbVal=coloredVerticesList.get(i).getValue().asIntARGB();
                   updatedVertex=coloredVerticesList.get(i).getKey();
@@ -186,45 +166,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                   minY=Math.min(minY,updatedVertex.getY());
                   maxX=Math.max(maxX,updatedVertex.getX());
                   maxY=Math.max(maxY,updatedVertex.getY());
-                  bufferIndex=bytesPerPixel*(updatedVertex.getX()+(updatedVertex.getY()*originalImage.getWidth()));
-                  switch(bytesPerPixel)
-                  {case 1:
-                   {imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
-                    break;
-                   }
-                   case 3:
-                   {if(texture.getImage().getDataFormat()==ImageDataFormat.RGB)
-                	    {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
-                         imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                         imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
-                	    }
-                    else
-                        {if(texture.getImage().getDataFormat()==ImageDataFormat.BGR)
-                             {imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>16)&0xFF));
-                              imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                              imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
-                             }
-                        }
-                    break;
-                   }
-                   case 4:
-                   {if(texture.getImage().getDataFormat()==ImageDataFormat.RGBA)
-                        {imageBuffer.put(bufferIndex,(byte)((rgbVal>>16)&0xFF));
-                         imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                         imageBuffer.put(bufferIndex+2,(byte)(rgbVal&0xFF));
-                         imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>24)&0xFF));
-                        }
-                    else
-                        {if(texture.getImage().getDataFormat()==ImageDataFormat.BGRA)
-                            {imageBuffer.put(bufferIndex+2,(byte)((rgbVal>>16)&0xFF));
-                             imageBuffer.put(bufferIndex+1,(byte)((rgbVal>>8)&0xFF));
-                             imageBuffer.put(bufferIndex,(byte)(rgbVal&0xFF));
-                             imageBuffer.put(bufferIndex+3,(byte)((rgbVal>>24)&0xFF));
-                            }
-                        }
-                    break;
-                   }
-                  }
+                  imgHelper.setARGB(modifiedImage,updatedVertex.getX(),updatedVertex.getY(),rgbVal);
                  }
              if(minX<originalImage.getWidth())
                  {//compute the zone that needs an update
@@ -253,15 +195,15 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
 	/**update the texture*/
 	private final void updateTexture(){
 	    //modify the texture by using the image data
-	    renderer.updateTexture2DSubImage(texture,updateX,updateY,updateWidth,updateHeight,imageBuffer,updateX,updateY,texture.getImage().getWidth());
+	    renderer.updateTexture2DSubImage(texture,updateX,updateY,updateWidth,updateHeight,modifiedImage.getData(0),updateX,updateY,texture.getImage().getWidth());
 	}
 	
 	public final void reset(){
 	    elapsedTime=0;
 	    //put the data of the original image back into the buffer
 	    final ByteBuffer originalImageData=originalImage.getData(0);
-	    imageBuffer.rewind();
-        imageBuffer.put(originalImageData).rewind();
+	    modifiedImage.getData(0).rewind();
+	    modifiedImage.getData(0).put(originalImageData).rewind();
         originalImageData.rewind();
 	}
 
