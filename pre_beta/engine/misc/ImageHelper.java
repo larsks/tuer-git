@@ -3,6 +3,7 @@ package engine.misc;
 import java.nio.ByteBuffer;
 
 import com.ardor3d.image.Image;
+import com.ardor3d.image.util.ImageUtils;
 
 public class ImageHelper {
 
@@ -10,7 +11,7 @@ public class ImageHelper {
 	
 	public int getARGB(final Image img,final int x,final int y){
 		final ByteBuffer imgData=img.getData(0);
-		final int bytesPerPixel=imgData.capacity()/(img.getWidth()*img.getHeight());
+		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());
 		final int dataIndex=bytesPerPixel*(x+(y*img.getWidth()));
 		final int argb;
 		switch(img.getDataFormat())
@@ -34,7 +35,7 @@ public class ImageHelper {
 	
 	public void setARGB(final Image img,final int x,final int y,final int argb){
 		final ByteBuffer imgData=img.getData(0);
-		final int bytesPerPixel=imgData.capacity()/(img.getWidth()*img.getHeight());
+		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());
 		final int dataIndex=bytesPerPixel*(x+(y*img.getWidth()));
 		switch(img.getDataFormat())
 		{case RGB:
