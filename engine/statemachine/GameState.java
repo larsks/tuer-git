@@ -232,6 +232,10 @@ public final class GameState extends ScenegraphState{
             }
         };
         playerNode.getSceneHints().setRenderBucketType(RenderBucketType.PostBucket);
+        //attaches a node for the crosshair to the player node
+        final Node crosshairNode=createCrosshairNode();
+        playerNode.attachChild(crosshairNode);
+        //builds the player data
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
         	@Override
         	public Map.Entry<Integer,Integer> attack(){
@@ -307,6 +311,48 @@ public final class GameState extends ScenegraphState{
         healthTextLabel=initializeHealthTextLabel();
         headUpDisplayLabel=initializeHeadUpDisplayLabel();
         initializeCollisionSystem(cam);
+    }
+    
+    private final Node createCrosshairNode() {
+    	final Node crosshairNode=new Node("crosshair");
+        final Mesh crosshairMesh=new Mesh();
+        final MeshData crosshairMeshData=new MeshData();
+        final FloatBuffer crosshairVertexBuffer=BufferUtils.createFloatBuffer(36);
+        final float halfSmallSize=0.0004f;
+        final float halfBigSize=0.005f;
+        final float z=1.0f;
+        crosshairVertexBuffer.put(-halfSmallSize).put(-halfBigSize).put(z);
+        crosshairVertexBuffer.put(-halfSmallSize).put(+halfBigSize).put(z);
+        crosshairVertexBuffer.put(+halfSmallSize).put(+halfBigSize).put(z);
+        crosshairVertexBuffer.put(+halfSmallSize).put(+halfBigSize).put(z);
+        crosshairVertexBuffer.put(+halfSmallSize).put(-halfBigSize).put(z);
+        crosshairVertexBuffer.put(-halfSmallSize).put(-halfBigSize).put(z);
+        crosshairVertexBuffer.put(-halfBigSize).put(-halfSmallSize).put(z);
+        crosshairVertexBuffer.put(-halfBigSize).put(+halfSmallSize).put(z);
+        crosshairVertexBuffer.put(+halfBigSize).put(+halfSmallSize).put(z);
+        crosshairVertexBuffer.put(+halfBigSize).put(+halfSmallSize).put(z);
+        crosshairVertexBuffer.put(+halfBigSize).put(-halfSmallSize).put(z);
+        crosshairVertexBuffer.put(-halfBigSize).put(-halfSmallSize).put(z);
+        crosshairVertexBuffer.rewind();
+        crosshairMeshData.setVertexBuffer(crosshairVertexBuffer);
+        final FloatBuffer crosshairColorBuffer=BufferUtils.createFloatBuffer(48);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        crosshairColorBuffer.rewind();
+        crosshairMeshData.setColorBuffer(crosshairColorBuffer);
+        crosshairMesh.setMeshData(crosshairMeshData);
+        crosshairNode.attachChild(crosshairMesh);
+        return(crosshairNode);
     }
     
     private final void initializeCollisionSystem(final Camera cam){
