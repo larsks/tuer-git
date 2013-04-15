@@ -184,6 +184,10 @@ public final class GameState extends ScenegraphState{
     
     private static String pain6soundSampleIdentifier = null;
     
+    private static final String enemyShotgunShotSamplePath = "/sounds/shotgun_shot.ogg";
+    
+    private static String enemyShotgunShotSampleIdentifier = null;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         random=new Random();
@@ -678,6 +682,8 @@ public final class GameState extends ScenegraphState{
                     			         enemyWeaponKeyframeController.setCurTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
                     			         enemyWeaponKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
                     			         enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
+                    			         
+                    			         getSoundManager().play(false,false,enemyShotgunShotSampleIdentifier);
                                         }
                 		           }
                 		      }
@@ -1202,6 +1208,11 @@ public final class GameState extends ScenegraphState{
             {final URL pain1SoundSampleUrl=GameState.class.getResource(pain6soundSamplePath);
 	         if(pain1SoundSampleUrl!=null)
 	             pain6soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
+            }
+        if(enemyShotgunShotSamplePath!=null&&enemyShotgunShotSampleIdentifier==null)
+            {final URL enemyShotgunShotSampleUrl=GameState.class.getResource(enemyShotgunShotSamplePath);
+        	 if(enemyShotgunShotSampleUrl!=null)
+        		 enemyShotgunShotSampleIdentifier=getSoundManager().loadSound(enemyShotgunShotSampleUrl);
             }
     }
     
