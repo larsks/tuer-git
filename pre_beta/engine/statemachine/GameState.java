@@ -546,91 +546,120 @@ public final class GameState extends ScenegraphState{
                 	 for(Spatial child:getRoot().getChildren())
                 	     {final String childname=child.getName();
                 		  //prevents an enemy from committing a suicide
-                		  if(childname!=null&&!projectileData.getOriginator().equals(childname)&&childname.equals("a soldier"))
-                              {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
-                               BoundingPickResults results=new BoundingPickResults();
-                               PickingUtil.findPick(child,ray,results);
-                               hasCollision=results.getNumber()>0;
-                               results.clear();                                   
-                               if(hasCollision)
-                                   {/**
-                                     * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
-                                     *      As a first step, it should be very limited. On the long term, it will have to be homogeneous with the 
-                                     *      data model used for the player so that any enemy can behave like a bot in the arena mode
-                                     *      - Create another controller to modify the view depending on the changes in the data model
-                                     */
-                            	    //attempts to kill this enemy
-                            	    final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
-                            	    editedEnemiesData.add(soldierData);
-                            	    final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
-                            	    if(soldierData.isAlive())
-                            	    	{soldierData.decreaseHealth(25);
-                            	         //stops at the last frame of the set in the supplied time frame
-                                         soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
-                                         //selects randomly the death kind
-                                         final int localFrameIndex;
-                                         if(soldierData.isAlive())
-                                             localFrameIndex=3+random.nextInt(3);
-                             	         else
-                             	             localFrameIndex=random.nextInt(3);
-                                         final MD2FrameSet frameSet;
-                                         switch(localFrameIndex)
-                                         {
-                                             case 0:
-                                       	         frameSet=MD2FrameSet.DEATH_FALLFORWARD;
-                                       	         break;
-                                             case 1:
-                                       	         frameSet=MD2FrameSet.DEATH_FALLBACK;
-                                       	         break;
-                                             case 2:
-                                       	         frameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
-                                       	         break;
-                                             case 3:
-                                                 frameSet=MD2FrameSet.PAIN_A;
-                                                 break;
-                                             case 4:
-                                                 frameSet=MD2FrameSet.PAIN_B;
-                                                 break;
-                                             case 5:
-                                                 frameSet=MD2FrameSet.PAIN_C;
-                                                 break;
-                                   	         default:
-                                   	             frameSet=null;	  
-                                         }
-                                         if(frameSet!=null)
-                                             {soldierKeyframeController.setSpeed(frameSet.getFramesPerSecond());
-                                              soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
-                                              soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
-                                              soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
-                                              final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
-                                              final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
-                                              soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
-                                              soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
-                                              soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
-                                              soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                		  if(childname!=null&&!projectileData.getOriginator().equals(childname))
+                			  //FIXME handle other kinds of enemies
+                			  if(childname.equals("a soldier"))
+                                  {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
+                                   BoundingPickResults results=new BoundingPickResults();
+                                   PickingUtil.findPick(child,ray,results);
+                                   hasCollision=results.getNumber()>0;
+                                   results.clear();                                   
+                                   if(hasCollision)
+                                       {/**
+                                         * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
+                                         *      As a first step, it should be very limited. On the long term, it will have to be homogeneous with the 
+                                         *      data model used for the player so that any enemy can behave like a bot in the arena mode
+                                         *      - Create another controller to modify the view depending on the changes in the data model
+                                         */
+                            	        //attempts to kill this enemy
+                            	        final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
+                            	        editedEnemiesData.add(soldierData);
+                            	        final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
+                            	        if(soldierData.isAlive())
+                            	    	    {soldierData.decreaseHealth(25);
+                            	             //stops at the last frame of the set in the supplied time frame
+                                             soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                             //selects randomly the death kind
+                                             final int localFrameIndex;
+                                             if(soldierData.isAlive())
+                                                 localFrameIndex=3+random.nextInt(3);
+                             	             else
+                             	                 localFrameIndex=random.nextInt(3);
+                                             final MD2FrameSet frameSet;
+                                             switch(localFrameIndex)
+                                             {
+                                                 case 0:
+                                       	             frameSet=MD2FrameSet.DEATH_FALLFORWARD;
+                                       	             break;
+                                                 case 1:
+                                       	             frameSet=MD2FrameSet.DEATH_FALLBACK;
+                                       	             break;
+                                                 case 2:
+                                       	             frameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
+                                       	             break;
+                                                 case 3:
+                                                     frameSet=MD2FrameSet.PAIN_A;
+                                                     break;
+                                                 case 4:
+                                                     frameSet=MD2FrameSet.PAIN_B;
+                                                     break;
+                                                 case 5:
+                                                     frameSet=MD2FrameSet.PAIN_C;
+                                                     break;
+                                   	             default:
+                                   	                 frameSet=null;	  
                                              }
-                                         //plays a sound if the enemy is not dead
-                                         if(soldierData.getHealth()<=17)
-                                             getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                         else
-                                        	 if(soldierData.getHealth()<=33)
-                                                 getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                        	 else
-                                        		 if(soldierData.getHealth()<=50)
-                                                     getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                        		 else
-                                        			 if(soldierData.getHealth()<=67)
-                                                         getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                    	             else
-                                    	            	 if(soldierData.getHealth()<=83)
-                                                             getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                         else
-                                                        	 getSoundManager().play(false,false,pain1soundSampleIdentifier);
-                                        }
-                                    projectilesToRemove.add(projectileNode);
-                            	    break;
-                                   }
-                              }
+                                             if(frameSet!=null)
+                                                 {soldierKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                                  soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                                  soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                                  soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                                  final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
+                                                  final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
+                                                  soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                                  soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                                  soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                                  soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                                 }
+                                             //plays a sound if the enemy is not dead
+                                             if(soldierData.getHealth()<=17)
+                                                 getSoundManager().play(false,false,pain6soundSampleIdentifier);
+                                             else
+                                        	     if(soldierData.getHealth()<=33)
+                                                     getSoundManager().play(false,false,pain5soundSampleIdentifier);
+                                        	     else
+                                        		     if(soldierData.getHealth()<=50)
+                                                         getSoundManager().play(false,false,pain4soundSampleIdentifier);
+                                        		     else
+                                        			     if(soldierData.getHealth()<=67)
+                                                             getSoundManager().play(false,false,pain3soundSampleIdentifier);
+                                    	                 else
+                                    	            	     if(soldierData.getHealth()<=83)
+                                                                 getSoundManager().play(false,false,pain2soundSampleIdentifier);
+                                                             else
+                                                        	     getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                            }
+                                        projectilesToRemove.add(projectileNode);
+                            	        break;
+                                       }
+                                  }
+                			  else
+                				  if(childname.equals("player"))
+                				      {Ray3 ray=new Ray3(projectileNode.getTranslation(),/*projectileNode.getTransform().getMatrix().getColumn(2,null)*/projectileData.getInitialDirection());
+                                       BoundingPickResults results=new BoundingPickResults();
+                                       PickingUtil.findPick(child,ray,results);
+                                       hasCollision=results.getNumber()>0;
+                                       results.clear();                                   
+                                       if(hasCollision)
+                                           {playerData.decreaseHealth(10);
+                                            if(playerData.getHealth()<=17)
+                                                getSoundManager().play(false,false,pain6soundSampleIdentifier);
+                                            else
+                                      	        if(playerData.getHealth()<=33)
+                                                    getSoundManager().play(false,false,pain5soundSampleIdentifier);
+                                      	        else
+                                      		        if(playerData.getHealth()<=50)
+                                                        getSoundManager().play(false,false,pain4soundSampleIdentifier);
+                                      		        else
+                                      			        if(playerData.getHealth()<=67)
+                                                            getSoundManager().play(false,false,pain3soundSampleIdentifier);
+                                  	                    else
+                                  	            	        if(playerData.getHealth()<=83)
+                                                                getSoundManager().play(false,false,pain2soundSampleIdentifier);
+                                                            else
+                                                      	        getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                           }
+                				      }
                 	     }
                     }
                 //FIXME move this logic into a state machine
@@ -683,6 +712,8 @@ public final class GameState extends ScenegraphState{
                     			         enemyWeaponKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
                     			         enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
                     			         
+                    			         //TODO create a new projectile
+                    			         createEnemyProjectile(enemyData,enemyMesh,enemyWeaponMesh);
                     			         getSoundManager().play(false,false,enemyShotgunShotSampleIdentifier);
                                         }
                 		           }
@@ -694,7 +725,36 @@ public final class GameState extends ScenegraphState{
                 	 getRoot().detachChild(projectileToRemove);
                     }
                 playerWithStateMachine.updateLogicalLayer(timer);
-            }           
+            }
+
+            private void createEnemyProjectile(EnemyData enemyData,Mesh enemyMesh,Mesh enemyWeaponMesh){
+            	final Vector3 initialLocation=new Vector3(enemyWeaponMesh.getWorldBound().getCenter());
+		    	final String originator=enemyMesh.getName();
+		    	final double initialSpeed=350.0/1000000000.0;
+		    	final double initialAcceleration=0;
+		    	//final Vector3 initialDirection=enemyWeaponMesh.getWorldTransform().getMatrix().getColumn(2,null);
+		    	final Vector3 initialDirection=new Vector3(0,0,1);
+		    	final long initialTimeInNanos=timer.getElapsedTimeInNanoseconds();
+		    	final ProjectileData projectileData=new ProjectileData(originator,initialLocation,initialSpeed,initialAcceleration,
+		    	initialDirection,initialTimeInNanos);
+		    	final Node projectileNode=new Node(projectileData.toString());
+		    	NodeHelper.setModelBound(projectileNode,BoundingBox.class);
+		    	projectileNode.setTransform(enemyWeaponMesh.getWorldTransform());
+		    	projectileNode.setTranslation(initialLocation);        		    	  
+		    	Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
+		        MeshData projectileMeshData=new MeshData();
+		        //FIXME do not recreate these data each time and track them in order to release native memory
+		        FloatBuffer projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
+		        projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
+		        projectileMeshData.setVertexBuffer(projectileVertexBuffer);
+		        projectileMesh.setMeshData(projectileMeshData);
+		        projectileNode.attachChild(projectileMesh);
+		    	projectileNode.addController(new ProjectileController(timer,projectileData));
+		    	projectileNode.setUserData(new BoundingBox());
+		    	//stores it for a further use
+		    	projectilesMap.put(projectileNode,projectileData);
+		    	getRoot().attachChild(projectileNode);
+            }
         });
     }
     
