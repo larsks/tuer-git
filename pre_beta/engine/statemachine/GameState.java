@@ -269,7 +269,7 @@ public final class GameState extends ScenegraphState{
         	private final void createProjectile(final Spatial weaponSpatial){
         		//uses the world bound of the primary weapon to compute the initial position of the shot
 		    	final Vector3 initialLocation=new Vector3(weaponSpatial.getWorldBound().getCenter());
-		    	final String originator=this.toString();
+		    	final String originator="player";
 		    	final double initialSpeed=350.0/1000000000.0;
 		    	final double initialAcceleration=0;
 		    	final Vector3 initialDirection=weaponSpatial.getWorldTransform().getMatrix().getColumn(2,null);
