@@ -26,6 +26,7 @@ import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
 import com.ardor3d.extension.model.util.KeyframeController;
+import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
@@ -269,7 +270,7 @@ public final class GameState extends ScenegraphState{
         	private final void createProjectile(final Spatial weaponSpatial){
         		//uses the world bound of the primary weapon to compute the initial position of the shot
 		    	final Vector3 initialLocation=new Vector3(weaponSpatial.getWorldBound().getCenter());
-		    	final String originator="player";
+		    	final String originator=playerNode.getName();
 		    	final double initialSpeed=350.0/1000000000.0;
 		    	final double initialAcceleration=0;
 		    	final Vector3 initialDirection=weaponSpatial.getWorldTransform().getMatrix().getColumn(2,null);
@@ -548,7 +549,7 @@ public final class GameState extends ScenegraphState{
                 		  //prevents an enemy from committing a suicide
                 		  if(childname!=null&&!projectileData.getOriginator().equals(childname))
                 			  //FIXME handle other kinds of enemies
-                			  if(childname.equals("a soldier"))
+                			  if(childname.startsWith("a soldier"))
                                   {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
                                    BoundingPickResults results=new BoundingPickResults();
                                    PickingUtil.findPick(child,ray,results);
@@ -634,8 +635,8 @@ public final class GameState extends ScenegraphState{
                                        }
                                   }
                 			  else
-                				  if(childname.equals("player"))
-                				      {Ray3 ray=new Ray3(projectileNode.getTranslation(),/*projectileNode.getTransform().getMatrix().getColumn(2,null)*/projectileData.getInitialDirection());
+                				  if(child.equals(playerNode))
+                				      {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
                                        BoundingPickResults results=new BoundingPickResults();
                                        PickingUtil.findPick(child,ray,results);
                                        hasCollision=results.getNumber()>0;
@@ -732,8 +733,7 @@ public final class GameState extends ScenegraphState{
 		    	final String originator=enemyMesh.getName();
 		    	final double initialSpeed=350.0/1000000000.0;
 		    	final double initialAcceleration=0;
-		    	//final Vector3 initialDirection=enemyWeaponMesh.getWorldTransform().getMatrix().getColumn(2,null);
-		    	final Vector3 initialDirection=new Vector3(0,0,1);
+		    	final Vector3 initialDirection=enemyWeaponMesh.getWorldTransform().getMatrix().getColumn(2,null);
 		    	final long initialTimeInNanos=timer.getElapsedTimeInNanoseconds();
 		    	final ProjectileData projectileData=new ProjectileData(originator,initialLocation,initialSpeed,initialAcceleration,
 		    	initialDirection,initialTimeInNanos);
@@ -1487,10 +1487,21 @@ public final class GameState extends ScenegraphState{
             enemiesDataMap.put(soldierNode,soldierData);
             final Mesh weaponNode=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
             weaponNode.setName("soldier's weapon");
-            weaponNode.setTranslation(118.5,0.4,219);
             weaponNode.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-            weaponNode.setScale(0.015);            
+            weaponNode.setScale(0.015);
+            //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
+            NodeHelper.applyTransformToMeshData(weaponNode);
+            weaponNode.setTranslation(118.5,0.4,219);
+            weaponNode.updateModelBound();
+            weaponNode.updateWorldBound(true);
             final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
+            for(PointInTime pit:weaponKeyframeController._keyframes)
+                {pit._newShape.setScale(0.015);
+                 pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                 NodeHelper.applyTransformToMeshData(pit._newShape);
+                 pit._newShape.updateModelBound();
+                 pit._newShape.updateWorldBound(true);
+                }
             //loops on all frames of the set in the supplied time frame
             weaponKeyframeController.setRepeatType(RepeatType.WRAP);
             //uses the "stand" animation
