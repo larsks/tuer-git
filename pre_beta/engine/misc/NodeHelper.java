@@ -13,11 +13,16 @@
 */
 package engine.misc;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
-
 import com.ardor3d.bounding.BoundingVolume;
+import com.ardor3d.math.Transform;
+import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyTransform;
 import com.ardor3d.renderer.state.CullState;
+import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.hint.DataMode;
@@ -70,5 +75,24 @@ public final class NodeHelper{
 	public static final void detachChildren(Node node,ArrayList<? extends Spatial> childrenList){
 		for(Spatial child:childrenList)
 			node.detachChild(child);
+	}
+	
+	public static final void applyTransformToMeshData(Mesh mesh){
+		MeshData meshData=mesh.getMeshData();
+		ReadOnlyTransform meshTransform=mesh.getTransform();
+		FloatBufferData vertexData=meshData.getVertexCoords();
+		FloatBuffer vertexBuffer=vertexData.getBuffer();
+		vertexBuffer.rewind();
+		Vector3 tmp=new Vector3();
+		while(vertexBuffer.remaining()>=3)
+		    {final int pos=vertexBuffer.position();
+		     tmp.set(vertexBuffer.get(),vertexBuffer.get(),vertexBuffer.get());
+		     meshTransform.applyForward(tmp);
+		     vertexBuffer.position(pos);
+		     vertexBuffer.put(tmp.getXf()).put(tmp.getYf()).put(tmp.getZf());
+		    }
+		vertexBuffer.rewind();
+		//resets the transform
+		mesh.setTransform(new Transform());
 	}
 }
