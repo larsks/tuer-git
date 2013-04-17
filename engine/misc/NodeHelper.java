@@ -16,6 +16,8 @@ package engine.misc;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import com.ardor3d.bounding.BoundingVolume;
+import com.ardor3d.extension.model.util.KeyframeController;
+import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.math.Transform;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyTransform;
@@ -25,6 +27,7 @@ import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.hint.DataMode;
 
 public final class NodeHelper{
@@ -94,5 +97,52 @@ public final class NodeHelper{
 		vertexBuffer.rewind();
 		//resets the transform
 		mesh.setTransform(new Transform());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static final Mesh makeCopy(Mesh mesh){
+		final KeyframeController<Mesh> keyframeController;
+		if(mesh.getControllerCount()>0)
+		    {SpatialController<?> controller=mesh.getController(0);
+			 if(controller instanceof KeyframeController)
+			     {keyframeController=(KeyframeController<Mesh>)controller;
+			      //removes the controller in order to avoid it both in the original mesh and in its copy
+			      mesh.removeController(keyframeController);
+			     }
+			 else
+				 keyframeController=null;
+		    }
+		else
+			keyframeController=null;
+		//the morph mesh cannot share geometric data
+		final Mesh copy=mesh.makeCopy(keyframeController==null);
+		if(keyframeController!=null)
+		    {//makes a copy of the controller
+			 final KeyframeController<Mesh> keyframeControllerCopy=new KeyframeController<Mesh>();
+			 keyframeControllerCopy.setRepeatType(keyframeController.getRepeatType());
+			 keyframeControllerCopy.setMinTime(keyframeController.getMinTime());
+			 keyframeControllerCopy.setMaxTime(keyframeController.getMaxTime());
+			 keyframeControllerCopy.setSpeed(keyframeController.getSpeed());
+			 keyframeControllerCopy.setActive(keyframeController.isActive());
+			 keyframeControllerCopy.setCurTime(keyframeController.getCurTime());
+			 keyframeControllerCopy.setInterpTex(keyframeController.isInterpTex());
+			 keyframeControllerCopy.shallowSetMorphMesh(copy);
+			 keyframeControllerCopy.setUpdateBounding(keyframeController.isUpdateBounding());
+			 keyframeControllerCopy.setBlendTime(keyframeController.getBlendTime());
+			 if(keyframeController._keyframes!=null)
+			     {keyframeControllerCopy._keyframes=new ArrayList<PointInTime>();
+			      for(PointInTime pit:keyframeController._keyframes)
+			          {final PointInTime pitCopy=new PointInTime(pit._time,null);
+			           if(pit._newShape!=null)
+			        	   pitCopy._newShape=pit._newShape.makeCopy(true);
+			           keyframeControllerCopy._keyframes.add(pitCopy);
+			          }
+			     }
+			 //uses it for the copy of the mesh
+			 copy.addController(keyframeControllerCopy);
+			 //puts back the controller into the original mesh (it mustn't be done earlier to avoid using the same controller in the morph mesh)
+			 mesh.addController(keyframeController);
+		    }
+		return(copy);
 	}
 }
