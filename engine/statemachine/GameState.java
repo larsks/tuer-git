@@ -162,6 +162,10 @@ public final class GameState extends ScenegraphState{
     
     private final HashMap<EnemyData,Long> enemiesLatestDetection;
     
+    private Long latestPlayerDeath;
+    
+    private ExtendedFirstPersonControl fpsc;
+    
     private static final String pain1soundSamplePath = "/sounds/pain1.ogg";
     
     private static final String pain2soundSamplePath = "/sounds/pain2.ogg";
@@ -307,6 +311,7 @@ public final class GameState extends ScenegraphState{
         		return(reloadedAmmoCount);
         	}
         };
+        latestPlayerDeath=null;
         playerWithStateMachine=new LogicalPlayer(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
@@ -701,7 +706,7 @@ public final class GameState extends ScenegraphState{
                 		      }
                 		  else
                 		      {Long latestDetectionObj=enemiesLatestDetection.get(enemyData);
-                			   if(latestDetectionObj==null||absoluteElapsedTimeInNanoseconds-latestDetectionObj.longValue()>=1000000000)
+                			   if((latestDetectionObj==null||absoluteElapsedTimeInNanoseconds-latestDetectionObj.longValue()>=1000000000)&&playerData.isAlive())
                 		           {enemiesLatestDetection.put(enemyData,Long.valueOf(absoluteElapsedTimeInNanoseconds));
                 		            //checks whether the player is in front of this enemy (defensive behavior)
                 		            Ray3 ray=new Ray3(playerNode.getTranslation(),playerNode.getTransform().getMatrix().getColumn(2,null));
@@ -723,7 +728,7 @@ public final class GameState extends ScenegraphState{
                     			         enemyWeaponKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
                     			         enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
                     			         
-                    			         //TODO create a new projectile
+                    			         //creates a new projectile
                     			         createEnemyProjectile(enemyData,enemyMesh,enemyWeaponMesh);
                     			         getSoundManager().play(false,false,enemyShotgunShotSampleIdentifier);
                                         }
@@ -734,6 +739,24 @@ public final class GameState extends ScenegraphState{
                 for(Node projectileToRemove:projectilesToRemove)
                     {projectilesMap.remove(projectileToRemove);
                 	 getRoot().detachChild(projectileToRemove);
+                    }
+                if(playerData.isAlive())
+                    {fpsc.setKeyRotateSpeed(2.25);
+               	     fpsc.setMouseRotateSpeed(0.005);
+               	     fpsc.setMoveSpeed(5);
+                    }
+                else
+                    {if(latestPlayerDeath==null)
+                         {fpsc.setKeyRotateSpeed(0);
+                	      fpsc.setMouseRotateSpeed(0);
+                	      fpsc.setMoveSpeed(0);
+                    	  latestPlayerDeath=Long.valueOf(absoluteElapsedTimeInNanoseconds);
+                         }
+                     else
+                         {final double y=0.4d-((((double)Math.max(0,Math.min(absoluteElapsedTimeInNanoseconds-latestPlayerDeath.longValue(),500000000)))/500000000.0d)*0.4d)+0.1d;
+                    	  playerNode.setTranslation(playerNode.getTranslation().getX(),y,playerNode.getTranslation().getZ());
+                    	  playerNode.getCamera().setLocation(playerNode.getTranslation());
+                         }
                     }
                 //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
@@ -862,15 +885,18 @@ public final class GameState extends ScenegraphState{
     	}
     	
     	public void tryReload(){
-    		stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_RELOADING);
+    		if(playerData.isAlive())
+    		    stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_RELOADING);
     	}
     	
     	public void trySelectNextWeapon(){
-    		stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_NEXT);
+    		if(playerData.isAlive())
+    		    stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_NEXT);
     	}
     	
         public void trySelectPreviousWeapon(){
-        	stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_PREVIOUS);
+        	if(playerData.isAlive())
+        	    stateMachine.fireEvent(PlayerEvent.PUTTING_BACK_BEFORE_SELECTING_PREVIOUS);
     	}
         
         public PlayerState getPreviousState(){
@@ -878,7 +904,8 @@ public final class GameState extends ScenegraphState{
         }
         
         public void tryStartAttacking(){
-        	stateMachine.fireEvent(PlayerEvent.PRESSING_TRIGGER);
+        	if(playerData.isAlive())
+        	    stateMachine.fireEvent(PlayerEvent.PRESSING_TRIGGER);
         }
         
         public void tryStopAttacking(){
@@ -889,8 +916,7 @@ public final class GameState extends ScenegraphState{
     private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	final Vector3 worldUp=new Vector3(0,1,0);              
         //sets "drag only" to false to remove the need of pressing a button to move
-        ExtendedFirstPersonControl fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
-        fpsc.setMoveSpeed(fpsc.getMoveSpeed()/10);
+        fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         //creates a text node that asks the user to confirm or not the exit
         final BasicText exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
