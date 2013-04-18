@@ -100,7 +100,7 @@ public final class NodeHelper{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static final Mesh makeCopy(Mesh mesh){
+	public static final Mesh makeCopy(Mesh mesh, boolean shareGeometricData){
 		final KeyframeController<Mesh> keyframeController;
 		if(mesh.getControllerCount()>0)
 		    {SpatialController<?> controller=mesh.getController(0);
@@ -114,8 +114,8 @@ public final class NodeHelper{
 		    }
 		else
 			keyframeController=null;
-		//the morph mesh cannot share geometric data
-		final Mesh copy=mesh.makeCopy(keyframeController==null);
+		//the morph mesh shouldn't share geometric data
+		final Mesh copy=mesh.makeCopy(shareGeometricData&&keyframeController==null);
 		if(keyframeController!=null)
 		    {//makes a copy of the controller
 			 final KeyframeController<Mesh> keyframeControllerCopy=new KeyframeController<Mesh>();
@@ -134,7 +134,7 @@ public final class NodeHelper{
 			      for(PointInTime pit:keyframeController._keyframes)
 			          {final PointInTime pitCopy=new PointInTime(pit._time,null);
 			           if(pit._newShape!=null)
-			        	   pitCopy._newShape=pit._newShape.makeCopy(true);
+			        	   pitCopy._newShape=pit._newShape.makeCopy(shareGeometricData);
 			           keyframeControllerCopy._keyframes.add(pitCopy);
 			          }
 			     }

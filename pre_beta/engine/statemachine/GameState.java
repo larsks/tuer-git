@@ -1500,7 +1500,7 @@ public final class GameState extends ScenegraphState{
 	    	    }
 	        final Vector3[] soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
 	        for(Vector3 soldierPos:soldiersPos)
-	            {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate);
+	            {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate,true);
 	        	 soldierNode.setName("enemy@"+soldierNode.hashCode());
                  soldierNode.setTranslation(soldierPos);
                  final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
@@ -1514,7 +1514,7 @@ public final class GameState extends ScenegraphState{
                  getRoot().attachChild(soldierNode);
                  final EnemyData soldierData=new EnemyData();
                  enemiesDataMap.put(soldierNode,soldierData);
-                 final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate);
+                 final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
                  weaponNode.setName("weapon of "+soldierNode.getName());
                  weaponNode.setTranslation(soldierPos);
                  final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
