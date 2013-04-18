@@ -18,6 +18,7 @@ import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -538,7 +539,7 @@ public final class GameState extends ScenegraphState{
                 if(!hasCollision)
                 	wasBeingTeleported=false;
                 //handles the collisions between enemies and projectiles
-                ArrayList<Node> projectilesToRemove=new ArrayList<Node>();
+                HashSet<Node> projectilesToRemove=new HashSet<Node>();
                 ArrayList<EnemyData> editedEnemiesData=new ArrayList<EnemyData>();
                 for(Entry<Node,ProjectileData> projectileEntry:projectilesMap.entrySet())
                     {final Node projectileNode=projectileEntry.getKey();
@@ -630,6 +631,7 @@ public final class GameState extends ScenegraphState{
                                                              else
                                                         	     getSoundManager().play(false,false,pain1soundSampleIdentifier);
                                             }
+                            	        //FIXME only remove the projectile if it doesn't pass through the enemy
                                         projectilesToRemove.add(projectileNode);
                             	        break;
                                        }
@@ -642,27 +644,35 @@ public final class GameState extends ScenegraphState{
                                        hasCollision=results.getNumber()>0;
                                        results.clear();                                   
                                        if(hasCollision)
-                                           {playerData.decreaseHealth(10);
-                                            if(playerData.getHealth()<=17)
-                                                getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                            else
-                                      	        if(playerData.getHealth()<=33)
-                                                    getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                      	        else
-                                      		        if(playerData.getHealth()<=50)
-                                                        getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                      		        else
-                                      			        if(playerData.getHealth()<=67)
-                                                            getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                  	                    else
-                                  	            	        if(playerData.getHealth()<=83)
-                                                                getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                            else
-                                                      	        getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                           {if(playerData.isAlive())
+                                                {playerData.decreaseHealth(10);
+                                                 if(playerData.getHealth()<=17)
+                                                     getSoundManager().play(false,false,pain6soundSampleIdentifier);
+                                                 else
+                                      	             if(playerData.getHealth()<=33)
+                                                         getSoundManager().play(false,false,pain5soundSampleIdentifier);
+                                      	             else
+                                      		             if(playerData.getHealth()<=50)
+                                                             getSoundManager().play(false,false,pain4soundSampleIdentifier);
+                                      		             else
+                                      			             if(playerData.getHealth()<=67)
+                                                                 getSoundManager().play(false,false,pain3soundSampleIdentifier);
+                                  	                         else
+                                  	             	             if(playerData.getHealth()<=83)
+                                                                     getSoundManager().play(false,false,pain2soundSampleIdentifier);
+                                                                 else
+                                                      	             getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                                }
+                                            //FIXME only remove the projectile if it doesn't pass through the player
+                                            projectilesToRemove.add(projectileNode);
+                               	            break;
                                            }
                 				      }
                 	     }
                     }
+                //FIXME only remove "infinite" rays
+                //as all projectiles are designed with rays, they shouldn't stay in the data model any longer
+                projectilesToRemove.addAll(projectilesMap.keySet());
                 //FIXME move this logic into a state machine
                 for(Entry<Mesh,EnemyData> enemyEntry:enemiesDataMap.entrySet())
                 	{EnemyData enemyData=enemyEntry.getValue();
@@ -725,6 +735,7 @@ public final class GameState extends ScenegraphState{
                     {projectilesMap.remove(projectileToRemove);
                 	 getRoot().detachChild(projectileToRemove);
                     }
+                //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
             }
 
