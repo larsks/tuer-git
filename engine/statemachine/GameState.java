@@ -166,31 +166,35 @@ public final class GameState extends ScenegraphState{
     
     private ExtendedFirstPersonControl fpsc;
     
-    private static final String pain1soundSamplePath = "/sounds/pain1.ogg";
+    private static final String gameoverSoundSamplePath="/sounds/gameover.ogg";
     
-    private static final String pain2soundSamplePath = "/sounds/pain2.ogg";
+    private static String gameoverSoundSampleIdentifier=null;
     
-    private static final String pain3soundSamplePath = "/sounds/pain3.ogg";
+    private static final String pain1soundSamplePath="/sounds/pain1.ogg";
     
-    private static final String pain4soundSamplePath = "/sounds/pain4.ogg";
+    private static final String pain2soundSamplePath="/sounds/pain2.ogg";
     
-    private static final String pain5soundSamplePath = "/sounds/pain5.ogg";
+    private static final String pain3soundSamplePath="/sounds/pain3.ogg";
     
-    private static final String pain6soundSamplePath = "/sounds/pain6.ogg";
+    private static final String pain4soundSamplePath="/sounds/pain4.ogg";
     
-    private static String pain1soundSampleIdentifier = null;
+    private static final String pain5soundSamplePath="/sounds/pain5.ogg";
     
-    private static String pain2soundSampleIdentifier = null;
+    private static final String pain6soundSamplePath="/sounds/pain6.ogg";
     
-    private static String pain3soundSampleIdentifier = null;
+    private static String pain1soundSampleIdentifier=null;
     
-    private static String pain4soundSampleIdentifier = null;
+    private static String pain2soundSampleIdentifier=null;
     
-    private static String pain5soundSampleIdentifier = null;
+    private static String pain3soundSampleIdentifier=null;
     
-    private static String pain6soundSampleIdentifier = null;
+    private static String pain4soundSampleIdentifier=null;
     
-    private static final String enemyShotgunShotSamplePath = "/sounds/shotgun_shot.ogg";
+    private static String pain5soundSampleIdentifier=null;
+    
+    private static String pain6soundSampleIdentifier=null;
+    
+    private static final String enemyShotgunShotSamplePath="/sounds/shotgun_shot.ogg";
     
     private static String enemyShotgunShotSampleIdentifier = null;
     
@@ -751,6 +755,10 @@ public final class GameState extends ScenegraphState{
                 	      fpsc.setMouseRotateSpeed(0);
                 	      fpsc.setMoveSpeed(0);
                     	  latestPlayerDeath=Long.valueOf(absoluteElapsedTimeInNanoseconds);
+                    	  final BasicText gameoverTextLabel=BasicText.createDefaultTextLabel("Game over","Game over");
+                    	  gameoverTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/3,0));
+                    	  getRoot().attachChild(gameoverTextLabel);
+                    	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
                          }
                      else
                          {final double y=0.4d-((((double)Math.max(0,Math.min(absoluteElapsedTimeInNanoseconds-latestPlayerDeath.longValue(),500000000)))/500000000.0d)*0.4d)+0.1d;
@@ -1310,6 +1318,11 @@ public final class GameState extends ScenegraphState{
             {final URL enemyShotgunShotSampleUrl=GameState.class.getResource(enemyShotgunShotSamplePath);
         	 if(enemyShotgunShotSampleUrl!=null)
         		 enemyShotgunShotSampleIdentifier=getSoundManager().loadSound(enemyShotgunShotSampleUrl);
+            }
+        if(gameoverSoundSamplePath!=null&&gameoverSoundSampleIdentifier==null)
+            {final URL gameoverSoundSampleUrl=GameState.class.getResource(gameoverSoundSamplePath);
+        	 if(gameoverSoundSampleUrl!=null)
+        		 gameoverSoundSampleIdentifier=getSoundManager().loadSound(gameoverSoundSampleUrl);
             }
     }
     
