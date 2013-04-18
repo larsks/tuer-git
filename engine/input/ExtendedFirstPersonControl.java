@@ -41,7 +41,7 @@ public final class ExtendedFirstPersonControl{
     /**turn speed when using the mouse*/
     private double mouseRotateSpeed = .005;
     /**speed of move (front, back ,strafe)*/
-    private double moveSpeed = 50;
+    private double moveSpeed = 5;
     /**turn speed when using the arrow keys*/
     private double keyRotateSpeed = 2.25;
     /**temporary matrix*/
@@ -137,7 +137,7 @@ public final class ExtendedFirstPersonControl{
         if (kb.isDown(Key.RIGHT)) {
             rotX -= 1;
         }
-        if (rotX != 0 || rotY != 0) {
+        if ((rotX != 0 || rotY != 0) && mouseRotateSpeed != 0 && keyRotateSpeed != 0) {
             rotate(camera, rotX * (keyRotateSpeed / mouseRotateSpeed) * tpf, rotY
                     * (keyRotateSpeed / mouseRotateSpeed) * tpf);
         }
