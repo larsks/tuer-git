@@ -731,6 +731,8 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(arenaModePanel);
             }
         });
+        //FIXME enable this button when the arena mode is ready
+        arenaModeButton.setEnabled(false);
         final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
