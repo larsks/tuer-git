@@ -1102,7 +1102,7 @@ public final class GameState extends ScenegraphState{
             @Override
             public final void update(double time,Spatial caller){
             	if(playerData.isCurrentWeaponAmmunitionCountDisplayable())
-            		{final StringBuffer text=new StringBuffer();
+            		{final StringBuffer text=new StringBuffer("AMMO: ");
             		 if(playerData.isDualWeaponUseEnabled())
             			 {text.append(playerData.getAmmunitionCountInSecondaryHandedWeapon());
             			  text.append(" ");
@@ -1539,7 +1539,9 @@ public final class GameState extends ScenegraphState{
     private final void loadAmmunitions(){
     	final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
         final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
-        bullet9mmAmmoBox.setDefaultColor(ColorRGBA.GREEN);
+        final TextureState ts = new TextureState();
+        ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/ammo.png")),Texture.MinificationFilter.Trilinear,true));
+        bullet9mmAmmoBox.setRenderState(ts);
         bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
         bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
         bullet9mmAmmoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get("BULLET_9MM"),30));
