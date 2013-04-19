@@ -595,7 +595,7 @@ public final class GameState extends ScenegraphState{
                                    BoundingPickResults results=new BoundingPickResults();
                                    PickingUtil.findPick(child,ray,results);
                                    hasCollision=results.getNumber()>0;
-                                   results.clear();                                   
+                                   results.clear();
                                    if(hasCollision)
                                        {/**
                                          * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
@@ -1584,6 +1584,7 @@ public final class GameState extends ScenegraphState{
 	        	 soldierNode.setName("enemy@"+soldierNode.hashCode());
                  soldierNode.setTranslation(soldierPos);
                  final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
+                 soldierKeyframeController.setUpdateBounding(true);
                  //loops on all frames of the set in the supplied time frame
                  soldierKeyframeController.setRepeatType(RepeatType.WRAP);
                  //uses the "stand" animation
