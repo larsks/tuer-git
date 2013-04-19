@@ -166,6 +166,8 @@ public final class GameState extends ScenegraphState{
     
     private ExtendedFirstPersonControl fpsc;
     
+    private BasicText exitPromptTextLabel;
+    
     private static final String gameoverSoundSamplePath="/sounds/gameover.ogg";
     
     private static String gameoverSoundSampleIdentifier=null;
@@ -354,23 +356,49 @@ public final class GameState extends ScenegraphState{
         crosshairVertexBuffer.rewind();
         crosshairMeshData.setVertexBuffer(crosshairVertexBuffer);
         final FloatBuffer crosshairColorBuffer=BufferUtils.createFloatBuffer(48);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
-        crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+        for(int vertexIndex=0;vertexIndex<12;vertexIndex++)
+		     crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
         crosshairColorBuffer.rewind();
         crosshairMeshData.setColorBuffer(crosshairColorBuffer);
         crosshairMesh.setMeshData(crosshairMeshData);
         crosshairNode.attachChild(crosshairMesh);
         return(crosshairNode);
+    }
+    
+    private final void updateCrosshairNode(){
+    	final Node crosshairNode=(Node)playerNode.getChild("crosshair");
+    	if(crosshairNode!=null)
+    	    {final Mesh crosshairMesh=(Mesh)crosshairNode.getChild(0);
+             final MeshData crosshairMeshData=crosshairMesh.getMeshData();
+    		 final FloatBuffer crosshairVertexBuffer=crosshairMeshData.getVertexBuffer();
+    		 final Camera cam=playerNode.getCamera();
+    		 final float halfSmallWidth=0.0004f*1920.0f/((float)cam.getWidth());
+    		 final float halfSmallHeight=0.0004f*1080.0f/((float)cam.getHeight());
+    	     final float halfBigWidth=0.005f*1920.0f/((float)cam.getWidth());
+    	     final float halfBigHeight=0.005f*1080.0f/((float)cam.getHeight());
+    	     final float z=1.0f;
+    	     crosshairVertexBuffer.rewind();
+    	     crosshairVertexBuffer.put(-halfSmallWidth).put(-halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(-halfSmallWidth).put(+halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfSmallWidth).put(+halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfSmallWidth).put(+halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfSmallWidth).put(-halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(-halfSmallWidth).put(-halfBigHeight).put(z);
+    	     crosshairVertexBuffer.put(-halfBigWidth).put(-halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.put(-halfBigWidth).put(+halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfBigWidth).put(+halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfBigWidth).put(+halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.put(+halfBigWidth).put(-halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.put(-halfBigWidth).put(-halfSmallHeight).put(z);
+    	     crosshairVertexBuffer.rewind();
+    		 final FloatBuffer crosshairColorBuffer=crosshairMeshData.getColorBuffer();
+    		 crosshairColorBuffer.rewind();
+    		 for(int vertexIndex=0;vertexIndex<12;vertexIndex++)
+    		     crosshairColorBuffer.put(1.0f).put(0.0f).put(0.0f).put(1.0f);
+    	     crosshairColorBuffer.rewind();
+    	     crosshairMeshData.getVertexCoords().setNeedsRefresh(true);
+    	     crosshairMeshData.getColorCoords().setNeedsRefresh(true);
+    	    }
     }
     
     private final void initializeCollisionSystem(final Camera cam){
@@ -929,8 +957,7 @@ public final class GameState extends ScenegraphState{
         //sets "drag only" to false to remove the need of pressing a button to move
         fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         //creates a text node that asks the user to confirm or not the exit
-        final BasicText exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
-        exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
+        exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         final InputTrigger exitPromptTrigger=new InputTrigger(new KeyReleasedCondition(Key.ESCAPE),new TriggerAction(){
         	@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
@@ -1687,6 +1714,10 @@ public final class GameState extends ScenegraphState{
                   previousCamLocation.set(cam.getLocation());
                   cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.1,200);
                   cam.setLocation(currentCamLocation);
+                  //the resolution of the screen might have been modified in the graphical user interface
+                  //updates all elements whose positions should be bound to the resolution of the screen
+                  updateCrosshairNode();
+          		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  
