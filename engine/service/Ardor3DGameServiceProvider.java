@@ -283,7 +283,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
      * Initializes our scene.
      */
     private final void init(){
-        canvas.setTitle("Ardor3DGameServiceProvider - close window to exit");
+        canvas.setTitle("Truly Unusual Experience of Revolution");
         //refreshes the frustum when the window is resized
         ((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter(){
 			@Override
