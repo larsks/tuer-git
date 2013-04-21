@@ -14,7 +14,7 @@
 package engine.statemachine;
 
 import java.util.List;
-
+import java.util.Set;
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
@@ -44,9 +44,10 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.ScreenMode;
-
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
+import engine.input.Action;
+import engine.input.ActionMap;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
@@ -106,16 +107,18 @@ public final class MainMenuState extends ScenegraphState{
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
      * @param creditsContent credits content (may be null)
-     * @param controlsContent controls content (may be null)
      * @param fontStore store that contains fonts
      * @param toggleScreenModeAction action allowing to modify the windowing mode
+     * @param defaultActionMap default action map, which should not be modified, used to reset the custom action map to its default value
+     * @param customActionMap custom action map, which can be modified
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
                   final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
-                  final Runnable uninstallRunnable,final String creditsContent,final String controlsContent,
-      			  final FontStore fontStore,final TriggerAction toggleScreenModeAction){
+                  final Runnable uninstallRunnable,final String creditsContent,
+      			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
+      			  final ActionMap customActionMap){
         super(soundManager);
         matchTypeFactory=new MatchTypeFactory();
         matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
@@ -127,8 +130,8 @@ public final class MainMenuState extends ScenegraphState{
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
         //creates the panels
-        if(controlsContent!=null)
-            controlsPanel=createControlsPanel(controlsContent);
+        if(customActionMap!=null)
+            controlsPanel=createControlsPanel(customActionMap);
         else
         	controlsPanel=null;
         profilePanel=createProfilePanel();
@@ -768,10 +771,22 @@ public final class MainMenuState extends ScenegraphState{
     
     /**
      * 
-     * @param controlsContent controls content (cannot be null)
+     * @param customActionMap custom action map (cannot be null)
      * @return
      */
-    private final UIPanel createControlsPanel(final String controlsContent){
+    private final UIPanel createControlsPanel(final ActionMap customActionMap){
+    	final StringBuilder controlsContentBuilder=new StringBuilder();
+    	controlsContentBuilder.append("CONTROLS\n\n");
+    	for(Action action:Action.values())
+    	    {controlsContentBuilder.append(action.name().replace('_',' ').toLowerCase()).append(": ");
+    		 final Set<ActionMap.Input> inputs=customActionMap.getInputs(action);
+    		 for(ActionMap.Input input:inputs)
+    			 controlsContentBuilder.append(input).append(", ");
+    		 if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
+    			 controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
+    		 controlsContentBuilder.append('\n');
+    	    }
+    	final String controlsContent=controlsContentBuilder.toString();
     	final UILabel label=new UILabel(controlsContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);

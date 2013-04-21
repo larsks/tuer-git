@@ -16,6 +16,8 @@ package engine.statemachine;
 import java.util.Collections;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.input.Key;
+import com.ardor3d.input.MouseButton;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.TriggerAction;
@@ -25,6 +27,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.BasicConditions;
+import engine.input.ActionMap;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManager;
@@ -38,8 +41,6 @@ import engine.taskmanagement.TaskManager;
  *                           PAUSE_MENU,
  *                           LEVEL_END_DISPLAY (display at the end of a level with figures, etc...)
  *                           GAME_END_DISPLAY (final scene)
- *                           
- *       move the sound manager here
  *       
  *       add an accepting state to this machine to handle the cleanup 
  */
@@ -52,6 +53,10 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     private final FontStore fontStore;
     
+    private final ActionMap defaultActionMap;
+    
+    private final ActionMap customActionMap;
+    
     /**
      * sound manager used to play sound samples and music
      * */    
@@ -62,11 +67,46 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             final TriggerAction serviceExitAction,final TriggerAction toggleScreenModeAction,
             final Runnable launchRunnable,
             final Runnable uninstallRunnable,
-            final String creditsContent,final String controlsContent){
+            final String creditsContent,final ActionMap defaultActionMap){
         super(ScenegraphState.class,String.class,new ScenegraphState());
         fontStore=new FontStore();
         taskManager=new TaskManager();
         soundManager=new SoundManager();
+        if(defaultActionMap==null)
+            {this.defaultActionMap=new ActionMap();
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_FORWARD,Key.W);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_FORWARD,Key.Z);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_FORWARD,Key.NUMPAD8);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_BACKWARD,Key.S);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_BACKWARD,Key.NUMPAD2);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.STRAFE_LEFT,Key.A);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.STRAFE_LEFT,Key.Q);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.STRAFE_LEFT,Key.NUMPAD4);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.STRAFE_RIGHT,Key.D);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.STRAFE_RIGHT,Key.NUMPAD6);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.TURN_LEFT,Key.LEFT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.TURN_RIGHT,Key.RIGHT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.LOOK_UP,Key.UP);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.LOOK_DOWN,Key.DOWN);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.CROUCH,Key.C);
+             this.defaultActionMap.setMouseButtonActionBinding(engine.input.Action.CROUCH,MouseButton.MIDDLE);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.PAUSE,Key.P);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.RELOAD,Key.R);
+             this.defaultActionMap.setMouseButtonActionBinding(engine.input.Action.RELOAD,MouseButton.RIGHT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.ACTIVATE,Key.RETURN);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.RUN,Key.LSHIFT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.RUN,Key.RSHIFT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.ATTACK,Key.SPACE);
+             this.defaultActionMap.setMouseButtonActionBinding(engine.input.Action.ATTACK,MouseButton.LEFT);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.NEXT_WEAPON,Key.M);
+             this.defaultActionMap.setMouseWheelMoveActionBinding(engine.input.Action.NEXT_WEAPON,Boolean.TRUE);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.PREVIOUS_WEAPON,Key.L);
+             this.defaultActionMap.setMouseWheelMoveActionBinding(engine.input.Action.PREVIOUS_WEAPON,Boolean.FALSE);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.QUIT,Key.ESCAPE);
+            }
+        else
+        	this.defaultActionMap=defaultActionMap;
+        this.customActionMap=new ActionMap(this.defaultActionMap);
         final TriggerAction exitAction=new TriggerAction() {
 			
 			@Override
@@ -109,7 +149,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager,fontStore);
         final InitializationState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
         final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,controlsContent,fontStore,toggleScreenModeAction);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager);
         //adds the states and their actions to the state machine
