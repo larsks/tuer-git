@@ -17,8 +17,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -164,6 +167,8 @@ public final class GameState extends ScenegraphState{
     
     private Long latestPlayerDeath;
     
+    private final ProjectileDataOpponentsComparator projectileDataOpponentsComparator;
+    
     private ExtendedFirstPersonControl fpsc;
     
     private BasicText exitPromptTextLabel;
@@ -203,6 +208,7 @@ public final class GameState extends ScenegraphState{
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         random=new Random();
+        projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<Mesh,EnemyData>();
         enemiesLatestDetection=new HashMap<EnemyData,Long>();
         this.binaryImporter=new BinaryImporter();
@@ -581,134 +587,145 @@ public final class GameState extends ScenegraphState{
                 //handles the collisions between enemies and projectiles
                 HashSet<Node> projectilesToRemove=new HashSet<Node>();
                 ArrayList<EnemyData> editedEnemiesData=new ArrayList<EnemyData>();
+                //filters data to keep only the valid opponents
+                final List<Spatial> reachableOpponents=new ArrayList<Spatial>();
+                for(Spatial child:getRoot().getChildren())
+            	    {if((enemiesDataMap.keySet().contains(child)||child.equals(playerNode)))
+               		     reachableOpponents.add(child);
+            	    }
                 for(Entry<Node,ProjectileData> projectileEntry:projectilesMap.entrySet())
                     {final Node projectileNode=projectileEntry.getKey();
                 	 final ProjectileData projectileData=projectileEntry.getValue();
                 	 hasCollision=false;
-                	 for(Spatial child:getRoot().getChildren())
-                	     {final String childname=child.getName();
-                		  //prevents an enemy from committing a suicide
-                		  if(childname!=null&&!projectileData.getOriginator().equals(childname))
-                			  //FIXME handle other kinds of enemies
-                			  if(childname.startsWith("enemy"))
-                                  {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
-                                   BoundingPickResults results=new BoundingPickResults();
-                                   PickingUtil.findPick(child,ray,results);
-                                   hasCollision=results.getNumber()>0;
-                                   results.clear();
-                                   if(hasCollision)
-                                       {/**
-                                         * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
-                                         *      As a first step, it should be very limited. On the long term, it will have to be homogeneous with the 
-                                         *      data model used for the player so that any enemy can behave like a bot in the arena mode
-                                         *      - Create another controller to modify the view depending on the changes in the data model
-                                         */
-                            	        //attempts to kill this enemy
-                            	        final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
-                            	        editedEnemiesData.add(soldierData);
-                            	        final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
-                            	        if(soldierData.isAlive())
-                            	    	    {soldierData.decreaseHealth(25);
-                            	             //stops at the last frame of the set in the supplied time frame
-                                             soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
-                                             //selects randomly the death kind
-                                             final int localFrameIndex;
-                                             if(soldierData.isAlive())
-                                                 localFrameIndex=3+random.nextInt(3);
-                             	             else
-                             	                 localFrameIndex=random.nextInt(3);
-                                             final MD2FrameSet frameSet;
-                                             switch(localFrameIndex)
-                                             {
-                                                 case 0:
-                                       	             frameSet=MD2FrameSet.DEATH_FALLFORWARD;
-                                       	             break;
-                                                 case 1:
-                                       	             frameSet=MD2FrameSet.DEATH_FALLBACK;
-                                       	             break;
-                                                 case 2:
-                                       	             frameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
-                                       	             break;
-                                                 case 3:
-                                                     frameSet=MD2FrameSet.PAIN_A;
-                                                     break;
-                                                 case 4:
-                                                     frameSet=MD2FrameSet.PAIN_B;
-                                                     break;
-                                                 case 5:
-                                                     frameSet=MD2FrameSet.PAIN_C;
-                                                     break;
-                                   	             default:
-                                   	                 frameSet=null;	  
+                	 //prevents the originator from committing a suicide
+                	 final Spatial originator=getRoot().getChild(projectileData.getOriginator());
+                	 reachableOpponents.remove(originator);
+                	 //sorts the opponents to perform a collision check on the closest one
+                	 projectileDataOpponentsComparator.setProjectileData(projectileData);
+                	 Collections.sort(reachableOpponents,projectileDataOpponentsComparator);
+                	 projectileDataOpponentsComparator.setProjectileData(null);
+                	 for(Spatial child:reachableOpponents)
+                	     {if(enemiesDataMap.keySet().contains(child))
+                              {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
+                               BoundingPickResults results=new BoundingPickResults();
+                               PickingUtil.findPick(child,ray,results);
+                               hasCollision=results.getNumber()>0;
+                               results.clear();
+                               if(hasCollision)
+                                   {/**
+                                     * TODO - Create a data model (for the enemy) containing the current state, the health, the ammunition, ...
+                                     *      As a first step, it should be very limited. On the long term, it will have to be homogeneous with the 
+                                     *      data model used for the player so that any enemy can behave like a bot in the arena mode
+                                     *      - Create another controller to modify the view depending on the changes in the data model
+                                     */
+                            	    //attempts to kill this enemy
+                            	    final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
+                            	    editedEnemiesData.add(soldierData);
+                            	    final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
+                            	    if(soldierData.isAlive())
+                            	  	    {soldierData.decreaseHealth(25);
+                            	         //stops at the last frame of the set in the supplied time frame
+                                         soldierKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                         //selects randomly the death kind
+                                         final int localFrameIndex;
+                                         if(soldierData.isAlive())
+                                             localFrameIndex=3+random.nextInt(3);
+                             	         else
+                             	             localFrameIndex=random.nextInt(3);
+                                         final MD2FrameSet frameSet;
+                                         switch(localFrameIndex)
+                                         {
+                                             case 0:
+                                   	             frameSet=MD2FrameSet.DEATH_FALLFORWARD;
+                                   	             break;
+                                             case 1:
+                                   	             frameSet=MD2FrameSet.DEATH_FALLBACK;
+                                   	             break;
+                                             case 2:
+                                   	             frameSet=MD2FrameSet.DEATH_FALLBACKSLOW;
+                                   	             break;
+                                             case 3:
+                                                 frameSet=MD2FrameSet.PAIN_A;
+                                                 break;
+                                             case 4:
+                                                 frameSet=MD2FrameSet.PAIN_B;
+                                                 break;
+                                             case 5:
+                                                 frameSet=MD2FrameSet.PAIN_C;
+                                                 break;
+                                             default:
+                                                 frameSet=null;	  
+                                         }
+                                         if(frameSet!=null)
+                                             {soldierKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                              soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                              soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                              final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
+                                              final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
+                                              soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                              soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                              soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                              soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
                                              }
-                                             if(frameSet!=null)
-                                                 {soldierKeyframeController.setSpeed(frameSet.getFramesPerSecond());
-                                                  soldierKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
-                                                  soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
-                                                  soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
-                                                  final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
-                                                  final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
-                                                  soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
-                                                  soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
-                                                  soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
-                                                  soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
-                                                 }
-                                             //plays a sound if the enemy is not dead
-                                             if(soldierData.getHealth()<=17)
-                                                 getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                             else
-                                        	     if(soldierData.getHealth()<=33)
-                                                     getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                        	     else
-                                        		     if(soldierData.getHealth()<=50)
-                                                         getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                        		     else
-                                        			     if(soldierData.getHealth()<=67)
-                                                             getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                    	                 else
-                                    	            	     if(soldierData.getHealth()<=83)
-                                                                 getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                             else
-                                                        	     getSoundManager().play(false,false,pain1soundSampleIdentifier);
-                                            }
-                            	        //FIXME only remove the projectile if it doesn't pass through the enemy
-                                        projectilesToRemove.add(projectileNode);
-                            	        break;
-                                       }
-                                  }
-                			  else
-                				  if(child.equals(playerNode))
-                				      {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
-                                       BoundingPickResults results=new BoundingPickResults();
-                                       PickingUtil.findPick(child,ray,results);
-                                       hasCollision=results.getNumber()>0;
-                                       results.clear();                                   
-                                       if(hasCollision)
-                                           {if(playerData.isAlive())
-                                                {playerData.decreaseHealth(10);
-                                                 if(playerData.getHealth()<=17)
-                                                     getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                                 else
-                                      	             if(playerData.getHealth()<=33)
-                                                         getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                      	             else
-                                      		             if(playerData.getHealth()<=50)
-                                                             getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                      		             else
-                                      			             if(playerData.getHealth()<=67)
-                                                                 getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                  	                         else
-                                  	             	             if(playerData.getHealth()<=83)
-                                                                     getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                                 else
-                                                      	             getSoundManager().play(false,false,pain1soundSampleIdentifier);
-                                                }
-                                            //FIXME only remove the projectile if it doesn't pass through the player
-                                            projectilesToRemove.add(projectileNode);
-                               	            break;
-                                           }
-                				      }
+                                         //plays a sound if the enemy is not dead
+                                         if(soldierData.getHealth()<=17)
+                                             getSoundManager().play(false,false,pain6soundSampleIdentifier);
+                                         else
+                                      	     if(soldierData.getHealth()<=33)
+                                                 getSoundManager().play(false,false,pain5soundSampleIdentifier);
+                                      	     else
+                                       		     if(soldierData.getHealth()<=50)
+                                                     getSoundManager().play(false,false,pain4soundSampleIdentifier);
+                                       		     else
+                                       			     if(soldierData.getHealth()<=67)
+                                                         getSoundManager().play(false,false,pain3soundSampleIdentifier);
+                                   	                 else
+                                   	            	     if(soldierData.getHealth()<=83)
+                                                             getSoundManager().play(false,false,pain2soundSampleIdentifier);
+                                                         else
+                                                       	     getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                        }
+                            	    //FIXME only remove the projectile if it doesn't pass through the enemy
+                                    projectilesToRemove.add(projectileNode);
+                            	    break;
+                                   }
+                               }
+                		   else
+                			   if(child.equals(playerNode))
+                				   {Ray3 ray=new Ray3(projectileNode.getTranslation(),projectileNode.getTransform().getMatrix().getColumn(2,null));
+                                    BoundingPickResults results=new BoundingPickResults();
+                                    PickingUtil.findPick(child,ray,results);
+                                    hasCollision=results.getNumber()>0;
+                                    results.clear();                                   
+                                    if(hasCollision)
+                                        {if(playerData.isAlive())
+                                             {playerData.decreaseHealth(10);
+                                              if(playerData.getHealth()<=17)
+                                                  getSoundManager().play(false,false,pain6soundSampleIdentifier);
+                                              else
+                                                  if(playerData.getHealth()<=33)
+                                                      getSoundManager().play(false,false,pain5soundSampleIdentifier);
+                                      	          else
+                                      		          if(playerData.getHealth()<=50)
+                                                          getSoundManager().play(false,false,pain4soundSampleIdentifier);
+                                      		          else
+                                      			          if(playerData.getHealth()<=67)
+                                                              getSoundManager().play(false,false,pain3soundSampleIdentifier);
+                                  	                      else
+                                  	                          if(playerData.getHealth()<=83)
+                                                                  getSoundManager().play(false,false,pain2soundSampleIdentifier);
+                                                              else
+                                                      	          getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                             }
+                                         //FIXME only remove the projectile if it doesn't pass through the player
+                                         projectilesToRemove.add(projectileNode);
+                               	         break;
+                                        }
+                				   }
                 	     }
+                	 //resets the list of opponents
+                	 reachableOpponents.add(originator);
                     }
                 //FIXME only remove "infinite" rays
                 //as all projectiles are designed with rays, they shouldn't stay in the data model any longer
@@ -830,6 +847,23 @@ public final class GameState extends ScenegraphState{
             }
         });
     }
+    
+    private static final class ProjectileDataOpponentsComparator implements Comparator<Spatial>{
+
+		 private ProjectileData projectileData;
+		 
+		 @Override
+		 public int compare(final Spatial opponent0,final Spatial opponent1){
+			 final double distance0=opponent0.getWorldTranslation().distance(projectileData.getInitialLocation());
+			 final double distance1=opponent1.getWorldTranslation().distance(projectileData.getInitialLocation());
+			 final int compareFactor=distance0==distance1?0:distance0<distance1?-1:1;
+		     return(compareFactor);
+		 }
+		 
+		 public void setProjectileData(final ProjectileData projectileData){
+			 this.projectileData=projectileData;
+		 }
+	 }
     
     /**
      * logical entity allowing to manipulate a player used as a link between
