@@ -13,14 +13,22 @@
  */
 package engine.input;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseButton;
+import com.ardor3d.input.logical.KeyPressedCondition;
+import com.ardor3d.input.logical.KeyReleasedCondition;
+import com.ardor3d.input.logical.MouseButtonPressedCondition;
+import com.ardor3d.input.logical.MouseButtonReleasedCondition;
+import com.ardor3d.input.logical.TriggerConditions;
+import com.ardor3d.input.logical.TwoInputStates;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 public class ActionMap{
 
@@ -32,15 +40,78 @@ public class ActionMap{
 	
 	public ActionMap(final ActionMap actionMap){
 		internalActionMap=new HashMap<Action,HashSet<Input>>();
-		if(actionMap!=null)
-		    {for(Entry<Action,HashSet<Input>> actionInputEntry:actionMap.internalActionMap.entrySet())
-		    	 {final Action action=actionInputEntry.getKey();
-		    	  final HashSet<Input> inputs=actionInputEntry.getValue();
-		    	  final HashSet<Input> inputsCopy=new HashSet<Input>(inputs);
-		    	  internalActionMap.put(action,inputsCopy);
-		    	 }
-		    }
+		set(actionMap);
 	}
+	
+	public void set(final ActionMap actionMap){
+		internalActionMap.clear();
+		if(actionMap!=null)
+	        {for(Entry<Action,HashSet<Input>> actionInputEntry:actionMap.internalActionMap.entrySet())
+	    	     {final Action action=actionInputEntry.getKey();
+	    	      final HashSet<Input> inputs=actionInputEntry.getValue();
+	    	      final HashSet<Input> inputsCopy=new HashSet<Input>(inputs);
+	    	      internalActionMap.put(action,inputsCopy);
+	    	     }
+	        }
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		boolean result;
+		if(o==null||!(o instanceof ActionMap))
+			result=false;
+		else
+			{result=true;
+			 final ActionMap that=(ActionMap)o;
+			 for(Entry<Action,HashSet<Input>> actionInputEntry:internalActionMap.entrySet())
+			     {final Action action=actionInputEntry.getKey();
+			      final HashSet<Input> inputs=actionInputEntry.getValue();
+			      final int inputCount=inputs==null?0:inputs.size();
+			      final HashSet<Input> thatInputs=that.internalActionMap.get(action);
+			      final int thatInputCount=thatInputs==null?0:thatInputs.size();
+			      if(inputCount==thatInputCount)
+			          {if(inputCount>0)
+			               {for(Input input:inputs)
+			        	        if(!thatInputs.contains(input))
+			        	        	{result=false;
+			        	        	 break;
+			        	        	}
+			                if(!result)
+			                	break;
+			               }
+			          }
+			      else
+			          {result=false;
+			    	   break;
+			          }
+			     }
+			}
+		return(result);
+	}
+	
+	protected Predicate<TwoInputStates> getCondition(final Input input,final boolean pressed){
+		return(input.getCondition(pressed));
+	}
+	
+	public Predicate<TwoInputStates> getCondition(final Action action,final boolean pressed){
+    	final Set<Input> inputs=getInputs(action);
+    	final Predicate<TwoInputStates> predicate;
+    	if(inputs==null||inputs.isEmpty())
+    		{//it should never happen
+    		 predicate=TriggerConditions.alwaysFalse();
+    		}
+    	else
+    	    {if(inputs.size()==1)
+    	    	 predicate=getCondition(inputs.iterator().next(),pressed);
+    	     else
+    	    	 {final ArrayList<Predicate<TwoInputStates>> conditions=new ArrayList<Predicate<TwoInputStates>>();
+    	    	  for(Input input:inputs)
+    	    		  conditions.add(getCondition(input,pressed));
+    	    	  predicate=Predicates.or(conditions);
+    	    	 }
+    	    }
+    	return(predicate);
+    }
 	
 	public Set<Input> getInputs(final Action action){
 		return(Collections.unmodifiableSet(internalActionMap.get(action)));
@@ -92,6 +163,8 @@ public class ActionMap{
 		}
 		
 		public abstract Object getInputObject();
+		
+		public abstract Predicate<TwoInputStates> getCondition(final boolean pressed);
 	}
 	
     public static class KeyInput extends Input{
@@ -113,9 +186,15 @@ public class ActionMap{
 			return(result);
 		}
 		
+    	@Override
 		public Key getInputObject(){
 			return(key);
 		}
+    	
+    	@Override
+    	public Predicate<TwoInputStates> getCondition(final boolean pressed){
+    		return(pressed?new KeyPressedCondition(key):new KeyReleasedCondition(key));
+    	}
 		
 		@Override
 		public String toString(){
@@ -142,9 +221,15 @@ public class ActionMap{
 			return(result);
 		}
 		
+    	@Override
 		public MouseButton getInputObject(){
 			return(mouseButton);
 		}
+		
+		@Override
+    	public Predicate<TwoInputStates> getCondition(final boolean pressed){
+    		return(pressed?new MouseButtonPressedCondition(mouseButton):new MouseButtonReleasedCondition(mouseButton));
+    	}
 		
 		@Override
 		public String toString(){
@@ -171,9 +256,15 @@ public class ActionMap{
 			return(result);
 		}
 		
+    	@Override
 		public Boolean getInputObject(){
 			return(mouseWheelUpFlag);
 		}
+    	
+    	@Override
+    	public Predicate<TwoInputStates> getCondition(final boolean pressed){
+    		return(mouseWheelUpFlag?new MouseWheelMovedUpCondition():new MouseWheelMovedDownCondition());
+    	}
 		
 		@Override
 		public String toString(){

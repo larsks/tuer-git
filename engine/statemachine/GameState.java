@@ -38,13 +38,9 @@ import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.input.Key;
-import com.ardor3d.input.MouseButton;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
-import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
-import com.ardor3d.input.logical.MouseButtonPressedCondition;
-import com.ardor3d.input.logical.MouseButtonReleasedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
@@ -89,9 +85,9 @@ import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
+import engine.input.Action;
+import engine.input.ActionMap;
 import engine.input.ExtendedFirstPersonControl;
-import engine.input.MouseWheelMovedDownCondition;
-import engine.input.MouseWheelMovedUpCondition;
 import engine.misc.ApplicativeTimer;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
@@ -174,6 +170,10 @@ public final class GameState extends ScenegraphState{
     
     private BasicText exitPromptTextLabel;
     
+    private final ActionMap defaultActionMap;
+    
+    private final ActionMap customActionMap;
+    
     private static final String gameoverSoundSamplePath="/sounds/gameover.ogg";
     
     private static String gameoverSoundSampleIdentifier=null;
@@ -206,8 +206,11 @@ public final class GameState extends ScenegraphState{
     
     private static String enemyShotgunShotSampleIdentifier = null;
     
-    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager){
+    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,
+    		         final SoundManager soundManager,final TaskManager taskManager,final ActionMap defaultActionMap,final ActionMap customActionMap){
         super(soundManager);
+        this.defaultActionMap=defaultActionMap;
+        this.customActionMap=customActionMap;
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<Mesh,EnemyData>();
@@ -987,13 +990,14 @@ public final class GameState extends ScenegraphState{
         }
     }
     
-    private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
-    	final Vector3 worldUp=new Vector3(0,1,0);              
+    private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,
+    		                           final PhysicalLayer physicalLayer){
+    	final Vector3 worldUp=new Vector3(0,1,0);
         //sets "drag only" to false to remove the need of pressing a button to move
         fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
         //creates a text node that asks the user to confirm or not the exit
         exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
-        final InputTrigger exitPromptTrigger=new InputTrigger(new KeyReleasedCondition(Key.ESCAPE),new TriggerAction(){
+        final InputTrigger exitPromptTrigger=new InputTrigger(customActionMap.getCondition(Action.QUIT,false),new TriggerAction(){
         	@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//if the player has not been prompted
@@ -1085,48 +1089,28 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 			}
 		};
-		final TriggerAction selectWeaponOneAction=new TriggerAction(){
+		/*final TriggerAction selectWeaponOneAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//playerData.selectWeapon(0,false);
 			}
-		};
-		final TriggerAction wheelUpWeaponAction=new TriggerAction(){		
-			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerWithStateMachine.trySelectNextWeapon();
-			}
-		};
-		final TriggerAction wheelDownWeaponAction=new TriggerAction(){		
-			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				playerWithStateMachine.trySelectPreviousWeapon();
-			}
-		};
+		};*/
         //add some triggers to change weapon, reload and shoot
-		final InputTrigger weaponMouseWheelUpTrigger=new InputTrigger(new MouseWheelMovedUpCondition(),wheelUpWeaponAction);
-		final InputTrigger weaponMouseWheelDownTrigger=new InputTrigger(new MouseWheelMovedDownCondition(),wheelDownWeaponAction);
-        final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.L),nextWeaponAction);
-        final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
-        final InputTrigger reloadWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.R),reloadWeaponAction);
-        final InputTrigger reloadWeaponMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.RIGHT),reloadWeaponAction);
-        final InputTrigger startAttackTrigger=new InputTrigger(new KeyPressedCondition(Key.SPACE),startAttackAction);
-        final InputTrigger stopAttackTrigger=new InputTrigger(new KeyReleasedCondition(Key.SPACE),stopAttackAction);
-        final InputTrigger startAttackMouseButtonTrigger=new InputTrigger(new MouseButtonPressedCondition(MouseButton.LEFT),startAttackAction);
-        final InputTrigger stopAttackMouseButtonTrigger=new InputTrigger(new MouseButtonReleasedCondition(MouseButton.LEFT),stopAttackAction);
-        final InputTrigger pauseTrigger=new InputTrigger(new KeyReleasedCondition(Key.P),pauseAction);
-        final InputTrigger crouchTrigger=new InputTrigger(new KeyReleasedCondition(Key.C),crouchAction);
-        final InputTrigger activateTrigger=new InputTrigger(new KeyReleasedCondition(Key.RETURN),activateAction);
-        final InputTrigger startRunningRightTrigger=new InputTrigger(new KeyPressedCondition(Key.RSHIFT),startRunningAction);
-        final InputTrigger stopRunningRightTrigger=new InputTrigger(new KeyReleasedCondition(Key.RSHIFT),stopRunningAction);
-        final InputTrigger startRunningLeftTrigger=new InputTrigger(new KeyPressedCondition(Key.LSHIFT),startRunningAction);
-        final InputTrigger stopRunningLeftTrigger=new InputTrigger(new KeyReleasedCondition(Key.LSHIFT),stopRunningAction);
-        final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);
+		final InputTrigger nextWeaponTrigger=new InputTrigger(customActionMap.getCondition(Action.NEXT_WEAPON,false),nextWeaponAction);
+		final InputTrigger previousWeaponTrigger=new InputTrigger(customActionMap.getCondition(Action.PREVIOUS_WEAPON,false),previousWeaponAction);
+        final InputTrigger reloadWeaponTrigger=new InputTrigger(customActionMap.getCondition(Action.RELOAD,false),reloadWeaponAction);
+        final InputTrigger startAttackTrigger=new InputTrigger(customActionMap.getCondition(Action.ATTACK,true),startAttackAction);
+        final InputTrigger stopAttackTrigger=new InputTrigger(customActionMap.getCondition(Action.ATTACK,false),stopAttackAction);
+        final InputTrigger pauseTrigger=new InputTrigger(customActionMap.getCondition(Action.PAUSE,false),pauseAction);
+        final InputTrigger crouchTrigger=new InputTrigger(customActionMap.getCondition(Action.CROUCH,false),crouchAction);
+        final InputTrigger activateTrigger=new InputTrigger(customActionMap.getCondition(Action.ACTIVATE,false),activateAction);
+        final InputTrigger startRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,true),startRunningAction);
+        final InputTrigger stopRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,false),stopRunningAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
-        		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelUpTrigger,weaponMouseWheelDownTrigger,reloadWeaponTrigger,
-        		reloadWeaponMouseButtonTrigger,startAttackTrigger,startAttackMouseButtonTrigger,pauseTrigger,crouchTrigger,
-        		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,startRunningLeftTrigger,
-        		stopRunningLeftTrigger,selectWeaponOneTrigger,stopAttackTrigger,stopAttackMouseButtonTrigger};
+        		nextWeaponTrigger,previousWeaponTrigger,reloadWeaponTrigger,
+        		startAttackTrigger,pauseTrigger,crouchTrigger,
+        		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,
+        		stopAttackTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -1758,6 +1742,11 @@ public final class GameState extends ScenegraphState{
                   //updates all elements whose positions should be bound to the resolution of the screen
                   updateCrosshairNode();
           		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
+          		  //checks whether the custom action map has been modified by comparing it to the default one
+          		  if(!customActionMap.equals(defaultActionMap))
+          		      {//FIXME reinitialize input triggers
+          			   
+          		      }
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  

@@ -32,6 +32,8 @@ import com.google.common.base.Predicates;
 /**
  * Adaptation of the class FirstPersonControl in order to handle QWERTY (WSAD) & AZERTY (ZSQD) keyboards correctly. 
  * @author Julien Gouesse
+ * 
+ * FIXME use the custom action map
  *
  */
 public final class ExtendedFirstPersonControl{

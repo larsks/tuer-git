@@ -136,7 +136,7 @@ public final class MainMenuState extends ScenegraphState{
         this.mouseManager=mouseManager;
         //creates the panels
         if(customActionMap!=null)
-            controlsPanel=createControlsPanel(customActionMap);
+            controlsPanel=createControlsPanel(defaultActionMap,customActionMap);
         else
         	controlsPanel=null;
         profilePanel=createProfilePanel();
@@ -844,27 +844,39 @@ public final class MainMenuState extends ScenegraphState{
         return(textualPanel);
     }
     
+    private String getControlsContent(final ActionMap actionMap){
+    	final StringBuilder controlsContentBuilder=new StringBuilder("CONTROLS\n\n");
+    	for(Action action:Action.values())
+	        {controlsContentBuilder.append(action.name().replace('_',' ').toLowerCase()).append(": ");
+		     final Set<ActionMap.Input> inputs=actionMap.getInputs(action);
+		     for(ActionMap.Input input:inputs)
+			     controlsContentBuilder.append(input).append(", ");
+		     if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
+			     controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
+		     controlsContentBuilder.append('\n');
+	        }
+    	final String controlsContent=controlsContentBuilder.toString();
+    	return(controlsContent);
+    }
+    
     /**
      * 
      * @param customActionMap custom action map (cannot be null)
      * @return
      */
-    private final UIPanel createControlsPanel(final ActionMap customActionMap){
-    	final StringBuilder controlsContentBuilder=new StringBuilder();
-    	controlsContentBuilder.append("CONTROLS\n\n");
-    	for(Action action:Action.values())
-    	    {controlsContentBuilder.append(action.name().replace('_',' ').toLowerCase()).append(": ");
-    		 final Set<ActionMap.Input> inputs=customActionMap.getInputs(action);
-    		 for(ActionMap.Input input:inputs)
-    			 controlsContentBuilder.append(input).append(", ");
-    		 if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
-    			 controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
-    		 controlsContentBuilder.append('\n');
-    	    }
-    	final String controlsContent=controlsContentBuilder.toString();
+    private final UIPanel createControlsPanel(final ActionMap defaultActionMap,final ActionMap customActionMap){
+    	final String controlsContent=getControlsContent(customActionMap);
     	final UILabel label=new UILabel(controlsContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
+        final UIButton resetToDefaultsButton=new UIButton("Reset to defaults");
+        resetToDefaultsButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	customActionMap.set(defaultActionMap);
+            	label.setText(getControlsContent(customActionMap));
+            }
+        });
         final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
