@@ -13,6 +13,8 @@
 */
 package engine.statemachine;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import com.ardor3d.annotation.MainThread;
@@ -22,11 +24,13 @@ import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
 import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
+import com.ardor3d.extension.ui.UIRadioButton;
 import com.ardor3d.extension.ui.event.ActionEvent;
 import com.ardor3d.extension.ui.event.ActionListener;
 import com.ardor3d.extension.ui.event.SelectionListener;
 import com.ardor3d.extension.ui.layout.RowLayout;
 import com.ardor3d.extension.ui.model.DefaultComboBoxModel;
+import com.ardor3d.extension.ui.util.ButtonGroup;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
@@ -44,6 +48,7 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.ScreenMode;
+import com.jogamp.newt.util.ScreenModeUtil;
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
 import engine.input.Action;
@@ -582,15 +587,54 @@ public final class MainMenuState extends ScenegraphState{
     	final Screen screen=((JoglNewtWindow)canvas).getNewtWindow().getScreen();
     	final ScreenMode currentScreenMode=screen.getCurrentScreenMode();
     	final List<ScreenMode> screenModes=screen.getScreenModes();
+    	final HashMap<Integer,List<ScreenMode>> screenModesByRotation=new HashMap<Integer,List<ScreenMode>>();
+    	final int[] rotations=new int[]{0,90,180,270};
+    	final ArrayList<Integer> availableRotations=new ArrayList<Integer>();
+    	for(int rotation:rotations)
+    	    {final List<ScreenMode> rotatedScreenModes=ScreenModeUtil.filterByRotation(screenModes,rotation);
+    		 if(rotatedScreenModes!=null&&!rotatedScreenModes.isEmpty())
+    			 {screenModesByRotation.put(Integer.valueOf(rotation),rotatedScreenModes);
+    			  availableRotations.add(Integer.valueOf(rotation));
+    			 }
+    	    }
+    	final int selectedScreenRotation=currentScreenMode.getRotation();
+    	final UIPanel rotationsPanel;
+    	final UIRadioButton[] rotationsButtons;
+    	if(availableRotations.size()>1)
+    	    {rotationsPanel=new UIPanel(new RowLayout(true));
+    	     final UILabel screenRotationsLabel=new UILabel("Screen rotation");
+    	     rotationsPanel.add(screenRotationsLabel);
+    		 final ButtonGroup rotationsGroup=new ButtonGroup();
+    		 rotationsButtons=new UIRadioButton[availableRotations.size()];
+    		 int availableRotationIndex=0;
+    		 for(Integer availableRotation:availableRotations)
+    		     {rotationsButtons[availableRotationIndex]=new UIRadioButton(availableRotation.toString());
+    		      rotationsButtons[availableRotationIndex].addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent ae){
+					}
+				  });
+    		      rotationsGroup.add(rotationsButtons[availableRotationIndex]);
+    		      rotationsPanel.add(rotationsButtons[availableRotationIndex]);
+    		      if(availableRotation.intValue()==selectedScreenRotation)
+    		    	  rotationsButtons[availableRotationIndex].setSelected(true);
+    		      availableRotationIndex++;
+    		     }
+    	    }
+    	else
+    		{rotationsButtons=null;
+    		 rotationsPanel=null;
+    		}
     	int selectedScreenModeIndex=-1,screenModeIndex=0;
-    	for(ScreenMode screenMode:screenModes)
+    	final List<ScreenMode> currentScreenModes=screenModesByRotation.get(Integer.valueOf(selectedScreenRotation));
+    	for(ScreenMode screenMode:currentScreenModes)
     		{if(screenMode==currentScreenMode)
     	         {selectedScreenModeIndex=screenModeIndex;
     			  break;
     	         }
     		 screenModeIndex++;
     		}
-    	final Object[] screenModesArray=screenModes.toArray();
+    	final Object[] screenModesArray=currentScreenModes.toArray();
     	final DefaultComboBoxModel displayModesModel=new DefaultComboBoxModel(screenModesArray);
     	final UIComboBox displayModesCombo=new UIComboBox(displayModesModel);
     	if(selectedScreenModeIndex!=-1)
@@ -601,6 +645,27 @@ public final class MainMenuState extends ScenegraphState{
 				screen.setCurrentScreenMode((ScreenMode)newValue);
 			}
 		});
+    	if(rotationsButtons!=null)
+    	    {for(UIRadioButton rotationButton:rotationsButtons)
+	             {rotationButton.addActionListener(new ActionListener(){
+			          @Override
+			          public void actionPerformed(ActionEvent ae){
+			        	  final Integer selectedRotation=Integer.valueOf(Integer.parseInt(((UIRadioButton)ae.getSource()).getText()));
+			        	  displayModesCombo.setSelectedIndex(-1,false);
+						  displayModesModel.clear();
+						  final ScreenMode freshCurrentScreenMode=screen.getCurrentScreenMode();
+						  for(ScreenMode rotatedScreenMode:screenModesByRotation.get(selectedRotation))
+							  {displayModesModel.addItem(rotatedScreenMode);
+							   if(rotatedScreenMode.getMonitorMode().getSurfaceSize().getResolution().getWidth()==freshCurrentScreenMode.getMonitorMode().getSurfaceSize().getResolution().getWidth()&&
+								  rotatedScreenMode.getMonitorMode().getSurfaceSize().getResolution().getHeight()==freshCurrentScreenMode.getMonitorMode().getSurfaceSize().getResolution().getHeight()&&
+								  rotatedScreenMode.getMonitorMode().getRefreshRate()==freshCurrentScreenMode.getMonitorMode().getRefreshRate())
+								   screen.setCurrentScreenMode(rotatedScreenMode);
+							  }
+						  displayModesCombo.setSelectedIndex(screenModesByRotation.get(selectedRotation).indexOf(screen.getCurrentScreenMode()),false);
+			          }
+		          });
+	             }
+    	    }
     	final UIButton windowingModeButton=new UIButton("Switch to windowed mode or full screen mode");
     	windowingModeButton.addActionListener(new ActionListener(){           
             @Override
@@ -608,20 +673,29 @@ public final class MainMenuState extends ScenegraphState{
             	toggleScreenModeAction.perform(canvas,null,Double.NaN);
             }
         });
-    	final UIButton enableVSyncButton=new UIButton("Enable vertical synchronization");
+    	final UIPanel vSyncPanel=new UIPanel(new RowLayout(true));
+    	final ButtonGroup vSyncGroup=new ButtonGroup();
+    	final UILabel vSyncLabel=new UILabel("Vertical synchronization");
+    	final UIRadioButton enableVSyncButton=new UIRadioButton("On");
     	enableVSyncButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
             	canvas.setVSyncEnabled(true);
             }
         });
-    	final UIButton disableVSyncButton=new UIButton("Disable vertical synchronization");
+    	final UIRadioButton disableVSyncButton=new UIRadioButton("Off");
+    	disableVSyncButton.setSelected(true);
     	disableVSyncButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
             	canvas.setVSyncEnabled(false);
             }
         });
+    	vSyncGroup.add(enableVSyncButton);
+    	vSyncGroup.add(disableVSyncButton);
+    	vSyncPanel.add(vSyncLabel);
+    	vSyncPanel.add(enableVSyncButton);
+    	vSyncPanel.add(disableVSyncButton);
     	final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
@@ -630,10 +704,11 @@ public final class MainMenuState extends ScenegraphState{
             }
         });
         displaySettingsMenuPanel.add(windowingModeButton);
-        displaySettingsMenuPanel.add(enableVSyncButton);
-        displaySettingsMenuPanel.add(disableVSyncButton);
+        displaySettingsMenuPanel.add(vSyncPanel);
         displaySettingsMenuPanel.add(screenModesLabel);
         displaySettingsMenuPanel.add(displayModesCombo);
+        if(rotationsPanel!=null)
+            displaySettingsMenuPanel.add(rotationsPanel);
         displaySettingsMenuPanel.add(backButton);
     	return(displaySettingsMenuPanel);
     }
