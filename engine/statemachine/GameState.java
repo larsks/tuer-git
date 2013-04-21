@@ -45,7 +45,6 @@ import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.MouseButtonPressedCondition;
 import com.ardor3d.input.logical.MouseButtonReleasedCondition;
-import com.ardor3d.input.logical.MouseWheelMovedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
@@ -91,6 +90,8 @@ import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.input.ExtendedFirstPersonControl;
+import engine.input.MouseWheelMovedDownCondition;
+import engine.input.MouseWheelMovedUpCondition;
 import engine.misc.ApplicativeTimer;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
@@ -1034,17 +1035,6 @@ public final class GameState extends ScenegraphState{
 				playerWithStateMachine.trySelectPreviousWeapon();
 			}
 		};
-		final TriggerAction wheelWeaponAction=new TriggerAction(){		
-			@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//if the mouse wheel has been rotated up/away from the user
-				if(inputState.getCurrent().getMouseState().getDwheel()>0)
-					playerWithStateMachine.trySelectNextWeapon();
-				else
-					//otherwise the mouse wheel has been rotated down/towards the user
-					playerWithStateMachine.trySelectPreviousWeapon();
-			}
-		};
 		final TriggerAction reloadWeaponAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
@@ -1101,8 +1091,21 @@ public final class GameState extends ScenegraphState{
 				//playerData.selectWeapon(0,false);
 			}
 		};
+		final TriggerAction wheelUpWeaponAction=new TriggerAction(){		
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerWithStateMachine.trySelectNextWeapon();
+			}
+		};
+		final TriggerAction wheelDownWeaponAction=new TriggerAction(){		
+			@Override
+			public void perform(Canvas source, TwoInputStates inputState, double tpf){
+				playerWithStateMachine.trySelectPreviousWeapon();
+			}
+		};
         //add some triggers to change weapon, reload and shoot
-		final InputTrigger weaponMouseWheelTrigger=new InputTrigger(new MouseWheelMovedCondition(),wheelWeaponAction);
+		final InputTrigger weaponMouseWheelUpTrigger=new InputTrigger(new MouseWheelMovedUpCondition(),wheelUpWeaponAction);
+		final InputTrigger weaponMouseWheelDownTrigger=new InputTrigger(new MouseWheelMovedDownCondition(),wheelDownWeaponAction);
         final InputTrigger nextWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.L),nextWeaponAction);
         final InputTrigger previousWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.M),previousWeaponAction);
         final InputTrigger reloadWeaponTrigger=new InputTrigger(new KeyReleasedCondition(Key.R),reloadWeaponAction);
@@ -1120,7 +1123,7 @@ public final class GameState extends ScenegraphState{
         final InputTrigger stopRunningLeftTrigger=new InputTrigger(new KeyReleasedCondition(Key.LSHIFT),stopRunningAction);
         final InputTrigger selectWeaponOneTrigger=new InputTrigger(new KeyReleasedCondition(Key.ONE),selectWeaponOneAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
-        		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelTrigger,reloadWeaponTrigger,
+        		nextWeaponTrigger,previousWeaponTrigger,weaponMouseWheelUpTrigger,weaponMouseWheelDownTrigger,reloadWeaponTrigger,
         		reloadWeaponMouseButtonTrigger,startAttackTrigger,startAttackMouseButtonTrigger,pauseTrigger,crouchTrigger,
         		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,startRunningLeftTrigger,
         		stopRunningLeftTrigger,selectWeaponOneTrigger,stopAttackTrigger,stopAttackMouseButtonTrigger};
