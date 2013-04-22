@@ -113,8 +113,26 @@ public class ActionMap{
     	return(predicate);
     }
 	
-	public Set<Input> getInputs(final Action action){
-		return(Collections.unmodifiableSet(internalActionMap.get(action)));
+	@SuppressWarnings("unchecked")
+	public <T extends Input> Set<T> getInputs(final Action... actions){
+		final Set<T> inputs;
+		if(actions==null||actions.length==0)
+			inputs=Collections.<T>emptySet();
+		else
+		    {final Set<T> tmpInputs=new HashSet<T>();
+			 for(Action action:actions)
+				 if(action!=null)
+					 {for(Input input:internalActionMap.get(action))
+					      {T tInput=null;
+						   try{tInput=(T)input;}
+					       catch(ClassCastException cce){}
+						   if(tInput!=null)
+							   tmpInputs.add(tInput);
+					      }
+					 }
+		     inputs=Collections.unmodifiableSet(tmpInputs);
+		    }
+		return(inputs);
 	}
 	
 	public void setKeyActionBinding(final Action action,final Key key){

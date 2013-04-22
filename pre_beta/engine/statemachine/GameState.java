@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
@@ -168,6 +169,12 @@ public final class GameState extends ScenegraphState{
     
     private ExtendedFirstPersonControl fpsc;
     
+    private final PhysicalLayer physicalLayer;
+    
+    private final TriggerAction exitAction;
+    
+    private final TriggerAction toggleScreenModeAction;
+    
     private BasicText exitPromptTextLabel;
     
     private final ActionMap defaultActionMap;
@@ -209,6 +216,9 @@ public final class GameState extends ScenegraphState{
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,
     		         final SoundManager soundManager,final TaskManager taskManager,final ActionMap defaultActionMap,final ActionMap customActionMap){
         super(soundManager);
+        this.physicalLayer=physicalLayer;
+        this.toggleScreenModeAction=toggleScreenModeAction;
+        this.exitAction=exitAction;
         this.defaultActionMap=defaultActionMap;
         this.customActionMap=customActionMap;
         random=new Random();
@@ -331,7 +341,6 @@ public final class GameState extends ScenegraphState{
         playerWithStateMachine=new LogicalPlayer(playerData);
         this.previousCamLocation=new Vector3(cam.getLocation());
         this.currentCamLocation=new Vector3(previousCamLocation);
-        initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
         //initializes all text displays
         ammoTextLabel=initializeAmmunitionTextLabel();
         fpsTextLabel=initializeFpsTextLabel();
@@ -992,9 +1001,15 @@ public final class GameState extends ScenegraphState{
     
     private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,
     		                           final PhysicalLayer physicalLayer){
+    	//deregisters all triggers
+        if(!getLogicalLayer().getTriggers().isEmpty())
+            {final Set<InputTrigger> triggers=new HashSet<InputTrigger>(getLogicalLayer().getTriggers());
+        	 for(InputTrigger trigger:triggers)
+        		 getLogicalLayer().deregisterTrigger(trigger);
+            }
     	final Vector3 worldUp=new Vector3(0,1,0);
         //sets "drag only" to false to remove the need of pressing a button to move
-        fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false);
+        fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false,customActionMap);
         //creates a text node that asks the user to confirm or not the exit
         exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         final InputTrigger exitPromptTrigger=new InputTrigger(customActionMap.getCondition(Action.QUIT,false),new TriggerAction(){
@@ -1741,12 +1756,15 @@ public final class GameState extends ScenegraphState{
                   //the resolution of the screen might have been modified in the graphical user interface
                   //updates all elements whose positions should be bound to the resolution of the screen
                   updateCrosshairNode();
-          		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
-          		  //checks whether the custom action map has been modified by comparing it to the default one
-          		  if(!customActionMap.equals(defaultActionMap))
-          		      {//FIXME reinitialize input triggers
-          			   
+          		  /*
+          		   * checks whether the custom action map has been modified by comparing it to the default one or 
+          		   * if the input triggers have never been initialized
+          		   * */
+          		  if(fpsc==null||!customActionMap.equals(defaultActionMap))
+          		      {//(re)initializes input triggers
+          			   initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
           		      }
+          		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  
