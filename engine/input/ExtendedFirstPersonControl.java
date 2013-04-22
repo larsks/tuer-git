@@ -13,6 +13,7 @@
  */
 package engine.input;
 
+import java.util.Set;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.KeyboardState;
@@ -28,12 +29,11 @@ import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.Camera;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import engine.input.ActionMap.KeyInput;
 
 /**
  * Adaptation of the class FirstPersonControl in order to handle QWERTY (WSAD) & AZERTY (ZSQD) keyboards correctly. 
  * @author Julien Gouesse
- * 
- * FIXME use the custom action map
  *
  */
 public final class ExtendedFirstPersonControl{
@@ -50,9 +50,36 @@ public final class ExtendedFirstPersonControl{
     private final Matrix3 workerMatrix = new Matrix3();
     /**temporary vector*/
     private final Vector3 workerStoreA = new Vector3();
+    
+    private final Set<KeyInput> moveForwardKeyInputs;
+    
+    private final Set<KeyInput> moveBackwardKeyInputs;
+    
+    private final Set<KeyInput> strafeLeftKeyInputs;
+    
+    private final Set<KeyInput> strafeRightKeyInputs;
+    
+    private final Set<KeyInput> turnLeftKeyInputs;
+    
+    private final Set<KeyInput> turnRightKeyInputs;
+    
+    private final Set<KeyInput> lookUpKeyInputs;
+    
+    private final Set<KeyInput> lookDownKeyInputs;
+    
+    private final ActionMap customActionMap;
 
-    public ExtendedFirstPersonControl(final ReadOnlyVector3 upAxis) {
+    public ExtendedFirstPersonControl(final ReadOnlyVector3 upAxis,final ActionMap customActionMap) {
         this.upAxis.set(upAxis);
+        this.customActionMap=customActionMap;
+        this.moveForwardKeyInputs=customActionMap.getInputs(Action.MOVE_FORWARD);
+        this.moveBackwardKeyInputs=customActionMap.getInputs(Action.MOVE_BACKWARD);
+        this.strafeLeftKeyInputs=customActionMap.getInputs(Action.STRAFE_LEFT);
+        this.strafeRightKeyInputs=customActionMap.getInputs(Action.STRAFE_RIGHT);
+        this.turnLeftKeyInputs=customActionMap.getInputs(Action.TURN_LEFT);
+        this.turnRightKeyInputs=customActionMap.getInputs(Action.TURN_RIGHT);
+        this.lookUpKeyInputs=customActionMap.getInputs(Action.LOOK_UP);
+        this.lookDownKeyInputs=customActionMap.getInputs(Action.LOOK_DOWN);
     }
 
     public ReadOnlyVector3 getUpAxis() {
@@ -96,19 +123,26 @@ public final class ExtendedFirstPersonControl{
     protected void move(final Camera camera, final KeyboardState kb, final double tpf) {
         // MOVEMENT
         int moveFB = 0, strafeLR = 0;
-        if (kb.isDown(Key.W) || kb.isDown(Key.Z) || kb.isDown(Key.NUMPAD8)) {
-            moveFB += 1;
-        }
-        if (kb.isDown(Key.S) || kb.isDown(Key.NUMPAD2)) {
-            moveFB -= 1;
-        }
-        if (kb.isDown(Key.A) || kb.isDown(Key.Q) || kb.isDown(Key.NUMPAD4)) {
-            strafeLR += 1;
-        }
-        if (kb.isDown(Key.D) || kb.isDown(Key.NUMPAD6)) {
-            strafeLR -= 1;
-        }
-
+        for(KeyInput input:moveForwardKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+            	 moveFB += 1;
+            }
+        for(KeyInput input:moveBackwardKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+            	 moveFB -= 1;
+            }
+        for(KeyInput input:strafeLeftKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+        	     strafeLR += 1;
+            }
+        for(KeyInput input:strafeRightKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+            	 strafeLR -= 1;
+            }
         if (moveFB != 0 || strafeLR != 0) {
             final Vector3 loc = workerStoreA.zero();
             if (moveFB == 1) {
@@ -127,18 +161,26 @@ public final class ExtendedFirstPersonControl{
 
         // ROTATION
         int rotX = 0, rotY = 0;
-        if (kb.isDown(Key.UP)) {
-            rotY -= 1;
-        }
-        if (kb.isDown(Key.DOWN)) {
-            rotY += 1;
-        }
-        if (kb.isDown(Key.LEFT)) {
-            rotX += 1;
-        }
-        if (kb.isDown(Key.RIGHT)) {
-            rotX -= 1;
-        }
+        for(KeyInput input:lookUpKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+            	 rotY -= 1;
+            }
+        for(KeyInput input:lookDownKeyInputs)
+            {final Key key=input.getInputObject();
+             if(kb.isDown(key))
+            	 rotY += 1;
+            }
+        for(KeyInput input:turnLeftKeyInputs)
+            {final Key key=input.getInputObject();
+        	 if(kb.isDown(key))
+        		 rotX += 1;
+            }
+        for(KeyInput input:turnRightKeyInputs)
+            {final Key key=input.getInputObject();
+    	     if(kb.isDown(key))
+    		     rotX -= 1;
+            }
         if ((rotX != 0 || rotY != 0) && mouseRotateSpeed != 0 && keyRotateSpeed != 0) {
             rotate(camera, rotX * (keyRotateSpeed / mouseRotateSpeed) * tpf, rotY
                     * (keyRotateSpeed / mouseRotateSpeed) * tpf);
@@ -183,14 +225,13 @@ public final class ExtendedFirstPersonControl{
      * @return a new FirstPersonControl object
      */
     public static ExtendedFirstPersonControl setupTriggers(final LogicalLayer layer, final ReadOnlyVector3 upAxis,
-            final boolean dragOnly) {
-        final ExtendedFirstPersonControl control = new ExtendedFirstPersonControl(upAxis);
+            final boolean dragOnly,final ActionMap customActionMap) {
+        final ExtendedFirstPersonControl control = new ExtendedFirstPersonControl(upAxis,customActionMap);
         control.setupMouseTriggers(layer, dragOnly, control.setupKeyboardTriggers(layer));
         return control;
     }
 
-    public void setupMouseTriggers(final LogicalLayer layer, final boolean dragOnly,
-            final Predicate<TwoInputStates> keysHeld) {
+    public void setupMouseTriggers(final LogicalLayer layer,final boolean dragOnly,final Predicate<TwoInputStates> keysHeld){
         // Mouse look
         final Predicate<TwoInputStates> someMouseDown = Predicates.or(TriggerConditions.leftButtonDown(), Predicates
                 .or(TriggerConditions.rightButtonDown(), TriggerConditions.middleButtonDown()));
@@ -200,33 +241,47 @@ public final class ExtendedFirstPersonControl{
             public void perform(final Canvas source, final TwoInputStates inputStates, final double tpf) {
                 final MouseState mouse = inputStates.getCurrent().getMouseState();
                 if (mouse.getDx() != 0 || mouse.getDy() != 0) {
+                	//FIXME support reverse up/down
                     ExtendedFirstPersonControl.this.rotate(source.getCanvasRenderer().getCamera(), -mouse.getDx(), -mouse.getDy());
                 }
             }
         };
         layer.registerTrigger(new InputTrigger(dragOnly ? dragged : TriggerConditions.mouseMoved(), dragAction));
     }
+    
+    private static final class FirstPersonControlKeyboardTriggersPredicate implements Predicate<TwoInputStates>{
+    	
+    	private final Set<KeyInput> inputs;
+    	
+    	private FirstPersonControlKeyboardTriggersPredicate(final ActionMap customActionMap){
+    		inputs=customActionMap.getInputs(Action.MOVE_FORWARD,Action.MOVE_BACKWARD,Action.LOOK_UP,Action.LOOK_DOWN,Action.STRAFE_LEFT,Action.STRAFE_RIGHT,Action.TURN_LEFT,Action.TURN_RIGHT);
+    	}
+    	
+    	@Override
+    	public boolean apply(final TwoInputStates states){
+    		boolean result=false;
+    		if(states.getCurrent()!=null)
+    		    {for(KeyInput input:inputs)
+    		         {final Key key=input.getInputObject();
+    		          if(states.getCurrent().getKeyboardState().isDown(key))
+    		        	  {result=true;
+    		        	   break;
+    		        	  }
+    		         }
+    		     //TODO handle controllers
+    		    }
+    		return(result);
+    	}
+    }
 
-    public Predicate<TwoInputStates> setupKeyboardTriggers(final LogicalLayer layer) {
-        final Predicate<TwoInputStates> keysHeld = new Predicate<TwoInputStates>() {
-            Key[] keys = new Key[] { Key.W, Key.Z, Key.NUMPAD8, Key.A, Key.Q, Key.NUMPAD4, Key.S, Key.NUMPAD2, Key.D, Key.NUMPAD6, Key.LEFT, Key.RIGHT, Key.UP, Key.DOWN };
-
-            public boolean apply(final TwoInputStates states) {
-                for (final Key k : keys) {
-                    if (states.getCurrent() != null && states.getCurrent().getKeyboardState().isDown(k)) {
-                        return true;
-                    }
-                }
-                return false;
+    public Predicate<TwoInputStates> setupKeyboardTriggers(final LogicalLayer layer){
+        final Predicate<TwoInputStates> keysHeld = new FirstPersonControlKeyboardTriggersPredicate(customActionMap);
+        final TriggerAction moveAction = new TriggerAction(){
+            public void perform(final Canvas source,final TwoInputStates inputStates,final double tpf){
+                ExtendedFirstPersonControl.this.move(source.getCanvasRenderer().getCamera(),inputStates.getCurrent().getKeyboardState(),tpf);
             }
         };
-
-        final TriggerAction moveAction = new TriggerAction() {
-            public void perform(final Canvas source, final TwoInputStates inputStates, final double tpf) {
-                ExtendedFirstPersonControl.this.move(source.getCanvasRenderer().getCamera(), inputStates.getCurrent().getKeyboardState(), tpf);
-            }
-        };
-        layer.registerTrigger(new InputTrigger(keysHeld, moveAction));
+        layer.registerTrigger(new InputTrigger(keysHeld,moveAction));
         return keysHeld;
     }
 
