@@ -675,11 +675,17 @@ public final class GameState extends ScenegraphState{
                                               soldierKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
                                               soldierKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
                                               final Mesh soldierWeaponMesh=(Mesh)getRoot().getChild((getRoot().getChildren().indexOf(child)+1));
-                                              final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
-                                              soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
-                                              soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
-                                              soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
-                                              soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                              if(localFrameIndex>=3)
+                                                  {final KeyframeController<Mesh> soldierWeaponKeyframeController=(KeyframeController<Mesh>)soldierWeaponMesh.getController(0);
+                                                   soldierWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                                   soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                                   soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                                   soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                                  }
+                                              else
+                                            	  {//there are only 173 frames for weapons
+                                            	   soldierWeaponMesh.setVisible(false);
+                                            	  }
                                              }
                                          //plays a sound if the enemy is not dead
                                          if(soldierData.getHealth()<=17)
