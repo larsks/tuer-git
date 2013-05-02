@@ -86,7 +86,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel desktopShortcutsMenuPanel;
     
-    private final UIPanel controlsPanel;
+    private final ControlsPanel controlsPanel;
     
     private final UIPanel profilePanel;
     
@@ -149,7 +149,7 @@ public final class MainMenuState extends ScenegraphState{
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(exitAction);
         optionsMenuPanel=createOptionsMenuPanel();
-        startMenuPanel=createStartMenuPanel(toLoadingDisplayAction);
+        startMenuPanel=createStartMenuPanel(/*toLoadingDisplayAction*/);
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
         arenaModePanel=createArenaModePanel();
         //creates the main frame
@@ -793,7 +793,7 @@ public final class MainMenuState extends ScenegraphState{
     	return(desktopShortcutsMenuPanel);
     }
     
-    private final UIPanel createStartMenuPanel(final TriggerAction toLoadingDisplayAction){
+    private final UIPanel createStartMenuPanel(/*final TriggerAction toLoadingDisplayAction*/){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
         final UIButton storyModeButton=new UIButton("Story mode");
         storyModeButton.addActionListener(new ActionListener(){           
@@ -844,48 +844,121 @@ public final class MainMenuState extends ScenegraphState{
         return(textualPanel);
     }
     
-    private String getControlsContent(final ActionMap actionMap){
-    	final StringBuilder controlsContentBuilder=new StringBuilder("CONTROLS\n\n");
-    	for(Action action:Action.values())
-	        {controlsContentBuilder.append(action.name().replace('_',' ').toLowerCase()).append(": ");
-		     final Set<ActionMap.Input> inputs=actionMap.getInputs(action);
-		     for(ActionMap.Input input:inputs)
-			     controlsContentBuilder.append(input).append(", ");
-		     if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
-			     controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
-		     controlsContentBuilder.append('\n');
-	        }
-    	final String controlsContent=controlsContentBuilder.toString();
-    	return(controlsContent);
+    private static final class ControlsPanel extends UIPanel{
+    	
+    	private Action latestEditedAction;
+    	
+    	private final MainMenuState mainMenuState;
+    	
+    	private final ActionMap defaultActionMap;
+    	
+    	private final ActionMap customActionMap;
+    	
+    	private final HashMap<Action,UILabel> actionsLabelsMap;
+    	
+    	private ControlsPanel(final MainMenuState mainMenuState,final ActionMap defaultActionMap,final ActionMap customActionMap){
+    		super();
+    		setLayout(new RowLayout(false));
+    		this.mainMenuState=mainMenuState;
+    		this.defaultActionMap=defaultActionMap;
+    		this.customActionMap=customActionMap;
+    		latestEditedAction=null;
+    		actionsLabelsMap=new HashMap<Action,UILabel>();
+    		add(new UILabel("Controls"));
+    		final UIPanel actionPanel=new UIPanel(new RowLayout(true));
+    		final UIPanel actionsButtonsPanel=new UIPanel(new RowLayout(false));
+    		final UIPanel actionsLabelsPanel=new UIPanel(new RowLayout(false));
+    		for(Action action:Action.values())
+                {final String actionName=action.name().replace('_',' ').toLowerCase();
+        	     final UIButton actionButton=new UIButton(actionName);
+        	     actionButton.setUserData(action);
+        	     actionButton.addActionListener(new ActionListener(){
+                     @Override
+                     public void actionPerformed(ActionEvent ae){
+                    	 actionButtonActionPerformed(ae);
+                     }
+                 });
+                 final UILabel actionLabel=new UILabel("");
+                 actionsLabelsMap.put(action,actionLabel);
+                 actionsButtonsPanel.add(actionButton);
+                 actionsLabelsPanel.add(actionLabel);
+                }
+    		actionPanel.add(actionsButtonsPanel);
+    		actionPanel.add(actionsLabelsPanel);
+    		add(actionPanel);
+    		update();
+            final UIButton resetToDefaultsButton=new UIButton("Reset to defaults");
+            resetToDefaultsButton.addActionListener(new ActionListener(){           
+                @Override
+                public void actionPerformed(ActionEvent ae){
+                	resetToDefaultsButtonActionPerformed(ae);
+                	update();
+                }
+            });
+            final UIButton backButton=new UIButton("Back");
+            backButton.addActionListener(new ActionListener(){           
+                @Override
+                public void actionPerformed(ActionEvent ae){
+                	backButtonActionPerformed(ae);
+                }
+            });
+            add(backButton);
+    	}
+    	
+    	private void update(){
+    		final StringBuilder controlsContentBuilder=new StringBuilder("");
+    		for(Action action:Action.values())
+                {final Set<ActionMap.Input> inputs=customActionMap.getInputs(action);
+		         for(ActionMap.Input input:inputs)
+			         controlsContentBuilder.append(input).append(", ");
+		         if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
+			         controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
+    			 final String actionText=controlsContentBuilder.toString();
+		         final UILabel actionLabel=actionsLabelsMap.get(action);
+		         actionLabel.setText(actionText);
+    			 controlsContentBuilder.delete(0,controlsContentBuilder.length());
+                }
+    	}
+    	
+    	private void actionButtonActionPerformed(ActionEvent ae){
+    		final Action action=(Action)ae.getSource().getUserData();
+    		latestEditedAction=action;
+    	}
+    	
+    	private void resetToDefaultsButtonActionPerformed(ActionEvent ae){
+    		customActionMap.set(defaultActionMap);
+    	}
+    	
+    	@Override
+    	public void attachedToHud(){
+    		super.attachedToHud();
+    		latestEditedAction=null;
+    		//TODO unregister all actions in the logical layer
+    		//TODO register the actions of this panel in the logical layer
+    		//TODO update the UI if this key binding gets modified by the end user
+    	}
+    	
+    	@Override
+    	public void detachedFromHud(){
+    		super.detachedFromHud();
+    		latestEditedAction=null;
+    		//TODO unregister the actions of this panel in the logical layer
+    		//TODO register all previous actions in the logical layer
+    	}
+    	
+    	private void backButtonActionPerformed(ActionEvent ae){
+    		latestEditedAction=null;
+    	    mainMenuState.showPanelInMainFrame(mainMenuState.optionsMenuPanel);
+    	}
     }
     
     /**
-     * 
+     * @param defaultActionMap default action map (which remains unchanged, cannot be null)
      * @param customActionMap custom action map (cannot be null)
      * @return
      */
-    private final UIPanel createControlsPanel(final ActionMap defaultActionMap,final ActionMap customActionMap){
-    	final String controlsContent=getControlsContent(customActionMap);
-    	final UILabel label=new UILabel(controlsContent);
-        final UIPanel textualPanel=new UIPanel(new RowLayout(false));
-        textualPanel.add(label);
-        final UIButton resetToDefaultsButton=new UIButton("Reset to defaults");
-        resetToDefaultsButton.addActionListener(new ActionListener(){           
-            @Override
-            public void actionPerformed(ActionEvent event){
-            	customActionMap.set(defaultActionMap);
-            	label.setText(getControlsContent(customActionMap));
-            }
-        });
-        final UIButton backButton=new UIButton("Back");
-        backButton.addActionListener(new ActionListener(){           
-            @Override
-            public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(optionsMenuPanel);
-            }
-        });
-        textualPanel.add(backButton);
-        return(textualPanel);
+    private final ControlsPanel createControlsPanel(final ActionMap defaultActionMap,final ActionMap customActionMap){
+        return(new ControlsPanel(this,defaultActionMap,customActionMap));
     }
     
     private final UIHud createHud(){
