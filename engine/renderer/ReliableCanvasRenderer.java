@@ -19,6 +19,7 @@ import javax.media.opengl.GLProfile;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.renderer.ContextCapabilities;
+import com.ardor3d.renderer.jogl.JoglRenderer;
 
 /**
  * Canvas renderer enhanced for higher frame rates especially 
@@ -40,6 +41,11 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 
 	public ReliableCanvasRenderer(Scene scene,boolean useDebug){
 		super(scene,useDebug);
+	}
+	
+	@Override
+	public final JoglRenderer createRenderer(){
+		return new ReliableRenderer();
 	}
 
 	@Override
