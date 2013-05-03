@@ -183,6 +183,21 @@ public class ActionMap{
 		public abstract Object getInputObject();
 		
 		public abstract Predicate<TwoInputStates> getCondition(final boolean pressed);
+		
+		@Override
+		public boolean equals(Object o){
+			final boolean result;
+			if(o==null||!(o instanceof Input))
+				result=false;
+			else
+				result=getInputObject().equals(((Input)o).getInputObject());
+			return(result);
+		}
+		
+		@Override
+		public int hashCode(){
+			return(getInputObject().hashCode());
+		}
 	}
 	
     public static class KeyInput extends Input{
