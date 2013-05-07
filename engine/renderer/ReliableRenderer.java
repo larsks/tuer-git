@@ -19,6 +19,9 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.ardor3d.image.Image;
+import com.ardor3d.image.Texture;
 import com.ardor3d.renderer.jogl.JoglRenderer;
 import com.ardor3d.scenegraph.AbstractBufferData;
 
@@ -71,45 +74,59 @@ public class ReliableRenderer extends JoglRenderer{
 	public void deleteVBOs(final AbstractBufferData<?> buffer){
 		super.deleteVBOs(buffer);
 		final Buffer realNioBuffer=buffer.getBuffer();
-		if(realNioBuffer.isDirect())
-		    {//This buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
-			 if(directByteBufferCleanerCleanCallable)
-		         {//The mechanism is working, tries to use it
-				  Object directByteBuffer=null;
-		          if(realNioBuffer instanceof ByteBuffer)
-		        	  {//this buffer is a direct byte buffer
-		        	   directByteBuffer=realNioBuffer;
-		        	  }
-		          else
-		              {//this buffer is a view on a direct byte buffer, gets this viewed buffer
-		        	   for(Field field:realNioBuffer.getClass().getDeclaredFields())
-		                   {final boolean wasAccessible=field.isAccessible();
-		        		    if(!wasAccessible)
-		                	    field.setAccessible(true);
-							try{final Object fieldValue = field.get(realNioBuffer);
-								if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
-		            	    	    {directByteBuffer=fieldValue;
-		            	    	     break;
-		            	    	    }
-							   }
-							catch(Throwable t)
-							{logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to get the value of a byte buffer's field",t);}
-		                    finally
-		                    {if(!wasAccessible)
-		                	     field.setAccessible(false);
-		                    }
-		                   }
-		              }
-		    	  if(directByteBuffer!=null)
-		              {Object cleaner;
-				       try{cleaner=directByteBufferCleanerMethod.invoke(directByteBuffer);
-					       if(cleaner!=null)
-		    		           cleanerCleanMethod.invoke(cleaner);
-				          }
-				       catch(Throwable t)
-				       {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to use the cleaner of a byte buffer",t);}
-		              }
-		         }
+		deleteBuffer(realNioBuffer);
+	}
+	
+	@Override
+	public void deleteTexture(final Texture texture){
+		super.deleteTexture(texture);
+		final Image image=texture.getImage();
+		if(image!=null&&image.getDataSize()>=1)
+		    {for(Buffer data:image.getData())
+		    	 deleteBuffer(data);
 		    }
+	}
+	
+	public void deleteBuffer(final Buffer realNioBuffer){
+		if(realNioBuffer.isDirect())
+	        {//This buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
+		     if(directByteBufferCleanerCleanCallable)
+	             {//The mechanism is working, tries to use it
+			      Object directByteBuffer=null;
+	              if(realNioBuffer instanceof ByteBuffer)
+	        	      {//this buffer is a direct byte buffer
+	        	       directByteBuffer=realNioBuffer;
+	        	      }
+	              else
+	                  {//this buffer is a view on a direct byte buffer, gets this viewed buffer
+	        	       for(Field field:realNioBuffer.getClass().getDeclaredFields())
+	                       {final boolean wasAccessible=field.isAccessible();
+	        		        if(!wasAccessible)
+	                	        field.setAccessible(true);
+						    try{final Object fieldValue = field.get(realNioBuffer);
+							    if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
+	            	    	        {directByteBuffer=fieldValue;
+	            	    	         break;
+	            	    	        }
+						       }
+						    catch(Throwable t)
+						    {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to get the value of a byte buffer's field",t);}
+	                        finally
+	                        {if(!wasAccessible)
+	                	         field.setAccessible(false);
+	                        }
+	                       }
+	                  }
+	    	      if(directByteBuffer!=null)
+	                  {Object cleaner;
+			           try{cleaner=directByteBufferCleanerMethod.invoke(directByteBuffer);
+				           if(cleaner!=null)
+	    		               cleanerCleanMethod.invoke(cleaner);
+			              }
+			           catch(Throwable t)
+			           {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to use the cleaner of a byte buffer",t);}
+	                  }
+	             }
+	        }
 	}
 }
