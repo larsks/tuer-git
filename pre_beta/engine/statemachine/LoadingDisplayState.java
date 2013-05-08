@@ -51,6 +51,8 @@ public final class LoadingDisplayState extends ScenegraphState{
     private final String[] texturesPaths;
     
     private final BMText levelTextLabel;
+    
+    private final Camera cam;
 
     
     public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,
@@ -59,8 +61,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         super(soundManager);
         this.taskManager=taskManager;
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
-        final Camera cam=canvas.getCanvasRenderer().getCamera();
-        taskNode.setTranslation(0,-cam.getHeight()/2.5,0);
+        cam=canvas.getCanvasRenderer().getCamera();
         getRoot().attachChild(taskNode);
         texturesPaths=new String[]{"communism.png","venimus_vidimus_vicimus.png"};
         textures=new Texture[texturesPaths.length];
@@ -150,6 +151,11 @@ public final class LoadingDisplayState extends ScenegraphState{
              if(enabled)
                  {taskManager.enqueueTask(levelInitializationTask);
                   taskNode.reset();
+                  //updates the position of the task node (the resolution might have been modified)
+                  final int x=(cam.getWidth()-taskNode.getBounds().getWidth())/2;
+                  final int y=(cam.getHeight()/20);
+                  taskNode.setTranslation(x,y,0);
+                  taskNode.updateGeometricState(0);
                  }
             }
     }

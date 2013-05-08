@@ -23,6 +23,7 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyPressedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
@@ -40,11 +41,13 @@ public final class InitializationState extends ScenegraphState{
     
     private final TaskManagementProgressionNode taskNode;
     
+    private final Camera cam;
+    
     
     public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
-        taskNode.setTranslation(0,-canvas.getCanvasRenderer().getCamera().getHeight()/2.5,0);
+        cam=canvas.getCanvasRenderer().getCamera();
         box=new Box("Initialization Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));       
@@ -86,7 +89,13 @@ public final class InitializationState extends ScenegraphState{
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 taskNode.reset();
+                 {taskNode.reset();
+                  //updates the position of the task node (the resolution might have been modified)
+                  final int x=(cam.getWidth()-taskNode.getBounds().getWidth())/2;
+                  final int y=(cam.getHeight()/20);
+                  taskNode.setTranslation(x,y,0);
+                  taskNode.updateGeometricState(0);
+                 }
             }
     }
 }
