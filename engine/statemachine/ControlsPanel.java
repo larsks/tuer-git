@@ -32,7 +32,6 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-
 import engine.input.Action;
 import engine.input.ActionMap;
 import engine.input.MouseWheelMovedDownCondition;
@@ -110,6 +109,9 @@ public final class ControlsPanel extends UIPanel{
 		         controlsContentBuilder.append(input).append(", ");
 	         if(controlsContentBuilder.charAt(controlsContentBuilder.length()-2)==',')
 		         controlsContentBuilder.delete(controlsContentBuilder.length()-2,controlsContentBuilder.length());
+	         //this is the only way of forcing a minimum size whatever the content of the label
+	         while(controlsContentBuilder.length()<100)
+	        	 controlsContentBuilder.append(' ');
 			 final String actionText=controlsContentBuilder.toString();
 	         final UILabel actionLabel=actionsLabelsMap.get(action);
 	         actionLabel.setText(actionText);
