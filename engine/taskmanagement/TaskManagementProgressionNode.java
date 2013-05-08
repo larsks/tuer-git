@@ -19,6 +19,7 @@ import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.UIProgressBar;
 import com.ardor3d.extension.ui.layout.RowLayout;
+import com.ardor3d.math.Rectangle2;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
@@ -33,9 +34,14 @@ public final class TaskManagementProgressionNode extends Node{
     
     private final TaskManager taskManager;
     
+    private final UIFrame frame;
+    
+    private final Rectangle2 bounds;
+    
     
     public TaskManagementProgressionNode(final Camera cam,final TaskManager taskManager){
         super("task progression node");
+        bounds=new Rectangle2();
         this.taskManager=taskManager;
         maxTaskCount=0;
         bar=new UIProgressBar("",true);
@@ -44,7 +50,7 @@ public final class TaskManagementProgressionNode extends Node{
         final UIPanel panel=new UIPanel(new RowLayout(false));
         panel.add(new UILabel("Loading... Please wait"));
         panel.add(bar);
-        final UIFrame frame=new UIFrame("");
+        frame=new UIFrame("");
         frame.setDecorated(false);
         frame.setContentPanel(panel);
         frame.updateMinimumSizeFromContents();
@@ -53,7 +59,7 @@ public final class TaskManagementProgressionNode extends Node{
         frame.setUseStandin(false);
         frame.setOpacity(1f);
         frame.setName("task progression frame");
-        frame.setLocationRelativeTo(cam);
+        frame.getRelativeComponentBounds(bounds);
         final UIHud hud=new UIHud();
         hud.add(frame);
         attachChild(hud);
@@ -67,6 +73,16 @@ public final class TaskManagementProgressionNode extends Node{
                     bar.setPercentFilled(1-((double)taskCount)/maxTaskCount);
             }
         });
+        //centers this node by default
+        final int x=(cam.getWidth()-getBounds().getWidth())/2;
+        final int y=(cam.getHeight()-getBounds().getHeight())/2;
+        setTranslation(x,y,0);
+        updateGeometricState(0);
+    }
+    
+    public final Rectangle2 getBounds(){
+    	frame.getRelativeComponentBounds(bounds);
+    	return(bounds);
     }
     
     public final void reset(){
