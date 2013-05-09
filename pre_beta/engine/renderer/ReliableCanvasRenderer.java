@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javax.media.opengl.GLProfile;
 import com.ardor3d.framework.Scene;
+import com.ardor3d.framework.jogl.CapsUtil;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.jogl.JoglRenderer;
@@ -40,7 +41,7 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 	}
 
 	public ReliableCanvasRenderer(Scene scene,boolean useDebug){
-		super(scene,useDebug);
+		super(scene,useDebug,new CapsUtil());
 	}
 	
 	@Override
