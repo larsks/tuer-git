@@ -223,7 +223,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         screen.addReference();
         final int screenWidth=screen.getWidth();
         final int screenHeight=screen.getHeight();
-        final int bitDepth=screen.getCurrentScreenMode().getMonitorMode().getSurfaceSize().getBitsPerPixel();
+        //FIXME is it really the main monitor?
+        final int bitDepth=screen.getMonitorDevices().get(0).queryCurrentMode().getSurfaceSize().getBitsPerPixel();
         screen.removeReference();
         
         //initializes the settings, the full-screen mode is enabled

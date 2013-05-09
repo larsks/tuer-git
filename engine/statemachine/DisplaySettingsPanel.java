@@ -35,9 +35,9 @@ import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
-import com.jogamp.newt.Screen;
-import com.jogamp.newt.ScreenMode;
-import com.jogamp.newt.util.ScreenModeUtil;
+import com.jogamp.newt.MonitorDevice;
+import com.jogamp.newt.MonitorMode;
+import com.jogamp.newt.util.MonitorModeUtil;
 
 public class DisplaySettingsPanel extends UIPanel{
 
@@ -49,7 +49,7 @@ public class DisplaySettingsPanel extends UIPanel{
 	
 	private final UIComboBox displayModesCombo;
 	
-	private final HashMap<Integer,List<ScreenMode>> screenModesByRotation;
+	private final HashMap<Integer,List<MonitorMode>> screenModesByRotation;
 	
 	public DisplaySettingsPanel(final MainMenuState mainMenuState,final TriggerAction toggleScreenModeAction){
 		super();
@@ -57,14 +57,14 @@ public class DisplaySettingsPanel extends UIPanel{
 		this.toggleScreenModeAction=toggleScreenModeAction;
 		setLayout(new RowLayout(false));
     	final UILabel screenModesLabel=new UILabel("Display Mode");
-    	final Screen screen=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen();
-    	final ScreenMode currentScreenMode=screen.getCurrentScreenMode();
-    	final List<ScreenMode> screenModes=screen.getScreenModes();
-    	screenModesByRotation=new HashMap<Integer,List<ScreenMode>>();
+    	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+    	final MonitorMode currentScreenMode=monitor.getCurrentMode();
+    	final List<MonitorMode> screenModes=monitor.getSupportedModes();
+    	screenModesByRotation=new HashMap<Integer,List<MonitorMode>>();
     	final int[] rotations=new int[]{0,90,180,270};
     	final ArrayList<Integer> availableRotations=new ArrayList<Integer>();
     	for(int rotation:rotations)
-    	    {final List<ScreenMode> rotatedScreenModes=ScreenModeUtil.filterByRotation(screenModes,rotation);
+    	    {final List<MonitorMode> rotatedScreenModes=MonitorModeUtil.filterByRotation(screenModes,rotation);
     		 if(rotatedScreenModes!=null&&!rotatedScreenModes.isEmpty())
     			 {screenModesByRotation.put(Integer.valueOf(rotation),rotatedScreenModes);
     			  availableRotations.add(Integer.valueOf(rotation));
@@ -94,8 +94,8 @@ public class DisplaySettingsPanel extends UIPanel{
     		 rotationsPanel=null;
     		}
     	int selectedScreenModeIndex=-1,screenModeIndex=0;
-    	final List<ScreenMode> currentScreenModes=screenModesByRotation.get(Integer.valueOf(selectedScreenRotation));
-    	for(ScreenMode screenMode:currentScreenModes)
+    	final List<MonitorMode> currentScreenModes=screenModesByRotation.get(Integer.valueOf(selectedScreenRotation));
+    	for(MonitorMode screenMode:currentScreenModes)
     		{if(screenMode==currentScreenMode)
     	         {selectedScreenModeIndex=screenModeIndex;
     			  break;
@@ -173,16 +173,16 @@ public class DisplaySettingsPanel extends UIPanel{
 		final Integer selectedRotation=Integer.valueOf(Integer.parseInt(((UIRadioButton)ae.getSource()).getText()));
 		displayModesCombo.setSelectedIndex(-1,false);
 		displayModesModel.clear();
-		final Screen screen=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen();
-		final ScreenMode freshCurrentScreenMode=screen.getCurrentScreenMode();
-		for(ScreenMode rotatedScreenMode:screenModesByRotation.get(selectedRotation))
+		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+		final MonitorMode freshCurrentScreenMode=monitor.getCurrentMode();
+		for(MonitorMode rotatedScreenMode:screenModesByRotation.get(selectedRotation))
 		    {displayModesModel.addItem(rotatedScreenMode);
-			 if(rotatedScreenMode.getMonitorMode().getSurfaceSize().getResolution().getWidth()==freshCurrentScreenMode.getMonitorMode().getSurfaceSize().getResolution().getWidth()&&
-			    rotatedScreenMode.getMonitorMode().getSurfaceSize().getResolution().getHeight()==freshCurrentScreenMode.getMonitorMode().getSurfaceSize().getResolution().getHeight()&&
-				rotatedScreenMode.getMonitorMode().getRefreshRate()==freshCurrentScreenMode.getMonitorMode().getRefreshRate())
+			 if(rotatedScreenMode.getSurfaceSize().getResolution().getWidth()==freshCurrentScreenMode.getSurfaceSize().getResolution().getWidth()&&
+			    rotatedScreenMode.getSurfaceSize().getResolution().getHeight()==freshCurrentScreenMode.getSurfaceSize().getResolution().getHeight()&&
+				rotatedScreenMode.getRefreshRate()==monitor.getCurrentMode().getRefreshRate())
 			     setScreenMode(rotatedScreenMode);
 			}
-		displayModesCombo.setSelectedIndex(screenModesByRotation.get(selectedRotation).indexOf(screen.getCurrentScreenMode()),false);
+		displayModesCombo.setSelectedIndex(screenModesByRotation.get(selectedRotation).indexOf(monitor.getCurrentMode()),false);
 	}
 	
 	private void onWindowingModeButtonActionPerformed(final ActionEvent event){
@@ -202,25 +202,25 @@ public class DisplaySettingsPanel extends UIPanel{
 	}
 	
 	private void onDisplayModesComboSelectionChanged(final UIComboBox component,final Object newValue){
-		setScreenMode((ScreenMode)newValue);
+		setScreenMode((MonitorMode)newValue);
 	}
 	
-	private void setScreenMode(final ScreenMode screenMode){
-		final Screen screen=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen();
-		screen.setCurrentScreenMode(screenMode);
+	private void setScreenMode(final MonitorMode monitorMode){
+		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+		monitor.setCurrentMode(monitorMode);
 		//the camera is going to take into account the change of resolution very soon, the update of the UI must be done later
 		final CanvasRenderer canvasRenderer=mainMenuState.canvas.getCanvasRenderer();
     	final RenderContext renderContext=canvasRenderer.getRenderContext();
 		GameTaskQueueManager.getManager(renderContext).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {
-				updateUiLocationOnCameraChange(screenMode);
+				updateUiLocationOnCameraChange();
 				return null;
 			}
     	});
 	}
 	
-	private void updateUiLocationOnCameraChange(final ScreenMode screenMode){
+	private void updateUiLocationOnCameraChange(){
 		final Camera cam=mainMenuState.canvas.getCanvasRenderer().getCamera();
 		mainMenuState.mainFrame.setLocationRelativeTo(cam);
 	}
