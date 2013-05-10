@@ -28,6 +28,7 @@ import com.ardor3d.util.ReadOnlyTimer;
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.BasicConditions;
 import engine.input.ActionMap;
+import engine.input.MouseAndKeyboardSettings;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManager;
@@ -57,6 +58,10 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     private final ActionMap customActionMap;
     
+    private final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings;
+    
+    private final MouseAndKeyboardSettings customMouseAndKeyboardSettings;
+    
     /**
      * sound manager used to play sound samples and music
      * */    
@@ -67,11 +72,22 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             final TriggerAction serviceExitAction,final TriggerAction toggleScreenModeAction,
             final Runnable launchRunnable,
             final Runnable uninstallRunnable,
-            final String creditsContent,final ActionMap defaultActionMap){
+            final String creditsContent,final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings){
         super(ScenegraphState.class,String.class,new ScenegraphState());
         fontStore=new FontStore();
         taskManager=new TaskManager();
         soundManager=new SoundManager();
+        if(defaultMouseAndKeyboardSettings==null)
+            {this.defaultMouseAndKeyboardSettings=new MouseAndKeyboardSettings();
+             this.defaultMouseAndKeyboardSettings.setKeyRotateSpeed(2.25);
+             this.defaultMouseAndKeyboardSettings.setLookUpDownReversed(false);
+             this.defaultMouseAndKeyboardSettings.setMousePointerNeverHidden(false);
+             this.defaultMouseAndKeyboardSettings.setMouseRotateSpeed(0.005);
+             this.defaultMouseAndKeyboardSettings.setMoveSpeed(5);
+            }
+        else
+            this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
+        customMouseAndKeyboardSettings=this.defaultMouseAndKeyboardSettings.clone();
         if(defaultActionMap==null)
             {this.defaultActionMap=new ActionMap();
              this.defaultActionMap.setKeyActionBinding(engine.input.Action.MOVE_FORWARD,Key.W);
@@ -106,7 +122,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             }
         else
         	this.defaultActionMap=defaultActionMap;
-        this.customActionMap=new ActionMap(this.defaultActionMap);
+        this.customActionMap=this.defaultActionMap.clone();
         final TriggerAction exitAction=new TriggerAction() {
 			
 			@Override
@@ -149,9 +165,9 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,exitAction,contentRatingSystemToInitializationTriggerAction,soundManager,fontStore);
         final InitializationState initializationState=new InitializationState(canvas,physicalLayer,exitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
         final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
-        final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager,this.defaultActionMap,this.customActionMap);
+        final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         //adds the states and their actions to the state machine
         //FIXME put all cleanup code into the entry action of the initial state
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());

@@ -30,17 +30,19 @@ import com.ardor3d.input.logical.TwoInputStates;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
-public class ActionMap{
+public class ActionMap implements Cloneable{
 
 	private final HashMap<Action,HashSet<Input>> internalActionMap;
 	
 	public ActionMap(){
-		this(null);
+		internalActionMap=new HashMap<Action,HashSet<Input>>();
 	}
 	
-	public ActionMap(final ActionMap actionMap){
-		internalActionMap=new HashMap<Action,HashSet<Input>>();
-		set(actionMap);
+	@Override
+	public ActionMap clone(){
+		final ActionMap clone=new ActionMap();
+		clone.set(this);
+		return(clone);
 	}
 	
 	public void set(final ActionMap actionMap){

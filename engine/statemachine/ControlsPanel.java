@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import com.ardor3d.extension.ui.UIButton;
+import com.ardor3d.extension.ui.UICheckBox;
 import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.event.ActionEvent;
@@ -34,9 +35,16 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import engine.input.Action;
 import engine.input.ActionMap;
+import engine.input.MouseAndKeyboardSettings;
 import engine.input.MouseWheelMovedDownCondition;
 import engine.input.MouseWheelMovedUpCondition;
 
+/**
+ * Panel used to modify the controls
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public final class ControlsPanel extends UIPanel{
 	
 	private Action latestEditedAction;
@@ -49,15 +57,22 @@ public final class ControlsPanel extends UIPanel{
 	
 	private final ActionMap customActionMap;
 	
+    private final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings;
+    
+    private final MouseAndKeyboardSettings customMouseAndKeyboardSettings;
+	
 	private final HashMap<Action,UILabel> actionsLabelsMap;
 	
-	public ControlsPanel(final MainMenuState mainMenuState,final ActionMap defaultActionMap,final ActionMap customActionMap){
+	public ControlsPanel(final MainMenuState mainMenuState,final ActionMap defaultActionMap,final ActionMap customActionMap,
+			             final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
 		super();
 		setLayout(new RowLayout(false));
 		previousTriggers=new HashSet<InputTrigger>();
 		this.mainMenuState=mainMenuState;
 		this.defaultActionMap=defaultActionMap;
 		this.customActionMap=customActionMap;
+		this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
+		this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
 		latestEditedAction=null;
 		actionsLabelsMap=new HashMap<Action,UILabel>();
 		add(new UILabel("Controls"));
@@ -82,6 +97,25 @@ public final class ControlsPanel extends UIPanel{
 		actionPanel.add(actionsButtonsPanel);
 		actionPanel.add(actionsLabelsPanel);
 		add(actionPanel);
+		
+		final UICheckBox lookUpDownReversedCheckBox=new UICheckBox("Reverse look up/down");
+		lookUpDownReversedCheckBox.setSelected(customMouseAndKeyboardSettings.isLookUpDownReversed());
+		lookUpDownReversedCheckBox.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onLookUpDownReversedCheckBoxActionPerformed(ae);
+            }
+		});
+		add(lookUpDownReversedCheckBox);
+		final UICheckBox mousePointerNeverHiddenCheckBox=new UICheckBox("Never hide the mouse pointer (for debug purpose only)");
+		mousePointerNeverHiddenCheckBox.setSelected(customMouseAndKeyboardSettings.isMousePointerNeverHidden());
+		mousePointerNeverHiddenCheckBox.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onMousePointerNeverHiddenCheckBoxActionPerformed(ae);
+            }
+		});
+		add(mousePointerNeverHiddenCheckBox);
 		update();
         final UIButton resetToDefaultsButton=new UIButton("Reset to defaults");
         resetToDefaultsButton.addActionListener(new ActionListener(){           
@@ -99,6 +133,14 @@ public final class ControlsPanel extends UIPanel{
             }
         });
         add(backButton);
+	}
+	
+	protected void onLookUpDownReversedCheckBoxActionPerformed(final ActionEvent ae){
+		customMouseAndKeyboardSettings.setLookUpDownReversed(((UICheckBox)ae.getSource()).isSelected());
+	}
+	
+    protected void onMousePointerNeverHiddenCheckBoxActionPerformed(final ActionEvent ae){
+    	customMouseAndKeyboardSettings.setMousePointerNeverHidden(((UICheckBox)ae.getSource()).isSelected());
 	}
 	
 	private void update(){
@@ -126,6 +168,7 @@ public final class ControlsPanel extends UIPanel{
 	
 	private void resetToDefaultsButtonActionPerformed(ActionEvent ae){
 		customActionMap.set(defaultActionMap);
+		customMouseAndKeyboardSettings.set(defaultMouseAndKeyboardSettings);
 	}
 	
 	@Override
