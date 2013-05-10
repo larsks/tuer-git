@@ -38,7 +38,9 @@ import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
+import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.Key;
+import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.KeyReleasedCondition;
@@ -89,6 +91,7 @@ import engine.data.common.userdata.WeaponUserData;
 import engine.input.Action;
 import engine.input.ActionMap;
 import engine.input.ExtendedFirstPersonControl;
+import engine.input.MouseAndKeyboardSettings;
 import engine.misc.ApplicativeTimer;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
@@ -171,6 +174,8 @@ public final class GameState extends ScenegraphState{
     
     private final PhysicalLayer physicalLayer;
     
+    private final MouseManager mouseManager;
+    
     private final TriggerAction exitAction;
     
     private final TriggerAction toggleScreenModeAction;
@@ -180,6 +185,10 @@ public final class GameState extends ScenegraphState{
     private final ActionMap defaultActionMap;
     
     private final ActionMap customActionMap;
+    
+    private final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings;
+    
+    private final MouseAndKeyboardSettings customMouseAndKeyboardSettings;
     
     private static final String gameoverSoundSamplePath="/sounds/gameover.ogg";
     
@@ -214,13 +223,17 @@ public final class GameState extends ScenegraphState{
     private static String enemyShotgunShotSampleIdentifier = null;
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,
-    		         final SoundManager soundManager,final TaskManager taskManager,final ActionMap defaultActionMap,final ActionMap customActionMap){
+    		         final SoundManager soundManager,final TaskManager taskManager,final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
+    		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
         super(soundManager);
+        this.mouseManager=mouseManager;
         this.physicalLayer=physicalLayer;
         this.toggleScreenModeAction=toggleScreenModeAction;
         this.exitAction=exitAction;
         this.defaultActionMap=defaultActionMap;
         this.customActionMap=customActionMap;
+        this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
+        this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<Mesh,EnemyData>();
@@ -1016,6 +1029,11 @@ public final class GameState extends ScenegraphState{
     	final Vector3 worldUp=new Vector3(0,1,0);
         //sets "drag only" to false to remove the need of pressing a button to move
         fpsc=ExtendedFirstPersonControl.setupTriggers(getLogicalLayer(),worldUp,false,customActionMap);
+        //applies the mouse and keyboard settings
+        fpsc.setKeyRotateSpeed(customMouseAndKeyboardSettings.getKeyRotateSpeed());
+        fpsc.setLookUpDownReversed(customMouseAndKeyboardSettings.isLookUpDownReversed());
+        fpsc.setMouseRotateSpeed(customMouseAndKeyboardSettings.getMouseRotateSpeed());
+        fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
         //creates a text node that asks the user to confirm or not the exit
         exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         final InputTrigger exitPromptTrigger=new InputTrigger(customActionMap.getCondition(Action.QUIT,false),new TriggerAction(){
@@ -1766,11 +1784,17 @@ public final class GameState extends ScenegraphState{
           		   * checks whether the custom action map has been modified by comparing it to the default one or 
           		   * if the input triggers have never been initialized
           		   * */
-          		  if(fpsc==null||!customActionMap.equals(defaultActionMap))
+          		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
           		      {//(re)initializes input triggers
           			   initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
           		      }
           		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
+          		  final GrabbedState grabbedState;
+          		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
+          			  grabbedState=GrabbedState.NOT_GRABBED;
+          		  else
+          			  grabbedState=GrabbedState.GRABBED;
+          		  mouseManager.setGrabbed(grabbedState);
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  

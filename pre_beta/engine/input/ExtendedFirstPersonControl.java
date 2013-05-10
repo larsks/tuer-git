@@ -39,17 +39,19 @@ import engine.input.ActionMap.KeyInput;
 public final class ExtendedFirstPersonControl{
 
 	/**axis headed to up*/
-    private final Vector3 upAxis = new Vector3();
+    private final Vector3 upAxis;
     /**turn speed when using the mouse*/
-    private double mouseRotateSpeed = .005;
+    private double mouseRotateSpeed=0.005;
     /**speed of move (front, back ,strafe)*/
-    private double moveSpeed = 5;
+    private double moveSpeed=5;
     /**turn speed when using the arrow keys*/
-    private double keyRotateSpeed = 2.25;
+    private double keyRotateSpeed=2.25;
     /**temporary matrix*/
-    private final Matrix3 workerMatrix = new Matrix3();
+    private final Matrix3 workerMatrix;
     /**temporary vector*/
-    private final Vector3 workerStoreA = new Vector3();
+    private final Vector3 workerStoreA;
+    /**flag indicating whether to reserve mouse look up/down*/
+    private boolean lookUpDownReversed;
     
     private final Set<KeyInput> moveForwardKeyInputs;
     
@@ -69,8 +71,14 @@ public final class ExtendedFirstPersonControl{
     
     private final ActionMap customActionMap;
 
-    public ExtendedFirstPersonControl(final ReadOnlyVector3 upAxis,final ActionMap customActionMap) {
+    public ExtendedFirstPersonControl(final ReadOnlyVector3 upAxis,final ActionMap customActionMap){
+    	this.upAxis=new Vector3();
         this.upAxis.set(upAxis);
+        mouseRotateSpeed=0.005;
+        moveSpeed=5;
+        keyRotateSpeed=2.25;
+        workerMatrix=new Matrix3();
+        workerStoreA=new Vector3();
         this.customActionMap=customActionMap;
         this.moveForwardKeyInputs=customActionMap.getInputs(Action.MOVE_FORWARD);
         this.moveBackwardKeyInputs=customActionMap.getInputs(Action.MOVE_BACKWARD);
@@ -82,36 +90,36 @@ public final class ExtendedFirstPersonControl{
         this.lookDownKeyInputs=customActionMap.getInputs(Action.LOOK_DOWN);
     }
 
-    public ReadOnlyVector3 getUpAxis() {
-        return upAxis;
+    public ReadOnlyVector3 getUpAxis(){
+        return(upAxis);
     }
 
-    public void setUpAxis(final ReadOnlyVector3 upAxis) {
+    public void setUpAxis(final ReadOnlyVector3 upAxis){
     	this.upAxis.set(upAxis);
     }
 
-    public double getMouseRotateSpeed() {
-        return mouseRotateSpeed;
+    public double getMouseRotateSpeed(){
+        return(mouseRotateSpeed);
     }
 
-    public void setMouseRotateSpeed(final double speed) {
-        mouseRotateSpeed = speed;
+    public void setMouseRotateSpeed(final double speed){
+        mouseRotateSpeed=speed;
     }
 
-    public double getMoveSpeed() {
-        return moveSpeed;
+    public double getMoveSpeed(){
+        return(moveSpeed);
     }
 
-    public void setMoveSpeed(final double speed) {
-        moveSpeed = speed;
+    public void setMoveSpeed(final double speed){
+        moveSpeed=speed;
     }
 
-    public double getKeyRotateSpeed() {
-        return keyRotateSpeed;
+    public double getKeyRotateSpeed(){
+        return(keyRotateSpeed);
     }
 
-    public void setKeyRotateSpeed(final double speed) {
-        keyRotateSpeed = speed;
+    public void setKeyRotateSpeed(final double speed){
+        keyRotateSpeed=speed;
     }
 
     /**
@@ -120,71 +128,71 @@ public final class ExtendedFirstPersonControl{
      * @param kb
      * @param tpf
      */
-    protected void move(final Camera camera, final KeyboardState kb, final double tpf) {
+    protected void move(final Camera camera,final KeyboardState kb,final double tpf){
         // MOVEMENT
-        int moveFB = 0, strafeLR = 0;
+        int moveFB=0,strafeLR=0;
         for(KeyInput input:moveForwardKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-            	 moveFB += 1;
+            	 moveFB+=1;
             }
         for(KeyInput input:moveBackwardKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-            	 moveFB -= 1;
+            	 moveFB-=1;
             }
         for(KeyInput input:strafeLeftKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-        	     strafeLR += 1;
+        	     strafeLR+=1;
             }
         for(KeyInput input:strafeRightKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-            	 strafeLR -= 1;
+            	 strafeLR-=1;
             }
-        if (moveFB != 0 || strafeLR != 0) {
-            final Vector3 loc = workerStoreA.zero();
-            if (moveFB == 1) {
-                loc.addLocal(camera.getDirection());
-            } else if (moveFB == -1) {
-                loc.subtractLocal(camera.getDirection());
+        if(moveFB!=0||strafeLR!=0)
+            {final Vector3 loc = workerStoreA.zero();
+             if(moveFB==1)
+                 loc.addLocal(camera.getDirection());
+             else
+                 {if(moveFB==-1) 
+                      loc.subtractLocal(camera.getDirection());
+                 }
+             if(strafeLR==1)
+                 loc.addLocal(camera.getLeft());
+             else
+            	 {if(strafeLR==-1)
+                      loc.subtractLocal(camera.getLeft());
+            	 }
+             loc.normalizeLocal().multiplyLocal(moveSpeed*tpf).addLocal(camera.getLocation());
+             camera.setLocation(loc);
             }
-            if (strafeLR == 1) {
-                loc.addLocal(camera.getLeft());
-            } else if (strafeLR == -1) {
-                loc.subtractLocal(camera.getLeft());
-            }
-            loc.normalizeLocal().multiplyLocal(moveSpeed * tpf).addLocal(camera.getLocation());
-            camera.setLocation(loc);
-        }
 
         // ROTATION
         int rotX = 0, rotY = 0;
         for(KeyInput input:lookUpKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-            	 rotY -= 1;
+            	 rotY-=1;
             }
         for(KeyInput input:lookDownKeyInputs)
             {final Key key=input.getInputObject();
              if(kb.isDown(key))
-            	 rotY += 1;
+            	 rotY+=1;
             }
         for(KeyInput input:turnLeftKeyInputs)
             {final Key key=input.getInputObject();
         	 if(kb.isDown(key))
-        		 rotX += 1;
+        		 rotX+=1;
             }
         for(KeyInput input:turnRightKeyInputs)
             {final Key key=input.getInputObject();
     	     if(kb.isDown(key))
-    		     rotX -= 1;
+    		     rotX-=1;
             }
-        if ((rotX != 0 || rotY != 0) && mouseRotateSpeed != 0 && keyRotateSpeed != 0) {
-            rotate(camera, rotX * (keyRotateSpeed / mouseRotateSpeed) * tpf, rotY
-                    * (keyRotateSpeed / mouseRotateSpeed) * tpf);
-        }
+        if((rotX != 0 || rotY != 0) && mouseRotateSpeed != 0 && keyRotateSpeed != 0)
+            rotate(camera,rotX * (keyRotateSpeed / mouseRotateSpeed) * tpf,rotY * (keyRotateSpeed / mouseRotateSpeed) * tpf);
     }
 
     /**
@@ -193,8 +201,7 @@ public final class ExtendedFirstPersonControl{
      * @param dx
      * @param dy
      */
-    protected void rotate(final Camera camera, final double dx, final double dy) {
-
+    protected void rotate(final Camera camera,final double dx,final double dy){
         if (dx != 0) {
             workerMatrix.fromAngleNormalAxis(mouseRotateSpeed * dx, upAxis != null ? upAxis : camera.getUp());
             workerMatrix.applyPost(camera.getLeft(), workerStoreA);
@@ -204,7 +211,6 @@ public final class ExtendedFirstPersonControl{
             workerMatrix.applyPost(camera.getUp(), workerStoreA);
             camera.setUp(workerStoreA);
         }
-
         if (dy != 0) {
             workerMatrix.fromAngleNormalAxis(mouseRotateSpeed * dy, camera.getLeft());
             workerMatrix.applyPost(camera.getLeft(), workerStoreA);
@@ -214,7 +220,6 @@ public final class ExtendedFirstPersonControl{
             workerMatrix.applyPost(camera.getUp(), workerStoreA);
             camera.setUp(workerStoreA);
         }
-
         camera.normalize();
     }
 
@@ -224,10 +229,10 @@ public final class ExtendedFirstPersonControl{
      * @param dragOnly
      * @return a new FirstPersonControl object
      */
-    public static ExtendedFirstPersonControl setupTriggers(final LogicalLayer layer, final ReadOnlyVector3 upAxis,
-            final boolean dragOnly,final ActionMap customActionMap) {
-        final ExtendedFirstPersonControl control = new ExtendedFirstPersonControl(upAxis,customActionMap);
-        control.setupMouseTriggers(layer, dragOnly, control.setupKeyboardTriggers(layer));
+    public static ExtendedFirstPersonControl setupTriggers(final LogicalLayer layer,final ReadOnlyVector3 upAxis,
+            final boolean dragOnly,final ActionMap customActionMap){
+        final ExtendedFirstPersonControl control=new ExtendedFirstPersonControl(upAxis,customActionMap);
+        control.setupMouseTriggers(layer,dragOnly,control.setupKeyboardTriggers(layer));
         return control;
     }
 
@@ -236,17 +241,28 @@ public final class ExtendedFirstPersonControl{
         final Predicate<TwoInputStates> someMouseDown = Predicates.or(TriggerConditions.leftButtonDown(), Predicates
                 .or(TriggerConditions.rightButtonDown(), TriggerConditions.middleButtonDown()));
         final Predicate<TwoInputStates> dragged = Predicates.and(TriggerConditions.mouseMoved(), someMouseDown);
-        final TriggerAction dragAction = new TriggerAction() {
-
-            public void perform(final Canvas source, final TwoInputStates inputStates, final double tpf) {
-                final MouseState mouse = inputStates.getCurrent().getMouseState();
-                if (mouse.getDx() != 0 || mouse.getDy() != 0) {
-                	//FIXME support reverse up/down
-                    ExtendedFirstPersonControl.this.rotate(source.getCanvasRenderer().getCamera(), -mouse.getDx(), -mouse.getDy());
-                }
+        final TriggerAction dragAction=new TriggerAction(){
+            @Override
+            public void perform(final Canvas source,final TwoInputStates inputStates,final double tpf){
+            	onDragAction(source,inputStates,tpf);
             }
         };
         layer.registerTrigger(new InputTrigger(dragOnly ? dragged : TriggerConditions.mouseMoved(), dragAction));
+    }
+    
+    protected void onDragAction(final Canvas source,final TwoInputStates inputStates,final double tpf){
+    	final MouseState mouse = inputStates.getCurrent().getMouseState();
+        if (mouse.getDx() != 0 || mouse.getDy() != 0) {
+        	rotate(source.getCanvasRenderer().getCamera(), -mouse.getDx(),lookUpDownReversed?mouse.getDy():-mouse.getDy());
+        }
+    }
+    
+    public boolean isLookUpDownReversed(){
+    	return(lookUpDownReversed);
+    }
+    
+    public void setLookUpDownReversed(final boolean lookUpDownReversed){
+    	this.lookUpDownReversed=lookUpDownReversed;
     }
     
     private static final class FirstPersonControlKeyboardTriggersPredicate implements Predicate<TwoInputStates>{
@@ -276,13 +292,17 @@ public final class ExtendedFirstPersonControl{
 
     public Predicate<TwoInputStates> setupKeyboardTriggers(final LogicalLayer layer){
         final Predicate<TwoInputStates> keysHeld = new FirstPersonControlKeyboardTriggersPredicate(customActionMap);
-        final TriggerAction moveAction = new TriggerAction(){
+        final TriggerAction moveAction=new TriggerAction(){
+        	@Override
             public void perform(final Canvas source,final TwoInputStates inputStates,final double tpf){
-                ExtendedFirstPersonControl.this.move(source.getCanvasRenderer().getCamera(),inputStates.getCurrent().getKeyboardState(),tpf);
+            	onMoveAction(source,inputStates,tpf);
             }
         };
         layer.registerTrigger(new InputTrigger(keysHeld,moveAction));
         return keysHeld;
     }
 
+    protected void onMoveAction(final Canvas source,final TwoInputStates inputStates,final double tpf){
+    	move(source.getCanvasRenderer().getCamera(),inputStates.getCurrent().getKeyboardState(),tpf);
+    }
 }

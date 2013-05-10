@@ -42,6 +42,7 @@ import com.ardor3d.ui.text.BMText;
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
 import engine.input.ActionMap;
+import engine.input.MouseAndKeyboardSettings;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
@@ -89,6 +90,10 @@ public final class MainMenuState extends ScenegraphState{
     
     private final Runnable uninstallRunnable;
     
+    private final LevelTransitionTriggerAction levelTransitionTriggerAction;
+    
+    private final LevelTransitionTriggerAction perfTestLevelTransitionTriggerAction;
+    
     /**
      * Constructor
      * 
@@ -105,6 +110,8 @@ public final class MainMenuState extends ScenegraphState{
      * @param toggleScreenModeAction action allowing to modify the windowing mode
      * @param defaultActionMap default action map, which should not be modified, used to reset the custom action map to its default value
      * @param customActionMap custom action map, which can be modified
+     * @param defaultMouseAndKeyboardSettings default mouse and keyboard settings, which should not be modified, used to reset the custom ones to their default values
+     * @param customMouseAndKeyboardSettings custom mouse and keyboard settings, which can be modified
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
@@ -112,7 +119,8 @@ public final class MainMenuState extends ScenegraphState{
                   final SoundManager soundManager,final Runnable launchRunnable,
                   final Runnable uninstallRunnable,final String creditsContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
-      			  final ActionMap customActionMap){
+      			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
+      			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
         super(soundManager);
         matchTypeFactory=new MatchTypeFactory();
         matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
@@ -125,7 +133,7 @@ public final class MainMenuState extends ScenegraphState{
         this.mouseManager=mouseManager;
         //creates the panels
         if(customActionMap!=null)
-            controlsPanel=new ControlsPanel(this,defaultActionMap,customActionMap);
+            controlsPanel=new ControlsPanel(this,defaultActionMap,customActionMap,defaultMouseAndKeyboardSettings,customMouseAndKeyboardSettings);
         else
         	controlsPanel=null;
         profilePanel=createProfilePanel();
@@ -138,7 +146,9 @@ public final class MainMenuState extends ScenegraphState{
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(exitAction);
         optionsMenuPanel=createOptionsMenuPanel();
-        startMenuPanel=createStartMenuPanel(/*toLoadingDisplayAction*/);
+        levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
+        perfTestLevelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
+        startMenuPanel=createStartMenuPanel();
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
         arenaModePanel=createArenaModePanel();
         //creates the main frame
@@ -182,22 +192,16 @@ public final class MainMenuState extends ScenegraphState{
         final UIPanel storyModePanel=new UIPanel(new RowLayout(false));
         final UIButton level0Button=new UIButton("Level 0");
         level0Button.addActionListener(new ActionListener(){
-        	
-        	private final LevelTransitionTriggerAction levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
-        	
             @Override
-            public void actionPerformed(ActionEvent event){
-            	levelTransitionTriggerAction.perform(null,null,-1);
+            public void actionPerformed(ActionEvent ae){
+            	onLevelButtonActionPerformed(ae);
             }
         });
-        final UIButton perfTestButton=new UIButton("Performance Test");
-        perfTestButton.addActionListener(new ActionListener(){
-        	
-        	private final LevelTransitionTriggerAction levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
-        	
+        final UIButton perfTestLevelButton=new UIButton("Performance Test");
+        perfTestLevelButton.addActionListener(new ActionListener(){
             @Override
-            public void actionPerformed(ActionEvent event){
-            	levelTransitionTriggerAction.perform(null,null,-1);
+            public void actionPerformed(ActionEvent ae){
+            	onPerfTestLevelButtonActionPerformed(ae);
             }
         });
         final UIButton backButton=new UIButton("Back");
@@ -208,9 +212,17 @@ public final class MainMenuState extends ScenegraphState{
             }
         });
         storyModePanel.add(level0Button);
-        storyModePanel.add(perfTestButton);
+        storyModePanel.add(perfTestLevelButton);
         storyModePanel.add(backButton);
         return(storyModePanel);
+    }
+    
+    private void onLevelButtonActionPerformed(final ActionEvent ae){
+    	levelTransitionTriggerAction.perform(null,null,-1);
+    }
+    
+    private void onPerfTestLevelButtonActionPerformed(final ActionEvent ae){
+    	perfTestLevelTransitionTriggerAction.perform(null,null,-1);
     }
     
     private final UIPanel createArenaModePanel(){
@@ -651,7 +663,7 @@ public final class MainMenuState extends ScenegraphState{
     	return(desktopShortcutsMenuPanel);
     }
     
-    private final UIPanel createStartMenuPanel(/*final TriggerAction toLoadingDisplayAction*/){
+    private final UIPanel createStartMenuPanel(){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
         final UIButton storyModeButton=new UIButton("Story mode");
         storyModeButton.addActionListener(new ActionListener(){           
