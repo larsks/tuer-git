@@ -35,6 +35,7 @@ import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
@@ -1789,12 +1790,16 @@ public final class GameState extends ScenegraphState{
           			   initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
           		      }
           		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
-          		  final GrabbedState grabbedState;
+          		  mouseManager.setGrabbed(GrabbedState.GRABBED);
           		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
-          			  grabbedState=GrabbedState.NOT_GRABBED;
-          		  else
-          			  grabbedState=GrabbedState.GRABBED;
-          		  mouseManager.setGrabbed(grabbedState);
+          		      {GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+          				   @Override
+          				   public Void call() throws Exception {
+          					   ((JoglNewtWindow)canvas).getNewtWindow().setPointerVisible(true);
+          					   return null;
+          				   }
+          	    	   });
+          		      }
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  
