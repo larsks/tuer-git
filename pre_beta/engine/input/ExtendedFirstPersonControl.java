@@ -41,11 +41,11 @@ public final class ExtendedFirstPersonControl{
 	/**axis headed to up*/
     private final Vector3 upAxis;
     /**turn speed when using the mouse*/
-    private double mouseRotateSpeed=0.005;
+    private double mouseRotateSpeed;
     /**speed of move (front, back ,strafe)*/
-    private double moveSpeed=5;
+    private double moveSpeed;
     /**turn speed when using the arrow keys*/
-    private double keyRotateSpeed=2.25;
+    private double keyRotateSpeed;
     /**temporary matrix*/
     private final Matrix3 workerMatrix;
     /**temporary vector*/

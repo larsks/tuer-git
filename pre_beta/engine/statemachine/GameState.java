@@ -826,9 +826,9 @@ public final class GameState extends ScenegraphState{
                 	 getRoot().detachChild(projectileToRemove);
                     }
                 if(playerData.isAlive())
-                    {fpsc.setKeyRotateSpeed(2.25);
-               	     fpsc.setMouseRotateSpeed(0.005);
-               	     fpsc.setMoveSpeed(5);
+                    {fpsc.setKeyRotateSpeed(customMouseAndKeyboardSettings.getKeyRotateSpeed());
+               	     fpsc.setMouseRotateSpeed(customMouseAndKeyboardSettings.getMouseRotateSpeed());
+               	     fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
                     }
                 else
                     {if(latestPlayerDeath==null)
