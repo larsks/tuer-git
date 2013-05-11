@@ -16,10 +16,13 @@ package engine.statemachine;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.ardor3d.extension.ui.Orientation;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UICheckBox;
 import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
+import com.ardor3d.extension.ui.UISlider;
 import com.ardor3d.extension.ui.event.ActionEvent;
 import com.ardor3d.extension.ui.event.ActionListener;
 import com.ardor3d.extension.ui.layout.RowLayout;
@@ -97,6 +100,34 @@ public final class ControlsPanel extends UIPanel{
 		actionPanel.add(actionsButtonsPanel);
 		actionPanel.add(actionsLabelsPanel);
 		add(actionPanel);
+		final UIPanel mouseRotateSpeedPanel=new UIPanel(new RowLayout(true));
+		final int initialMouseRotateSliderValue=fromMouseRotationModelToSliderModel(customMouseAndKeyboardSettings.getMouseRotateSpeed());
+		final UISlider mouseRotateSpeedSlider=new UISlider(Orientation.Horizontal,1,100,initialMouseRotateSliderValue);
+		mouseRotateSpeedSlider.setSnapToValues(true);
+		mouseRotateSpeedSlider.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onMouseRotateSpeedSliderActionPerformed(ae);
+            }
+		});
+		final UILabel mouseRotateSpeedLabel=new UILabel("Mouse Rotation Speed");
+		mouseRotateSpeedPanel.add(mouseRotateSpeedSlider);
+		mouseRotateSpeedPanel.add(mouseRotateSpeedLabel);
+		add(mouseRotateSpeedPanel);
+		final UIPanel keyRotateSpeedPanel=new UIPanel(new RowLayout(true));
+		final int initialkeyRotateSliderValue=fromKeyRotationModelToSliderModel(customMouseAndKeyboardSettings.getKeyRotateSpeed());
+		final UISlider keyRotateSpeedSlider=new UISlider(Orientation.Horizontal,1,100,initialkeyRotateSliderValue);
+		keyRotateSpeedSlider.setSnapToValues(true);
+		keyRotateSpeedSlider.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onKeyRotateSpeedSliderActionPerformed(ae);
+            }
+		});
+		final UILabel keyRotateSpeedLabel=new UILabel("Key Rotation Speed");
+		keyRotateSpeedPanel.add(keyRotateSpeedSlider);
+		keyRotateSpeedPanel.add(keyRotateSpeedLabel);
+		add(keyRotateSpeedPanel);
 		
 		final UICheckBox lookUpDownReversedCheckBox=new UICheckBox("Reverse look up/down");
 		lookUpDownReversedCheckBox.setSelected(customMouseAndKeyboardSettings.isLookUpDownReversed());
@@ -133,6 +164,38 @@ public final class ControlsPanel extends UIPanel{
             }
         });
         add(backButton);
+	}
+	
+	protected double fromSliderModelToMouseRotationModel(final int value){
+		final double mouseRotationModelValue=((double)value)/1000.0d;
+		return(mouseRotationModelValue);
+	}
+	
+	protected int fromMouseRotationModelToSliderModel(final double value){
+		final int sliderModelValue=(int)Math.round(value*1000.0d);
+		return(sliderModelValue);
+	}
+	
+	protected void onMouseRotateSpeedSliderActionPerformed(final ActionEvent ae){
+		final int sliderModelValue=((UISlider)ae.getSource()).getValue();
+		final double mouseRotationModelValue=fromSliderModelToMouseRotationModel(sliderModelValue);
+		customMouseAndKeyboardSettings.setMouseRotateSpeed(mouseRotationModelValue);
+	}
+	
+	protected double fromSliderModelToKeyRotationModel(final int value){
+		final double mouseRotationModelValue=((double)value)/10.0d;
+		return(mouseRotationModelValue);
+	}
+	
+	protected int fromKeyRotationModelToSliderModel(final double value){
+		final int sliderModelValue=(int)Math.round(value*10.0d);
+		return(sliderModelValue);
+	}
+	
+	protected void onKeyRotateSpeedSliderActionPerformed(final ActionEvent ae){
+		final int sliderModelValue=((UISlider)ae.getSource()).getValue();
+		final double keyRotationModelValue=fromSliderModelToKeyRotationModel(sliderModelValue);
+		customMouseAndKeyboardSettings.setKeyRotateSpeed(keyRotationModelValue);
 	}
 	
 	protected void onLookUpDownReversedCheckBoxActionPerformed(final ActionEvent ae){

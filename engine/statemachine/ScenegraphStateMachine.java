@@ -79,7 +79,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         soundManager=new SoundManager();
         if(defaultMouseAndKeyboardSettings==null)
             {this.defaultMouseAndKeyboardSettings=new MouseAndKeyboardSettings();
-             this.defaultMouseAndKeyboardSettings.setKeyRotateSpeed(2.25);
+             this.defaultMouseAndKeyboardSettings.setKeyRotateSpeed(2.2);
              this.defaultMouseAndKeyboardSettings.setLookUpDownReversed(false);
              this.defaultMouseAndKeyboardSettings.setMousePointerNeverHidden(false);
              this.defaultMouseAndKeyboardSettings.setMouseRotateSpeed(0.005);
