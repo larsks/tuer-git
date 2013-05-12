@@ -1773,7 +1773,19 @@ public final class GameState extends ScenegraphState{
             {super.setEnabled(enabled);
              final Camera cam=canvas.getCanvasRenderer().getCamera();
              if(enabled)
-                 {previousFrustumNear=cam.getFrustumNear();
+                 {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+                  mouseManager.setPosition(cam.getWidth()/2,cam.getHeight()/2);
+            	  mouseManager.setGrabbed(GrabbedState.GRABBED);
+         		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
+      		          {GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+      				       @Override
+      				       public Void call() throws Exception {
+      					       ((JoglNewtWindow)canvas).getNewtWindow().setPointerVisible(true);
+      					       return null;
+      				       }
+      	    	       });
+      		          }
+            	  previousFrustumNear=cam.getFrustumNear();
                   previousFrustumFar=cam.getFrustumFar();
                   previousCamLocation.set(cam.getLocation());
                   cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.1,200);
@@ -1790,16 +1802,6 @@ public final class GameState extends ScenegraphState{
           			   initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
           		      }
           		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
-          		  mouseManager.setGrabbed(GrabbedState.GRABBED);
-          		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
-          		      {GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
-          				   @Override
-          				   public Void call() throws Exception {
-          					   ((JoglNewtWindow)canvas).getNewtWindow().setPointerVisible(true);
-          					   return null;
-          				   }
-          	    	   });
-          		      }
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  
