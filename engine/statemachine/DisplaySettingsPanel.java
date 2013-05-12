@@ -208,20 +208,25 @@ public class DisplaySettingsPanel extends UIPanel{
 	private void setScreenMode(final MonitorMode monitorMode){
 		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
 		monitor.setCurrentMode(monitorMode);
+		updateUiLocationOnCameraChange(monitorMode.getSurfaceSize().getResolution().getWidth(),monitorMode.getSurfaceSize().getResolution().getHeight());
+	}
+	
+	private void updateUiLocationOnCameraChange(final int width,final int height){
 		//the camera is going to take into account the change of resolution very soon, the update of the UI must be done later
 		final CanvasRenderer canvasRenderer=mainMenuState.canvas.getCanvasRenderer();
     	final RenderContext renderContext=canvasRenderer.getRenderContext();
 		GameTaskQueueManager.getManager(renderContext).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 			@Override
-			public Void call() throws Exception {
-				updateUiLocationOnCameraChange();
+			public Void call() throws Exception{
+				if(canvasRenderer.getCamera().getWidth()==width&&
+				   canvasRenderer.getCamera().getHeight()==height)
+				    {final Camera cam=mainMenuState.canvas.getCanvasRenderer().getCamera();
+					 mainMenuState.mainFrame.setLocationRelativeTo(cam);
+				    }
+				else
+					updateUiLocationOnCameraChange(width,height);
 				return null;
 			}
     	});
-	}
-	
-	private void updateUiLocationOnCameraChange(){
-		final Camera cam=mainMenuState.canvas.getCanvasRenderer().getCamera();
-		mainMenuState.mainFrame.setLocationRelativeTo(cam);
 	}
 }
