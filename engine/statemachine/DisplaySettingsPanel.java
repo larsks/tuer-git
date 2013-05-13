@@ -208,10 +208,10 @@ public class DisplaySettingsPanel extends UIPanel{
 	private void setScreenMode(final MonitorMode monitorMode){
 		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
 		monitor.setCurrentMode(monitorMode);
-		updateUiLocationOnCameraChange(monitorMode.getRotatedWidth(),monitorMode.getRotatedHeight());
+		updateUiLocationOnCameraChange(monitorMode.getRotatedWidth(),monitorMode.getRotatedHeight(),5);
 	}
 	
-	private void updateUiLocationOnCameraChange(final int width,final int height){
+	private void updateUiLocationOnCameraChange(final int width,final int height,final int recurse){
 		//the camera is going to take into account the change of resolution very soon, the update of the UI must be done later
 		final CanvasRenderer canvasRenderer=mainMenuState.canvas.getCanvasRenderer();
     	final RenderContext renderContext=canvasRenderer.getRenderContext();
@@ -222,9 +222,13 @@ public class DisplaySettingsPanel extends UIPanel{
 				   canvasRenderer.getCamera().getHeight()==height)
 				    {final Camera cam=mainMenuState.canvas.getCanvasRenderer().getCamera();
 					 mainMenuState.mainFrame.setLocationRelativeTo(cam);
+					 if(recurse>0)
+						 {//some operating systems (especially Microsoft Windows) may require several attempts...
+						  updateUiLocationOnCameraChange(width,height,recurse-1);
+						 }
 				    }
 				else
-					updateUiLocationOnCameraChange(width,height);
+					updateUiLocationOnCameraChange(width,height,recurse);
 				return null;
 			}
     	});
