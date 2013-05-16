@@ -130,6 +130,9 @@ public final class SoundManager{
     
     public final void cleanup(){
         if(soundSystem!=null)
-            soundSystem.cleanup();
+            {soundSystem.cleanup();
+             //prevents the manager from playing another sound
+             soundSystem=null;
+            }
     }
 }
