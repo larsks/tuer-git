@@ -207,8 +207,8 @@ public class DisplaySettingsPanel extends UIPanel{
 	
 	private void setScreenMode(final MonitorMode monitorMode){
 		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
-		monitor.setCurrentMode(monitorMode);
-		updateUiLocationOnCameraChange(monitorMode.getRotatedWidth(),monitorMode.getRotatedHeight(),5);
+		if(monitor.setCurrentMode(monitorMode))
+		    updateUiLocationOnCameraChange(monitorMode.getRotatedWidth(),monitorMode.getRotatedHeight(),5);
 	}
 	
 	private void updateUiLocationOnCameraChange(final int width,final int height,final int recurse){
