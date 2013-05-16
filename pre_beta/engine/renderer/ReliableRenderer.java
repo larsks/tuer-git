@@ -41,27 +41,47 @@ public class ReliableRenderer extends JoglRenderer{
 	
 	private static final Method cleanerCleanMethod;
 	
+	private static final Method viewedBufferMethod;
+	
 	static{
 		boolean tmpDirectByteBufferCleanerCleanCallable;
 		Method tmpDirectByteBufferCleanerMethod;
 		Method tmpCleanerCleanMethod;
+		Method tmpViewedBufferMethod=null;
 		try{final Class<?> directByteBufferClass=Class.forName("java.nio.DirectByteBuffer");
 		    tmpDirectByteBufferCleanerMethod=directByteBufferClass.getDeclaredMethod("cleaner");
 		    tmpDirectByteBufferCleanerMethod.setAccessible(true);
 		    final Class<?> cleanerClass=Class.forName("sun.misc.Cleaner");
 		    tmpCleanerCleanMethod=cleanerClass.getDeclaredMethod("clean");
 		    tmpCleanerCleanMethod.setAccessible(true);
+		    final Class<?> directBufferInterface=Class.forName("sun.nio.ch.DirectBuffer");
+		    try{//Java 1.6
+		    	tmpViewedBufferMethod=directBufferInterface.getDeclaredMethod("viewedBuffer");
+		       }
+		    catch(NoSuchMethodException nsme)
+		    {try{//Java 1.7 and later
+		         tmpViewedBufferMethod=directBufferInterface.getDeclaredMethod("attachment");
+		        }
+		     catch(NoSuchMethodException nsme2)
+		     {//it should never happen (but I haven't tested with AvianVM)
+		      tmpViewedBufferMethod=null;
+		     }
+		    }
+		    if(tmpViewedBufferMethod!=null)
+		    	tmpViewedBufferMethod.setAccessible(true);
 		    tmpDirectByteBufferCleanerCleanCallable=true;
 		   } 
 		catch(Throwable t){
 			tmpDirectByteBufferCleanerCleanCallable=false;
 			tmpDirectByteBufferCleanerMethod=null;
 			tmpCleanerCleanMethod=null;
+			tmpViewedBufferMethod=null;
 			logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"<static initializer>","Impossible to retrieve the required methods to release the native resources of direct NIO buffers",t);
 		}
 		directByteBufferCleanerCleanCallable=tmpDirectByteBufferCleanerCleanCallable;
 		directByteBufferCleanerMethod=tmpDirectByteBufferCleanerMethod;
 		cleanerCleanMethod=tmpCleanerCleanMethod;
+		viewedBufferMethod=tmpViewedBufferMethod;
 		if(directByteBufferCleanerCleanCallable)
 			logger.info("the deallocator has been successfully initialized");
 	}
@@ -89,9 +109,9 @@ public class ReliableRenderer extends JoglRenderer{
 	
 	public void deleteBuffer(final Buffer realNioBuffer){
 		if(realNioBuffer.isDirect())
-	        {//This buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
+	        {//this buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
 		     if(directByteBufferCleanerCleanCallable)
-	             {//The mechanism is working, tries to use it
+	             {//the mechanism is working, tries to use it
 			      Object directByteBuffer=null;
 	              if(realNioBuffer instanceof ByteBuffer)
 	        	      {//this buffer is a direct byte buffer
@@ -99,23 +119,32 @@ public class ReliableRenderer extends JoglRenderer{
 	        	      }
 	              else
 	                  {//this buffer is a view on a direct byte buffer, gets this viewed buffer
-	        	       for(Field field:realNioBuffer.getClass().getDeclaredFields())
-	                       {final boolean wasAccessible=field.isAccessible();
-	        		        if(!wasAccessible)
-	                	        field.setAccessible(true);
-						    try{final Object fieldValue = field.get(realNioBuffer);
-							    if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
-	            	    	        {directByteBuffer=fieldValue;
-	            	    	         break;
-	            	    	        }
-						       }
-						    catch(Throwable t)
-						    {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to get the value of a byte buffer's field",t);}
-	                        finally
-	                        {if(!wasAccessible)
-	                	         field.setAccessible(false);
-	                        }
-	                       }
+	            	   //first attempt (inspired of com.jme3.util.BufferUtils.destroyByteBuffer(Buffer) from JMonkeyEngine 3: http://www.jmonkeyengine.org)
+	            	   if(viewedBufferMethod!=null)
+	            		   {try{directByteBuffer=viewedBufferMethod.invoke(realNioBuffer);}
+	            		    catch(Throwable t)
+	            		    {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteBuffer","Failed to get the viewed buffer",t);}
+	            		   }
+	            	   //last attempt, less straightforward, looks at each field
+	            	   if(directByteBuffer==null)
+	            	       {for(Field field:realNioBuffer.getClass().getDeclaredFields())
+	                            {final boolean wasAccessible=field.isAccessible();
+	        		             if(!wasAccessible)
+	                	             field.setAccessible(true);
+						         try{final Object fieldValue = field.get(realNioBuffer);
+							         if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
+	            	    	             {directByteBuffer=fieldValue;
+	            	    	              break;
+	            	    	             }
+						            }
+						         catch(Throwable t)
+						         {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteBuffer","Failed to get the value of a byte buffer's field",t);}
+	                             finally
+	                             {if(!wasAccessible)
+	                	              field.setAccessible(false);
+	                             }
+	                            }
+	            	       }
 	                  }
 	    	      if(directByteBuffer!=null)
 	                  {Object cleaner;
@@ -124,7 +153,7 @@ public class ReliableRenderer extends JoglRenderer{
 	    		               cleanerCleanMethod.invoke(cleaner);
 			              }
 			           catch(Throwable t)
-			           {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteVBOs","Failed to use the cleaner of a byte buffer",t);}
+			           {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteBuffer","Failed to use the cleaner of a byte buffer",t);}
 	                  }
 	             }
 	        }
