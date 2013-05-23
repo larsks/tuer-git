@@ -127,7 +127,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
 			
 			@Override
 			public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-				//FIXME rather come back to the initial state
+				//FIXME remove this call when the exit state works fine
 				soundManager.cleanup();
 				serviceExitAction.perform(source,inputState,tpf);
 			}
@@ -168,14 +168,21 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
         final GameState gameState=new GameState(canvas,physicalLayer,exitAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
+        final PauseMenuState pauseMenuState=new PauseMenuState();
+        final GameOverState gameOverState=new GameOverState();
+        final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager);
+        final ExitGameState exitGameState=new ExitGameState(canvas,soundManager);
         //adds the states and their actions to the state machine
-        //FIXME put all cleanup code into the entry action of the initial state
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(initializationState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(introductionState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(mainMenuState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(loadingDisplayState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(gameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
+        addState(pauseMenuState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
+        addState(gameOverState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
+        addState(unloadingDisplayState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
+        addState(exitGameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         //adds all transitions between states to the transition model
         transitionModel.addTransition(initialState,contentRatingSystemState,initialScenegraphStateToContentRatingSystemEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(contentRatingSystemState,initializationState,contentRatingSystemToInitializationEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
@@ -183,6 +190,18 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         transitionModel.addTransition(introductionState,mainMenuState,introductionToMainMenuEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(mainMenuState,loadingDisplayState,mainMenuToLoadingDisplayEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(loadingDisplayState,gameState,loadingDisplayToGameEvent,noPendingTaskCondition,Collections.<Action<ScenegraphState,String>>emptyList());
+        /**
+         * FIXME add the following missing transitions:
+         * - from the loading display state to the unloading display state (when the end user presses ESC while the game is loading)
+         * - from the unloading display state to the loading display state (when the end user is going to switch to another level)
+         * - from the game state to the game over state (when the end user wins or loses a game whatever the reason)
+         * - from the game over state to the unloading display state (when the end user chooses to restart the current mission, to go to the next one, to go to the main menu or to quit the game)
+         * - from the unloading display state to the exit game state (when the end user quits the game)
+         * - from the game state to the pause menu state (when the end user pauses the game)
+         * - from the pause menu state to the game state (when the end user resumes the game)
+         * - from the pause menu state to the game over state (when the end user aborts a mission)
+         * - from the pause menu state to the unloading display state (when the end user quits the game)
+         */
         //enqueues other tasks except the first one and in-game tasks
         taskManager.enqueueTask(new StateInitializationRunnable<InitializationState>(initializationState));
         taskManager.enqueueTask(new StateInitializationRunnable<IntroductionState>(introductionState));
