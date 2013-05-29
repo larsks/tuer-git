@@ -223,8 +223,10 @@ public final class GameState extends ScenegraphState{
     
     private static String enemyShotgunShotSampleIdentifier = null;
     
-    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,
-    		         final SoundManager soundManager,final TaskManager taskManager,final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
+    public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+    		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,final TriggerAction exitAction,
+    		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
+    		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
     		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
         super(soundManager);
         this.mouseManager=mouseManager;
