@@ -460,26 +460,26 @@ public final class MainMenuState extends ScenegraphState{
         final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
         initialMenuPanel.setForegroundColor(ColorRGBA.DARK_GRAY);
         final UIButton startButton=new UIButton("Start");
-        startButton.addActionListener(new ActionListener(){           
+        startButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(startMenuPanel);
             }
         });
         final UIButton optionsButton=new UIButton("Options");
-        optionsButton.addActionListener(new ActionListener(){           
+        optionsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(optionsMenuPanel);
             }
         });
         final UIButton exitButton=new UIButton("Exit");
-        exitButton.addActionListener(new ActionListener(){           
+        exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 exitAction.perform(null,null,-1);
             }
-        });      
+        });
         initialMenuPanel.add(startButton);
         initialMenuPanel.add(optionsButton);
         initialMenuPanel.add(exitButton);
