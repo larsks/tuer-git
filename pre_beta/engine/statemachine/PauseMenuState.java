@@ -26,6 +26,7 @@ import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import engine.sound.SoundManager;
 
 /**
  * State for the in-game pause menu
@@ -48,8 +49,8 @@ public class PauseMenuState extends ScenegraphState{
     private final UIPanel initialMenuPanel;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction){
-		super();
+			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,final SoundManager soundManager){
+		super(soundManager);
 		this.canvas=canvas;
 		this.physicalLayer=physicalLayer;
 		this.mouseManager=mouseManager;

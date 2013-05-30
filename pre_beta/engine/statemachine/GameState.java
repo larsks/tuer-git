@@ -179,6 +179,8 @@ public final class GameState extends ScenegraphState{
     
     private final TriggerAction exitAction;
     
+    private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction;
+    
     private final TriggerAction toggleScreenModeAction;
     
     private BasicText exitPromptTextLabel;
@@ -231,6 +233,7 @@ public final class GameState extends ScenegraphState{
         super(soundManager);
         this.mouseManager=mouseManager;
         this.physicalLayer=physicalLayer;
+        this.toPauseMenuTriggerAction=toPauseMenuTriggerAction;
         this.toggleScreenModeAction=toggleScreenModeAction;
         this.exitAction=exitAction;
         this.defaultActionMap=defaultActionMap;
@@ -1021,8 +1024,8 @@ public final class GameState extends ScenegraphState{
         }
     }
     
-    private final void initializeInput(final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final Camera cam,
-    		                           final PhysicalLayer physicalLayer){
+    private final void initializeInput(final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
+    		                           final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	//deregisters all triggers
         if(!getLogicalLayer().getTriggers().isEmpty())
             {final Set<InputTrigger> triggers=new HashSet<InputTrigger>(getLogicalLayer().getTriggers());
@@ -1107,8 +1110,9 @@ public final class GameState extends ScenegraphState{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 				//TODO: pause
 				//TODO: pause the timer
-				timer.setPauseEnabled(true);
-				timer.update();
+				//timer.setPauseEnabled(true);
+				//timer.update();
+				toPauseMenuTriggerAction.perform(null,null,-1);
 			}
 		};
 		final TriggerAction crouchAction=new TriggerAction(){
@@ -1801,7 +1805,7 @@ public final class GameState extends ScenegraphState{
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
           		      {//(re)initializes input triggers
-          			   initializeInput(exitAction,toggleScreenModeAction,cam,physicalLayer);
+          			   initializeInput(exitAction,toPauseMenuTriggerAction,toggleScreenModeAction,cam,physicalLayer);
           		      }
           		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
                  }
