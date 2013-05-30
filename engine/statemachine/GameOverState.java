@@ -13,6 +13,8 @@
 */
 package engine.statemachine;
 
+import engine.sound.SoundManager;
+
 /**
  * State representing the end of a game, caused by the death of the player, his victory or his abandonment
  * 
@@ -21,7 +23,7 @@ package engine.statemachine;
  */
 public class GameOverState extends ScenegraphState{
 
-	public GameOverState(){
-		super();
+	public GameOverState(final SoundManager soundManager){
+		super(soundManager);
 	}
 }

@@ -38,7 +38,7 @@ public class ExitGameState extends ScenegraphState{
 	private final SoundManager soundManager;
 
 	public ExitGameState(final NativeCanvas canvas,final SoundManager soundManager){
-		super();
+		super(soundManager);
 		this.canvas=canvas;
 		this.soundManager=soundManager;
 		getRoot().addController(new SpatialController<Node>(){
