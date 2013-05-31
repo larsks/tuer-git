@@ -50,7 +50,8 @@ public class ExitGameState extends ScenegraphState{
 	}
 	
 	protected void performFinalCleanupAndExit(){
-		try{soundManager.cleanup();
+		try{soundManager.stop();
+			soundManager.cleanup();
 		    final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();
 		    GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>(){
                 @Override

@@ -26,6 +26,7 @@ import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
 import se.hiflyer.fettle.Action;
+import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
 import engine.input.ActionMap;
 import engine.input.MouseAndKeyboardSettings;
@@ -163,6 +164,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToLoadingDisplayEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
         final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerActionForExitConfirm=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,new Arguments(PauseMenuStateEntryAction.EXIT_CONFIRM_TAG),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToGameEvent,renderContext);
         //creates states
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
@@ -171,7 +173,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,exitAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
         final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,exitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,exitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
-        final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,exitAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
+        final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,exitAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final PauseMenuState pauseMenuState=new PauseMenuState(canvas,physicalLayer,mouseManager,pauseMenuToGameTriggerAction,soundManager);
         final GameOverState gameOverState=new GameOverState(soundManager);
         final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager);
@@ -183,7 +185,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         addState(mainMenuState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(loadingDisplayState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(gameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
-        addState(pauseMenuState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
+        addState(pauseMenuState,new PauseMenuStateEntryAction(),new ScenegraphStateExitAction());
         addState(gameOverState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(unloadingDisplayState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(exitGameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
@@ -205,6 +207,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
          * - from the pause menu state to the unloading display state (when the end user quits the game)
          */
         transitionModel.addTransition(pauseMenuState,gameState,pauseMenuToGameEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
+        transitionModel.addTransition(gameState,pauseMenuState,gameToPauseMenuEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(gameState,pauseMenuState,gameToPauseMenuEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         //enqueues other tasks except the first one and in-game tasks
         taskManager.enqueueTask(new StateInitializationRunnable<InitializationState>(initializationState));
