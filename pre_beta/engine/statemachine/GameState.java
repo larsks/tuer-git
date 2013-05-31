@@ -40,11 +40,9 @@ import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.input.GrabbedState;
-import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
-import com.ardor3d.input.logical.KeyReleasedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
@@ -181,9 +179,9 @@ public final class GameState extends ScenegraphState{
     
     private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction;
     
-    private final TriggerAction toggleScreenModeAction;
+    private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm;
     
-    private BasicText exitPromptTextLabel;
+    private final TriggerAction toggleScreenModeAction;
     
     private final ActionMap defaultActionMap;
     
@@ -226,14 +224,16 @@ public final class GameState extends ScenegraphState{
     private static String enemyShotgunShotSampleIdentifier = null;
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
-    		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,final TriggerAction exitAction,
-    		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
+    		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
+    		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
+    		         final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
     		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
     		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
         super(soundManager);
         this.mouseManager=mouseManager;
         this.physicalLayer=physicalLayer;
         this.toPauseMenuTriggerAction=toPauseMenuTriggerAction;
+        this.toPauseMenuTriggerActionForExitConfirm=toPauseMenuTriggerActionForExitConfirm;
         this.toggleScreenModeAction=toggleScreenModeAction;
         this.exitAction=exitAction;
         this.defaultActionMap=defaultActionMap;
@@ -1025,6 +1025,7 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void initializeInput(final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
+    		                           final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
     		                           final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	//deregisters all triggers
         if(!getLogicalLayer().getTriggers().isEmpty())
@@ -1040,36 +1041,10 @@ public final class GameState extends ScenegraphState{
         fpsc.setLookUpDownReversed(customMouseAndKeyboardSettings.isLookUpDownReversed());
         fpsc.setMouseRotateSpeed(customMouseAndKeyboardSettings.getMouseRotateSpeed());
         fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
-        //creates a text node that asks the user to confirm or not the exit
-        exitPromptTextLabel=BasicText.createDefaultTextLabel("Confirm Exit","Confirm Exit? Y/N");
         final InputTrigger exitPromptTrigger=new InputTrigger(customActionMap.getCondition(Action.QUIT,false),new TriggerAction(){
         	@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//if the player has not been prompted
-        		if(!getRoot().hasChild(exitPromptTextLabel))
-        		    getRoot().attachChild(exitPromptTextLabel);
-			}
-		});
-        final InputTrigger exitConfirmTrigger=new InputTrigger(new KeyReleasedCondition(Key.Y),new TriggerAction(){     	
-        	@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//if the player has just been prompted
-        		if(getRoot().hasChild(exitPromptTextLabel))
-				    {//removes the prompt message
-        			 getRoot().detachChild(exitPromptTextLabel);
-        			 //quits the program
-        			 exitAction.perform(source,inputState,tpf);
-				    }
-			}
-		});
-        final InputTrigger exitInfirmTrigger=new InputTrigger(new KeyReleasedCondition(Key.N),new TriggerAction(){     	
-        	@Override
-			public void perform(Canvas source, TwoInputStates inputState, double tpf){
-				//if the player has just been prompted
-        		if(getRoot().hasChild(exitPromptTextLabel))
-				    {//removes the prompt message
-        			 getRoot().detachChild(exitPromptTextLabel);
-				    }
+        		toPauseMenuTriggerActionForExitConfirm.perform(null,null,-1);
 			}
 		});
         final TriggerAction nextWeaponAction=new TriggerAction(){		
@@ -1152,7 +1127,7 @@ public final class GameState extends ScenegraphState{
         final InputTrigger activateTrigger=new InputTrigger(customActionMap.getCondition(Action.ACTIVATE,false),activateAction);
         final InputTrigger startRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,true),startRunningAction);
         final InputTrigger stopRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,false),stopRunningAction);
-        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,exitConfirmTrigger,exitInfirmTrigger,
+        final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,
         		nextWeaponTrigger,previousWeaponTrigger,reloadWeaponTrigger,
         		startAttackTrigger,pauseTrigger,crouchTrigger,
         		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,
@@ -1805,9 +1780,8 @@ public final class GameState extends ScenegraphState{
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
           		      {//(re)initializes input triggers
-          			   initializeInput(exitAction,toPauseMenuTriggerAction,toggleScreenModeAction,cam,physicalLayer);
+          			   initializeInput(exitAction,toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }
-          		  exitPromptTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/2,0));
                  }
              else
                  {currentCamLocation.set(cam.getLocation());                  

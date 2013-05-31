@@ -38,6 +38,9 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     /**event fired in this state machine*/
     protected final E event;
     
+    /**arguments used when the event is fired*/
+    protected final Arguments arguments;
+    
     /**render context if the event must be fired on the update queue, otherwise null*/
     protected final RenderContext renderContext;
     
@@ -48,10 +51,22 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
      * @param event event fired in this state machine (must not be null)
      * @param renderContext render context if the event must be fired on the update queue, otherwise null
      */
-    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,
-    		RenderContext renderContext) {
+    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,RenderContext renderContext){
+        this(stateMachine,event,null,renderContext);
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param stateMachine state machine to which events are fired (must not be null)
+     * @param event event fired in this state machine (must not be null)
+     * @param arguments arguments used when the event is fired (can be null)
+     * @param renderContext render context if the event must be fired on the update queue, otherwise null
+     */
+    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,Arguments arguments,RenderContext renderContext){
         this.stateMachine=stateMachine;
         this.event=event;
+        this.arguments=arguments;
         this.renderContext=renderContext;
     }
 
@@ -67,7 +82,7 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     
     protected void doFireEvent(){
     	//fires the event in the state machine to cause the transition
-        stateMachine.fireEvent(event);
+        stateMachine.fireEvent(event,arguments);
     }
     
     @Override

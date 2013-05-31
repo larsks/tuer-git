@@ -16,6 +16,7 @@ package engine.statemachine;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
+import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.event.ActionEvent;
 import com.ardor3d.extension.ui.event.ActionListener;
@@ -47,6 +48,12 @@ public class PauseMenuState extends ScenegraphState{
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
+    
+    private final UIPanel confirmAbortMenuPanel;
+    
+    private final UIPanel confirmExitMenuPanel;
+    
+    private boolean openedForExitConfirm=false;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,final SoundManager soundManager){
@@ -56,6 +63,8 @@ public class PauseMenuState extends ScenegraphState{
 		this.mouseManager=mouseManager;
 		this.toGameTriggerAction=toGameTriggerAction;
 		initialMenuPanel=createInitialMenuPanel();
+		confirmAbortMenuPanel=createConfirmAbortMenuPanel();
+		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
         mainFrame=createMainFrame();
         //creates the head-up display
@@ -77,14 +86,14 @@ public class PauseMenuState extends ScenegraphState{
 		abortButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	//TODO
+            	onAbortButtonActionPerformed(ae);
             }
         });
 		final UIButton exitButton=new UIButton("Exit");
 		exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	//TODO
+            	onExitButtonActionPerformed(ae);
             }
         });
 		initialMenuPanel.add(resumeButton);
@@ -93,9 +102,79 @@ public class PauseMenuState extends ScenegraphState{
 		return(initialMenuPanel);
 	}
 	
+	private final UIPanel createConfirmAbortMenuPanel(){
+		final UIPanel confirmAbortMenuPanel=new UIPanel(new RowLayout(false));
+		final UILabel confirmLabel=new UILabel("Confirm abort?");
+		final UIButton yesButton=new UIButton("Yes");
+		yesButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onYesAbortButtonActionPerformed(ae);
+            }
+        });
+		final UIButton noButton=new UIButton("No");
+		noButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onNoAbortButtonActionPerformed(ae);
+            }
+        });
+		confirmAbortMenuPanel.add(confirmLabel);
+		confirmAbortMenuPanel.add(yesButton);
+		confirmAbortMenuPanel.add(noButton);
+		return(confirmAbortMenuPanel);
+	}
+	
+	private final UIPanel createConfirmExitMenuPanel(){
+		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
+		final UILabel confirmLabel=new UILabel("Confirm exit?");
+		final UIButton yesButton=new UIButton("Yes");
+		yesButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onYesExitButtonActionPerformed(ae);
+            }
+        });
+		final UIButton noButton=new UIButton("No");
+		noButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onNoExitButtonActionPerformed(ae);
+            }
+        });
+		confirmExitMenuPanel.add(confirmLabel);
+		confirmExitMenuPanel.add(yesButton);
+		confirmExitMenuPanel.add(noButton);
+		return(confirmExitMenuPanel);
+	}
+	
 	private void onResumeButtonActionPerformed(final ActionEvent ae){
 		toGameTriggerAction.perform(null,null,-1);
     }
+	
+	private void onAbortButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(confirmAbortMenuPanel);
+    }
+	
+	private void onExitButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(confirmExitMenuPanel);
+    }
+	
+	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
+		//TODO
+	}
+	
+	private void onNoAbortButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(initialMenuPanel);
+	}
+	
+	private void onYesExitButtonActionPerformed(final ActionEvent ae){
+		//TODO
+	}
+	
+	private void onNoExitButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(initialMenuPanel);
+	}
 	
 	private final UIHud createHud(){
         final UIHud hud=new UIHud();
@@ -119,6 +198,10 @@ public class PauseMenuState extends ScenegraphState{
         return(mainFrame);
     }
     
+    public void setOpenedForExitConfirm(final boolean openedForExitConfirm){
+    	this.openedForExitConfirm=openedForExitConfirm;
+    }
+    
     @Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
@@ -126,9 +209,13 @@ public class PauseMenuState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
-                  //FIXME if the end user arrives here after pressing ESC, rather show the exit confirm panel
-                  //shows the initial menu
-                  showPanelInMainFrame(initialMenuPanel);
+                  //if the end user arrives here after pressing ESC, it shows the exit confirm panel
+                  if(openedForExitConfirm)
+                      {showPanelInMainFrame(confirmExitMenuPanel);
+                	   openedForExitConfirm=false;
+                      }
+                  else
+                      showPanelInMainFrame(initialMenuPanel);
                  }
              else
                  mouseManager.setGrabbed(GrabbedState.GRABBED);
