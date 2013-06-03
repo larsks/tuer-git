@@ -33,14 +33,11 @@ public class UnloadingDisplayState extends ScenegraphState{
 	private final NativeCanvas canvas;
 	
 	private final TaskManager taskManager;
-	
-	private final SoundManager soundManager;
 
 	public UnloadingDisplayState(final NativeCanvas canvas,final TaskManager taskManager,final SoundManager soundManager){
-		super();
+		super(soundManager);
 		this.canvas=canvas;
 		this.taskManager=taskManager;
-		this.soundManager=soundManager;
 	}
 	
 	@Override

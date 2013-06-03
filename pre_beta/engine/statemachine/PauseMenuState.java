@@ -45,6 +45,10 @@ public class PauseMenuState extends ScenegraphState{
     
     private final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction;
     
+    private final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction;
+    
+    private final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction;
+    
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
@@ -56,12 +60,16 @@ public class PauseMenuState extends ScenegraphState{
     private boolean openedForExitConfirm=false;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,final SoundManager soundManager){
+			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
+			              final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction,
+			              final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,final SoundManager soundManager){
 		super(soundManager);
 		this.canvas=canvas;
 		this.physicalLayer=physicalLayer;
 		this.mouseManager=mouseManager;
 		this.toGameTriggerAction=toGameTriggerAction;
+		this.toGameOverTriggerAction=toGameOverTriggerAction;
+		this.toUnloadingDisplayTriggerAction=toUnloadingDisplayTriggerAction;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmAbortMenuPanel=createConfirmAbortMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
@@ -161,7 +169,7 @@ public class PauseMenuState extends ScenegraphState{
     }
 	
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
-		//TODO
+		toGameOverTriggerAction.perform(null,null,-1);
 	}
 	
 	private void onNoAbortButtonActionPerformed(final ActionEvent ae){
@@ -169,7 +177,7 @@ public class PauseMenuState extends ScenegraphState{
 	}
 	
 	private void onYesExitButtonActionPerformed(final ActionEvent ae){
-		//TODO
+		toUnloadingDisplayTriggerAction.perform(null,null,-1);
 	}
 	
 	private void onNoExitButtonActionPerformed(final ActionEvent ae){
