@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
 import com.ardor3d.annotation.MainThread;
@@ -43,7 +42,6 @@ import com.ardor3d.math.Ray3;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.state.ZBufferState;
 import com.ardor3d.scenegraph.Node;
-import com.ardor3d.util.ContextGarbageCollector;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
@@ -81,6 +79,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private final Timer timer;
 
     /**boolean allowing us to "pull the plug" from anywhere*/
+    //FIXME remove this useless crap
     private boolean exit;
 
     /**root of our scene*/
@@ -266,18 +265,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
              canvas.draw(null);
              //Thread.yield();
             }
-        try{
-        	//drives the context current to perform a final cleanup
-            //canvas.getCanvasRenderer().makeCurrentContext();
-            //done, does the cleanup
-            ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
-        }
-        finally
-        {//necessary for Java Web Start
-         System.exit(0);
-        }
-        
-        
     }
 
     /**
@@ -321,6 +308,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
+        //FIXME remove this useless crap
         final TriggerAction exitAction=new TriggerAction(){
             public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
                 exit=true;
