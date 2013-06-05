@@ -91,6 +91,8 @@ public class PauseMenuState extends ScenegraphState{
             }
         });
 		final UIButton abortButton=new UIButton("Abort");
+		//disables it temporarily until this feature really works
+		abortButton.setEnabled(false);
 		abortButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
