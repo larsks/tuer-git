@@ -55,7 +55,8 @@ public final class LoadingDisplayState extends ScenegraphState{
     private final Camera cam;
 
     
-    public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,
+    public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+    		final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,
     		final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager, 
     		final FontStore fontStore){
         super(soundManager);
@@ -117,7 +118,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         levelTextLabel=new BMText("Level Index Text","",fontStore.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         levelTextLabel.setTranslation(levelTextLabel.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(levelTextLabel);
-        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toUnloadingDisplayTriggerAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)

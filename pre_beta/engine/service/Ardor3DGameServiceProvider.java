@@ -78,10 +78,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**Our timer*/
     private final Timer timer;
 
-    /**boolean allowing us to "pull the plug" from anywhere*/
-    //FIXME remove this useless crap
-    private boolean exit;
-
     /**root of our scene*/
     private final Node root;
 
@@ -212,7 +208,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
      * Constructs the example class, also creating the native window and GL surface.
      */
     private Ardor3DGameServiceProvider(){
-        exit=false;
         timer=new Timer();
         root=new Node("root node of the game");
         
@@ -253,15 +248,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
         init();
 
         //runs in this same thread
-        while(!exit)
-            {if(canvas.isClosing())
-                 exit=true;
-             else
-                 {timer.update();
-                  updateLogicalLayer(timer);
-                  //updates controllers/render states/transforms/bounds for rootNode.
-                  root.updateGeometricState(timer.getTimePerFrame(),true);
-                 }
+        while(!canvas.isClosing())
+            {timer.update();
+             updateLogicalLayer(timer);
+             //updates controllers/render states/transforms/bounds for rootNode
+             root.updateGeometricState(timer.getTimePerFrame(),true);
              canvas.draw(null);
              //Thread.yield();
             }
@@ -308,12 +299,6 @@ public final class Ardor3DGameServiceProvider implements Scene{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
-        //FIXME remove this useless crap
-        final TriggerAction exitAction=new TriggerAction(){
-            public final void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
-                exit=true;
-            }
-        };
         final LaunchDesktopShortcutCreationRunnable launchRunnable;
         final UninstallDesktopShortcutCreationRunnable uninstallRunnable;
         if(DesktopIntegration.isDesktopShortcutCreationSupported())
@@ -326,7 +311,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         final String creditsContent=getTextFileContent("/credits.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,exitAction,toggleScreenModeAction,launchRunnable,uninstallRunnable,creditsContent,null,null);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,creditsContent,null,null);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
