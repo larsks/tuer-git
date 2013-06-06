@@ -44,7 +44,7 @@ public final class InitializationState extends ScenegraphState{
     private final Camera cam;
     
     
-    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,final TriggerAction toIntroAction,final SoundManager soundManager,final TaskManager taskManager){
+    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TriggerAction toIntroAction,final SoundManager soundManager,final TaskManager taskManager){
         super(soundManager);
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
         cam=canvas.getCanvasRenderer().getCamera();
@@ -65,7 +65,7 @@ public final class InitializationState extends ScenegraphState{
         });
         getRoot().attachChild(box);
         getRoot().attachChild(taskNode);
-        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
         final InputTrigger returnTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toIntroAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,returnTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);

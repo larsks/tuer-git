@@ -66,13 +66,11 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
      * */    
     private final SoundManager soundManager;
     
-    //FIXME remove serviceExitAction, use the exit game state
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
-            final TriggerAction serviceExitAction,final TriggerAction toggleScreenModeAction,
-            final Runnable launchRunnable,
-            final Runnable uninstallRunnable,
-            final String creditsContent,final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings){
+            final TriggerAction toggleScreenModeAction,final Runnable launchRunnable,
+            final Runnable uninstallRunnable,final String creditsContent,
+            final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings){
         super(ScenegraphState.class,String.class,new ScenegraphState());
         fontStore=new FontStore();
         taskManager=new TaskManager();
@@ -142,6 +140,10 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final String pauseMenuToGameOverEvent=getTransitionEvent(PauseMenuState.class,GameOverState.class);
         final String pauseMenuToUnloadingDisplayEvent=getTransitionEvent(PauseMenuState.class,UnloadingDisplayState.class);
         final String unloadingDisplayToExitGameEvent=getTransitionEvent(UnloadingDisplayState.class,ExitGameState.class);
+        final String initializationToExitGameEvent=getTransitionEvent(InitializationState.class,ExitGameState.class);
+        final String introductionToExitGameEvent=getTransitionEvent(IntroductionState.class,ExitGameState.class);
+        final String mainMenuToExitGameEvent=getTransitionEvent(MainMenuState.class,ExitGameState.class);
+        final String loadingDisplayToUnloadingDisplayEvent=getTransitionEvent(LoadingDisplayState.class,UnloadingDisplayState.class);
         //creates actions allowing to go to the next state by pressing a key
         final TransitionTriggerAction<ScenegraphState,String> contentRatingSystemToInitializationTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,contentRatingSystemToInitializationEvent,renderContext);
         //the initialization state must be leaved only once there is no pending task
@@ -162,14 +164,18 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameOverTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToGameOverEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToUnloadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.EXIT_TAG),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> unloadingDisplayToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,unloadingDisplayToExitGameEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> initializationToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,initializationToExitGameEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> introductionToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,introductionToExitGameEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> mainMenuToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToExitGameEvent,renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToUnloadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.EXIT_TAG),renderContext);
         //creates states
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
-        final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,serviceExitAction,contentRatingSystemToInitializationTriggerAction,soundManager,fontStore);
-        final InitializationState initializationState=new InitializationState(canvas,physicalLayer,serviceExitAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
-        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,serviceExitAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,serviceExitAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
-        final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,serviceExitAction,loadingDisplayToGameTriggerAction,soundManager,taskManager,fontStore);
-        final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,serviceExitAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
+        final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,soundManager,fontStore);
+        final InitializationState initializationState=new InitializationState(canvas,physicalLayer,initializationToExitGameTriggerAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
+        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,introductionToExitGameTriggerAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,mainMenuToExitGameTriggerAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
+        final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,loadingDisplayToGameTriggerAction,loadingDisplayToUnloadingDisplayTriggerAction,soundManager,taskManager,fontStore);
+        final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final PauseMenuState pauseMenuState=new PauseMenuState(canvas,physicalLayer,mouseManager,pauseMenuToGameTriggerAction,pauseMenuToGameOverTriggerAction,pauseMenuToUnloadingDisplayTriggerAction,soundManager);
         final GameOverState gameOverState=new GameOverState(soundManager);
         final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager);
@@ -204,6 +210,10 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         transitionModel.addTransition(pauseMenuState,gameOverState,pauseMenuToGameOverEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(pauseMenuState,unloadingDisplayState,pauseMenuToUnloadingDisplayEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         transitionModel.addTransition(unloadingDisplayState,exitGameState,unloadingDisplayToExitGameEvent,noPendingTaskCondition,Collections.<Action<ScenegraphState,String>>emptyList());
+        transitionModel.addTransition(initializationState,exitGameState,initializationToExitGameEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
+        transitionModel.addTransition(introductionState,exitGameState,introductionToExitGameEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
+        transitionModel.addTransition(mainMenuState,exitGameState,mainMenuToExitGameEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
+        transitionModel.addTransition(loadingDisplayState,unloadingDisplayState,loadingDisplayToUnloadingDisplayEvent,BasicConditions.ALWAYS,Collections.<Action<ScenegraphState,String>>emptyList());
         //enqueues other tasks except the first one and in-game tasks
         taskManager.enqueueTask(new StateInitializationRunnable<InitializationState>(initializationState));
         taskManager.enqueueTask(new StateInitializationRunnable<IntroductionState>(introductionState));

@@ -100,7 +100,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param canvas canvas used to display the menu
      * @param physicalLayer physical layer for triggers
      * @param mouseManager mouse manager
-     * @param exitAction action used when exit the menu
+     * @param toExitGameTriggerAction action used when exit the menu
      * @param toLoadingDisplayAction action used to switch to the loading display
      * @param soundManager sound manager
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
@@ -115,7 +115,7 @@ public final class MainMenuState extends ScenegraphState{
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
-                  final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
+                  final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
                   final Runnable uninstallRunnable,final String creditsContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
@@ -144,7 +144,7 @@ public final class MainMenuState extends ScenegraphState{
         displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction);
         soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
-        initialMenuPanel=createInitialMenuPanel(exitAction);
+        initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
         optionsMenuPanel=createOptionsMenuPanel();
         levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
         perfTestLevelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
@@ -164,7 +164,7 @@ public final class MainMenuState extends ScenegraphState{
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(textNode);
         //setups the keyboard triggers
-        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);

@@ -52,7 +52,8 @@ public final class IntroductionState extends ScenegraphState{
     private final Box box;
 
     
-    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TriggerAction exitAction,
+    public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+    		final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,
     		final TriggerAction toMainMenuAction,final SoundManager soundManager,final FontStore fontStore){
         super(soundManager);
         box=new Box("Introduction Box",Vector3.ZERO,12,9,5);
@@ -85,7 +86,7 @@ public final class IntroductionState extends ScenegraphState{
         getRoot().attachChild(textNode);
         //adds the triggers
         final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
-        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),exitAction);
+        final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger,toMainMenuTrigger};
         //binds the physical layer to the logical layer
         getLogicalLayer().registerInput(canvas,physicalLayer);

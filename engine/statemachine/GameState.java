@@ -175,8 +175,6 @@ public final class GameState extends ScenegraphState{
     
     private final MouseManager mouseManager;
     
-    private final TriggerAction exitAction;
-    
     private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction;
     
     private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm;
@@ -226,7 +224,7 @@ public final class GameState extends ScenegraphState{
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
-    		         final TriggerAction exitAction,final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
+    		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
     		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
     		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
         super(soundManager);
@@ -235,7 +233,6 @@ public final class GameState extends ScenegraphState{
         this.toPauseMenuTriggerAction=toPauseMenuTriggerAction;
         this.toPauseMenuTriggerActionForExitConfirm=toPauseMenuTriggerActionForExitConfirm;
         this.toggleScreenModeAction=toggleScreenModeAction;
-        this.exitAction=exitAction;
         this.defaultActionMap=defaultActionMap;
         this.customActionMap=customActionMap;
         this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
@@ -1024,7 +1021,7 @@ public final class GameState extends ScenegraphState{
         }
     }
     
-    private final void initializeInput(final TriggerAction exitAction,final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
+    private final void initializeInput(final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		                           final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
     		                           final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	//deregisters all triggers
@@ -1780,7 +1777,7 @@ public final class GameState extends ScenegraphState{
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
           		      {//(re)initializes input triggers
-          			   initializeInput(exitAction,toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
+          			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }
                  }
              else
