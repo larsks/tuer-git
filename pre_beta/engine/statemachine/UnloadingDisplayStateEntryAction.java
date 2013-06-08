@@ -30,13 +30,27 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
 	
 	private final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction;
 	
+	private final TransitionTriggerAction<ScenegraphState,String> toMainMenuTriggerAction;
+	
+	private final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayTriggerAction;
+	
 	public static final String EXIT_TAG = "EXIT";
+	
+	public static final String MAIN_MENU_TAG = "MAIN_MENU";
+	
+	public static final String LEVEL_TAG = "LEVEL";
+	
+	
 
 	public UnloadingDisplayStateEntryAction(final Scheduler<ScenegraphState> scheduler,final NoPendingTaskCondition noPendingTaskCondition,
-			final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction){
+			final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,
+			final TransitionTriggerAction<ScenegraphState,String> toMainMenuTriggerAction,
+			final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayTriggerAction){
 		this.scheduler=scheduler;
 		this.noPendingTaskCondition=noPendingTaskCondition;
 		this.toExitGameTriggerAction=toExitGameTriggerAction;
+		this.toMainMenuTriggerAction=toMainMenuTriggerAction;
+		this.toLoadingDisplayTriggerAction=toLoadingDisplayTriggerAction;
 	}
 	
 	@Override
@@ -44,6 +58,19 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
         super.onTransition(from,to,cause,args,stateMachine);
         //adds a (one shot) scheduled task that exits this state when there is no pending task. The arguments are used to determine the destination
         if(args!=null&&args.getFirst()!=null&&args.getFirst() instanceof String&&((String)args.getFirst()).equals(EXIT_TAG))
-            scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
+            {final String destinationTag=(String)args.getFirst();
+        	 if(destinationTag.equals(EXIT_TAG))
+        		 scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
+        	 else
+        		 if(destinationTag.equals(MAIN_MENU_TAG))
+        			 scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
+        		 else
+        			 if(destinationTag.equals(LEVEL_TAG))
+        			     {final int levelIndex=((int[])args.getArgument(1))[0];
+        			      //uses an argument to pass the level index
+        			      ((int[])toLoadingDisplayTriggerAction.arguments.getArgument(0))[0]=levelIndex;
+        			      scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
+        			     }
+            }
     }
 }

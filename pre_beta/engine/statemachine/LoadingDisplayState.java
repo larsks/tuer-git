@@ -39,8 +39,6 @@ public final class LoadingDisplayState extends ScenegraphState{
     
     
     private final TaskManagementProgressionNode taskNode;
-    /**task used to initialize the game level*/
-    private GameStateInitializationRunnable levelInitializationTask;
     
     private final TaskManager taskManager;
     /**box on which the textures are displayed*/
@@ -53,14 +51,19 @@ public final class LoadingDisplayState extends ScenegraphState{
     private final BMText levelTextLabel;
     
     private final Camera cam;
+    
+    private final StateInitializationRunnable<GameState> gameStateInitializationRunnable;
 
     
     public LoadingDisplayState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+    		final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
     		final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,
-    		final TriggerAction toGameAction,final SoundManager soundManager,final TaskManager taskManager, 
+    		final SoundManager soundManager,final TaskManager taskManager,
+    		final StateInitializationRunnable<GameState> gameStateInitializationRunnable,
     		final FontStore fontStore){
         super(soundManager);
         this.taskManager=taskManager;
+        this.gameStateInitializationRunnable=gameStateInitializationRunnable;
         taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
         cam=canvas.getCanvasRenderer().getCamera();
         getRoot().attachChild(taskNode);
@@ -85,7 +88,7 @@ public final class LoadingDisplayState extends ScenegraphState{
             	//performs the long task only at the second update to display the task node correctly
             	if(!oneSkipDone)
             		{oneSkipDone=true;
-            		 levelTextLabel.setText("Level " + levelInitializationTask.getLevelIndex());
+            		 levelTextLabel.setText("Level "+gameStateInitializationRunnable.state.getLevelIndex());
             		}
             	else
             	    {if(taskManager.getTaskCount()>0)
@@ -103,7 +106,7 @@ public final class LoadingDisplayState extends ScenegraphState{
             		    	  textureIndex=textures.length-1;
             		     }
             	     else
-                         {toGameAction.perform(null,null,-1);
+                         {toGameTriggerAction.perform(null,null,-1);
                           oneSkipDone=false;
                           firstTaskOk=false;
                           textureIndex=0;
@@ -136,21 +139,13 @@ public final class LoadingDisplayState extends ScenegraphState{
         	textures[textureIndex]=TextureManager.load(texturesPaths[textureIndex],Texture.MinificationFilter.Trilinear,true);
     }
     
-    public final void setLevelInitializationTask(final GameStateInitializationRunnable levelInitializationTask){
-    	this.levelInitializationTask=levelInitializationTask;
-    }
-    
-    public final GameStateInitializationRunnable getLevelInitializationTask(){
-    	return(levelInitializationTask);
-    }
-    
     @Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
         if(wasEnabled!=enabled)
             {super.setEnabled(enabled);
              if(enabled)
-                 {taskManager.enqueueTask(levelInitializationTask);
+                 {taskManager.enqueueTask(gameStateInitializationRunnable);
                   taskNode.reset();
                   //updates the position of the task node (the resolution might have been modified)
                   final int x=(cam.getWidth()-taskNode.getBounds().getWidth())/2;

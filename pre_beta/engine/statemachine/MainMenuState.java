@@ -90,9 +90,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final Runnable uninstallRunnable;
     
-    private final LevelTransitionTriggerAction levelTransitionTriggerAction;
-    
-    private final LevelTransitionTriggerAction perfTestLevelTransitionTriggerAction;
+    private final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction;
     
     /**
      * Constructor
@@ -146,8 +144,9 @@ public final class MainMenuState extends ScenegraphState{
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
         optionsMenuPanel=createOptionsMenuPanel();
-        levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
-        perfTestLevelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
+        this.toLoadingDisplayAction=toLoadingDisplayAction;
+        //levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
+        //perfTestLevelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
         startMenuPanel=createStartMenuPanel();
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
         arenaModePanel=createArenaModePanel();
@@ -168,24 +167,6 @@ public final class MainMenuState extends ScenegraphState{
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
-    }
-    
-    private static final class LevelTransitionTriggerAction extends TransitionTriggerAction<ScenegraphState,String>{
-    	
-    	private final int levelIndex;
-    	
-    	private LevelTransitionTriggerAction(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
-    			final int levelIndex){
-    		super(toLoadingDisplayAction.stateMachine,toLoadingDisplayAction.event,toLoadingDisplayAction.renderContext);
-    		this.levelIndex=levelIndex;
-    	}
-    	
-    	@Override
-    	protected void doFireEvent(){
-    		super.doFireEvent();
-    		LoadingDisplayState loadingDisplayState=(LoadingDisplayState)stateMachine.getCurrentState();
-    		loadingDisplayState.getLevelInitializationTask().setLevelIndex(levelIndex);
-    	}
     }
     
     private final UIPanel createStoryModePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
@@ -218,11 +199,13 @@ public final class MainMenuState extends ScenegraphState{
     }
     
     private void onLevelButtonActionPerformed(final ActionEvent ae){
-    	levelTransitionTriggerAction.perform(null,null,-1);
+    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=0;
+    	toLoadingDisplayAction.perform(null,null,-1);
     }
     
     private void onPerfTestLevelButtonActionPerformed(final ActionEvent ae){
-    	perfTestLevelTransitionTriggerAction.perform(null,null,-1);
+    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=1;
+    	toLoadingDisplayAction.perform(null,null,-1);
     }
     
     private final UIPanel createArenaModePanel(){
