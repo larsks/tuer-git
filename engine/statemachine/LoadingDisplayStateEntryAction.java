@@ -13,22 +13,28 @@
 */
 package engine.statemachine;
 
+import se.hiflyer.fettle.Arguments;
+import se.hiflyer.fettle.StateMachine;
+
 /**
+ * Entry action that receives the level index and passes it to the game state
  * 
  * @author Julien Gouesse
  *
  */
-public class GameStateInitializationRunnable extends StateInitializationRunnable<GameState>{
+public class LoadingDisplayStateEntryAction extends ScenegraphStateEntryAction{
+	
+	private final GameState gameState;
 
-	public GameStateInitializationRunnable(final GameState gameState){
-		super(gameState);
+	public LoadingDisplayStateEntryAction(final GameState gameState){
+		super();
+		this.gameState=gameState;
 	}
 	
-	public int getLevelIndex(){
-		return(state.getLevelIndex());
-	}
-	
-	public void setLevelIndex(final int levelIndex){
-		state.setLevelIndex(levelIndex);
+	@Override
+    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
+		final int levelIndex=((int[])args.getFirst())[0];
+		gameState.setLevelIndex(levelIndex);
+		super.onTransition(from,to,cause,args,stateMachine);
 	}
 }

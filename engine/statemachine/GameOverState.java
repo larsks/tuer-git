@@ -13,6 +13,9 @@
 */
 package engine.statemachine;
 
+import com.ardor3d.framework.NativeCanvas;
+import com.ardor3d.input.PhysicalLayer;
+
 import engine.sound.SoundManager;
 
 /**
@@ -23,7 +26,10 @@ import engine.sound.SoundManager;
  */
 public class GameOverState extends ScenegraphState{
 
-	public GameOverState(final SoundManager soundManager){
+	public GameOverState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final SoundManager soundManager,
+			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForExit,
+			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForMainMenu,
+			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForLoadingDisplay){
 		super(soundManager);
 	}
 }

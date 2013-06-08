@@ -224,6 +224,7 @@ public final class GameState extends ScenegraphState{
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
+    		         final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction,
     		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
     		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
     		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
