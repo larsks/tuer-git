@@ -25,8 +25,12 @@ import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
+import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.ui.text.BMText;
+
+import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 /**
@@ -62,7 +66,8 @@ public class PauseMenuState extends ScenegraphState{
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction,
-			              final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,final SoundManager soundManager){
+			              final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,final SoundManager soundManager,
+			              final FontStore fontStore){
 		super(soundManager);
 		this.canvas=canvas;
 		this.physicalLayer=physicalLayer;
@@ -79,6 +84,12 @@ public class PauseMenuState extends ScenegraphState{
         final UIHud hud=createHud();
         hud.add(mainFrame);
         getRoot().attachChild(hud);
+        //adds some text
+        final BMText textNode=new BMText("gamePauseNode","Game paused",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        textNode.setFontScale(10);
+        textNode.setTextColor(ColorRGBA.RED);
+        textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
+        getRoot().attachChild(textNode);
 	}
 	
 	private final UIPanel createInitialMenuPanel(){

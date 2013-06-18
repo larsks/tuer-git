@@ -145,8 +145,6 @@ public final class MainMenuState extends ScenegraphState{
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
         optionsMenuPanel=createOptionsMenuPanel();
         this.toLoadingDisplayAction=toLoadingDisplayAction;
-        //levelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,0);
-        //perfTestLevelTransitionTriggerAction=new LevelTransitionTriggerAction(toLoadingDisplayAction,1);
         startMenuPanel=createStartMenuPanel();
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
         arenaModePanel=createArenaModePanel();
