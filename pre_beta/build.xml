@@ -216,6 +216,8 @@
 			<exclude name="**/*.py" />
 			<manifest>
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
+				<attribute name="Permissions" value="all-permissions"/>
+				<attribute name="Codebase" value=""/>
 			</manifest>
 		</jar>
 		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" 
@@ -242,6 +244,8 @@
 			<exclude name="**/lib/**" />
 			<manifest>
 				<attribute name="Main-Class" value="${tuer-main-class}"/>
+				<attribute name="Permissions" value="all-permissions"/>
+				<attribute name="Codebase" value=""/>
 			</manifest>
 		</jar>
 		<delete file="${keystore}" failonerror="false" />
