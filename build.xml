@@ -217,7 +217,7 @@
 			<manifest>
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
 				<attribute name="Permissions" value="all-permissions"/>
-				<attribute name="Codebase" value=""/>
+				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
 		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" 
@@ -245,7 +245,7 @@
 			<manifest>
 				<attribute name="Main-Class" value="${tuer-main-class}"/>
 				<attribute name="Permissions" value="all-permissions"/>
-				<attribute name="Codebase" value=""/>
+				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
 		<delete file="${keystore}" failonerror="false" />
