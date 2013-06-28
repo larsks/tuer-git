@@ -179,6 +179,8 @@ public final class GameState extends ScenegraphState{
     
     private final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm;
     
+    private final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction;
+    
     private final TriggerAction toggleScreenModeAction;
     
     private final ActionMap defaultActionMap;
@@ -233,6 +235,7 @@ public final class GameState extends ScenegraphState{
         this.physicalLayer=physicalLayer;
         this.toPauseMenuTriggerAction=toPauseMenuTriggerAction;
         this.toPauseMenuTriggerActionForExitConfirm=toPauseMenuTriggerActionForExitConfirm;
+        this.toGameOverTriggerAction=toGameOverTriggerAction;
         this.toggleScreenModeAction=toggleScreenModeAction;
         this.defaultActionMap=defaultActionMap;
         this.customActionMap=customActionMap;
@@ -839,15 +842,20 @@ public final class GameState extends ScenegraphState{
                 	      fpsc.setMouseRotateSpeed(0);
                 	      fpsc.setMoveSpeed(0);
                     	  latestPlayerDeath=Long.valueOf(absoluteElapsedTimeInNanoseconds);
-                    	  final BasicText gameoverTextLabel=BasicText.createDefaultTextLabel("Game over","Game over");
+                    	  /*final BasicText gameoverTextLabel=BasicText.createDefaultTextLabel("Game over","Game over");
                     	  gameoverTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/3,0));
-                    	  getRoot().attachChild(gameoverTextLabel);
+                    	  getRoot().attachChild(gameoverTextLabel);*/
                     	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
                          }
                      else
                          {final double y=0.4d-((((double)Math.max(0,Math.min(absoluteElapsedTimeInNanoseconds-latestPlayerDeath.longValue(),500000000)))/500000000.0d)*0.4d)+0.1d;
                     	  playerNode.setTranslation(playerNode.getTranslation().getX(),y,playerNode.getTranslation().getZ());
                     	  playerNode.getCamera().setLocation(playerNode.getTranslation());
+                    	  /**
+                    	   * TODO add a mechanism into the entry action of this state to handle the figures of the player.
+                    	   * It would help to know why he enters this state and which level(s) should be available
+                    	   */
+                    	  toGameOverTriggerAction.perform(null,null,-1);
                          }
                     }
                 //updates the state machine of the player
