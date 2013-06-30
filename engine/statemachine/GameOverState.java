@@ -49,6 +49,8 @@ private final NativeCanvas canvas;
     
     private final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForExit;
     
+    private final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForMainMenu;
+    
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
@@ -65,6 +67,7 @@ private final NativeCanvas canvas;
 		this.physicalLayer=physicalLayer;
 		this.mouseManager=mouseManager;
 		this.toUnloadingDisplayTriggerActionForExit=toUnloadingDisplayTriggerActionForExit;
+		this.toUnloadingDisplayTriggerActionForMainMenu=toUnloadingDisplayTriggerActionForMainMenu;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -97,10 +100,8 @@ private final NativeCanvas canvas;
             	onRetryButtonActionPerformed(ae);
             }
         });
-		final UIButton abortButton=new UIButton("Main Menu");
-		//disables it temporarily until this feature really works
-		abortButton.setEnabled(false);
-		abortButton.addActionListener(new ActionListener(){
+		final UIButton mainMenuButton=new UIButton("Main Menu");
+		mainMenuButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onMainMenuButtonActionPerformed(ae);
@@ -113,12 +114,12 @@ private final NativeCanvas canvas;
             	onExitButtonActionPerformed(ae);
             }
         });
+		//disables them temporarily until these features really work
 		nextButton.setEnabled(false);
 		retryButton.setEnabled(false);
-		abortButton.setEnabled(false);
 		initialMenuPanel.add(nextButton);
 		initialMenuPanel.add(retryButton);
-		initialMenuPanel.add(abortButton);
+		initialMenuPanel.add(mainMenuButton);
 		initialMenuPanel.add(exitButton);
 		return(initialMenuPanel);
 	}
@@ -132,7 +133,7 @@ private final NativeCanvas canvas;
     }
 	
 	private void onMainMenuButtonActionPerformed(final ActionEvent ae){
-		//TODO
+		toUnloadingDisplayTriggerActionForMainMenu.perform(null,null,-1);
     }
 	
 	private void onExitButtonActionPerformed(final ActionEvent ae){
