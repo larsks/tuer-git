@@ -57,7 +57,7 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
         super.onTransition(from,to,cause,args,stateMachine);
         //adds a (one shot) scheduled task that exits this state when there is no pending task. The arguments are used to determine the destination
-        if(args!=null&&args.getFirst()!=null&&args.getFirst() instanceof String&&((String)args.getFirst()).equals(EXIT_TAG))
+        if(args!=null&&args.getFirst()!=null&&args.getFirst() instanceof String)
             {final String destinationTag=(String)args.getFirst();
         	 if(destinationTag.equals(EXIT_TAG))
         		 scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
