@@ -98,7 +98,14 @@ public final class SoundManager{
         else
         	identifier=null;
         return(identifier);
-    }   
+    }
+    
+    public final void unloadSound(final URL url){
+        if(soundSystem!=null)
+            {final String path=url.getPath();
+             soundSystem.unloadSound(path);
+            }
+    }
     
     public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier,float x,float y,float z){
     	if(soundSystem!=null)

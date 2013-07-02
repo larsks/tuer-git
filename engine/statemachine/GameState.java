@@ -842,9 +842,6 @@ public final class GameState extends ScenegraphState{
                 	      fpsc.setMouseRotateSpeed(0);
                 	      fpsc.setMoveSpeed(0);
                     	  latestPlayerDeath=Long.valueOf(absoluteElapsedTimeInNanoseconds);
-                    	  /*final BasicText gameoverTextLabel=BasicText.createDefaultTextLabel("Game over","Game over");
-                    	  gameoverTextLabel.setTranslation(new Vector3(cam.getWidth()/2,cam.getHeight()/3,0));
-                    	  getRoot().attachChild(gameoverTextLabel);*/
                     	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
                          }
                      else
@@ -877,7 +874,7 @@ public final class GameState extends ScenegraphState{
 		    	projectileNode.setTranslation(initialLocation);        		    	  
 		    	Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
 		        MeshData projectileMeshData=new MeshData();
-		        //FIXME do not recreate these data each time and track them in order to release native memory
+		        //FIXME do not create anew these data each time and track them in order to release native memory
 		        FloatBuffer projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
 		        projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
 		        projectileMeshData.setVertexBuffer(projectileVertexBuffer);
@@ -1404,6 +1401,113 @@ public final class GameState extends ScenegraphState{
             }
     }
     
+    /**
+     * unloads the sound samples
+     */
+    private final void unloadSounds(){
+        final String teleporterSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
+  	    if(teleporterSoundSamplePath!=null)
+  	        {final URL teleporterSoundSampleUrl=GameState.class.getResource(teleporterSoundSamplePath);
+  		     if(teleporterSoundSampleUrl!=null)
+  		         {getSoundManager().unloadSound(teleporterSoundSampleUrl);
+  		          if(teleporter.getPickingUpSoundSampleIdentifier()!=null)
+  			     	  teleporter.setPickingUpSoundSampleIdentifier(null);
+  		         }
+  	        }
+        final int ammoCount=ammunitionFactory.getSize();
+        for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
+            {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
+             final String pickingUpSoundSamplePath=ammo.getPickingUpSoundSamplePath();
+       	     if(pickingUpSoundSamplePath!=null)
+       	         {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+       		      if(pickingUpSoundSampleUrl!=null)
+       		          {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
+       			       if(ammo.getPickingUpSoundSampleIdentifier()!=null)
+       				       ammo.setPickingUpSoundSampleIdentifier(null);
+       		          }
+       	         }
+            }
+        final int weaponCount=weaponFactory.getSize();
+        for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
+            {final Weapon weapon=weaponFactory.get(weaponIndex);
+        	 final String pickingUpSoundSamplePath=weapon.getPickingUpSoundSamplePath();
+        	 if(pickingUpSoundSamplePath!=null)
+        	     {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+        		  if(pickingUpSoundSampleUrl!=null)
+        		      {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
+        			   if(weapon.getPickingUpSoundSampleIdentifier()!=null)
+        				   weapon.setPickingUpSoundSampleIdentifier(null);
+        		      }
+        	     }
+        	 final String blowOrShotSoundSamplePath=weapon.getBlowOrShotSoundSamplePath();
+        	 if(blowOrShotSoundSamplePath!=null)
+        	     {final URL blowOrShotSoundSampleUrl=GameState.class.getResource(blowOrShotSoundSamplePath);
+        		  if(blowOrShotSoundSampleUrl!=null)
+        		      {getSoundManager().unloadSound(blowOrShotSoundSampleUrl);
+        			   if(weapon.getBlowOrShotSoundSampleIdentifier()!=null)
+        				   weapon.setBlowOrShotSoundSampleIdentifier(null);
+        		      }
+        	     }
+        	 final String reloadSoundSamplePath=weapon.getReloadSoundSamplePath();
+        	 if(reloadSoundSamplePath!=null)
+        	     {final URL reloadSoundSampleUrl=GameState.class.getResource(reloadSoundSamplePath);
+        		  if(reloadSoundSampleUrl!=null)
+        		      {getSoundManager().unloadSound(reloadSoundSampleUrl);
+        			   if(weapon.getReloadSoundSampleIdentifier()!=null)
+        				   weapon.setReloadSoundSampleIdentifier(null);
+        		      }
+        	     }
+            }
+        if(pain1soundSamplePath!=null&&pain1soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain1soundSamplePath);
+        	 if(pain1SoundSampleUrl!=null)
+        	     getSoundManager().unloadSound(pain1SoundSampleUrl);
+        	 pain1soundSampleIdentifier=null;
+            }
+        if(pain2soundSamplePath!=null&&pain2soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain2soundSamplePath);
+    	     if(pain1SoundSampleUrl!=null)
+    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
+    	     pain2soundSampleIdentifier=null;
+            }
+        if(pain3soundSamplePath!=null&&pain3soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain3soundSamplePath);
+    	     if(pain1SoundSampleUrl!=null)
+    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
+    	     pain3soundSampleIdentifier=null;
+            }
+        if(pain4soundSamplePath!=null&&pain4soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain4soundSamplePath);
+    	     if(pain1SoundSampleUrl!=null)
+    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
+    	     pain4soundSampleIdentifier=null;
+            }
+        if(pain5soundSamplePath!=null&&pain5soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain5soundSamplePath);
+	         if(pain1SoundSampleUrl!=null)
+	             getSoundManager().unloadSound(pain1SoundSampleUrl);
+	         pain5soundSampleIdentifier=null;
+            }
+        if(pain6soundSamplePath!=null&&pain6soundSampleIdentifier!=null)
+            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain6soundSamplePath);
+	         if(pain1SoundSampleUrl!=null)
+	             getSoundManager().unloadSound(pain1SoundSampleUrl);
+	         pain6soundSampleIdentifier=null;
+            }
+        if(enemyShotgunShotSamplePath!=null&&enemyShotgunShotSampleIdentifier!=null)
+            {final URL enemyShotgunShotSampleUrl=GameState.class.getResource(enemyShotgunShotSamplePath);
+        	 if(enemyShotgunShotSampleUrl!=null)
+        		 getSoundManager().unloadSound(enemyShotgunShotSampleUrl);
+        	 enemyShotgunShotSampleIdentifier=null;
+            }
+        if(gameoverSoundSamplePath!=null&&gameoverSoundSampleIdentifier!=null)
+            {final URL gameoverSoundSampleUrl=GameState.class.getResource(gameoverSoundSamplePath);
+        	 if(gameoverSoundSampleUrl!=null)
+        		 getSoundManager().unloadSound(gameoverSoundSampleUrl);
+        	 gameoverSoundSampleIdentifier=null;
+            }
+    }
+    
     private final void loadLevelModel(){
     	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
     	    if(levelIndex==1)
@@ -1425,10 +1529,6 @@ public final class GameState extends ScenegraphState{
     }
     
     private final void performInitialBasicSetup(){
-    	//clears the list of objects that can be picked up
-    	collectibleObjectsList.clear();
-        //removes all previously attached children
-        getRoot().detachAllChildren();
         //FIXME it should not be hard-coded
         currentCamLocation.set(115,0.5,223);
         //attaches the player itself
@@ -1443,6 +1543,18 @@ public final class GameState extends ScenegraphState{
         getRoot().attachChild(headUpDisplayLabel);
     }
     
+    private final void performTerminalBasicCleanup(){
+    	//clears the list of objects that can be picked up
+    	collectibleObjectsList.clear();
+    	//clears the list of teleporters
+    	teleportersList.clear();
+    	//clears the data model used for the enemies
+    	enemiesDataMap.clear();
+    	enemiesLatestDetection.clear();
+        //removes all previously attached children
+        getRoot().detachAllChildren();
+    }
+    
     private final void performTerminalBasicSetup(){
     	//adds a bounding box to each collectible object
         for(Node collectible:collectibleObjectsList)
@@ -1451,6 +1563,35 @@ public final class GameState extends ScenegraphState{
        	    NodeHelper.setModelBound(teleporter,BoundingBox.class);
         //resets the timer at the end of all long operations performed while loading
         timer.reset();
+    }
+    
+    private final void performInitialBasicCleanup(){
+    	//detaches the player itself
+        getRoot().detachChild(playerNode);
+        //detaches the ammunition display node
+        getRoot().detachChild(ammoTextLabel);
+        //detaches the FPS display node
+        getRoot().detachChild(fpsTextLabel);
+        //detaches the health display node
+        getRoot().detachChild(healthTextLabel);
+        //detaches the HUD node
+        getRoot().detachChild(headUpDisplayLabel);
+    	//resets the timer at the beginning of all long operations performed while unloading
+        timer.reset();
+    }
+    
+    /**
+     * TODO unload direct NIO buffers
+     */
+    private final void performDirectNioBuffersCleanup(){
+    	
+    }
+    
+    /**
+     * TODO unload textures
+     */
+    private final void performTexturesDataCleanup(){
+    	
     }
     
     private final void loadSkybox(){
@@ -1676,78 +1817,111 @@ public final class GameState extends ScenegraphState{
     	});
     }
     
+    public final void cleanup(){
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run(){
+    	        unloadSounds();
+			}
+    	});
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run(){
+    	        performInitialBasicCleanup();
+			}
+    	});
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run(){
+    	        performDirectNioBuffersCleanup();
+			}
+    	});
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run(){
+    	        performTexturesDataCleanup();
+			}
+    	});
+    	taskManager.enqueueTask(new Runnable(){			
+			@Override
+			public final void run(){
+    	        performTerminalBasicCleanup();
+			}
+    	});
+    }
+    
     @Override
     public final void init(){
     	taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadSounds();
 			}
 		}); 	
     	taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				performInitialBasicSetup();
 			}
 		});
         // Load level model
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadLevelModel();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadOutdoor();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadSkybox();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadTeleporters();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadMedikits();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadWeapons();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadAmmunitions();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				loadEnemies();
 			}
 		});
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				preloadTextures();
 			}
 	    });
         taskManager.enqueueTask(new Runnable(){			
 			@Override
-			public final void run() {
+			public final void run(){
 				performTerminalBasicSetup();
 			}
 		});

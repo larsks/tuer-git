@@ -229,6 +229,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         taskManager.enqueueTask(new StateInitializationRunnable<IntroductionState>(introductionState));
         taskManager.enqueueTask(new StateInitializationRunnable<MainMenuState>(mainMenuState));
         taskManager.enqueueTask(new StateInitializationRunnable<LoadingDisplayState>(loadingDisplayState));
+        taskManager.enqueueTask(new StateInitializationRunnable<UnloadingDisplayState>(unloadingDisplayState));
         //creates the scheduled tasks
         final ScheduledTask<ScenegraphState> contentRatingSystemToInitializationTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,contentRatingSystemToInitializationTriggerAction,2.0,contentRatingSystemState,StateChangeType.ENTRY);
         final ScheduledTask<ScenegraphState> initializationToIntroductionTask=new StateChangeScheduledTask<ScenegraphState>(Integer.MAX_VALUE,initializationToIntroductionRunnable,5.0,initializationState,StateChangeType.ENTRY);
