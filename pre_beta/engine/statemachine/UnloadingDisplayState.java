@@ -13,12 +13,7 @@
 */
 package engine.statemachine;
 
-import java.util.concurrent.Callable;
-
 import com.ardor3d.framework.NativeCanvas;
-import com.ardor3d.renderer.RenderContext;
-import com.ardor3d.util.GameTaskQueueManager;
-
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManager;
 
@@ -34,6 +29,7 @@ public class UnloadingDisplayState extends ScenegraphState{
 	
 	private final TaskManager taskManager;
 
+	//TODO pass a runnable to perform the cleanup of the game state
 	public UnloadingDisplayState(final NativeCanvas canvas,final TaskManager taskManager,final SoundManager soundManager){
 		super(soundManager);
 		this.canvas=canvas;
@@ -42,33 +38,24 @@ public class UnloadingDisplayState extends ScenegraphState{
 	
 	@Override
     public void init(){
-		taskManager.enqueueTask(new Runnable(){			
-			@Override
-			public final void run() {
-				unloadUnusedSounds();
-			}
-		});
-		taskManager.enqueueTask(new Runnable(){			
-			@Override
-			public final void run() {
-				performRuntimeCleanup();
-			}
-		});
+		//TODO prepare the task manager and the task node
 	}
 	
-	protected void unloadUnusedSounds(){
-		//FIXME detect the sound samples used in the latest game and unload them
-	}
-	
-	protected void performRuntimeCleanup(){
-		final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();
-	    GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>(){
-            @Override
-            public Void call() throws Exception{
-            	//FIXME do almost the same thing except that you have to destroy the direct NIO buffers by using the dedicated method in the renderer
-        	    //ContextGarbageCollector.doRuntimeCleanup(canvas.getCanvasRenderer().getRenderer());
-                return(null);
+	@Override
+    public void setEnabled(final boolean enabled){
+        final boolean wasEnabled=isEnabled();
+        if(wasEnabled!=enabled)
+            {super.setEnabled(enabled);
+             if(enabled)
+                 {//TODO prepare the cleanup
+            	  //taskManager.enqueueTask(gameStateCleanupRunnable);
+                  //taskNode.reset();
+                  //updates the position of the task node (the resolution might have been modified)
+                  //final int x=(cam.getWidth()-taskNode.getBounds().getWidth())/2;
+                  //final int y=(cam.getHeight()/20);
+                  //taskNode.setTranslation(x,y,0);
+                  //taskNode.updateGeometricState(0);
+                 }
             }
-        });
-	}
+    }
 }
