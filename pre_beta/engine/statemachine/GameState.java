@@ -845,14 +845,16 @@ public final class GameState extends ScenegraphState{
                     	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
                          }
                      else
-                         {final double y=0.4d-((((double)Math.max(0,Math.min(absoluteElapsedTimeInNanoseconds-latestPlayerDeath.longValue(),500000000)))/500000000.0d)*0.4d)+0.1d;
+                         {final long latestDeathDuration=absoluteElapsedTimeInNanoseconds-latestPlayerDeath.longValue();
+                    	  final double y=0.4d-((((double)Math.max(0,Math.min(latestDeathDuration,500000000)))/500000000.0d)*0.4d)+0.1d;
                     	  playerNode.setTranslation(playerNode.getTranslation().getX(),y,playerNode.getTranslation().getZ());
                     	  playerNode.getCamera().setLocation(playerNode.getTranslation());
                     	  /**
                     	   * TODO add a mechanism into the entry action of this state to handle the figures of the player.
                     	   * It would help to know why he enters this state and which level(s) should be available
                     	   */
-                    	  toGameOverTriggerAction.perform(null,null,-1);
+                    	  if(latestDeathDuration>500000000)
+                    	      toGameOverTriggerAction.perform(null,null,-1);
                          }
                     }
                 //updates the state machine of the player
@@ -1541,6 +1543,13 @@ public final class GameState extends ScenegraphState{
         getRoot().attachChild(healthTextLabel);
         //attaches the HUD node
         getRoot().attachChild(headUpDisplayLabel);
+        //resurrects the player
+        if(playerData.getHealth()!=100)
+            {if(playerData.getHealth()<100)
+        	     playerData.increaseHealth(100-playerData.getHealth());
+             else
+            	 playerData.decreaseHealth(playerData.getHealth()-100);
+            }
     }
     
     private final void performTerminalBasicCleanup(){
