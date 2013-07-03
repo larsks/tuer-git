@@ -188,7 +188,13 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,loadingDisplayToGameTriggerAction,loadingDisplayToUnloadingDisplayTriggerAction,soundManager,taskManager,new StateInitializationRunnable<GameState>(gameState),fontStore);
         final PauseMenuState pauseMenuState=new PauseMenuState(canvas,physicalLayer,mouseManager,pauseMenuToGameTriggerAction,pauseMenuToGameOverTriggerAction,pauseMenuToUnloadingDisplayTriggerAction,soundManager,fontStore);
         final GameOverState gameOverState=new GameOverState(canvas,physicalLayer,mouseManager,soundManager,fontStore,gameOverToUnloadingDisplayTriggerActionForExit,gameOverToUnloadingDisplayTriggerActionForMainMenu,gameOverToUnloadingDisplayTriggerActionForLoadingDisplay);
-        final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager);
+        final Runnable gameStateCleanupRunnable=new Runnable(){
+			@Override
+			public void run(){
+				gameState.cleanup();
+			}
+        };
+        final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager,gameStateCleanupRunnable,fontStore);
         final ExitGameState exitGameState=new ExitGameState(canvas,soundManager);
         //adds the states and their actions to the state machine
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
