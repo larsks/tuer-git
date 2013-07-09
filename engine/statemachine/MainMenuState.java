@@ -70,6 +70,8 @@ public final class MainMenuState extends ScenegraphState{
     
     final UIPanel optionsMenuPanel;
     
+    private final UIPanel confirmExitMenuPanel;
+    
     private final DisplaySettingsPanel displaySettingsMenuPanel;
     
     private final UIPanel soundSettingsMenuPanel;
@@ -91,6 +93,8 @@ public final class MainMenuState extends ScenegraphState{
     private final Runnable uninstallRunnable;
     
     private final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction;
+    
+    private final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction;
     
     /**
      * Constructor
@@ -126,6 +130,7 @@ public final class MainMenuState extends ScenegraphState{
         matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag");
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
+        this.toExitGameTriggerAction=toExitGameTriggerAction;
         this.canvas=canvas;
         this.physicalLayer=physicalLayer;
         this.mouseManager=mouseManager;
@@ -144,6 +149,7 @@ public final class MainMenuState extends ScenegraphState{
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
         optionsMenuPanel=createOptionsMenuPanel();
+        confirmExitMenuPanel=createConfirmExitMenuPanel();
         this.toLoadingDisplayAction=toLoadingDisplayAction;
         startMenuPanel=createStartMenuPanel();
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
@@ -457,8 +463,8 @@ public final class MainMenuState extends ScenegraphState{
         final UIButton exitButton=new UIButton("Exit");
         exitButton.addActionListener(new ActionListener(){
             @Override
-            public void actionPerformed(ActionEvent event){
-                exitAction.perform(null,null,-1);
+            public void actionPerformed(ActionEvent ae){
+            	onExitButtonActionPerformed(ae);
             }
         });
         initialMenuPanel.add(startButton);
@@ -563,6 +569,41 @@ public final class MainMenuState extends ScenegraphState{
         optionsMenuPanel.add(backButton);
     	return(optionsMenuPanel);
     }
+    
+    private final UIPanel createConfirmExitMenuPanel(){
+		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
+		final UILabel confirmLabel=new UILabel("Confirm exit?");
+		final UIButton yesButton=new UIButton("Yes");
+		yesButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onYesExitButtonActionPerformed(ae);
+            }
+        });
+		final UIButton noButton=new UIButton("No");
+		noButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onNoExitButtonActionPerformed(ae);
+            }
+        });
+		confirmExitMenuPanel.add(confirmLabel);
+		confirmExitMenuPanel.add(yesButton);
+		confirmExitMenuPanel.add(noButton);
+		return(confirmExitMenuPanel);
+	}
+    
+    private void onExitButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(confirmExitMenuPanel);
+    }
+    
+    private void onYesExitButtonActionPerformed(final ActionEvent ae){
+    	toExitGameTriggerAction.perform(null,null,-1);
+	}
+	
+	private void onNoExitButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(initialMenuPanel);
+	}
     
     private static final class ToggleSoundManagerAction implements TriggerAction{
     	
