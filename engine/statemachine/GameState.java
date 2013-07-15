@@ -118,8 +118,13 @@ public final class GameState extends ScenegraphState{
     private double previousFrustumNear;
     /**previous (before entering this state) frustum near value*/
     private double previousFrustumFar;
+    
+    private final Vector3 previousCamLeft,previousCamUp,previousCamDirection;
+    
     /**previous (before entering this state) location of the camera*/
     private final Vector3 previousCamLocation;
+    
+    private final Vector3 currentCamLeft,currentCamUp,currentCamDirection;
     /**current location of the camera*/
     private final Vector3 currentCamLocation;
     /**node of the player*/
@@ -359,7 +364,13 @@ public final class GameState extends ScenegraphState{
         };
         latestPlayerDeath=null;
         playerWithStateMachine=new LogicalPlayer(playerData);
+        this.previousCamLeft=new Vector3(cam.getLeft());
+        this.previousCamUp=new Vector3(cam.getUp());
+        this.previousCamDirection=new Vector3(cam.getDirection());
         this.previousCamLocation=new Vector3(cam.getLocation());
+        this.currentCamLeft=new Vector3(previousCamLeft);
+        this.currentCamUp=new Vector3(previousCamUp);
+        this.currentCamDirection=new Vector3(previousCamDirection);
         this.currentCamLocation=new Vector3(previousCamLocation);
         //initializes all text displays
         ammoTextLabel=initializeAmmunitionTextLabel();
@@ -1532,6 +1543,9 @@ public final class GameState extends ScenegraphState{
     
     private final void performInitialBasicSetup(){
         //FIXME it should not be hard-coded
+    	currentCamLeft.set(-1,0,0);
+    	currentCamUp.set(0,1,0);
+    	currentCamDirection.set(0,0,-1);
         currentCamLocation.set(115,0.5,223);
         //attaches the player itself
         getRoot().attachChild(playerNode);
@@ -1957,8 +1971,14 @@ public final class GameState extends ScenegraphState{
       		          }
             	  previousFrustumNear=cam.getFrustumNear();
                   previousFrustumFar=cam.getFrustumFar();
+                  previousCamLeft.set(cam.getLeft());
+                  previousCamUp.set(cam.getUp());
+                  previousCamDirection.set(cam.getDirection());
                   previousCamLocation.set(cam.getLocation());
                   cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.1,200);
+                  cam.setLeft(currentCamLeft);
+                  cam.setUp(currentCamUp);
+                  cam.setDirection(currentCamDirection);
                   cam.setLocation(currentCamLocation);
                   //the resolution of the screen might have been modified in the graphical user interface
                   //updates all elements whose positions should be bound to the resolution of the screen
@@ -1973,8 +1993,14 @@ public final class GameState extends ScenegraphState{
           		      }
                  }
              else
-                 {currentCamLocation.set(cam.getLocation());                  
+                 {currentCamLeft.set(cam.getLeft());
+                  currentCamUp.set(cam.getUp());
+                  currentCamDirection.set(cam.getDirection());
+            	  currentCamLocation.set(cam.getLocation());
                   cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),previousFrustumNear,previousFrustumFar);
+                  cam.setLeft(previousCamLeft);
+                  cam.setUp(previousCamUp);
+                  cam.setDirection(previousCamDirection);
                   cam.setLocation(previousCamLocation);
                  }
             }
