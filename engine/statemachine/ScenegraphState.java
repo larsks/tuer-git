@@ -21,6 +21,7 @@ import engine.sound.SoundManager;
 
 public class ScenegraphState{
 
+	/**flag indicating whether this state is enabled*/
     private boolean enabled;
 	/**layer used to handle the input*/
     private LogicalLayer logicalLayer;    
@@ -74,7 +75,7 @@ public class ScenegraphState{
                   else
                 	  //shows no child node
                 	  switchNode.setAllNonVisible();
-    	         }    	     
+    	         }
     	    }
     }
 }

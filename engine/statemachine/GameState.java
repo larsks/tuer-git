@@ -43,6 +43,7 @@ import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.InputTrigger;
+import com.ardor3d.input.logical.LogicalLayer;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.intersection.BoundingCollisionResults;
@@ -108,25 +109,12 @@ import engine.weaponry.WeaponFactory;
  *
  * TODO store statistics in a way that cannot cause memory leak
  */
-public final class GameState extends ScenegraphState{
+public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     /**index of the level*/
     private int levelIndex;
     /**Our native window, not the OpenGL surface itself*/
     private final NativeCanvas canvas;
-    /**previous (before entering this state) frustum far value*/
-    private double previousFrustumNear;
-    /**previous (before entering this state) frustum near value*/
-    private double previousFrustumFar;
-    
-    private final Vector3 previousCamLeft,previousCamUp,previousCamDirection;
-    
-    /**previous (before entering this state) location of the camera*/
-    private final Vector3 previousCamLocation;
-    
-    private final Vector3 currentCamLeft,currentCamUp,currentCamDirection;
-    /**current location of the camera*/
-    private final Vector3 currentCamLocation;
     /**node of the player*/
     private final CameraNode playerNode;
     /**data of the player*/
@@ -235,7 +223,7 @@ public final class GameState extends ScenegraphState{
     		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
     		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
     		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
-        super(soundManager);
+        super(soundManager,new LogicalLayer(),new Node(),canvas.getCanvasRenderer().getCamera());
         this.mouseManager=mouseManager;
         this.physicalLayer=physicalLayer;
         this.toPauseMenuTriggerAction=toPauseMenuTriggerAction;
@@ -364,14 +352,6 @@ public final class GameState extends ScenegraphState{
         };
         latestPlayerDeath=null;
         playerWithStateMachine=new LogicalPlayer(playerData);
-        this.previousCamLeft=new Vector3(cam.getLeft());
-        this.previousCamUp=new Vector3(cam.getUp());
-        this.previousCamDirection=new Vector3(cam.getDirection());
-        this.previousCamLocation=new Vector3(cam.getLocation());
-        this.currentCamLeft=new Vector3(previousCamLeft);
-        this.currentCamUp=new Vector3(previousCamUp);
-        this.currentCamDirection=new Vector3(previousCamDirection);
-        this.currentCamLocation=new Vector3(previousCamLocation);
         //initializes all text displays
         ammoTextLabel=initializeAmmunitionTextLabel();
         fpsTextLabel=initializeFpsTextLabel();
@@ -1547,6 +1527,8 @@ public final class GameState extends ScenegraphState{
     	currentCamUp.set(0,1,0);
     	currentCamDirection.set(0,0,-1);
         currentCamLocation.set(115,0.5,223);
+        currentFrustumNear=0.1;
+        currentFrustumFar=200;
         //attaches the player itself
         getRoot().attachChild(playerNode);
         //attaches the ammunition display node
@@ -1953,11 +1935,12 @@ public final class GameState extends ScenegraphState{
     @Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
-        if(wasEnabled!=enabled)
-            {super.setEnabled(enabled);
-             final Camera cam=canvas.getCanvasRenderer().getCamera();
-             if(enabled)
-                 {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+        super.setEnabled(enabled);
+        if(wasEnabled!=isEnabled())
+            {final Camera cam=canvas.getCanvasRenderer().getCamera();
+             if(isEnabled())
+                 {//FIXME this is a source of bugs, rather do that during the initialization
+            	  mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   mouseManager.setPosition(cam.getWidth()/2,cam.getHeight()/2);
             	  mouseManager.setGrabbed(GrabbedState.GRABBED);
          		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
@@ -1969,17 +1952,6 @@ public final class GameState extends ScenegraphState{
       				       }
       	    	       });
       		          }
-            	  previousFrustumNear=cam.getFrustumNear();
-                  previousFrustumFar=cam.getFrustumFar();
-                  previousCamLeft.set(cam.getLeft());
-                  previousCamUp.set(cam.getUp());
-                  previousCamDirection.set(cam.getDirection());
-                  previousCamLocation.set(cam.getLocation());
-                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),0.1,200);
-                  cam.setLeft(currentCamLeft);
-                  cam.setUp(currentCamUp);
-                  cam.setDirection(currentCamDirection);
-                  cam.setLocation(currentCamLocation);
                   //the resolution of the screen might have been modified in the graphical user interface
                   //updates all elements whose positions should be bound to the resolution of the screen
                   updateCrosshairNode();
@@ -1991,17 +1963,6 @@ public final class GameState extends ScenegraphState{
           		      {//(re)initializes input triggers
           			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }
-                 }
-             else
-                 {currentCamLeft.set(cam.getLeft());
-                  currentCamUp.set(cam.getUp());
-                  currentCamDirection.set(cam.getDirection());
-            	  currentCamLocation.set(cam.getLocation());
-                  cam.setFrustumPerspective(cam.getFovY(),(float)cam.getWidth()/(float)cam.getHeight(),previousFrustumNear,previousFrustumFar);
-                  cam.setLeft(previousCamLeft);
-                  cam.setUp(previousCamUp);
-                  cam.setDirection(previousCamDirection);
-                  cam.setLocation(previousCamLocation);
                  }
             }
     }
