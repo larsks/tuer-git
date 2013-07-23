@@ -187,22 +187,25 @@ public class PlayerData {
 	    return(health);
 	}
 	
-	public void die(){
-		if(!isAlive())
-		    {/**
-			  * TODO change the owner uid (if there is no digital watermark) and detach them from the player
-			  *      empty the container of ammunition container (use WeaponUserData)
-			  */
-		    }
-	}
+//	public void die(){
+//		if(!isAlive())
+//		    {/**
+//			  * TODO change the owner uid (if there is no digital watermark) and detach them from the player
+//			  *      empty the container of ammunition container (use WeaponUserData)
+//			  */
+//		    }
+//	}
 	
 	public void respawn(){
+		//resets the health
 		health=maxHealth;
-		weaponInUse=null;
-		ammoContainerContainer.empty();
-		dualWeaponUseEnabled=false;
+		//unselects the weapon(s)
+		unselectWeaponInUse(true);
+		//drives all weapons unavailable
 		primaryHandWeaponContainer.empty();
 		secondaryHandWeaponContainer.empty();
+		//empties the ammunition containers
+		ammoContainerContainer.empty();
 	}
 	
 	/**
@@ -683,6 +686,49 @@ public class PlayerData {
     	return(selectWeapon(false));
 	}
 	
+	/**
+	 * Unselects the weapon in use
+	 * 
+	 * @param bothPrimaryAndSecondary if <code>true</code> unselects the weapons in both hands, otherwise only unselects the secondary hand weapon
+	 * @return
+	 */
+	protected boolean unselectWeaponInUse(final boolean bothPrimaryAndSecondary){
+		boolean success=false;
+		if(weaponInUse!=null)
+		    {final Node primaryHandWeaponNode=primaryHandWeaponContainer.getNode(weaponInUse);
+			 //drops the primary hand weapon
+		     if(primaryHandWeaponNode!=null)
+		         {primaryHandWeaponNode.clearControllers();
+		          //FIXME maybe hiding it would be enough, detaching it should be done only when the player really drops it
+		          cameraNode.detachChild(primaryHandWeaponNode);
+		          success=true;
+		         }
+			 final Node secondaryHandWeaponNode=secondaryHandWeaponContainer.getNode(weaponInUse);
+			 if(bothPrimaryAndSecondary)
+			     {//drops the secondary hand weapon
+		          if(secondaryHandWeaponNode!=null)
+		              {secondaryHandWeaponNode.clearControllers();
+			           cameraNode.detachChild(secondaryHandWeaponNode);
+			           success=true;
+		              }
+			     }
+			 
+			 if(success)
+			     {//updates this flag if no weapon is in use
+				  if((primaryHandWeaponNode==null||!cameraNode.getChildren().contains(primaryHandWeaponNode))&&
+				     (secondaryHandWeaponNode==null||!cameraNode.getChildren().contains(secondaryHandWeaponNode)))
+					  {weaponInUse=null;
+					   dualWeaponUseEnabled=false;
+					  }
+				  else
+					  {//this flag is set to true if the secondary hand weapon is still in use
+					   dualWeaponUseEnabled=secondaryHandWeaponNode!=null&&cameraNode.getChildren().contains(secondaryHandWeaponNode);
+					  }
+			     }
+		    }
+		return(success);
+	}
+	
 	public boolean selectWeapon(final int index,final boolean dualWeaponUseWished){
 		final Weapon chosenWeapon=weaponFactory.get(index);
 		/**
@@ -696,31 +742,21 @@ public class PlayerData {
 		if(success)
 			{final Weapon oldWeaponIDInUse=weaponInUse;
 	    	 final boolean oldDualWeaponUse=dualWeaponUseEnabled;
-			 weaponInUse=chosenWeapon;
-			 dualWeaponUseEnabled=dualWeaponUseWished;
-			 if(oldWeaponIDInUse!=weaponInUse||oldDualWeaponUse!=dualWeaponUseEnabled)
-	    	     {Node oldWeapon,newWeapon;
-    		      if(oldWeaponIDInUse!=weaponInUse)
+			 if(oldWeaponIDInUse!=chosenWeapon||oldDualWeaponUse!=dualWeaponUseWished)
+	    	     {Node newWeapon;
+    		      if(oldWeaponIDInUse!=chosenWeapon)
     	              {//if at least one weapon was used previously
     		    	   if(oldWeaponIDInUse!=null)
-    		    	       {//drops the right hand weapon
-    		    		    oldWeapon=primaryHandWeaponContainer.getNode(oldWeaponIDInUse);
-    		    		    oldWeapon.clearControllers();
-    		    		    cameraNode.detachChild(oldWeapon);
-    		    		    if(oldDualWeaponUse)
-    		    		        {//drops the left hand weapon
-    		    			     oldWeapon=secondaryHandWeaponContainer.getNode(oldWeaponIDInUse);
-    		    			     oldWeapon.clearControllers();
-    		    			     cameraNode.detachChild(oldWeapon);
-    		    		        }
-    		    	       }
+    		    		   {//unselects them both
+    		    		    unselectWeaponInUse(true);
+    		    		   }
     		    	   //adds the right hand weapon
-    		    	   newWeapon=primaryHandWeaponContainer.getNode(weaponInUse);
+    		    	   newWeapon=primaryHandWeaponContainer.getNode(chosenWeapon);
     		    	   initializeWeaponLocalTransform(newWeapon,true);
     		    	   cameraNode.attachChild(newWeapon);
-    		    	   if(dualWeaponUseEnabled)
+    		    	   if(dualWeaponUseWished)
     		    	       {//adds the left hand weapon
-    		    		    newWeapon=secondaryHandWeaponContainer.getNode(weaponInUse);
+    		    		    newWeapon=secondaryHandWeaponContainer.getNode(chosenWeapon);
     		    		    initializeWeaponLocalTransform(newWeapon,false);
     		    		    cameraNode.attachChild(newWeapon);
     		    	       }
@@ -728,23 +764,24 @@ public class PlayerData {
     		      else
     		    	  //only the dual use has changed
     		          {//FIXME dirty kludge, forces the ordinate of the right weapon
-    		           newWeapon=primaryHandWeaponContainer.getNode(weaponInUse);
+    		           newWeapon=primaryHandWeaponContainer.getNode(chosenWeapon);
        		    	   initializeWeaponLocalTransform(newWeapon,true);
-    		    	   if(dualWeaponUseEnabled)
+    		    	   if(dualWeaponUseWished)
     		               {//adds the left hand weapon
-    		    	        newWeapon=secondaryHandWeaponContainer.getNode(weaponInUse);
+    		    	        newWeapon=secondaryHandWeaponContainer.getNode(chosenWeapon);
     		    	        initializeWeaponLocalTransform(newWeapon,false);
     		    	        cameraNode.attachChild(newWeapon);
     		               }
     		           else
     		    	       if(oldWeaponIDInUse!=null)
-    		    	           {//drops the left hand weapon
-    		    		        oldWeapon=secondaryHandWeaponContainer.getNode(oldWeaponIDInUse);
-    		    		        oldWeapon.clearControllers();
-    		    		        cameraNode.detachChild(oldWeapon);
+    		    	           {//unselects the secondary hand weapon
+    		    	    	    unselectWeaponInUse(false);
     		    	           }
     		          }
 	    	     }
+			 //updates these variables when the intermediary operations have been performed
+			 weaponInUse=chosenWeapon;
+			 dualWeaponUseEnabled=dualWeaponUseWished;
 			}
 		return(success);
 	}

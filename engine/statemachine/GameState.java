@@ -1540,12 +1540,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //attaches the HUD node
         getRoot().attachChild(headUpDisplayLabel);
         //resurrects the player
-        if(playerData.getHealth()!=100)
-            {if(playerData.getHealth()<100)
-        	     playerData.increaseHealth(100-playerData.getHealth());
-             else
-            	 playerData.decreaseHealth(playerData.getHealth()-100);
-            }
+        playerData.respawn();
+        //TODO resets the parameters to the latest saved values
     }
     
     private final void performTerminalBasicCleanup(){
