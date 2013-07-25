@@ -61,6 +61,8 @@ public class GameOverState extends ScenegraphState{
     
     private int latestPlayedLevelIndex;
     
+    private int latestNextPlayableLevelIndex;
+    
     //TODO store the figures
 
 	public GameOverState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
@@ -76,6 +78,7 @@ public class GameOverState extends ScenegraphState{
 		this.toUnloadingDisplayTriggerActionForMainMenu=toUnloadingDisplayTriggerActionForMainMenu;
 		this.toUnloadingDisplayTriggerActionForLoadingDisplay=toUnloadingDisplayTriggerActionForLoadingDisplay;
 		this.latestPlayedLevelIndex=-1;
+		this.latestNextPlayableLevelIndex=-1;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -130,8 +133,7 @@ public class GameOverState extends ScenegraphState{
 	}
 	
 	private void onNextButtonActionPerformed(final ActionEvent ae){
-		//the trigger action contains the latest played level, increments it to get the next level if any
-		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestPlayedLevelIndex+1;
+		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestNextPlayableLevelIndex;
 		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
@@ -205,6 +207,10 @@ public class GameOverState extends ScenegraphState{
 		this.latestPlayedLevelIndex=latestPlayedLevelIndex;
 	}
 	
+	public void setLatestNextPlayableLevelIndex(final int latestNextPlayableLevelIndex){
+		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
+	}
+	
 	@Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
@@ -212,10 +218,8 @@ public class GameOverState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
-                  //TODO update the available items depending on the previous state and the figures
-                  //TODO enable the "next" button if the player has just ended up with the latest level and if it isn't the last level
-                  //disables them temporarily until these features really work
-                  ((UIButton)initialMenuPanel.getChild(0)).setEnabled(false);
+                  //enables the "next" button if the latest next playable level index seems valid
+                  ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else

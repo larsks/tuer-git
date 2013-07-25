@@ -846,6 +846,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	   */
                     	  if(latestDeathDuration>500000000)
                     	      {((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+                    	       //the player can't go to the next level when he dies
+                    	       ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=-1;
                     		   toGameOverTriggerAction.perform(null,null,-1);
                     	      }
                          }
@@ -1961,6 +1963,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
           		      {//FIXME add the figures too
           			   ((int[])toPauseMenuTriggerAction.arguments.getFirst())[0]=levelIndex;
           			   ((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[0]=levelIndex;
+          			   //the player cannot go to the next level when leaving or aborting
+          			   ((int[])toPauseMenuTriggerAction.arguments.getFirst())[1]=-1;
+        			   ((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[1]=-1;
           			   //(re)initializes input triggers
           			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }

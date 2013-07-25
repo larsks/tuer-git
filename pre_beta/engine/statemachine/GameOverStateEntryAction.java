@@ -22,7 +22,7 @@ import se.hiflyer.fettle.StateMachine;
  * @author gouessej
  *
  */
-public class GameOverStateEntryAction extends ScenegraphStateEntryAction {
+public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
 
 	public GameOverStateEntryAction(){
 		super();
@@ -31,8 +31,10 @@ public class GameOverStateEntryAction extends ScenegraphStateEntryAction {
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final int latestPlayedLevelIndex=((int[])args.getFirst())[0];
+		final int latestNextPlayableLevelIndex=((int[])args.getFirst())[1];
 		final GameOverState gameOverState=(GameOverState)to;
 		gameOverState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
+		gameOverState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
 		super.onTransition(from,to,cause,args,stateMachine);
 	}
 }

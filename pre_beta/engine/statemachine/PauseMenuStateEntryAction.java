@@ -29,7 +29,9 @@ public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction{
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final PauseMenuState pauseMenuState=(PauseMenuState)to;
 		final int latestPlayedLevelIndex=((int[])args.getFirst())[0];
+		final int latestNextPlayableLevelIndex=((int[])args.getFirst())[1];
 		pauseMenuState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
+		pauseMenuState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
 		final boolean openedForExitConfirm=args!=null&&args.getNumberOfArguments()>=2&&args.getArgument(1)!=null&&args.getArgument(1) instanceof String&&(((String)args.getArgument(1)).equals(EXIT_CONFIRM_TAG));
 		pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
 		super.onTransition(from,to,cause,args,stateMachine);
