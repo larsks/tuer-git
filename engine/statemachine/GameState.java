@@ -845,7 +845,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	   * It would help to know why he enters this state and which level(s) should be available
                     	   */
                     	  if(latestDeathDuration>500000000)
-                    	      toGameOverTriggerAction.perform(null,null,-1);
+                    	      {((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+                    		   toGameOverTriggerAction.perform(null,null,-1);
+                    	      }
                          }
                     }
                 //updates the state machine of the player
@@ -1956,7 +1958,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
           		   * if the input triggers have never been initialized
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
-          		      {//(re)initializes input triggers
+          		      {//FIXME add the figures too
+          			   ((int[])toPauseMenuTriggerAction.arguments.getFirst())[0]=levelIndex;
+          			   ((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[0]=levelIndex;
+          			   //(re)initializes input triggers
           			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }
                  }

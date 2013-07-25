@@ -41,7 +41,7 @@ import engine.sound.SoundManager;
  */
 public class GameOverState extends ScenegraphState{
 	
-private final NativeCanvas canvas;
+    private final NativeCanvas canvas;
     
     private final PhysicalLayer physicalLayer;
     
@@ -51,11 +51,17 @@ private final NativeCanvas canvas;
     
     private final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForMainMenu;
     
+    private final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForLoadingDisplay;
+    
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
     
     private final UIPanel confirmExitMenuPanel;
+    
+    private int latestPlayedLevelIndex;
+    
+    //TODO store the figures
 
 	public GameOverState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
 			final FontStore fontStore,
@@ -68,6 +74,8 @@ private final NativeCanvas canvas;
 		this.mouseManager=mouseManager;
 		this.toUnloadingDisplayTriggerActionForExit=toUnloadingDisplayTriggerActionForExit;
 		this.toUnloadingDisplayTriggerActionForMainMenu=toUnloadingDisplayTriggerActionForMainMenu;
+		this.toUnloadingDisplayTriggerActionForLoadingDisplay=toUnloadingDisplayTriggerActionForLoadingDisplay;
+		this.latestPlayedLevelIndex=-1;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -114,9 +122,6 @@ private final NativeCanvas canvas;
             	onExitButtonActionPerformed(ae);
             }
         });
-		//disables them temporarily until these features really work
-		nextButton.setEnabled(false);
-		retryButton.setEnabled(false);
 		initialMenuPanel.add(nextButton);
 		initialMenuPanel.add(retryButton);
 		initialMenuPanel.add(mainMenuButton);
@@ -125,11 +130,14 @@ private final NativeCanvas canvas;
 	}
 	
 	private void onNextButtonActionPerformed(final ActionEvent ae){
-		//TODO
+		//the trigger action contains the latest played level, increments it to get the next level if any
+		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestPlayedLevelIndex+1;
+		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
 	private void onRetryButtonActionPerformed(final ActionEvent ae){
-		//TODO
+		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestPlayedLevelIndex;
+		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
 	private void onMainMenuButtonActionPerformed(final ActionEvent ae){
@@ -193,6 +201,10 @@ private final NativeCanvas canvas;
         return(hud);
     }
 	
+	public void setLatestPlayedLevelIndex(final int latestPlayedLevelIndex){
+		this.latestPlayedLevelIndex=latestPlayedLevelIndex;
+	}
+	
 	@Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
@@ -201,6 +213,9 @@ private final NativeCanvas canvas;
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   //TODO update the available items depending on the previous state and the figures
+                  //TODO enable the "next" button if the player has just ended up with the latest level and if it isn't the last level
+                  //disables them temporarily until these features really work
+                  ((UIButton)initialMenuPanel.getChild(0)).setEnabled(false);
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else
