@@ -17,21 +17,22 @@ import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
 /**
+ * Entry action used for the game over state to get some parameters about the latest played level
  * 
- * @author Julien Gouesse
+ * @author gouessej
  *
  */
-public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction{
+public class GameOverStateEntryAction extends ScenegraphStateEntryAction {
 
-	public static final String EXIT_CONFIRM_TAG = "(For Exit Confirm)"; 
-	
+	public GameOverStateEntryAction(){
+		super();
+	}
+
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		final PauseMenuState pauseMenuState=(PauseMenuState)to;
 		final int latestPlayedLevelIndex=((int[])args.getFirst())[0];
-		pauseMenuState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
-		final boolean openedForExitConfirm=args!=null&&args.getNumberOfArguments()>=2&&args.getArgument(1)!=null&&args.getArgument(1) instanceof String&&(((String)args.getArgument(1)).equals(EXIT_CONFIRM_TAG));
-		pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
+		final GameOverState gameOverState=(GameOverState)to;
+		gameOverState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
 		super.onTransition(from,to,cause,args,stateMachine);
-    }
+	}
 }
