@@ -64,6 +64,8 @@ public class PauseMenuState extends ScenegraphState{
     private boolean openedForExitConfirm=false;
     
     private int latestPlayedLevelIndex;
+    
+    private int latestNextPlayableLevelIndex;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
@@ -78,6 +80,7 @@ public class PauseMenuState extends ScenegraphState{
 		this.toGameOverTriggerAction=toGameOverTriggerAction;
 		this.toUnloadingDisplayTriggerAction=toUnloadingDisplayTriggerAction;
 		this.latestPlayedLevelIndex=-1;
+		this.latestNextPlayableLevelIndex=-1;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmAbortMenuPanel=createConfirmAbortMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
@@ -184,6 +187,7 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
 		((int[])toGameOverTriggerAction.arguments.getFirst())[0]=latestPlayedLevelIndex;
+		((int[])toGameOverTriggerAction.arguments.getFirst())[1]=latestNextPlayableLevelIndex;
 		toGameOverTriggerAction.perform(null,null,-1);
 	}
 	
@@ -227,6 +231,10 @@ public class PauseMenuState extends ScenegraphState{
     
     public void setLatestPlayedLevelIndex(final int latestPlayedLevelIndex){
 		this.latestPlayedLevelIndex=latestPlayedLevelIndex;
+	}
+    
+    public void setLatestNextPlayableLevelIndex(final int latestNextPlayableLevelIndex){
+		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
 	}
     
     @Override
