@@ -66,6 +66,8 @@ public class PauseMenuState extends ScenegraphState{
     private int latestPlayedLevelIndex;
     
     private int latestNextPlayableLevelIndex;
+    
+    private GameStatistics gameStats;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
@@ -186,8 +188,10 @@ public class PauseMenuState extends ScenegraphState{
     }
 	
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
+		gameStats.setMissionStatus(MissionStatus.ABORTED);
 		((int[])toGameOverTriggerAction.arguments.getFirst())[0]=latestPlayedLevelIndex;
 		((int[])toGameOverTriggerAction.arguments.getFirst())[1]=latestNextPlayableLevelIndex;
+		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=gameStats;
 		toGameOverTriggerAction.perform(null,null,-1);
 	}
 	
@@ -236,6 +240,10 @@ public class PauseMenuState extends ScenegraphState{
     public void setLatestNextPlayableLevelIndex(final int latestNextPlayableLevelIndex){
 		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
 	}
+    
+    public void setGameStatistics(final GameStatistics gameStats){
+    	this.gameStats=gameStats;
+    }
     
     @Override
     public void setEnabled(final boolean enabled){

@@ -63,7 +63,9 @@ public class GameOverState extends ScenegraphState{
     
     private int latestNextPlayableLevelIndex;
     
-    //TODO store the figures
+    private GameStatistics gameStats;
+    
+    private final BMText textNode;
 
 	public GameOverState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
 			final FontStore fontStore,
@@ -88,7 +90,7 @@ public class GameOverState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final BMText textNode=new BMText("gameOverNode","Game over",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        textNode=new BMText("gameOverNode","Game over",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(10);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
@@ -211,6 +213,10 @@ public class GameOverState extends ScenegraphState{
 		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
 	}
 	
+	public void setGameStatistics(final GameStatistics gameStats){
+    	this.gameStats=gameStats;
+    }
+	
 	@Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
@@ -220,6 +226,22 @@ public class GameOverState extends ScenegraphState{
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   //enables the "next" button if the latest next playable level index seems valid
                   ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
+                  //TODO update the main message
+                  switch(gameStats.getMissionStatus())
+                  {
+                      case COMPLETED:
+                    	  textNode.setText("You win\nMission status: completed");
+                    	  break;
+                      case ABORTED:
+                    	  textNode.setText("Game over\nMission status: aborted");
+                    	  break;
+                      case DECEASED:
+                    	  textNode.setText("Game over\nMission status: deceased");
+                    	  break;
+                      case FAILED:
+                    	  textNode.setText("Game over\nMission status: failed");
+                    	  break;
+                  }
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else
