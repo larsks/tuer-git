@@ -19,7 +19,7 @@ import se.hiflyer.fettle.StateMachine;
 /**
  * Entry action used for the game over state to get some parameters about the latest played level
  * 
- * @author gouessej
+ * @author Julien Gouesse
  *
  */
 public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
@@ -32,9 +32,11 @@ public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final int latestPlayedLevelIndex=((int[])args.getFirst())[0];
 		final int latestNextPlayableLevelIndex=((int[])args.getFirst())[1];
+		final GameStatistics gameStats=((GameStatistics[])args.getArgument(1))[0];
 		final GameOverState gameOverState=(GameOverState)to;
 		gameOverState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
 		gameOverState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
+		gameOverState.setGameStatistics(gameStats);
 		super.onTransition(from,to,cause,args,stateMachine);
 	}
 }

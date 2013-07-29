@@ -107,7 +107,6 @@ import engine.weaponry.WeaponFactory;
  * State used during the game, the party.
  * @author Julien Gouesse
  *
- * TODO store statistics in a way that cannot cause memory leak
  */
 public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
@@ -121,6 +120,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final PlayerData playerData;
     /**player object that relies on a state machine*/
     private final LogicalPlayer playerWithStateMachine;
+    /**player's game statistics*/
+    private GameStatistics gameStats;
     /**list containing all objects that can be picked up*/
     private final ArrayList<Node> collectibleObjectsList;
     /**list of teleporters*/
@@ -137,6 +138,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText healthTextLabel;
     /**text label of the head-up display*/
     private final BasicText headUpDisplayLabel;
+    /**@deprecated this collision map is a temporary solution, the real collision system will have to use the 3D mesh instead of a flat 2D array*/
     @Deprecated
     private boolean[][] collisionMap;
     /**instance that creates all ammunitions*/
@@ -829,7 +831,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     }
                 else
                     {if(latestPlayerDeath==null)
-                         {fpsc.setKeyRotateSpeed(0);
+                         {gameStats.setMissionStatus(MissionStatus.DECEASED);
+                    	  fpsc.setKeyRotateSpeed(0);
                 	      fpsc.setMouseRotateSpeed(0);
                 	      fpsc.setMoveSpeed(0);
                     	  latestPlayerDeath=Long.valueOf(absoluteElapsedTimeInNanoseconds);
@@ -1543,6 +1546,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().attachChild(healthTextLabel);
         //attaches the HUD node
         getRoot().attachChild(headUpDisplayLabel);
+        //resets the latest player's death
+        latestPlayerDeath=null;
+        //resets player's stats
+        gameStats=new GameStatistics();
+        //sets the statistics of each action
+		((GameStatistics[])toPauseMenuTriggerAction.arguments.getArgument(2))[0]=gameStats;
+		((GameStatistics[])toPauseMenuTriggerActionForExitConfirm.arguments.getArgument(2))[0]=gameStats;
+		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=gameStats;
+		((int[])toPauseMenuTriggerAction.arguments.getFirst())[0]=levelIndex;
+		((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[0]=levelIndex;
+		//the player cannot go to the next level when leaving or aborting
+		((int[])toPauseMenuTriggerAction.arguments.getFirst())[1]=-1;
+		((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[1]=-1;
         //resurrects the player
         playerData.respawn();
         //TODO resets the parameters to the latest saved values
@@ -1960,13 +1976,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
           		   * if the input triggers have never been initialized
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
-          		      {//FIXME add the figures too
-          			   ((int[])toPauseMenuTriggerAction.arguments.getFirst())[0]=levelIndex;
-          			   ((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[0]=levelIndex;
-          			   //the player cannot go to the next level when leaving or aborting
-          			   ((int[])toPauseMenuTriggerAction.arguments.getFirst())[1]=-1;
-        			   ((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[1]=-1;
-          			   //(re)initializes input triggers
+          		      {//(re)initializes input triggers
           			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
           		      }
                  }

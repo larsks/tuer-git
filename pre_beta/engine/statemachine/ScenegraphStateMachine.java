@@ -162,11 +162,11 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> introductionToMainMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,introductionToMainMenuEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToLoadingDisplayEvent,new Arguments(new int[]{-1}),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
-        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1}),renderContext);
-        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerActionForExitConfirm=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.EXIT_CONFIRM_TAG),renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.NO_PRESELECTED_MENU_ITEM,(Object)new GameStatistics[1]),renderContext);
+        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerActionForExitConfirm=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.EXIT_CONFIRM_TAG,(Object)new GameStatistics[1]),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToGameEvent,renderContext);
-        //TODO use an argument of a transition to pass the figures to the game over state
-        final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameOverTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToGameOverEvent,new Arguments(new int[]{-1,-1}),renderContext);
+        //uses an argument of a transition to pass the figures to the game over state
+        final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameOverTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToGameOverEvent,new Arguments(new int[]{-1,-1},(Object)new GameStatistics[1]),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToUnloadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,pauseMenuToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.EXIT_TAG),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> unloadingDisplayToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,unloadingDisplayToExitGameEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> unloadingDisplayToMainMenuTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,unloadingDisplayToMainMenuEvent,renderContext);
@@ -175,8 +175,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> introductionToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,introductionToExitGameEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToExitGameTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,mainMenuToExitGameEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToUnloadingDisplayTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,loadingDisplayToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.EXIT_TAG),renderContext);
-        //TODO use an argument of a transition to pass the figures to the game over state
-        final TransitionTriggerAction<ScenegraphState,String> gameToGameOverTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToGameOverEvent,new Arguments(new int[]{-1,-1}),renderContext);
+        //uses an argument of a transition to pass the figures to the game over state
+        final TransitionTriggerAction<ScenegraphState,String> gameToGameOverTriggerAction=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameToGameOverEvent,new Arguments(new int[]{-1,-1},(Object)new GameStatistics[1]),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> gameOverToUnloadingDisplayTriggerActionForExit=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameOverToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.EXIT_TAG),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> gameOverToUnloadingDisplayTriggerActionForMainMenu=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameOverToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.MAIN_MENU_TAG),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> gameOverToUnloadingDisplayTriggerActionForLoadingDisplay=new TransitionTriggerAction<ScenegraphState,String>(internalStateMachine,gameOverToUnloadingDisplayEvent,new Arguments(UnloadingDisplayStateEntryAction.LEVEL_TAG,new int[]{-1}),renderContext);
@@ -207,7 +207,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         addState(loadingDisplayState,new LoadingDisplayStateEntryAction(gameState),new ScenegraphStateExitAction());
         addState(gameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(pauseMenuState,new PauseMenuStateEntryAction(),new ScenegraphStateExitAction());
-        //TODO get the figures from the argument of the transition in the entry action and pass it to the game over state
+        //gets the figures from the argument of the transition in the entry action and pass it to the game over state
         addState(gameOverState,new GameOverStateEntryAction(),new ScenegraphStateExitAction());
         addState(unloadingDisplayState,new UnloadingDisplayStateEntryAction(scheduler,noPendingTaskCondition,unloadingDisplayToExitGameTriggerAction,unloadingDisplayToMainMenuTriggerAction,unloadingDisplayToLoadingDisplayTriggerAction),new ScenegraphStateExitAction());
         addState(exitGameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
