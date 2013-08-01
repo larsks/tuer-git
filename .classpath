@@ -9,15 +9,15 @@
 	<classpathentry exported="true" kind="lib" path="lib/joal/joal.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
 	<classpathentry kind="lib" path="lib/fettle/fettle-0.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jogl/jogl-all.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jogl/jogl-all.jar" sourcepath="/home/gouessej/.m2/repository/org/jogamp/jogl/jogl-all/2.0.2-rc12/jogl-all-2.0.2-rc12-sources.jar"/>
 	<classpathentry kind="lib" path="lib/google-collect/guava-13.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-math-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-0.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-animation-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-extras-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-jogl-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-math-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

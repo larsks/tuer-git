@@ -33,7 +33,7 @@
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
-	<property name="ardor3d-version" value="0.9-SNAPSHOT" />
+	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
