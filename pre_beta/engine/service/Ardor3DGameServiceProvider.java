@@ -33,6 +33,7 @@ import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.jogl.JoglNewtFocusWrapper;
+import com.ardor3d.input.jogl.JoglNewtKeyboardWrapper;
 import com.ardor3d.input.jogl.JoglNewtMouseManager;
 import com.ardor3d.input.jogl.JoglNewtMouseWrapper;
 import com.ardor3d.input.logical.TriggerAction;
@@ -57,7 +58,6 @@ import com.jogamp.newt.opengl.GLWindow;
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.renderer.ReliableCanvasRenderer;
-import engine.renderer.ReliableKeyboardWrapper;
 import engine.statemachine.ScenegraphStateMachine;
 
 /**
@@ -236,7 +236,12 @@ public final class Ardor3DGameServiceProvider implements Scene{
         mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
         //removes the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
-        physicalLayer=new PhysicalLayer(new ReliableKeyboardWrapper((JoglNewtWindow)canvas),new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager),new JoglNewtFocusWrapper((JoglNewtWindow)canvas));
+        final JoglNewtKeyboardWrapper keyboardWrapper=new JoglNewtKeyboardWrapper((JoglNewtWindow)canvas);
+        keyboardWrapper.setSkipAutoRepeatEvents(true);
+        final JoglNewtMouseWrapper mouseWrapper=new JoglNewtMouseWrapper((JoglNewtWindow)canvas,mouseManager);
+        mouseWrapper.setSkipAutoRepeatEvents(true);
+        final JoglNewtFocusWrapper focusWrapper=new JoglNewtFocusWrapper((JoglNewtWindow)canvas);
+        physicalLayer=new PhysicalLayer(keyboardWrapper,mouseWrapper,focusWrapper);
     }
 
     
