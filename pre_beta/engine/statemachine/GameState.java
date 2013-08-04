@@ -490,7 +490,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
              	    	for(int x=0;x<2&&!collisionFound;x++)
              	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
              	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
-             	    	     if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+             	    	     if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
              	    		     collisionFound=collisionMap[tmpX][tmpZ];
              	    	     else
              	    	    	 collisionFound=false;
@@ -507,7 +507,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                        	    	  for(int x=0;x<2&&!collisionFound;x++)
                        	    	      {tmpX=(int)(playerX-0.2+(x*0.4));
                        	    	       tmpZ=(int)(playerZ-0.2+(z*0.4));
-                       	    	       if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                       	    	       if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                        	    		       collisionFound=collisionMap[tmpX][tmpZ];
                        	    	       else
                        	    	    	   collisionFound=false;
@@ -524,7 +524,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                            	    	   for(int x=0;x<2&&!collisionFound;x++)
                            	    	       {tmpX=(int)(playerX-0.2+(x*0.4));
                            	    	        tmpZ=(int)(playerZ-0.2+(z*0.4));
-                           	    	        if(0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                           	    	        if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                            	    		        collisionFound=collisionMap[tmpX][tmpZ];
                            	    	        else
                            	    	    	    collisionFound=false;
@@ -1510,8 +1510,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadLevelModel(){
     	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
-    	    if(levelIndex==1)
-    	    	levelNode.setTranslation(109,0,208);
             getRoot().attachChild(levelNode);
     	   }
     	catch(IOException ioe)
@@ -1519,21 +1517,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadOutdoor(){
-    	if(levelIndex==0)
-    	    try{final Node outdoorPartLevelNode=(Node)binaryImporter.load(getClass().getResource("/abin/wildhouse_action.abin"));
-                outdoorPartLevelNode.setTranslation(-128,-6,-128);
-                getRoot().attachChild(outdoorPartLevelNode);   		
-    	       }
-    	    catch(IOException ioe)
-    	    {throw new RuntimeException("outdoor loading failed",ioe);}
+    	//TODO load separately the outdoor if any
     }
     
     private final void performInitialBasicSetup(){
         //FIXME it should not be hard-coded
-    	currentCamLeft.set(-1,0,0);
-    	currentCamUp.set(0,1,0);
-    	currentCamDirection.set(0,0,-1);
-        currentCamLocation.set(115,0.5,223);
+    	if(levelIndex!=2)
+    	    {currentCamLeft.set(-1,0,0);
+    		 currentCamUp.set(0,1,0);
+    		 currentCamDirection.set(0,0,-1);
+    	     currentCamLocation.set(115,0.5,223);
+    	    }
         currentFrustumNear=0.1;
         currentFrustumFar=200;
         //attaches the player itself
@@ -1616,9 +1610,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-    	if(levelIndex==0)
-    	    {final Skybox skyboxNode=new Skybox("skybox",64,64,64);
-    	     skyboxNode.setTranslation(-128,0,-128);
+    	if(levelIndex==2)
+    	    {//TODO the skybox should be attached to the camera node
+    		 final Skybox skyboxNode=new Skybox("skybox",64,64,64);
     	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
     	     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
     	     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -1636,7 +1630,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadTeleporters(){
-    	if(levelIndex==0)
+    	/*if(levelIndex==0)
     	    {final Node teleporterNode=new Node("a teleporter");
              final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
              teleporterBox.setRandomColors();
@@ -1653,7 +1647,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
              secondTeleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(112.5,0.5,221.5)));
              teleportersList.add(secondTeleporterNode);
              getRoot().attachChild(secondTeleporterNode);
-    	    }
+    	    }*/
     }
     
     private final void loadMedikits(){
@@ -1670,6 +1664,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
+    	if(levelIndex!=2)
     	//N.B: only show working weapons
 	    try{/*final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
             uziNode.setName("an uzi");
@@ -1761,6 +1756,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     @SuppressWarnings("unchecked")
 	private final void loadEnemies(){
+    	if(levelIndex!=2)
 	    try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
 	        weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
 	        weaponNodeTemplate.setScale(0.015);
