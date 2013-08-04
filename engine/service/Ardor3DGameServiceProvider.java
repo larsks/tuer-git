@@ -66,7 +66,7 @@ import engine.statemachine.ScenegraphStateMachine;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 
-    /**Our native window, not the GL surface itself*/
+    /**native window, not the GL surface itself*/
     private final NativeCanvas canvas;
     
     /**physical layer of the input system*/
@@ -75,7 +75,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**mouse manager used to handle the cursor*/
     private final MouseManager mouseManager;
 
-    /**Our timer*/
+    /**main timer*/
     private final Timer timer;
 
     /**root of our scene*/
@@ -205,7 +205,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
     }
     
     /**
-     * Constructs the example class, also creating the native window and GL surface.
+     * Constructs an instance of this class, also creating the native window and GL surface.
      */
     private Ardor3DGameServiceProvider(){
         timer=new Timer();
@@ -246,8 +246,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
 
     
     /**
-     * Kicks off the example logic, first setting up the scene, then continuously updating and rendering it until exit
-     * is flagged. Afterwards, the scene and GL surface are cleaned up.
+     * Kicks off the logic, first setting up the scene, then continuously updating and rendering it until the exit
+     * state is used. Afterwards, the scene and GL surface are cleaned up.
      */
     private final void start(){
         init();
