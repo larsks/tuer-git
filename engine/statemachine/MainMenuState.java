@@ -179,14 +179,21 @@ public final class MainMenuState extends ScenegraphState{
         level0Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onLevelButtonActionPerformed(ae);
+            	onLevelButtonActionPerformed(ae,0);
             }
         });
         final UIButton perfTestLevelButton=new UIButton("Performance Test");
         perfTestLevelButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onPerfTestLevelButtonActionPerformed(ae);
+            	onLevelButtonActionPerformed(ae,1);
+            }
+        });
+        final UIButton level2Button=new UIButton("Level 2");
+        level2Button.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onLevelButtonActionPerformed(ae,2);
             }
         });
         final UIButton backButton=new UIButton("Back");
@@ -198,17 +205,13 @@ public final class MainMenuState extends ScenegraphState{
         });
         storyModePanel.add(level0Button);
         storyModePanel.add(perfTestLevelButton);
+        storyModePanel.add(level2Button);
         storyModePanel.add(backButton);
         return(storyModePanel);
     }
     
-    private void onLevelButtonActionPerformed(final ActionEvent ae){
-    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=0;
-    	toLoadingDisplayAction.perform(null,null,-1);
-    }
-    
-    private void onPerfTestLevelButtonActionPerformed(final ActionEvent ae){
-    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=1;
+    private void onLevelButtonActionPerformed(final ActionEvent ae,final int levelIndex){
+    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=levelIndex;
     	toLoadingDisplayAction.perform(null,null,-1);
     }
     
@@ -435,6 +438,7 @@ public final class MainMenuState extends ScenegraphState{
                    * all parts of the GUI that depend on the unlocked 
                    * items in the profile
                    */
+                  //TODO check which levels are available
                   //shows the initial menu
                   showPanelInMainFrame(initialMenuPanel);
                  }
