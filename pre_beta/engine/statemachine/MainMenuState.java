@@ -196,6 +196,13 @@ public final class MainMenuState extends ScenegraphState{
             	onLevelButtonActionPerformed(ae,2);
             }
         });
+        final UIButton level3Button=new UIButton("Level 3");
+        level3Button.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onLevelButtonActionPerformed(ae,3);
+            }
+        });
         final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
@@ -206,6 +213,7 @@ public final class MainMenuState extends ScenegraphState{
         storyModePanel.add(level0Button);
         storyModePanel.add(perfTestLevelButton);
         storyModePanel.add(level2Button);
+        storyModePanel.add(level3Button);
         storyModePanel.add(backButton);
         return(storyModePanel);
     }

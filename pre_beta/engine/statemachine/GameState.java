@@ -1545,6 +1545,20 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     		 currentCamDirection.set(0,0,-1);
     	     currentCamLocation.set(115,0.5,223);
     	    }
+    	switch(levelIndex)
+    	{case 0:
+    	 case 1:
+    	     {currentCamLeft.set(-1,0,0);
+    		  currentCamUp.set(0,1,0);
+    		  currentCamDirection.set(0,0,-1);
+    	      currentCamLocation.set(115,0.5,223);
+    	      break;
+    	     }
+    	 case 3:
+    	     {currentCamLocation.set(0,0,5);
+    	      break;
+    	     }
+    	}
         currentFrustumNear=0.1;
         currentFrustumFar=200;
         //attaches the player itself
