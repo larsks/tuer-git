@@ -116,6 +116,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
              this.defaultActionMap.setMouseWheelMoveActionBinding(engine.input.Action.NEXT_WEAPON,Boolean.TRUE);
              this.defaultActionMap.setKeyActionBinding(engine.input.Action.PREVIOUS_WEAPON,Key.L);
              this.defaultActionMap.setMouseWheelMoveActionBinding(engine.input.Action.PREVIOUS_WEAPON,Boolean.FALSE);
+             this.defaultActionMap.setKeyActionBinding(engine.input.Action.TOGGLE_WIREFRAME_MODE,Key.T);
              this.defaultActionMap.setKeyActionBinding(engine.input.Action.QUIT,Key.ESCAPE);
             }
         else
