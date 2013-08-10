@@ -60,12 +60,14 @@ import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.queue.RenderBucketType;
 import com.ardor3d.renderer.state.TextureState;
+import com.ardor3d.renderer.state.WireframeState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.controller.SpatialController;
+import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
@@ -105,6 +107,7 @@ import engine.weaponry.WeaponFactory;
 
 /**
  * State used during the game, the party.
+ * 
  * @author Julien Gouesse
  *
  */
@@ -217,6 +220,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private static final String enemyShotgunShotSamplePath="/sounds/shotgun_shot.ogg";
     
     private static String enemyShotgunShotSampleIdentifier = null;
+    
+    private WireframeState wireframeState;
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
@@ -360,6 +365,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         healthTextLabel=initializeHealthTextLabel();
         headUpDisplayLabel=initializeHeadUpDisplayLabel();
         initializeCollisionSystem(cam);
+        wireframeState=new WireframeState();
+        wireframeState.setEnabled(false);
+        getRoot().setRenderState(wireframeState);
     }
     
     private final Node createCrosshairNode() {
@@ -483,6 +491,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 boolean collisionFound=false;
                 double correctX=playerStartX,correctZ=playerStartZ;
                 int tmpX,tmpZ;
+                //temporary hack to disable collisions in some levels
+                final boolean useCollisionMap=levelIndex==0||levelIndex==1;
                 for(int i=1;i<=stepCount&&!collisionFound;i++)
                     {playerX=playerStartX+(stepX*i);
                 	 playerZ=playerStartZ+(stepZ*i);
@@ -490,7 +500,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
              	    	for(int x=0;x<2&&!collisionFound;x++)
              	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
              	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
-             	    	     if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+             	    	     if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
              	    		     collisionFound=collisionMap[tmpX][tmpZ];
              	    	     else
              	    	    	 collisionFound=false;
@@ -507,7 +517,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                        	    	  for(int x=0;x<2&&!collisionFound;x++)
                        	    	      {tmpX=(int)(playerX-0.2+(x*0.4));
                        	    	       tmpZ=(int)(playerZ-0.2+(z*0.4));
-                       	    	       if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                       	    	       if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                        	    		       collisionFound=collisionMap[tmpX][tmpZ];
                        	    	       else
                        	    	    	   collisionFound=false;
@@ -524,7 +534,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                            	    	   for(int x=0;x<2&&!collisionFound;x++)
                            	    	       {tmpX=(int)(playerX-0.2+(x*0.4));
                            	    	        tmpZ=(int)(playerZ-0.2+(z*0.4));
-                           	    	        if(levelIndex!=2&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                           	    	        if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                            	    		        collisionFound=collisionMap[tmpX][tmpZ];
                            	    	        else
                            	    	    	    collisionFound=false;
@@ -1113,6 +1123,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
 			}
 		};
+		final TriggerAction toggleWireframeModeAction=new TriggerAction() {
+            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
+                wireframeState.setEnabled(!wireframeState.isEnabled());
+                getRoot().markDirty(DirtyType.RenderState);
+            }
+        };
 		/*final TriggerAction selectWeaponOneAction=new TriggerAction(){
 			@Override
 			public void perform(Canvas source, TwoInputStates inputState, double tpf){
@@ -1130,11 +1146,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         final InputTrigger activateTrigger=new InputTrigger(customActionMap.getCondition(Action.ACTIVATE,false),activateAction);
         final InputTrigger startRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,true),startRunningAction);
         final InputTrigger stopRunningRightTrigger=new InputTrigger(customActionMap.getCondition(Action.RUN,false),stopRunningAction);
+        final InputTrigger toggleWireframeModeTrigger=new InputTrigger(customActionMap.getCondition(Action.TOGGLE_WIREFRAME_MODE,false),toggleWireframeModeAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitPromptTrigger,
         		nextWeaponTrigger,previousWeaponTrigger,reloadWeaponTrigger,
         		startAttackTrigger,pauseTrigger,crouchTrigger,
         		activateTrigger,startRunningRightTrigger,stopRunningRightTrigger,
-        		stopAttackTrigger};
+        		stopAttackTrigger,toggleWireframeModeTrigger};
         getLogicalLayer().registerInput(canvas,physicalLayer);
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
@@ -1522,7 +1539,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void performInitialBasicSetup(){
         //FIXME it should not be hard-coded
-    	if(levelIndex!=2)
+    	if(levelIndex==0||levelIndex==1)
     	    {currentCamLeft.set(-1,0,0);
     		 currentCamUp.set(0,1,0);
     		 currentCamDirection.set(0,0,-1);
@@ -1610,7 +1627,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-    	if(levelIndex==2)
+    	if(levelIndex==2||levelIndex==3)
     	    {//TODO the skybox should be attached to the camera node
     		 final Skybox skyboxNode=new Skybox("skybox",64,64,64);
     	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -1664,7 +1681,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
-    	if(levelIndex!=2)
+    	if(levelIndex==0||levelIndex==1)
     	//N.B: only show working weapons
 	    try{/*final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
             uziNode.setName("an uzi");
@@ -1756,7 +1773,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     @SuppressWarnings("unchecked")
 	private final void loadEnemies(){
-    	if(levelIndex!=2)
+    	if(levelIndex==0||levelIndex==1)
 	    try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
 	        weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
 	        weaponNodeTemplate.setScale(0.015);

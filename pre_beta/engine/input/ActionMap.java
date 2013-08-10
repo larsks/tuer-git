@@ -95,6 +95,14 @@ public class ActionMap implements Cloneable{
 		return(input.getCondition(pressed));
 	}
 	
+	/**
+	 * Gets the condition of this action
+	 * 
+	 * @param action action
+	 * @param pressed condition valid when the input component is pressed if <code>true</code>, otherwise 
+	 * condition valid when the input component is released (if supported)
+	 * @return
+	 */
 	public Predicate<TwoInputStates> getCondition(final Action action,final boolean pressed){
     	final Set<Input> inputs=getInputs(action);
     	final Predicate<TwoInputStates> predicate;

@@ -21,21 +21,40 @@ package engine.input;
  */
 public enum Action{
 
+	/***/
 	MOVE_FORWARD,
+	/***/
 	MOVE_BACKWARD,
+	/***/
 	STRAFE_LEFT,
+	/***/
 	STRAFE_RIGHT,
+	/***/
 	TURN_LEFT,
+	/***/
 	TURN_RIGHT,
+	/***/
 	LOOK_UP,
+	/***/
 	LOOK_DOWN,
+	/**crouch*/
 	CROUCH,
+	/**pause the game*/
 	PAUSE,
+	/**reload the current weapon*/
 	RELOAD,
+	/**activate, i.e use a switch*/
 	ACTIVATE,
+	/***/
 	RUN,
+	/**attack, i.e shoot or beat*/
 	ATTACK,
+	/**select the next weapon*/
 	NEXT_WEAPON,
+	/**select the previous weapon*/
 	PREVIOUS_WEAPON,
+	/**enable/disable the wireframe mode, mainly for debug purposes*/
+	TOGGLE_WIREFRAME_MODE,
+	/**leave the game*/
 	QUIT;
 }
