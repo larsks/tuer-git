@@ -223,6 +223,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private WireframeState wireframeState;
     
+    private Skybox skyboxNode;
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
@@ -551,6 +553,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 //updates the previous location and the camera
                 previousPosition.set(playerNode.getTranslation());
                 cam.setLocation(playerNode.getTranslation());
+                if(skyboxNode!=null)
+                    skyboxNode.setTranslation(playerNode.getTranslation());
                 //checks if any object is collected
                 Node collectibleNode;
                 String subElementName;
@@ -1609,6 +1613,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
        	    NodeHelper.setModelBound(teleporter,BoundingBox.class);
         //resets the timer at the end of all long operations performed while loading
         timer.reset();
+        if(skyboxNode!=null)
+        	skyboxNode.setTranslation(currentCamLocation);
     }
     
     private final void performInitialBasicCleanup(){
@@ -1624,6 +1630,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(headUpDisplayLabel);
     	//resets the timer at the beginning of all long operations performed while unloading
         timer.reset();
+        //performs the cleanup on the sky box node if any
+        if(skyboxNode!=null)
+            {getRoot().detachChild(skyboxNode);
+        	 skyboxNode=null;
+            }
     }
     
     /**
@@ -1642,8 +1653,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadSkybox(){
     	if(levelIndex==2||levelIndex==3)
-    	    {//TODO the skybox should be attached to the camera node
-    		 final Skybox skyboxNode=new Skybox("skybox",64,64,64);
+    	    {skyboxNode=new Skybox("skybox",64,64,64);
     	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
     	     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
     	     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -1655,7 +1665,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	     skyboxNode.setTexture(Skybox.Face.South,south);
     	     skyboxNode.setTexture(Skybox.Face.East,east);
     	     skyboxNode.setTexture(Skybox.Face.Up,up);
-    	     skyboxNode.setTexture(Skybox.Face.Down,down);            
+    	     skyboxNode.setTexture(Skybox.Face.Down,down);
     	     getRoot().attachChild(skyboxNode);
     	    }
     }
@@ -1682,16 +1692,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	final Node medikitNode=new Node("a medikit");
-        final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
-        final TextureState ts = new TextureState();
-        ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
-        medikitBox.setRenderState(ts);
-        medikitNode.setTranslation(112.5,0.1,220.5);
-        medikitNode.attachChild(medikitBox);
-        medikitNode.setUserData(new MedikitUserData(medikit));
-        collectibleObjectsList.add(medikitNode);
-        getRoot().attachChild(medikitNode);
+    	if(levelIndex==0||levelIndex==1)
+    	    {final Node medikitNode=new Node("a medikit");
+             final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
+             final TextureState ts = new TextureState();
+             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
+             medikitBox.setRenderState(ts);
+             medikitNode.setTranslation(112.5,0.1,220.5);
+             medikitNode.attachChild(medikitBox);
+             medikitNode.setUserData(new MedikitUserData(medikit));
+             collectibleObjectsList.add(medikitNode);
+             getRoot().attachChild(medikitNode);
+    	    }
     }
     
     private final void loadWeapons(){
@@ -1773,16 +1785,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
-        final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
-        final TextureState ts = new TextureState();
-        ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/ammo.png")),Texture.MinificationFilter.Trilinear,true));
-        bullet9mmAmmoBox.setRenderState(ts);
-        bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
-        bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
-        bullet9mmAmmoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get("BULLET_9MM"),30));
-        collectibleObjectsList.add(bullet9mmAmmoNode);
-        getRoot().attachChild(bullet9mmAmmoNode);
+    	if(levelIndex==0||levelIndex==1)
+	        {final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
+             final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
+             final TextureState ts = new TextureState();
+             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/ammo.png")),Texture.MinificationFilter.Trilinear,true));
+             bullet9mmAmmoBox.setRenderState(ts);
+             bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
+             bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
+             bullet9mmAmmoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get("BULLET_9MM"),30));
+             collectibleObjectsList.add(bullet9mmAmmoNode);
+             getRoot().attachChild(bullet9mmAmmoNode);
+	        }
     }
     
     @SuppressWarnings("unchecked")
