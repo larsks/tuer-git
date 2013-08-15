@@ -149,11 +149,10 @@
 	    <pathelement location="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
-		<fail message="Please use Java SDK 1.6 or higher.">
+		<fail message="Please use Java SDK 1.7 or higher.">
 		    <condition>
 		        <not>		            
 		            <or>
-		                <equals arg1="${ant.java.version}" arg2="1.6" />
 		                <equals arg1="${ant.java.version}" arg2="1.7" />
 		            	<equals arg1="${ant.java.version}" arg2="1.8" />
 		            </or>		                		            
@@ -289,7 +288,7 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m"/>  
+			    <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m"/>  
 			    <property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.java2d.d3d" value="false"/>
@@ -402,7 +401,7 @@
 			  </security>
 			  <update check="always" policy="always"/>
 			  <resources>
-			    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m"/>
+			    <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m"/>
 			    <property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 			    <property name="sun.java2d.noddraw" value="true"/>
 			    <property name="sun.java2d.d3d" value="false"/>
