@@ -48,12 +48,12 @@ public abstract class DirectedGraph<V,E>{
 	 */
 	public DirectedGraph(final boolean ordered){
 		if(ordered)
-		    {vertices=new LinkedHashMap<V,Pair<Set<E>>>();
-		     edges=new LinkedHashMap<E,Pair<V>>();
+		    {vertices=new LinkedHashMap<>();
+		     edges=new LinkedHashMap<>();
 		    }
 		else
-		    {vertices=new HashMap<V,Pair<Set<E>>>();
-		     edges=new HashMap<E,Pair<V>>();
+		    {vertices=new HashMap<>();
+		     edges=new HashMap<>();
 		    }
 	}
 	
@@ -66,7 +66,7 @@ public abstract class DirectedGraph<V,E>{
 	 * <code>false</code>
 	 */
 	public boolean addEdge(E e,V v){
-		return(addEdge(e,new Pair<V>(v,v)));
+		return(addEdge(e,new Pair<>(v,v)));
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public abstract class DirectedGraph<V,E>{
 	 * @return
 	 */
 	public boolean addEdge(E e,V v1,V v2){
-		return(addEdge(e,new Pair<V>(v1,v2)));
+		return(addEdge(e,new Pair<>(v1,v2)));
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public abstract class DirectedGraph<V,E>{
         if(vertices==null)
             throw new IllegalArgumentException("endpoints must not be null");
         
-        Pair<V> newVertices=new Pair<V>(vertices.getFirst(),
+        Pair<V> newVertices=new Pair<>(vertices.getFirst(),
         		                        vertices.getSecond());
         if(containsEdge(edge))
             {Pair<V> existingVertices = getVertices(edge);
@@ -272,7 +272,7 @@ public abstract class DirectedGraph<V,E>{
         if(!containsVertex(vertex))
             result=null;
         else
-            {Set<V> preds=new HashSet<V>();
+            {Set<V> preds=new HashSet<>();
              for(E edge:internalGetIncomingEdges(vertex))
                  preds.add(this.getSource(edge));
         	 result=Collections.unmodifiableCollection(preds);
@@ -290,7 +290,7 @@ public abstract class DirectedGraph<V,E>{
         if(!containsVertex(vertex))
         	result=null;
         else
-            {Set<V> succs=new HashSet<V>();
+            {Set<V> succs=new HashSet<>();
              for(E edge:internalGetOutgoingEdges(vertex))
                  succs.add(this.getDest(edge));
              result=Collections.unmodifiableCollection(succs);
@@ -308,7 +308,7 @@ public abstract class DirectedGraph<V,E>{
         if(!containsVertex(vertex))
         	result=null;
         else
-            {Collection<V> neighbors=new HashSet<V>();
+            {Collection<V> neighbors=new HashSet<>();
              for(E edge:internalGetIncomingEdges(vertex))
                  neighbors.add(this.getSource(edge));
              for(E edge:internalGetOutgoingEdges(vertex))
@@ -328,7 +328,7 @@ public abstract class DirectedGraph<V,E>{
     	if(!containsVertex(vertex))
     		incident=null;
     	else
-    	    {incident = new HashSet<E>();
+    	    {incident = new HashSet<>();
              incident.addAll(internalGetIncomingEdges(vertex));
              incident.addAll(internalGetOutgoingEdges(vertex));
     	    }
@@ -438,7 +438,7 @@ public abstract class DirectedGraph<V,E>{
     	final boolean success=containsVertex(vertex);
         if(success)
             {//copies to avoid concurrent modification in removeEdge
-             Set<E> incident = new HashSet<E>(internalGetIncomingEdges(vertex));
+             Set<E> incident = new HashSet<>(internalGetIncomingEdges(vertex));
              incident.addAll(internalGetOutgoingEdges(vertex));
         
              for(E edge:incident)

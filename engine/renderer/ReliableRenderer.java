@@ -64,7 +64,6 @@ public class ReliableRenderer extends JoglRenderer{
 		        }
 		     catch(NoSuchMethodException nsme2)
 		     {//it should never happen (but I haven't tested with AvianVM)
-		      tmpViewedBufferMethod=null;
 		     }
 		    }
 		    if(tmpViewedBufferMethod!=null)

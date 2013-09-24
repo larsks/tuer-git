@@ -63,16 +63,16 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
         if(args!=null&&args.getFirst()!=null&&args.getFirst() instanceof String)
             {final String destinationTag=(String)args.getFirst();
         	 if(destinationTag.equals(EXIT_TAG))
-        		 scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
+        		 scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
         	 else
         		 if(destinationTag.equals(MAIN_MENU_TAG))
-        			 scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
+        			 scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
         		 else
         			 if(destinationTag.equals(LEVEL_TAG))
         			     {final int levelIndex=((int[])args.getArgument(1))[0];
         			      //uses an argument to pass the level index
         			      ((int[])toLoadingDisplayTriggerAction.arguments.getFirst())[0]=levelIndex;
-        			      scheduler.addScheduledTask(new ScheduledTask<ScenegraphState>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
+        			      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
         			     }
             }
     }

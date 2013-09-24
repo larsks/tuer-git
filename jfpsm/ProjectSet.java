@@ -54,7 +54,7 @@ public final class ProjectSet extends JFPSMUserObject{
     
     public ProjectSet(String name){
         super(name);
-        projectsList=new ArrayList<Project>();
+        projectsList=new ArrayList<>();
         dirty=true;
         initializeWorkspaceDirectory();
     }
@@ -136,9 +136,7 @@ public final class ProjectSet extends JFPSMUserObject{
     	     //if it is an external (exported) project
     		 final File parentFile=file.getParentFile();
         	 if(project.isDirty()||parentFile==null||!parentFile.equals(workspaceDirectory))
-    	         {ZipOutputStream zoStream=null;
-    	          File tmpFile=null;
-    	          FileInputStream fis=null;
+    	         {File tmpFile=null;
     			  //saves the project (project.xml and image files have to be put into a ZIP file)
           	      try{if(!file.exists())
           	              {if(!file.createNewFile())
@@ -146,70 +144,61 @@ public final class ProjectSet extends JFPSMUserObject{
           	              }
           	          //creates a temporary file used as a buffer before putting the data into the archive
           	          tmpFile=File.createTempFile("JFPSM",".tmp");
-          	          zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-          	          zoStream.setMethod(ZipOutputStream.DEFLATED);
-          	          //creates a ZipEntry for the XML file
-          	          ZipEntry projectXMLEntry=new ZipEntry("project.xml");
-          	          projectXMLEntry.setMethod(ZipEntry.DEFLATED);
-          	          //puts it into the ZipOutputStream
-          	          zoStream.putNextEntry(projectXMLEntry);
-          	          //creates, uses and closes an XMLEncoder
-          	          /**
-          	           * Actually, it "should" be possible to use the existing ZIP output stream to avoid creating a
-          	           * temporary file by flushing the encoder to avoid closing this stream but it throws a 
-          	           * SAX exception. It is necessary to close the XML node by doing zoStream.write("</java> \n".getBytes());
-          	           */
-          	          CustomXMLEncoder encoder=new CustomXMLEncoder(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-          	          encoder.writeObject(project);
-          	          encoder.close();
-          	          //copies the temporary file into the zip entry         	          
-          	          int bytesIn;
-          	          byte[] readBuffer=new byte[1024];
-          	          fis=new FileInputStream(tmpFile);
-          	          while((bytesIn=fis.read(readBuffer))!=-1) 
-          	              zoStream.write(readBuffer,0,bytesIn);
-          	          ZipEntry entry;
-          	          String floorDirectory;
-          	          for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
-          	        	  for(Floor floor:floorSet.getFloorsList())
-          	                  {floorDirectory="levelset/"+floorSet.getName()+"/"+floor.getName()+"/";
-          	                   //saves each map
-          	                   for(MapType type:MapType.values())
-          	                       {entry=new ZipEntry(floorDirectory+type.getFilename());
-              	                    entry.setMethod(ZipEntry.DEFLATED);
-              	                    zoStream.putNextEntry(entry);
-              	                    ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);
-          	                       }
-          	                  }
-          	          final String tileDirectory="tileset/";
-          	          for(Tile tile:project.getTileSet().getTilesList())
-          	        	  for(int textureIndex=0;textureIndex<tile.getMaxTextureCount();textureIndex++)
-          	                  if(tile.getTexture(textureIndex)!=null)
-          	                      {entry=new ZipEntry(tileDirectory+tile.getName()+textureIndex+".png");
-          	                       entry.setMethod(ZipEntry.DEFLATED);
-                                   zoStream.putNextEntry(entry);
-                                   ImageIO.write(tile.getTexture(textureIndex),"png",zoStream);
+          	          try(ZipOutputStream zoStream=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
+          	              zoStream.setMethod(ZipOutputStream.DEFLATED);
+          	              //creates a ZipEntry for the XML file
+          	              ZipEntry projectXMLEntry=new ZipEntry("project.xml");
+          	              projectXMLEntry.setMethod(ZipEntry.DEFLATED);
+          	              //puts it into the ZipOutputStream
+          	              zoStream.putNextEntry(projectXMLEntry);
+          	              //creates, uses and closes an XMLEncoder
+          	              /**
+          	               * Actually, it "should" be possible to use the existing ZIP output stream to avoid creating a
+          	               * temporary file by flushing the encoder to avoid closing this stream but it throws a 
+          	               * SAX exception. It is necessary to close the XML node by doing zoStream.write("</java> \n".getBytes());
+          	               */
+          	              try(CustomXMLEncoder encoder=new CustomXMLEncoder(new BufferedOutputStream(new FileOutputStream(tmpFile)))){
+          	                  encoder.writeObject(project);
+          	              }
+          	              //copies the temporary file into the zip entry         	          
+          	              int bytesIn;
+          	              byte[] readBuffer=new byte[1024];
+          	              try(FileInputStream fis=new FileInputStream(tmpFile)){
+          	                  while((bytesIn=fis.read(readBuffer))!=-1) 
+          	                      zoStream.write(readBuffer,0,bytesIn);
+          	              }
+          	              ZipEntry entry;
+          	              String floorDirectory;
+          	              for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
+          	        	      for(Floor floor:floorSet.getFloorsList())
+          	                      {floorDirectory="levelset/"+floorSet.getName()+"/"+floor.getName()+"/";
+          	                       //saves each map
+          	                       for(MapType type:MapType.values())
+          	                           {entry=new ZipEntry(floorDirectory+type.getFilename());
+              	                        entry.setMethod(ZipEntry.DEFLATED);
+              	                        zoStream.putNextEntry(entry);
+              	                        ImageIO.write(floor.getMap(type).getImage(),"png",zoStream);
+          	                           }
           	                      }
+          	              final String tileDirectory="tileset/";
+          	              for(Tile tile:project.getTileSet().getTilesList())
+          	        	      for(int textureIndex=0;textureIndex<tile.getMaxTextureCount();textureIndex++)
+          	                      if(tile.getTexture(textureIndex)!=null)
+          	                          {entry=new ZipEntry(tileDirectory+tile.getName()+textureIndex+".png");
+          	                           entry.setMethod(ZipEntry.DEFLATED);
+                                       zoStream.putNextEntry(entry);
+                                       ImageIO.write(tile.getTexture(textureIndex),"png",zoStream);
+          	                          }
+          	              }
           	         }
           	      catch(IOException ioe)
           	      {throw new RuntimeException("The project "+project.getName()+" cannot be saved!",ioe);}
           	      finally
-          	      {if(fis!=null)
-          	    	   try{fis.close();}
-          	           catch(IOException ioe)
-   	                   {//does nothing
-   	                   }
-          	       //closes the ZipOutputStream
-          	       if(zoStream!=null)
-          	           try{zoStream.close();}
-          	           catch(IOException ioe)
-          	           {//does nothing
-          	           }
-          	       //deletes the temporary file
+          	      {//deletes the temporary file
           	       if(tmpFile!=null)
           	           tmpFile.delete();
           	      }
-    	         }   		 
+    	         }
     	    }
     	else
     		throw new IllegalArgumentException("The project "+project.getName()+" is not handled by this project set!");
@@ -291,15 +280,15 @@ public final class ProjectSet extends JFPSMUserObject{
         if(projectFile.getName().endsWith(Project.getFileExtension()))
             {int nameLength=fullname.length();
              String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());
-             ZipFile zipFile=null;
-             try{zipFile=new ZipFile(projectFile);
+             try(ZipFile zipFile=new ZipFile(projectFile)){
                  ZipEntry entry;
                  //at first, gets the file project.xml to build the project object as soon as possible
                  entry=zipFile.getEntry("project.xml");
                  if(entry!=null)
-                     {CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry));
-                      Object decodedObject=decoder.readObject();
-                      decoder.close();
+                     {Object decodedObject=null;
+                	  try(CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry))){
+                          decodedObject=decoder.readObject();
+                      }
                       if(decodedObject!=null&&decodedObject instanceof Project)
                           {project=(Project)decodedObject;
                            Enumeration<? extends ZipEntry> entries=zipFile.entries();
@@ -364,13 +353,6 @@ public final class ProjectSet extends JFPSMUserObject{
                 } 
              catch(Throwable throwable)
              {throw new RuntimeException("The project "+projectName+" cannot be loaded!",throwable);}
-             finally
-             {if(zipFile!=null)
-				  try{zipFile.close();}
-                  catch (IOException ioe) 
-				  {//ignores this exception
-				  }
-             }
             }
         else
             throw new IllegalArgumentException("The file "+fullname+" is not a JFPSM project file!");

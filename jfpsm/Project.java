@@ -69,6 +69,12 @@ public final class Project extends JFPSMUserObject{
     }
     
     @Override
+	public int hashCode(){
+    	final String name=getName();
+    	return(name==null?0:name.hashCode());
+    }
+    
+    @Override
     public final boolean isDirty(){
         return(levelSet.isDirty()||tileSet.isDirty());
     }
@@ -110,30 +116,22 @@ public final class Project extends JFPSMUserObject{
     	String projectName=fullname.substring(0,fullname.length()-Project.getFileExtension().length());
     	return(projectName);*/
     	String projectName=null;
-    	ZipFile zipFile=null;
-    	try{zipFile=new ZipFile(projectFile);
+    	try(ZipFile zipFile=new ZipFile(projectFile)){
     		ZipEntry entry=zipFile.getEntry("project.xml");
     		if(entry!=null)
-    		    {CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry));
-                 Object decodedObject=decoder.readObject();
-                 decoder.close();
-                 if(decodedObject!=null&&decodedObject instanceof Project)
-                     {Project project=(Project)decodedObject;
-                      projectName=project.getName();
-                     }
+    		    {try(CustomXMLDecoder decoder=new CustomXMLDecoder(zipFile.getInputStream(entry))){
+                     Object decodedObject=decoder.readObject();
+                     if(decodedObject!=null&&decodedObject instanceof Project)
+                         {Project project=(Project)decodedObject;
+                          projectName=project.getName();
+                         }
+    		     }
     		    }
     	}
     	catch(ZipException ze)
     	{}
     	catch(IOException ioe)
     	{}
-    	finally
-        {if(zipFile!=null)
-		     try{zipFile.close();}
-             catch (IOException ioe) 
-			 {//ignores this exception
-			 }
-        }
         return(projectName);
     }
     

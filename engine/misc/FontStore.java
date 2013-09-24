@@ -34,7 +34,7 @@ public class FontStore{
 	private final List<BMFont> fontsList;
 	
 	public FontStore(){
-		fontsList=new ArrayList<BMFont>();
+		fontsList=new ArrayList<>();
         try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
         catch(IOException ioe)
         {ioe.printStackTrace();}

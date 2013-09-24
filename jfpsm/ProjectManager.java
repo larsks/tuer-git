@@ -290,7 +290,7 @@ public final class ProjectManager extends JPanel{
     }
     
     private final ArrayList<String> getAllChildrenNames(DefaultMutableTreeNode parentNode){
-        ArrayList<String> namesList=new ArrayList<String>();
+        ArrayList<String> namesList=new ArrayList<>();
         final int size=parentNode.getChildCount();
         for(int index=0;index<size;index++)
             namesList.add(((DefaultMutableTreeNode)parentNode.getChildAt(index)).getUserObject().toString());
@@ -431,7 +431,7 @@ public final class ProjectManager extends JPanel{
                 enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"floor");
     		else
     			if(userObject instanceof TileSet)
-                    {final ArrayList<Color> colors=new ArrayList<Color>();
+                    {final ArrayList<Color> colors=new ArrayList<>();
                      //white is used for void
                      colors.add(Color.WHITE);
                      for(Tile tile:((TileSet)userObject).getTilesList())
@@ -580,17 +580,19 @@ public final class ProjectManager extends JPanel{
                                     {projectNode=(DefaultMutableTreeNode)selectedNode.getChildAt(i);
                                      break;
                                     }
-                            Project project=(Project)projectNode.getUserObject();  
-                            //removes all its entities from the entity viewer
-                            for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
-                            	for(Floor floor:floorSet.getFloorsList())
-                            		mainWindow.getEntityViewer().closeEntityView(floor);
-                            for(Tile tile:project.getTileSet().getTilesList())
-                                mainWindow.getEntityViewer().closeEntityView(tile);
-                            //removes the project from the project set and the file system
-                            workspace.removeProject(project);
-                            //removes it from the tree
-                            ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(projectNode);                            
+                            if(projectNode!=null)
+                                {final Project project=(Project)projectNode.getUserObject();  
+                                 //removes all its entities from the entity viewer
+                                 for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
+                            	     for(Floor floor:floorSet.getFloorsList())
+                            		     mainWindow.getEntityViewer().closeEntityView(floor);
+                                 for(Tile tile:project.getTileSet().getTilesList())
+                                     mainWindow.getEntityViewer().closeEntityView(tile);
+                                 //removes the project from the project set and the file system
+                                 workspace.removeProject(project);
+                                 //removes it from the tree
+                                 ((DefaultTreeModel)projectsTree.getModel()).removeNodeFromParent(projectNode);
+                                }
                            }
                       }
                   if(confirmLoad)
@@ -599,14 +601,14 @@ public final class ProjectManager extends JPanel{
                        boolean success=true;
                        try{success=projectFile.createNewFile();
                            if(success)
-                               {BufferedInputStream bis=new BufferedInputStream(new FileInputStream(fileChooser.getSelectedFile()));
-                                BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(projectFile));
-                                byte[] buf=new byte[1024];
-                                int len;
-                                while((len=bis.read(buf))>0)
-                                    bos.write(buf,0,len);
-                                bis.close();
-                                bos.close();
+                               {try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(fileChooser.getSelectedFile()))){
+                                    try(BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(projectFile))){
+                                        byte[] buf=new byte[1024];
+                                        int len;
+                                        while((len=bis.read(buf))>0)
+                                            bos.write(buf,0,len);
+                                    }
+                                }
                                }
                           } 
                        catch(Throwable throwable)
@@ -798,10 +800,10 @@ public final class ProjectManager extends JPanel{
         TreePath[] paths=projectsTree.getSelectionPaths();
         DefaultMutableTreeNode selectedNode;
         JFPSMUserObject userObject;
-        ArrayList<DefaultMutableTreeNode> floorsTrashList=new ArrayList<DefaultMutableTreeNode>();
-        ArrayList<DefaultMutableTreeNode> floorSetsTrashList=new ArrayList<DefaultMutableTreeNode>();
-        ArrayList<DefaultMutableTreeNode> tilesTrashList=new ArrayList<DefaultMutableTreeNode>();
-        ArrayList<DefaultMutableTreeNode> projectsTrashList=new ArrayList<DefaultMutableTreeNode>();        
+        ArrayList<DefaultMutableTreeNode> floorsTrashList=new ArrayList<>();
+        ArrayList<DefaultMutableTreeNode> floorSetsTrashList=new ArrayList<>();
+        ArrayList<DefaultMutableTreeNode> tilesTrashList=new ArrayList<>();
+        ArrayList<DefaultMutableTreeNode> projectsTrashList=new ArrayList<>();        
         for(TreePath path:paths)
             {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              userObject=(JFPSMUserObject)selectedNode.getUserObject();
@@ -953,7 +955,7 @@ public final class ProjectManager extends JPanel{
     	protected final ArrayList<String> doInBackground(){
     		//prevents the user from leaving the application during an export
     		projectManager.setQuitEnabled(false);
-    		ArrayList<String> filenamesList=new ArrayList<String>();
+    		ArrayList<String> filenamesList=new ArrayList<>();
     		File levelFile,levelCollisionFile;
     		int levelIndex=0;
     		for(FloorSet level:levelsList)

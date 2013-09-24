@@ -117,9 +117,8 @@ public final class DesktopIntegration {
 		    	  if(configUserDirsScript.exists())
 		    	      {logger.info(configUserDirsScriptPath+" exists, parse it to find XDG_DESKTOP_DIR");
 		    		   //N.B: do not source the script to be as neutral as possible (to avoid changing the environment)
-		    		   try
+		    		   try(BufferedReader reader=new BufferedReader(new FileReader(configUserDirsScript)))
 		    	          {//reads this file, line by line
-		    			   final BufferedReader reader=new BufferedReader(new FileReader(configUserDirsScript));
 		    	           String line=null;
 		    	           while((line=reader.readLine())!=null)
 		    	        	   if(line.startsWith("XDG_DESKTOP_DIR"))
@@ -128,7 +127,6 @@ public final class DesktopIntegration {
 		    	                    	XDG_DESKTOP_DIR=splitLine[1].replaceAll("\"","");
 		    	        	        break;
 		    	                   }
-		    	           reader.close();
 					      } 
 		    	       catch(FileNotFoundException fnfe) 
 					   {fnfe.printStackTrace();}
@@ -143,9 +141,8 @@ public final class DesktopIntegration {
 		    		   if(defaultConfigUsersDirsScript.exists())
 		    		       {logger.info(defaultConfigUsersDirsScript+" exists, parse it to find the DESKTOP tag");
 		    			    //N.B: do not source the script to be as neutral as possible (to avoid changing the environment)
-			    		    try
+			    		    try(BufferedReader reader=new BufferedReader(new FileReader(defaultConfigUsersDirsScript)))
 			    	           {//reads this file, line by line
-			    			    final BufferedReader reader=new BufferedReader(new FileReader(defaultConfigUsersDirsScript));
 			    	            String line=null;
 			    	            while((line=reader.readLine())!=null)
 			    	         	    if(line.startsWith("DESKTOP"))
@@ -242,14 +239,14 @@ public final class DesktopIntegration {
 			        {logger.info("operating system family: Windows");
 		    		 String specialFolderValue=null;
 		    		 File tmpWshFile=null;
-		    		 PrintWriter pw=null;
 		    		 try
 		    		    {logger.info("tries to create a temporary file to contain the WSH script...");
 		    			 tmpWshFile=File.createTempFile("getDesktopFolder",".js");
 		    			 logger.info("temporary file "+tmpWshFile.getAbsolutePath()+" successfully created");
-					     pw=new PrintWriter(tmpWshFile);
-					     pw.println("WScript.Echo(WScript.SpecialFolders(\"Desktop\"));");
-					     logger.info("temporary file "+tmpWshFile.getAbsolutePath()+" successfully filled");
+					     try(PrintWriter pw=new PrintWriter(tmpWshFile))
+					        {pw.println("WScript.Echo(WScript.SpecialFolders(\"Desktop\"));");
+					         logger.info("temporary file "+tmpWshFile.getAbsolutePath()+" successfully filled");
+					        }
 		    		    }
 		    		 catch(IOException ioe)
 		    		 {if(tmpWshFile!=null)
@@ -260,10 +257,6 @@ public final class DesktopIntegration {
 		    			  logger.warning("temporary file not created");
 		    	      ioe.printStackTrace();
 		    	     }
-		    		 finally
-		    		 {if(pw!=null)
-		    			  pw.close();
-		    		 }
 		    		 if(tmpWshFile!=null)
 		    		     {//use Windows Scripting Host (supported since Windows 98)
 		    		      final String wshellCmd="wscript //NoLogo //B "+tmpWshFile.getAbsolutePath();		    		 
@@ -296,9 +289,7 @@ public final class DesktopIntegration {
 			                  reader.join();
 			                  String result=reader.getResult();
 			                  int p=result.indexOf(REGSTR_TOKEN);
-			                  if(p==-1)
-			            	      registryValue=null;
-			                  else 
+			                  if(p!=-1)
 			            	      {//get the raw value
 			            	       registryValue=result.substring(p+REGSTR_TOKEN.length()).trim();
 			            	       //substitute environment variables by their values
@@ -409,11 +400,9 @@ public final class DesktopIntegration {
 				               desktopShortcutFileContent[desktopShortcutFileNameLineIndex]=desktopShortcutFileContent[desktopShortcutFileNameLineIndex]+desktopShortcutFilenameWithoutExtension;
 				           boolean fileWritingSuccess=true;
 					       //writes the content of the file
-					       try
-					          {PrintWriter pw=new PrintWriter(desktopShortcutFile);
-					           for(String line:desktopShortcutFileContent)
+					       try(PrintWriter pw=new PrintWriter(desktopShortcutFile))
+					          {for(String line:desktopShortcutFileContent)
 					    	       pw.println(line);
-					           pw.close();
 					          }
 					       catch(FileNotFoundException fnfe)
 					       {fileWritingSuccess=false;
@@ -454,7 +443,8 @@ public final class DesktopIntegration {
 	        sw=new StringWriter();
 	    }
 
-	    public void run(){
+	    @Override
+		public void run(){
 	        try 
 	           {int c;
 	            while((c=is.read())!=-1)

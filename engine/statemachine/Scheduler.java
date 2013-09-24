@@ -57,10 +57,10 @@ public class Scheduler<S>{
      * Constructor
      */
     public Scheduler(){
-        scheduledTasks=new HashMap<ScheduledTask<S>,Integer>();
-        queuedTasks=new HashMap<ScheduledTask<S>,Double>();
-        unschedulableTasks=new ArrayList<ScheduledTask<S>>();
-        schedulableTasks=new ArrayList<ScheduledTask<S>>();
+        scheduledTasks=new HashMap<>();
+        queuedTasks=new HashMap<>();
+        unschedulableTasks=new ArrayList<>();
+        schedulableTasks=new ArrayList<>();
     }
     
     /**
@@ -97,7 +97,7 @@ public class Scheduler<S>{
              queuedTasks.remove(unschedulableTask);             
             }
         unschedulableTasks.clear();
-        final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<ScheduledTask<S>>();
+        final ArrayList<ScheduledTask<S>> executedTasks=new ArrayList<>();
         //checks all scheduled tasks
         for(ScheduledTask<S> scheduledTask:scheduledTasks.keySet())
         	//if it is not yet in the queue and if its condition is satisfied

@@ -306,7 +306,7 @@ public final class CuboidParameters extends VolumeParameters{
                       texCoordBuffer.put(u1).put(v1);
                      }
              texCoordBuffer.rewind();
-             ArrayList<int[][]> verticesIndicesOfPotentiallyIdenticalFacesList=new ArrayList<int[][]>();
+             ArrayList<int[][]> verticesIndicesOfPotentiallyIdenticalFacesList=new ArrayList<>();
              int fvi0,fvi1;
              if(faceOrientation[Side.BACK.ordinal()]!=Orientation.NONE&&
                 faceOrientation[Side.FRONT.ordinal()]!=Orientation.NONE)
@@ -331,7 +331,7 @@ public final class CuboidParameters extends VolumeParameters{
                  }
              //6 faces * 2 triangles * 3 indices
              verticesIndicesOfPotentiallyIdenticalFaces=verticesIndicesOfPotentiallyIdenticalFacesList.toArray(new int[verticesIndicesOfPotentiallyIdenticalFacesList.size()][2][3]);     
-             ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<int[][]>();
+             ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<>();
              int indexIndex=0;
              for(Side side:Side.values())
                  if(faceOrientation[side.ordinal()]!=Orientation.NONE)
@@ -358,13 +358,13 @@ public final class CuboidParameters extends VolumeParameters{
     @Override
     public final Entry<int[][][],int[][]> getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(RegularGrid grid){
     	recomputeBuffersIfNeeded();
-    	ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<int[][]>();
-    	ArrayList<int[]> adjacencyCoordIndicesList=new ArrayList<int[]>();
+    	ArrayList<int[][]> verticesIndicesOfAdjacentMergeableFacesList=new ArrayList<>();
+    	ArrayList<int[]> adjacencyCoordIndicesList=new ArrayList<>();
     	int[] adjacentCoordsCount=new int[6];
-    	ArrayList<Integer> adjacencyCoordIndices=new ArrayList<Integer>();
+    	ArrayList<Integer> adjacencyCoordIndices=new ArrayList<>();
     	int[] adjacencyCoordIndicesArray;
     	boolean canMerge;
-    	ArrayList<Integer> indices=new ArrayList<Integer>();
+    	ArrayList<Integer> indices=new ArrayList<>();
     	int index,adjacencyCoordIndex;
     	float coord,dot;
     	float[] vec0=new float[3],vec1=new float[3],vec2=new float[3],vec3=new float[3],adjacencyLinkVec=new float[3];
@@ -445,7 +445,7 @@ public final class CuboidParameters extends VolumeParameters{
     		}
     	int[][][] verticesIndicesOfAdjacentMergeableFacesForThisGrid=verticesIndicesOfAdjacentMergeableFacesList.toArray(new int[verticesIndicesOfAdjacentMergeableFacesList.size()][2][3]);
     	int[][] adjacencyCoordIndicesPerFaceArray=adjacencyCoordIndicesList.toArray(new int[adjacencyCoordIndicesList.size()][]);
-    	Entry<int[][][],int[][]> entry=new AbstractMap.SimpleImmutableEntry<int[][][],int[][]>(verticesIndicesOfAdjacentMergeableFacesForThisGrid,adjacencyCoordIndicesPerFaceArray);
+    	Entry<int[][][],int[][]> entry=new AbstractMap.SimpleImmutableEntry<>(verticesIndicesOfAdjacentMergeableFacesForThisGrid,adjacencyCoordIndicesPerFaceArray);
     	return(entry);
     }
     

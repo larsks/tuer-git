@@ -64,34 +64,30 @@ public final class SerializationHelper{
     }
     
     public static final Object decodeObjectInXMLFile(String path){
-        BufferedInputStream bis=new BufferedInputStream(SerializationHelper.class.getResourceAsStream(path));
-        XMLDecoder decoder=new XMLDecoder(bis);
-        Object resultingObject=decoder.readObject();
-        decoder.close();
-        try{bis.close();}
+    	Object resultingObject=null;
+    	try(BufferedInputStream bis=new BufferedInputStream(SerializationHelper.class.getResourceAsStream(path))){
+            try(XMLDecoder decoder=new XMLDecoder(bis)){
+                resultingObject=decoder.readObject();
+            }
+        }
         catch(IOException ioe)
         {throw new RuntimeException("Unable to close the file "+path,ioe);}
         return(resultingObject);
     }
 
     public static final void encodeObjectInFile(Object o,String filename){
-        BufferedOutputStream bos=null;
         File file=new File(filename);   
         try{if(!file.exists())
                 if(!file.createNewFile())
                     throw new IOException("Unable to create the file "+filename);
-            bos=new BufferedOutputStream(new FileOutputStream(file));
-            XMLEncoder encoder=new XMLEncoder(bos);
-            encoder.writeObject(o);
-            encoder.close();
+            try(BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file))){
+                try(XMLEncoder encoder=new XMLEncoder(bos)){
+                    encoder.writeObject(o);
+                }
+            }
            }
         catch(IOException ioe)
         {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
-        finally
-        {if(bos!=null)
-             try{bos.close();}
-             catch(IOException ioe)
-             {throw new RuntimeException("Unable to close the file "+filename,ioe);}           
-        }
+        
     }
 }

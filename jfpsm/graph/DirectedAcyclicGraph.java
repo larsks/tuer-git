@@ -61,7 +61,7 @@ public class DirectedAcyclicGraph<V,E> extends DirectedSimpleGraph<V,E>{
 					    * vertex and tries to find the first vertex
 					    */
 					   final DirectedConnectedComponentSearchVisitor<V,E,DirectedAcyclicGraph<V,E>> 
-					   visitor=new DirectedConnectedComponentSearchVisitor<V,E,DirectedAcyclicGraph<V,E>>(
+					   visitor=new DirectedConnectedComponentSearchVisitor<>(
 							   firstVertex);
 					   /**
 					    * the visitor returns true if the first vertex cannot 

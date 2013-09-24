@@ -104,4 +104,9 @@ public class MouseAndKeyboardSettings implements Cloneable{
 	public void setMousePointerNeverHidden(final boolean mousePointerNeverHidden){
 		this.mousePointerNeverHidden=mousePointerNeverHidden;
 	}
+
+	@Override
+	public int hashCode(){
+		return super.hashCode();
+	}
 }

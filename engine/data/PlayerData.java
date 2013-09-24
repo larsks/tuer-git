@@ -646,7 +646,7 @@ public class PlayerData {
 		     consumedAmmunitionOrKnockCountWithSecondaryHand=dualWeaponUseEnabled?1:0;
 			 //punch & kick or melee weapon(s)
 		    }
-		final Map.Entry<Integer,Integer> consumedAmmunitionOrKnockCounts=new AbstractMap.SimpleEntry<Integer,Integer>(Integer.valueOf(consumedAmmunitionOrKnockCountWithPrimaryHand),Integer.valueOf(consumedAmmunitionOrKnockCountWithSecondaryHand));
+		final Map.Entry<Integer,Integer> consumedAmmunitionOrKnockCounts=new AbstractMap.SimpleEntry<>(Integer.valueOf(consumedAmmunitionOrKnockCountWithPrimaryHand),Integer.valueOf(consumedAmmunitionOrKnockCountWithSecondaryHand));
 		return(consumedAmmunitionOrKnockCounts);
 	}
 	
@@ -869,7 +869,7 @@ public class PlayerData {
 		  		   * - the player does not want to use one weapon per hand or the weapon is available in the secondary hand
 		  		   */
 		          if(chosenWeapon!=null&&primaryHandWeaponContainer.isAvailable(chosenWeapon)&&(!dualWeaponUseEnabledTested||secondaryHandWeaponContainer.isAvailable(chosenWeapon)))
-		        	  result=new AbstractMap.SimpleEntry<Integer,Boolean>(Integer.valueOf(currentWeaponIndex),Boolean.valueOf(dualWeaponUseEnabledTested));		        	  
+		        	  result=new AbstractMap.SimpleEntry<>(Integer.valueOf(currentWeaponIndex),Boolean.valueOf(dualWeaponUseEnabledTested));		        	  
 		          else 
 		              {//prepares the next iteration
 		               //updates the iteration index by using the multiplier

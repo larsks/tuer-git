@@ -70,7 +70,8 @@ public class NamingDialog extends JDialog implements ActionListener,PropertyChan
         //Handle window closing correctly.
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter(){
-            public void windowClosing(WindowEvent we) {
+            @Override
+			public void windowClosing(WindowEvent we) {
                 /*
                  * Instead of directly closing the window,
                  * we're going to change the JOptionPane's
@@ -81,7 +82,8 @@ public class NamingDialog extends JDialog implements ActionListener,PropertyChan
         });
         //Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent ce) {
+            @Override
+			public void componentShown(ComponentEvent ce) {
                 textField.requestFocusInWindow();
             }
         });
@@ -157,13 +159,15 @@ public class NamingDialog extends JDialog implements ActionListener,PropertyChan
     }
     
     /** This method handles events for the text field. */
-    public final void actionPerformed(ActionEvent e){
+    @Override
+	public final void actionPerformed(ActionEvent e){
         if(updateConfirmationAbility())
             optionPane.setValue(Integer.valueOf(JOptionPane.OK_OPTION));
     }
 
     /** This method reacts to state changes in the option pane. */
-    public final void propertyChange(PropertyChangeEvent e){
+    @Override
+	public final void propertyChange(PropertyChangeEvent e){
         String prop = e.getPropertyName();
         if(isVisible()&&(e.getSource()==optionPane) && (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop)))
             {Object value = optionPane.getValue();

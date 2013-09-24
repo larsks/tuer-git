@@ -46,8 +46,8 @@ public abstract class Visitor<V,E,G extends DirectedGraph<V,E>>{
 	public boolean visit(final G graph,
 			final V firstVertexToVisit,
 			final boolean breadthFirstSearchEnabled){
-        final ArrayList<V> markedChildrenList=new ArrayList<V>();
-        final ArrayList<V> queueOrStack=new ArrayList<V>();
+        final ArrayList<V> markedChildrenList=new ArrayList<>();
+        final ArrayList<V> queueOrStack=new ArrayList<>();
         markedChildrenList.add(firstVertexToVisit);
         queueOrStack.add(firstVertexToVisit);
         boolean mustGoOn=true;

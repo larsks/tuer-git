@@ -114,7 +114,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         currentImage.getData(0).rewind();
         modifiedImage=new Image(currentImage.getDataFormat(),currentImage.getDataType(),currentImage.getWidth(),currentImage.getHeight(),modifiedImageData,null);
         //computes effect (compute sorted vertices with color substitution)
-        coloredVerticesList=new ArrayList<Entry<Point,ReadOnlyColorRGBA>>();
+        coloredVerticesList=new ArrayList<>();
         //fills
         ReadOnlyColorRGBA sourceColor,destinationColor;
         final ImageHelper imgHelper=new ImageHelper();
@@ -124,7 +124,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                  sourceColor=new ColorRGBA().fromIntARGB(argb);
                  destinationColor=colorSubstitutionTable.get(sourceColor);
                  if(destinationColor!=null)
-                     coloredVerticesList.add(new AbstractMap.SimpleEntry<Point,ReadOnlyColorRGBA>(new Point(x,y),destinationColor));
+                     coloredVerticesList.add(new AbstractMap.SimpleEntry<>(new Point(x,y),destinationColor));
                 }
         //sorts
         Collections.sort(coloredVerticesList,getColoredPointComparator());

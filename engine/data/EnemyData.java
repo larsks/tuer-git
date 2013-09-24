@@ -70,6 +70,7 @@ public class EnemyData{
 	    return(health);
 	}
 	
+	@Override
 	public String toString(){
 		return(super.toString()+"#"+String.valueOf(uid));
 	}

@@ -39,7 +39,7 @@ public final class TileSet extends JFPSMUserObject{
     
     public TileSet(String name){
         super(name);
-        tilesList=new ArrayList<Tile>();
+        tilesList=new ArrayList<>();
         dirty=true;
     }
     

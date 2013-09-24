@@ -44,7 +44,7 @@ final class EntityViewer extends JPanel{
     
     EntityViewer(ProjectManager projectManager){
     	this.projectManager=projectManager;
-    	entityToTabComponentMap=new HashMap<Namable,JPanel>();
+    	entityToTabComponentMap=new HashMap<>();
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         entityTabbedPane=new JTabbedPane();
         add(entityTabbedPane);

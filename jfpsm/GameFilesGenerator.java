@@ -41,7 +41,7 @@ final class GameFilesGenerator{
         int width=0,depth=0,rgb;
         Map map;
         AbsoluteVolumeParameters[][] avp;
-        ArrayList<AbsoluteVolumeParameters[][]> volumeElementsList=new ArrayList<AbsoluteVolumeParameters[][]>();
+        ArrayList<AbsoluteVolumeParameters[][]> volumeElementsList=new ArrayList<>();
         //get the biggest dimension of the floors
         for(Floor floor:level.getFloorsList())
             {map=floor.getMap(MapType.CONTAINER_MAP);
@@ -85,7 +85,7 @@ final class GameFilesGenerator{
              volumeElementsList.add(avp);
              j++;
             }
-        return(new AbstractMap.SimpleEntry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid>(volumeElementsList,grid));
+        return(new AbstractMap.SimpleEntry<>(volumeElementsList,grid));
     }
     
     /**
@@ -120,12 +120,12 @@ final class GameFilesGenerator{
              String floorNodeName,meshName,tilePath;
              File tileFile;
              Object volumeElementMesh,floorNode;
-             HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable=new HashMap<Integer,ArrayList<float[]>>();
-             HashMap<Integer,ArrayList<Buffer>> volumeParamTable=new HashMap<Integer,ArrayList<Buffer>>();
-             HashMap<Integer,String> tileNameTable=new HashMap<Integer,String>();
-             HashMap<Integer,Entry<Boolean,Boolean>> removalOfIdenticalFacesAndMergeOfAdjacentFacesTable=new HashMap<Integer,Entry<Boolean,Boolean>>();
-             HashMap<Integer,int[][][]> verticesIndicesOfPotentiallyIdenticalFacesTable=new HashMap<Integer,int[][][]>();
-             HashMap<Integer,Entry<int[][][],int[][]>> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable=new HashMap<Integer,Entry<int[][][],int[][]>>();
+             HashMap<Integer,ArrayList<float[]>> volumeParamLocationTable=new HashMap<>();
+             HashMap<Integer,ArrayList<Buffer>> volumeParamTable=new HashMap<>();
+             HashMap<Integer,String> tileNameTable=new HashMap<>();
+             HashMap<Integer,Entry<Boolean,Boolean>> removalOfIdenticalFacesAndMergeOfAdjacentFacesTable=new HashMap<>();
+             HashMap<Integer,int[][][]> verticesIndicesOfPotentiallyIdenticalFacesTable=new HashMap<>();
+             HashMap<Integer,Entry<int[][][],int[][]>> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable=new HashMap<>();
              int[][][] verticesIndicesOfPotentiallyIdenticalFaces=null;
              Entry<int[][][],int[][]> verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=null;
              int[][][] absoluteVerticesIndicesOfPotentiallyIdenticalFaces=null;
@@ -137,7 +137,7 @@ final class GameFilesGenerator{
              ArrayList<float[]> locationList;
              ArrayList<Buffer> bufferList;
              int meshIndex,indexOffset;
-             boolean isRemovalOfIdenticalFacesEnabled,isMergeOfAdjacentFacesEnabled;
+             boolean isRemovalOfIdenticalFacesEnabled/*,isMergeOfAdjacentFacesEnabled*/;
              float[] vertexCoords=new float[3],normals=new float[3],texCoords=new float[3];
              int[] indices=new int[3];
              //create the grid and the absolute volume parameters
@@ -147,9 +147,9 @@ final class GameFilesGenerator{
              Buffer[][][][] buffersGrid=new Buffer[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()][6];       
              int[][][] indexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
-             int[][][] newOtherIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
-             ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<int[]>();
-             ArrayList<Object> boundingBoxesList=new ArrayList<Object>();
+             //int[][][] newOtherIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
+             ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<>();
+             ArrayList<Object> boundingBoxesList=new ArrayList<>();
              int[] logicalGridPos;
              //start with the first floor
              int j=0;
@@ -170,9 +170,9 @@ final class GameFilesGenerator{
                                //if there is no such list
                                if(locationList==null)
                                    {//create it
-                                    locationList=new ArrayList<float[]>();
+                                    locationList=new ArrayList<>();
                                     volumeParamLocationTable.put(key,locationList);
-                                    bufferList=new ArrayList<Buffer>();
+                                    bufferList=new ArrayList<>();
                                     //copy all buffers
                                     bufferList.add(floorVolumeElements[i][k].getVertexBuffer());
                                     bufferList.add(floorVolumeElements[i][k].getIndexBuffer());
@@ -181,7 +181,7 @@ final class GameFilesGenerator{
                                     bufferList.add(floorVolumeElements[i][k].getMergeableIndexBuffer());
                                     volumeParamTable.put(key,bufferList);
                                     tileNameTable.put(key,floorVolumeElements[i][k].getName());
-                                    removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.put(key,new AbstractMap.SimpleEntry<Boolean,Boolean>(Boolean.valueOf(floorVolumeElements[i][k].isRemovalOfIdenticalFacesEnabled()),Boolean.valueOf(floorVolumeElements[i][k].isMergeOfAdjacentFacesEnabled())));
+                                    removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.put(key,new AbstractMap.SimpleEntry<>(Boolean.valueOf(floorVolumeElements[i][k].isRemovalOfIdenticalFacesEnabled()),Boolean.valueOf(floorVolumeElements[i][k].isMergeOfAdjacentFacesEnabled())));
                                     verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=floorVolumeElements[i][k].getVerticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices(grid);
                                     if(verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices!=null)
                                     	verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.put(key,verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices);                                  	
@@ -214,7 +214,7 @@ final class GameFilesGenerator{
                        if(texCoords.length<texCoordBuffer.capacity())
                            texCoords=new float[texCoordBuffer.capacity()];                      
                        isRemovalOfIdenticalFacesEnabled=removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.get(key).getKey().booleanValue();
-                       isMergeOfAdjacentFacesEnabled=removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.get(key).getValue().booleanValue();
+                       //isMergeOfAdjacentFacesEnabled=removalOfIdenticalFacesAndMergeOfAdjacentFacesTable.get(key).getValue().booleanValue();
                        verticesIndicesOfPotentiallyIdenticalFaces=verticesIndicesOfPotentiallyIdenticalFacesTable.get(key);
                        verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndices=verticesIndicesOfAdjacentMergeableFacesAndAdjacencyCoordIndicesTable.get(key);
                        if(verticesIndicesOfPotentiallyIdenticalFaces!=null)
@@ -713,8 +713,8 @@ final class GameFilesGenerator{
 		int newBufferSize;
 		int indice;
 		//table of the occurrences of the indices
-        HashMap<Integer,Integer> indexCountTable=new HashMap<Integer,Integer>();
-        HashMap<Integer,Integer> reindexationTable=new HashMap<Integer,Integer>();
+        HashMap<Integer,Integer> indexCountTable=new HashMap<>();
+        HashMap<Integer,Integer> reindexationTable=new HashMap<>();
 		//rebuild all index buffers by retaining only useful indices and do the same for all other buffers
         for(int i=0;i<grid.getLogicalWidth();i++)
             for(int k=0;k<grid.getLogicalDepth();k++)
