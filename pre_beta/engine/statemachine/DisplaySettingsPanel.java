@@ -60,9 +60,9 @@ public class DisplaySettingsPanel extends UIPanel{
     	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
     	final MonitorMode currentScreenMode=monitor.getCurrentMode();
     	final List<MonitorMode> screenModes=monitor.getSupportedModes();
-    	screenModesByRotation=new HashMap<Integer,List<MonitorMode>>();
+    	screenModesByRotation=new HashMap<>();
     	final int[] rotations=new int[]{0,90,180,270};
-    	final ArrayList<Integer> availableRotations=new ArrayList<Integer>();
+    	final ArrayList<Integer> availableRotations=new ArrayList<>();
     	for(int rotation:rotations)
     	    {final List<MonitorMode> rotatedScreenModes=MonitorModeUtil.filterByRotation(screenModes,rotation);
     		 if(rotatedScreenModes!=null&&!rotatedScreenModes.isEmpty())

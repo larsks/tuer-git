@@ -49,7 +49,8 @@ public class ObjToArdorConverter{
 	
 	//FIXME code duplication, already used in JFPSM
 	private static final class DirectBinaryExporter extends BinaryExporter{
-        protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+        @Override
+		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
             final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
             return pair;
         }

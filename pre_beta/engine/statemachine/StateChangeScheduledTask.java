@@ -34,6 +34,6 @@ public class StateChangeScheduledTask<S> extends ScheduledTask<S>{
 	 */
     public StateChangeScheduledTask(final int executionCount,final Runnable runnable,final double timeOffsetInSeconds,
     		final S state,final StateChangeType stateChangeType){
-        super(new StateChangeScheduledTaskCondition<S>(state,stateChangeType),executionCount,runnable,timeOffsetInSeconds);
+        super(new StateChangeScheduledTaskCondition<>(state,stateChangeType),executionCount,runnable,timeOffsetInSeconds);
     }
 }

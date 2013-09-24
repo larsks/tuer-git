@@ -61,7 +61,7 @@ public final class IntroductionState extends ScenegraphState{
         box.setTranslation(new Vector3(0,0,-75));
         //configures the spread effect
         final Point spreadCenter=new Point(205,265);     
-        HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA>();
+        HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE,ColorRGBA.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
         //sets a controller that modifies the image
@@ -71,7 +71,7 @@ public final class IntroductionState extends ScenegraphState{
          * */
         box.addController(new CircularSpreadTextureUpdaterController(textureFilePath,equation,colorSubstitutionTable,spreadCenter,canvas.getCanvasRenderer().getRenderer(),canvas.getCanvasRenderer().getRenderContext()));
         //sets a controller that moves the image
-        LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
+        LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(6));
         box.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));       
         getRoot().attachChild(box);       
@@ -80,7 +80,7 @@ public final class IntroductionState extends ScenegraphState{
         textNode.setFontScale(6);
         textNode.setTextColor(ColorRGBA.BLACK);
         textNode.setTranslation(0,0,-75);
-        timeWindowsTable=new LinkedHashMap<Double,Double>();
+        timeWindowsTable=new LinkedHashMap<>();
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(8));
         textNode.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
         getRoot().attachChild(textNode);

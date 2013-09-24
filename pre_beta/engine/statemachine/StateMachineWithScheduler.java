@@ -56,7 +56,7 @@ public class StateMachineWithScheduler<S,E>{
          */
         internalStateMachine=transitionModel.newStateMachine(initialState);
         //creates the scheduler
-        scheduler=new Scheduler<S>();
+        scheduler=new Scheduler<>();
     }
     
     /**

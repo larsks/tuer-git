@@ -84,7 +84,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 
 		@Override
 		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState, PlayerEvent> stateMachine){
-			final Runnable runnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,event,null);
+			final Runnable runnable=new TransitionTriggerAction<>(stateMachine,event,null);
 			return(runnable);
 		}
 
@@ -139,7 +139,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
 
 		@Override
 		protected Runnable createCancellableRunnable(PlayerState from,PlayerState to,PlayerEvent event, Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-			final Runnable runnableToWaitForTriggerRelease=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,null);
+			final Runnable runnableToWaitForTriggerRelease=new TransitionTriggerAction<>(stateMachine,PlayerEvent.WAITING_FOR_TRIGGER_RELEASE,null);
 			final Runnable runnable=new AttackOrWaitForTriggerReleaseRunnable(playerData,runnableToWaitForTriggerRelease);
 			return(runnable);
 		}
@@ -237,7 +237,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
         	//gets the event used in the next transition if there is no interruption
     		nextEvent=getNextEvent(event);
     		//creates the runnable that will fire the proper player event later
-    		final Runnable transitionRunnable=new TransitionTriggerAction<PlayerState,PlayerEvent>(stateMachine,nextEvent,null);
+    		final Runnable transitionRunnable=new TransitionTriggerAction<>(stateMachine,nextEvent,null);
     		return(transitionRunnable);
         }
     }
@@ -269,7 +269,7 @@ public class PlayerStateMachine extends StateMachineWithScheduler<PlayerState,Pl
     		final Runnable runnable=createCancellableRunnable(from,to,event,args,stateMachine);
     		if(runnable!=null)
     		    {//creates the scheduled task using the condition and the runnable above
-    		     scheduledTask=new ScheduledTask<PlayerState>(condition,getScheduledTaskExecutionCount(),runnable,getScheduledTaskTimeOffsetInSeconds());
+    		     scheduledTask=new ScheduledTask<>(condition,getScheduledTaskExecutionCount(),runnable,getScheduledTaskTimeOffsetInSeconds());
     		     //adds this task into the scheduler
     		     scheduler.addScheduledTask(scheduledTask);
     		    }

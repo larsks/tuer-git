@@ -37,7 +37,7 @@ public final class LevelSet extends JFPSMUserObject{
     
     public LevelSet(String name){
         super(name);
-        floorSetsList=new ArrayList<FloorSet>();
+        floorSetsList=new ArrayList<>();
         markDirty();
     }
     

@@ -118,7 +118,7 @@ public final class NodeHelper{
 		final Mesh copy=mesh.makeCopy(shareGeometricData&&keyframeController==null);
 		if(keyframeController!=null)
 		    {//makes a copy of the controller
-			 final KeyframeController<Mesh> keyframeControllerCopy=new KeyframeController<Mesh>();
+			 final KeyframeController<Mesh> keyframeControllerCopy=new KeyframeController<>();
 			 keyframeControllerCopy.setRepeatType(keyframeController.getRepeatType());
 			 keyframeControllerCopy.setMinTime(keyframeController.getMinTime());
 			 keyframeControllerCopy.setMaxTime(keyframeController.getMaxTime());
@@ -130,7 +130,7 @@ public final class NodeHelper{
 			 keyframeControllerCopy.setUpdateBounding(keyframeController.isUpdateBounding());
 			 keyframeControllerCopy.setBlendTime(keyframeController.getBlendTime());
 			 if(keyframeController._keyframes!=null)
-			     {keyframeControllerCopy._keyframes=new ArrayList<PointInTime>();
+			     {keyframeControllerCopy._keyframes=new ArrayList<>();
 			      for(PointInTime pit:keyframeController._keyframes)
 			          {final PointInTime pitCopy=new PointInTime(pit._time,null);
 			           if(pit._newShape!=null)

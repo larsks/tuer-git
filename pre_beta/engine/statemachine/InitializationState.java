@@ -51,7 +51,7 @@ public final class InitializationState extends ScenegraphState{
         box=new Box("Initialization Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));       
-        LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<Double,Double>();
+        LinkedHashMap<Double,Double> timeWindowsTable=new LinkedHashMap<>();
         // the rotation lasts 6 seconds
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(10));
         // set it to rotate

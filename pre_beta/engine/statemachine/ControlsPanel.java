@@ -70,14 +70,14 @@ public final class ControlsPanel extends UIPanel{
 			             final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
 		super();
 		setLayout(new RowLayout(false));
-		previousTriggers=new HashSet<InputTrigger>();
+		previousTriggers=new HashSet<>();
 		this.mainMenuState=mainMenuState;
 		this.defaultActionMap=defaultActionMap;
 		this.customActionMap=customActionMap;
 		this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
 		this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
 		latestEditedAction=null;
-		actionsLabelsMap=new HashMap<Action,UILabel>();
+		actionsLabelsMap=new HashMap<>();
 		add(new UILabel("Controls"));
 		final UIPanel actionPanel=new UIPanel(new RowLayout(true));
 		final UIPanel actionsButtonsPanel=new UIPanel(new RowLayout(false));
@@ -305,7 +305,7 @@ public final class ControlsPanel extends UIPanel{
 		super.detachedFromHud();
 		latestEditedAction=null;
 		//unregisters all triggers of this logical layer
-		final Set<InputTrigger> triggers=new HashSet<InputTrigger>(mainMenuState.getLogicalLayer().getTriggers());
+		final Set<InputTrigger> triggers=new HashSet<>(mainMenuState.getLogicalLayer().getTriggers());
    	    for(InputTrigger trigger:triggers)
    	    	mainMenuState.getLogicalLayer().deregisterTrigger(trigger);
 		//registers all triggers that were in this logical layer before the attachment of this panel to the current HUD

@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -79,6 +80,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -245,14 +247,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
-        enemiesDataMap=new HashMap<Mesh,EnemyData>();
-        enemiesLatestDetection=new HashMap<EnemyData,Long>();
+        enemiesDataMap=new HashMap<>();
+        enemiesLatestDetection=new HashMap<>();
         this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
-        collectibleObjectsList=new ArrayList<Node>();
-        projectilesMap=new HashMap<Node,ProjectileData>();
-        teleportersList=new ArrayList<Node>();        
+        collectibleObjectsList=new ArrayList<>();
+        projectilesMap=new HashMap<>();
+        teleportersList=new ArrayList<>();        
         teleporter=initializeTeleporter();
         medikit=initializeMedikit();
         //initializes the factories, the build-in ammo and the build-in weapons       
@@ -372,7 +374,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().setRenderState(wireframeState);
     }
     
-    private final Node createCrosshairNode() {
+    @SuppressWarnings("cast")
+	private final Node createCrosshairNode() {
     	final Node crosshairNode=new Node("crosshair");
         final Mesh crosshairMesh=new Mesh();
         final MeshData crosshairMeshData=new MeshData();
@@ -407,7 +410,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         return(crosshairNode);
     }
     
-    private final void updateCrosshairNode(){
+    @SuppressWarnings("cast")
+	private final void updateCrosshairNode(){
     	final Node crosshairNode=(Node)playerNode.getChild("crosshair");
     	if(crosshairNode!=null)
     	    {final Mesh crosshairMesh=(Mesh)crosshairNode.getChild(0);
@@ -466,7 +470,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	
         	//private long previouslyMeasuredElapsedTime=-1;
         	
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "unchecked", "cast" })
 			@Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//updates the timer
@@ -625,10 +629,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 if(!hasCollision)
                 	wasBeingTeleported=false;
                 //handles the collisions between enemies and projectiles
-                HashSet<Node> projectilesToRemove=new HashSet<Node>();
-                ArrayList<EnemyData> editedEnemiesData=new ArrayList<EnemyData>();
+                HashSet<Node> projectilesToRemove=new HashSet<>();
+                ArrayList<EnemyData> editedEnemiesData=new ArrayList<>();
                 //filters data to keep only the valid opponents
-                final List<Spatial> reachableOpponents=new ArrayList<Spatial>();
+                final List<Spatial> reachableOpponents=new ArrayList<>();
                 for(Spatial child:getRoot().getChildren())
             	    {if((enemiesDataMap.keySet().contains(child)||child.equals(playerNode)))
                		     reachableOpponents.add(child);
@@ -659,7 +663,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                      *      - Create another controller to modify the view depending on the changes in the data model
                                      */
                             	    //attempts to kill this enemy
-                            	    final EnemyData soldierData=enemiesDataMap.get((Mesh)child);
+                            	    final EnemyData soldierData=enemiesDataMap.get(child);
                             	    editedEnemiesData.add(soldierData);
                             	    final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)child.getController(0);
                             	    if(soldierData.isAlive())
@@ -1046,7 +1050,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     		                           final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
     	//deregisters all triggers
         if(!getLogicalLayer().getTriggers().isEmpty())
-            {final Set<InputTrigger> triggers=new HashSet<InputTrigger>(getLogicalLayer().getTriggers());
+            {final Set<InputTrigger> triggers=new HashSet<>(getLogicalLayer().getTriggers());
         	 for(InputTrigger trigger:triggers)
         		 getLogicalLayer().deregisterTrigger(trigger);
             }
@@ -1128,7 +1132,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 			}
 		};
 		final TriggerAction toggleWireframeModeAction=new TriggerAction() {
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
+            @Override
+			public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
                 wireframeState.setEnabled(!wireframeState.isEnabled());
                 getRoot().markDirty(DirtyType.RenderState);
             }
@@ -1609,8 +1614,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//adds a bounding box to each collectible object
         for(Node collectible:collectibleObjectsList)
        	    NodeHelper.setModelBound(collectible,BoundingBox.class);
-        for(Node teleporter:teleportersList)
-       	    NodeHelper.setModelBound(teleporter,BoundingBox.class);
+        for(Node currentTeleporter:teleportersList)
+       	    NodeHelper.setModelBound(currentTeleporter,BoundingBox.class);
         //resets the timer at the end of all long operations performed while loading
         timer.reset();
         if(skyboxNode!=null)

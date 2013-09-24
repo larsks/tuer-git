@@ -35,7 +35,7 @@ public class ActionMap implements Cloneable{
 	private final HashMap<Action,HashSet<Input>> internalActionMap;
 	
 	public ActionMap(){
-		internalActionMap=new HashMap<Action,HashSet<Input>>();
+		internalActionMap=new HashMap<>();
 	}
 	
 	@Override
@@ -51,10 +51,15 @@ public class ActionMap implements Cloneable{
 	        {for(Entry<Action,HashSet<Input>> actionInputEntry:actionMap.internalActionMap.entrySet())
 	    	     {final Action action=actionInputEntry.getKey();
 	    	      final HashSet<Input> inputs=actionInputEntry.getValue();
-	    	      final HashSet<Input> inputsCopy=new HashSet<Input>(inputs);
+	    	      final HashSet<Input> inputsCopy=new HashSet<>(inputs);
 	    	      internalActionMap.put(action,inputsCopy);
 	    	     }
 	        }
+	}
+	
+	@Override
+	public int hashCode(){
+		return(System.identityHashCode(this));
 	}
 	
 	@Override
@@ -72,7 +77,7 @@ public class ActionMap implements Cloneable{
 			      final HashSet<Input> thatInputs=that.internalActionMap.get(action);
 			      final int thatInputCount=thatInputs==null?0:thatInputs.size();
 			      if(inputCount==thatInputCount)
-			          {if(inputCount>0)
+			          {if(inputCount>0&&thatInputs!=null&&inputs!=null)
 			               {for(Input input:inputs)
 			        	        if(!thatInputs.contains(input))
 			        	        	{result=false;
@@ -114,7 +119,7 @@ public class ActionMap implements Cloneable{
     	    {if(inputs.size()==1)
     	    	 predicate=getCondition(inputs.iterator().next(),pressed);
     	     else
-    	    	 {final ArrayList<Predicate<TwoInputStates>> conditions=new ArrayList<Predicate<TwoInputStates>>();
+    	    	 {final ArrayList<Predicate<TwoInputStates>> conditions=new ArrayList<>();
     	    	  for(Input input:inputs)
     	    		  conditions.add(getCondition(input,pressed));
     	    	  predicate=Predicates.or(conditions);
@@ -129,7 +134,7 @@ public class ActionMap implements Cloneable{
 		if(actions==null||actions.length==0)
 			inputs=Collections.<T>emptySet();
 		else
-		    {final Set<T> tmpInputs=new HashSet<T>();
+		    {final Set<T> tmpInputs=new HashSet<>();
 			 for(Action action:actions)
 				 if(action!=null)
 					 {for(Input input:internalActionMap.get(action))

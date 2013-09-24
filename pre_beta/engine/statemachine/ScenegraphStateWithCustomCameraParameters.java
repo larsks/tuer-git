@@ -62,8 +62,8 @@ public class ScenegraphStateWithCustomCameraParameters extends ScenegraphState {
         this.currentCamDirection=new Vector3(previousCamDirection);
         this.currentCamLocation=new Vector3(previousCamLocation);
 	}
-
 	
+	@Override
 	public void setEnabled(final boolean enabled){
 		final boolean wasEnabled=isEnabled();
         super.setEnabled(enabled);

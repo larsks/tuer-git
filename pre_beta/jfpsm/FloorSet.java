@@ -39,7 +39,7 @@ public final class FloorSet extends JFPSMUserObject{
     
     public FloorSet(String name){
         super(name);
-        floorsList=new ArrayList<Floor>();
+        floorsList=new ArrayList<>();
         markDirty();
     }
     

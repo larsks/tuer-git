@@ -200,7 +200,7 @@ public class ArrayHelper{
 	public <T> ArrayList<T[][]> computeFullArraysFromNonFullArray(final T[][] array){
 		//creates an occupancy map that will be updated (instead of modifying the supplied array)
 		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array);
-		final ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<T[][]>();
+		final ArrayList<T[][]> adjacentTrisArraysList=new ArrayList<>();
 		//if the array isn't empty (then the occupancy map isn't empty)
 		if(!occupancyMapObj.isEmpty())
 		    {final int smallestI=occupancyMapObj.getSmallestRowIndex();

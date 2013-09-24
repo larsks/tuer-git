@@ -34,7 +34,7 @@ public class DirectedConnectedComponentVisitorWithHistory<V,E,G extends Directed
 	 */
 	public DirectedConnectedComponentVisitorWithHistory(){
 		super();
-		visitedVertices=new ArrayList<V>();
+		visitedVertices=new ArrayList<>();
 	}
 
 	/* (non-Javadoc)

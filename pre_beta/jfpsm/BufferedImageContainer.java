@@ -8,7 +8,7 @@ class BufferedImageContainer {
 	private final ArrayList<BufferedImage> bufferedImagesList;
 	
 	BufferedImageContainer(){
-		bufferedImagesList=new ArrayList<BufferedImage>();
+		bufferedImagesList=new ArrayList<>();
 	}
 	
 	final void set(final int index,final BufferedImage image){

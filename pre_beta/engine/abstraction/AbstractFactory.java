@@ -33,8 +33,8 @@ public abstract class AbstractFactory<T>{
 	protected final HashMap<Integer,T> componentIdentifierMap;
 
 	public AbstractFactory(){
-		componentMap=new HashMap<String,T>();
-		componentIdentifierMap=new HashMap<Integer,T>();
+		componentMap=new HashMap<>();
+		componentIdentifierMap=new HashMap<>();
 	}
 
 	protected boolean add(final String stringId,final T component){

@@ -18,7 +18,8 @@ import com.ardor3d.input.logical.TwoInputStates;
 import com.google.common.base.Predicate;
 
 public class MouseWheelMovedDownCondition implements Predicate<TwoInputStates> {
-    public boolean apply(final TwoInputStates states) {
+    @Override
+	public boolean apply(final TwoInputStates states) {
         final InputState currentState = states.getCurrent();
         final InputState previousState = states.getPrevious();
 

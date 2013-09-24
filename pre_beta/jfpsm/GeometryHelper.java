@@ -123,7 +123,7 @@ public class GeometryHelper{
 			 final int numberOfUnits=meshData.getNumberOfUnits();
 			 if(numberOfUnits>0)
 			     {final List<FloatBufferData> previousTextureCoordsList=meshData.getTextureCoords();
-			      final List<FloatBufferData> nextTextureCoordsList=new ArrayList<FloatBufferData>();
+			      final List<FloatBufferData> nextTextureCoordsList=new ArrayList<>();
 				  for(int unitIndex=0;unitIndex<numberOfUnits;unitIndex++)
 				      {final FloatBufferData previousTextureCoords=previousTextureCoordsList.get(unitIndex);
 				       if(previousTextureCoords==null)

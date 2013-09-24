@@ -346,25 +346,21 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     //TODO move this method into a separate class in order to avoid mixing scene services and file services
     private final String getTextFileContent(final String path){
-    	final InputStream stream=getClass().getResourceAsStream(path);        
-        final String result;
-        if(stream!=null)
-            {BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream));
-        	 String line;
-             StringBuilder textContent=new StringBuilder();
-        	 try{while((line=bufferedReader.readLine())!=null)
-                     textContent.append(line+"\n");
+    	String result=null;
+    	try(InputStream stream=getClass().getResourceAsStream(path)){        
+            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream))){
+        	    String line;
+                StringBuilder textContent=new StringBuilder();
+        	    try{while((line=bufferedReader.readLine())!=null)
+                        textContent.append(line+"\n");
                 }
-             catch(IOException ioe)
-             {ioe.printStackTrace();}
-        	 finally
-        	 {try{bufferedReader.close();}
-        	  catch(IOException ioe){}
-        	 }
-        	 result=textContent.toString();
+                catch(IOException ioe)
+                {ioe.printStackTrace();}
+        	    result=textContent.toString();
             }
-        else
-        	result=null;
+    	} 
+    	catch(IOException ioe)
+    	{ioe.printStackTrace();}
         return(result);
     }
 }

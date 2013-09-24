@@ -47,6 +47,7 @@ public class Pair<E>{
 		return(second);
 	}
 	
+	@Override
 	public boolean equals(Object o){
 		boolean result;
 		if(o==null||!(o instanceof Pair))

@@ -14,7 +14,6 @@
 package engine.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -45,7 +44,8 @@ import com.ardor3d.util.resource.URLResourceSource;
 public final class EngineServiceProvider implements I3DServiceProvider{
     
     private static final class DirectBinaryExporter extends BinaryExporter{
-        protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+        @Override
+		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
             final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
             return pair;
         }
@@ -80,30 +80,19 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     @Override
     public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
         boolean success=true;
-        FileOutputStream fos=null;
-        try{fos=new FileOutputStream(file);} 
-        catch(FileNotFoundException fnfe)
-        {success=false;
-         fnfe.printStackTrace();
+        try(FileOutputStream fos=new FileOutputStream(file)){
+        	for(Object savable:savablesList)
+                {try{binaryExporter.save((Savable)savable,fos);}
+                 catch(Throwable t)
+                 {success=false;}
+            	  if(!success)
+                      break;
+                 }
         }
-        if(success)
-            try{for(Object savable:savablesList)
-                    {try{binaryExporter.save((Savable)savable,fos);}
-                     catch(Throwable t)
-                     {success=false;}
-            	     if(!success)
-                        break;
-                    }
-                fos.close(); 
-               }
-            catch(IOException ioe)
-            {success=false;
-             ioe.printStackTrace();
-            }
-            catch(ClassCastException cce)
-            {success=false;
-             cce.printStackTrace();
-            }
+        catch(Throwable t)
+        {success=false;
+         t.printStackTrace();
+        }
         return(success);
     }
     

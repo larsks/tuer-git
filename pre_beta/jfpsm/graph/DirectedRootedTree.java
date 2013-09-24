@@ -195,9 +195,9 @@ public class DirectedRootedTree<V,E> extends DirectedAcyclicGraph<V,E>{
         	       * successors
         	       */
         		  final DirectedConnectedComponentVisitorWithHistory<V,E,DirectedRootedTree<V,E>> 
-        		  visitor=new DirectedConnectedComponentVisitorWithHistory<V,E,DirectedRootedTree<V,E>>();
+        		  visitor=new DirectedConnectedComponentVisitorWithHistory<>();
         		  visitor.visit(this,vertex,true);
-        		  final List<V> directAndIndirectsuccessors=new ArrayList<V>();
+        		  final List<V> directAndIndirectsuccessors=new ArrayList<>();
         		  directAndIndirectsuccessors.addAll(visitor.getVisitedVertices());
         		  /**
         		   * starts using this set by the end, reverses the order of 
