@@ -297,6 +297,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         playerNode.attachChild(crosshairNode);
         //builds the player data
         playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
+        	
+        	private final FloatBuffer projectileVertexBuffer;
+        	
+        	{
+        		projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
+        		projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
+        	}
+        	
         	@Override
         	public Map.Entry<Integer,Integer> attack(){
         		final Map.Entry<Integer,Integer> consumedAmmunitionOrKnockCounts=super.attack();
@@ -314,7 +322,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         		for(int index=0;index<consumedAmmunitionOrKnockCounts.getValue().intValue();index++)
     		        {if(isCurrentWeaponAmmunitionCountDisplayable())
     		    	     {//creates a new projectile launched by the secondary hand
-    		        	  createProjectile(cameraNode.getChild(1));
+    		        	  createProjectile(cameraNode.getChild(0));
     		    	     }
     		         if(identifier!=null)
     		    	     soundManager.play(false,false,identifier);
@@ -335,19 +343,25 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 		    	final Node projectileNode=new Node(projectileData.toString());
 		    	NodeHelper.setModelBound(projectileNode,BoundingBox.class);
 		    	projectileNode.setTransform(weaponSpatial.getWorldTransform());
-		    	projectileNode.setTranslation(initialLocation);        		    	  
-		    	Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
-		        MeshData projectileMeshData=new MeshData();
-		        FloatBuffer projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
-		        projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
-		        projectileMeshData.setVertexBuffer(projectileVertexBuffer);
-		        projectileMesh.setMeshData(projectileMeshData);
+		    	projectileNode.setTranslation(initialLocation);
+		    	//TODO use the correct node
+		    	//final WeaponUserData weaponUserData=(WeaponUserData)((Node)weaponSpatial).getUserData();
+		        //final Weapon weapon=weaponUserData.getWeapon();
+		    	Mesh projectileMesh=createProjectileMesh(null,projectileData);
 		        projectileNode.attachChild(projectileMesh);
 		    	projectileNode.addController(new ProjectileController(timer,projectileData));
-		    	projectileNode.setUserData(new BoundingBox());
 		    	//stores it for a further use
 		    	projectilesMap.put(projectileNode,projectileData);
 		    	getRoot().attachChild(projectileNode);
+        	}
+        	
+        	private Mesh createProjectileMesh(final Weapon weapon,final ProjectileData projectileData){
+        		//TODO support several kinds of projectile with different sizes
+        		Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
+        		MeshData projectileMeshData=new MeshData();
+        		projectileMeshData.setVertexBuffer(projectileVertexBuffer);
+        		projectileMesh.setMeshData(projectileMeshData);
+        		return(projectileMesh);
         	}
         	
         	@Override
@@ -451,9 +465,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//configures the collision system
         CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);       
         //adds a mesh with an invisible mesh data
-        Mesh playerMesh=new Mesh("player");
-        MeshData playerMeshData=new MeshData();
-        FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
+        final Mesh playerMesh=new Mesh("player");
+        final MeshData playerMeshData=new MeshData();
+        final FloatBuffer playerVertexBuffer=BufferUtils.createFloatBuffer(6);
         playerVertexBuffer.put(-0.5f).put(-0.9f).put(-0.5f).put(0.5f).put(0.9f).put(0.5f).rewind();
         playerMeshData.setVertexBuffer(playerVertexBuffer);
         playerMesh.setMeshData(playerMeshData);
@@ -461,6 +475,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //adds a bounding box to the camera node
         NodeHelper.setModelBound(playerNode,BoundingBox.class);
         playerNode.addController(new SpatialController<Spatial>(){
+        	
+            private final FloatBuffer projectileVertexBuffer;
+        	
+        	{
+        		projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
+        		projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
+        	}
         	
         	private final CollisionResults collisionResults=new BoundingCollisionResults();
         	
@@ -890,20 +911,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 		    	NodeHelper.setModelBound(projectileNode,BoundingBox.class);
 		    	projectileNode.setTransform(enemyWeaponMesh.getWorldTransform());
 		    	projectileNode.setTranslation(initialLocation);        		    	  
-		    	Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
-		        MeshData projectileMeshData=new MeshData();
-		        //FIXME do not create anew these data each time and track them in order to release native memory
-		        FloatBuffer projectileVertexBuffer=BufferUtils.createFloatBuffer(6);
-		        projectileVertexBuffer.put(-0.1f).put(-0.1f).put(-0.1f).put(0.1f).put(0.1f).put(0.1f).rewind();
-		        projectileMeshData.setVertexBuffer(projectileVertexBuffer);
-		        projectileMesh.setMeshData(projectileMeshData);
+		    	final Mesh projectileMesh=createProjectileMesh(null,projectileData);
 		        projectileNode.attachChild(projectileMesh);
 		    	projectileNode.addController(new ProjectileController(timer,projectileData));
-		    	projectileNode.setUserData(new BoundingBox());
 		    	//stores it for a further use
 		    	projectilesMap.put(projectileNode,projectileData);
 		    	getRoot().attachChild(projectileNode);
             }
+            
+            private Mesh createProjectileMesh(final Weapon weapon,final ProjectileData projectileData){
+        		//TODO support several kinds of projectile with different sizes
+        		Mesh projectileMesh=new Mesh("Mesh@"+projectileData.toString());
+        		MeshData projectileMeshData=new MeshData();
+        		projectileMeshData.setVertexBuffer(projectileVertexBuffer);
+        		projectileMesh.setMeshData(projectileMeshData);
+        		return(projectileMesh);
+        	}
         });
     }
     
