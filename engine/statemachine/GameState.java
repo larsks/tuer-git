@@ -1647,6 +1647,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void performInitialBasicCleanup(){
     	//detaches the player itself
+    	//FIXME maybe it is done a bit too early
         getRoot().detachChild(playerNode);
         //detaches the ammunition display node
         getRoot().detachChild(ammoTextLabel);
@@ -1669,7 +1670,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
      * TODO unload direct NIO buffers
      */
     private final void performDirectNioBuffersCleanup(){
-    	
+    	//TODO get the renderer
+    	//TODO destroy the morph meshes of enemies
+    	//TODO destroy the template meshes of enemies (cleanup the binary importer too)
+    	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
+    	//TODO destroy the mesh of the level
+    	//TODO destroy the mesh of the skybox
     }
     
     /**
