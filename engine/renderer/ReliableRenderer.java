@@ -130,7 +130,7 @@ public class ReliableRenderer extends JoglRenderer{
 	                            {final boolean wasAccessible=field.isAccessible();
 	        		             if(!wasAccessible)
 	                	             field.setAccessible(true);
-						         try{final Object fieldValue = field.get(realNioBuffer);
+						         try{final Object fieldValue=field.get(realNioBuffer);
 							         if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
 	            	    	             {directByteBuffer=fieldValue;
 	            	    	              break;
