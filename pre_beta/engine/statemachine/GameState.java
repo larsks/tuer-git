@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -60,8 +59,10 @@ import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.queue.RenderBucketType;
+import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.renderer.state.WireframeState;
+import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -72,6 +73,7 @@ import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
+import com.ardor3d.scenegraph.shape.Quad;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -80,7 +82,6 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -226,6 +227,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private WireframeState wireframeState;
     
     private Skybox skyboxNode;
+    
+    private Node levelNode;
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
@@ -1558,7 +1561,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadLevelModel(){
-    	try{final Node levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+    	try{levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
             getRoot().attachChild(levelNode);
     	   }
     	catch(IOException ioe)
@@ -1622,6 +1625,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void performTerminalBasicCleanup(){
+    	if(levelNode!=null)
+    	    {levelNode.detachAllChildren();
+    		 levelNode=null;
+    	    }
+    	if(skyboxNode!=null)
+    	    {skyboxNode.detachAllChildren();
+    		 skyboxNode=null;
+    	    }
     	//clears the list of objects that can be picked up
     	collectibleObjectsList.clear();
     	//clears the list of teleporters
@@ -1647,7 +1658,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void performInitialBasicCleanup(){
     	//detaches the player itself
-    	//FIXME maybe it is done a bit too early
         getRoot().detachChild(playerNode);
         //detaches the ammunition display node
         getRoot().detachChild(ammoTextLabel);
@@ -1659,30 +1669,73 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(headUpDisplayLabel);
     	//resets the timer at the beginning of all long operations performed while unloading
         timer.reset();
-        //performs the cleanup on the sky box node if any
+        //detaches some nodes from the root to prevent Java from using them while releasing their resources
+        if(levelNode!=null)
+        	getRoot().detachChild(levelNode);
         if(skyboxNode!=null)
-            {getRoot().detachChild(skyboxNode);
-        	 skyboxNode=null;
-            }
+            getRoot().detachChild(skyboxNode);
     }
     
     /**
      * TODO unload direct NIO buffers
      */
     private final void performDirectNioBuffersCleanup(){
-    	//TODO get the renderer
+    	//gets the renderer
+    	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
     	//TODO destroy the morph meshes of enemies
     	//TODO destroy the template meshes of enemies (cleanup the binary importer too)
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
     	//TODO destroy the mesh of the level
-    	//TODO destroy the mesh of the skybox
+    	if(levelNode!=null)
+	        {
+	        }
+    	//destroys the quads of the skybox if any
+    	if(skyboxNode!=null)
+    	    {for(Skybox.Face face:Skybox.Face.values())
+                 {final Quad quad=skyboxNode.getFace(face);
+                  //deletes the OpenGL identifier of the VBO and releases the native memory of its direct NIO buffer
+	        	  final FloatBufferData vertexBufferData=quad.getMeshData().getVertexCoords();
+    	    	  GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+ 				      @Override
+ 				      public Void call()throws Exception{
+ 				    	  renderer.deleteVBOs(vertexBufferData);
+ 					      return null;
+ 				      }
+ 	    	      });
+    	    	  //removes the vertex buffer from the mesh data and removes the mesh data from the quad
+    	    	  quad.getMeshData().setVertexCoords(null);
+    	    	  quad.setMeshData(null);
+                 }
+    	    }
     }
     
     /**
-     * TODO unload textures
+     * unloads the textures
      */
     private final void performTexturesDataCleanup(){
-    	
+    	//gets the renderer
+    	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
+    	if(skyboxNode!=null)
+	        {for(Skybox.Face face:Skybox.Face.values())
+	             {//deletes the OpenGL identifier of the texture and releases the native memory of its direct NIO buffer
+	        	  final Texture texture=skyboxNode.getTexture(face);
+	              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+ 				      @Override
+ 				      public Void call()throws Exception{
+ 				    	  renderer.deleteTexture(texture);
+ 					      return null;
+ 				      }
+ 	    	      });
+	              //removes the textures from the texture state
+	              final Quad quad=skyboxNode.getFace(face);
+    	    	  final TextureState textureState=(TextureState)quad.getLocalRenderState(StateType.Texture);
+    	    	  textureState.clearTextures();
+	             }
+	        }
+    	if(levelNode!=null)
+            {
+            }
+    	//TODO destroy other textures
     }
     
     private final void loadSkybox(){
