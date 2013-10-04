@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -63,6 +64,7 @@ import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.renderer.state.WireframeState;
 import com.ardor3d.scenegraph.FloatBufferData;
+import com.ardor3d.scenegraph.IndexBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
@@ -74,6 +76,7 @@ import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.scenegraph.shape.Quad;
+import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -82,6 +85,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -1676,37 +1680,100 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
             getRoot().detachChild(skyboxNode);
     }
     
+    private static final class VBODeleterVisitor implements Visitor{
+    	
+    	private final Renderer renderer;
+    	
+    	private VBODeleterVisitor(final Renderer renderer){
+    		super();
+    		this.renderer=renderer;
+    	}
+    	
+    	@Override
+    	public void visit(final Spatial spatial){
+    		if(spatial instanceof Mesh)
+    			deleteVBOs((Mesh)spatial);
+    	}
+    	
+    	private final void deleteVBOs(final Mesh disposableMesh){
+            final MeshData meshData=disposableMesh.getMeshData();
+    	    if(meshData!=null)
+    	        {//deletes the OpenGL identifier of the VBOs and releases the native memory of their direct NIO buffers
+    	         final FloatBufferData vertexBufferData=meshData.getVertexCoords();
+    	         if(vertexBufferData!=null)
+    	      	     {renderer.deleteVBOs(vertexBufferData);
+    	              meshData.setVertexCoords(null);
+    	             }
+    	         final FloatBufferData colorBufferData=meshData.getColorCoords();
+    	         if(colorBufferData!=null)
+    	             {renderer.deleteVBOs(colorBufferData);
+    	              meshData.setColorCoords(null);
+    	             }
+    	         final IndexBufferData<?> indexBufferData=meshData.getIndices();
+    	         if(indexBufferData!=null)
+    	             {renderer.deleteVBOs(indexBufferData);
+    	              meshData.setIndices(null);
+    	             }
+    	         final FloatBufferData fogBufferData=meshData.getFogCoords();
+    	         if(fogBufferData!=null)
+	                 {renderer.deleteVBOs(fogBufferData);
+	                  meshData.setFogCoords(null);
+	                 }
+    	         final FloatBufferData intervealedBufferData=meshData.getInterleavedData();
+    	         if(intervealedBufferData!=null)
+                     {renderer.deleteVBOs(intervealedBufferData);
+            	      meshData.setInterleavedData(null);
+            	     }
+    	         final FloatBufferData normalBufferData=meshData.getNormalCoords();
+    	         if(normalBufferData!=null)
+        	         {renderer.deleteVBOs(normalBufferData);
+        	          meshData.setNormalCoords(null);
+        	         }
+    	         final FloatBufferData tangentBufferData=meshData.getTangentCoords();
+    	         if(tangentBufferData!=null)
+    	             {renderer.deleteVBOs(tangentBufferData);
+    	              meshData.setTangentCoords(null);
+    	             }
+    	         final List<FloatBufferData> textureCoordsList=meshData.getTextureCoords();
+    	         if(textureCoordsList!=null&&!textureCoordsList.isEmpty())
+    	             {for(FloatBufferData textureCoords:textureCoordsList)
+    	                  if(textureCoords!=null)
+    	                      renderer.deleteVBOs(textureCoords);
+    	              textureCoordsList.clear();
+    	             }
+    	         disposableMesh.setMeshData(null);
+    	        }
+        }
+    }
+    
     /**
-     * TODO unload direct NIO buffers
+     * unloads direct NIO buffers
      */
     private final void performDirectNioBuffersCleanup(){
-    	//gets the renderer
-    	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
-    	//TODO destroy the morph meshes of enemies
-    	//TODO destroy the template meshes of enemies (cleanup the binary importer too)
+    	//stores the spatials whose direct NIO buffers need to be disposed
+    	final HashSet<Spatial> disposableSpatials=new HashSet<>();
+    	//TODO destroy the morph meshes and the template meshes of enemies
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
-    	//TODO destroy the mesh of the level
     	if(levelNode!=null)
-	        {
-	        }
-    	//destroys the quads of the skybox if any
+	        disposableSpatials.add(levelNode);
     	if(skyboxNode!=null)
-    	    {for(Skybox.Face face:Skybox.Face.values())
-                 {final Quad quad=skyboxNode.getFace(face);
-                  //deletes the OpenGL identifier of the VBO and releases the native memory of its direct NIO buffer
-	        	  final FloatBufferData vertexBufferData=quad.getMeshData().getVertexCoords();
-    	    	  GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
- 				      @Override
- 				      public Void call()throws Exception{
- 				    	  renderer.deleteVBOs(vertexBufferData);
- 					      return null;
- 				      }
- 	    	      });
-    	    	  //removes the vertex buffer from the mesh data and removes the mesh data from the quad
-    	    	  quad.getMeshData().setVertexCoords(null);
-    	    	  quad.setMeshData(null);
-                 }
-    	    }
+    	    disposableSpatials.add(skyboxNode);
+    	//performs the destruction with a single callable
+    	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+		      @Override
+		      public Void call()throws Exception{
+		    	  //gets the renderer
+    	          final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
+		    	  //builds the visitor
+    	          final VBODeleterVisitor deleter=new VBODeleterVisitor(renderer);
+    	          //runs it on all disposable spatials
+    	          for(Spatial spatial:disposableSpatials)
+    	        	  spatial.acceptVisitor(deleter,false);
+    	          //clears the list of disposable spatials as it is now useless
+    	          disposableSpatials.clear();
+			      return null;
+		      }
+	    });
     }
     
     /**
