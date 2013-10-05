@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -230,6 +231,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private Skybox skyboxNode;
     
     private Node levelNode;
+    
+    private Vector3 previousPosition=new Vector3();
     
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
@@ -489,8 +492,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	
         	private final CollisionResults collisionResults=new BoundingCollisionResults();
         	
-        	private Vector3 previousPosition=new Vector3(115,0.5,223);
-        	
         	private boolean wasBeingTeleported=false;
         	
         	//private long previouslyMeasuredElapsedTime=-1;
@@ -508,7 +509,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 //temporary avoids to move on Y
                 playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
                 //synchronizes the camera with the camera node
-                cam.setLocation(playerNode.getTranslation());
+                //cam.setLocation(playerNode.getTranslation());
                 //FIXME remove this temporary system
                 double playerStartX=previousPosition.getX();
                 double playerStartZ=previousPosition.getZ();
@@ -579,8 +580,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     }
                 //updates the current location
                 playerNode.setTranslation(correctX,0.5,correctZ);
-                //updates the previous location and the camera
+                //updates the previous location
                 previousPosition.set(playerNode.getTranslation());
+                //synchronizes the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
                 if(skyboxNode!=null)
                     skyboxNode.setTranslation(playerNode.getTranslation());
@@ -1074,7 +1076,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void initializeInput(final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		                           final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
-    		                           final TriggerAction toggleScreenModeAction,final Camera cam,final PhysicalLayer physicalLayer){
+    		                           final TriggerAction toggleScreenModeAction,final PhysicalLayer physicalLayer){
     	//deregisters all triggers
         if(!getLogicalLayer().getTriggers().isEmpty())
             {final Set<InputTrigger> triggers=new HashSet<>(getLogicalLayer().getTriggers());
@@ -1599,6 +1601,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	      break;
     	     }
     	}
+    	previousPosition.set(currentCamLocation);
         currentFrustumNear=0.1;
         currentFrustumFar=200;
         //attaches the player itself
@@ -2181,10 +2184,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         final boolean wasEnabled=isEnabled();
         super.setEnabled(enabled);
         if(wasEnabled!=isEnabled())
-            {final Camera cam=canvas.getCanvasRenderer().getCamera();
-             if(isEnabled())
+            {if(isEnabled())
                  {//FIXME this is a source of bugs, rather do that during the initialization
             	  mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+            	  final Camera cam=canvas.getCanvasRenderer().getCamera();
                   mouseManager.setPosition(cam.getWidth()/2,cam.getHeight()/2);
             	  mouseManager.setGrabbed(GrabbedState.GRABBED);
          		  if(customMouseAndKeyboardSettings.isMousePointerNeverHidden())
@@ -2205,7 +2208,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
           		   * */
           		  if(fpsc==null||!customActionMap.equals(defaultActionMap)||!customMouseAndKeyboardSettings.equals(defaultMouseAndKeyboardSettings))
           		      {//(re)initializes input triggers
-          			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,cam,physicalLayer);
+          			   initializeInput(toPauseMenuTriggerAction,toPauseMenuTriggerActionForExitConfirm,toggleScreenModeAction,physicalLayer);
           		      }
                  }
             }
