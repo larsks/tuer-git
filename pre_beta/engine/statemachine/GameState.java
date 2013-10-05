@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -75,7 +74,6 @@ import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
-import com.ardor3d.scenegraph.shape.Quad;
 import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueue;
@@ -85,7 +83,6 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -1578,12 +1575,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void performInitialBasicSetup(){
         //FIXME it should not be hard-coded
-    	if(levelIndex==0||levelIndex==1)
-    	    {currentCamLeft.set(-1,0,0);
-    		 currentCamUp.set(0,1,0);
-    		 currentCamDirection.set(0,0,-1);
-    	     currentCamLocation.set(115,0.5,223);
-    	    }
     	switch(levelIndex)
     	{case 0:
     	 case 1:
@@ -1593,8 +1584,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	      currentCamLocation.set(115,0.5,223);
     	      break;
     	     }
+    	 case 2:
+    	     {currentCamLeft.set(1,0,0);
+   		      currentCamUp.set(0,1,0);
+   		      currentCamDirection.set(0,0,1);
+    	      currentCamLocation.set(0,0,0);
+    	      break;
+    	     }
     	 case 3:
-    	     {currentCamLocation.set(0,0,5);
+    	     {currentCamLeft.set(1,0,0);
+  		      currentCamUp.set(0,1,0);
+  		      currentCamDirection.set(0,0,1);
+    	      currentCamLocation.set(0,0,5);
     	      break;
     	     }
     	}
@@ -1752,6 +1753,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final void performDirectNioBuffersCleanup(){
     	//stores the spatials whose direct NIO buffers need to be disposed
     	final HashSet<Spatial> disposableSpatials=new HashSet<>();
+    	//gets the renderer
+    	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
     	//TODO destroy the morph meshes and the template meshes of enemies
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
     	if(levelNode!=null)
@@ -1762,8 +1765,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
 		      public Void call()throws Exception{
-		    	  //gets the renderer
-    	          final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
 		    	  //builds the visitor
     	          final VBODeleterVisitor deleter=new VBODeleterVisitor(renderer);
     	          //runs it on all disposable spatials
@@ -1776,33 +1777,65 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 	    });
     }
     
+    private static final class TextureDeleterVisitor implements Visitor{
+    	
+    	private final Renderer renderer;
+    	
+    	private TextureDeleterVisitor(final Renderer renderer){
+    		super();
+    		this.renderer=renderer;
+    	}
+    	
+    	@Override
+    	public void visit(final Spatial spatial){
+    		deleteTextures(spatial);
+    	}
+    	
+    	private void deleteTextures(final Spatial disposableSpatial){
+    		final TextureState textureState=(TextureState)disposableSpatial.getLocalRenderState(StateType.Texture);
+    		if(textureState!=null)
+    		    {//loops on all texture units
+    			 for(int textureUnit=0;textureUnit<textureState.getMaxTextureIndexUsed();textureUnit++)
+    		         {final Texture texture=textureState.getTexture(textureUnit);
+    		    	  if(texture!=null)
+    		    	      {//deletes the OpenGL identifier of the texture and releases the native memory of its direct NIO buffer
+    		    		   renderer.deleteTexture(texture);
+    		    	      }
+    		         }
+    		     //removes the textures from the texture state
+    			 textureState.clearTextures();
+    			 //removes the texture state from this spatial
+    			 disposableSpatial.clearRenderState(StateType.Texture);
+    		    }
+    	}
+    }
+    
     /**
      * unloads the textures
      */
     private final void performTexturesDataCleanup(){
+    	//stores the spatials whose textures need to be disposed
+    	final HashSet<Spatial> disposableSpatials=new HashSet<>();
     	//gets the renderer
     	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
-    	if(skyboxNode!=null)
-	        {for(Skybox.Face face:Skybox.Face.values())
-	             {//deletes the OpenGL identifier of the texture and releases the native memory of its direct NIO buffer
-	        	  final Texture texture=skyboxNode.getTexture(face);
-	              GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
- 				      @Override
- 				      public Void call()throws Exception{
- 				    	  renderer.deleteTexture(texture);
- 					      return null;
- 				      }
- 	    	      });
-	              //removes the textures from the texture state
-	              final Quad quad=skyboxNode.getFace(face);
-    	    	  final TextureState textureState=(TextureState)quad.getLocalRenderState(StateType.Texture);
-    	    	  textureState.clearTextures();
-	             }
-	        }
     	if(levelNode!=null)
-            {
-            }
-    	//TODO destroy other textures
+    		disposableSpatials.add(levelNode);
+    	if(skyboxNode!=null)
+	        disposableSpatials.add(skyboxNode);
+    	//performs the destruction with a single callable
+    	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
+		      @Override
+		      public Void call()throws Exception{
+		    	  //builds the visitor
+    	          final TextureDeleterVisitor deleter=new TextureDeleterVisitor(renderer);
+    	          //runs it on all disposable spatials
+    	          for(Spatial spatial:disposableSpatials)
+    	        	  spatial.acceptVisitor(deleter,false);
+    	          //clears the list of disposable spatials as it is now useless
+    	          disposableSpatials.clear();
+			      return null;
+		      }
+	    });
     }
     
     private final void loadSkybox(){
