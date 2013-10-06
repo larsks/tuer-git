@@ -57,6 +57,7 @@ import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.ContextManager;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 import com.ardor3d.renderer.queue.RenderBucketType;
@@ -84,6 +85,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.EnemyData;
 import engine.data.PlayerData;
 import engine.data.ProjectileController;
@@ -234,6 +236,40 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private Vector3 previousPosition=new Vector3();
     
+    /**
+     * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
+     * 3D objects
+     * FIXME detect whether the weapon is close to another 3D object and update its position
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    public static final class PlayerCameraNode extends CameraNode{
+    	
+    	public PlayerCameraNode(final String name,final Camera camera){
+    		super(name,camera);
+    	}
+    	
+    	@Override
+        public void draw(final Renderer renderer){
+    		/**
+    		 * Ardor3D doesn't put nodes without render delegate 
+    		 * into render queues by default, it must be done here
+    		 */
+    		final boolean queued;
+    		if(!renderer.isProcessingQueue())
+    			queued=renderer.checkAndAdd(this);
+    		else
+    			queued=false;
+    		if(!queued)
+                {//clears the depth buffer
+    			 renderer.clearBuffers(Renderer.BUFFER_DEPTH);
+    			 //renders
+                 super.draw(renderer);
+                }
+        }
+    }
+    
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
@@ -271,33 +307,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         //creates a node that follows the camera
-        /**
-         * draws the content of the player node at last just after clearing the 
-         * depth buffer in order to prevent the weapons from being clipped into 
-         * 3D objects
-         * FIXME detect whether the weapon is close to another 3D object and 
-         * update its position
-         */
-        playerNode=new CameraNode("player",cam){
-        	@Override
-            public void draw(final Renderer renderer){
-        		/**
-        		 * Ardor3D doesn't put nodes without render delegate 
-        		 * into render queues by default, it must be done here
-        		 */
-        		final boolean queued;
-        		if(!renderer.isProcessingQueue())
-        			queued=renderer.checkAndAdd(this);
-        		else
-        			queued=false;
-        		if(!queued)
-                    {//clears the depth buffer
-        			 renderer.clearBuffers(Renderer.BUFFER_DEPTH);
-        			 //renders
-                     super.draw(renderer);
-                    }
-            }
-        };
+        playerNode=new PlayerCameraNode("player",cam);
         playerNode.getSceneHints().setRenderBucketType(RenderBucketType.PostBucket);
         //attaches a node for the crosshair to the player node
         final Node crosshairNode=createCrosshairNode();
@@ -496,7 +506,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	
         	//private long previouslyMeasuredElapsedTime=-1;
         	
-            @SuppressWarnings({ "unchecked", "cast" })
+            @SuppressWarnings({"unchecked","cast"})
 			@Override
             public void update(double timeSinceLastCall,Spatial caller){
             	//updates the timer
@@ -504,19 +514,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
             	final long absoluteElapsedTimeInNanoseconds=timer.getElapsedTimeInNanoseconds();
             	/*final long elapsedTimeSinceLatestCallInNanos=previouslyMeasuredElapsedTime==-1?0:absoluteElapsedTimeInNanoseconds-previouslyMeasuredElapsedTime;
             	previouslyMeasuredElapsedTime=absoluteElapsedTimeInNanoseconds;*/
-                //synchronizes the camera node with the camera
-                playerNode.updateFromCamera();
+            	//retrieves the data from the camera
+            	final Camera cam=ContextManager.getCurrentContext().getCurrentCamera();
                 //temporary avoids to move on Y
-                playerNode.addTranslation(0,0.5-playerNode.getTranslation().getY(),0);
-                //synchronizes the camera with the camera node
-                //cam.setLocation(playerNode.getTranslation());
+            	cam.setLocation(cam.getLocation().getX(),0.5,cam.getLocation().getZ());
                 //FIXME remove this temporary system
                 double playerStartX=previousPosition.getX();
                 double playerStartZ=previousPosition.getZ();
-                double playerEndX=playerNode.getTranslation().getX();
-                double playerEndZ=playerNode.getTranslation().getZ();
+                double playerEndX=cam.getLocation().getX();
+                double playerEndZ=cam.getLocation().getZ();
                 double playerX,playerZ;
-                double distance=previousPosition.distance(playerNode.getTranslation());
+                double distance=previousPosition.distance(cam.getLocation());
                 int stepCount=(int)Math.ceil(distance/0.2);
                 double stepX=stepCount==0?0:(playerEndX-playerStartX)/stepCount;
                 double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
@@ -580,6 +588,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     }
                 //updates the current location
                 playerNode.setTranslation(correctX,0.5,correctZ);
+                //copies the translation of the player node into the camera
+                cam.setLocation(correctX,0.5,correctZ);
+                //synchronizes the camera node with the camera
+                playerNode.updateFromCamera();
                 //updates the previous location
                 previousPosition.set(playerNode.getTranslation());
                 //synchronizes the camera with the camera node
