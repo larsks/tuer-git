@@ -15,11 +15,13 @@ package engine.renderer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import javax.media.opengl.GLProfile;
+
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.CapsUtil;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
-import com.ardor3d.renderer.ContextCapabilities;
+import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 import com.ardor3d.renderer.jogl.JoglRenderer;
 
 /**
@@ -50,8 +52,8 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 	}
 
 	@Override
-	public final ContextCapabilities createContextCapabilities(){
-		final ContextCapabilities defaultCaps = super.createContextCapabilities();
+	public final JoglContextCapabilities createContextCapabilities(){
+		final JoglContextCapabilities defaultCaps = super.createContextCapabilities();
         final ReliableContextCapabilities realCaps = new ReliableContextCapabilities(defaultCaps);
         //checks if the operating system is Windows
         if(System.getProperty("os.name").toLowerCase().startsWith("windows"))
