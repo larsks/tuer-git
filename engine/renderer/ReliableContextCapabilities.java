@@ -13,11 +13,11 @@
 */
 package engine.renderer;
 
-import com.ardor3d.renderer.ContextCapabilities;
+import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 
-public class ReliableContextCapabilities extends ContextCapabilities {
+public class ReliableContextCapabilities extends JoglContextCapabilities{
 
-	public ReliableContextCapabilities(final ContextCapabilities defaultCaps){
+	public ReliableContextCapabilities(final JoglContextCapabilities defaultCaps){
 		super(defaultCaps);
         //System.err.println(defaultCaps.getDisplayRenderer());
         //System.err.println(defaultCaps.getDisplayVendor());
