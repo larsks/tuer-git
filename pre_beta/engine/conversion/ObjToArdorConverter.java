@@ -19,16 +19,20 @@ import java.net.URISyntaxException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
+import com.ardor3d.extension.model.obj.ObjGeometryStore;
 import com.ardor3d.extension.model.obj.ObjImporter;
+import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.state.MaterialState;
 import com.ardor3d.renderer.state.RenderState.StateType;
+import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
-import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.visitor.Visitor;
+import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryClassObject;
 import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.export.binary.BinaryIdContentPair;
@@ -56,13 +60,22 @@ public class ObjToArdorConverter{
         }
     }
 
+	/**
+	 * flag indicating whether to convert ambient colors (of materials, when the lighting is enabled) into vertices colors 
+	 * (with no material, when the lighting is disabled)
+	 */
 	private boolean conversionOfAmbientColorsIntoVerticesColorsEnabled;
+	
+	/**
+	 * flag indicating whether to convert ambient colors into texture coordinates
+	 */
+	private boolean conversionOfAmbientColorsIntoTexCoordsEnabled;
 	
 	public ObjToArdorConverter(){
 		super();
 	}
 	
-	public boolean getConversionOfAmbientColorsIntoVerticesColorsEnabled(){
+	public boolean isConversionOfAmbientColorsIntoVerticesColorsEnabled(){
 		return(conversionOfAmbientColorsIntoVerticesColorsEnabled);
 	}
 	
@@ -70,9 +83,18 @@ public class ObjToArdorConverter{
 		this.conversionOfAmbientColorsIntoVerticesColorsEnabled=conversionOfAmbientColorsIntoVerticesColorsEnabled;
 	}
 	
+	public boolean isConversionOfAmbientColorsIntoTexCoordsEnabled() {
+		return conversionOfAmbientColorsIntoTexCoordsEnabled;
+	}
+
+	public void setConversionOfAmbientColorsIntoTexCoordsEnabled(
+			boolean conversionOfAmbientColorsIntoTexCoordsEnabled) {
+		this.conversionOfAmbientColorsIntoTexCoordsEnabled = conversionOfAmbientColorsIntoTexCoordsEnabled;
+	}
+
 	public void run(final String[] args) throws IOException,URISyntaxException{
 		JoglImageLoader.registerLoader();
-        BinaryExporter binaryExporter=conversionOfAmbientColorsIntoVerticesColorsEnabled?new DirectBinaryExporter():new BinaryExporter();
+        BinaryExporter binaryExporter=conversionOfAmbientColorsIntoVerticesColorsEnabled||conversionOfAmbientColorsIntoTexCoordsEnabled?new DirectBinaryExporter():new BinaryExporter();
         try{SimpleResourceLocator srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
             srl=new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/obj"));
@@ -88,9 +110,14 @@ public class ObjToArdorConverter{
         Spatial objSpatial;
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             objSpatial=objImporter.load(arg).getScene();
+             final ObjGeometryStore geomStore=objImporter.load(arg);
+             objSpatial=geomStore.getScene();
+             if(isConversionOfAmbientColorsIntoTexCoordsEnabled())
+            	 convertAmbientColorsIntoTexCoords(objSpatial,geomStore);
              if(conversionOfAmbientColorsIntoVerticesColorsEnabled)
             	 convertAmbientColorsIntoVerticesColors(objSpatial);
+             if(isConversionOfAmbientColorsIntoTexCoordsEnabled()||conversionOfAmbientColorsIntoVerticesColorsEnabled)
+                 removeMaterialStates(objSpatial);
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              File destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".obj"))+".abin");
@@ -105,13 +132,114 @@ public class ObjToArdorConverter{
             }
 	}
 	
-	private void convertAmbientColorsIntoVerticesColors(final Spatial spatial){
-		if(spatial instanceof Node)
-		    {final Node node=(Node)spatial;
-			 for(Spatial child:node.getChildren())
-		    	 convertAmbientColorsIntoVerticesColors(child);
-		    }
-		else
+	private static final class MaterialStateDeleter implements Visitor{
+		
+		@Override
+    	public void visit(final Spatial spatial){
+			if(spatial instanceof Mesh)
+			    {final Mesh mesh=(Mesh)spatial;
+			     mesh.clearRenderState(StateType.Material);
+			    }
+		}
+	}
+	
+	private void removeMaterialStates(final Spatial spatial){
+		spatial.acceptVisitor(new MaterialStateDeleter(),false);
+	}
+	
+    private static final class AmbientColorsIntoTexCoordsConverter implements Visitor{
+		
+    	private final ObjGeometryStore geomStore;
+    	
+    	private AmbientColorsIntoTexCoordsConverter(final ObjGeometryStore geomStore){
+    		this.geomStore=geomStore;
+    	}
+    	
+		@Override
+    	public void visit(final Spatial spatial){
+			if(spatial instanceof Mesh)
+			    {final Mesh mesh=(Mesh)spatial;
+			     final MaterialState materialState=(MaterialState)mesh.getLocalRenderState(StateType.Material);
+			     //checks whether there is a material state
+			     if(materialState!=null)
+			         {final ReadOnlyColorRGBA ambientRgbaColor=materialState.getAmbient();
+			          //checks whether there is a material ambient color
+			    	  if(ambientRgbaColor!=null)
+			    	      {final MeshData meshData=mesh.getMeshData();
+			    		   //checks whether there is no texture coordinate buffer
+				           if(meshData!=null&&meshData.getTextureCoords(0)==null)
+				               {final Buffer vertexBuffer=meshData.getVertexBuffer();
+				                //checks whether there is a vertex buffer
+					            if(vertexBuffer!=null)
+					                {final int vertexCount=meshData.getVertexCount();
+					                 //creates the new texture coordinate buffer data of the mesh
+					                 final FloatBuffer texCoordBuffer=BufferUtils.createFloatBufferOnHeap(vertexCount*2);
+					            	 final FloatBufferData texCoordBufferData=new FloatBufferData(texCoordBuffer,2);
+					            	 //fills it with texture coordinates
+					            	 int vertexIndex=0;
+					            	 while(texCoordBuffer.hasRemaining())
+					            	     {texCoordBuffer.put(vertexIndex/2);
+					            	      texCoordBuffer.put(vertexIndex%2);
+					            	      vertexIndex=(vertexIndex+1)%4;
+					            	     }
+					            	 texCoordBuffer.rewind();
+					            	 //sets the new texture coordinate buffer data of the mesh
+					            	 meshData.setTextureCoords(texCoordBufferData,0);
+					                }
+				               }
+			    	      }
+			         }
+			     final String materialName=geomStore.getMaterialMap().get(mesh);
+			     //final ObjMaterial material=geomStore.getMaterialLibrary().get(materialName);
+			     //modifies its texture state
+			     
+			     //TODO set the texture
+			     switch(materialName)
+			     {
+			         case "ASPHALT":
+			        	 Texture texture=TextureManager.load("asphalt.png",Texture.MinificationFilter.Trilinear,true);
+			        	 TextureState textureState=(TextureState)mesh.getLocalRenderState(StateType.Texture);
+			        	 if(textureState==null)
+			                 {textureState=new TextureState();
+			    	          mesh.setRenderState(textureState);
+			                 }
+			        	 textureState.setTexture(texture,0);
+			        	 textureState.setEnabled(true);
+			        	 break;
+			         case "BRICK":
+			         case "BRIDGE_DEFAULT":
+			         case "BUILDING_DEFAULT":
+			         case "BUS_STOP_SIGN":
+			         case "COBBLESTONE":
+			         case "CONCRETE":
+			         case "EARTH":
+			         case "FENCE_DEFAULT":
+			         case "GLASS":
+			         case "GRASS":
+			         case "MAT_0":
+			         case "MAT_1":
+			         case "RED_ROAD_MARKING":
+			         case "ROAD_MARKING_DASHED":
+			         case "ROOF_DEFAULT":
+			         case "STEEL":
+			         case "STEPS_DEFAULT":
+			         case "TERRAIN_DEFAULT":
+			         case "TUNNEL_DEFAULT":
+			         case "WATER":
+			         
+			     }
+			    }
+		}
+	}
+	
+	private void convertAmbientColorsIntoTexCoords(final Spatial spatial,final ObjGeometryStore geomStore){
+		spatial.acceptVisitor(new AmbientColorsIntoTexCoordsConverter(geomStore),false);
+	}
+	
+	private static final class AmbientColorsIntoVerticesColorsConverter implements Visitor{
+		
+		@Override
+    	public void visit(final Spatial spatial){
 			if(spatial instanceof Mesh)
 			    {final Mesh mesh=(Mesh)spatial;
 			     final MaterialState materialState=(MaterialState)mesh.getLocalRenderState(StateType.Material);
@@ -144,11 +272,17 @@ public class ObjToArdorConverter{
 			    	      }
 			         }
 			    }
+		}
+	}
+	
+	private void convertAmbientColorsIntoVerticesColors(final Spatial spatial){
+		spatial.acceptVisitor(new AmbientColorsIntoVerticesColorsConverter(),false);
 	}
 	
 	public static final void main(final String[] args){
 		try{final ObjToArdorConverter converter=new ObjToArdorConverter();
-		    //converter.setConversionOfAmbientColorsIntoVerticesColorsEnabled(true);
+		    converter.setConversionOfAmbientColorsIntoVerticesColorsEnabled(true);
+		    converter.setConversionOfAmbientColorsIntoTexCoordsEnabled(true);
 		    converter.run(args);
 		   }
 		catch(Throwable t)
