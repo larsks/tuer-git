@@ -112,10 +112,10 @@ public class ObjToArdorConverter{
             {System.out.println("Loading "+arg+" ...");
              final ObjGeometryStore geomStore=objImporter.load(arg);
              objSpatial=geomStore.getScene();
-             if(isConversionOfAmbientColorsIntoTexCoordsEnabled())
-            	 convertAmbientColorsIntoTexCoords(objSpatial,geomStore);
              if(conversionOfAmbientColorsIntoVerticesColorsEnabled)
             	 convertAmbientColorsIntoVerticesColors(objSpatial);
+             if(isConversionOfAmbientColorsIntoTexCoordsEnabled())
+            	 convertAmbientColorsIntoTexCoords(objSpatial,geomStore);
              if(isConversionOfAmbientColorsIntoTexCoordsEnabled()||conversionOfAmbientColorsIntoVerticesColorsEnabled)
                  removeMaterialStates(objSpatial);
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
@@ -205,6 +205,8 @@ public class ObjToArdorConverter{
 			                 }
 			        	 textureState.setTexture(texture,0);
 			        	 textureState.setEnabled(true);
+			        	 //removes the colors
+			        	 mesh.getMeshData().setColorCoords(null);
 			        	 break;
 			         case "BRICK":
 			         case "BRIDGE_DEFAULT":
@@ -281,6 +283,7 @@ public class ObjToArdorConverter{
 	
 	public static final void main(final String[] args){
 		try{final ObjToArdorConverter converter=new ObjToArdorConverter();
+		    //only for OSM WaveFront OBJ files
 		    converter.setConversionOfAmbientColorsIntoVerticesColorsEnabled(true);
 		    converter.setConversionOfAmbientColorsIntoTexCoordsEnabled(true);
 		    converter.run(args);
