@@ -33,15 +33,21 @@
 	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
+	<property name="tuer-zip-filename" value="tuer.zip" />
 	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="jfpsm-application-name" value="Java First Person Shooter Maker"/>
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
+	<!-- Sourceforge username -->
+	<property name="sftp-userid" value="gouessej" />
+	<!-- Sourceforge Project Web space -->
 	<property name="sftp-server" value="web.sourceforge.net" />
 	<property name="sftp-remotedir" value="/home/project-web/tuer/htdocs/very_experimental" />
-	<property name="sftp-userid" value="gouessej" />
+	<!-- Sourceforge Project file releases -->
+	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
+	<property name="sftp-pfs-remotedir" value="/home/pfs/project/tuer/tuer/" />
 	<path id="project.lib.path">
 	    <pathelement location="lib/ardor3d/ardor3d-animation-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
@@ -511,12 +517,19 @@
 		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
 		<!-- Gets the SFTP account's password from the end user's input -->
 		<input message="Please enter the password:" addproperty="sftp-password"/>
-		<!-- TODO: delete all files in the remote directory -->
-		<!-- Uploads the files onto the SFTP server.  -->
+		<!-- There is no way to delete files with Ant SCP, you have to do it yourself -->
+		<!-- Uploads the files onto the SFTP server  -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
 		    <fileset dir="${destdir}" includes="**/*"/>
 		</scp>
-		<!-- TODO: create a ZIP archive and put it into another remote directory -->
+		<!-- Creates the archive -->
+		<zip destfile="${destdir}/${tuer-zip-filename}">
+			<fileset dir="." excludes="**/*.class,**/bin/*,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
+		</zip>
+		<!-- Uploads the archive onto the SFTP server  -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
+		    <fileset file="${destdir}/${tuer-zip-filename}" />
+		</scp>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
@@ -526,6 +539,7 @@
 	  		<fileset dir="${bindir}" includes="**/*.class" />
 	  	</delete>
 		<delete file="${keystore}" failonerror="false" />
+		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
 		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
 		<delete file="${destdir}/${jfpsm-jnlp-filename}" failonerror="false" />
 		<delete file="lib/joal/openal-soft-1.15.1-bin.zip" failonerror="false" />
