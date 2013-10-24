@@ -39,6 +39,9 @@
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
+	<property name="sftp-server" value="web.sourceforge.net" />
+	<property name="sftp-remotedir" value="/home/project-web/tuer/htdocs/very_experimental" />
+	<property name="sftp-userid" value="gouessej" />
 	<path id="project.lib.path">
 	    <pathelement location="lib/ardor3d/ardor3d-animation-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
@@ -201,11 +204,11 @@
 	<!-- =================================================================== -->
 	<!-- Build                                                               -->
 	<!-- =================================================================== -->
-	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and create the JARs"/>
+	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and deploys the application"/>
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start">
+	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start and uploads all files onto the server">
 		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -259,14 +262,14 @@
 				<param name="OU" value="Engineer"/>
 				<param name="O"  value="FGF"/>
 				<param name="C"  value="FR"/>
-				<param name="L"  value="PARIS"/>
+				<param name="L"  value="BAGNOLET"/>
 				<param name="S"  value="FRANCE"/>
 			</dname>
 		</genkey>
 		<!-- copy these JARs into the local destination directory -->		
 		<copy todir="${destdir}" flatten="true" overwrite="true">
 			<path refid="project.lib.path"/>
-			<!-- copy these JARs to host JOGL and GlueGen on your own server -->
+			<!-- copy these JARs to host JOGL, JOAL and GlueGen on your own server -->
 			<path refid="gluegen-rt.natives.path"/>
 			<path refid="jogl.natives.path"/>
 			<path refid="joal.natives.path"/>
@@ -503,6 +506,17 @@
 			</jnlp>
 			]]>
 		</echo>
+		<!-- jsch-0.1.50.jar is required to use scp -->
+		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
+		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
+		<!-- Gets the SFTP account's password from the end user's input -->
+		<input message="Please enter the password:" addproperty="sftp-password"/>
+		<!-- TODO: delete all files in the remote directory -->
+		<!-- Uploads the files onto the SFTP server.  -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
+		    <fileset dir="${destdir}" includes="**/*"/>
+		</scp>
+		<!-- TODO: create a ZIP archive and put it into another remote directory -->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
