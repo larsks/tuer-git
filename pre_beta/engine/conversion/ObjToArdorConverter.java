@@ -19,11 +19,16 @@ import java.net.URISyntaxException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
+import jfpsm.GeometryHelper;
+
 import com.ardor3d.extension.model.obj.ObjGeometryStore;
 import com.ardor3d.extension.model.obj.ObjImporter;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
+import com.ardor3d.math.Vector2;
+import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
+import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.renderer.state.MaterialState;
 import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.renderer.state.TextureState;
@@ -112,6 +117,8 @@ public class ObjToArdorConverter{
             {System.out.println("Loading "+arg+" ...");
              final ObjGeometryStore geomStore=objImporter.load(arg);
              objSpatial=geomStore.getScene();
+             if(isConversionOfAmbientColorsIntoTexCoordsEnabled()||conversionOfAmbientColorsIntoVerticesColorsEnabled)
+            	 deindex(objSpatial);
              if(conversionOfAmbientColorsIntoVerticesColorsEnabled)
             	 convertAmbientColorsIntoVerticesColors(objSpatial);
              if(isConversionOfAmbientColorsIntoTexCoordsEnabled())
@@ -147,11 +154,36 @@ public class ObjToArdorConverter{
 		spatial.acceptVisitor(new MaterialStateDeleter(),false);
 	}
 	
+	private static final class Deindexer implements Visitor{
+		
+		private final GeometryHelper geometryHelper;
+		
+		private Deindexer(){
+			super();
+			this.geometryHelper=new GeometryHelper();
+		}
+		
+		@Override
+    	public void visit(final Spatial spatial){
+			if(spatial instanceof Mesh)
+			    {final Mesh mesh=(Mesh)spatial;
+			     final MeshData meshData=mesh.getMeshData();
+			     if(meshData!=null)
+			    	 geometryHelper.convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+			    }
+		}
+	}
+	
+	private void deindex(final Spatial spatial){
+		spatial.acceptVisitor(new Deindexer(),false);
+	}
+	
     private static final class AmbientColorsIntoTexCoordsConverter implements Visitor{
 		
     	private final ObjGeometryStore geomStore;
     	
     	private AmbientColorsIntoTexCoordsConverter(final ObjGeometryStore geomStore){
+    		super();
     		this.geomStore=geomStore;
     	}
     	
@@ -168,20 +200,44 @@ public class ObjToArdorConverter{
 			    	      {final MeshData meshData=mesh.getMeshData();
 			    		   //checks whether there is no texture coordinate buffer
 				           if(meshData!=null&&meshData.getTextureCoords(0)==null)
-				               {final Buffer vertexBuffer=meshData.getVertexBuffer();
+				               {//gets the vertex buffer
+				        	    final Buffer vertexBuffer=meshData.getVertexBuffer();
 				                //checks whether there is a vertex buffer
 					            if(vertexBuffer!=null)
 					                {final int vertexCount=meshData.getVertexCount();
 					                 //creates the new texture coordinate buffer data of the mesh
 					                 final FloatBuffer texCoordBuffer=BufferUtils.createFloatBufferOnHeap(vertexCount*2);
 					            	 final FloatBufferData texCoordBufferData=new FloatBufferData(texCoordBuffer,2);
+					                 final Vector3[] triangleVertices=new Vector3[]{new Vector3(),new Vector3(),new Vector3()};
+					                 final Vector2[] triangleTexCoords=new Vector2[]{new Vector2(),new Vector2(),new Vector2()};
+					                 int tmpDummyTexCoordIndex=0;
+					                 for(int sectionIndex=0,sectionCount=meshData.getSectionCount();sectionIndex<sectionCount;sectionIndex++)
+					                	 //only takes care of sections containing triangles
+					    				 if(meshData.getIndexMode(sectionIndex)==IndexMode.Triangles)
+					                         {//loops on all triangles of each section
+					   					      for(int trianglePrimitiveIndex=0,triangleCount=meshData.getPrimitiveCount(sectionIndex);trianglePrimitiveIndex<triangleCount;trianglePrimitiveIndex++)
+								                  {//gets the 3 vertices of the triangle
+										           meshData.getPrimitiveVertices(trianglePrimitiveIndex,sectionIndex,triangleVertices);
+										           //TODO use a better algorithm to compute the texture coordinates
+										           for(Vector2 triTexCoord:triangleTexCoords)
+										               {triTexCoord.set(tmpDummyTexCoordIndex/2,tmpDummyTexCoordIndex%2);
+										        	    tmpDummyTexCoordIndex=(tmpDummyTexCoordIndex+1)%4;
+										               }
+										           //puts the texture coordinates into the buffer
+										           for(Vector2 triTexCoord:triangleTexCoords)
+										               {texCoordBuffer.put(triTexCoord.getXf());
+										                texCoordBuffer.put(triTexCoord.getYf());
+										               }
+								                  }
+					                         }
+					                 //TODO remove this loop
 					            	 //fills it with texture coordinates
-					            	 int vertexIndex=0;
+					            	 /*int vertexIndex=0;
 					            	 while(texCoordBuffer.hasRemaining())
 					            	     {texCoordBuffer.put(vertexIndex/2);
 					            	      texCoordBuffer.put(vertexIndex%2);
 					            	      vertexIndex=(vertexIndex+1)%4;
-					            	     }
+					            	     }*/
 					            	 texCoordBuffer.rewind();
 					            	 //sets the new texture coordinate buffer data of the mesh
 					            	 meshData.setTextureCoords(texCoordBufferData,0);
@@ -190,10 +246,7 @@ public class ObjToArdorConverter{
 			    	      }
 			         }
 			     final String materialName=geomStore.getMaterialMap().get(mesh);
-			     //final ObjMaterial material=geomStore.getMaterialLibrary().get(materialName);
 			     //modifies its texture state
-			     
-			     //TODO set the texture
 			     switch(materialName)
 			     {
 			         case "ASPHALT":
