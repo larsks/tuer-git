@@ -214,7 +214,24 @@
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the JARs, signs them, creates the JNLP files for Java Web Start and uploads all files onto the server">
+	<target name="dist" depends="compile" description="Creates the deployable files and uploads them onto the server(s)">
+		<!-- Creates the JARs of the applications and prepares the JARs of the libraries -->
+		<antcall target="create-jars" />
+		<antcall target="prepare-third-party-jars" />
+		<!-- Signs them -->
+		<antcall target="sign-jars" />
+		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
+		<antcall target="create-jnlp-files" />
+		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
+		<antcall target="create-archive" />
+		<!-- Sends all stuffs to the server(s) -->
+		<antcall target="install-jsch" />
+		<antcall target="upload" />
+	</target>
+	<!-- ================================================================= -->
+	<!-- Create JARs                                                       -->
+	<!-- ================================================================= -->
+	<target name="create-jars">
 		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" 
 			includes="**/*.class" 
 			compress="false">
@@ -260,29 +277,48 @@
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
-		<delete file="${keystore}" failonerror="false" />
-		<input message="Please enter the store pass:" addproperty="storepass"/>
-		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}" >
-			<dname>
-				<param name="CN" value="${vendor}"/>
-				<param name="OU" value="Engineer"/>
-				<param name="O"  value="FGF"/>
-				<param name="C"  value="FR"/>
-				<param name="L"  value="BAGNOLET"/>
-				<param name="S"  value="FRANCE"/>
-			</dname>
-		</genkey>
-		<!-- copy these JARs into the local destination directory -->		
+	</target>
+	<!-- ================================================================= -->
+	<!-- Prepare third party JARs                                          -->
+	<!-- ================================================================= -->
+	<target name="prepare-third-party-jars">
+		<!-- copies these JARs into the local destination directory (to avoid mixing unsigned JARs with signed JARs) -->     
 		<copy todir="${destdir}" flatten="true" overwrite="true">
-			<path refid="project.lib.path"/>
-			<!-- copy these JARs to host JOGL, JOAL and GlueGen on your own server -->
-			<path refid="gluegen-rt.natives.path"/>
-			<path refid="jogl.natives.path"/>
-			<path refid="joal.natives.path"/>
+		    <path refid="project.lib.path"/>
+		    <!-- copies these JARs to host JOGL, JOAL and GlueGen (instead of using JogAmp signed JARs hosted on its servers) -->
+		    <path refid="gluegen-rt.natives.path"/>
+		    <path refid="jogl.natives.path"/>
+		    <path refid="joal.natives.path"/>
 		</copy>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Sign JARs                                                         -->
+	<!-- ================================================================= -->
+	<target name="sign-jars">
+		<!-- deletes the keystore if any -->
+		<delete file="${keystore}" failonerror="false" />
+		<!-- gets the storepass -->
+		<input message="Please enter the store pass:" addproperty="storepass"/>
+		<!-- creates the keystore -->
+		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}" >
+		    <dname>
+		        <param name="CN" value="${vendor}"/>
+		        <param name="OU" value="Engineer"/>
+		        <param name="O"  value="FGF"/>
+		        <param name="C"  value="FR"/>
+		        <param name="L"  value="BAGNOLET"/>
+		        <param name="S"  value="FRANCE"/>
+		    </dname>
+		</genkey>
+		<!-- uses this keystore to sign the JARs -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}">
-			<path refid="project.sign.jars.path"/>
+		    <path refid="project.sign.jars.path"/>
 		</signjar>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Create JNLP files                                                 -->
+	<!-- ================================================================= -->
+	<target name="create-jnlp-files">
 		<!-- generate the JNLP files used by Java Web Start -->
 		<echo file="${destdir}/${tuer-jnlp-filename}"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 			<jnlp spec="1.0+" codebase="${codebase-url}" href="${tuer-jnlp-filename}">
@@ -512,23 +548,39 @@
 			</jnlp>
 			]]>
 		</echo>
-		<!-- jsch-0.1.50.jar is required to use scp -->
-		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
-		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
-		<!-- Gets the SFTP account's password from the end user's input -->
-		<input message="Please enter the password:" addproperty="sftp-password"/>
-		<!-- There is no way to delete files with Ant SCP, you have to do it yourself -->
-		<!-- Uploads the files onto the SFTP server  -->
-		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-		    <fileset dir="${destdir}" includes="**/*"/>
-		</scp>
+    </target>
+	<!-- ================================================================= -->
+	<!-- Create archive                                                    -->
+	<!-- ================================================================= -->
+	<target name="create-archive">
+		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
 		<zip destfile="${destdir}/${tuer-zip-filename}">
 			<fileset dir="." excludes="**/*.class,**/bin/*,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
 		</zip>
-		<!-- Uploads the archive onto the SFTP server  -->
+	</target>
+	<!-- ================================================================= -->
+	<!-- Install JSCH                                                      -->
+	<!-- ================================================================= -->
+	<target name="install-jsch">
+		<!-- jsch-0.1.50.jar is required to use scp -->
+		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
+		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
+	</target>
+	<!-- ================================================================= -->
+	<!-- Upload                                                            -->
+	<!-- ================================================================= -->
+	<target name="upload">
+		<!-- Gets the SFTP account's password from the end user's input -->
+		<input message="Please enter the password:" addproperty="sftp-password"/>
+		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
+		<!-- Uploads the archive onto the SFTP server in the Project file release -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
 		    <fileset file="${destdir}/${tuer-zip-filename}" />
+		</scp>
+		<!-- Uploads the files onto the SFTP server in the Project Web Space -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
+		    <fileset dir="${destdir}" includes="**/*" excludes="${tuer-zip-filename}" />
 		</scp>
 	</target>
 	<!-- ================================================================= -->
