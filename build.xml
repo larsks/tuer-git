@@ -34,12 +34,15 @@
 	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="tuer-zip-filename" value="tuer.zip" />
-	<property name="tuer-chrome-web-store-zip-filename" value="tuer_chrome_web_store.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="jfpsm-application-name" value="Java First Person Shooter Maker"/>
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
+	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
+	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
+	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1 -->
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
@@ -174,8 +177,33 @@
 	<!-- ================================================================= -->
 	<!-- Upgrade JogAmp                                                    -->
 	<!-- ================================================================= -->
-	<target name="upgrade-jogamp" description="Upgrades JogAmp, uses the latest aggregated build">
-		<!-- TODO download the latest aggregated build and update the local files -->
+	<target name="upgrade-jogamp" description="Upgrades JogAmp">
+		<!-- updates the local files -->
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-amd64.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-i586.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-macosx-universal.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-solaris-amd64.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-solaris-i586.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-windows-amd64.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-windows-i586.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />		
+		<get src="${jogamp-unsigned-jars-url}/joal.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-macosx-universal.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-solaris-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-solaris-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-windows-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-windows-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-linux-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-linux-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-macosx-universal.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-solaris-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-solaris-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-windows-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-natives-windows-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />		
+		<!-- TODO check whether it is still necessary as it should have been integrated into JOAL a long time ago -->
 		<!-- downloads the binaries of OpenAL-Soft for Windows as they aren't bundled with JOAL yet -->
 		<get src="http://kcat.strangesoft.net/openal-soft-1.15.1-bin.zip" dest="lib/joal" verbose="true" usetimestamp="true" />
 		<!-- extracts the DLLs of OpenAL-Soft for Windows 32 bits & 64 bits -->
@@ -556,7 +584,7 @@
 		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
 		<zip destfile="${destdir}/${tuer-zip-filename}">
-			<fileset dir="." excludes="**/*.class,**/bin/*,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
+			<fileset dir="." excludes="**/*.class,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
 		</zip>
 	</target>
 	<!-- ================================================================= -->
