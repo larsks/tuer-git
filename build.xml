@@ -42,7 +42,7 @@
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1 -->
-	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar" />
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_740-joal_494-jogl_1131-jocl_870/jar" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
@@ -196,33 +196,13 @@
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-windows-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-windows-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-linux-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-linux-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-macosx-universal.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-solaris-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-solaris-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-windows-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
-		<get src="${jogamp-unsigned-jars-url}/jogl-natives-windows-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />		
-		<!-- TODO check whether it is still necessary as it should have been integrated into JOAL a long time ago -->
-		<!-- downloads the binaries of OpenAL-Soft for Windows as they aren't bundled with JOAL yet -->
-		<get src="http://kcat.strangesoft.net/openal-soft-1.15.1-bin.zip" dest="lib/joal" verbose="true" usetimestamp="true" />
-		<!-- extracts the DLLs of OpenAL-Soft for Windows 32 bits & 64 bits -->
-		<unzip src="lib/joal/openal-soft-1.15.1-bin.zip" dest="lib/joal">
-			<patternset>
-			    <include name="**/soft_oal.dll"/>
-			</patternset>
-		</unzip>
-		<!-- deletes the ZIP archive -->
-		<delete file="lib/joal/openal-soft-1.15.1-bin.zip" />
-		<!-- puts these DLLs into JOAL JARs containing native libraries for Windows -->
-		<jar destfile="lib/joal/joal-natives-windows-i586.jar" update="true">
-			<fileset file="lib/joal/openal-soft-1.15.1-bin/Win32/soft_oal.dll" />
-		</jar>
-		<jar destfile="lib/joal/joal-natives-windows-amd64.jar" update="true">
-			<fileset file="lib/joal/openal-soft-1.15.1-bin/Win64/soft_oal.dll" />
-		</jar>
-		<!-- deletes the extracted DLLs -->
-		<delete dir="lib/joal/openal-soft-1.15.1-bin" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-macosx-universal.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-solaris-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-solaris-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-windows-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-windows-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
