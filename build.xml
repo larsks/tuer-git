@@ -52,7 +52,6 @@
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
 	<property name="sftp-pfs-remotedir" value="/home/pfs/project/tuer/tuer/" />
 	<path id="project.lib.path">
-	    <pathelement location="lib/ardor3d/ardor3d-animation-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar"/>
@@ -114,7 +113,6 @@
 	<path id="project.sign.jars.path">
 	    <pathelement location="${destdir}/fettle-0.7.0.jar" />
 	    <pathelement location="${destdir}/guava-13.0.1.jar" />
-	    <pathelement location="${destdir}/ardor3d-animation-${ardor3d-version}.jar" />
 	    <pathelement location="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
 	    <pathelement location="${destdir}/ardor3d-core-${ardor3d-version}.jar" />
 		<pathelement location="${destdir}/ardor3d-math-${ardor3d-version}.jar" />
@@ -351,7 +349,6 @@
 			    <property name="sun.java2d.d3d" value="false"/>
 			    <property name="sun.java2d.opengl" value="false"/>
 			    <jar href="${tuer-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
@@ -465,7 +462,6 @@
 			    <property name="sun.java2d.opengl" value="false"/>
 			    <property name="sun.awt.noerasebackground" value="true"/>
 			    <jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
-			    <jar href="ardor3d-animation-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
