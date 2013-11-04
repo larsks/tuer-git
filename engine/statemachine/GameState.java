@@ -1712,8 +1712,28 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	}
     	
     	private final void deleteVBOs(final Mesh disposableMesh){
-            final MeshData meshData=disposableMesh.getMeshData();
-    	    if(meshData!=null)
+    		final HashSet<MeshData> meshDataSet=new HashSet<>();
+    		//checks the data of the mesh
+            if(disposableMesh.getMeshData()!=null)
+            	{meshDataSet.add(disposableMesh.getMeshData());
+            	 disposableMesh.setMeshData(null);
+            	}
+            //checks the data of the key frames
+            for(SpatialController<?> controller:disposableMesh.getControllers())
+            	if(controller!=null&&controller instanceof KeyframeController)
+                    {final KeyframeController<?> keyframeController=(KeyframeController<?>)controller;
+            	     if(keyframeController._keyframes!=null)
+            	         {for(PointInTime pit:keyframeController._keyframes)
+            	        	  if(pit._newShape!=null)
+            	                  {final MeshData meshData=pit._newShape.getMeshData();
+            	        	       if(meshData!=null)
+            	        	    	   {meshDataSet.add(meshData);
+            	        	    	    pit._newShape.setMeshData(null);
+            	        	    	   }
+            	                  }
+            	         }
+                    }
+    	    for(MeshData meshData:meshDataSet)
     	        {//deletes the OpenGL identifier of the VBOs and releases the native memory of their direct NIO buffers
     	         final FloatBufferData vertexBufferData=meshData.getVertexCoords();
     	         if(vertexBufferData!=null)
@@ -1757,7 +1777,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	                      renderer.deleteVBOs(textureCoords);
     	              textureCoordsList.clear();
     	             }
-    	         disposableMesh.setMeshData(null);
     	        }
         }
     }
