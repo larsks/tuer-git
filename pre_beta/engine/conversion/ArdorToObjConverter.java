@@ -1,0 +1,80 @@
+/*This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation, version 2
+  of the License.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+  MA 02111-1307, USA.
+*/
+package engine.conversion;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import com.ardor3d.extension.model.obj.ObjExporter;
+import com.ardor3d.image.util.jogl.JoglImageLoader;
+import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.util.export.binary.BinaryImporter;
+import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
+import com.ardor3d.util.resource.URLResourceSource;
+
+public class ArdorToObjConverter {
+
+	public ArdorToObjConverter(){
+		super();
+	}
+	
+	public void run(final String[] args) throws IOException,URISyntaxException{
+		JoglImageLoader.registerLoader();
+		try{SimpleResourceLocator srl=new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/images"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
+            srl=new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/abin"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
+           }
+        catch(final URISyntaxException urise)
+        {urise.printStackTrace();}
+		final ObjExporter objExporter=new ObjExporter();
+		final BinaryImporter binaryImporter=new BinaryImporter();
+		Spatial binarySpatial;
+		for(String arg:args)
+            {System.out.println("Loading "+arg+" ...");
+             URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
+             File sourceFile=new File(source.getURL().toURI());
+             binarySpatial=(Spatial)binaryImporter.load(sourceFile);
+             if(binarySpatial instanceof Mesh)
+                 {final Mesh mesh=(Mesh)binarySpatial;
+            	  final String filenameWithoutExtension=sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".abin"));
+            	  File objDestFile=new File(filenameWithoutExtension+".obj");
+                  File mtlDestFile=new File(filenameWithoutExtension+".mtl");
+                  if(!objDestFile.exists())
+                      if(!objDestFile.createNewFile())
+                          {System.out.println(objDestFile.getAbsolutePath()+" cannot be created!");
+                           continue;
+                          }
+                  if(!mtlDestFile.exists())
+                      if(!mtlDestFile.createNewFile())
+                          {System.out.println(mtlDestFile.getAbsolutePath()+" cannot be created!");
+                           continue;
+                          }
+                  System.out.println("Converting "+arg+" ...");
+            	  objExporter.save(mesh,objDestFile,mtlDestFile);
+            	  System.out.println(arg+" successfully converted");
+                 }
+            }
+	}
+
+	public static final void main(final String[] args){
+		try{final ArdorToObjConverter converter=new ArdorToObjConverter();
+		    converter.run(args);
+		   }
+		catch(Throwable t)
+		{t.printStackTrace();}
+    }
+}
