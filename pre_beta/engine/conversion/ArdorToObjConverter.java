@@ -16,9 +16,12 @@ package engine.conversion;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+
 import com.ardor3d.extension.model.obj.ObjExporter;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
@@ -48,25 +51,34 @@ public class ArdorToObjConverter {
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              binarySpatial=(Spatial)binaryImporter.load(sourceFile);
+             final String filenameWithoutExtension=sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".abin"));
+             File objDestFile=new File(filenameWithoutExtension+".obj");
+             File mtlDestFile=new File(filenameWithoutExtension+".mtl");
+             if(!objDestFile.exists())
+                 if(!objDestFile.createNewFile())
+                     {System.out.println(objDestFile.getAbsolutePath()+" cannot be created!");
+                      continue;
+                     }
+             if(!mtlDestFile.exists())
+                 if(!mtlDestFile.createNewFile())
+                     {System.out.println(mtlDestFile.getAbsolutePath()+" cannot be created!");
+                      continue;
+                     }
+             System.out.println("Converting "+arg+" ...");
              if(binarySpatial instanceof Mesh)
                  {final Mesh mesh=(Mesh)binarySpatial;
-            	  final String filenameWithoutExtension=sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".abin"));
-            	  File objDestFile=new File(filenameWithoutExtension+".obj");
-                  File mtlDestFile=new File(filenameWithoutExtension+".mtl");
-                  if(!objDestFile.exists())
-                      if(!objDestFile.createNewFile())
-                          {System.out.println(objDestFile.getAbsolutePath()+" cannot be created!");
-                           continue;
-                          }
-                  if(!mtlDestFile.exists())
-                      if(!mtlDestFile.createNewFile())
-                          {System.out.println(mtlDestFile.getAbsolutePath()+" cannot be created!");
-                           continue;
-                          }
-                  System.out.println("Converting "+arg+" ...");
-            	  objExporter.save(mesh,objDestFile,mtlDestFile);
-            	  System.out.println(arg+" successfully converted");
-                 }
+                  objExporter.save(mesh,objDestFile,mtlDestFile);
+            	 }
+             else
+                 if(binarySpatial instanceof Node)
+                     {final Node node=(Node)binarySpatial;
+                      ArrayList<Mesh> meshes=new ArrayList<>();
+                      for(Spatial child:node.getChildren())
+                          if(child instanceof Mesh)
+                        	  meshes.add((Mesh)child);
+                      objExporter.save(meshes,objDestFile,mtlDestFile,null);
+                     }
+             System.out.println(arg+" successfully converted");
             }
 	}
 
