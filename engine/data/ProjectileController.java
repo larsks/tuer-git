@@ -19,6 +19,12 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 
 import engine.misc.ApplicativeTimer;
 
+/**
+ * Controller of a projectile which makes a uniformly accelerated rectilinear motion.
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class ProjectileController implements SpatialController<Node>{
 	
 	protected final ApplicativeTimer timer;
