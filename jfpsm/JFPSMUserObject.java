@@ -13,6 +13,12 @@
 */
 package jfpsm;
 
+/**
+ * Object managed by JFPSM, it appears in the tree and in its dedicated viewer if any.
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resolvable{
 
     
@@ -33,6 +39,13 @@ public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resol
     
     abstract boolean canInstantiateChildren();
     
+    /**
+     * Creates a dedicated viewer for this object, it returns <code>null</code> if it has no such viewer
+     * 
+     * @param project project in which this object is, can be null if it does not depend on any project
+     * @param projectManager project manager
+     * @return
+     */
     public Viewer createViewer(final Project project,final ProjectManager projectManager){
     	return(null);
     }
