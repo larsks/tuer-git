@@ -13,19 +13,52 @@
 */
 package jfpsm;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+/**
+ * Set of tools
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public final class ToolSet extends JFPSMUserObject{
 
-final class OpenConverterAction implements ActionListener{
+	private static final long serialVersionUID=1L;
 	
-	private final ProjectManager projectManager;
-
-	OpenConverterAction(ProjectManager projectManager){
-		this.projectManager=projectManager;
+	//TODO add a list of tools
+	
+	public ToolSet(){
+		this("");
+	}
+	
+	public ToolSet(final String name){
+		super(name);
 	}
 
 	@Override
-    public final void actionPerformed(ActionEvent e){
-        this.projectManager.openConverter();
+	public boolean isDirty(){
+		return(false);
+	}
+
+	@Override
+	public void markDirty(){
+	}
+
+	@Override
+	public void unmarkDirty(){
+	}
+
+	@Override
+    final boolean isOpenable(){
+        //it is always open and it cannot be closed
+        return(false);
     }
+
+    @Override
+    final boolean isRemovable(){
+        return(false);
+    }
+
+	@Override
+	boolean canInstantiateChildren(){
+		return(false);
+	}
 }

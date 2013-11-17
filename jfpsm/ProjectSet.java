@@ -39,7 +39,7 @@ public final class ProjectSet extends JFPSMUserObject{
 	
     private static final ProjectFileFilter projectFileFilter=new ProjectFileFilter();
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID=1L;
     
     private ArrayList<Project> projectsList;
     

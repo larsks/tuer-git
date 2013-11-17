@@ -32,7 +32,6 @@ import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -61,7 +60,7 @@ import javax.swing.tree.TreeSelectionModel;
 public final class ProjectManager extends JPanel{
 
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID=1L;
 	
 	private final JTree projectsTree;
 	
@@ -73,17 +72,18 @@ public final class ProjectManager extends JPanel{
 
 	
 	/**
-	 * build a project manager
+	 * builds a project manager
 	 * @param mainWindow window that contains this manager
 	 */
 	public ProjectManager(final MainWindow mainWindow){
+		super();
+		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		this.mainWindow=mainWindow;
 		quitEnabled=true;
 		progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));		
         final DefaultMutableTreeNode projectsRoot=new DefaultMutableTreeNode(new ProjectSet("Project Set"));
         projectsTree=new JTree(new DefaultTreeModel(projectsRoot));
-        JScrollPane treePane=new JScrollPane(projectsTree);
+        final JScrollPane treePane=new JScrollPane(projectsTree);
         projectsTree.setShowsRootHandles(true);
         projectsTree.addTreeWillExpandListener(new TreeWillExpandListener(){
 
@@ -107,14 +107,11 @@ public final class ProjectManager extends JPanel{
         final JMenuItem exportMenuItem=new JMenuItem("Export");
         //FIXME: re-organizes the GUI that allows to generate game files
         final JMenuItem generateGameFilesMenuItem=new JMenuItem("Generate game files");
-        final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
-        final JMenuItem openMenuItem=new JMenuItem("Open");        
-        final JMenuItem closeMenuItem=new JMenuItem("Close");       
-        final JMenuItem deleteMenuItem=new JMenuItem("Delete");       
+        final JMenuItem refreshMenuItem=new JMenuItem("Refresh");
+        final JMenuItem openMenuItem=new JMenuItem("Open");
+        final JMenuItem closeMenuItem=new JMenuItem("Close");
+        final JMenuItem deleteMenuItem=new JMenuItem("Delete");
         final JMenuItem saveMenuItem=new JMenuItem("Save");
-        final JPopupMenu.Separator separator=new JPopupMenu.Separator();
-        final JMenu toolsMenu=new JMenu("Tools");
-        final JMenuItem converterMenuItem=new JMenuItem("Converter");
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(renameMenuItem);
         treePopupMenu.add(importMenuItem);
@@ -125,9 +122,6 @@ public final class ProjectManager extends JPanel{
         treePopupMenu.add(closeMenuItem);
         treePopupMenu.add(deleteMenuItem);
         treePopupMenu.add(saveMenuItem);
-        treePopupMenu.add(separator);
-        treePopupMenu.add(toolsMenu);
-        toolsMenu.add(converterMenuItem);
         //builds action listeners
         newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
@@ -139,7 +133,6 @@ public final class ProjectManager extends JPanel{
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
         deleteMenuItem.addActionListener(new DeleteSelectedEntitiesAction(this));
         saveMenuItem.addActionListener(new SaveSelectedEntitiesAction(this));
-        converterMenuItem.addActionListener(new OpenConverterAction(this));
         projectsTree.setCellRenderer(new DefaultTreeCellRenderer(){
 			
 			private static final long serialVersionUID=1L;
@@ -156,21 +149,21 @@ public final class ProjectManager extends JPanel{
 				    {DefaultMutableTreeNode node=(DefaultMutableTreeNode)value;
 					 Object userObject=node.getUserObject();
 					 if(defaultLeafIcon==null)
-						 //get the default icon stored in the super class
+						 //gets the default icon stored in the super class
 						 defaultLeafIcon=super.getLeafIcon();
 				     if(userObject instanceof Tile)
 				    	 {int w=super.getLeafIcon().getIconWidth(),h=super.getLeafIcon().getIconHeight();
 				    	  if(coloredTileLeafIcon==null)
-				    		  {//build the image icon used to render the icon of the tile in the tree				    		   
+				    		  {//builds the image icon used to render the icon of the tile in the tree				    		   
 				    		   BufferedImage coloredTileImage=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);				    		  
 				    		   coloredTileLeafIcon=new ImageIcon(coloredTileImage);				    		   
 				    		  }
-				    	  //set the color
+				    	  //sets the color
 				    	  Tile tile=(Tile)userObject;
 				    	  for(int x=0;x<w;x++)
 				    		  for(int y=0;y<h;y++)
 				    	          ((BufferedImage)coloredTileLeafIcon.getImage()).setRGB(x,y,tile.getColor().getRGB());
-				    	  //set the colored icon
+				    	  //sets the colored icon
 				    	  setLeafIcon(coloredTileLeafIcon);
 				    	 }
 				     else
@@ -191,7 +184,7 @@ public final class ProjectManager extends JPanel{
                 handleMouseEvent(e);
             }
             
-            private final void handleMouseEvent(MouseEvent e){           	
+            private final void handleMouseEvent(MouseEvent e){
                 if(e.isPopupTrigger())
                     {//gets all selected paths
                      TreePath[] paths=projectsTree.getSelectionPaths();
@@ -225,7 +218,6 @@ public final class ProjectManager extends JPanel{
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof FloorSet||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
-                          final boolean showTools=singleSelection&&userObject instanceof ProjectSet;
                           boolean showOpenAndClose;
                           showOpenAndClose=false;
                           JFPSMUserObject currentUserObject;
@@ -255,8 +247,6 @@ public final class ProjectManager extends JPanel{
                           closeMenuItem.setVisible(showOpenAndClose);
                           deleteMenuItem.setVisible(showDelete);
                           saveMenuItem.setVisible(showSave);
-                          separator.setVisible(showTools);
-                          toolsMenu.setVisible(showTools);
                           treePopupMenu.show(mainWindow.getApplicativeFrame(),e.getXOnScreen(),e.getYOnScreen());
                          }
                     }
@@ -272,7 +262,7 @@ public final class ProjectManager extends JPanel{
                              }
                 	    }
             }
-        });       
+        });
         add(treePane);       
 	}
 	
@@ -694,10 +684,6 @@ public final class ProjectManager extends JPanel{
         DefaultTreeModel treeModel=(DefaultTreeModel)projectsTree.getModel();
         for(int i=0;i<node.getChildCount();i++)
             expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
-    }
-    
-    final void openConverter(){
-    	//TODO
     }
     
     final void openSelectedEntities(){
