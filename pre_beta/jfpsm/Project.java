@@ -27,7 +27,7 @@ import misc.SerializationHelper;
  * @author Julien Gouesse
  *
  */
-public final class Project extends JFPSMUserObject{
+public final class Project extends JFPSMProjectUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Project.class);}
@@ -112,9 +112,6 @@ public final class Project extends JFPSMUserObject{
      * @return project name from this file if it is a project file, otherwise <code>null</code>
      */
     public static final String getProjectNameFromFile(File projectFile){
-    	/*String fullname=projectFile.getName();
-    	String projectName=fullname.substring(0,fullname.length()-Project.getFileExtension().length());
-    	return(projectName);*/
     	String projectName=null;
     	try(ZipFile zipFile=new ZipFile(projectFile)){
     		ZipEntry entry=zipFile.getEntry("project.xml");

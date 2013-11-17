@@ -40,24 +40,65 @@ final class EntityViewer extends JPanel{
     private final HashMap<Namable,JPanel> entityToTabComponentMap;
     
     private final ProjectManager projectManager;
+    
+    private final ToolManager toolManager;
 
     
-    EntityViewer(ProjectManager projectManager){
+    EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
     	this.projectManager=projectManager;
+    	this.toolManager=toolManager;
     	entityToTabComponentMap=new HashMap<>();
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         entityTabbedPane=new JTabbedPane();
         add(entityTabbedPane);
     }
     
+    final boolean openEntityView(final JFPSMToolUserObject entity){
+    	final boolean success;
+    	JPanel tabComponent=entityToTabComponentMap.get(entity);
+    	final Viewer entityView;
+    	if(tabComponent==null)
+    	    {entityView=entity.createViewer(toolManager);
+    	     if(entityView!=null)
+    	         {entityTabbedPane.addTab(entity.getName(),entityView);
+                  tabComponent=new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
+                  entityToTabComponentMap.put(entity,tabComponent);
+                  tabComponent.setOpaque(false);
+                  tabComponent.add(new JLabel(entity.getName()));
+                  final JButton closeButton=new JButton("x");
+                  closeButton.addActionListener(new ActionListener(){               
+                      @Override
+                      public final void actionPerformed(ActionEvent e){
+                	      closeEntityView(entity);
+                      }
+                  });
+                  //removes all margins
+                  closeButton.setMargin(new Insets(0,0,0,0));
+                  tabComponent.add(closeButton);
+                  entityTabbedPane.setTabComponentAt(entityTabbedPane.indexOfComponent(entityView),tabComponent);
+                  success=true;
+    	        }
+    	     else
+    	    	 {//this entity has no dedicated viewer
+    	    	  success=false;
+    	    	 }
+    	    }
+    	else
+    		{//the view of this entity is already open, selects it
+    		 entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
+    		 success=true;
+    		}
+        return(success);
+    }
+    
     /**
      * Opens the view of an entity. Creates it if it does not exist yet, otherwise selects it
      * 
      * @param entity entity to view
-     * @param project project in which this entity is, can be null if it does not depend on any project
+     * @param project project in which this entity is
      * @return
      */
-    final boolean openEntityView(final JFPSMUserObject entity,final Project project){
+    final boolean openEntityView(final JFPSMProjectUserObject entity,final Project project){
     	final boolean success;
     	JPanel tabComponent=entityToTabComponentMap.get(entity);
     	final Viewer entityView;

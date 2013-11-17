@@ -13,17 +13,21 @@
 */
 package jfpsm;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Set of tools
  * 
  * @author Julien Gouesse
  *
  */
-public final class ToolSet extends JFPSMUserObject{
+public final class ToolSet extends JFPSMToolUserObject{
 
 	private static final long serialVersionUID=1L;
 	
-	//TODO add a list of tools
+	private final ArrayList<Tool> toolsList;
 	
 	public ToolSet(){
 		this("");
@@ -31,6 +35,7 @@ public final class ToolSet extends JFPSMUserObject{
 	
 	public ToolSet(final String name){
 		super(name);
+		toolsList=new ArrayList<>();
 	}
 
 	@Override
@@ -44,6 +49,15 @@ public final class ToolSet extends JFPSMUserObject{
 
 	@Override
 	public void unmarkDirty(){
+	}
+	
+	final void addTool(final Tool tool){
+		toolsList.add(tool);
+		markDirty();
+	}
+	
+	final List<Tool> getToolsList(){
+		return(Collections.unmodifiableList(toolsList));
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import misc.SerializationHelper;
  * @author Julien Gouesse
  *
  */
-public final class Tile extends JFPSMUserObject{   
+public final class Tile extends JFPSMProjectUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Tile.class);}

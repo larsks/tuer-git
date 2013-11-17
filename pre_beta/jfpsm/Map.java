@@ -18,7 +18,7 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import misc.SerializationHelper;
 
-public final class Map extends JFPSMUserObject{
+public final class Map extends JFPSMProjectUserObject{
 
 	
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Map.class);}

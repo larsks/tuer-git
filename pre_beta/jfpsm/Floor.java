@@ -22,7 +22,7 @@ import misc.SerializationHelper;
  * @author Julien Gouesse
  *
  */
-public final class Floor extends JFPSMUserObject{
+public final class Floor extends JFPSMProjectUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Floor.class);}

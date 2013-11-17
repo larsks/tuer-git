@@ -21,7 +21,7 @@ import misc.SerializationHelper;
  * @author Julien Gouesse
  *
  */
-public final class LevelSet extends JFPSMUserObject{
+public final class LevelSet extends JFPSMProjectUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(LevelSet.class);}

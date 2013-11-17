@@ -13,39 +13,38 @@
 */
 package jfpsm;
 
-/**
- * Object managed by JFPSM, it appears in the tree and in its dedicated viewer if any.
- * 
- * @author Julien Gouesse
- *
- */
-public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resolvable{
+public abstract class Tool extends JFPSMToolUserObject{
 
-    
-    private static final long serialVersionUID=1L;
 
-    
-    public JFPSMUserObject(){
-        super("");
-    }
-    
-    public JFPSMUserObject(String name){
-        super(name);
-    }
-
-    abstract boolean isRemovable();
-    
-    abstract boolean isOpenable();
-    
-    abstract boolean canInstantiateChildren();
+	private static final long serialVersionUID=1L;
+	
+	public Tool(final String name){
+		super(name);
+	}
+	
+	@Override
+    public final boolean isDirty(){
+		return(false);
+	}
+	
+	@Override
+    public final void unmarkDirty(){}
     
     @Override
-    public final void setName(String name){
-        super.setName(name);
-        //mark the entity as dirty when the user renames it
-        markDirty();
+    public final void markDirty(){}
+
+	@Override
+    final boolean canInstantiateChildren(){
+        return(true);
     }
-    
+
     @Override
-    public void resolve(){}
+    final boolean isOpenable(){
+        return(true);
+    }
+
+    @Override
+    final boolean isRemovable(){
+        return(false);
+    }
 }
