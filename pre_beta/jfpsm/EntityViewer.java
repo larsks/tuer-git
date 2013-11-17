@@ -50,47 +50,63 @@ final class EntityViewer extends JPanel{
         add(entityTabbedPane);
     }
     
+    /**
+     * Opens the view of an entity. Creates it if it does not exist yet, otherwise selects it
+     * 
+     * @param entity entity to view
+     * @param project project in which this entity is, can be null if it does not depend on any project
+     * @return
+     */
     final boolean openEntityView(final JFPSMUserObject entity,final Project project){
     	final boolean success;
-    	JPanel tabComponent;
-    	Viewer entityView=null;
-    	if(success=((tabComponent=entityToTabComponentMap.get(entity))==null&&(entityView=entity.createViewer(project,projectManager))!=null))
-    	    {entityTabbedPane.addTab(entity.getName(),entityView);
-             tabComponent=new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
-             entityToTabComponentMap.put(entity,tabComponent);
-             tabComponent.setOpaque(false);
-             tabComponent.add(new JLabel(entity.getName()));
-             JButton closeButton=new JButton("x");
-             closeButton.addActionListener(new ActionListener(){               
-                 @Override
-                 public final void actionPerformed(ActionEvent e){
-                	 closeEntityView(entity);
-                 }
-             });
-             //remove all margins
-             closeButton.setMargin(new Insets(0,0,0,0));
-             tabComponent.add(closeButton);
-             entityTabbedPane.setTabComponentAt(entityTabbedPane.indexOfComponent(entityView),tabComponent);
+    	JPanel tabComponent=entityToTabComponentMap.get(entity);
+    	final Viewer entityView;
+    	if(tabComponent==null)
+    	    {entityView=entity.createViewer(project,projectManager);
+    	     if(entityView!=null)
+    	         {entityTabbedPane.addTab(entity.getName(),entityView);
+                  tabComponent=new JPanel(new FlowLayout(FlowLayout.LEFT,3,0));
+                  entityToTabComponentMap.put(entity,tabComponent);
+                  tabComponent.setOpaque(false);
+                  tabComponent.add(new JLabel(entity.getName()));
+                  final JButton closeButton=new JButton("x");
+                  closeButton.addActionListener(new ActionListener(){               
+                      @Override
+                      public final void actionPerformed(ActionEvent e){
+                	      closeEntityView(entity);
+                      }
+                  });
+                  //removes all margins
+                  closeButton.setMargin(new Insets(0,0,0,0));
+                  tabComponent.add(closeButton);
+                  entityTabbedPane.setTabComponentAt(entityTabbedPane.indexOfComponent(entityView),tabComponent);
+                  success=true;
+    	        }
+    	     else
+    	    	 {//this entity has no dedicated viewer
+    	    	  success=false;
+    	    	 }
     	    }
     	else
-    		//if the view of this entity is already open, select it
-    		if(tabComponent!=null)
-    		    entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
+    		{//the view of this entity is already open, selects it
+    		 entityTabbedPane.setSelectedIndex(entityTabbedPane.indexOfTabComponent(tabComponent));
+    		 success=true;
+    		}
         return(success);
     }
     
     final boolean renameEntityView(final Namable entity){
-    	final boolean success;
-    	final JPanel tabComponent;
-    	if(success=(tabComponent=entityToTabComponentMap.get(entity))!=null)
+    	final JPanel tabComponent=entityToTabComponentMap.get(entity);
+    	final boolean success=tabComponent!=null;
+    	if(tabComponent!=null)
 	        ((JLabel)tabComponent.getComponent(0)).setText(entity.getName());
     	return(success);
     }
         
     final boolean closeEntityView(final Namable entity){
-    	JPanel tabComponent=entityToTabComponentMap.get(entity);
-    	final boolean success;
-    	if(success=tabComponent!=null)
+    	final JPanel tabComponent=entityToTabComponentMap.get(entity);
+    	final boolean success=tabComponent!=null;
+    	if(tabComponent!=null)
     	    {entityTabbedPane.removeTabAt(entityTabbedPane.indexOfTabComponent(tabComponent));
     	     entityToTabComponentMap.remove(entity);
     	    }
