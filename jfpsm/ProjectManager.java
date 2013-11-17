@@ -266,13 +266,12 @@ public final class ProjectManager extends JPanel{
                 	    {final TreePath path=projectsTree.getSelectionPath();
                          final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
                          final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();    
-                         if(userObject!=null)
+                         if(userObject!=null&&userObject.isOpenable())
                              {final Project project=getProjectFromSelectedNode(selectedNode);
-                              if(project!=null)
-                        	      mainWindow.getEntityViewer().openEntityView(userObject,project);                        
+                        	  mainWindow.getEntityViewer().openEntityView(userObject,project);
                              }
                 	    }
-            }           
+            }
         });       
         add(treePane);       
 	}
@@ -708,18 +707,14 @@ public final class ProjectManager extends JPanel{
         for(TreePath path:paths)
             {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              userObject=(JFPSMUserObject)selectedNode.getUserObject();
-             if(userObject instanceof Project||userObject instanceof LevelSet||userObject instanceof FloorSet||userObject instanceof TileSet||userObject instanceof Floor)
-                 expandPathDeeplyFromPath(path);
-             if(userObject instanceof Tile)
-                 {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
-                  mainWindow.getEntityViewer().openEntityView(userObject,project);                       
+             if(userObject.isOpenable())
+                 {expandPathDeeplyFromPath(path);
+            	  if(userObject instanceof Tile||userObject instanceof Floor)
+                      {final Project project=getProjectFromSelectedNode(selectedNode);
+            	       //opens a tab view for this entity
+                       mainWindow.getEntityViewer().openEntityView(userObject,project);
+                      }
                  }
-             else
-                 if(userObject instanceof Floor)
-                     {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent().getParent()).getUserObject();                                 
-                      //opens a tab view for this entity
-                      mainWindow.getEntityViewer().openEntityView(userObject,project);                       
-                     }
             }
     }
     
