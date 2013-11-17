@@ -113,7 +113,7 @@ public final class MainWindow{
     	//builds the projects manager
     	projectManager=new ProjectManager(this);
     	//builds the viewer
-        entityViewer=new EntityViewer(projectManager);
+        entityViewer=new EntityViewer(projectManager,toolManager);
         JSplitPane leftSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,toolManager,projectManager);
         JSplitPane mainSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,true,leftSplitPane,entityViewer);
         leftSplitPane.setOneTouchExpandable(true);

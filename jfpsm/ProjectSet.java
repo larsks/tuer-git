@@ -32,7 +32,7 @@ import misc.SerializationHelper;
  * @author Julien Gouesse
  *
  */
-public final class ProjectSet extends JFPSMUserObject{
+public final class ProjectSet extends JFPSMProjectUserObject{
     
     
 	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(ProjectSet.class);}
