@@ -26,11 +26,13 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -87,7 +89,7 @@ public final class ProjectManager extends JPanel{
 
             @Override
             public final void treeWillCollapse(TreeExpansionEvent event)throws ExpandVetoException{             
-                //prevent the user from collapsing the root
+                //prevents the user from collapsing the root
                 if(((DefaultMutableTreeNode)event.getPath().getLastPathComponent()).getUserObject() instanceof ProjectSet)
                     throw new ExpandVetoException(event);
             }
@@ -97,19 +99,22 @@ public final class ProjectManager extends JPanel{
         });
         projectsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         loadExistingProjects();
-        //build the popup menu
+        //builds the popup menu
         final JPopupMenu treePopupMenu=new JPopupMenu();
         final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
         final JMenuItem exportMenuItem=new JMenuItem("Export");
-        //FIXME: re-organize the GUI that allows to generate game files
+        //FIXME: re-organizes the GUI that allows to generate game files
         final JMenuItem generateGameFilesMenuItem=new JMenuItem("Generate game files");
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");       
         final JMenuItem openMenuItem=new JMenuItem("Open");        
         final JMenuItem closeMenuItem=new JMenuItem("Close");       
         final JMenuItem deleteMenuItem=new JMenuItem("Delete");       
         final JMenuItem saveMenuItem=new JMenuItem("Save");
+        final JPopupMenu.Separator separator=new JPopupMenu.Separator();
+        final JMenu toolsMenu=new JMenu("Tools");
+        final JMenuItem converterMenuItem=new JMenuItem("Converter");
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(renameMenuItem);
         treePopupMenu.add(importMenuItem);
@@ -120,7 +125,10 @@ public final class ProjectManager extends JPanel{
         treePopupMenu.add(closeMenuItem);
         treePopupMenu.add(deleteMenuItem);
         treePopupMenu.add(saveMenuItem);
-        //build action listeners
+        treePopupMenu.add(separator);
+        treePopupMenu.add(toolsMenu);
+        toolsMenu.add(converterMenuItem);
+        //builds action listeners
         newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
         renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
         importMenuItem.addActionListener(new ImportSelectedEntityAction(this));
@@ -131,6 +139,7 @@ public final class ProjectManager extends JPanel{
         closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
         deleteMenuItem.addActionListener(new DeleteSelectedEntitiesAction(this));
         saveMenuItem.addActionListener(new SaveSelectedEntitiesAction(this));
+        converterMenuItem.addActionListener(new OpenConverterAction(this));
         projectsTree.setCellRenderer(new DefaultTreeCellRenderer(){
 			
 			private static final long serialVersionUID=1L;
@@ -184,12 +193,12 @@ public final class ProjectManager extends JPanel{
             
             private final void handleMouseEvent(MouseEvent e){           	
                 if(e.isPopupTrigger())
-                    {//get all selected paths
+                    {//gets all selected paths
                      TreePath[] paths=projectsTree.getSelectionPaths();
                 	 TreePath mouseOverPath=projectsTree.getClosestPathForLocation(e.getX(),e.getY());
                      if(mouseOverPath!=null)
                          {//if no node is selected or if the node under the mouse pointer is not selected
-                          //then select only the node under the mouse pointer and invalidate the previous selection
+                          //then selects only the node under the mouse pointer and invalidate the previous selection
                           boolean found=false;
                           if(paths!=null)
                               for(TreePath path:paths)
@@ -198,14 +207,14 @@ public final class ProjectManager extends JPanel{
                                        break;
                                       }
                           if(!found)
-                              {//select the path on right click if none was already selected                      
+                              {//selects the path on right click if none was already selected                      
                                projectsTree.setSelectionPath(mouseOverPath);
                                paths=new TreePath[]{mouseOverPath};
                               }                                                     
                          }
                      if(paths!=null)
                          {final boolean singleSelection=paths.length==1;
-                          //get the first selected tree node
+                          //gets the first selected tree node
                           final TreePath path=projectsTree.getSelectionPath();
                           final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
                           final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
@@ -216,6 +225,7 @@ public final class ProjectManager extends JPanel{
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof FloorSet||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
+                          final boolean showTools=singleSelection&&userObject instanceof ProjectSet;
                           boolean showOpenAndClose;
                           showOpenAndClose=false;
                           JFPSMUserObject currentUserObject;
@@ -245,6 +255,8 @@ public final class ProjectManager extends JPanel{
                           closeMenuItem.setVisible(showOpenAndClose);
                           deleteMenuItem.setVisible(showDelete);
                           saveMenuItem.setVisible(showSave);
+                          separator.setVisible(showTools);
+                          toolsMenu.setVisible(showTools);
                           treePopupMenu.show(mainWindow.getApplicativeFrame(),e.getXOnScreen(),e.getYOnScreen());
                          }
                     }
@@ -257,7 +269,7 @@ public final class ProjectManager extends JPanel{
                          if(userObject!=null)
                              {final Project project=getProjectFromSelectedNode(selectedNode);
                               if(project!=null)
-                        	      ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                        
+                        	      mainWindow.getEntityViewer().openEntityView(userObject,project);                        
                              }
                 	    }
             }           
@@ -301,7 +313,7 @@ public final class ProjectManager extends JPanel{
      * saves all projects of the current projects set
      */
     final void saveCurrentWorkspace(){
-    	//check if the tree has been fully created
+    	//checks if the tree has been fully created
    	    //this method may be called very early if something does not work
    	    if(projectsTree!=null)
    	        {DefaultTreeModel treeModel=(DefaultTreeModel)projectsTree.getModel();
@@ -685,6 +697,10 @@ public final class ProjectManager extends JPanel{
             expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
     }
     
+    final void openConverter(){
+    	//TODO
+    }
+    
     final void openSelectedEntities(){
         TreePath[] paths=projectsTree.getSelectionPaths();
         DefaultMutableTreeNode selectedNode;
@@ -696,13 +712,13 @@ public final class ProjectManager extends JPanel{
                  expandPathDeeplyFromPath(path);
              if(userObject instanceof Tile)
                  {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent()).getUserObject();                                 
-                  ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                       
+                  mainWindow.getEntityViewer().openEntityView(userObject,project);                       
                  }
              else
                  if(userObject instanceof Floor)
                      {Project project=(Project)((DefaultMutableTreeNode)selectedNode.getParent().getParent().getParent()).getUserObject();                                 
                       //opens a tab view for this entity
-                      ProjectManager.this.mainWindow.getEntityViewer().openEntityView(userObject,project);                       
+                      mainWindow.getEntityViewer().openEntityView(userObject,project);                       
                      }
             }
     }
