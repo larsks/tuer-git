@@ -235,7 +235,7 @@ public final class ProjectSet extends JFPSMUserObject{
     }
     
     private final void initializeWorkspaceDirectory(){
-    	//ensure the workspace directory exists and is writable
+    	//ensures that the workspace directory exists and is writable
         workspaceDirectory=new File(System.getProperty("user.home")+System.getProperty("file.separator")+"jfpsm");       
         if(!workspaceDirectory.exists()||!workspaceDirectory.isDirectory())
             workspaceDirectory.mkdir();
