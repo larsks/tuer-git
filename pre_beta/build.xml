@@ -37,6 +37,7 @@
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="jfpsm-application-name" value="Java First Person Shooter Maker"/>
 	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
+	<property name="jfpsm-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
 	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
@@ -250,6 +251,7 @@
 			<manifest>
 				<attribute name="Application-Name" value="${jfpsm-application-name}"/>
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
+				<attribute name="SplashScreen-Image" value="${jfpsm-splashscreen-image}"/>
 				<attribute name="Permissions" value="all-permissions"/>
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
@@ -615,6 +617,7 @@
 			  dir="${bindir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
+			<jvmarg value="-splash:${jfpsm-splashscreen-image}"/>
 			<jvmarg value="-Xmx512m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
 		</java>
