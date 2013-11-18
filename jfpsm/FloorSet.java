@@ -14,6 +14,9 @@
 package jfpsm;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import misc.SerializationHelper;
 
 /**
@@ -80,7 +83,7 @@ public final class FloorSet extends JFPSMProjectUserObject{
         markDirty();
     }
 
-    public final ArrayList<Floor> getFloorsList(){
+    public final List<Floor> getFloorsList(){
         return(floorsList);
     }
 

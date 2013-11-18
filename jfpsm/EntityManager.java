@@ -96,6 +96,8 @@ public abstract class EntityManager extends JPanel{
             }
     }
 	
+	protected abstract Namable createNewEntityFromSelectedEntity();
+	
 	protected abstract void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException;
 	
 	public synchronized boolean isQuitEnabled(){
