@@ -186,8 +186,7 @@ public final class ProjectManager extends EntityManager{
                           final boolean showRefresh=singleSelection&&userObject instanceof ProjectSet;
                           final boolean showRename=singleSelection&&(userObject instanceof FloorSet||userObject instanceof Floor||userObject instanceof Tile);
                           final boolean showSave=singleSelection&&userObject instanceof Project;
-                          boolean showOpenAndClose;
-                          showOpenAndClose=false;
+                          boolean showOpenAndClose=false;
                           JFPSMUserObject currentUserObject;
                           for(TreePath currentPath:paths)
                               {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
@@ -196,8 +195,7 @@ public final class ProjectManager extends EntityManager{
                             		break;
                             	   }
                               }
-                          boolean showDelete;
-                          showDelete=false;
+                          boolean showDelete=false;
                           for(TreePath currentPath:paths)
                               {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
                                if(currentUserObject.isRemovable())
@@ -222,12 +220,14 @@ public final class ProjectManager extends EntityManager{
                 	//double-click
                 	if(e.getClickCount()==2)
                 	    {final TreePath path=tree.getSelectionPath();
-                         final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                         final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();    
-                         if(userObject!=null&&userObject.isOpenable())
-                             {final Project project=getProjectFromSelectedNode(selectedNode);
-                        	  mainWindow.getEntityViewer().openEntityView(userObject,project);
-                             }
+                	     if(path!=null)
+                	         {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+                              final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();    
+                              if(userObject!=null&&userObject.isOpenable())
+                                  {final Project project=getProjectFromSelectedNode(selectedNode);
+                        	       mainWindow.getEntityViewer().openEntityView(userObject,project);
+                                  }
+                	         }
                 	    }
             }
         });
@@ -791,65 +791,69 @@ public final class ProjectManager extends EntityManager{
     	return(color);
     }
     
-    final void deleteSelectedEntities(){
-        TreePath[] paths=tree.getSelectionPaths();
-        DefaultMutableTreeNode selectedNode;
-        JFPSMUserObject userObject;
+    @Override
+    protected void deleteSelectedEntities(){
+        final TreePath[] paths=tree.getSelectionPaths();
         ArrayList<DefaultMutableTreeNode> floorsTrashList=new ArrayList<>();
         ArrayList<DefaultMutableTreeNode> floorSetsTrashList=new ArrayList<>();
         ArrayList<DefaultMutableTreeNode> tilesTrashList=new ArrayList<>();
         ArrayList<DefaultMutableTreeNode> projectsTrashList=new ArrayList<>();        
         for(TreePath path:paths)
-            {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             userObject=(JFPSMUserObject)selectedNode.getUserObject();
-             if(userObject instanceof Tile)
-                 tilesTrashList.add(selectedNode);
-             else
-                 if(userObject instanceof Floor)
-                     floorsTrashList.add(selectedNode);
-                 else
-                     if(userObject instanceof FloorSet)
-                         floorSetsTrashList.add(selectedNode);
-                 else
-                     if(userObject instanceof Project)
-                         projectsTrashList.add(selectedNode);
+            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+             final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
+             if(userObject.isRemovable())
+                 {if(userObject instanceof Tile)
+                      tilesTrashList.add(selectedNode);
+                  else
+                      if(userObject instanceof Floor)
+                          floorsTrashList.add(selectedNode);
+                      else
+                          if(userObject instanceof FloorSet)
+                              floorSetsTrashList.add(selectedNode);
+                          else
+                              if(userObject instanceof Project)
+                                  projectsTrashList.add(selectedNode);
+                 }
             }
         final int elementsCount=floorsTrashList.size()+floorSetsTrashList.size()+tilesTrashList.size()+projectsTrashList.size();
         if(elementsCount>=1)
-            {StringBuffer entitiesBuffer=new StringBuffer();
-             for(int index=0;index<floorsTrashList.size();index++)
-                 entitiesBuffer.append(", \""+floorsTrashList.get(index).getUserObject().toString()+"\"");
-             for(int index=0;index<floorSetsTrashList.size();index++)
-                 entitiesBuffer.append(", \""+floorSetsTrashList.get(index).getUserObject().toString()+"\"");
-             for(int index=0;index<tilesTrashList.size();index++)
-                 entitiesBuffer.append(", \""+tilesTrashList.get(index).getUserObject().toString()+"\"");
-             for(int index=0;index<projectsTrashList.size();index++)
-                 entitiesBuffer.append(", \""+projectsTrashList.get(index).getUserObject().toString()+"\"");
-             //deletes the useless string ", " at the beginning
-             entitiesBuffer.delete(0,2);
-             String questionStart;
+            {final StringBuilder entitiesBuilder=new StringBuilder();
              final boolean noFloor=floorsTrashList.isEmpty();
              final boolean noLevel=floorSetsTrashList.isEmpty();
              final boolean noProject=projectsTrashList.isEmpty();
              final boolean noTile=tilesTrashList.isEmpty();
+             String questionStart;
              if(noFloor&&noProject&&noLevel)
-                 questionStart="Delete tile";                
+            	 questionStart="Delete tile";                
              else
                  if(noTile&&noProject&&noLevel)
-                     questionStart="Delete floor";
+                	 questionStart="Delete floor";
                  else
                      if(noFloor&&noTile&&noLevel)
-                         questionStart="Delete project";
+                    	 questionStart="Delete project";
                      else
                          if(noFloor&&noTile&&noProject)
-                             questionStart="Delete level";
+                        	 questionStart="Delete level";
                          else
-                             questionStart="Delete element";
+                        	 questionStart="Delete element";
              //checks if a plural is needed
              if(elementsCount>1)
-                 questionStart+="s";
-             String windowTitle="Confirm "+questionStart.toLowerCase();             
-             if(JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),questionStart+" "+entitiesBuffer.toString()+"?",windowTitle,JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION)
+            	 questionStart+="s";
+             entitiesBuilder.append(questionStart);
+             entitiesBuilder.append(" ");
+             for(int index=0;index<floorsTrashList.size();index++)
+                 entitiesBuilder.append("\""+floorsTrashList.get(index).getUserObject().toString()+"\", ");
+             for(int index=0;index<floorSetsTrashList.size();index++)
+                 entitiesBuilder.append("\""+floorSetsTrashList.get(index).getUserObject().toString()+"\", ");
+             for(int index=0;index<tilesTrashList.size();index++)
+                 entitiesBuilder.append("\""+tilesTrashList.get(index).getUserObject().toString()+"\", ");
+             for(int index=0;index<projectsTrashList.size();index++)
+                 entitiesBuilder.append("\""+projectsTrashList.get(index).getUserObject().toString()+"\", ");
+             //deletes the useless string ", " at the end
+             entitiesBuilder.delete(entitiesBuilder.length()-2,entitiesBuilder.length());
+             entitiesBuilder.append("?");
+             final String windowTitle="Confirm "+questionStart.toLowerCase();
+             if(JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),entitiesBuilder.toString(),windowTitle,JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION)
                  {final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
             	  for(DefaultMutableTreeNode node:tilesTrashList)
                       {TileSet tileSet=(TileSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();   
