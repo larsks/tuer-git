@@ -17,8 +17,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -41,6 +43,8 @@ public final class ToolManager extends EntityManager{
 	private final JMenuItem openMenuItem;
 	
 	private final JMenuItem closeMenuItem;
+	
+	private final JMenuItem deleteMenuItem;
 
 	public ToolManager(final MainWindow mainWindow) {
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ToolSet("Tool Set"))));
@@ -56,9 +60,11 @@ public final class ToolManager extends EntityManager{
         newMenuItem=new JMenuItem("New");
         openMenuItem=new JMenuItem("Open");
         closeMenuItem=new JMenuItem("Close");
+        deleteMenuItem=new JMenuItem("Delete");
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(openMenuItem);
         treePopupMenu.add(closeMenuItem);
+        treePopupMenu.add(deleteMenuItem);
         newMenuItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent ae){
@@ -75,6 +81,12 @@ public final class ToolManager extends EntityManager{
 			@Override
 			public void actionPerformed(ActionEvent ae){
 				closeSelectedEntities();
+			}
+		});
+        deleteMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				deleteSelectedEntities();
 			}
 		});
         tree.addMouseListener(new MouseAdapter(){   
@@ -119,8 +131,7 @@ public final class ToolManager extends EntityManager{
                   final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
                   final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
                   final boolean showNew=singleSelection&&userObject.canInstantiateChildren();
-                  boolean showOpenAndClose;
-                  showOpenAndClose=false;
+                  boolean showOpenAndClose=false;
                   JFPSMUserObject currentUserObject;
                   for(TreePath currentPath:paths)
                       {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
@@ -129,10 +140,19 @@ public final class ToolManager extends EntityManager{
                     		break;
                     	   }
                       }
+                  boolean showDelete=false;
+                  for(TreePath currentPath:paths)
+                      {currentUserObject=(JFPSMUserObject)((DefaultMutableTreeNode)currentPath.getLastPathComponent()).getUserObject();
+                       if(currentUserObject.isRemovable())
+                           {showDelete=true;
+                            break;
+                    	   }
+                      }
                   newMenuItem.setVisible(showNew);
                   openMenuItem.setVisible(showOpenAndClose);
                   closeMenuItem.setVisible(showOpenAndClose);
-                  if(showNew||showOpenAndClose)
+                  deleteMenuItem.setVisible(showDelete);
+                  if(showNew||showOpenAndClose||showDelete)
                       treePopupMenu.show(mainWindow.getApplicativeFrame(),me.getXOnScreen(),me.getYOnScreen());
                  }
             }
@@ -209,6 +229,54 @@ public final class ToolManager extends EntityManager{
                   if(userObject instanceof ModelConverter)
                       {//closes the tab view of this entity
                        mainWindow.getEntityViewer().closeEntityView(userObject);
+                      }
+                 }
+            }
+    }
+	
+	@Override
+    protected void deleteSelectedEntities(){
+        final TreePath[] paths=tree.getSelectionPaths();
+        final ArrayList<DefaultMutableTreeNode> modelConvertersNodesTrash=new ArrayList<>();
+        for(TreePath path:paths)
+            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+             final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
+             if(userObject.isRemovable())
+                 {if(userObject instanceof ModelConverter)
+                	  modelConvertersNodesTrash.add(selectedNode);
+                 }
+            }
+        final int elementsCount=modelConvertersNodesTrash.size();
+        if(elementsCount>=1)
+            {final StringBuilder entitiesBuilder=new StringBuilder();
+        	 final boolean noModelConverter=modelConvertersNodesTrash.isEmpty();
+        	 String questionStart;
+        	 if(noModelConverter)
+        		 questionStart="Delete element";
+        	 else
+        		 questionStart="Delete model converter";
+        	 //checks if a plural is needed
+             if(elementsCount>1)
+            	 questionStart+="s";
+             entitiesBuilder.append(questionStart);
+             entitiesBuilder.append(" ");
+             for(final DefaultMutableTreeNode modelConverterNode:modelConvertersNodesTrash)
+                 entitiesBuilder.append("\""+modelConverterNode.getUserObject().toString()+"\", ");
+             //deletes the useless string ", " at the end
+             entitiesBuilder.delete(entitiesBuilder.length()-2,entitiesBuilder.length());
+             entitiesBuilder.append("?");
+             final String windowTitle="Confirm "+questionStart.toLowerCase();
+             if(JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),entitiesBuilder.toString(),windowTitle,JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION)
+                 {final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
+                  for(DefaultMutableTreeNode node:modelConvertersNodesTrash)
+                      {final ModelConverterSet modelConverterSet=(ModelConverterSet)((DefaultMutableTreeNode)node.getParent()).getUserObject();   
+                       final ModelConverter modelConverter=(ModelConverter)node.getUserObject();
+                       //removes the model converter from the entity viewer by closing its tab view
+                       mainWindow.getEntityViewer().closeEntityView(modelConverter);
+                       //removes the model converter from the workspace
+                       modelConverterSet.removeModelConverter(modelConverter);
+                       //removes the model converter from the tree
+                       treeModel.removeNodeFromParent(node);
                       }
                  }
             }
