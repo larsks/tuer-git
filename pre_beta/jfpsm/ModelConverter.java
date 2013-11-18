@@ -13,10 +13,10 @@
 */
 package jfpsm;
 
-public class ModelConverter extends Tool{
+public class ModelConverter extends JFPSMToolUserObject{
 
 	private static final long serialVersionUID=1L;
-	
+
 	public ModelConverter(){
 		this("");
 	}
@@ -30,4 +30,30 @@ public class ModelConverter extends Tool{
 		//TODO
     	return(null);
     }
+
+	@Override
+	public boolean isDirty(){
+		return(false);
+	}
+
+	@Override
+	public void markDirty(){}
+
+	@Override
+	public void unmarkDirty(){}
+
+	@Override
+	boolean isRemovable(){
+		return(true);
+	}
+
+	@Override
+	boolean isOpenable(){
+		return(true);
+	}
+
+	@Override
+	boolean canInstantiateChildren(){
+		return(false);
+	}
 }

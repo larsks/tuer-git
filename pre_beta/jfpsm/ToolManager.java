@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JMenuItem;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -46,7 +47,7 @@ public final class ToolManager extends EntityManager{
 		final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
 		final DefaultMutableTreeNode toolsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
 		final ToolSet toolSet=(ToolSet)toolsRoot.getUserObject();
-		toolSet.addTool(new ModelConverter("Model Converter"));
+		toolSet.addTool(new ModelConverterSet("Model Converter Set"));
     	for(final Tool tool:toolSet.getToolsList())
     	    {DefaultMutableTreeNode toolNode=new DefaultMutableTreeNode(tool);
              treeModel.insertNodeInto(toolNode,toolsRoot,toolsRoot.getChildCount());
@@ -140,18 +141,40 @@ public final class ToolManager extends EntityManager{
         	if(me.getClickCount()==2)
         	    {final TreePath path=tree.getSelectionPath();
                  final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                 final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();    
+                 final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
                  if(userObject!=null&&userObject.isOpenable())
                      mainWindow.getEntityViewer().openEntityView(userObject);
         	    }
     }
 	
+	@Override
 	protected Namable createNewEntityFromSelectedEntity(){
     	final TreePath path=tree.getSelectionPath();
     	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-    	final Object userObject=selectedNode.getUserObject();
-    	//TODO
-    	return(null);
+    	final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
+    	final Namable newlyCreatedEntity;
+    	if(userObject.canInstantiateChildren()) 
+    	    {if(userObject instanceof ModelConverterSet)
+    	         {final ModelConverterSet modelConverterSet=(ModelConverterSet)userObject;
+    	          //creates the model converter
+    	    	  final ModelConverter modelConverter=new ModelConverter("Model Converter");
+    	          //adds it into the set
+    	    	  modelConverterSet.addModelConverter(modelConverter);
+    	          //creates and adds the node into the tree
+    	          final DefaultMutableTreeNode modelConverterNode=new DefaultMutableTreeNode(modelConverter);
+                  ((DefaultTreeModel)tree.getModel()).insertNodeInto(modelConverterNode,selectedNode,selectedNode.getChildCount());
+                  //expands the path of the set node
+                  final TreePath modelConverterSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
+                  if(!tree.isExpanded(modelConverterSetPath))
+      	              tree.expandPath(modelConverterSetPath);
+    	    	  newlyCreatedEntity=modelConverter;
+    	         }
+    	     else
+    	    	 newlyCreatedEntity=null;
+    	    }
+    	else
+    		newlyCreatedEntity=null;
+    	return(newlyCreatedEntity);
     }
 	
 	@Override
@@ -160,12 +183,12 @@ public final class ToolManager extends EntityManager{
         final TreePath[] paths=tree.getSelectionPaths();
         for(TreePath path:paths)
             {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
+             final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
              if(userObject.isOpenable())
-                 {/*if(userObject instanceof ModelConversion)
+                 {if(userObject instanceof ModelConverter)
                       {//opens a tab view for this entity
-                       mainWindow.getEntityViewer().openEntityView(userObject,null);
-                      }*/
+                       mainWindow.getEntityViewer().openEntityView(userObject);
+                      }
                  }
             }
     }
@@ -179,14 +202,14 @@ public final class ToolManager extends EntityManager{
              final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
              if(userObject.isOpenable())
                  {//closes the tab views of its children
-                  /*if(userObject instanceof ModelConverter)
-                      {for(ModelConversion modelConversion:((ModelConverter)userObject).getModelConversionsList())
-                    		  mainWindow.getEntityViewer().closeEntityView(modelConversion);
-                      }*/
-                  /*if(userObject instanceof ModelConversion)
+                  if(userObject instanceof ModelConverterSet)
+                      {for(final ModelConverter modelConverter:((ModelConverterSet)userObject).getModelConvertersList())
+                    		  mainWindow.getEntityViewer().closeEntityView(modelConverter);
+                      }
+                  if(userObject instanceof ModelConverter)
                       {//closes the tab view of this entity
                        mainWindow.getEntityViewer().closeEntityView(userObject);
-                      }*/
+                      }
                  }
             }
     }

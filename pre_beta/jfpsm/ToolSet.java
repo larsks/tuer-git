@@ -57,6 +57,7 @@ public final class ToolSet extends JFPSMToolUserObject{
 	}
 	
 	final List<Tool> getToolsList(){
+		//it should be unmodifiable if and only if it is not serialized
 		return(Collections.unmodifiableList(toolsList));
 	}
 

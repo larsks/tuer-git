@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -54,6 +56,8 @@ public final class ProjectManager extends EntityManager{
 	
 	private static final long serialVersionUID=1L;
 	
+	private static final Logger logger = Logger.getLogger(ProjectManager.class.getName());
+	
 	private final ProgressDialog progressDialog;
 
 	
@@ -64,7 +68,6 @@ public final class ProjectManager extends EntityManager{
 	public ProjectManager(final MainWindow mainWindow){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
 		progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
-        loadExistingProjects();
         //fills the popup menu
         final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
@@ -227,7 +230,16 @@ public final class ProjectManager extends EntityManager{
                              }
                 	    }
             }
-        });       
+        });
+        //FIXME use a SwingWorker, separate the model from the view
+        SwingUtilities.invokeLater(new Runnable(){
+			@Override
+			public void run(){
+				loadExistingProjects();
+				ProjectManager.this.mainWindow.getApplicativeFrame().invalidate();
+				ProjectManager.this.mainWindow.getApplicativeFrame().validate();
+			}
+        });
 	}
 	
 	@Override
@@ -305,7 +317,7 @@ public final class ProjectManager extends EntityManager{
      * loads existing projects, skips already loaded projects
      */
     final void loadExistingProjects(){
-        ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();
+        final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();
         for(String projectName:workspace.getProjectNames())
             addProject(projectName);
     }
@@ -314,9 +326,9 @@ public final class ProjectManager extends EntityManager{
         Project project=null;
         //if it is not in the tree
         if(!getAllProjectNames().contains(name))
-            {ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();            
-             String[] projectNames=workspace.getProjectNames();
-             File[] projectFiles=workspace.getProjectFiles();
+            {final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();            
+             final String[] projectNames=workspace.getProjectNames();
+             final File[] projectFiles=workspace.getProjectFiles();
              File projectFile=null;
              for(int i=0;i<projectNames.length;i++)
                  if(projectNames[i].equals(name))
@@ -390,82 +402,103 @@ public final class ProjectManager extends EntityManager{
         return(project);
     }
     
-    final Namable createNewEntityFromSelectedEntity(){
-    	TreePath path=tree.getSelectionPath();
-    	DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-    	Object userObject=selectedNode.getUserObject();
-    	NamingDialog enterNameDialog=null;
-    	Namable newlyCreatedEntity=null;
-    	if(userObject instanceof ProjectSet)
-    	    enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllProjectNames(),"project");
-    	else
-    		if(userObject instanceof FloorSet)
-                enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"floor");
-    		else
-    			if(userObject instanceof TileSet)
-                    {final ArrayList<Color> colors=new ArrayList<>();
-                     //white is used for void
-                     colors.add(Color.WHITE);
-                     for(Tile tile:((TileSet)userObject).getTilesList())
-                         colors.add(tile.getColor());
-                     enterNameDialog=new TileCreationDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),colors);
-                    }
-    			else
-    			    if(userObject instanceof LevelSet)
-    			        enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"level");
-    	if(enterNameDialog!=null)
-    	    {enterNameDialog.setVisible(true);
-             String name=enterNameDialog.getValidatedText();
-             enterNameDialog.dispose();
-             //if the name is correct and not already in use => not null
-    		 if(name!=null)
-    		     {if(userObject instanceof ProjectSet)
-    		          newlyCreatedEntity=addProject(name);
+    @Override
+    protected Namable createNewEntityFromSelectedEntity(){
+    	final TreePath path=tree.getSelectionPath();
+    	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+    	final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
+    	final Namable newlyCreatedEntity;
+    	if(userObject.canInstantiateChildren())
+    	    {final NamingDialog enterNameDialog;
+    		 if(userObject instanceof ProjectSet)
+    	         enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllProjectNames(),"project");
+    	     else
+    		     if(userObject instanceof FloorSet)
+                     enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"floor");
+    		     else
+    			     if(userObject instanceof TileSet)
+                         {final ArrayList<Color> colors=new ArrayList<>();
+                          //white is used for void
+                          colors.add(Color.WHITE);
+                          for(Tile tile:((TileSet)userObject).getTilesList())
+                              colors.add(tile.getColor());
+                          enterNameDialog=new TileCreationDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),colors);
+                         }
+    			     else
+    			         if(userObject instanceof LevelSet)
+    			             enterNameDialog=new NamingDialog(mainWindow.getApplicativeFrame(),getAllChildrenNames(selectedNode),"level");
+    			         else
+    			        	 enterNameDialog=null;
+    		 if(enterNameDialog!=null)
+    	         {enterNameDialog.setVisible(true);
+                  final String name=enterNameDialog.getValidatedText();
+                  enterNameDialog.dispose();
+                  //if the name is correct and not already in use => not null
+    		      if(name!=null)
+    		          {if(userObject instanceof ProjectSet)
+    		               newlyCreatedEntity=addProject(name);
+    		           else
+    		    	       if(userObject instanceof FloorSet)
+    		    	           {Floor floor=new Floor(name);
+                                ((FloorSet)userObject).addFloor(floor);
+                                DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
+                                ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorNode,selectedNode,selectedNode.getChildCount());
+                                //adds each node of a map
+                                DefaultMutableTreeNode mapNode;
+                                for(MapType type:MapType.values())
+                                    {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
+                                     ((DefaultTreeModel)tree.getModel()).insertNodeInto(mapNode,floorNode,floorNode.getChildCount());
+                                    }
+                                final TreePath floorSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
+                                if(!tree.isExpanded(floorSetPath))
+                    	            tree.expandPath(floorSetPath);
+                                final TreePath floorPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(floorNode));
+                                if(!tree.isExpanded(floorPath))
+                    	            tree.expandPath(floorPath);
+                                newlyCreatedEntity=floor;
+    		    	           }
+    		    	       else
+    		    		       if(userObject instanceof TileSet)
+    		    		           {Tile tile=new Tile(name);
+    		    		            tile.setColor(((TileCreationDialog)enterNameDialog).getValidatedColor());
+                                    ((TileSet)userObject).addTile(tile);  
+                                    DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
+                                    ((DefaultTreeModel)tree.getModel()).insertNodeInto(tileNode,selectedNode,selectedNode.getChildCount());
+                                    TreePath tileSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
+                                    if(!tree.isExpanded(tileSetPath))
+                            	        tree.expandPath(tileSetPath);
+                                    newlyCreatedEntity=tile;
+    		    		           }
+    		    		       else
+    		    		           if(userObject instanceof LevelSet)
+    		    		               {FloorSet floorSet=new FloorSet(name);
+    		    		                ((LevelSet)userObject).addFloorSet(floorSet);
+    		    		                DefaultMutableTreeNode floorSetNode=new DefaultMutableTreeNode(floorSet);
+    	                                ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorSetNode,selectedNode,selectedNode.getChildCount());
+    	                                TreePath floorSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
+                                        if(!tree.isExpanded(floorSetPath))
+                                            tree.expandPath(floorSetPath);
+                                        newlyCreatedEntity=floorSet;
+    		    		               }
+    		    		           else
+    		    		               {newlyCreatedEntity=null;
+    		    		                logger.warning("Unexpected case: "+userObject.getClass().getSimpleName()+" cannot create a tree node");
+    		    		               }
+    		          }
     		      else
-    		    	  if(userObject instanceof FloorSet)
-    		    	      {Floor floor=new Floor(name);
-                           ((FloorSet)userObject).addFloor(floor);
-                           DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
-                           ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorNode,selectedNode,selectedNode.getChildCount());
-                           //adds each node of a map
-                           DefaultMutableTreeNode mapNode;
-                           for(MapType type:MapType.values())
-                               {mapNode=new DefaultMutableTreeNode(floor.getMap(type));
-                                ((DefaultTreeModel)tree.getModel()).insertNodeInto(mapNode,floorNode,floorNode.getChildCount());
-                               }
-                           TreePath floorSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
-                           if(!tree.isExpanded(floorSetPath))
-                    	       tree.expandPath(floorSetPath);
-                           TreePath floorPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(floorNode));
-                           if(!tree.isExpanded(floorPath))
-                    	       tree.expandPath(floorPath);
-                           newlyCreatedEntity=floor;
-    		    	      }
-    		    	  else
-    		    		  if(userObject instanceof TileSet)
-    		    		      {Tile tile=new Tile(name);
-    		    		       tile.setColor(((TileCreationDialog)enterNameDialog).getValidatedColor());
-                               ((TileSet)userObject).addTile(tile);  
-                               DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
-                               ((DefaultTreeModel)tree.getModel()).insertNodeInto(tileNode,selectedNode,selectedNode.getChildCount());
-                               TreePath tileSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
-                               if(!tree.isExpanded(tileSetPath))
-                            	   tree.expandPath(tileSetPath);
-                               newlyCreatedEntity=tile;
-    		    		      }
-    		    		  else
-    		    		      if(userObject instanceof LevelSet)
-    		    		          {FloorSet floorSet=new FloorSet(name);
-    		    		           ((LevelSet)userObject).addFloorSet(floorSet);
-    		    		           DefaultMutableTreeNode floorSetNode=new DefaultMutableTreeNode(floorSet);
-    	                           ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorSetNode,selectedNode,selectedNode.getChildCount());
-    	                           TreePath floorSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
-                                   if(!tree.isExpanded(floorSetPath))
-                                       tree.expandPath(floorSetPath);
-                                   newlyCreatedEntity=floorSet;
-    		    		          }
-    		     }
+    		          {newlyCreatedEntity=null;
+    		           //no name
+    		          }
+    	         }
+    		 else
+    			 {newlyCreatedEntity=null;
+    			  logger.warning("Unexpected case: "+userObject.getClass().getSimpleName()+" cannot create a naming dialog");
+    			 }
     	    }
+    	else
+    		{newlyCreatedEntity=null;
+    		 logger.warning("Unexpected case: attempt of creating a child of "+userObject.getClass().getSimpleName()+" which does not support this feature");
+    		}
     	return(newlyCreatedEntity);
     }
     
