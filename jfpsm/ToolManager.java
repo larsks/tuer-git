@@ -17,10 +17,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -41,16 +40,16 @@ public final class ToolManager extends EntityManager{
 		final ToolSet toolSet=(ToolSet)toolsRoot.getUserObject();
 		toolSet.addTool(new ModelConverterSet("Model Converter Set"));
     	for(final Tool tool:toolSet.getToolsList())
-    	    {DefaultMutableTreeNode toolNode=new DefaultMutableTreeNode(tool);
+    	    {final DefaultMutableTreeNode toolNode=new DefaultMutableTreeNode(tool);
              treeModel.insertNodeInto(toolNode,toolsRoot,toolsRoot.getChildCount());
     	    }
-        tree.addMouseListener(new MouseAdapter(){   
-            
+    	//expands the tree path from the root
+		tree.expandPath(new TreePath(treeModel.getPathToRoot((TreeNode)treeModel.getRoot())));
+        tree.addMouseListener(new MouseAdapter(){
             @Override
             public final void mousePressed(MouseEvent e){
                 handleMouseEvent(e);
             }
-            
             @Override
             public final void mouseReleased(MouseEvent e){
                 handleMouseEvent(e);
@@ -115,10 +114,12 @@ public final class ToolManager extends EntityManager{
     		//double-click
         	if(me.getClickCount()==2)
         	    {final TreePath path=tree.getSelectionPath();
-                 final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-                 final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
-                 if(userObject!=null&&userObject.isOpenable())
-                     mainWindow.getEntityViewer().openEntityView(userObject);
+        	     if(path!=null)
+        	         {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+                      final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
+                      if(userObject!=null&&userObject.isOpenable())
+                          mainWindow.getEntityViewer().openEntityView(userObject);
+        	         }
         	    }
     }
 	
@@ -236,11 +237,4 @@ public final class ToolManager extends EntityManager{
                  }
             }
     }
-	
-	@Override
-	protected void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{
-		//prevents the user from collapsing the root
-        if(((DefaultMutableTreeNode)event.getPath().getLastPathComponent()).getUserObject() instanceof ToolSet)
-            throw new ExpandVetoException(event);
-	}
 }

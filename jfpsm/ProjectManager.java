@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -39,12 +38,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.event.TreeExpansionEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 
 /**
@@ -121,45 +118,7 @@ public final class ProjectManager extends EntityManager{
 				saveSelectedEntities();
 			}
         });
-        tree.setCellRenderer(new DefaultTreeCellRenderer(){
-			
-			private static final long serialVersionUID=1L;
-			
-			private ImageIcon coloredTileLeafIcon=null;
-			
-			private Icon defaultLeafIcon=null;
-
-			@Override
-			public final Component getTreeCellRendererComponent(JTree tree, Object value,
-					boolean selected, boolean expanded, boolean leaf, int row,
-					boolean hasFocus) {
-				if(leaf)
-				    {DefaultMutableTreeNode node=(DefaultMutableTreeNode)value;
-					 Object userObject=node.getUserObject();
-					 if(defaultLeafIcon==null)
-						 //gets the default icon stored in the super class
-						 defaultLeafIcon=super.getLeafIcon();
-				     if(userObject instanceof Tile)
-				    	 {int w=super.getLeafIcon().getIconWidth(),h=super.getLeafIcon().getIconHeight();
-				    	  if(coloredTileLeafIcon==null)
-				    		  {//builds the image icon used to render the icon of the tile in the tree				    		   
-				    		   BufferedImage coloredTileImage=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);				    		  
-				    		   coloredTileLeafIcon=new ImageIcon(coloredTileImage);				    		   
-				    		  }
-				    	  //sets the color
-				    	  Tile tile=(Tile)userObject;
-				    	  for(int x=0;x<w;x++)
-				    		  for(int y=0;y<h;y++)
-				    	          ((BufferedImage)coloredTileLeafIcon.getImage()).setRGB(x,y,tile.getColor().getRGB());
-				    	  //sets the colored icon
-				    	  setLeafIcon(coloredTileLeafIcon);
-				    	 }
-				     else
-				    	 setLeafIcon(defaultLeafIcon);
-				    }
-				return(super.getTreeCellRendererComponent(tree,value,selected,expanded,leaf,row,hasFocus));
-			}
-		});
+        tree.setCellRenderer(new ProjectManagerTreeCellRenderer());
         tree.addMouseListener(new MouseAdapter(){   
             
             @Override
@@ -262,11 +221,44 @@ public final class ProjectManager extends EntityManager{
         });
 	}
 	
-	@Override
-	protected void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{
-		//prevents the user from collapsing the root
-        if(((DefaultMutableTreeNode)event.getPath().getLastPathComponent()).getUserObject() instanceof ProjectSet)
-            throw new ExpandVetoException(event);
+	public static final class ProjectManagerTreeCellRenderer extends DefaultTreeCellRenderer{
+
+		private static final long serialVersionUID=1L;
+		
+		private ImageIcon coloredTileLeafIcon=null;
+		
+		private Icon defaultLeafIcon=null;
+
+		@Override
+		public final Component getTreeCellRendererComponent(JTree tree, Object value,
+				boolean selected, boolean expanded, boolean leaf, int row,
+				boolean hasFocus) {
+			if(leaf)
+			    {DefaultMutableTreeNode node=(DefaultMutableTreeNode)value;
+				 Object userObject=node.getUserObject();
+				 if(defaultLeafIcon==null)
+					 //gets the default icon stored in the super class
+					 defaultLeafIcon=super.getLeafIcon();
+			     if(userObject instanceof Tile)
+			    	 {int w=super.getLeafIcon().getIconWidth(),h=super.getLeafIcon().getIconHeight();
+			    	  if(coloredTileLeafIcon==null)
+			    		  {//builds the image icon used to render the icon of the tile in the tree				    		   
+			    		   BufferedImage coloredTileImage=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);				    		  
+			    		   coloredTileLeafIcon=new ImageIcon(coloredTileImage);				    		   
+			    		  }
+			    	  //sets the color
+			    	  Tile tile=(Tile)userObject;
+			    	  for(int x=0;x<w;x++)
+			    		  for(int y=0;y<h;y++)
+			    	          ((BufferedImage)coloredTileLeafIcon.getImage()).setRGB(x,y,tile.getColor().getRGB());
+			    	  //sets the colored icon
+			    	  setLeafIcon(coloredTileLeafIcon);
+			    	 }
+			     else
+			    	 setLeafIcon(defaultLeafIcon);
+			    }
+			return(super.getTreeCellRendererComponent(tree,value,selected,expanded,leaf,row,hasFocus));
+		}
 	}
 	
 	private static final Project getProjectFromSelectedNode(final DefaultMutableTreeNode selectedNode){
@@ -705,10 +697,9 @@ public final class ProjectManager extends EntityManager{
     @Override
 	protected void openSelectedEntities(){
     	super.openSelectedEntities();
-        TreePath[] paths=tree.getSelectionPaths();
-        DefaultMutableTreeNode selectedNode;
+        final TreePath[] paths=tree.getSelectionPaths();
         for(TreePath path:paths)
-            {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
              if(userObject.isOpenable())
                  {if(userObject instanceof Tile||userObject instanceof Floor)
@@ -723,12 +714,10 @@ public final class ProjectManager extends EntityManager{
     @Override
     protected void closeSelectedEntities(){
     	super.closeSelectedEntities();
-        TreePath[] paths=tree.getSelectionPaths();
-        DefaultMutableTreeNode selectedNode;
-        JFPSMUserObject userObject;
-        for(TreePath path:paths)
-            {selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             userObject=(JFPSMUserObject)selectedNode.getUserObject();
+        final TreePath[] paths=tree.getSelectionPaths();
+        for(final TreePath path:paths)
+            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
+             final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
              if(userObject.isOpenable())
                  {//closes the tab views of their children
                   if(userObject instanceof LevelSet)
@@ -748,7 +737,7 @@ public final class ProjectManager extends EntityManager{
                               }
                 	      else
                 		      if(userObject instanceof Project)
-                		          {Project project=(Project)userObject;
+                		          {final Project project=(Project)userObject;
                 		           for(FloorSet floorSet:project.getLevelSet().getFloorSetsList())
                                 	   for(Floor floor:floorSet.getFloorsList())
                                 		   mainWindow.getEntityViewer().closeEntityView(floor);

@@ -34,7 +34,6 @@ import javax.swing.tree.TreeSelectionModel;
  * Panel that allows to manipulate the entities in a tree containing their sub-components.
  * 
  * @author Julien Gouesse
- *
  */
 public abstract class EntityManager extends JPanel{
 
@@ -147,8 +146,6 @@ public abstract class EntityManager extends JPanel{
 	
 	protected abstract Namable createNewEntityFromSelectedEntity();
 	
-	protected abstract void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException;
-	
 	public synchronized boolean isQuitEnabled(){
     	return(quitEnabled);
     }
@@ -156,4 +153,10 @@ public abstract class EntityManager extends JPanel{
 	public synchronized void setQuitEnabled(final boolean quitEnabled){
     	this.quitEnabled=quitEnabled;
     }
+	
+	protected void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{
+		//prevents the user from collapsing the root
+        if(event.getPath().getLastPathComponent() == tree.getModel().getRoot())
+            throw new ExpandVetoException(event);
+	}
 }
