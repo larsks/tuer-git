@@ -13,7 +13,11 @@
 */
 package jfpsm;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.BoxLayout;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -44,6 +48,14 @@ public abstract class EntityManager extends JPanel{
 	private boolean quitEnabled;
 	
 	protected final JPopupMenu treePopupMenu;
+	
+	protected final JMenuItem newMenuItem;
+	
+	protected final JMenuItem openMenuItem;
+	
+	protected final JMenuItem closeMenuItem;
+	
+	protected final JMenuItem deleteMenuItem;
 
 	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel){
 		super();
@@ -64,6 +76,41 @@ public abstract class EntityManager extends JPanel{
             public final void treeWillExpand(final TreeExpansionEvent event)throws ExpandVetoException{}
         });
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+		//creates the menu item
+		newMenuItem=new JMenuItem("New");
+        openMenuItem=new JMenuItem("Open");
+        closeMenuItem=new JMenuItem("Close");
+        deleteMenuItem=new JMenuItem("Delete");
+        //fills the popup menu
+        treePopupMenu.add(newMenuItem);
+        treePopupMenu.add(openMenuItem);
+        treePopupMenu.add(closeMenuItem);
+        treePopupMenu.add(deleteMenuItem);
+        //adds the action listeners into the menu items
+        newMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				createNewEntityFromSelectedEntity();
+			}
+		});
+        openMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				openSelectedEntities();
+			}
+		});
+        closeMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				closeSelectedEntities();
+			}
+		});
+        deleteMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				deleteSelectedEntities();
+			}
+		});
 		final JScrollPane treePane=new JScrollPane(tree);
 		add(treePane);
 	}
