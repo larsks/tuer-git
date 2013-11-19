@@ -13,13 +13,9 @@
 */
 package jfpsm;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -37,16 +33,8 @@ public final class ToolManager extends EntityManager{
 	
 	
     private static final long serialVersionUID=1L;
-	
-	private final JMenuItem newMenuItem;
-	
-	private final JMenuItem openMenuItem;
-	
-	private final JMenuItem closeMenuItem;
-	
-	private final JMenuItem deleteMenuItem;
 
-	public ToolManager(final MainWindow mainWindow) {
+	public ToolManager(final MainWindow mainWindow){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ToolSet("Tool Set"))));
 		final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
 		final DefaultMutableTreeNode toolsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
@@ -56,39 +44,6 @@ public final class ToolManager extends EntityManager{
     	    {DefaultMutableTreeNode toolNode=new DefaultMutableTreeNode(tool);
              treeModel.insertNodeInto(toolNode,toolsRoot,toolsRoot.getChildCount());
     	    }
-    	//fills the popup menu
-        newMenuItem=new JMenuItem("New");
-        openMenuItem=new JMenuItem("Open");
-        closeMenuItem=new JMenuItem("Close");
-        deleteMenuItem=new JMenuItem("Delete");
-        treePopupMenu.add(newMenuItem);
-        treePopupMenu.add(openMenuItem);
-        treePopupMenu.add(closeMenuItem);
-        treePopupMenu.add(deleteMenuItem);
-        newMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				createNewEntityFromSelectedEntity();
-			}
-		});
-        openMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				openSelectedEntities();
-			}
-		});
-        closeMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				closeSelectedEntities();
-			}
-		});
-        deleteMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				deleteSelectedEntities();
-			}
-		});
         tree.addMouseListener(new MouseAdapter(){   
             
             @Override

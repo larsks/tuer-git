@@ -15,6 +15,8 @@ package jfpsm;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -69,38 +71,56 @@ public final class ProjectManager extends EntityManager{
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
 		progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
         //fills the popup menu
-        final JMenuItem newMenuItem=new JMenuItem("New");
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
         final JMenuItem exportMenuItem=new JMenuItem("Export");
         //FIXME: re-organizes the GUI that allows to generate game files
         final JMenuItem generateGameFilesMenuItem=new JMenuItem("Generate game files");
         final JMenuItem refreshMenuItem=new JMenuItem("Refresh");
-        final JMenuItem openMenuItem=new JMenuItem("Open");
-        final JMenuItem closeMenuItem=new JMenuItem("Close");
-        final JMenuItem deleteMenuItem=new JMenuItem("Delete");
         final JMenuItem saveMenuItem=new JMenuItem("Save");
-        treePopupMenu.add(newMenuItem);
         treePopupMenu.add(renameMenuItem);
         treePopupMenu.add(importMenuItem);
         treePopupMenu.add(exportMenuItem);
         treePopupMenu.add(generateGameFilesMenuItem);
         treePopupMenu.add(refreshMenuItem);
-        treePopupMenu.add(openMenuItem);
-        treePopupMenu.add(closeMenuItem);
-        treePopupMenu.add(deleteMenuItem);
         treePopupMenu.add(saveMenuItem);
         //builds action listeners
-        newMenuItem.addActionListener(new CreateNewEntityFromSelectedEntityAction(this));
-        renameMenuItem.addActionListener(new RenameSelectedEntityAction(this));
-        importMenuItem.addActionListener(new ImportSelectedEntityAction(this));
-        exportMenuItem.addActionListener(new ExportSelectedEntityAction(this));
-        generateGameFilesMenuItem.addActionListener(new GenerateGameFilesAction(this));
-        refreshMenuItem.addActionListener(new RefreshSelectedEntitiesAction(this));
-        openMenuItem.addActionListener(new OpenSelectedEntitiesAction(this));
-        closeMenuItem.addActionListener(new CloseSelectedEntitiesAction(this));
-        deleteMenuItem.addActionListener(new DeleteSelectedEntitiesAction(this));
-        saveMenuItem.addActionListener(new SaveSelectedEntitiesAction(this));
+        renameMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				renameSelectedEntity();
+			}
+        });
+        importMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				importSelectedEntity();
+			}
+        });
+        exportMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				exportSelectedEntity();
+			}
+        });
+        generateGameFilesMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				generateGameFiles();
+			}
+        });
+        refreshMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				loadExistingProjects();
+			}
+        });
+        saveMenuItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(final ActionEvent ae){
+				saveSelectedEntities();
+			}
+        });
         tree.setCellRenderer(new DefaultTreeCellRenderer(){
 			
 			private static final long serialVersionUID=1L;
@@ -743,7 +763,7 @@ public final class ProjectManager extends EntityManager{
             }
     }
     
-    final void renameSelectedEntity(){
+    protected void renameSelectedEntity(){
         TreePath path=tree.getSelectionPath();
         DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
         JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
