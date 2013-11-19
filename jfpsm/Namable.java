@@ -30,11 +30,11 @@ public abstract class Namable implements Serializable{
     }
     
     @Override
-    public final String toString(){
-        return(name);
+    public String toString(){
+        return(getName());
     }
 
-    public final String getName(){
+    public String getName(){
         return(name);
     }
 

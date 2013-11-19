@@ -258,28 +258,30 @@ public final class ProjectSet extends JFPSMProjectUserObject{
     }
     
     /**
+     * Gets the names of the projects in the file system. It may contain duplicates
      * 
      * @return names of the projects in the file system
      */
     final String[] getProjectNames(){
-        File[] files=getProjectFiles();
-        String[] names=new String[files.length];
+        final File[] files=getProjectFiles();
+        final String[] names=new String[files.length];
         for(int i=0;i<names.length;i++)
             names[i]=Project.getProjectNameFromFile(files[i]);
         return(names);
     }
     
     /**
-     * loads a project from a file
+     * Loads a project from a file
+     * 
      * @param projectFile project file
      * @return the newly loaded project or the previous one if it had been already loaded
      */
     final Project loadProject(File projectFile){
-        String fullname=projectFile.getName();
+        final String fullname=projectFile.getName();
         Project project=null;
         if(projectFile.getName().endsWith(Project.getFileExtension()))
-            {int nameLength=fullname.length();
-             String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());
+            {final int nameLength=fullname.length();
+             final String projectName=fullname.substring(0,nameLength-Project.getFileExtension().length());
              try(ZipFile zipFile=new ZipFile(projectFile)){
                  ZipEntry entry;
                  //at first, gets the file project.xml to build the project object as soon as possible
