@@ -40,7 +40,7 @@ public abstract class JFPSMUserObject extends Namable implements Dirtyable,Resol
     abstract boolean canInstantiateChildren();
     
     @Override
-    public final void setName(String name){
+    public void setName(String name){
         super.setName(name);
         //mark the entity as dirty when the user renames it
         markDirty();

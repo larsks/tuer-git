@@ -336,8 +336,13 @@ public final class ProjectManager extends EntityManager{
     
     private final Project addProject(String name){
         Project project=null;
-        //if it is not in the tree
-        if(!getAllProjectNames().contains(name))
+        //if it is already in the tree
+        if(getAllProjectNames().contains(name))
+            {//FIXME check whether this name is used by several projects, use workspace.getProjectNames()
+        	 //TODO allow project renaming as it should be supported
+        	 //TODO allow project duplication
+            }
+        else
             {final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();            
              final String[] projectNames=workspace.getProjectNames();
              final File[] projectFiles=workspace.getProjectFiles();
@@ -582,12 +587,22 @@ public final class ProjectManager extends EntityManager{
              fileChooser.setFileFilter(new FileNameExtensionFilter("JFPSM Projects","jfpsm.zip"));
              int result=fileChooser.showOpenDialog(mainWindow.getApplicativeFrame());
              if(result==JFileChooser.APPROVE_OPTION)
-                 {String projectName=Project.getProjectNameFromFile(fileChooser.getSelectedFile());
-                  ProjectSet workspace=(ProjectSet)userObject;
+                 {final String projectName=Project.getProjectNameFromFile(fileChooser.getSelectedFile());
+                  final ProjectSet workspace=(ProjectSet)userObject;
+                  final String projectPathName=workspace.createProjectPath(projectName);
+                  final File sourceProjectFile=fileChooser.getSelectedFile();
+                  final File destinationProjectFile=new File(projectPathName);
                   boolean confirmLoad=true;
-                  if(Arrays.asList(workspace.getProjectNames()).contains(projectName))
-                      {//prompts the user
-                       confirmLoad=JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),"Overwrite project \""+projectName+"\""+"?","Overwrite project",JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION;
+                  final boolean destinationProjectNameAlreadyUsed=Arrays.asList(workspace.getProjectNames()).contains(projectName);
+                  final boolean destinationProjectFileAlreadyPresent=destinationProjectFile.exists();
+                  if(destinationProjectNameAlreadyUsed||destinationProjectFileAlreadyPresent)
+                      {final String message;
+                       if(destinationProjectNameAlreadyUsed)
+                    	   message="Overwrite project \""+projectName+"\""+"?";
+                       else
+                    	   message="Overwrite file \""+destinationProjectFile.getName()+"\""+"?";
+                	   //prompts the user
+                       confirmLoad=JOptionPane.showConfirmDialog(mainWindow.getApplicativeFrame(),message,"Overwrite project",JOptionPane.OK_CANCEL_OPTION )==JOptionPane.OK_OPTION;
                        //if he confirms, deletes the project
                        if(confirmLoad)
                            {final int count=selectedNode.getChildCount();
@@ -614,12 +629,11 @@ public final class ProjectManager extends EntityManager{
                       }
                   if(confirmLoad)
                       {//copies the file into the workspace
-                       File projectFile=new File(workspace.createProjectPath(projectName));
                        boolean success=true;
-                       try{success=projectFile.createNewFile();
+                       try{success=destinationProjectFile.createNewFile();
                            if(success)
-                               {try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(fileChooser.getSelectedFile()))){
-                                    try(BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(projectFile))){
+                               {try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(sourceProjectFile))){
+                                    try(BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(destinationProjectFile))){
                                         byte[] buf=new byte[1024];
                                         int len;
                                         while((len=bis.read(buf))>0)

@@ -65,8 +65,8 @@ public final class SerializationHelper{
     
     public static final Object decodeObjectInXMLFile(String path){
     	Object resultingObject=null;
-    	try(BufferedInputStream bis=new BufferedInputStream(SerializationHelper.class.getResourceAsStream(path))){
-            try(XMLDecoder decoder=new XMLDecoder(bis)){
+    	try(final BufferedInputStream bis=new BufferedInputStream(SerializationHelper.class.getResourceAsStream(path))){
+            try(final XMLDecoder decoder=new XMLDecoder(bis)){
                 resultingObject=decoder.readObject();
             }
         }
@@ -80,8 +80,8 @@ public final class SerializationHelper{
         try{if(!file.exists())
                 if(!file.createNewFile())
                     throw new IOException("Unable to create the file "+filename);
-            try(BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file))){
-                try(XMLEncoder encoder=new XMLEncoder(bos)){
+            try(final BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file))){
+                try(final XMLEncoder encoder=new XMLEncoder(bos)){
                     encoder.writeObject(o);
                 }
             }
