@@ -19,7 +19,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
@@ -34,17 +33,18 @@ import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.ShortBufferData;
 import com.ardor3d.util.geom.BufferUtils;
+import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.geom.VertGroupData;
 import com.ardor3d.util.geom.VertKey;
 import com.ardor3d.util.geom.VertMap;
-import com.ardor3d.util.geom.GeometryTool.MatchCondition;
 import com.google.common.collect.Maps;
 
-public class GeometryHelper{
+public class GeometryHelper extends GeometryTool{
 	
 	private static final Logger logger=Logger.getLogger(GeometryHelper.class.getName());
 
 	public GeometryHelper(){
+		super();
 	}
 
 	/**
@@ -163,7 +163,8 @@ public class GeometryHelper{
      *            our match conditions.
      * @return a mapping of old vertex positions to their new positions.
      */
-    public VertMap minimizeVerts(final Mesh mesh, final EnumSet<MatchCondition> conditions) {
+    @Override
+	public VertMap minimizeVerts(final Mesh mesh, final EnumSet<MatchCondition> conditions) {
         final VertGroupData groupData = new VertGroupData();
         groupData.setGroupConditions(VertGroupData.DEFAULT_GROUP, conditions);
         return minimizeVerts(mesh, groupData);
@@ -180,7 +181,8 @@ public class GeometryHelper{
      *            grouping data for the vertices in this mesh.
      * @return a mapping of old vertex positions to their new positions.
      */
-    public VertMap minimizeVerts(final Mesh mesh, final VertGroupData groupData) {
+    @Override
+	public VertMap minimizeVerts(final Mesh mesh, final VertGroupData groupData) {
         final long start = System.currentTimeMillis();
 
         int vertCount = -1;

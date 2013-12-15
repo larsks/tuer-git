@@ -16,11 +16,16 @@ package engine.conversion;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
+import jfpsm.GeometryHelper;
+
 import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.ResourceSource;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 
@@ -38,9 +43,11 @@ public final class DaeToArdorConverter{
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
         ColladaImporter colladaImporter=new ColladaImporter();
+        final GeometryTool geomTool=new GeometryHelper();
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             final Node colladaNode=colladaImporter.load(arg).getScene();
+             final ResourceSource argSrc=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
+             final Node colladaNode=colladaImporter.load(argSrc,geomTool).getScene();
              URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
              File sourceFile=new File(source.getURL().toURI());
              File destFile=new File(sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".dae"))+".abin");

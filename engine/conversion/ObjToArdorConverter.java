@@ -43,7 +43,9 @@ import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.export.binary.BinaryIdContentPair;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.BufferUtils;
+import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.ResourceSource;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 
@@ -107,6 +109,7 @@ public class ObjToArdorConverter{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
+        final GeometryTool geomTool=new GeometryHelper();
         final ObjImporter objImporter=new ObjImporter();
         try{objImporter.setTextureLocator(new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images")));
            } 
@@ -115,7 +118,8 @@ public class ObjToArdorConverter{
         Spatial objSpatial;
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
-             final ObjGeometryStore geomStore=objImporter.load(arg);
+             final ResourceSource argSrc=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
+             final ObjGeometryStore geomStore=objImporter.load(argSrc,geomTool);
              objSpatial=geomStore.getScene();
              if(isConversionOfAmbientColorsIntoTexCoordsEnabled()||conversionOfAmbientColorsIntoVerticesColorsEnabled)
             	 deindex(objSpatial);
