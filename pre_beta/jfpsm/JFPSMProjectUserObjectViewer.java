@@ -13,21 +13,28 @@
 */
 package jfpsm;
 
-import javax.swing.JPanel;
+import java.awt.Color;
 
-public abstract class Viewer extends JPanel{
+public abstract class JFPSMProjectUserObjectViewer extends Viewer{
+	
+	private static final long serialVersionUID=1L;
 
+    private final ProjectManager projectManager;
     
-    private static final long serialVersionUID=1L;
-    
-    private final Dirtyable entity;
-    
-    
-    public Viewer(final Dirtyable entity){
-        this.entity=entity;
+    private final Project project;
+	
+	
+	public JFPSMProjectUserObjectViewer(final JFPSMProjectUserObject entity,final Project project,final ProjectManager projectManager){
+		super(entity);
+		this.project=project;
+        this.projectManager=projectManager;
+	}
+	
+	final Color getSelectedTileColor(){
+        return(projectManager.getSelectedTileColor(project));
     }
     
-    public final Dirtyable getEntity(){
-    	return(entity);
-    }
+    /*final BufferedImage openFileAndLoadImage(){
+        return(projectManager.openFileAndLoadImage());
+    }*/
 }

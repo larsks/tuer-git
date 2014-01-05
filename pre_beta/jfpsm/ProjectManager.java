@@ -47,6 +47,17 @@ import javax.swing.tree.TreePath;
 /**
  * Panel that allows to manipulate the projects in a tree containing their
  * sub-components.
+ * 
+ * TODO:
+ * Separate the entity managers from their views
+ * Use Swing workers to manage long changes
+ * Implement the model converter
+ * Add some icons into the trees and the tabs
+ * Check whether bean fields are accessible
+ * Save the whole project as a single XML file
+ * Allow to rename and duplicate projects
+ * Save tool sessions
+ * 
  * @author Julien Gouesse
  *
  */

@@ -17,10 +17,10 @@ import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import javax.swing.JSplitPane;
 
-final class FloorViewer extends Viewer{
+final class FloorViewer extends JFPSMProjectUserObjectViewer{
 
     
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
     
     private final FloorDrawingPanel[] drawingPanels;
     

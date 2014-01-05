@@ -15,12 +15,12 @@ package jfpsm;
 
 import java.awt.GridLayout;
 
-final class FloorSetViewer extends Viewer {
+public class FloorSetViewer extends JFPSMProjectUserObjectViewer{
 
 	
 	private static final long serialVersionUID = 1L;
 	
-	FloorSetViewer(final FloorSet floorSet,final Project project,final ProjectManager projectManager){
+	public FloorSetViewer(final FloorSet floorSet,final Project project,final ProjectManager projectManager){
 		super(floorSet, project, projectManager);
 		setLayout(new GridLayout(1,1));
 	}

@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 
-final class TileViewer extends Viewer{
+final class TileViewer extends JFPSMProjectUserObjectViewer{
 
     
     private static final long serialVersionUID=1L;
