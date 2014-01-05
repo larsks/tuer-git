@@ -40,7 +40,7 @@ class DrawingPanel extends JPanel{
 	
 	private Graphics graphics;
 	
-	private final Viewer viewer;
+	private final JFPSMProjectUserObjectViewer viewer;
 	
 	private final int fontSize;
 	
@@ -54,7 +54,7 @@ class DrawingPanel extends JPanel{
 	 * @param zoomParams zoom parameters (zoom disabled if null)
 	 * @param viewer viewer that displays this panel
 	 */
-	DrawingPanel(String title,BufferedImage bufferedImage,ZoomParameters zoomParams,Viewer viewer){
+	DrawingPanel(String title,BufferedImage bufferedImage,ZoomParameters zoomParams,JFPSMProjectUserObjectViewer viewer){
 		super();
 		this.viewer=viewer;
 		this.title=title;
@@ -71,7 +71,7 @@ class DrawingPanel extends JPanel{
 	
 	
 	protected boolean draw(int x1,int y1,int x2,int y2){
-		//get the color of the selected tile
+		//gets the color of the selected tile
 	    Color color=viewer.getSelectedTileColor();
 	    final boolean success;
 	    if(success=color!=null)

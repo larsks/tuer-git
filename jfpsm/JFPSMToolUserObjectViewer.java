@@ -13,21 +13,16 @@
 */
 package jfpsm;
 
-import javax.swing.JPanel;
+public abstract class JFPSMToolUserObjectViewer extends Viewer{
+	
+	private static final long serialVersionUID=1L;
+	
+	private final ToolManager toolManager;
+	
+	
+	public JFPSMToolUserObjectViewer(final JFPSMToolUserObject entity,final ToolManager toolManager){
+		super(entity);
+		this.toolManager=toolManager;
+	}
 
-public abstract class Viewer extends JPanel{
-
-    
-    private static final long serialVersionUID=1L;
-    
-    private final Dirtyable entity;
-    
-    
-    public Viewer(final Dirtyable entity){
-        this.entity=entity;
-    }
-    
-    public final Dirtyable getEntity(){
-    	return(entity);
-    }
 }

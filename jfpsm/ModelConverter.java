@@ -13,6 +13,12 @@
 */
 package jfpsm;
 
+/**
+ * 
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class ModelConverter extends JFPSMToolUserObject{
 
 	private static final long serialVersionUID=1L;
@@ -26,9 +32,8 @@ public class ModelConverter extends JFPSMToolUserObject{
 	}
 	
 	@Override
-    public Viewer createViewer(final ToolManager projectManager){
-		//TODO
-    	return(null);
+    public Viewer createViewer(final ToolManager toolManager){
+    	return(new ModelConverterViewer(this,toolManager));
     }
 
 	@Override
