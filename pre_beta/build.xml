@@ -43,7 +43,7 @@
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1/jar -->
-	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_758-joal_508-jogl_1193-jocl_900/jar" />
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_759-joal_509-jogl_1195-jocl_901/jar" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
@@ -61,7 +61,7 @@
 		<pathelement location="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar"/>
 	    <pathelement location="lib/fettle/fettle-0.7.0.jar"/>
-	    <pathelement location="lib/google-collect/guava-13.0.1.jar"/>	    
+	    <pathelement location="lib/google-collect/guava-14.0.1.jar"/>	    
 	    <pathelement location="lib/gluegen-rt/gluegen-rt.jar"/>
 		<pathelement location="lib/joal/joal.jar"/>
 	    <pathelement location="lib/jogl/jogl-all.jar"/>
@@ -113,7 +113,7 @@
 	</path>
 	<path id="project.sign.jars.path">
 	    <pathelement location="${destdir}/fettle-0.7.0.jar" />
-	    <pathelement location="${destdir}/guava-13.0.1.jar" />
+	    <pathelement location="${destdir}/guava-14.0.1.jar" />
 	    <pathelement location="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
 	    <pathelement location="${destdir}/ardor3d-core-${ardor3d-version}.jar" />
 		<pathelement location="${destdir}/ardor3d-math-${ardor3d-version}.jar" />
@@ -359,7 +359,7 @@
 			    <jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-			    <jar href="guava-13.0.1.jar" download="eager" main="false"/>
+			    <jar href="guava-14.0.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="LibraryJOAL.jar" download="eager" main="false"/>
@@ -471,7 +471,7 @@
 			    <jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
 			    <jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-			    <jar href="guava-13.0.1.jar" download="eager" main="false"/>
+			    <jar href="guava-14.0.1.jar" download="eager" main="false"/>
 			    <jar href="CodecJOrbis.jar" download="eager" main="false"/>
 			    <jar href="LibraryJavaSound.jar" download="eager" main="false"/>
 			    <jar href="LibraryJOAL.jar" download="eager" main="false"/>
