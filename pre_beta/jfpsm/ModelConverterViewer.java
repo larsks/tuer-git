@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Arrays;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -60,14 +61,6 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	private final JComboBox<ModelFileFormat> convertedModelFormatCombobox;
 	
 	private final JButton conversionButton;
-	//FIXME put those 4 fields into a separate class representing the data model
-	private File convertibleModelFile;
-	
-	private File convertedModelDir;
-	
-	private String convertedModelFilename;
-	
-	private ModelFileFormat convertedModelFileFormat;
 
 	public ModelConverterViewer(final ModelConverter modelConverter,final ToolManager toolManager){
 		super(modelConverter,toolManager);
@@ -150,57 +143,54 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			}
 		});
 		modelConversionSetupPanel.add(conversionButton,new GridBagConstraints(2,4,1,1,1,1,GridBagConstraints.LAST_LINE_END,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
-		if(convertedModelFileFormat==null)
-			convertedModelFileFormat=ModelFileFormat.values()[0];
-		if(convertedModelFilename!=null)
-			convertedModelFilenameTextField.setText(convertedModelFilename);
-		//FIXME load the data from the data model
-		
-		convertedModelFormatCombobox.setSelectedItem(convertedModelFileFormat);
+		if(getEntity().getConvertedModelFileFormat()==null)
+		    getEntity().setConvertedModelFileFormat(ModelFileFormat.values()[0]);
+		convertedModelFormatCombobox.setSelectedItem(getEntity().getConvertedModelFileFormat());
+		if(getEntity().getConvertedModelFilename()!=null)
+			convertedModelFilenameTextField.setText(getEntity().getConvertedModelFilename());
+		if(getEntity().getConvertedModelDirectoryPath()!=null)
+			convertedModelDirectoryLabel.setText(getEntity().getConvertedModelDirectoryPath()+System.getProperty("file.separator"));
+		if(getEntity().getConvertibleModelFilePath()!=null)
+			convertibleModelContentLabel.setText(getEntity().getConvertibleModelFilePath());
 		updateConvertedModelExtensionLabel();
 		updateConversionButton();
 	}
 	
-	private static ModelFileFormat getModelFileFormatFromFile(final File file){
-		ModelFileFormat modelFileFormat=null;
-		if(file!=null)
-		    {final String modelFileExtension=file.getName().substring(file.getName().lastIndexOf('.'));
-		     for(ModelFileFormat currentModelFileFormat:ModelFileFormat.values())
-	    	     if(modelFileExtension.equals(currentModelFileFormat.getExtension()))
-	                 {modelFileFormat=currentModelFileFormat;
-	                  break;
-	                 }
-		    }
-		return(modelFileFormat);
-	} 
+	@Override
+	public ModelConverter getEntity(){
+		return((ModelConverter)super.getEntity());
+	}
 	
 	private void convertibleModelButtonActionPerformed(ActionEvent ae){
-		fileChooser.setCurrentDirectory(convertibleModelFile);
+		fileChooser.setCurrentDirectory(getEntity().getConvertibleModelFilePath()==null?null:new File(getEntity().getConvertibleModelFilePath()));
 		fileChooser.setSelectedFile(null);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		for(FileFilter fileFilter:Arrays.asList(fileChooser.getChoosableFileFilters()))
 			fileChooser.removeChoosableFileFilter(fileFilter);
 		fileChooser.addChoosableFileFilter(new ConvertibleModelFileFilter());
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
-		    {convertibleModelFile=fileChooser.getSelectedFile();
-		     convertibleModelContentLabel.setText(convertibleModelFile.getAbsolutePath());
-		     final ModelFileFormat modelFileFormat=getModelFileFormatFromFile(convertibleModelFile);
+		    {//updates the data model first
+			 getEntity().setConvertibleModelFilePath(fileChooser.getSelectedFile().getAbsolutePath());
+			 //updates the GUI
+		     convertibleModelContentLabel.setText(getEntity().getConvertibleModelFilePath());
+		     final ModelFileFormat modelFileFormat=ModelFileFormat.get(getEntity().getConvertibleModelFilePath());
 		     if(modelFileFormat!=null)
 		         convertibleModelFormatContentLabel.setText(modelFileFormat.getDescription());
 			 updateConversionButton();
 		    }
-		
 	}
 	
 	private void convertedModelButtonActionPerformed(ActionEvent ae){
-		fileChooser.setCurrentDirectory(convertedModelDir);
+		fileChooser.setCurrentDirectory(getEntity().getConvertedModelDirectoryPath()==null?null:new File(getEntity().getConvertedModelDirectoryPath()));
 		fileChooser.setSelectedFile(null);
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		for(FileFilter fileFilter:Arrays.asList(fileChooser.getChoosableFileFilters()))
 			fileChooser.removeChoosableFileFilter(fileFilter);
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
-	        {convertedModelDir=fileChooser.getSelectedFile();
-	         convertedModelDirectoryLabel.setText(convertedModelDir.getAbsolutePath()+System.getProperty("file.separator"));
+	        {//updates the data model first
+			 getEntity().setConvertedModelDirectoryPath(fileChooser.getSelectedFile().getAbsolutePath());
+			 //updates the GUI
+	         convertedModelDirectoryLabel.setText(getEntity().getConvertedModelDirectoryPath()+System.getProperty("file.separator"));
 			 updateConversionButton();
 	        }
 	}
@@ -209,13 +199,14 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		SwingUtilities.invokeLater(new Runnable(){
 			@Override
 			public void run(){
-				convertedModelFilename=convertedModelFilenameTextField.getText();
+				getEntity().setConvertedModelFilename(convertedModelFilenameTextField.getText());
 				updateConversionButton();
 			}
 		});
 	}
 	
 	private void convertedModelFormatComboboxActionPerformed(ActionEvent ae){
+		getEntity().setConvertedModelFileFormat((ModelFileFormat)convertedModelFormatCombobox.getSelectedItem());
 	    updateConvertedModelExtensionLabel();
 	}
 	
@@ -224,53 +215,23 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	}
 	
 	private void convert(){
-		final File convertedModelFile=new File(convertedModelDir,convertedModelFilename+convertedModelFileFormat.getExtension());
+		final File convertedModelFile=new File(new File(getEntity().getConvertedModelDirectoryPath()),getEntity().getConvertedModelFilename()+getEntity().getConvertedModelFileFormat().getExtension());
 		//FIXME implement the conversions
 	}
 	
 	private void updateConversionButton(){
 		//verifies that all required fields are set and the input format is different from the output format
-		final boolean conversionEnabled=convertibleModelFile!=null&&convertedModelDir!=null&&convertedModelFilename!=null&&
-		!convertedModelFilename.isEmpty()&&convertedModelFileFormat!=null&&
-		!getModelFileFormatFromFile(convertibleModelFile).equals(convertedModelFileFormat);
+		final boolean conversionEnabled=getEntity().getConvertibleModelFilePath()!=null&&
+				getEntity().getConvertedModelDirectoryPath()!=null&&
+				getEntity().getConvertedModelFilename()!=null&&!getEntity().getConvertedModelFilename().isEmpty()&&
+				getEntity().getConvertedModelFileFormat()!=null&&
+				!ModelFileFormat.get(getEntity().getConvertibleModelFilePath()).equals(getEntity().getConvertedModelFileFormat());
 		conversionButton.setEnabled(conversionEnabled);
 	}
 	
 	private void updateConvertedModelExtensionLabel(){
-		convertedModelFileFormat=(ModelFileFormat)convertedModelFormatCombobox.getSelectedItem();
-		convertedModelExtensionLabel.setText(convertedModelFileFormat.getExtension());
+		convertedModelExtensionLabel.setText(getEntity().getConvertedModelFileFormat().getExtension());
 		updateConversionButton();
-	}
-	
-	public enum ModelFileFormat{
-		ARDOR3D_BINARY("Ardor3D Binary",".abin"),
-		ARDOR3D_XML("Ardor3D XML",".axml"),
-		COLLADA("Collada",".dae"),
-		MD2("MD2",".md2"),
-		MD3("MD3",".md3"),
-		WAVEFRONT_OBJ("WaveFront OBJ",".obj");
-		
-		private final String description;
-		
-		private final String extension;
-		
-        private ModelFileFormat(final String description,final String extension){
-			this.description=description;
-			this.extension=extension;
-		}
-        
-        public final String getDescription(){
-        	return(description);
-        }
-        
-        public final String getExtension(){
-        	return(extension);
-        }
-        
-        @Override
-        public final String toString(){
-        	return(getDescription());
-        }
 	}
 	
 	private static final class ConvertibleModelFileFilter extends FileFilter{

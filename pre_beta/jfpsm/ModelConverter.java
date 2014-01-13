@@ -14,7 +14,8 @@
 package jfpsm;
 
 /**
- * 
+ * Data model of the 3D model converter, it contains some information
+ * about the output file and the input file
  * 
  * @author Julien Gouesse
  *
@@ -22,6 +23,14 @@ package jfpsm;
 public class ModelConverter extends JFPSMToolUserObject{
 
 	private static final long serialVersionUID=1L;
+	
+	private String convertibleModelFilePath;
+	
+	private String convertedModelDirectoryPath;
+	
+	private String convertedModelFilename;
+	
+	private ModelFileFormat convertedModelFileFormat;
 
 	public ModelConverter(){
 		this("");
@@ -35,6 +44,38 @@ public class ModelConverter extends JFPSMToolUserObject{
     public Viewer createViewer(final ToolManager toolManager){
     	return(new ModelConverterViewer(this,toolManager));
     }
+
+	public String getConvertibleModelFilePath(){
+		return(convertibleModelFilePath);
+	}
+
+	public void setConvertibleModelFilePath(String convertibleModelFilePath){
+		this.convertibleModelFilePath=convertibleModelFilePath;
+	}
+
+	public String getConvertedModelDirectoryPath(){
+		return(convertedModelDirectoryPath);
+	}
+
+	public void setConvertedModelDirectoryPath(String convertedModelDirectoryPath){
+		this.convertedModelDirectoryPath=convertedModelDirectoryPath;
+	}
+
+	public String getConvertedModelFilename(){
+		return(convertedModelFilename);
+	}
+
+	public void setConvertedModelFilename(String convertedModelFilename){
+		this.convertedModelFilename=convertedModelFilename;
+	}
+
+	public ModelFileFormat getConvertedModelFileFormat(){
+		return(convertedModelFileFormat);
+	}
+
+	public void setConvertedModelFileFormat(ModelFileFormat convertedModelFileFormat){
+		this.convertedModelFileFormat=convertedModelFileFormat;
+	}
 
 	@Override
 	public boolean isDirty(){

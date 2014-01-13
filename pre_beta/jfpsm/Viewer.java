@@ -27,7 +27,7 @@ public abstract class Viewer extends JPanel{
         this.entity=entity;
     }
     
-    public final Dirtyable getEntity(){
+    public Dirtyable getEntity(){
     	return(entity);
     }
 }
