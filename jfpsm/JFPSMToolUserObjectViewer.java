@@ -25,4 +25,8 @@ public abstract class JFPSMToolUserObjectViewer extends Viewer{
 		this.toolManager=toolManager;
 	}
 
+	@Override
+	public JFPSMToolUserObject getEntity(){
+		return((JFPSMToolUserObject)super.getEntity());
+	}
 }
