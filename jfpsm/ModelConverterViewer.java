@@ -14,6 +14,7 @@
 package jfpsm;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -21,22 +22,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Arrays;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
 /**
  * Graphical user interface of the model converter
- * 
- * TODO: - manage the converted model file (add a text field)
- *       - improve the data model of the converter
- *       - implement the conversions
  * 
  * @author Julien Gouesse
  *
@@ -51,15 +51,23 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	
 	private final JLabel convertibleModelFormatContentLabel;
 	
-	private final JLabel convertedModelContentLabel;
+	private final JLabel convertedModelDirectoryLabel;
+	
+	private final JTextField convertedModelFilenameTextField;
+	
+	private final JLabel convertedModelExtensionLabel;
+	
+	private final JComboBox<ModelFileFormat> convertedModelFormatCombobox;
 	
 	private final JButton conversionButton;
-	
+	//FIXME put those 4 fields into a separate class representing the data model
 	private File convertibleModelFile;
 	
 	private File convertedModelDir;
 	
-	private File convertedModelFile;
+	private String convertedModelFilename;
+	
+	private ModelFileFormat convertedModelFileFormat;
 
 	public ModelConverterViewer(final ModelConverter modelConverter,final ToolManager toolManager){
 		super(modelConverter,toolManager);
@@ -83,10 +91,38 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		modelConversionSetupPanel.add(convertibleModelContentLabel,new GridBagConstraints(1,0,1,1,10,1,GridBagConstraints.PAGE_START,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
 		convertibleModelFormatContentLabel=new JLabel("");
 		modelConversionSetupPanel.add(convertibleModelFormatContentLabel,new GridBagConstraints(1,1,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
-		convertedModelContentLabel=new JLabel("");
-		//TODO add a panel containing the label of the directory, the text field of the name and the label of the extension
-		modelConversionSetupPanel.add(convertedModelContentLabel,new GridBagConstraints(1,2,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
-		final JComboBox<ModelFileFormat> convertedModelFormatCombobox=new JComboBox<>(new ModelFileFormat[]{ModelFileFormat.ARDOR3D_BINARY,ModelFileFormat.WAVEFRONT_OBJ});
+		convertedModelDirectoryLabel=new JLabel("");
+		convertedModelFilenameTextField=new JTextField();
+		convertedModelFilenameTextField.getDocument().addDocumentListener(new DocumentListener(){
+			@Override
+			public void removeUpdate(DocumentEvent de){
+				convertedModelFilenameTextFieldUpdated(de);
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent de){
+				convertedModelFilenameTextFieldUpdated(de);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent de){
+				convertedModelFilenameTextFieldUpdated(de);
+			}
+		});
+		convertedModelFilenameTextField.setColumns(20);
+		convertedModelExtensionLabel=new JLabel("");
+		final JPanel convertedModelEditionPanel=new JPanel(new FlowLayout());
+		convertedModelEditionPanel.add(convertedModelDirectoryLabel);
+		convertedModelEditionPanel.add(convertedModelFilenameTextField);
+		convertedModelEditionPanel.add(convertedModelExtensionLabel);
+		modelConversionSetupPanel.add(convertedModelEditionPanel,new GridBagConstraints(1,2,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
+		convertedModelFormatCombobox=new JComboBox<>(new ModelFileFormat[]{ModelFileFormat.ARDOR3D_BINARY,ModelFileFormat.WAVEFRONT_OBJ});
+		convertedModelFormatCombobox.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae){
+				convertedModelFormatComboboxActionPerformed(ae);
+			}
+		});
 		modelConversionSetupPanel.add(convertedModelFormatCombobox,new GridBagConstraints(1,3,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
 		final JLabel conversionStatusContentLabel=new JLabel("");
 		modelConversionSetupPanel.add(conversionStatusContentLabel,new GridBagConstraints(1,4,1,1,10,1,GridBagConstraints.PAGE_END,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
@@ -114,8 +150,29 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			}
 		});
 		modelConversionSetupPanel.add(conversionButton,new GridBagConstraints(2,4,1,1,1,1,GridBagConstraints.LAST_LINE_END,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
+		if(convertedModelFileFormat==null)
+			convertedModelFileFormat=ModelFileFormat.values()[0];
+		if(convertedModelFilename!=null)
+			convertedModelFilenameTextField.setText(convertedModelFilename);
+		//FIXME load the data from the data model
+		
+		convertedModelFormatCombobox.setSelectedItem(convertedModelFileFormat);
+		updateConvertedModelExtensionLabel();
 		updateConversionButton();
 	}
+	
+	private static ModelFileFormat getModelFileFormatFromFile(final File file){
+		ModelFileFormat modelFileFormat=null;
+		if(file!=null)
+		    {final String modelFileExtension=file.getName().substring(file.getName().lastIndexOf('.'));
+		     for(ModelFileFormat currentModelFileFormat:ModelFileFormat.values())
+	    	     if(modelFileExtension.equals(currentModelFileFormat.getExtension()))
+	                 {modelFileFormat=currentModelFileFormat;
+	                  break;
+	                 }
+		    }
+		return(modelFileFormat);
+	} 
 	
 	private void convertibleModelButtonActionPerformed(ActionEvent ae){
 		fileChooser.setCurrentDirectory(convertibleModelFile);
@@ -127,12 +184,9 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
 		    {convertibleModelFile=fileChooser.getSelectedFile();
 		     convertibleModelContentLabel.setText(convertibleModelFile.getAbsolutePath());
-		     final String convertibleModelFileExtension=convertibleModelFile.getName().substring(convertibleModelFile.getName().lastIndexOf('.'));
-		     for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
-		    	 if(convertibleModelFileExtension.equals(modelFileFormat.getExtension()))
-		             {convertibleModelFormatContentLabel.setText(modelFileFormat.getDescription());
-		              break;
-		             }
+		     final ModelFileFormat modelFileFormat=getModelFileFormatFromFile(convertibleModelFile);
+		     if(modelFileFormat!=null)
+		         convertibleModelFormatContentLabel.setText(modelFileFormat.getDescription());
 			 updateConversionButton();
 		    }
 		
@@ -146,18 +200,46 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			fileChooser.removeChoosableFileFilter(fileFilter);
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
 	        {convertedModelDir=fileChooser.getSelectedFile();
-	         convertedModelContentLabel.setText(convertedModelDir.getAbsolutePath());
+	         convertedModelDirectoryLabel.setText(convertedModelDir.getAbsolutePath()+System.getProperty("file.separator"));
 			 updateConversionButton();
 	        }
 	}
 	
+	private void convertedModelFilenameTextFieldUpdated(DocumentEvent de){
+		SwingUtilities.invokeLater(new Runnable(){
+			@Override
+			public void run(){
+				convertedModelFilename=convertedModelFilenameTextField.getText();
+				updateConversionButton();
+			}
+		});
+	}
+	
+	private void convertedModelFormatComboboxActionPerformed(ActionEvent ae){
+	    updateConvertedModelExtensionLabel();
+	}
+	
 	private void conversionButtonActionPerformed(ActionEvent ae){
-		
+		convert();
+	}
+	
+	private void convert(){
+		final File convertedModelFile=new File(convertedModelDir,convertedModelFilename+convertedModelFileFormat.getExtension());
+		//FIXME implement the conversions
 	}
 	
 	private void updateConversionButton(){
-		final boolean conversionEnabled=convertibleModelFile!=null&&convertedModelDir!=null&&convertedModelFile!=null;
+		//verifies that all required fields are set and the input format is different from the output format
+		final boolean conversionEnabled=convertibleModelFile!=null&&convertedModelDir!=null&&convertedModelFilename!=null&&
+		!convertedModelFilename.isEmpty()&&convertedModelFileFormat!=null&&
+		!getModelFileFormatFromFile(convertibleModelFile).equals(convertedModelFileFormat);
 		conversionButton.setEnabled(conversionEnabled);
+	}
+	
+	private void updateConvertedModelExtensionLabel(){
+		convertedModelFileFormat=(ModelFileFormat)convertedModelFormatCombobox.getSelectedItem();
+		convertedModelExtensionLabel.setText(convertedModelFileFormat.getExtension());
+		updateConversionButton();
 	}
 	
 	public enum ModelFileFormat{
@@ -216,6 +298,5 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		public final String getDescription(){
 			return("Convertible models");
 		}
-		
 	}
 }
