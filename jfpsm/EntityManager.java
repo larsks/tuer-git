@@ -42,6 +42,8 @@ public abstract class EntityManager extends JPanel{
 	
     protected final MainWindow mainWindow;
     
+    protected final ProgressDialog progressDialog;
+    
     protected final JTree tree;
 	
 	private boolean quitEnabled;
@@ -60,6 +62,7 @@ public abstract class EntityManager extends JPanel{
 		super();
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		this.mainWindow=mainWindow;
+		this.progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
 		this.quitEnabled=true;
 		this.treePopupMenu=new JPopupMenu();
 		this.tree=new JTree(treeModel);
@@ -113,6 +116,10 @@ public abstract class EntityManager extends JPanel{
 		final JScrollPane treePane=new JScrollPane(tree);
 		add(treePane);
 	}
+	
+	protected final void displayErrorMessage(Throwable throwable,boolean fatal){
+        mainWindow.displayErrorMessage(throwable,fatal);
+    }
 	
 	private void expandPathDeeplyFromPath(TreePath path){
 		tree.expandPath(path);

@@ -21,7 +21,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -31,10 +33,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
+
+import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
+import com.ardor3d.extension.model.md2.Md2Importer;
+import com.ardor3d.extension.model.obj.ObjExporter;
+import com.ardor3d.extension.model.obj.ObjImporter;
+import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.export.binary.BinaryImporter;
+import com.ardor3d.util.resource.URLResourceSource;
 
 /**
  * Graphical user interface of the model converter
@@ -109,7 +123,11 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		convertedModelEditionPanel.add(convertedModelFilenameTextField);
 		convertedModelEditionPanel.add(convertedModelExtensionLabel);
 		modelConversionSetupPanel.add(convertedModelEditionPanel,new GridBagConstraints(1,2,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
-		convertedModelFormatCombobox=new JComboBox<>(new ModelFileFormat[]{ModelFileFormat.ARDOR3D_BINARY,ModelFileFormat.WAVEFRONT_OBJ});
+		final ArrayList<ModelFileFormat> writableModelFileFormatsList=new ArrayList<>();
+		for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
+			if(modelFileFormat.isWritable())
+				writableModelFileFormatsList.add(modelFileFormat);
+		convertedModelFormatCombobox=new JComboBox<>(writableModelFileFormatsList.toArray(new ModelFileFormat[writableModelFileFormatsList.size()]));
 		convertedModelFormatCombobox.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent ae){
@@ -215,13 +233,127 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	}
 	
 	private void convert(){
-		final File convertedModelFile=new File(new File(getEntity().getConvertedModelDirectoryPath()),getEntity().getConvertedModelFilename()+getEntity().getConvertedModelFileFormat().getExtension());
-		//FIXME implement the conversions
+		final File inputModelFile=new File(getEntity().getConvertibleModelFilePath());
+		final File outputModelFile=new File(new File(getEntity().getConvertedModelDirectoryPath()),getEntity().getConvertedModelFilename()+getEntity().getConvertedModelFileFormat().getExtension());
+		final ModelFileFormat inputModelFileFormat=ModelFileFormat.get(getEntity().getConvertibleModelFilePath());
+		final ModelFileFormat outputModelFileFormat=getEntity().getConvertedModelFileFormat();
+		//prevents another conversion from being run at the same time
+		toolManager.setQuitEnabled(false);
+		updateConversionButton();
+		//runs the current one
+		new ModelConversionSwingWorker(inputModelFile,outputModelFile,inputModelFileFormat,outputModelFileFormat,toolManager,toolManager.progressDialog).execute();
+	}
+	
+	private static final class ModelConversionSwingWorker extends SwingWorker<Object,Object>{
+		
+		private final File inputModelFile;
+		
+		private final File outputModelFile;
+		
+		private final ModelFileFormat inputModelFileFormat;
+		
+		private final ModelFileFormat outputModelFileFormat;
+		
+		private final ToolManager toolManager;
+		
+		private final ProgressDialog dialog;
+		
+		
+		private ModelConversionSwingWorker(final File inputModelFile,final File outputModelFile,
+				final ModelFileFormat inputModelFileFormat,final ModelFileFormat outputModelFileFormat,
+				final ToolManager toolManager,final ProgressDialog dialog){
+			super();
+			this.inputModelFile=inputModelFile;
+			this.outputModelFile=outputModelFile;
+			this.inputModelFileFormat=inputModelFileFormat;
+			this.outputModelFileFormat=outputModelFileFormat;
+			this.toolManager=toolManager;
+			this.dialog=dialog;
+			SwingUtilities.invokeLater(new Runnable(){
+   			    @Override
+   			    public final void run(){
+   				    dialog.reset();
+   				    dialog.setVisible(true);
+   			    }
+   		    });
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		protected Object doInBackground() throws Exception{
+			final Spatial convertible;
+			switch(inputModelFileFormat)
+			{
+			    case ARDOR3D_BINARY:
+			    	convertible=(Spatial)new BinaryImporter().load(inputModelFile);
+			    	break;
+			    case COLLADA:
+			    	convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	break;
+			    case MD2:
+			    	convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURL())).getScene();
+			    	break;
+			    case WAVEFRONT_OBJ:
+			    	convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	break;
+			    default:
+			    	convertible=null;
+			    	throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
+			}
+			//FIXME publish something
+			if(!outputModelFile.exists()&&!outputModelFile.createNewFile())
+				{//FIXME throw an exception
+				}
+			switch(outputModelFileFormat)
+			{
+			    case ARDOR3D_BINARY:
+			    	//FIXME use DirectBinaryExporter
+			    	new BinaryExporter().save(convertible,outputModelFile);
+			    	break;
+			    case WAVEFRONT_OBJ:
+			    	//FIXME create a file to store material data (MTL)
+			    	//FIXME create a mesh list by visiting the spatial
+			    	//new ObjExporter().save(meshList,outputModelFile,secondaryOutputModelFile,null);
+			    	if(convertible instanceof Mesh)
+			    	    {
+			    		 
+			    	    }
+			    	else
+			    		if(convertible instanceof Node)
+			    		    {
+			    			 
+			    		    }
+			    	break;
+			    default:
+			    	throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
+			}
+			//FIXME publish something
+			return(null);
+		}
+		
+		@Override
+    	protected final void process(List<Object> chunks){
+			final StringBuilder builder=new StringBuilder();
+    		for(Object chunk:chunks)
+    			{builder.append(chunk.toString());
+    			 builder.append(" ");
+    			}
+    		dialog.setText(builder.toString().trim());
+    		dialog.setValue(100);
+		}
+		
+		@Override
+        protected final void done(){
+			//allows the user to leave the application
+			toolManager.setQuitEnabled(true);
+   	        dialog.setVisible(false);
+   	        dialog.reset();
+		}
 	}
 	
 	private void updateConversionButton(){
-		//verifies that all required fields are set and the input format is different from the output format
-		final boolean conversionEnabled=getEntity().getConvertibleModelFilePath()!=null&&
+		//verifies that the tool manager is ready, all required fields are set and the input format is different from the output format
+		final boolean conversionEnabled=toolManager.isQuitEnabled()&&getEntity().getConvertibleModelFilePath()!=null&&
 				getEntity().getConvertedModelDirectoryPath()!=null&&
 				getEntity().getConvertedModelFilename()!=null&&!getEntity().getConvertedModelFilename().isEmpty()&&
 				getEntity().getConvertedModelFileFormat()!=null&&
@@ -236,7 +368,13 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	
 	private static final class ConvertibleModelFileFilter extends FileFilter{
 
-		private static final String[] convertibleFileFormatsExtensions=new String[]{".abin",".dae",".md2",".obj"};
+		private static final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
+		
+		static{
+			for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
+				if(modelFileFormat.isReadable())
+					convertibleFileFormatsExtensions.add(modelFileFormat.getExtension());
+		}
 		
 		@Override
 		public final boolean accept(File f){

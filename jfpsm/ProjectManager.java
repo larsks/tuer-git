@@ -67,8 +67,6 @@ public final class ProjectManager extends EntityManager{
 	private static final long serialVersionUID=1L;
 	
 	private static final Logger logger = Logger.getLogger(ProjectManager.class.getName());
-	
-	private final ProgressDialog progressDialog;
 
 	
 	/**
@@ -77,7 +75,6 @@ public final class ProjectManager extends EntityManager{
 	 */
 	public ProjectManager(final MainWindow mainWindow){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
-		progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
         //fills the popup menu
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
@@ -330,10 +327,6 @@ public final class ProjectManager extends EntityManager{
    			          }
    		         }
    	        }
-    }
-    
-    final void displayErrorMessage(Throwable throwable,boolean fatal){
-        mainWindow.displayErrorMessage(throwable,fatal);
     }
     
     /**

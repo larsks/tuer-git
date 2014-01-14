@@ -17,7 +17,7 @@ public abstract class JFPSMToolUserObjectViewer extends Viewer{
 	
 	private static final long serialVersionUID=1L;
 	
-	private final ToolManager toolManager;
+	protected final ToolManager toolManager;
 	
 	
 	public JFPSMToolUserObjectViewer(final JFPSMToolUserObject entity,final ToolManager toolManager){
