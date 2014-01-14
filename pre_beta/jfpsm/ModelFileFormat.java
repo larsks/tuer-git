@@ -13,8 +13,6 @@
 */
 package jfpsm;
 
-import java.io.File;
-
 /**
  * model file format supported by JFPSM
  * 
@@ -22,20 +20,26 @@ import java.io.File;
  *
  */
 public enum ModelFileFormat{
-	ARDOR3D_BINARY("Ardor3D Binary",".abin"),
-	ARDOR3D_XML("Ardor3D XML",".axml"),
-	COLLADA("Collada",".dae"),
-	MD2("MD2",".md2"),
-	MD3("MD3",".md3"),
-	WAVEFRONT_OBJ("WaveFront OBJ",".obj");
+	ARDOR3D_BINARY("Ardor3D Binary",".abin",true,true),
+	ARDOR3D_XML("Ardor3D XML",".axml",false,false/*true,true*/),
+	COLLADA("Collada",".dae",true,false),
+	MD2("MD2",".md2",true,false),
+	MD3("MD3",".md3",false,false/*,true,false*/),
+	WAVEFRONT_OBJ("WaveFront OBJ",".obj",true,true);
 	
 	private final String description;
 	
 	private final String extension;
 	
-    private ModelFileFormat(final String description,final String extension){
+	private final boolean readable;
+	
+	private final boolean writable;
+	
+    private ModelFileFormat(final String description,final String extension,final boolean readable,final boolean writable){
 		this.description=description;
 		this.extension=extension;
+		this.readable=readable;
+		this.writable=writable;
 	}
     
     public final String getDescription(){
@@ -44,6 +48,14 @@ public enum ModelFileFormat{
     
     public final String getExtension(){
     	return(extension);
+    }
+    
+    public final boolean isReadable(){
+    	return(readable);
+    }
+    
+    public final boolean isWritable(){
+    	return(writable);
     }
     
     @Override
