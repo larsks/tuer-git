@@ -20,24 +20,27 @@ package jfpsm;
  *
  */
 public enum ModelFileFormat{
-	ARDOR3D_BINARY("Ardor3D Binary",".abin",true,true),
-	ARDOR3D_XML("Ardor3D XML",".axml",false,false/*true,true*/),
-	COLLADA("Collada",".dae",true,false),
-	MD2("MD2",".md2",true,false),
-	MD3("MD3",".md3",false,false/*,true,false*/),
-	WAVEFRONT_OBJ("WaveFront OBJ",".obj",true,true);
+	ARDOR3D_BINARY("Ardor3D Binary",".abin",null,true,true),
+	ARDOR3D_XML("Ardor3D XML",".axml",null,false,false/*true,true*/),
+	COLLADA("Collada",".dae",null,true,false),
+	MD2("MD2",".md2",null,true,false),
+	MD3("MD3",".md3",null,false,false/*,true,false*/),
+	WAVEFRONT_OBJ("WaveFront OBJ",".obj",".mtl",true,true);
 	
 	private final String description;
 	
 	private final String extension;
 	
+	private final String secondaryExtension;
+	
 	private final boolean readable;
 	
 	private final boolean writable;
 	
-    private ModelFileFormat(final String description,final String extension,final boolean readable,final boolean writable){
+    private ModelFileFormat(final String description,final String extension,final String secondaryExtension,final boolean readable,final boolean writable){
 		this.description=description;
 		this.extension=extension;
+		this.secondaryExtension=secondaryExtension;
 		this.readable=readable;
 		this.writable=writable;
 	}
@@ -48,6 +51,10 @@ public enum ModelFileFormat{
     
     public final String getExtension(){
     	return(extension);
+    }
+    
+    public final String getSecondaryExtension(){
+    	return(secondaryExtension);
     }
     
     public final boolean isReadable(){
