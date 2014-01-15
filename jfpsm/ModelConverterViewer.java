@@ -21,10 +21,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -38,7 +38,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-
 import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.extension.model.md2.Md2Importer;
 import com.ardor3d.extension.model.obj.ObjExporter;
@@ -46,12 +45,20 @@ import com.ardor3d.extension.model.obj.ObjImporter;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.visitor.Visitor;
+import com.ardor3d.util.export.binary.BinaryClassObject;
 import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.export.binary.BinaryIdContentPair;
 import com.ardor3d.util.export.binary.BinaryImporter;
+import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.resource.URLResourceSource;
 
 /**
  * Graphical user interface of the model converter
+ * 
+ * TODO: - display settings specific to some formats
+ *       - export the data of the key frames in the comments of the WaveFront OBJ file
+ *       - move the operations for the OBJ OSM files into this class
  * 
  * @author Julien Gouesse
  *
@@ -234,21 +241,82 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	
 	private void convert(){
 		final File inputModelFile=new File(getEntity().getConvertibleModelFilePath());
-		final File outputModelFile=new File(new File(getEntity().getConvertedModelDirectoryPath()),getEntity().getConvertedModelFilename()+getEntity().getConvertedModelFileFormat().getExtension());
+		if(!inputModelFile.exists())
+			throw new IllegalArgumentException("The input file "+inputModelFile.getAbsolutePath()+" does not exist");
+		if(!inputModelFile.canRead())
+			throw new IllegalArgumentException("The input file "+inputModelFile.getAbsolutePath()+" cannot be read");
+		final File convertedModelDirectory=new File(getEntity().getConvertedModelDirectoryPath());
+		final String convertedModelFilename=getEntity().getConvertedModelFilename();
+		final File outputModelFile=new File(convertedModelDirectory,convertedModelFilename+getEntity().getConvertedModelFileFormat().getExtension());
+		if(!outputModelFile.exists())
+		    {boolean success=false;
+			 try{success=outputModelFile.createNewFile();}
+			 catch(IOException ioe)
+			 {throw new IllegalArgumentException("The output file "+outputModelFile.getAbsolutePath()+" cannot be created",ioe);}
+			 if(!success)
+				 throw new IllegalArgumentException("The output file "+outputModelFile.getAbsolutePath()+" cannot be created");
+		    }
+		if(!outputModelFile.canWrite())
+			throw new IllegalArgumentException("The output file "+outputModelFile.getAbsolutePath()+" cannot be written");
+		final File secondaryOutputModelFile;
+		if(getEntity().getConvertedModelFileFormat().getSecondaryExtension()==null)
+			secondaryOutputModelFile=null;
+		else
+			{secondaryOutputModelFile=new File(convertedModelDirectory,convertedModelFilename+getEntity().getConvertedModelFileFormat().getSecondaryExtension());
+			 if(!secondaryOutputModelFile.exists())
+		         {boolean success=false;
+			      try{success=secondaryOutputModelFile.createNewFile();}
+			      catch(IOException ioe)
+			      {throw new IllegalArgumentException("The secondary output file "+secondaryOutputModelFile.getAbsolutePath()+" cannot be created",ioe);}
+			      if(!success)
+				      throw new IllegalArgumentException("The secondary output file "+secondaryOutputModelFile.getAbsolutePath()+" cannot be created");
+		         }
+		     if(!secondaryOutputModelFile.canWrite())
+			     throw new IllegalArgumentException("The secondary output file "+outputModelFile.getAbsolutePath()+" cannot be written");
+			}
 		final ModelFileFormat inputModelFileFormat=ModelFileFormat.get(getEntity().getConvertibleModelFilePath());
 		final ModelFileFormat outputModelFileFormat=getEntity().getConvertedModelFileFormat();
 		//prevents another conversion from being run at the same time
 		toolManager.setQuitEnabled(false);
 		updateConversionButton();
 		//runs the current one
-		new ModelConversionSwingWorker(inputModelFile,outputModelFile,inputModelFileFormat,outputModelFileFormat,toolManager,toolManager.progressDialog).execute();
+		new ModelConversionSwingWorker(inputModelFile,outputModelFile,secondaryOutputModelFile,inputModelFileFormat,outputModelFileFormat,
+				toolManager,toolManager.progressDialog,this).execute();
 	}
 	
-	private static final class ModelConversionSwingWorker extends SwingWorker<Object,Object>{
+	private static final class DirectBinaryExporter extends BinaryExporter{
+        @Override
+		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
+            return pair;
+        }
+    }
+	
+    private static final class MeshFinder implements Visitor{
+    	
+    	private final List<Mesh> meshList;
+		
+		private MeshFinder(){
+			super();
+			meshList=new ArrayList<>();
+		}
+		
+		@Override
+    	public void visit(final Spatial spatial){
+			if(spatial instanceof Mesh)
+			    {final Mesh mesh=(Mesh)spatial;
+			     meshList.add(mesh);
+			    }
+		}
+	}
+	
+	private static final class ModelConversionSwingWorker extends SwingWorker<Spatial,String>{
 		
 		private final File inputModelFile;
 		
 		private final File outputModelFile;
+		
+		private final File secondaryOutputModelFile;
 		
 		private final ModelFileFormat inputModelFileFormat;
 		
@@ -258,17 +326,21 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		
 		private final ProgressDialog dialog;
 		
+		private final ModelConverterViewer modelConverterViewer;
 		
-		private ModelConversionSwingWorker(final File inputModelFile,final File outputModelFile,
+		
+		private ModelConversionSwingWorker(final File inputModelFile,final File outputModelFile,final File secondaryOutputModelFile,
 				final ModelFileFormat inputModelFileFormat,final ModelFileFormat outputModelFileFormat,
-				final ToolManager toolManager,final ProgressDialog dialog){
+				final ToolManager toolManager,final ProgressDialog dialog,final ModelConverterViewer modelConverterViewer){
 			super();
 			this.inputModelFile=inputModelFile;
 			this.outputModelFile=outputModelFile;
+			this.secondaryOutputModelFile=secondaryOutputModelFile;
 			this.inputModelFileFormat=inputModelFileFormat;
 			this.outputModelFileFormat=outputModelFileFormat;
 			this.toolManager=toolManager;
 			this.dialog=dialog;
+			this.modelConverterViewer=modelConverterViewer;
 			SwingUtilities.invokeLater(new Runnable(){
    			    @Override
    			    public final void run(){
@@ -280,62 +352,71 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 
 		@SuppressWarnings("deprecation")
 		@Override
-		protected Object doInBackground() throws Exception{
-			final Spatial convertible;
-			switch(inputModelFileFormat)
-			{
-			    case ARDOR3D_BINARY:
-			    	convertible=(Spatial)new BinaryImporter().load(inputModelFile);
-			    	break;
-			    case COLLADA:
-			    	convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
-			    	break;
-			    case MD2:
-			    	convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURL())).getScene();
-			    	break;
-			    case WAVEFRONT_OBJ:
-			    	convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
-			    	break;
-			    default:
-			    	convertible=null;
-			    	throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
+		protected Spatial doInBackground() throws Exception{
+			boolean success=false;
+			try
+			    {final Spatial convertible;
+			     switch(inputModelFileFormat)
+			     {
+			         case ARDOR3D_BINARY:
+			    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
+			    	     break;
+			         case COLLADA:
+			    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	     break;
+			         case MD2:
+			    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURL())).getScene();
+			    	     break;
+			         case WAVEFRONT_OBJ:
+			    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	     break;
+			         default:
+			    	     convertible=null;
+			    	     throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
+			     }
+			     publish("Loading successful");
+			     switch(outputModelFileFormat)
+			     {
+			         case ARDOR3D_BINARY:
+			    	     new DirectBinaryExporter().save(convertible,outputModelFile);
+			    	     break;
+			         case WAVEFRONT_OBJ:
+			    	     if(convertible instanceof Mesh)
+			    	    	 new ObjExporter().save((Mesh)convertible,outputModelFile,secondaryOutputModelFile);
+			    	     else
+			    		     if(convertible instanceof Node)
+			    		         {//creates a mesh list by visiting the spatial
+			    			      final MeshFinder meshFinder=new MeshFinder();
+			    			      meshFinder.visit(convertible);
+			    			      //exports the whole
+			    			      new ObjExporter().save(meshFinder.meshList,outputModelFile,secondaryOutputModelFile,null);
+			    		         }
+			    	     break;
+			         default:
+			    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
+			     }
+			     success=true;
+			     publish("Conversion successful");
+			     return(convertible);
 			}
-			//FIXME publish something
-			if(!outputModelFile.exists()&&!outputModelFile.createNewFile())
-				{//FIXME throw an exception
-				}
-			switch(outputModelFileFormat)
-			{
-			    case ARDOR3D_BINARY:
-			    	//FIXME use DirectBinaryExporter
-			    	new BinaryExporter().save(convertible,outputModelFile);
-			    	break;
-			    case WAVEFRONT_OBJ:
-			    	//FIXME create a file to store material data (MTL)
-			    	//FIXME create a mesh list by visiting the spatial
-			    	//new ObjExporter().save(meshList,outputModelFile,secondaryOutputModelFile,null);
-			    	if(convertible instanceof Mesh)
-			    	    {
-			    		 
-			    	    }
-			    	else
-			    		if(convertible instanceof Node)
-			    		    {
-			    			 
-			    		    }
-			    	break;
-			    default:
-			    	throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
+			finally
+			{if(!success)
+			     {//forces the call to done() even though the conversion has just failed
+				  SwingUtilities.invokeLater(new Runnable(){
+				      @Override
+				      public void run(){
+					      done();
+				      }
+			      });
+			     }
 			}
-			//FIXME publish something
-			return(null);
 		}
 		
 		@Override
-    	protected final void process(List<Object> chunks){
+    	protected final void process(List<String> chunks){
 			final StringBuilder builder=new StringBuilder();
-    		for(Object chunk:chunks)
-    			{builder.append(chunk.toString());
+    		for(String chunk:chunks)
+    			{builder.append(chunk);
     			 builder.append(" ");
     			}
     		dialog.setText(builder.toString().trim());
@@ -346,6 +427,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
         protected final void done(){
 			//allows the user to leave the application
 			toolManager.setQuitEnabled(true);
+			modelConverterViewer.updateConversionButton();
    	        dialog.setVisible(false);
    	        dialog.reset();
 		}
