@@ -319,7 +319,7 @@
 		    </dname>
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
-		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamp.verisign.com">
+		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr">
 		    <path refid="project.sign.jars.path"/>
 		</signjar>
 	</target>
