@@ -30,7 +30,7 @@ import javax.swing.JTabbedPane;
  * @author Julien Gouesse
  *
  */
-final class EntityViewer extends JPanel{
+public class EntityViewer extends JPanel{
 
     
     private static final long serialVersionUID=1L;
@@ -44,7 +44,7 @@ final class EntityViewer extends JPanel{
     private final ToolManager toolManager;
 
     
-    EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
+    public EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
     	this.projectManager=projectManager;
     	this.toolManager=toolManager;
     	entityToTabComponentMap=new HashMap<>();
@@ -53,7 +53,7 @@ final class EntityViewer extends JPanel{
         add(entityTabbedPane);
     }
     
-    final boolean openEntityView(final JFPSMToolUserObject entity){
+    public boolean openEntityView(final JFPSMToolUserObject entity){
     	final boolean success;
     	JPanel tabComponent=entityToTabComponentMap.get(entity);
     	final Viewer entityView;
@@ -98,7 +98,7 @@ final class EntityViewer extends JPanel{
      * @param project project in which this entity is
      * @return
      */
-    final boolean openEntityView(final JFPSMProjectUserObject entity,final Project project){
+    public boolean openEntityView(final JFPSMProjectUserObject entity,final Project project){
     	final boolean success;
     	JPanel tabComponent=entityToTabComponentMap.get(entity);
     	final Viewer entityView;
@@ -136,7 +136,7 @@ final class EntityViewer extends JPanel{
         return(success);
     }
     
-    final boolean renameEntityView(final Namable entity){
+    public boolean renameEntityView(final Namable entity){
     	final JPanel tabComponent=entityToTabComponentMap.get(entity);
     	final boolean success=tabComponent!=null;
     	if(tabComponent!=null)
@@ -144,7 +144,7 @@ final class EntityViewer extends JPanel{
     	return(success);
     }
         
-    final boolean closeEntityView(final Namable entity){
+    public boolean closeEntityView(final Namable entity){
     	final JPanel tabComponent=entityToTabComponentMap.get(entity);
     	final boolean success=tabComponent!=null;
     	if(tabComponent!=null)

@@ -51,7 +51,6 @@ import javax.swing.tree.TreePath;
  * TODO:
  * Separate the entity managers from their views
  * Use Swing workers to manage long changes
- * Implement the model converter
  * Add some icons into the trees and the tabs
  * Check whether bean fields are accessible
  * Save the whole project as a single XML file
@@ -211,7 +210,7 @@ public final class ProjectManager extends EntityManager{
                 	         {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
                               final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();    
                               if(userObject!=null&&userObject.isOpenable())
-                                  {final Project project=getProjectFromSelectedNode(selectedNode);
+                                  {final Project project=getProjectFromTreeNode(selectedNode);
                         	       mainWindow.getEntityViewer().openEntityView(userObject,project);
                                   }
                 	         }
@@ -269,8 +268,8 @@ public final class ProjectManager extends EntityManager{
 		}
 	}
 	
-	private static final Project getProjectFromSelectedNode(final DefaultMutableTreeNode selectedNode){
-		DefaultMutableTreeNode node=selectedNode;
+	private static final Project getProjectFromTreeNode(final DefaultMutableTreeNode treeNode){
+		DefaultMutableTreeNode node=treeNode;
 		Project project=null;
 		Object userObject;
 		while(node!=null)
@@ -347,7 +346,7 @@ public final class ProjectManager extends EntityManager{
         	 //TODO allow project duplication
             }
         else
-            {final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();            
+            {final ProjectSet workspace=(ProjectSet)((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject();
              final String[] projectNames=workspace.getProjectNames();
              final File[] projectFiles=workspace.getProjectFiles();
              File projectFile=null;
@@ -424,11 +423,11 @@ public final class ProjectManager extends EntityManager{
     }
     
     @Override
-    protected Namable createNewEntityFromSelectedEntity(){
+    protected JFPSMProjectUserObject createNewEntityFromSelectedEntity(){
     	final TreePath path=tree.getSelectionPath();
     	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
     	final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
-    	final Namable newlyCreatedEntity;
+    	final JFPSMProjectUserObject newlyCreatedEntity;
     	if(userObject.canInstantiateChildren())
     	    {final NamingDialog enterNameDialog;
     		 if(userObject instanceof ProjectSet)
@@ -721,7 +720,7 @@ public final class ProjectManager extends EntityManager{
              final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
              if(userObject.isOpenable())
                  {if(userObject instanceof Tile||userObject instanceof Floor)
-                      {final Project project=getProjectFromSelectedNode(selectedNode);
+                      {final Project project=getProjectFromTreeNode(selectedNode);
             	       //opens a tab view for this entity
                        mainWindow.getEntityViewer().openEntityView(userObject,project);
                       }

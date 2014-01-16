@@ -124,11 +124,11 @@ public final class ToolManager extends EntityManager{
     }
 	
 	@Override
-	protected Namable createNewEntityFromSelectedEntity(){
+	protected JFPSMToolUserObject createNewEntityFromSelectedEntity(){
     	final TreePath path=tree.getSelectionPath();
     	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
     	final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
-    	final Namable newlyCreatedEntity;
+    	final JFPSMToolUserObject newlyCreatedEntity;
     	if(userObject.canInstantiateChildren()) 
     	    {if(userObject instanceof ModelConverterSet)
     	         {final ModelConverterSet modelConverterSet=(ModelConverterSet)userObject;
