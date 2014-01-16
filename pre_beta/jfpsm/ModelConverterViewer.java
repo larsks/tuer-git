@@ -350,10 +350,8 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
    		    });
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		protected Spatial doInBackground() throws Exception{
-			boolean success=false;
 			try
 			    {final Spatial convertible;
 			     switch(inputModelFileFormat)
@@ -362,13 +360,13 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
 			    	     break;
 			         case COLLADA:
-			    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryHelper()).getScene();
 			    	     break;
 			         case MD2:
-			    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURL())).getScene();
+			    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
 			    	     break;
 			         case WAVEFRONT_OBJ:
-			    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURL()),new GeometryHelper()).getScene();
+			    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryHelper()).getScene();
 			    	     break;
 			         default:
 			    	     convertible=null;
@@ -395,20 +393,18 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			         default:
 			    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
 			     }
-			     success=true;
 			     publish("Conversion successful");
 			     return(convertible);
 			}
-			finally
-			{if(!success)
-			     {//forces the call to done() even though the conversion has just failed
-				  SwingUtilities.invokeLater(new Runnable(){
-				      @Override
-				      public void run(){
-					      done();
-				      }
-			      });
+			catch(Exception e)
+			{//forces the call to done() even though the conversion has just failed
+			 SwingUtilities.invokeLater(new Runnable(){
+			     @Override
+			     public void run(){
+			         done();
 			     }
+			 });
+			 throw e;
 			}
 		}
 		
