@@ -16,6 +16,8 @@ package jfpsm;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.AbstractMap.SimpleEntry;
+
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -124,11 +126,12 @@ public final class ToolManager extends EntityManager{
     }
 	
 	@Override
-	protected JFPSMToolUserObject createNewEntityFromSelectedEntity(){
+	protected SimpleEntry<JFPSMToolUserObject,DefaultMutableTreeNode> createNewEntityFromSelectedEntity(){
     	final TreePath path=tree.getSelectionPath();
     	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
     	final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
     	final JFPSMToolUserObject newlyCreatedEntity;
+    	final DefaultMutableTreeNode treeNode;
     	if(userObject.canInstantiateChildren()) 
     	    {if(userObject instanceof ModelConverterSet)
     	         {final ModelConverterSet modelConverterSet=(ModelConverterSet)userObject;
@@ -144,30 +147,35 @@ public final class ToolManager extends EntityManager{
                   if(!tree.isExpanded(modelConverterSetPath))
       	              tree.expandPath(modelConverterSetPath);
     	    	  newlyCreatedEntity=modelConverter;
+    	    	  treeNode=modelConverterNode;
     	         }
     	     else
-    	    	 newlyCreatedEntity=null;
+    	    	 {newlyCreatedEntity=null;
+    	    	  treeNode=null;
+    	    	 }
     	    }
     	else
-    		newlyCreatedEntity=null;
-    	return(newlyCreatedEntity);
+    		{newlyCreatedEntity=null;
+    		 treeNode=null;
+    		}
+    	final SimpleEntry<JFPSMToolUserObject,DefaultMutableTreeNode> entry;
+    	if(newlyCreatedEntity==null&&treeNode==null)
+    		entry=null;
+    	else
+    		entry=new SimpleEntry<>(newlyCreatedEntity,treeNode);
+    	return(entry);
     }
 	
 	@Override
-	protected void openSelectedEntities(){
-		super.openSelectedEntities();
-        final TreePath[] paths=tree.getSelectionPaths();
-        for(TreePath path:paths)
-            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             final JFPSMToolUserObject userObject=(JFPSMToolUserObject)selectedNode.getUserObject();
-             if(userObject.isOpenable())
-                 {if(userObject instanceof ModelConverter)
-                      {//opens a tab view for this entity
-                       mainWindow.getEntityViewer().openEntityView(userObject);
-                      }
+    protected void openEntity(final TreePath path,final DefaultMutableTreeNode node,final JFPSMUserObject userObject){
+		super.openEntity(path,node,userObject);
+    	if(userObject.isOpenable())
+    	    {if(userObject instanceof ModelConverter)
+                 {//opens a tab view for this entity
+                  mainWindow.getEntityViewer().openEntityView((JFPSMToolUserObject)userObject);
                  }
             }
-    }
+	}
 	
 	@Override
 	protected void closeSelectedEntities(){

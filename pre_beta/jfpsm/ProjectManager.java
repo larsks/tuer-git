@@ -25,10 +25,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -337,11 +339,14 @@ public final class ProjectManager extends EntityManager{
             addProject(projectName);
     }
     
-    private final Project addProject(String name){
-        Project project=null;
+    private final SimpleEntry<Project,DefaultMutableTreeNode> addProject(String name){
+        final Project project;
+        final DefaultMutableTreeNode projectRootNode;
         //if it is already in the tree
         if(getAllProjectNames().contains(name))
-            {//FIXME check whether this name is used by several projects, use workspace.getProjectNames()
+            {projectRootNode=null;
+             project=null;
+        	 //FIXME check whether this name is used by several projects, use workspace.getProjectNames()
         	 //TODO allow project renaming as it should be supported
         	 //TODO allow project duplication
             }
@@ -357,8 +362,9 @@ public final class ProjectManager extends EntityManager{
                      }
              //if it is in the file system          
              if(projectFile!=null)
-                 //loads it into the workspace
-                 project=workspace.loadProject(projectFile);
+                 {//loads it into the workspace
+                  project=workspace.loadProject(projectFile);
+                 }
              else
                  {//creates the project
                   project=new Project(name);
@@ -369,7 +375,7 @@ public final class ProjectManager extends EntityManager{
              //puts it into the tree
              DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
              DefaultMutableTreeNode projectsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
-             DefaultMutableTreeNode projectRootNode=new DefaultMutableTreeNode(project);
+             projectRootNode=new DefaultMutableTreeNode(project);
              treeModel.insertNodeInto(projectRootNode,projectsRoot,projectsRoot.getChildCount());
              //adds the level set
              LevelSet levelSet=project.getLevelSet();
@@ -419,15 +425,21 @@ public final class ProjectManager extends EntityManager{
              TreePath projectPath=new TreePath(new Object[]{projectsRoot,projectRootNode});
              tree.expandPath(projectPath);
             }
-        return(project);
+        SimpleEntry<Project,DefaultMutableTreeNode> entry;
+        if(project==null&&projectRootNode==null)
+        	entry=null;
+        else
+        	entry=new SimpleEntry<>(project,projectRootNode);
+        return(entry);
     }
     
     @Override
-    protected JFPSMProjectUserObject createNewEntityFromSelectedEntity(){
+    protected SimpleEntry<JFPSMProjectUserObject,DefaultMutableTreeNode> createNewEntityFromSelectedEntity(){
     	final TreePath path=tree.getSelectionPath();
     	final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
     	final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
     	final JFPSMProjectUserObject newlyCreatedEntity;
+    	final DefaultMutableTreeNode treeNode;
     	if(userObject.canInstantiateChildren())
     	    {final NamingDialog enterNameDialog;
     		 if(userObject instanceof ProjectSet)
@@ -456,12 +468,15 @@ public final class ProjectManager extends EntityManager{
                   //if the name is correct and not already in use => not null
     		      if(name!=null)
     		          {if(userObject instanceof ProjectSet)
-    		               newlyCreatedEntity=addProject(name);
+    		               {final SimpleEntry<Project,DefaultMutableTreeNode> entry=addProject(name);
+    		        	    newlyCreatedEntity=entry==null?null:entry.getKey();
+    		        	    treeNode=entry==null?null:entry.getValue();
+    		               }
     		           else
     		    	       if(userObject instanceof FloorSet)
-    		    	           {Floor floor=new Floor(name);
+    		    	           {final Floor floor=new Floor(name);
                                 ((FloorSet)userObject).addFloor(floor);
-                                DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
+                                final DefaultMutableTreeNode floorNode=new DefaultMutableTreeNode(floor);
                                 ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorNode,selectedNode,selectedNode.getChildCount());
                                 //adds each node of a map
                                 DefaultMutableTreeNode mapNode;
@@ -476,50 +491,62 @@ public final class ProjectManager extends EntityManager{
                                 if(!tree.isExpanded(floorPath))
                     	            tree.expandPath(floorPath);
                                 newlyCreatedEntity=floor;
+                                treeNode=floorNode;
     		    	           }
     		    	       else
     		    		       if(userObject instanceof TileSet)
-    		    		           {Tile tile=new Tile(name);
+    		    		           {final Tile tile=new Tile(name);
     		    		            tile.setColor(((TileCreationDialog)enterNameDialog).getValidatedColor());
                                     ((TileSet)userObject).addTile(tile);  
-                                    DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
+                                    final DefaultMutableTreeNode tileNode=new DefaultMutableTreeNode(tile);
                                     ((DefaultTreeModel)tree.getModel()).insertNodeInto(tileNode,selectedNode,selectedNode.getChildCount());
                                     TreePath tileSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
                                     if(!tree.isExpanded(tileSetPath))
                             	        tree.expandPath(tileSetPath);
                                     newlyCreatedEntity=tile;
+                                    treeNode=tileNode;
     		    		           }
     		    		       else
     		    		           if(userObject instanceof LevelSet)
-    		    		               {FloorSet floorSet=new FloorSet(name);
+    		    		               {final FloorSet floorSet=new FloorSet(name);
     		    		                ((LevelSet)userObject).addFloorSet(floorSet);
-    		    		                DefaultMutableTreeNode floorSetNode=new DefaultMutableTreeNode(floorSet);
+    		    		                final DefaultMutableTreeNode floorSetNode=new DefaultMutableTreeNode(floorSet);
     	                                ((DefaultTreeModel)tree.getModel()).insertNodeInto(floorSetNode,selectedNode,selectedNode.getChildCount());
     	                                TreePath floorSetPath=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(selectedNode));
                                         if(!tree.isExpanded(floorSetPath))
                                             tree.expandPath(floorSetPath);
                                         newlyCreatedEntity=floorSet;
+                                        treeNode=floorSetNode;
     		    		               }
     		    		           else
     		    		               {newlyCreatedEntity=null;
+    		    		                treeNode=null;
     		    		                logger.warning("Unexpected case: "+userObject.getClass().getSimpleName()+" cannot create a tree node");
     		    		               }
     		          }
     		      else
     		          {newlyCreatedEntity=null;
+    		           treeNode=null;
     		           //no name
     		          }
     	         }
     		 else
     			 {newlyCreatedEntity=null;
+    			  treeNode=null;
     			  logger.warning("Unexpected case: "+userObject.getClass().getSimpleName()+" cannot create a naming dialog");
     			 }
     	    }
     	else
     		{newlyCreatedEntity=null;
+    		 treeNode=null;
     		 logger.warning("Unexpected case: attempt of creating a child of "+userObject.getClass().getSimpleName()+" which does not support this feature");
     		}
-    	return(newlyCreatedEntity);
+    	final SimpleEntry<JFPSMProjectUserObject,DefaultMutableTreeNode> entry;
+    	if(newlyCreatedEntity==null&&treeNode==null)
+    		entry=null;
+    	else
+    		entry=new SimpleEntry<>(newlyCreatedEntity,treeNode);
+    	return(entry);
     }
     
     final void saveSelectedEntities(){
@@ -712,21 +739,16 @@ public final class ProjectManager extends EntityManager{
     }
     
     @Override
-	protected void openSelectedEntities(){
-    	super.openSelectedEntities();
-        final TreePath[] paths=tree.getSelectionPaths();
-        for(TreePath path:paths)
-            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             final JFPSMProjectUserObject userObject=(JFPSMProjectUserObject)selectedNode.getUserObject();
-             if(userObject.isOpenable())
-                 {if(userObject instanceof Tile||userObject instanceof Floor)
-                      {final Project project=getProjectFromTreeNode(selectedNode);
-            	       //opens a tab view for this entity
-                       mainWindow.getEntityViewer().openEntityView(userObject,project);
-                      }
+    protected void openEntity(final TreePath path,final DefaultMutableTreeNode node,final JFPSMUserObject userObject){
+		super.openEntity(path,node,userObject);
+    	if(userObject.isOpenable())
+		    {if(userObject instanceof Tile||userObject instanceof Floor)
+                 {final Project project=getProjectFromTreeNode(node);
+	              //opens a tab view for this entity
+                  mainWindow.getEntityViewer().openEntityView((JFPSMProjectUserObject)userObject,project);
                  }
             }
-    }
+	}
     
     @Override
     protected void closeSelectedEntities(){
