@@ -15,9 +15,7 @@ package jfpsm;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import java.util.AbstractMap.SimpleEntry;
 import javax.swing.BoxLayout;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -25,8 +23,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -44,7 +40,7 @@ public abstract class EntityManager extends JPanel{
 	
 	private static final long serialVersionUID=1L;
 	/**
-	 * flag indicating whether the application automatically selects and opens the viewer of an entity at its creation
+	 * flag indicating whether the application automatically opens the viewer of an entity at its creation
 	 * */
 	public static boolean automaticOpeningOfNewlyCreatedEntityViewerEnabled=true;
 	
@@ -125,56 +121,15 @@ public abstract class EntityManager extends JPanel{
 		add(treePane);
 	}
 	
-	private static final class InsertedTreeNodesListener implements TreeModelListener{
-
-		private ArrayList<Object> insertedTreeNodes;
-		
-		private InsertedTreeNodesListener(){
-			super();
-			insertedTreeNodes=new ArrayList<>();
-		}
-		
-		@Override
-		public void treeNodesChanged(TreeModelEvent tme){
-		}
-
-		@Override
-		public void treeNodesInserted(TreeModelEvent tme){
-			insertedTreeNodes.addAll(Arrays.asList(tme.getChildren()));
-		}
-
-		@Override
-		public void treeNodesRemoved(TreeModelEvent tme){
-		}
-
-		@Override
-		public void treeStructureChanged(TreeModelEvent tme){
-		}
-		
-	}
-	
 	protected void newMenuItemActionPerformed(ActionEvent ae){
 		if(automaticOpeningOfNewlyCreatedEntityViewerEnabled)
-		    {//listens to tree node(s) insertion(s)
-			 final InsertedTreeNodesListener listener=new InsertedTreeNodesListener();
-			 tree.getModel().addTreeModelListener(listener);
-			 final JFPSMUserObject userObject=createNewEntityFromSelectedEntity();
-			 //removes the listener
-			 tree.getModel().removeTreeModelListener(listener);
-			 //finds the tree node of the newly created user object in the most recently inserted tree nodes
-			 for(Object node:listener.insertedTreeNodes)
-				 if(node instanceof DefaultMutableTreeNode)
-				     {final DefaultMutableTreeNode treeNode=(DefaultMutableTreeNode)node;
-					  if(treeNode.getUserObject()==userObject)
-					      {tree.clearSelection();
-						   //selects this tree node of this object
-					       final TreePath path=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(treeNode));
-						   tree.setSelectionPath(path);
-						   //opens its viewer if any
-			               openSelectedEntities();
-						   break;
-					      }
-				     }
+		    {final SimpleEntry<? extends JFPSMUserObject,DefaultMutableTreeNode> entry=createNewEntityFromSelectedEntity();
+			 if(entry!=null)
+			     {final JFPSMUserObject userObject=entry.getKey();
+			      final DefaultMutableTreeNode node=entry.getValue();
+			      final TreePath path=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(node));
+			      openEntity(path,node,userObject);
+			     }
 		    }
 		else
 			createNewEntityFromSelectedEntity();
@@ -204,15 +159,19 @@ public abstract class EntityManager extends JPanel{
 	        expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
 	}
 	
-	protected void openSelectedEntities(){
+	private void openSelectedEntities(){
         final TreePath[] paths=tree.getSelectionPaths();
         for(TreePath path:paths)
             {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
              final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
-             if(userObject.isOpenable())
-                 expandPathDeeplyFromPath(path);
+             openEntity(path,selectedNode,userObject);
             }
     }
+	
+	protected void openEntity(final TreePath path,final DefaultMutableTreeNode node,final JFPSMUserObject userObject){
+		if(userObject.isOpenable())
+            expandPathDeeplyFromPath(path);
+	}
 	
 	protected void closeSelectedEntities(){
         final TreePath[] paths=tree.getSelectionPaths();
@@ -226,7 +185,7 @@ public abstract class EntityManager extends JPanel{
 	
 	protected abstract void deleteSelectedEntities();
 	
-	protected abstract JFPSMUserObject createNewEntityFromSelectedEntity();
+	protected abstract SimpleEntry<? extends JFPSMUserObject,DefaultMutableTreeNode> createNewEntityFromSelectedEntity();
 	
 	public synchronized boolean isQuitEnabled(){
     	return(quitEnabled);

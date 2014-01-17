@@ -56,7 +56,8 @@ import com.ardor3d.util.resource.URLResourceSource;
 /**
  * Graphical user interface of the model converter
  * 
- * TODO: - display settings specific to some formats
+ * TODO: - show the 3D model
+ *       - display settings specific to some formats
  *       - export the data of the key frames in the comments of the WaveFront OBJ file
  *       - move the operations for the OBJ OSM files into this class
  * 
