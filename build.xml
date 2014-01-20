@@ -19,130 +19,21 @@
 	<path id="project.class.path">
 	    <!-- N.B: do not add java.class.path -->
 	    <pathelement path="${destdir}"/>	    
-	    <pathelement location="lib/jogl/jogl.jar"/>
+	    <pathelement location="lib/jogl/jogl-all.jar"/>
 	    <pathelement location="lib/jogl/gluegen-rt.jar"/>	        
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
-	    <fail message="Please use Java SDK 1.6 or higher.">
+	    <fail message="Please use Java SDK 1.7 or higher.">
 	        <condition>
 	            <not>                   
 	                <or>
-	                    <equals arg1="${ant.java.version}" arg2="1.6" />
 	                    <equals arg1="${ant.java.version}" arg2="1.7" />
+	                    <equals arg1="${ant.java.version}" arg2="1.8" />
 	                </or>                                           
 	            </not>
 	        </condition>
 	    </fail>
 	</target>
-	<condition property="is-linux-amd64">
-	    <and>
-	        <os name="Linux" />
-	        <or>
-	            <os arch="amd64" />
-	            <os arch="x86_64" />
-	        </or>
-	    </and>
-	</condition>
-	<condition property="is-linux-i586">
-	    <and>
-	        <os name="Linux" />
-	        <or>
-	            <os arch="i386" />
-	            <os arch="i586" />
-	            <os arch="x86" />
-	        </or>
-	    </and>
-	</condition>
-	<condition property="is-windows-amd64">
-	    <and>
-	        <os family="windows" />
-	        <or>
-	            <os arch="amd64" />
-	            <os arch="x86_64" />
-	        </or>
-	    </and>
-	</condition>
-	<condition property="is-windows-i586">
-	    <and>
-	        <os family="windows" />
-	        <or>
-	            <os arch="i386" />
-	            <os arch="i586" />
-	            <os arch="x86" />
-	        </or>
-	    </and>
-	</condition>
-	<condition property="is-macosx-universal">
-	    <and>
-	        <os name="Mac OS X" />          
-	        <not>
-	            <os arch="ppc" />
-	        </not>
-	    </and>
-	</condition>
-	<condition property="is-macosx-ppc">
-	    <and>
-	        <os name="Mac OS X" />          
-	        <os arch="ppc" />
-	    </and>
-	</condition>
-	<target name="set-jogl-library-path-linux-amd64" if="is-linux-amd64">
-	    <property name="jogl.library.path" value="lib/jogl/native/linux-amd64/" />
-	</target>
-	<target name="set-jogl-library-path-linux-i586" if="is-linux-i586">
-	    <property name="jogl.library.path" value="lib/jogl/native/linux-i586/" />
-	</target>
-	<target name="set-jogl-library-path-windows-amd64" if="is-windows-amd64">
-	    <property name="jogl.library.path" value="lib/jogl/native/windows-amd64/" />
-	</target>
-	<target name="set-jogl-library-path-windows-i586" if="is-windows-i586">
-	    <property name="jogl.library.path" value="lib/jogl/native/windows-i586/" />
-	</target>
-	<target name="set-jogl-library-path-macosx-universal" if="is-macosx-universal">
-	    <property name="jogl.library.path" value="lib/jogl/native/macosx-universal/" />
-	</target>
-	<target name="set-jogl-library-path-macosx-ppc" if="is-macosx-ppc">
-	    <property name="jogl.library.path" value="lib/jogl/native/macosx-ppc/" />
-	</target>
-	<target name="set-jogl-library-path" depends="set-jogl-library-path-linux-i586,set-jogl-library-path-linux-amd64,set-jogl-library-path-macosx-universal,set-jogl-library-path-macosx-ppc,set-jogl-library-path-windows-i586,set-jogl-library-path-windows-amd64,check-java-version" description="Sets the library path with JOGL binaries">
-	    <echo message="jogl.library.path: ${jogl.library.path}" />
-	</target>
-	<condition property="eclipse-setup-not-ok">
-	    <not>
-	        <isset property="eclipse-setup-ok"/>
-	    </not>
-	</condition>
-	<condition property="eclipse-setup-not-ok">
-	        <not>
-	            <isset property="eclipse-setup-ok"/>
-	        </not>
-	    </condition>
-	<target name="setup-eclipse" depends="set-jogl-library-path" if="eclipse-setup-not-ok" description="Generates the .classpath file of the Eclipse project including OS and architecture dependencies">
-	    <pathconvert property="os-specific-jogl.library.path">
-	        <path location="${jogl.library.path}" />
-	    </pathconvert>
-	    <!-- TODO: maybe convert the other paths if necessary for Windows -->
-	    <echo file=".classpath"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-	    	<classpath>
-	    	    <classpathentry kind="src" path=""/>
-	    	    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	    	    <classpathentry kind="lib" path="lib/jogl/gluegen-rt.jar">
-	    	        <attributes>
-	    	            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
-	    	        </attributes>
-	    	    </classpathentry>
-	    	    <classpathentry kind="lib" path="lib/jogl/jogl.jar">
-	    	        <attributes>
-	    	            <attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="${os-specific-jogl.library.path}"/>
-	    	        </attributes>
-	    	    </classpathentry>
-	    	    <classpathentry kind="output" path=""/>
-	    	</classpath>]]>
-	    </echo>
-	    <!-- Sets this property to avoid generating the .classpath file several times at runtime -->
-	    <property name="eclipse-setup-ok" value="true" />
-	</target>
-	
     <!-- ================================================================= -->
     <!-- Compile                                                           -->
     <!-- ================================================================= -->
@@ -164,13 +55,13 @@
     		<fileset file="${keystore}" />
     	    <fileset dir="${destdir}" includes="**/*.class" />
     		<fileset file="${destdir}/tuer.jar" />
-    		<fileset file="${destdir}/jogl.jar"/>
-    		<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
-    		<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
-    		<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
-    		<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
-    		<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
-    		<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
+    		<fileset file="${destdir}/jogl-all.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
+    		<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
     		<fileset file="${destdir}/gluegen-rt.jar"/>
     		<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
     		<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
@@ -223,13 +114,13 @@
 			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
 			</manifest>
 		</jar>
-		<copy file="lib/jogl/jogl.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-linux-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-linux-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-macosx-ppc.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-macosx-universal.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-windows-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-natives-windows-i586.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-linux-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-linux-i586.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-macosx-ppc.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-macosx-universal.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-windows-amd64.jar" todir="${destdir}"/>
+		<copy file="lib/jogl/jogl-all-natives-windows-i586.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}"/>
 		<copy file="lib/jogl/gluegen-rt-natives-linux-i586.jar" todir="${destdir}"/>
@@ -257,13 +148,13 @@
 		<signjar alias="${alias}" storepass="${storepass}" keystore="${keystore}" lazy="false"> 
 		    <path>
 		    	<fileset file="${destdir}/tuer.jar"/>
-		    	<fileset file="${destdir}/jogl.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-linux-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-linux-i586.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-macosx-ppc.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-macosx-universal.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-windows-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-natives-windows-i586.jar"/>
+		    	<fileset file="${destdir}/jogl-all.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
+		    	<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
 		    	<fileset file="${destdir}/gluegen-rt.jar"/>
 		    	<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
 		    	<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
@@ -336,14 +227,13 @@
 	        	    <arg value="texture/wallTexture0.png"/>
 		</java>
 	</target>
-	<target name="run-tuer" depends="set-jogl-library-path" description="Runs the game TUER">
+	<target name="run-tuer" description="Runs the game TUER">
 	    <java classname="connection.GameServiceProvider"
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
 	              >
 	    	<classpath refid="project.class.path"/>
-	    	<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
 	    </java>
 	</target>
 </project>
