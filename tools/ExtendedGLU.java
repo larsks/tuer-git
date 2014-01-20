@@ -18,8 +18,11 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
-import com.sun.opengl.impl.GLUquadricImpl;
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
+
+import jogamp.opengl.glu.GLUquadricImpl;
+
+
 
 public final class ExtendedGLU{
 
@@ -77,7 +80,7 @@ public final class ExtendedGLU{
         if(drawStyle == GLU.GLU_POINT) 
             {//3 normal coordinates + 3 vertex coordinates
              //use it with GL.GL_POINTS
-             buffer=BufferUtil.newFloatBuffer(slices*(stacks+1)*(3+(computeNormal?3:0)));          
+             buffer=Buffers.newDirectFloatBuffer(slices*(stacks+1)*(3+(computeNormal?3:0)));          
              for(i = 0; i < slices; i++) 
                  {x = (float) Math.cos((float)(i * da));
                   y = (float) Math.sin((float)(i * da));                            
@@ -153,7 +156,7 @@ public final class ExtendedGLU{
                 if(drawStyle == GLU.GLU_FILL)
                     {//2 texture coordinates + 3 normal coordinates + 3 vertex coordinates
                      final int floatPerPrimitive=3+(computeTexture?2:0)+(computeNormal?3:0);
-                     buffer=BufferUtil.newFloatBuffer(stacks*slices*(4*(floatPerPrimitive)));
+                     buffer=Buffers.newDirectFloatBuffer(stacks*slices*(4*(floatPerPrimitive)));
                      //use it with GL.GL_QUAD
                      float ds = 1.0f / slices;
                      float dt = 1.0f / stacks;

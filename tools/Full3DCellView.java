@@ -2,8 +2,7 @@ package tools;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import drawer.IStaticVertexSet;
 import drawer.VertexSetFactory;
@@ -19,7 +18,7 @@ public final class Full3DCellView{
     
     
     public Full3DCellView(Full3DCellController controller){
-        this.portalsViewsList=new ArrayList<Full3DPortalView>();
+        this.portalsViewsList=new ArrayList<>();
         controller.setView(this);
         setController(controller);
     }
@@ -33,7 +32,7 @@ public final class Full3DCellView{
         this.controller=controller;
         //TODO: use a better approach to respect the software-components-based architecture
         //rather than using directly the package "drawer"
-        vertexSet=VertexSetFactory.getInstance().getIStaticVertexSetInstance(this.controller.getInternalBuffer(),GL.GL_QUADS);
+        vertexSet=VertexSetFactory.getInstance().getIStaticVertexSetInstance(this.controller.getInternalBuffer(),GL2.GL_QUADS);
     }
 
     public final Full3DCellController getController(){

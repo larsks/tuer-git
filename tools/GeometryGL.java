@@ -16,9 +16,9 @@ package tools;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.TraceGL;
+import javax.media.opengl.TraceGL2;
 
-public class GeometryGL extends TraceGL
+public class GeometryGL extends TraceGL2
 {
     /*protected ArrayList<float[]> vertices;
     protected ArrayList<float[]> normals;
@@ -37,9 +37,9 @@ public class GeometryGL extends TraceGL
     {
         // note: we set the stream to null so we know when a method is used which is not
         // overwritten yet; we will get a NullPointerException in this case
-        super(downstreamGL, System.out);
+        super(downstreamGL.getGL2(), System.out);
         //reset();
-        vertices=new ArrayList<float[]>();
+        vertices=new ArrayList<>();
     }
 
     /*public void reset()
@@ -84,7 +84,8 @@ public class GeometryGL extends TraceGL
         return lines;
     }*/
 
-    public void glBegin(int arg0)
+    @Override
+	public void glBegin(int arg0)
     {
         // see http://wiki.delphigl.com/index.php/GlBegin for a good description of modes
         /*mode=arg0;
@@ -116,7 +117,8 @@ public class GeometryGL extends TraceGL
         }*/
     }
 
-    public void glEnd()
+    @Override
+	public void glEnd()
     {
         /*if(mode==GL.GL_LINE_LOOP)
         {
@@ -130,22 +132,26 @@ public class GeometryGL extends TraceGL
         mode=-1;*/
     }
  
-    public void glVertex3d(double arg0, double arg1, double arg2)
+    @Override
+	public void glVertex3d(double arg0, double arg1, double arg2)
     {
         glVertex3f((float)arg0, (float)arg1, (float)arg2);
     }
 
-    public void glVertex3dv(double[] arg0, int arg1)
+    @Override
+	public void glVertex3dv(double[] arg0, int arg1)
     {
         glVertex3f((float)arg0[arg1], (float)arg0[arg1+1], (float)arg0[arg1+2]);
     }
 
-    public void glVertex3fv(float[] arg0, int arg1)
+    @Override
+	public void glVertex3fv(float[] arg0, int arg1)
     {
         glVertex3f(arg0[arg1], arg0[arg1+1], arg0[arg1+2]);
     }
 
-    public void glVertex3f(float arg0, float arg1, float arg2)
+    @Override
+	public void glVertex3f(float arg0, float arg1, float arg2)
     {
         vertices.add(new float[]{arg0, arg1, arg2});/*
         vCount++;
@@ -229,22 +235,26 @@ public class GeometryGL extends TraceGL
         }*/
     }
 
-    public void glNormal3d(double arg0, double arg1, double arg2)
+    @Override
+	public void glNormal3d(double arg0, double arg1, double arg2)
     {
         glNormal3f((float)arg0, (float)arg1, (float)arg2);
     }
  
-    public void glNormal3dv(double[] arg0, int arg1)
+    @Override
+	public void glNormal3dv(double[] arg0, int arg1)
     {
         glNormal3f((float)arg0[arg1], (float)arg0[arg1+1], (float)arg0[arg1+2]);
     }
 
-    public void glNormal3fv(float[] arg0, int arg1)
+    @Override
+	public void glNormal3fv(float[] arg0, int arg1)
     {
         glNormal3f(arg0[arg1], arg0[arg1+1], arg0[arg1+2]);
     }
 
-    public void glNormal3f(float arg0, float arg1, float arg2)
+    @Override
+	public void glNormal3f(float arg0, float arg1, float arg2)
     {
         // the normal value will be applied once a new vertex is created
         //normal=new float[]{arg0, arg1, arg2};
