@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 final class VertexSetDecoratorFactory{
     
@@ -39,19 +40,19 @@ final class VertexSetDecoratorFactory{
                   copyFirstElementIntoLastElement=false;
                   break;
                  }
-             case GL.GL_QUADS:
+             case GL2.GL_QUADS:
                  {maxElementsVertices=maxElementsVertices-(maxElementsVertices%4);
                   interBufferDuplicateElementsCount=0;
                   copyFirstElementIntoLastElement=false;
                   break;
                  }
-             case GL.GL_QUAD_STRIP:
+             case GL2.GL_QUAD_STRIP:
                  {maxElementsVertices=maxElementsVertices-(maxElementsVertices%2);
                   interBufferDuplicateElementsCount=2;
                   copyFirstElementIntoLastElement=false;
                   break;
                  }                        
-             case GL.GL_POLYGON:
+             case GL2.GL_POLYGON:
                  {interBufferDuplicateElementsCount=1;
                   //it needs the first element for the last sub-buffer too
                   copyFirstElementIntoLastElement=true;
@@ -126,7 +127,7 @@ final class VertexSetDecoratorFactory{
              else   
                  currentSubBufferSize=maxSize;
              //allocate the sub-buffer
-             subBuffer=BufferUtil.newFloatBuffer(currentSubBufferSize);
+             subBuffer=Buffers.newDirectFloatBuffer(currentSubBufferSize);
              //some data may have to be duplicated except for the first sub-buffer
              if(i!=0&&duplicateOffset!=0)
                  {offset=duplicateOffset;

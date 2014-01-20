@@ -14,7 +14,8 @@
 package drawer;
 
 import java.nio.FloatBuffer;
-import javax.media.opengl.GL;
+
+import javax.media.opengl.GL2;
 
 
 abstract class VertexSet implements IVertexSet{
@@ -24,7 +25,7 @@ abstract class VertexSet implements IVertexSet{
     static final int primitiveCount=5;
     
     //update it to GL.GL_T2F_N3F_V3F if you use the normals 
-    static final int interleavedFormat=GL.GL_T2F_V3F;
+    static final int interleavedFormat=GL2.GL_T2F_V3F;
     
     protected FloatBuffer buffer;
     
