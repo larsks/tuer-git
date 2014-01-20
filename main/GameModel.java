@@ -31,7 +31,6 @@
 
 package main;
 
-import com.sun.opengl.util.BufferUtil;
 import java.awt.geom.Rectangle2D;
 import java.beans.XMLDecoder;
 import java.io.BufferedInputStream;
@@ -46,6 +45,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+
+import com.jogamp.common.nio.Buffers;
+
 import tools.GameIO;
 import tools.NetworkSet;
 
@@ -323,7 +325,7 @@ public class GameModel{
             artWorksCount4=in.readInt();
             //for each point : 2 levelTexture coordinates + 3 vertex coordinates
             final int floatPerPrimitive=5;
-            artCoordinatesBuffer1=BufferUtil.newFloatBuffer(artWorksCount1*floatPerPrimitive);
+            artCoordinatesBuffer1=Buffers.newDirectFloatBuffer(artWorksCount1*floatPerPrimitive);
             for(i=0;i<artWorksCount1;i++)
                 {artCoordinatesBuffer1.put(in.readFloat());
                  artCoordinatesBuffer1.put(in.readFloat());
@@ -335,7 +337,7 @@ public class GameModel{
                  artCoordinatesBuffer1.put(in.readFloat());
                 }
             artCoordinatesBuffer1.rewind();        
-            artCoordinatesBuffer2=BufferUtil.newFloatBuffer(artWorksCount2*floatPerPrimitive);
+            artCoordinatesBuffer2=Buffers.newDirectFloatBuffer(artWorksCount2*floatPerPrimitive);
             for(i=0;i<artWorksCount2;i++)
                 {artCoordinatesBuffer2.put(in.readFloat());
                  artCoordinatesBuffer2.put(in.readFloat());
@@ -347,7 +349,7 @@ public class GameModel{
                  artCoordinatesBuffer2.put(in.readFloat());
                 }
             artCoordinatesBuffer2.rewind();            
-            artCoordinatesBuffer3=BufferUtil.newFloatBuffer(artWorksCount3*floatPerPrimitive);
+            artCoordinatesBuffer3=Buffers.newDirectFloatBuffer(artWorksCount3*floatPerPrimitive);
             for(i=0;i<artWorksCount3;i++)
                 {artCoordinatesBuffer3.put(in.readFloat());
                  artCoordinatesBuffer3.put(in.readFloat());
@@ -359,7 +361,7 @@ public class GameModel{
                  artCoordinatesBuffer3.put(in.readFloat());
                 }
             artCoordinatesBuffer3.rewind();           
-            artCoordinatesBuffer4=BufferUtil.newFloatBuffer(artWorksCount4*floatPerPrimitive);
+            artCoordinatesBuffer4=Buffers.newDirectFloatBuffer(artWorksCount4*floatPerPrimitive);
             for(i=0;i<artWorksCount4;i++)
                 {artCoordinatesBuffer4.put(in.readFloat());
                  artCoordinatesBuffer4.put(in.readFloat());

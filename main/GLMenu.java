@@ -22,6 +22,8 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
+
 //import com.sun.opengl.util.j2d.TextRenderer;
 
 public final class GLMenu extends KeyAdapter {

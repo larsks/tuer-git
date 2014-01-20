@@ -16,12 +16,14 @@ package md3;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.gl2.GLUgl2;
 
 class Renderer implements KeyListener, GLEventListener{
 
@@ -50,7 +52,7 @@ class Renderer implements KeyListener, GLEventListener{
 	g_RotationSpeed=0.1f;	
 	g_TranslationZ=-100.0f;
 	g_RenderMode=true;
-	glu=new GLU();
+	glu=new GLUgl2();
 	gl=null;
 	
     }

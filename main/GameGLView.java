@@ -14,11 +14,8 @@
 
 package main;
 
-//import com.sun.opengl.util.j2d.TextRenderer;
-import com.sun.opengl.util.BufferUtil;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
-import com.sun.opengl.util.Screenshot;
+import com.jogamp.common.nio.Buffers;
+
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
@@ -27,12 +24,21 @@ import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Vector;
 import java.util.Map.Entry;
+
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.gl2.GLUgl2;
+
+import com.jogamp.opengl.util.awt.Screenshot;
+import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
+
 import tools.Full3DCellView;
 import tools.GameIO;
 import tools.NetworkViewSet;
@@ -258,7 +264,7 @@ public class GameGLView implements GLEventListener{
     
     GameGLView(GameController gameController){
         this.gameController=gameController;	
-    	this.glu=new GLU();
+    	this.glu=new GLUgl2();
     	this.useAlphaTest=false;
     	this.loadProgress=0;
     	this.canvas=gameController.getCanvas();
@@ -354,25 +360,25 @@ public class GameGLView implements GLEventListener{
 	                  break;
 	              gl.glEnable(GL.GL_TEXTURE_2D); 
 	              gl.glEnable(GL.GL_DEPTH_TEST);
-	              gl.glLoadIdentity();
+	              gl.getGL2().glLoadIdentity();
 	              glu.gluLookAt(gameController.getPlayerXpos(),gameController.getPlayerYpos(),gameController.getPlayerZpos(),
 	                      gameController.getPlayerXpos()+Math.cos(0.5*Math.PI-gameController.getPlayerDirection()),gameController.getPlayerYpos(),gameController.getPlayerZpos()+Math.sin(0.5*Math.PI-gameController.getPlayerDirection()),
 	                      0,1,0);
 	              //draw the rocket launcher                                  
                   float[] rocketLauncherPos=gameController.getRocketLauncherPos();
-                  this.rocketLauncherTexture.bind();
-                  gl.glPushMatrix();
-                  gl.glTranslatef(rocketLauncherPos[0],rocketLauncherPos[1],rocketLauncherPos[2]);
-                  gl.glRotatef(rocketLauncherPos[3]+180,0.0f,1.0f,0.0f);
-                  gl.glScalef(0.03f/6.5536f,0.03f/6.5536f,0.03f/6.5536f);
+                  this.rocketLauncherTexture.bind(gl);
+                  gl.getGL2().glPushMatrix();
+                  gl.getGL2().glTranslatef(rocketLauncherPos[0],rocketLauncherPos[1],rocketLauncherPos[2]);
+                  gl.getGL2().glRotatef(rocketLauncherPos[3]+180,0.0f,1.0f,0.0f);
+                  gl.getGL2().glScalef(0.03f/6.5536f,0.03f/6.5536f,0.03f/6.5536f);
                   this.rocketLauncherVertexSet.draw();                                                
-                  gl.glPopMatrix();
+                  gl.getGL2().glPopMatrix();
                   
                   
 	              softwareViewFrustumCullingPerformer.computeViewFrustum();	              
 	              //draw here the objects in absolute coordinates	              
 	              //draw the levelTextured level	              
-	              this.levelTexture.bind();
+	              this.levelTexture.bind(gl);
 	              //levelDrawTime=System.currentTimeMillis();
 	              this.playerPositioning=networkViewSet.draw((float)gameController.getPlayerXpos(),(float)gameController.getPlayerYpos(),(float)gameController.getPlayerZpos(),(float)gameController.getPlayerDirection(),playerPositioning,softwareViewFrustumCullingPerformer);	              
 	              //System.out.println("NETWORK VIEW SET DRAW TIME: "+(System.currentTimeMillis()-levelDrawTime));
@@ -385,28 +391,28 @@ public class GameGLView implements GLEventListener{
 	              //draw the artworks  
 	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
 	              if(!gameController.getPlayerWins())
-	                  {this.artTexture1.bind();	                   
+	                  {this.artTexture1.bind(gl);	                   
 	                   this.artVertexSet1.draw();
 	                   this.artVertexSet3.draw();
-	                   this.artTexture2.bind();	          
+	                   this.artTexture2.bind(gl);	          
 	                   this.artVertexSet2.draw();
                        this.artVertexSet4.draw();
 	                  }                          
 	              else
-	                  {this.artTexture3.bind();	                   
+	                  {this.artTexture3.bind(gl);	                   
 	                   this.artVertexSet1.draw();
                        this.artVertexSet3.draw();
-	                   this.artTexture4.bind();	                   
+	                   this.artTexture4.bind(gl);	                   
 	                   this.artVertexSet2.draw();
                        this.artVertexSet4.draw();
 	                  }	
 	              gl.glDisable(GL.GL_POLYGON_OFFSET_FILL);
 	              //draw the bots
 	              limit=0;      
-	              FloatBuffer translation=BufferUtil.newFloatBuffer(gameController.getBotList().size()*3);
-	              FloatBuffer rotation=BufferUtil.newFloatBuffer(gameController.getBotList().size()*4);
-	              IntBuffer first=BufferUtil.newIntBuffer(gameController.getBotList().size());
-	              IntBuffer count=BufferUtil.newIntBuffer(gameController.getBotList().size());         
+	              FloatBuffer translation=Buffers.newDirectFloatBuffer(gameController.getBotList().size()*3);
+	              FloatBuffer rotation=Buffers.newDirectFloatBuffer(gameController.getBotList().size()*4);
+	              IntBuffer first=Buffers.newDirectIntBuffer(gameController.getBotList().size());
+	              IntBuffer count=Buffers.newDirectIntBuffer(gameController.getBotList().size());         
 	              for(BotModel bot:gameController.getBotList())
 	                  if(bot.getHealth()==BotModel.startingHealth && 
 	                 bot.getX()<=gameController.getPlayerXpos()+1638400 &&
@@ -427,8 +433,8 @@ public class GameGLView implements GLEventListener{
 	              //draw the bots without damage here
 	              //bug fix : allows to display objects on SiS 661 FX  
 	              if(this.useAlphaTest)
-	                  gl.glEnable(GL.GL_ALPHA_TEST);	                  	              
-	              this.botTexture1.bind();	              
+	                  gl.glEnable(GL2.GL_ALPHA_TEST);	                  	              
+	              this.botTexture1.bind(gl);	              
 	              this.botVertexSet.multiDraw(translation,rotation,first,count,limit,false);      
 	              translation.position(0);
 	              rotation.position(0);
@@ -453,88 +459,88 @@ public class GameGLView implements GLEventListener{
 	                   limit++;
 	                  }
 	              //draw the bots with damage here
-	              this.botTexture2.bind();                    
+	              this.botTexture2.bind(gl);                    
 	              this.botVertexSet.multiDraw(translation,rotation,first,count,limit,false);
 	              //draw the objects
-	              this.objectsTexture.bind();
+	              this.objectsTexture.bind(gl);
 	              //avoid an ArrayOutOfBoundException in some corners of the level
 	              for(i=Math.max(0,zp-25);i<Math.min(256,zp+25);i++)
 	                  for(j=Math.max(0,xp-25);j<Math.min(256,xp+25);j++)
 	                      {switch(gameController.getCollisionMap(i*256+j))
 	                          {case AVOIDABLE_AND_UNBREAKABLE:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.unbreakableObjectVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_BIG:  
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.vendingMachineVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }                        
 	                           case FIXED_AND_BREAKABLE_LIGHT:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.lampVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_CHAIR:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.chairVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_FLOWER:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.flowerVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_TABLE:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.tableVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }
 	                           case FIXED_AND_BREAKABLE_BONSAI:
-	                               {gl.glPushMatrix();
-	                                gl.glTranslatef((j+0.5f),0.0f,(i+0.5f));
+	                               {gl.getGL2().glPushMatrix();
+	                                gl.getGL2().glTranslatef((j+0.5f),0.0f,(i+0.5f));
 	                                this.bonsaiVertexSet.draw();
-	                                gl.glPopMatrix();
+	                                gl.getGL2().glPopMatrix();
 	                                break;
 	                               }                  
 	                          }
 	                      }
 	              //draw the impacts
 	              gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);              
-	              impactTexture.bind();
+	              impactTexture.bind(gl);
 	              for(Impact impact:gameController.getImpactList())
-	                  {gl.glPushMatrix();
-	                   gl.glTranslatef(impact.getX(),impact.getY(),impact.getZ());
+	                  {gl.getGL2().glPushMatrix();
+	                   gl.getGL2().glTranslatef(impact.getX(),impact.getY(),impact.getZ());
 	                   if(impact.getNx()<0)
-	                       gl.glRotatef(90.0f,0.0f,1.0f,0.0f);
+	                       gl.getGL2().glRotatef(90.0f,0.0f,1.0f,0.0f);
 	                   else
 	                       if(impact.getNx()>0)
-	                           gl.glRotatef(-90.0f,0.0f,1.0f,0.0f);
+	                           gl.getGL2().glRotatef(-90.0f,0.0f,1.0f,0.0f);
 	                   this.impactVextexSet.draw();	                   
-	                   gl.glPopMatrix();
+	                   gl.getGL2().glPopMatrix();
 	                  }	              	                           
 	              gl.glDisable(GL.GL_POLYGON_OFFSET_FILL);
 	              //draw the rockets
-	              this.rocketLauncherTexture.bind();
+	              this.rocketLauncherTexture.bind(gl);
                   for(float[] rocket:gameController.getRocketList())
-                      {gl.glPushMatrix();
-                       gl.glTranslatef(rocket[0],rocket[1],rocket[2]);
-                       gl.glRotatef(rocket[3],0.0f,1.0f,0.0f);
+                      {gl.getGL2().glPushMatrix();
+                       gl.getGL2().glTranslatef(rocket[0],rocket[1],rocket[2]);
+                       gl.getGL2().glRotatef(rocket[3],0.0f,1.0f,0.0f);
                        this.rocketVertexSet.draw();             
-                       gl.glPopMatrix();                      
+                       gl.getGL2().glPopMatrix();                      
                       }
                   //draw the explosions if they are associated to a controller
                   Vector<Object3DView> uselessObjectsList = new Vector<Object3DView>();
@@ -551,7 +557,7 @@ public class GameGLView implements GLEventListener{
                   this.objectViewList.removeAll(uselessObjectsList);
                   uselessObjectsList.clear();
 	              if(this.useAlphaTest)
-	                  gl.glDisable(GL.GL_ALPHA_TEST);         
+	                  gl.glDisable(GL2.GL_ALPHA_TEST);         
 	              gl.glDisable(GL.GL_DEPTH_TEST);
 	              gl.glDisable(GL.GL_TEXTURE_2D);  	                                          
 	              break;
@@ -562,30 +568,30 @@ public class GameGLView implements GLEventListener{
 	             {break;}
 	        }	    
 	    //2D display (but I save the previous projection matrix)
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
+        gl.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+        gl.getGL2().glPushMatrix();
+        gl.getGL2().glLoadIdentity();
         //2D display using gluOrtho2D
         glu.gluOrtho2D(0,screenWidth,0,screenHeight);       
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-        gl.glLoadIdentity();       
+        gl.getGL2().glMatrixMode(GL2.GL_MODELVIEW);
+        gl.getGL2().glLoadIdentity();       
         //it is not necessary to change the viewport here       
         //draw the panel with the data here : health, map, etc...
         switch(cycle)
             {case START_SCREEN:
                  {if(this.startingScreenTexture!=null)
                       {gl.glEnable(GL.GL_TEXTURE_2D);
-                       this.startingScreenTexture.bind();
-                       gl.glBegin(GL.GL_QUADS);            
-                       gl.glTexCoord2i(0,1);
-                       gl.glVertex2i(0,0);
-                       gl.glTexCoord2i(1,1);
-                       gl.glVertex2i(screenWidth,0);
-                       gl.glTexCoord2i(1,0);
-                       gl.glVertex2i(screenWidth,screenHeight);
-                       gl.glTexCoord2i(0,0);
-                       gl.glVertex2i(0,screenHeight);          
-                       gl.glEnd();
+                       this.startingScreenTexture.bind(gl);
+                       gl.getGL2().glBegin(GL2.GL_QUADS);            
+                       gl.getGL2().glTexCoord2i(0,1);
+                       gl.getGL2().glVertex2i(0,0);
+                       gl.getGL2().glTexCoord2i(1,1);
+                       gl.getGL2().glVertex2i(screenWidth,0);
+                       gl.getGL2().glTexCoord2i(1,0);
+                       gl.getGL2().glVertex2i(screenWidth,screenHeight);
+                       gl.getGL2().glTexCoord2i(0,0);
+                       gl.getGL2().glVertex2i(0,screenHeight);          
+                       gl.getGL2().glEnd();
                        gl.glDisable(GL.GL_TEXTURE_2D);                      
                        progressBar.setValue(loadProgress);
                        progressBar.display(drawable);
@@ -595,17 +601,17 @@ public class GameGLView implements GLEventListener{
              case MAIN_MENU:
                  {if(this.startingMenuTexture!=null)
                       {gl.glEnable(GL.GL_TEXTURE_2D);
-                       this.startingMenuTexture.bind();
-                       gl.glBegin(GL.GL_QUADS);             
-                       gl.glTexCoord2f(0.0f,0.75f);
-                       gl.glVertex2i(0,(int)(screenHeight*0.75));
-                       gl.glTexCoord2f(1.0f,0.75f);
-                       gl.glVertex2i(screenWidth,(int)(screenHeight*0.75));
-                       gl.glTexCoord2f(1.0f,0.25f);
-                       gl.glVertex2i(screenWidth,screenHeight);
-                       gl.glTexCoord2f(0.0f,0.25f);
-                       gl.glVertex2i(0,screenHeight);
-                       gl.glEnd();
+                       this.startingMenuTexture.bind(gl);
+                       gl.getGL2().glBegin(GL2.GL_QUADS);             
+                       gl.getGL2().glTexCoord2f(0.0f,0.75f);
+                       gl.getGL2().glVertex2i(0,(int)(screenHeight*0.75));
+                       gl.getGL2().glTexCoord2f(1.0f,0.75f);
+                       gl.getGL2().glVertex2i(screenWidth,(int)(screenHeight*0.75));
+                       gl.getGL2().glTexCoord2f(1.0f,0.25f);
+                       gl.getGL2().glVertex2i(screenWidth,screenHeight);
+                       gl.getGL2().glTexCoord2f(0.0f,0.25f);
+                       gl.getGL2().glVertex2i(0,screenHeight);
+                       gl.getGL2().glEnd();
                        gl.glDisable(GL.GL_TEXTURE_2D);
                        if(!menu.isVisible())
                            menu.setVisible(true);
@@ -647,24 +653,24 @@ public class GameGLView implements GLEventListener{
                   else
                       {//draw the crosshair     
                        final int halfWidth=screenWidth/2,halfHeight=screenHeight/2;
-                       gl.glColor3f(1.0f,0.0f,0.0f);
-                       gl.glPushMatrix();
-                       gl.glScalef(halfWidth,halfHeight,1.0f);
+                       gl.getGL2().glColor3f(1.0f,0.0f,0.0f);
+                       gl.getGL2().glPushMatrix();
+                       gl.getGL2().glScalef(halfWidth,halfHeight,1.0f);
                        crosshairVertexSet.draw();
-                       gl.glPopMatrix();
+                       gl.getGL2().glPopMatrix();
                        if(gameController.getPlayerYpos()<0)
                            {//draw the blood
                             //TODO: use dynamic vertex sets instead
                             int bloodHeight=screenHeight-(int)(screenHeight*-gameController.getPlayerYpos()/0.5f);
-                            gl.glColor4f(1.0f,0.0f,0.0f,0.5f);
-                            gl.glBegin(GL.GL_QUADS);
-                            gl.glVertex2i(0,bloodHeight);
-                            gl.glVertex2i(screenWidth,bloodHeight);
-                            gl.glVertex2i(screenWidth,screenHeight);
-                            gl.glVertex2i(0,screenHeight);
-                            gl.glEnd();                            
+                            gl.getGL2().glColor4f(1.0f,0.0f,0.0f,0.5f);
+                            gl.getGL2().glBegin(GL2.GL_QUADS);
+                            gl.getGL2().glVertex2i(0,bloodHeight);
+                            gl.getGL2().glVertex2i(screenWidth,bloodHeight);
+                            gl.getGL2().glVertex2i(screenWidth,screenHeight);
+                            gl.getGL2().glVertex2i(0,screenHeight);
+                            gl.getGL2().glEnd();                            
                            }
-                       gl.glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
+                       gl.getGL2().glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
                       }
                   if(menu.isVisible())
                       menu.setVisible(false);
@@ -702,15 +708,15 @@ public class GameGLView implements GLEventListener{
              for(int i=0;i<messageLine.size();i++)                                 
                  textRenderer.draw(messageLine.get(i),messageWidth.get(i).intValue(),messageHeight.get(i).intValue());
              textRenderer.end3DRendering();
-             gl.glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
+             gl.getGL2().glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
             }
         messageLine.clear();
         messageHeight.clear();
         messageWidth.clear();         
         //restore the matrices for 3D display                            
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+        gl.getGL2().glPopMatrix();
+        gl.getGL2().glMatrixMode(GL2.GL_MODELVIEW);
 	    try{canvas.swapBuffers();}
 	    catch(GLException glex)
 	    {glex.printStackTrace();
@@ -744,91 +750,91 @@ public class GameGLView implements GLEventListener{
 	    if(loadProgress < loadableItemCount)
 	        {loadProgress=0;
 	         if(this.artVertexSet1==null)
-	             {this.artVertexSet1=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer1(),GL.GL_QUADS);
+	             {this.artVertexSet1=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer1(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
 	             loadProgress+=1;
 	         if(this.artVertexSet2==null)
-	             {this.artVertexSet2=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer2(),GL.GL_QUADS);
+	             {this.artVertexSet2=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer2(),GL2.GL_QUADS);
 	              return; 
 	             }
 	         else
 	             loadProgress+=1;
 	         if(this.artVertexSet3==null)
-                 {this.artVertexSet3=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer3(),GL.GL_QUADS);
+                 {this.artVertexSet3=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer3(),GL2.GL_QUADS);
                   return; 
                  }
              else
                  loadProgress+=1;
 	         if(this.artVertexSet4==null)
-                 {this.artVertexSet4=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer4(),GL.GL_QUADS);
+                 {this.artVertexSet4=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getArtCoordinatesBuffer4(),GL2.GL_QUADS);
                   return; 
                  }
              else
                  loadProgress+=1;
 	         if(this.botVertexSet==null)
-	             {this.botVertexSet=vertexSetSeeker.getIDynamicVertexSetInstance(gameController.getBotCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.botVertexSet=vertexSetSeeker.getIDynamicVertexSetInstance(gameController.getBotCoordinatesBuffer(),GL2.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.unbreakableObjectVertexSet==null)
-	             {this.unbreakableObjectVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getUnbreakableObjectCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.unbreakableObjectVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getUnbreakableObjectCoordinatesBuffer(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.vendingMachineVertexSet==null)
-	             {this.vendingMachineVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getVendingMachineCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.vendingMachineVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getVendingMachineCoordinatesBuffer(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.lampVertexSet==null)
-	             {this.lampVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getLampCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.lampVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getLampCoordinatesBuffer(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.chairVertexSet==null)
-	             {this.chairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getChairCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.chairVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getChairCoordinatesBuffer(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.flowerVertexSet==null)
-	             {this.flowerVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getFlowerCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.flowerVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getFlowerCoordinatesBuffer(),GL2.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.tableVertexSet==null)
-	             {this.tableVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getTableCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.tableVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getTableCoordinatesBuffer(),GL2.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.bonsaiVertexSet==null)
-	             {this.bonsaiVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getBonsaiCoordinatesBuffer(),GL.GL_QUADS);
+	             {this.bonsaiVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getBonsaiCoordinatesBuffer(),GL2.GL_QUADS);
 	              return;
 	             }
 	         else
                  loadProgress+=1;
 	         if(this.rocketLauncherVertexSet==null)
-	             {this.rocketLauncherVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketLauncherCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.rocketLauncherVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketLauncherCoordinatesBuffer(),GL2.GL_QUADS);	              
 	              return;
 	             }
 	         else
                  loadProgress+=1;	         
 	         if(this.rocketVertexSet==null)
-                 {this.rocketVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketCoordinatesBuffer(),GL.GL_QUADS);
+                 {this.rocketVertexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getRocketCoordinatesBuffer(),GL2.GL_QUADS);
                   return;
                  }
              else
                  loadProgress+=1;
 	         if(this.impactVextexSet==null)
-	             {this.impactVextexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getImpactCoordinatesBuffer(),GL.GL_QUADS);	              
+	             {this.impactVextexSet=vertexSetSeeker.getIStaticVertexSetInstance(gameController.getImpactCoordinatesBuffer(),GL2.GL_QUADS);	              
 	              return;
 	             }
 	         else
@@ -843,7 +849,7 @@ public class GameGLView implements GLEventListener{
 	         loadProgress+=ExplosionViewFactory.getInstance(false).getVertexSetsList().size();	         
 	         try{if(this.levelTexture==null)
 	                 {this.levelTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/wallTexture.png"),false,TextureIO.PNG);
-	                  this.levelTexture.setTexParameteri(GL.GL_TEXTURE_PRIORITY,1);
+	                  this.levelTexture.setTexParameteri(gl,GL2.GL_TEXTURE_PRIORITY,1);
 	                  return;
 	                 }
 	             else
@@ -892,7 +898,7 @@ public class GameGLView implements GLEventListener{
 	                 loadProgress+=1;
 	             if(this.rocketLauncherTexture==null)
 	                 {this.rocketLauncherTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/rocketLauncher.png"),false,TextureIO.PNG);	                  
-                      this.rocketLauncherTexture.setTexParameteri(GL.GL_TEXTURE_PRIORITY,1);
+                      this.rocketLauncherTexture.setTexParameteri(gl,GL2.GL_TEXTURE_PRIORITY,1);
 	                  return;
 	                 }
 	             else
@@ -931,29 +937,29 @@ public class GameGLView implements GLEventListener{
         GL_MAX_TEXTURE_SIZE=configurationDetector.getMaxTextureSize();
         GameIO.TextureFactory.createFactory(GL_MAX_TEXTURE_SIZE);
         gl.glClearColor(1.0f,1.0f,1.0f,1.0f);
-    	gl.glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
-    	gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT,GL.GL_NICEST);
+    	gl.getGL2().glColor3f(neutralColor[0],neutralColor[1],neutralColor[2]);
+    	gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT,GL.GL_NICEST);
     	gl.glHint(GL.GL_LINE_SMOOTH_HINT,GL.GL_NICEST);
-    	gl.glHint(GL.GL_POINT_SMOOTH_HINT,GL.GL_NICEST);
-    	gl.glHint(GL.GL_POLYGON_SMOOTH_HINT,GL.GL_NICEST);
+    	gl.glHint(GL2.GL_POINT_SMOOTH_HINT,GL.GL_NICEST);
+    	gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT,GL.GL_NICEST);
     	/*gl.glViewport(-50,-50,100,100);*/	
     	/*gl.glClearDepth(1.0);
 	    gl.glEnable(GL.GL_DEPTH_TEST);
 	    gl.glDepthFunc(GL.GL_LESS);*/   	
     	gl.glEnable(GL.GL_CULL_FACE);
     	gl.glCullFace(GL.GL_BACK);	
-    	gl.glMatrixMode(GL.GL_PROJECTION);
-    	gl.glLoadIdentity();
+    	gl.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+    	gl.getGL2().glLoadIdentity();
     	/*modify the projection matrix only when in 3D full mode*/
     	final float baseSize=50.0f/65536.0f;
-    	gl.glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
+    	gl.getGL2().glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
     	//glu.gluPerspective(45.0f,4.0f/3.0f,0.2f,2000f);
     	//softwareViewFrustumCullingPerformer=new SoftwareViewFrustumCullingPerformer(gl,0);
     	softwareViewFrustumCullingPerformer=new DummyViewFrustumCullingPerformer(gameController);
-    	gl.glMatrixMode(GL.GL_MODELVIEW);
-    	gl.glLoadIdentity();
+    	gl.getGL2().glMatrixMode(GL2.GL_MODELVIEW);
+    	gl.getGL2().glLoadIdentity();
     	//this.lStartPhase=System.currentTimeMillis()+15000;
-    	this.lnow=System.currentTimeMillis();    	
+    	this.lnow=System.currentTimeMillis();
         this.textRenderer=new TextRenderer(new Font("SansSerif",Font.BOLD,12));
     	try{this.startingScreenTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/starting_screen_bis.png"),false,TextureIO.PNG);          	        
     	    this.startingMenuTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/starting_menu.png"),false,TextureIO.PNG);   	    
@@ -963,7 +969,7 @@ public class GameGLView implements GLEventListener{
     	gl.setSwapInterval(0);  	
     	gl.glPolygonOffset(glPolygonOffsetFactor,glPolygonOffsetUnit);
     	if(this.useAlphaTest)           
-            gl.glAlphaFunc(GL.GL_EQUAL,1);    	  	
+            gl.getGL2().glAlphaFunc(GL.GL_EQUAL,1);    	  	
     	initMainMenu();
     	
     }
@@ -996,15 +1002,15 @@ public class GameGLView implements GLEventListener{
      */
     public final void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
         final GL gl=drawable.getGL();
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glLoadIdentity();
+        gl.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+        gl.getGL2().glLoadIdentity();
         float aspect=(float)width/(float)height;
         //gl.glFrustum(-37.5*aspect,37.5*aspect,-50,50,50,5000000);
         //glu.gluPerspective(45.0f,aspect,0.2f,2000f);
         final float baseSize=37.5f*aspect/65536.0f;
-        gl.glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
+        gl.getGL2().glFrustum(-baseSize,baseSize,-baseSize,baseSize,baseSize,baseSize*100000);
         softwareViewFrustumCullingPerformer.updateProjectionMatrix();
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.getGL2().glMatrixMode(GL2.GL_MODELVIEW);
     }
     
     private final void pushMessage(String message,int width,int height){
@@ -1079,6 +1085,10 @@ public class GameGLView implements GLEventListener{
     public static final int getGL_MAX_TEXTURE_SIZE(){
         return GL_MAX_TEXTURE_SIZE;
     }
+
+	@Override
+	public void dispose(GLAutoDrawable arg0){
+	}
     
     /*private final void removeUselessObjectViews(){
         Vector<Object3DView> removedObjects=new Vector<Object3DView>();

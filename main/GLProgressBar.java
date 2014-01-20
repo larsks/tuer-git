@@ -18,10 +18,13 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.event.ChangeListener;
+
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 //import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -163,47 +166,47 @@ public final class GLProgressBar {
         if(paintBorder)
             {progressWidth=width-4;
              progressHeight=height-4;
-             gl.glPushAttrib(GL.GL_CURRENT_BIT);
-             gl.glColor3f(0.0f,0.0f,0.0f);
-             gl.glBegin(GL.GL_LINES);
-             gl.glVertex2i(x,y);
-             gl.glVertex2i(x+width,y);
-             gl.glVertex2i(x+width,y);
-             gl.glVertex2i(x+width,y-height);
-             gl.glVertex2i(x+width,y-height);
-             gl.glVertex2i(x,y-height);
-             gl.glVertex2i(x,y-height);
-             gl.glVertex2i(x,y);
-             gl.glEnd();
-             gl.glPopAttrib();
+             gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);
+             gl.getGL2().glColor3f(0.0f,0.0f,0.0f);
+             gl.getGL2().glBegin(GL.GL_LINES);
+             gl.getGL2().glVertex2i(x,y);
+             gl.getGL2().glVertex2i(x+width,y);
+             gl.getGL2().glVertex2i(x+width,y);
+             gl.getGL2().glVertex2i(x+width,y-height);
+             gl.getGL2().glVertex2i(x+width,y-height);
+             gl.getGL2().glVertex2i(x,y-height);
+             gl.getGL2().glVertex2i(x,y-height);
+             gl.getGL2().glVertex2i(x,y);
+             gl.getGL2().glEnd();
+             gl.getGL2().glPopAttrib();
             }
         else
             {progressWidth=width;
              progressHeight=height;
             }
-        gl.glPushAttrib(GL.GL_CURRENT_BIT);
-        gl.glColor3f(0.0f,0.0f,1.0f);
-        gl.glBegin(GL.GL_QUADS);
+        gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);
+        gl.getGL2().glColor3f(0.0f,0.0f,1.0f);
+        gl.getGL2().glBegin(GL2.GL_QUADS);
         switch(shape)
             {case HORIZONTAL_STRAIGHT:
                  {int progressFullX=(int)(x+2+progressWidth*getPercentComplete());
-                  gl.glVertex2i(x+2,y-2);
-                  gl.glVertex2i(x+2,y-2-progressHeight);
-                  gl.glVertex2i(progressFullX,y-2-progressHeight);
-                  gl.glVertex2i(progressFullX,y-2);
+                  gl.getGL2().glVertex2i(x+2,y-2);
+                  gl.getGL2().glVertex2i(x+2,y-2-progressHeight);
+                  gl.getGL2().glVertex2i(progressFullX,y-2-progressHeight);
+                  gl.getGL2().glVertex2i(progressFullX,y-2);
                   break;
                  }
              case VERTICAL_STRAIGHT:
                  {int progressFullY=(int)(y-2-progressHeight*getPercentComplete());
-                  gl.glVertex2i(x+2,y-2);
-                  gl.glVertex2i(x+2+progressWidth,y-2);
-                  gl.glVertex2i(x+2+progressWidth,progressFullY);
-                  gl.glVertex2i(x+2,progressFullY);
+                  gl.getGL2().glVertex2i(x+2,y-2);
+                  gl.getGL2().glVertex2i(x+2+progressWidth,y-2);
+                  gl.getGL2().glVertex2i(x+2+progressWidth,progressFullY);
+                  gl.getGL2().glVertex2i(x+2,progressFullY);
                   break;
                  }
             }
-        gl.glEnd();
-        gl.glPopAttrib();      
+        gl.getGL2().glEnd();
+        gl.getGL2().glPopAttrib();      
         if(paintProgressString)
             {if(textRenderer==null)                
                  textRenderer=new TextRenderer(new Font("SansSerif",Font.PLAIN,12));
@@ -215,13 +218,13 @@ public final class GLProgressBar {
              Rectangle2D progressStringBounds=textRenderer.getBounds(trueProgressString);
              int progressStringx = (int)(x+2+((progressWidth-progressStringBounds.getWidth())/2));
              int progressStringy = (int)(y-2-((progressHeight-progressStringBounds.getHeight())/2)-progressStringBounds.getHeight());           
-             gl.glPushAttrib(GL.GL_CURRENT_BIT);
-             gl.glColor3f(0.0f,0.0f,0.0f);          
+             gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);
+             gl.getGL2().glColor3f(0.0f,0.0f,0.0f);          
              textRenderer.beginRendering(drawable.getWidth(),drawable.getHeight());
              textRenderer.setColor(Color.BLACK);
              textRenderer.draw(trueProgressString,progressStringx,progressStringy);            
              textRenderer.endRendering();
-             gl.glPopAttrib();           
+             gl.getGL2().glPopAttrib();           
             }    
     }
 }

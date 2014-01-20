@@ -21,12 +21,11 @@
 
 package main;
 
-import com.sun.opengl.util.texture.Texture;
 import java.util.List;
 import java.util.Vector;
-
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GLContext;
+import com.jogamp.opengl.util.texture.Texture;
 
 class Object3DView{
 
@@ -125,15 +124,15 @@ class Object3DView{
     }
 
     void draw(){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         int index=this.controller.getCurrentFrameIndex();
-        texturesList.get(texturesIndicesList.get(index).intValue()).bind();
-        gl.glPushMatrix();
-        gl.glTranslatef(controller.getX(),controller.getY(),controller.getZ());
-        gl.glRotatef(controller.getHorizontalDirection(),0.0f,1.0f,0.0f);
-        gl.glRotatef(controller.getVerticalDirection(),1.0f,0.0f,0.0f);
+        texturesList.get(texturesIndicesList.get(index).intValue()).bind(gl);
+        gl.getGL2().glPushMatrix();
+        gl.getGL2().glTranslatef(controller.getX(),controller.getY(),controller.getZ());
+        gl.getGL2().glRotatef(controller.getHorizontalDirection(),0.0f,1.0f,0.0f);
+        gl.getGL2().glRotatef(controller.getVerticalDirection(),1.0f,0.0f,0.0f);
         //don't add a third rotation to avoid any gimbal lock
         vertexSetsList.get(index).draw();
-        gl.glPopMatrix();
+        gl.getGL2().glPopMatrix();
     }
 }
