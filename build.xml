@@ -319,7 +319,8 @@
 		    </dname>
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
-		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr">
+		<!-- The time stamping does not work yet: tsaurl="http://timestamping.edelweb.fr" -->
+		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 		    <path refid="project.sign.jars.path"/>
 		</signjar>
 	</target>
