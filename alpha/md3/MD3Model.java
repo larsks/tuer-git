@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 
 class MD3Model{
@@ -164,7 +164,7 @@ class MD3Model{
 	private int[] m_Textures = new int[MAX_TEXTURES];	
 	
 	  /** This stores the texture array for each of the textures assigned to this model. **/
-	private ArrayList<String> strTextures = new ArrayList<String>();
+	private ArrayList<String> strTextures = new ArrayList<>();
 
 	  /** Global file content. **/
 	private byte[] fileContents;
@@ -644,7 +644,7 @@ class MD3Model{
 
 	final void draw(){
 		  // Rotate the model to compensate for the z up orientation that the model was saved
-		gl.glRotatef(-90, 1, 0, 0);
+		gl.getGL2().glRotatef(-90, 1, 0, 0);
 
 		  // Update the leg and torso animations
 		updateModel(m_Lower);
@@ -656,7 +656,7 @@ class MD3Model{
 	}
 
         final void analyseModel(){
-	    ArrayList<Float> tmpDataBuffer=new ArrayList<Float>();
+	    ArrayList<Float> tmpDataBuffer=new ArrayList<>();
 	    analyseUpdateModel(m_Lower);
 	    analyseUpdateModel(m_Upper);
 	    analyseDrawLink(m_Lower,tmpDataBuffer);
@@ -762,7 +762,7 @@ class MD3Model{
 	    float[] pMatrix;
 	    float[] pNextMatrix;
 	    float[] finalMatrix = new float[16];
-	    final FloatBuffer finalMatrixBuffer = BufferUtil.newFloatBuffer(16);
+	    final FloatBuffer finalMatrixBuffer = Buffers.newDirectFloatBuffer(16);
 	    Model3D pLink=null;
 	    Vector3D vOldPosition = null;
 	    Vector3D vNextPosition = null;
@@ -835,7 +835,7 @@ class MD3Model{
 	    float[] pMatrix;
 	    float[] pNextMatrix;
 	    float[] finalMatrix = new float[16];
-	    final FloatBuffer finalMatrixBuffer = BufferUtil.newFloatBuffer(16);
+	    final FloatBuffer finalMatrixBuffer = Buffers.newDirectFloatBuffer(16);
 	    Model3D pLink=null;
 	    Vector3D vOldPosition = null;
 	    Vector3D vNextPosition = null;
@@ -882,14 +882,14 @@ class MD3Model{
 		     finalMatrixBuffer.put(finalMatrix).rewind();
 
 		       // Start a new matrix scope
-		     gl.glPushMatrix();
+		     gl.getGL2().glPushMatrix();
 
 		       // Finally, apply the rotation and translation matrix to the current matrix
-		     gl.glMultMatrixf(finalMatrixBuffer);
+		     gl.getGL2().glMultMatrixf(finalMatrixBuffer);
 		       // Recursively draw the next model that is linked to the current one.
 		     drawLink(pLink);
 		       // End the current matrix scope
-		     gl.glPopMatrix();
+		     gl.getGL2().glPopMatrix();
 		    }
 		
 
@@ -963,7 +963,7 @@ class MD3Model{
 		  gl.glBindTexture(GL.GL_TEXTURE_2D, m_Textures[textureID]);
 
 		    // Start drawing our model triangles
-		  gl.glBegin(GL.GL_TRIANGLES);
+		  gl.getGL2().glBegin(GL.GL_TRIANGLES);
 
 		    // Go through all of the faces (polygons) of the object and draw them
 		  for(int j = 0; j < pObject.getNumOfFaces(); j++)
@@ -976,7 +976,7 @@ class MD3Model{
 			    if(pObject.getPTexVerts() != null) 
 			    {
 				      // Assign the texture coordinate to this vertex
-				    gl.glTexCoord2f(pObject.getPTexVerts()[ index ].getX(), 
+				    gl.getGL2().glTexCoord2f(pObject.getPTexVerts()[ index ].getX(), 
 							     pObject.getPTexVerts()[ index ].getY());
 			    }
 
@@ -987,14 +987,14 @@ class MD3Model{
 
 			      // By using the equation: p(t) = p0 + t(p1 - p0), with a time t,
 			      // we create a new vertex that is closer to the next key frame.
-			    gl.glVertex3f(vPoint1.getX() + pModel.getT() * (vPoint2.getX() - vPoint1.getX()),
+			    gl.getGL2().glVertex3f(vPoint1.getX() + pModel.getT() * (vPoint2.getX() - vPoint1.getX()),
 					       vPoint1.getY() + pModel.getT() * (vPoint2.getY() - vPoint1.getY()),
 					       vPoint1.getZ() + pModel.getT() * (vPoint2.getZ() - vPoint1.getZ()));
 		           }
 		      }
 
 		    // Stop drawing polygons
-		  gl.glEnd();
+		  gl.getGL2().glEnd();
 		 }
 	}
 
@@ -1415,7 +1415,7 @@ class MD3Model{
 
 		  // Put Image In Memory
 		byte data[] = (byte[])tex.getRaster().getDataElements(0, 0, tex.getWidth(), tex.getHeight(), null);
-		ByteBuffer buffer2 = BufferUtil.newByteBuffer(data.length);
+		ByteBuffer buffer2 = Buffers.newDirectByteBuffer(data.length);
 		buffer2.put(data);
 		buffer2.rewind();
 

@@ -14,19 +14,12 @@
 
 package md3;
 
-import com.sun.opengl.util.Animator;
+
 import java.awt.Frame;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
+import com.jogamp.opengl.util.Animator;
 
 
 class MD3Viewer{
@@ -36,7 +29,7 @@ class MD3Viewer{
 	Frame frame=new Frame("GOUESSE Julien's MD3 loader"); 
 	frame.setIgnoreRepaint(true);       
 	frame.setResizable(false);
-	GLCapabilities capabilities=new GLCapabilities();
+	GLCapabilities capabilities=new GLCapabilities(GLProfile.getMaxFixedFunc(true));
 	//enables double buffering
 	capabilities.setDoubleBuffered(true);
 	//enables hardware acceleration
