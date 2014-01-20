@@ -14,8 +14,9 @@
 package drawer;
 
 import java.nio.FloatBuffer;
+
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GLContext;
 
 
 class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
@@ -27,7 +28,7 @@ class DynamicVertexSetFactory extends AbstractDynamicVertexSetFactory{
     
     
     DynamicVertexSetFactory(){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         DynamicVertexSetFactory.multiDrawSupported=gl.isFunctionAvailable("glMultiDrawArrays");	
         if((gl.isExtensionAvailable("GL_ARB_vertex_buffer_object")
                 || gl.isExtensionAvailable("GL_EXT_vertex_buffer_object"))

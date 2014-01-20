@@ -13,10 +13,9 @@
 */
 package drawer;
 
-import com.sun.opengl.util.BufferUtil;
-import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
-
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
+import com.jogamp.common.nio.Buffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -103,8 +102,8 @@ public class VertexSetFactory implements IVertexSetProvider{
     }
     
     private void updateMaxElementsVertices(){
-        IntBuffer buffer=BufferUtil.newIntBuffer(1);	
-        GLU.getCurrentGL().glGetIntegerv(GL.GL_MAX_ELEMENTS_VERTICES,buffer);
+        IntBuffer buffer=Buffers.newDirectIntBuffer(1);	
+        GLContext.getCurrentGL().glGetIntegerv(GL2.GL_MAX_ELEMENTS_VERTICES,buffer);
         buffer.position(0);
         int internalGlMaxElementsVertices=buffer.get();
         //the fucking driver for ATI Xpress 200 returns -1 under Linux!!!!

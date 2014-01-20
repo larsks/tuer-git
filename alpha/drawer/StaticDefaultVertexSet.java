@@ -13,10 +13,14 @@
 */
 package drawer;
 
-import com.sun.opengl.util.BufferUtil;
+
 import java.nio.FloatBuffer;
+
 import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.glu.GLU;
+
+import com.jogamp.common.nio.Buffers;
 
 
 class StaticDefaultVertexSet extends StaticVertexSet{
@@ -24,14 +28,14 @@ class StaticDefaultVertexSet extends StaticVertexSet{
 
     StaticDefaultVertexSet(float[] array,int mode){
         this.mode=mode;
-        this.buffer=BufferUtil.newFloatBuffer(array.length);
+        this.buffer=Buffers.newDirectFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);	
     }
     
     StaticDefaultVertexSet(FloatBuffer floatBuffer,int mode){
         this.mode=mode;
-        this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
+        this.buffer=Buffers.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);
     }
     
@@ -40,16 +44,16 @@ class StaticDefaultVertexSet extends StaticVertexSet{
     }    
             
     public void draw(){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         buffer.position(0);
-	    gl.glBegin(mode);
+	    gl.getGL2().glBegin(mode);
 	    for(int i=0;i<buffer.capacity();i+=VertexSet.primitiveCount)
 	        {//update it if you use the normals
-	         gl.glTexCoord2f(buffer.get(),buffer.get());
-	         //gl.glNormal3f(buffer.get(),buffer.get(),buffer.get());
-	         gl.glVertex3f(buffer.get(),buffer.get(),buffer.get());
+	         gl.getGL2().glTexCoord2f(buffer.get(),buffer.get());
+	         //gl.getGL2().glNormal3f(buffer.get(),buffer.get(),buffer.get());
+	         gl.getGL2().glVertex3f(buffer.get(),buffer.get(),buffer.get());
 	        }
-	    gl.glEnd();
+	    gl.getGL2().glEnd();
 	    buffer.position(0);
     }
 }

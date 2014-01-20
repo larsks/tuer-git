@@ -13,10 +13,12 @@
 */
 package drawer;
 
-import com.sun.opengl.util.BufferUtil;
 import java.nio.FloatBuffer;
+
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
+import com.jogamp.common.nio.Buffers;
 
 
 /*TODO: use rather GL.GL_T2F_N3F_V3F when precalculating normals*/
@@ -30,7 +32,7 @@ class DisplayList extends StaticVertexSet{
     DisplayList(float[] array,int mode)throws RuntimeException{
         this.mode=mode;
         this.id=0;
-        this.buffer=BufferUtil.newFloatBuffer(array.length);
+        this.buffer=Buffers.newDirectFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);
         this.createDisplayList();
@@ -39,7 +41,7 @@ class DisplayList extends StaticVertexSet{
     DisplayList(FloatBuffer floatBuffer,int mode)throws RuntimeException{
         this.mode=mode;
         this.id=0;
-        this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
+        this.buffer=Buffers.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);    
         this.createDisplayList();
     }
@@ -50,42 +52,42 @@ class DisplayList extends StaticVertexSet{
     
     
     private void createDisplayList()throws RuntimeException{
-        final GL gl=GLU.getCurrentGL();
-        if((id=gl.glGenLists(1))==0)
+        final GL gl=GLContext.getCurrentGL();
+        if((id=gl.getGL2().glGenLists(1))==0)
 	        throw new RuntimeException("unable to create a display list");
-        gl.glNewList(id,GL.GL_COMPILE);
+        gl.getGL2().glNewList(id,GL2.GL_COMPILE);
         /*WARNING: format T2F_V3F*/
-        gl.glBegin(mode);
+        gl.getGL2().glBegin(mode);
         for(int i=0;i<buffer.capacity();i+=VertexSet.primitiveCount)
             {//update it if you use the normals
-             gl.glTexCoord2f(buffer.get(),buffer.get());
+             gl.getGL2().glTexCoord2f(buffer.get(),buffer.get());
              //gl.glNormal3f(buffer.get(),buffer.get(),buffer.get());
-             gl.glVertex3f(buffer.get(),buffer.get(),buffer.get());
+             gl.getGL2().glVertex3f(buffer.get(),buffer.get(),buffer.get());
             }
-        gl.glEnd();
+        gl.getGL2().glEnd();
         buffer.position(0);
-        gl.glEndList();
+        gl.getGL2().glEndList();
         buffer.position(0);
     }
     
     public void setMode(int mode){
         if(this.mode!=mode)
             {this.mode=mode;
-             final GL gl=GLU.getCurrentGL();
+             final GL gl=GLContext.getCurrentGL();
              if(id!=0)
-                 gl.glDeleteLists(id,1);
+                 gl.getGL2().glDeleteLists(id,1);
              createDisplayList();
             }
     }
     
     public void draw(){
-        final GL gl=GLU.getCurrentGL();
-	    gl.glCallList(id);
+        final GL gl=GLContext.getCurrentGL();
+	    gl.getGL2().glCallList(id);
     } 
     
     protected void finalize(){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         if(id>0)
-	        gl.glDeleteLists(id,1);
+	        gl.getGL2().glDeleteLists(id,1);
     }   
 }

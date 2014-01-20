@@ -13,11 +13,12 @@
 */
 package drawer;
 
-import com.sun.opengl.util.BufferUtil;
+
 import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
-
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
+import com.jogamp.common.nio.Buffers;
 
 class StaticVertexBufferObject extends StaticVertexSet{
     
@@ -26,27 +27,27 @@ class StaticVertexBufferObject extends StaticVertexSet{
     
     
     StaticVertexBufferObject(float[] array,int mode){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         this.mode=mode;
-        this.buffer=BufferUtil.newFloatBuffer(array.length);
+        this.buffer=Buffers.newDirectFloatBuffer(array.length);
         this.buffer.put(array);	
         this.buffer.position(0);
         this.id=new int[1];
-        gl.glGenBuffersARB(1,id,0);
-        gl.glBindBufferARB(GL.GL_ARRAY_BUFFER,id[0]);
-        gl.glBufferDataARB(GL.GL_ARRAY_BUFFER,BufferUtil.SIZEOF_FLOAT*buffer.capacity(),buffer,GL.GL_STATIC_DRAW_ARB);
+        gl.glGenBuffers(1,id,0);
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER,id[0]);
+        gl.glBufferData(GL.GL_ARRAY_BUFFER,Buffers.SIZEOF_FLOAT*buffer.capacity(),buffer,GL.GL_STATIC_DRAW);
         this.buffer.position(0);       
     }
     
     StaticVertexBufferObject(FloatBuffer floatBuffer,int mode){
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         this.mode=mode;
-        this.buffer=BufferUtil.copyFloatBuffer(floatBuffer);
+        this.buffer=Buffers.copyFloatBuffer(floatBuffer);
         this.buffer.position(0);
         this.id=new int[1];
-        gl.glGenBuffersARB(1,id,0);
-        gl.glBindBufferARB(GL.GL_ARRAY_BUFFER,id[0]);
-        gl.glBufferDataARB(GL.GL_ARRAY_BUFFER,BufferUtil.SIZEOF_FLOAT*buffer.capacity(),buffer,GL.GL_STATIC_DRAW_ARB);
+        gl.glGenBuffers(1,id,0);
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER,id[0]);
+        gl.glBufferData(GL.GL_ARRAY_BUFFER,Buffers.SIZEOF_FLOAT*buffer.capacity(),buffer,GL.GL_STATIC_DRAW);
         this.buffer.position(0);
     }
     
@@ -55,18 +56,18 @@ class StaticVertexBufferObject extends StaticVertexSet{
     }    
             
     public void draw(){    
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         //draw the vertex buffer object
-        gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-        //gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
-        gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-        gl.glBindBufferARB(GL.GL_ARRAY_BUFFER,id[0]);
-        gl.glInterleavedArrays(VertexSet.interleavedFormat,0,0);                       
+        gl.getGL2().glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        //gl.getGL2().glEnableClientState(GL2.GL_NORMAL_ARRAY);
+        gl.getGL2().glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        gl.getGL2().glBindBuffer(GL.GL_ARRAY_BUFFER,id[0]);
+        gl.getGL2().glInterleavedArrays(VertexSet.interleavedFormat,0,0);                       
         buffer.rewind();      
         gl.glDrawArrays(mode,0,buffer.capacity()/VertexSet.primitiveCount);
         buffer.rewind();       
-        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-        //gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
-        gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+        gl.getGL2().glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+        //gl.getGL2().glDisableClientState(GL2.GL_NORMAL_ARRAY);
+        gl.getGL2().glDisableClientState(GL2.GL_VERTEX_ARRAY);
     }
 }

@@ -14,15 +14,16 @@
 package drawer;
 
 import java.nio.FloatBuffer;
+
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GLContext;
 
 
 class CompiledVertexArrayFactory{
     
     
     CompiledVertexArrayFactory()throws RuntimeException{
-        final GL gl=GLU.getCurrentGL();
+        final GL gl=GLContext.getCurrentGL();
         if(gl.isExtensionAvailable("GL_EXT_compiled_vertex_array")
 	    && gl.isFunctionAvailable("glLockArraysEXT")
 	    && gl.isFunctionAvailable("glUnlockArraysEXT"))
