@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.nio.FloatBuffer;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 
 public final class Object3DModelBean implements XMLTransportableWrapper<Object3DModel>{
@@ -38,7 +38,7 @@ public final class Object3DModelBean implements XMLTransportableWrapper<Object3D
         List<FloatBuffer> trueCoordinatesBuffersList=new ArrayList<FloatBuffer>();
         FloatBuffer buffer;
         for(float[] array:coordinatesBuffersList)
-            {buffer=BufferUtil.newFloatBuffer(array.length);
+            {buffer=Buffers.newDirectFloatBuffer(array.length);
              buffer.put(array);
              buffer.rewind();
              trueCoordinatesBuffersList.add(buffer);

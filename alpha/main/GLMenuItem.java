@@ -19,7 +19,10 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
+
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 //import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -57,7 +60,7 @@ public final class GLMenuItem {
     
     public void display(GLAutoDrawable drawable,float x,float y,TextRenderer textRenderer){
 		GL gl=drawable.getGL();
-		gl.glPushAttrib(GL.GL_CURRENT_BIT);		
+		gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);		
 		textRenderer.beginRendering(drawable.getWidth(),drawable.getHeight());	
 		switch(state)
 		    {case UNSELECTED:
@@ -79,7 +82,7 @@ public final class GLMenuItem {
 		    }
         textRenderer.draw(label,(int)x,(int)y);
         textRenderer.endRendering();
-		gl.glPopAttrib();
+		gl.getGL2().glPopAttrib();
 	}
 	
 	final void processActionEvent(ActionEvent ae){

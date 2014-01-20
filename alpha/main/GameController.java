@@ -25,8 +25,11 @@ import java.rmi.RemoteException;
 import java.util.BitSet;*/
 import java.util.ArrayList;
 import java.util.List;
-import javax.media.opengl.GLCanvas;
+
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLProfile;
+
 import tools.Full3DCell;
 import tools.Full3DCellController;
 import tools.Full3DCellView;
@@ -93,7 +96,7 @@ public final class GameController {
 	    BufferedImage cursor=new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
 	    cursor.setRGB(0,0,0);
 	    frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(cursor,new Point(0,0),"empty cursor"));	
-	    GLCapabilities capabilities=new GLCapabilities();
+	    GLCapabilities capabilities=new GLCapabilities(GLProfile.getMaxFixedFunc(true));
 	    capabilities.setDoubleBuffered(true);//enables double buffering
 	    capabilities.setHardwareAccelerated(true);//enables hardware acceleration
 	    canvas=new GLCanvas(capabilities);

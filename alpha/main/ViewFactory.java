@@ -1,7 +1,8 @@
 package main;
 
 import java.util.List;
-import com.sun.opengl.util.texture.Texture;
+
+import com.jogamp.opengl.util.texture.Texture;
 
 abstract class ViewFactory{
 

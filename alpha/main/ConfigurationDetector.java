@@ -4,7 +4,7 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public final class ConfigurationDetector {
 
@@ -84,7 +84,7 @@ public final class ConfigurationDetector {
                 && gl.isFunctionAvailable("glLinkProgram")
                 && gl.isFunctionAvailable("glValidateProgram")
                 && gl.isFunctionAvailable("glUseProgram"));
-        IntBuffer buffer=BufferUtil.newIntBuffer(1);   
+        IntBuffer buffer=Buffers.newDirectIntBuffer(1);   
         gl.glGetIntegerv(GL.GL_MAX_TEXTURE_SIZE,buffer);
         buffer.position(0);
         maxTextureSize=buffer.get();

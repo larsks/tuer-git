@@ -17,8 +17,9 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public final class SoftwareViewFrustumCullingPerformer implements ViewFrustumCullingPerformer{
     
@@ -35,22 +36,22 @@ public final class SoftwareViewFrustumCullingPerformer implements ViewFrustumCul
     SoftwareViewFrustumCullingPerformer(GL gl,float tolerance){
         this.gl=gl;
         this.tolerance=tolerance;
-        this.projectionMatrix=BufferUtil.newFloatBuffer(16);
-        this.frustumMatrix=BufferUtil.newFloatBuffer(24);
+        this.projectionMatrix=Buffers.newDirectFloatBuffer(16);
+        this.frustumMatrix=Buffers.newDirectFloatBuffer(24);
         updateProjectionMatrix();
     }
 
     @Override
     public final void updateProjectionMatrix(){
-        gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glScalef(1+tolerance,1+tolerance,1+tolerance);
+        gl.getGL2().glPushAttrib(GL2.GL_TRANSFORM_BIT);
+        gl.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+        gl.getGL2().glPushMatrix();
+        gl.getGL2().glScalef(1+tolerance,1+tolerance,1+tolerance);
         this.projectionMatrix.rewind();
-        gl.glGetFloatv(GL.GL_PROJECTION_MATRIX,projectionMatrix);
+        gl.glGetFloatv(GL2.GL_PROJECTION_MATRIX,projectionMatrix);
         this.projectionMatrix.rewind();
-        gl.glPopMatrix();
-        gl.glPopAttrib();
+        gl.getGL2().glPopMatrix();
+        gl.getGL2().glPopAttrib();
     }
     
     /**
@@ -59,14 +60,14 @@ public final class SoftwareViewFrustumCullingPerformer implements ViewFrustumCul
      */
     @Override
     public final void computeViewFrustum(){
-        FloatBuffer clipMatrix=BufferUtil.newFloatBuffer(16);
+        FloatBuffer clipMatrix=Buffers.newDirectFloatBuffer(16);
         float normalizationFactor;
         //We assume that the model view matrix is selected
-        gl.glPushMatrix();
+        gl.getGL2().glPushMatrix();
         //Use glMultTransposeMatrix if it doesn't work
-        gl.glMultMatrixf(projectionMatrix);
-        gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX,clipMatrix);
-        gl.glPopMatrix();
+        gl.getGL2().glMultMatrixf(projectionMatrix);
+        gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX,clipMatrix);
+        gl.getGL2().glPopMatrix();
         projectionMatrix.rewind();
         clipMatrix.rewind();
         frustumMatrix.rewind();

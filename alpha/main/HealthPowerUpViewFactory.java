@@ -18,12 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 
-import tools.GameIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import tools.GameIO;
 
 final class HealthPowerUpViewFactory extends ViewFactory{
 
@@ -46,7 +47,7 @@ final class HealthPowerUpViewFactory extends ViewFactory{
         if(loadFully)
             {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                      HealthPowerUpControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
-                     GL.GL_QUADS);
+                     GL2.GL_QUADS);
              vertexSetsList.add(vertexSet);
             }
         //textures indices
@@ -83,7 +84,7 @@ final class HealthPowerUpViewFactory extends ViewFactory{
             {if(vertexSet==null)
                  {vertexSet=VertexSetSeeker.getInstance().getIStaticVertexSetInstance(
                          HealthPowerUpControllerFactory.getInstance().getCoordinatesBuffersList().get(0),
-                         GL.GL_QUADS);                
+                         GL2.GL_QUADS);                
                  }
              vertexSetsList.add(vertexSet);
             }
