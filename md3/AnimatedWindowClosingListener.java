@@ -14,7 +14,7 @@
 
 package md3;
 
-import com.sun.opengl.util.Animator;
+import com.jogamp.opengl.util.Animator;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -39,10 +39,11 @@ class AnimatedWindowClosingListener extends WindowAdapter{
     }
     
     
-    public void windowClosing(WindowEvent we){
+    @Override
+	public void windowClosing(WindowEvent we){
         if(animator!=null)
-	    animator.stop();
-	System.exit(0);
+	        animator.stop();
+	    System.exit(0);
     }   
     
 }

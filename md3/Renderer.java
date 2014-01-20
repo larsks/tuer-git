@@ -16,14 +16,11 @@ package md3;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.media.opengl.glu.GLU;
 
 class Renderer implements KeyListener, GLEventListener{
@@ -59,15 +56,16 @@ class Renderer implements KeyListener, GLEventListener{
     }
 
 
-    public void init(GLAutoDrawable drawable){
+    @Override
+	public void init(GLAutoDrawable drawable){
         gl=drawable.getGL();
 	g_Model.setGL(gl);	        
         //This will clear the background color to Black
         gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);  
-	gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT,GL.GL_NICEST);
+	gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT,GL.GL_NICEST);
 	gl.glHint(GL.GL_LINE_SMOOTH_HINT,GL.GL_NICEST);
-	gl.glHint(GL.GL_POINT_SMOOTH_HINT,GL.GL_NICEST);
-	gl.glHint(GL.GL_POLYGON_SMOOTH_HINT,GL.GL_NICEST);
+	gl.glHint(GL2.GL_POINT_SMOOTH_HINT,GL.GL_NICEST);
+	gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT,GL.GL_NICEST);
         gl.glEnable(GL.GL_TEXTURE_2D);// Enables Texture Mapping
         gl.glEnable(GL.GL_DEPTH_TEST);// Enables Depth Testing                                
         /*try {g_Model.LoadModel(gl,glu,"models/players/warpspider","lower","lower_Red","upper","upper_Red","head","head_Red");
@@ -110,26 +108,28 @@ class Renderer implements KeyListener, GLEventListener{
     */
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged){}
 
-    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){                    
+    @Override
+	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){                    
        if(height <= 0) // avoid a divide by zero error!
           height = 1;
        final float h = (float)width / (float)height;
        gl.glViewport(0, 0, width, height);
-       gl.glMatrixMode(GL.GL_PROJECTION);
-       gl.glLoadIdentity();
+       gl.getGL2().glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+       gl.getGL2().glLoadIdentity();
        glu.gluPerspective(45.0f, h, 1.0, 2000.0);
-       gl.glMatrixMode(GL.GL_MODELVIEW);
-       gl.glLoadIdentity();
+       gl.getGL2().glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+       gl.getGL2().glLoadIdentity();
     }    
 
-    public void display(GLAutoDrawable drawable){                        
+    @Override
+	public void display(GLAutoDrawable drawable){                        
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);// Clear The Screen And The Depth Buffer
-        gl.glLoadIdentity();// Reset The matrix         
+        gl.getGL2().glLoadIdentity();// Reset The matrix         
         glu.gluLookAt(0, 5.5f,g_TranslationZ,0, 5.5f,0,0,1,0);                  
-        gl.glRotatef(g_RotateX, 0f, 1.0f, 0f);// Rotate the object around the Y-Axis
+        gl.getGL2().glRotatef(g_RotateX, 0f, 1.0f, 0f);// Rotate the object around the Y-Axis
         g_RotateX += g_RotationSpeed;    // Increase the speed of rotation        
         // Now comes the moment we have all been waiting for!  Below we draw our character.
-        gl.glColor3f(1.f, 1.f, 1.f);
+        gl.getGL2().glColor3f(1.f, 1.f, 1.f);
         g_Model.draw();//  Render our character to the screen	
         gl.glFlush();
         ProcessKeyboard(gl); 	
@@ -173,10 +173,10 @@ class Renderer implements KeyListener, GLEventListener{
             // Change the rendering mode to and from lines or triangles
             if(g_RenderMode) 				
                 // Render the triangles in fill mode		
-                gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);	
+                gl.getGL2().glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);	
             else 
                 // Render the triangles in wire frame mode
-                gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);	
+                gl.getGL2().glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_LINE);	
             keys['W'] = false;
            }
        if(keys['L'])
@@ -248,4 +248,9 @@ class Renderer implements KeyListener, GLEventListener{
        if(e.getKeyCode()<250)		// only interested in first 250 key codes
           keys[e.getKeyCode()]=false;	
     }
+
+
+	@Override
+	public void dispose(GLAutoDrawable arg0) {
+	}
 }
