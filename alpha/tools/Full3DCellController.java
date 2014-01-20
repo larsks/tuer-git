@@ -17,8 +17,7 @@ import java.awt.Rectangle;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public final class Full3DCellController{
     
@@ -34,10 +33,10 @@ public final class Full3DCellController{
     
     
     public Full3DCellController(Full3DCell full3DCellModel,Full3DCellView full3DCellView){
-        this.portalsControllersList=new ArrayList<Full3DPortalController>();
+        this.portalsControllersList=new ArrayList<>();
         this.model=full3DCellModel;
         this.model.setController(this);       
-        this.internalBuffer=BufferUtil.newFloatBuffer(
+        this.internalBuffer=Buffers.newDirectFloatBuffer(
                 (model.getBottomWalls().size()+
                  model.getTopWalls().size()+
                  model.getLeftWalls().size()+

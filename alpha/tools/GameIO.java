@@ -20,9 +20,11 @@
 
 package tools;
 
-import com.sun.opengl.util.BufferUtil;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
+
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -33,7 +35,9 @@ import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLProfile;
 import javax.swing.ImageIcon;
 
 public final class GameIO{
@@ -51,7 +55,7 @@ public final class GameIO{
         in=new DataInputStream(new BufferedInputStream(GameIO.class.getResourceAsStream(path)));
         int[] headerData=readGameFloatDataFileHeader(in);
         //? bounds * ? animations * ? frames * ? elements in a primitive
-        coordinatesBuffer=BufferUtil.newFloatBuffer(headerData[PRIMITIVE_COUNT_HEADER_INDEX]*headerData[VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX]);
+        coordinatesBuffer=Buffers.newDirectFloatBuffer(headerData[PRIMITIVE_COUNT_HEADER_INDEX]*headerData[VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX]);
         for(int i=0;i<coordinatesBuffer.capacity();i++)
             coordinatesBuffer.put(in.readFloat());
         coordinatesBuffer.position(0);
@@ -60,7 +64,7 @@ public final class GameIO{
     }
     
     public static final List<FloatBuffer> readGameMultiBufferFloatDataFile(String path) throws IOException{
-        List<FloatBuffer> coordinatesBufferList=new ArrayList<FloatBuffer>();
+        List<FloatBuffer> coordinatesBufferList=new ArrayList<>();
         //read several buffers from a single file
         DataInputStream in=new DataInputStream(new BufferedInputStream(GameIO.class.getResourceAsStream(path)));
         int[] headerData;
@@ -69,7 +73,7 @@ public final class GameIO{
             {//read the header to know the amount of data to read
              headerData=readGameFloatDataFileHeader(in);
              //create a buffer
-             coordinatesBuffer=BufferUtil.newFloatBuffer(headerData[PRIMITIVE_COUNT_HEADER_INDEX]*headerData[VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX]);
+             coordinatesBuffer=Buffers.newDirectFloatBuffer(headerData[PRIMITIVE_COUNT_HEADER_INDEX]*headerData[VALUE_COUNT_PER_PRIMITIVE_HEADER_INDEX]);
              //fill the buffer
              for(int i=0;i<coordinatesBuffer.capacity();i++)
                  coordinatesBuffer.put(in.readFloat());
@@ -155,7 +159,7 @@ public final class GameIO{
                  Graphics2D g=bdest.createGraphics();
                  AffineTransform at=AffineTransform.getScaleInstance((double)xScaleFactor,(double)yScaleFactor);
                  g.drawRenderedImage(bsrc,at);              
-                 texture=TextureIO.newTexture(bdest,useMipmap);
+                 texture=AWTTextureIO.newTexture(GLProfile.getMaxFixedFunc(true),bdest,useMipmap);
                  g.dispose();
                 }
             else
