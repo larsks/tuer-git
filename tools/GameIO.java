@@ -22,7 +22,6 @@ package tools;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 import java.awt.Graphics2D;
@@ -153,17 +152,17 @@ public final class GameIO{
                    }            
                 }
             Texture texture;
+            BufferedImage bsrc=ImageIO.read(path);
             if(xScaleFactor!=1.0f||yScaleFactor!=1.0f)
-                {BufferedImage bsrc=ImageIO.read(path);
-                 BufferedImage bdest=new BufferedImage((int)(bsrc.getWidth()*xScaleFactor),(int)(bsrc.getHeight()*yScaleFactor),BufferedImage.TYPE_INT_ARGB);
+                {BufferedImage bdest=new BufferedImage((int)(bsrc.getWidth()*xScaleFactor),(int)(bsrc.getHeight()*yScaleFactor),BufferedImage.TYPE_INT_ARGB);
                  Graphics2D g=bdest.createGraphics();
                  AffineTransform at=AffineTransform.getScaleInstance((double)xScaleFactor,(double)yScaleFactor);
-                 g.drawRenderedImage(bsrc,at);              
+                 g.drawRenderedImage(bsrc,at);
                  texture=AWTTextureIO.newTexture(GLProfile.getMaxFixedFunc(true),bdest,useMipmap);
                  g.dispose();
                 }
             else
-                texture=TextureIO.newTexture(path,useMipmap,format);
+                texture=AWTTextureIO.newTexture(GLProfile.getMaxFixedFunc(true),bsrc,useMipmap);
             return(texture);
         }
     }  
