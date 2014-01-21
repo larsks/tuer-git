@@ -209,7 +209,9 @@ public final class GLProgressBar {
         gl.getGL2().glPopAttrib();      
         if(paintProgressString)
             {if(textRenderer==null)                
-                 textRenderer=new TextRenderer(new Font("SansSerif",Font.PLAIN,12));
+                 {textRenderer=new TextRenderer(new Font("SansSerif",Font.PLAIN,12));
+                  textRenderer.setUseVertexArrays(false);
+                 }
              String trueProgressString;
              if(progressString==null)
                  trueProgressString=(int)(getPercentComplete()*100)+"%";
