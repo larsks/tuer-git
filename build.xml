@@ -172,6 +172,8 @@
 			</unzip>
 			<!-- updates the manifest -->
 			<manifest mode="update" file="${destdir}/META-INF/MANIFEST.MF">
+				<attribute name="Trusted-Only" value="true"/>
+				<attribute name="Trusted-Library" value="false"/>
 				<attribute name="Permissions" value="all-permissions" />
 				<attribute name="Codebase" value="${codebase-url}" />
 			</manifest>
@@ -273,6 +275,8 @@
 				<attribute name="Application-Name" value="${jfpsm-application-name}"/>
 				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
 				<attribute name="SplashScreen-Image" value="${jfpsm-splashscreen-image}"/>
+				<attribute name="Trusted-Only" value="true"/>
+				<attribute name="Trusted-Library" value="false"/>
 				<attribute name="Permissions" value="all-permissions"/>
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
@@ -302,6 +306,8 @@
 			<manifest>
 				<attribute name="Application-Name" value="${tuer-application-name}"/>
 				<attribute name="Main-Class" value="${tuer-main-class}"/>
+				<attribute name="Trusted-Only" value="true"/>
+				<attribute name="Trusted-Library" value="false"/>
 				<attribute name="Permissions" value="all-permissions"/>
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
@@ -330,8 +336,6 @@
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-extras-${ardor3d-version}.jar" />
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-jogl-${ardor3d-version}.jar" />
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-ui-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/${tuer-jar-filename}" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/${jfpsm-jar-filename}" />
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/CodecJOrbis.jar" />
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/LibraryJavaSound.jar" />
 		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/LibraryJOAL.jar" />
@@ -390,10 +394,11 @@
 			</dname>
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
-		<!-- The time stamping does not work yet: tsaurl="http://timestamping.edelweb.fr" -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 			<path refid="project.sign.jars.path"/>
 		</signjar>
+		<!-- deletes the keystore if any -->
+		<delete file="${keystore}" failonerror="false" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create JNLP files                                                 -->
