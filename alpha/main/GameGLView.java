@@ -961,6 +961,7 @@ public class GameGLView implements GLEventListener{
     	//this.lStartPhase=System.currentTimeMillis()+15000;
     	this.lnow=System.currentTimeMillis();
         this.textRenderer=new TextRenderer(new Font("SansSerif",Font.BOLD,12));
+        textRenderer.setUseVertexArrays(false);
     	try{this.startingScreenTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/starting_screen_bis.png"),false,TextureIO.PNG);          	        
     	    this.startingMenuTexture=GameIO.TextureFactory.getInstance().newTexture(getClass().getResource("/texture/starting_menu.png"),false,TextureIO.PNG);   	    
     	   }
@@ -975,7 +976,9 @@ public class GameGLView implements GLEventListener{
     }
     
     private final void initMainMenu(){
-        this.menu=new GLMenu(0.9f*screenWidth/2.0f,1.1f*screenHeight/2.0f,false,new TextRenderer(new Font("SansSerif",Font.BOLD,42)));
+    	final TextRenderer bigTextRenderer=new TextRenderer(new Font("SansSerif",Font.BOLD,42));
+    	bigTextRenderer.setUseVertexArrays(false);
+        this.menu=new GLMenu(0.9f*screenWidth/2.0f,1.1f*screenHeight/2.0f,false,bigTextRenderer);
         GLMenuItem resumeMenuItem=new GLMenuItem("resume");
         resumeMenuItem.addActionListener(new ResumeGameActionListener(this));
         this.menu.addGLMenuItem(resumeMenuItem);
