@@ -2,98 +2,179 @@
 
 <!-- ===================================================================== -->
 <!-- TUER                                                                  -->
-<!-- Ant 1.5 build file                                                    -->
+<!-- Ant 1.8 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
 
-    <property name="basedir" value="."/>
-    <property name="srcdir" value="."/>
-    <property name="destdir" value="."/>
+	<property name="basedir" value="."/>
+	<property name="bindir" value="."/>
+	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
+	<property name="destdir" value="target"/>
+	<!-- directory containing the source code -->
+	<property name="srcdir" value="."/>
+	<property name="vendor" value="Julien GOUESSE" />
 	<property name="alias" value="gouessej"/>
-	<property name="keystore" value="key"/>
+	<property name="keystore" value="${destdir}/key"/>
+	<property name="homepage-url" value="http://tuer.sourceforge.net" />
+	<property name="codebase-url" value="${homepage-url}/alpha/" />
+	<property name="tuer-application-name" value="Truly Unusual Experience of Revolution"/>
+	<property name="tuer-main-class" value="connection.GameServiceProvider"/>
+	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
+	<property name="tuer-jar-filename" value="tuer.jar" />
+	<!-- Sourceforge username -->
+	<property name="sftp-userid" value="gouessej" />
+	<!-- Sourceforge Project Web space -->
+	<property name="sftp-server" value="web.sourceforge.net" />
+	<property name="sftp-remotedir" value="/home/project-web/tuer/htdocs/alpha" />
 
-    <!-- Allow user to override properties without editing this file -->
-    <property file="${user.home}/.ant.properties" />
+	<!-- Allows the user to override properties without editing this file -->
+	<property file="${user.home}/.ant.properties" />
 
 	<path id="project.class.path">
-	    <!-- N.B: do not add java.class.path -->
-	    <pathelement path="${destdir}"/>	    
-	    <pathelement location="lib/jogl/jogl-all.jar"/>
-	    <pathelement location="lib/jogl/gluegen-rt.jar"/>	        
+		<!-- N.B: do not add java.class.path -->
+		<pathelement path="${bindir}"/>
+		<pathelement location="lib/jogl/jogl-all.jar"/>
+		<pathelement location="lib/gluegen-rt/gluegen-rt.jar"/>
 	</path>
+	<macrodef name="override-permissions-and-codebase-manifest-attributes">
+		<attribute name="jar" />
+		<sequential>
+			<!-- extracts the manifest from the jar -->
+			<unzip src="@{jar}" dest="${destdir}">
+				<patternset>
+					<include name="META-INF/MANIFEST.MF" />
+				</patternset>
+			</unzip>
+			<!-- updates the manifest -->
+			<manifest mode="update" file="${destdir}/META-INF/MANIFEST.MF">
+				<attribute name="Trusted-Only" value="true"/>
+				<attribute name="Trusted-Library" value="false"/>
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Codebase" value="${codebase-url}" />
+			</manifest>
+			<!-- updates the JAR -->
+			<jar update="true" destFile="@{jar}" manifest="${destdir}/META-INF/MANIFEST.MF" />
+			<!-- deletes the temporary manifest -->
+			<delete file="${destdir}/META-INF/MANIFEST.MF" />
+			<delete dir="${destdir}/META-INF" />
+		</sequential>
+	</macrodef>
 	<target name="check-java-version" description="Checks the Java version">
-	    <fail message="Please use Java SDK 1.7 or higher.">
-	        <condition>
-	            <not>                   
-	                <or>
-	                    <equals arg1="${ant.java.version}" arg2="1.7" />
-	                    <equals arg1="${ant.java.version}" arg2="1.8" />
-	                </or>                                           
-	            </not>
-	        </condition>
-	    </fail>
+		<fail message="Please use Java SDK 1.7 or higher.">
+			<condition>
+				<not>
+					<or>
+						<equals arg1="${ant.java.version}" arg2="1.7" />
+						<equals arg1="${ant.java.version}" arg2="1.8" />
+					</or>
+				</not>
+			</condition>
+		</fail>
 	</target>
-    <!-- ================================================================= -->
-    <!-- Compile                                                           -->
-    <!-- ================================================================= -->
+	<!-- ================================================================= -->
+	<!-- Compile                                                           -->
+	<!-- ================================================================= -->
 	<target name="compile" description="Compiles the source code">
-        <javac srcdir="${srcdir}"       	   
-               destdir="${destdir}"
+		<javac includeantruntime="false" srcdir="${srcdir}"       	   
+               destdir="${bindir}"
                debug="on" >
-        	<classpath refid="project.class.path"/>
-            <include name="**/*.java"/>
-        </javac>
-    </target>
+			<classpath refid="project.class.path"/>
+			<include name="**/*.java"/>
+		</javac>
+	</target>
 
+	<!-- ================================================================= -->
+	<!-- Install JSCH                                                      -->
+	<!-- ================================================================= -->
+	<target name="install-jsch">
+		<!-- jsch-0.1.50.jar is required to use scp -->
+		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
+		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
+	</target>
 
-    <!-- ================================================================= -->
-    <!-- Clean                                                             -->
-    <!-- ================================================================= -->
-    <target name="clean" description="Deletes the snap directory, the java archive and the .class files">
-    	<delete failonerror="false">
-    		<fileset file="${keystore}" />
-    	    <fileset dir="${destdir}" includes="**/*.class" />
-    		<fileset file="${destdir}/tuer.jar" />
-    		<fileset file="${destdir}/jogl-all.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
-    		<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
-    		<fileset file="${destdir}/gluegen-rt.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-    		<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-    	</delete>
-    	<delete dir="${destdir}/snap" failonerror="false" />
-    	<delete dir="${destdir}/obj" failonerror="false" />
-    	<delete dir="${destdir}/xml" failonerror="false" />
-    	<delete dir="${destdir}/data" failonerror="false" />
-    	<!-- delete only the generated files, not the artworks -->
-    	<!-- generated textures -->
-    	<delete file="${destdir}/texture/ceilTexture.png" failonerror="false" />
-    	<delete file="${destdir}/texture/floorTexture.png" failonerror="false" />
-    	<delete file="${destdir}/texture/wallTexture0.png" failonerror="false" />   	
-    </target>
+	<!-- ================================================================= -->
+	<!-- Upload                                                            -->
+	<!-- ================================================================= -->
+	<target name="upload">
+		<!-- Gets the SFTP account's password from the end user's input -->
+		<input message="Please enter the password:" addproperty="sftp-password" />
+		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
+		<!-- Uploads the files onto the SFTP server in the Project Web Space -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
+			<fileset dir="${destdir}" includes="**/*" />
+		</scp>
+	</target>
+
+	<!-- ================================================================= -->
+	<!-- Clean                                                             -->
+	<!-- ================================================================= -->
+	<target name="clean" description="Deletes the snap directory, the java archive and the .class files">
+		<delete failonerror="false">
+			<fileset dir="${bindir}" includes="**/*.class" />
+		</delete>
+		<delete file="${keystore}" failonerror="false" />
+		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
+		<delete failonerror="false">
+			<fileset file="${destdir}/tuer.jar" />
+			<fileset file="${destdir}/jogl-all.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
+			<!--<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>-->
+			<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
+			<fileset file="${destdir}/jogl-all-natives-solaris-i586.jar"/>
+			<fileset file="${destdir}/gluegen-rt.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
+			<!--<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>-->
+			<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
+			<fileset file="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
+		</delete>
+		<delete dir="${basedir}/snap" failonerror="false" />
+		<delete dir="${basedir}/obj" failonerror="false" />
+		<delete dir="${basedir}/xml" failonerror="false" />
+		<delete dir="${basedir}/data" failonerror="false" />
+		<!-- delete only the generated files, not the artworks -->
+		<!-- generated textures -->
+		<delete file="${basedir}/texture/ceilTexture.png" failonerror="false" />
+		<delete file="${basedir}/texture/floorTexture.png" failonerror="false" />
+		<delete file="${basedir}/texture/wallTexture0.png" failonerror="false" />
+	</target>
 
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the java archive">
-		<jar destfile="tuer.jar" basedir="${destdir}" 
-			includes="**/*.class" 
-			compress="false">
+	<target name="dist" depends="compile" description="Creates the deployable files and uploads them onto the server(s)">
+		<antcall target="run-datapreprocessor" />
+		<!-- Creates the JARs of the applications and prepares the JARs of the libraries -->
+		<antcall target="create-jar" />
+		<antcall target="prepare-third-party-jars" />
+		<!-- Signs them -->
+		<antcall target="sign-jars" />
+		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
+		<antcall target="create-jnlp-file" />
+		<!-- Sends all stuffs to the server(s) -->
+		<antcall target="install-jsch" />
+		<antcall target="upload" />
+	</target>
+
+	<!-- ================================================================= -->
+	<!-- Create JAR                                                        -->
+	<!-- ================================================================= -->
+	<target name="create-jar">
+		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
 			<include name="**/*.png" />
 			<include name="**/*.jpg" />
 			<include name="**/*.gif" />
-			<include name="**/*.data"/>
+			<include name="**/*.data" />
 			<include name="**/*.txt" />
-			<include name="**/*.ogg" />			
+			<include name="**/*.ogg" />
 			<include name="**/*.xml" />
 			<!-- generated textures -->
 			<exclude name="**/texture/ceilTexture.png" />
@@ -111,129 +192,269 @@
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<manifest>
-			    <attribute name="Main-Class" value="connection.GameServiceProvider"/>
+				<attribute name="Application-Name" value="${tuer-application-name}" />
+				<attribute name="Main-Class" value="${tuer-main-class}" />
+				<attribute name="Trusted-Only" value="true"/>
+				<attribute name="Trusted-Library" value="false"/>
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Codebase" value="${codebase-url}" />
 			</manifest>
 		</jar>
-		<copy file="lib/jogl/jogl-all.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-linux-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-linux-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-macosx-ppc.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-macosx-universal.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-windows-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/jogl-all-natives-windows-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-linux-i586.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}"/>
-		<copy file="lib/jogl/gluegen-rt-natives-windows-i586.jar" todir="${destdir}"/>
 	</target>
-	
+
 	<!-- ================================================================= -->
-	<!-- Sign                                                              -->
+	<!-- Prepare third party JARs                                          -->
 	<!-- ================================================================= -->
-	<target name="sign" depends="dist" description="Sign the java archive">
+	<target name="prepare-third-party-jars">
+		<!-- copies these JARs into the local destination directory (to avoid mixing unsigned JARs with signed JARs) -->
+		<copy file="lib/jogl/jogl-all.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-linux-amd64.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-linux-i586.jar" todir="${destdir}" />
+		<!--<copy file="lib/jogl/jogl-all-natives-macosx-ppc.jar" todir="${destdir}" />-->
+		<copy file="lib/jogl/jogl-all-natives-macosx-universal.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-windows-amd64.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-windows-i586.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-solaris-amd64.jar" todir="${destdir}" />
+		<copy file="lib/jogl/jogl-all-natives-solaris-i586.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar" todir="${destdir}" />
+		<!--<copy file="lib/gluegen-rt/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}" />-->
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar" todir="${destdir}" />
+		<copy file="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar" todir="${destdir}" />
+		<!-- repurposes the JARs of the third party libraries, overrides the permissions and codebase manifest attributes -->
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-i586.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-i586.jar" />
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparc.jar"/> -->
+		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/> -->
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-macosx-universal.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-i586.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-i586.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-i586.jar" />
+		<!-- There is no JAR for these architectures yet -->
+		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/> -->
+		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-macosx-universal.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-amd64.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-i586.jar" />
+	</target>
+
+	<!-- ================================================================= -->
+	<!-- Sign JARs                                                         -->
+	<!-- ================================================================= -->
+	<target name="sign-jars">
+		<!-- deletes the keystore if any -->
+		<delete file="${keystore}" failonerror="false" />
+		<!-- gets the storepass -->
 		<input message="Please enter the store pass:" addproperty="storepass"/>
+		<!-- creates the keystore -->
 		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}" >
-		    <dname>
-		        <param name="CN" value="${vendor}"/>
-		        <param name="OU" value="Engineer"/>
-		        <param name="O"  value="FGF"/>
-		        <param name="C"  value="FR"/>
-		        <param name="L"  value="PARIS"/>
-		        <param name="S"  value="FRANCE"/>
-		    </dname>
+			<dname>
+				<param name="CN" value="${vendor}"/>
+				<param name="OU" value="Engineer"/>
+				<param name="O"  value="FGF"/>
+				<param name="C"  value="FR"/>
+				<param name="L"  value="PARIS"/>
+				<param name="S"  value="FRANCE"/>
+			</dname>
 		</genkey>
-		<signjar alias="${alias}" storepass="${storepass}" keystore="${keystore}" lazy="false"> 
-		    <path>
-		    	<fileset file="${destdir}/tuer.jar"/>
-		    	<fileset file="${destdir}/jogl-all.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
-		    	<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-		    	<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-		    </path>
+		<!-- uses this keystore to sign the JARs -->
+		<signjar alias="${alias}" storepass="${storepass}" keystore="${keystore}" lazy="false" tsaurl="http://timestamping.edelweb.fr/service/tsp">
+			<path>
+				<fileset file="${destdir}/tuer.jar"/>
+				<fileset file="${destdir}/jogl-all.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
+				<!--<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>-->
+				<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
+				<fileset file="${destdir}/jogl-all-natives-solaris-i586.jar"/>
+				<fileset file="${destdir}/gluegen-rt.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
+				<!--<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>-->
+				<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
+				<fileset file="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
+			</path>
 		</signjar>
+		<!-- deletes the keystore if any -->
+		<delete file="${keystore}" failonerror="false" />
 	</target>
-	
-    <!-- =================================================================== -->
-    <!-- Build                                                               -->
-    <!-- =================================================================== -->
-    <target name="build" depends="clean, compile, run-datapreprocessor, dist"
-        description="Performs a clean build of the source code and create the java archive"/>
+
+	<!-- ================================================================= -->
+	<!-- Create JNLP file                                                  -->
+	<!-- ================================================================= -->
+	<target name="create-jnlp-file">
+		<!-- generates the JNLP file used by Java Web Start -->
+		<echo file="${destdir}/${tuer-jnlp-filename}">
+			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
+			<jnlp spec="1.0+" codebase="${codebase-url}" href="${tuer-jnlp-filename}">
+				<information>
+					<title>${tuer-application-name}</title>
+					<vendor>${vendor}</vendor>
+					<homepage href="${homepage-url}"/>
+					<description>Small Quake-like written in Java + JOGL</description>
+					<description kind="short">kill them all!!</description>
+					<icon href="tuerLogo.png"/>
+					<icon kind="splash" href="tuerLogo.png"/>
+					<offline-allowed/>
+				</information>
+				<security>
+					<all-permissions />
+				</security>
+				<update check="always" policy="always"/>
+				<resources>
+					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m"/>
+					<property name="sun.nio.MaxDirectMemorySize" value="128M"/>
+					<property name="sun.java2d.noddraw" value="true"/>
+					<property name="sun.java2d.d3d" value="false"/>
+					<property name="sun.java2d.opengl" value="false"/>
+					<jar href="${tuer-jar-filename}" download="eager" main="true"/>
+					<jar href="gluegen-rt.jar" download="eager" main="false"/>
+					<jar href="jogl-all.jar" download="eager" main="false"/>
+				</resources>
+				<resources os="Linux" arch="i386">
+					<nativelib href = "jogl-all-natives-linux-i586.jar" />
+					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+				</resources>
+				<resources os="Linux" arch="x86">
+					<nativelib href = "jogl-all-natives-linux-i586.jar" />
+					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+				</resources>
+				<resources os="Linux" arch="amd64">
+					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+				</resources>
+				<resources os="Linux" arch="x86_64">
+					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+				</resources>
+				<resources os="SunOS" arch="sparc">
+					<nativelib href = "jogl-all-natives-solaris-sparc.jar" />
+					<nativelib href = "gluegen-rt-natives-solaris-sparc.jar" />
+				</resources>
+				<resources os="SunOS" arch="sparcv9">
+					<nativelib href = "jogl-all-natives-solaris-sparcv9.jar" />
+					<nativelib href = "gluegen-rt-natives-solaris-sparcv9.jar" />
+				</resources>
+				<resources os="SunOS" arch="x86">
+					<nativelib href = "jogl-all-natives-solaris-i586.jar" />
+					<nativelib href = "gluegen-rt-natives-solaris-i586.jar" />
+				</resources>
+				<resources os="SunOS" arch="amd64">
+					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+				</resources>
+				<resources os="SunOS" arch="x86_64">
+					<nativelib href = "joal-natives-solaris-amd64.jar" />
+					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+				</resources>
+				<resources os="Mac OS X" arch="i386">
+					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
+					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+				</resources>
+				<resources os="Mac OS X" arch="x86_64">
+					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
+					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+				</resources>
+				<resources os="Windows" arch="x86">
+					<nativelib href = "joal-natives-windows-i586.jar" />
+					<nativelib href = "jogl-all-natives-windows-i586.jar" />
+					<nativelib href = "gluegen-rt-natives-windows-i586.jar" />
+				</resources>
+				<resources os="Windows" arch="amd64">
+					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+				</resources>
+				<resources os="Windows" arch="x86_64">
+					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
+					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+				</resources>
+				<application-desc main-class="${tuer-main-class}" />
+			</jnlp>
+	            ]]>
+	        </echo>
+	</target>
+	<!-- =================================================================== -->
+	<!-- Build                                                               -->
+	<!-- =================================================================== -->
+	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and create the java archive" />
 
 
-    <!-- =================================================================== -->
-    <!-- Run Targets                                                         -->
-    <!-- =================================================================== -->  
+	<!-- =================================================================== -->
+	<!-- Run Targets                                                         -->
+	<!-- =================================================================== -->
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
-		    <mkdir dir="${destdir}/obj" />
-		    <mkdir dir="${destdir}/xml" />
-			<mkdir dir="${destdir}/data" />
-	        <java classname="connection.DataPreprocessor"
-		              fork="true"
-		              dir="${destdir}"
-		              failonerror="true"
-		              >   
-	        	    <classpath refid="project.class.path"/>
-	<!-- The program uses only 512 MB but it might need more on bigger maps -->
-	        	    <jvmarg value="-Xmx1536m"/>       	    
-		        	<arg value="texture/worldmap.gif"/>
-		        	<arg value="data/worldmap.data"/>
-		        	<arg value="data/rocketLauncher.data"/>
-		        	<arg value="data/binaryWorldmap.data"/>
-		        	<arg value="data/bot.data"/>
-		        	<arg value="data/unbreakableObject.data"/>	        	
-		        	<arg value="data/vendingMachine.data"/>
-		        	<arg value="data/lamp.data"/>
-		        	<arg value="data/chair.data"/>
-		        	<arg value="data/flower.data"/>
-		        	<arg value="data/table.data"/>
-		        	<arg value="data/bonsai.data"/>
-		        	<arg value="data/rocket.data"/>
-		        	<arg value="data/explosion.data"/>
-		        	<arg value="data/impact.data"/>
-		        	<arg value="data/healthPowerUp.data"/>
-		        	<arg value="xml/itemList.xml"/>
-		        	<arg value="data/crosshair.data"/>
-		        	<arg value="data/sphericalBeast.data"/>
-		        	<arg value="data/network.data"/>
-	        	    <arg value="obj/LID0"/>
-	        	    <arg value="texture/wallTexture.png"/>
-	        	    <arg value="texture/rocketLauncher.png"/>
-	        	    <arg value="obj/rocketLauncher"/>
-	        	    <arg value="obj/rocket"/>
-	        	    <arg value="texture/objects.png"/>
-	        	    <arg value="obj/unbreakableObject"/>	        	
-	        		<arg value="obj/vendingMachine"/>
-	        		<arg value="obj/lamp"/>
-	        		<arg value="obj/chair"/>
-	        		<arg value="obj/flower"/>
-	        		<arg value="obj/table"/>
-	        		<arg value="obj/bonsai"/>
-	        	    <arg value="LID0.mtl"/>
-	        	    <arg value="texture/ceilTexture.png"/>
-	        	    <arg value="texture/floorTexture.png"/>
-	        	    <arg value="texture/wallTexture0.png"/>
+		<mkdir dir="${basedir}/obj" />
+		<mkdir dir="${basedir}/xml" />
+		<mkdir dir="${basedir}/data" />
+		<java classname="connection.DataPreprocessor" fork="true" dir="${bindir}" failonerror="true">
+			<classpath refid="project.class.path" />
+			<!-- The program uses only 512 MB but it might need more on bigger maps -->
+			<jvmarg value="-Xmx1536m" />
+			<arg value="texture/worldmap.gif" />
+			<arg value="data/worldmap.data" />
+			<arg value="data/rocketLauncher.data" />
+			<arg value="data/binaryWorldmap.data" />
+			<arg value="data/bot.data" />
+			<arg value="data/unbreakableObject.data" />
+			<arg value="data/vendingMachine.data" />
+			<arg value="data/lamp.data" />
+			<arg value="data/chair.data" />
+			<arg value="data/flower.data" />
+			<arg value="data/table.data" />
+			<arg value="data/bonsai.data" />
+			<arg value="data/rocket.data" />
+			<arg value="data/explosion.data" />
+			<arg value="data/impact.data" />
+			<arg value="data/healthPowerUp.data" />
+			<arg value="xml/itemList.xml" />
+			<arg value="data/crosshair.data" />
+			<arg value="data/sphericalBeast.data" />
+			<arg value="data/network.data" />
+			<arg value="obj/LID0" />
+			<arg value="texture/wallTexture.png" />
+			<arg value="texture/rocketLauncher.png" />
+			<arg value="obj/rocketLauncher" />
+			<arg value="obj/rocket" />
+			<arg value="texture/objects.png"/>
+			<arg value="obj/unbreakableObject"/>
+			<arg value="obj/vendingMachine"/>
+			<arg value="obj/lamp"/>
+			<arg value="obj/chair"/>
+			<arg value="obj/flower"/>
+			<arg value="obj/table"/>
+			<arg value="obj/bonsai"/>
+			<arg value="LID0.mtl"/>
+			<arg value="texture/ceilTexture.png"/>
+			<arg value="texture/floorTexture.png"/>
+			<arg value="texture/wallTexture0.png"/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs the game TUER">
-	    <java classname="connection.GameServiceProvider"
+		<java classname="connection.GameServiceProvider"
 	              fork="true"
 	              dir="${destdir}"
 	              failonerror="true"
 	              >
-	    	<classpath refid="project.class.path"/>
-	    </java>
+			<classpath refid="project.class.path"/>
+		</java>
 	</target>
 </project>
