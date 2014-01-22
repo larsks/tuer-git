@@ -90,9 +90,10 @@
 	<target name="install-jsch">
 		<!-- jsch-0.1.50.jar is required to use scp -->
 		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
-		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
+		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed.
+		     If you use Eclipse, please go to go to Window -> Preferences -> Ant -> Runtime and add this JAR into Ant Home Entries
+		 -->
 	</target>
-
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
 	<!-- ================================================================= -->
@@ -105,7 +106,6 @@
 			<fileset dir="${destdir}" includes="**/*" />
 		</scp>
 	</target>
-
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
 	<!-- ================================================================= -->
@@ -362,7 +362,6 @@
 					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
 				<resources os="SunOS" arch="x86_64">
-					<nativelib href = "joal-natives-solaris-amd64.jar" />
 					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
 					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
@@ -375,7 +374,6 @@
 					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
 				</resources>
 				<resources os="Windows" arch="x86">
-					<nativelib href = "joal-natives-windows-i586.jar" />
 					<nativelib href = "jogl-all-natives-windows-i586.jar" />
 					<nativelib href = "gluegen-rt-natives-windows-i586.jar" />
 				</resources>
