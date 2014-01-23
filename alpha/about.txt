@@ -2,14 +2,14 @@ TUER : Truly Ununsual Experience of Revolution
 alpha version (quite stable, with a few bugs)
 
 Single player first person shooter 
-created by Julien Gouesse (alumni of the university of Paris 6)
+created by Julien Gouesse (engineer in computer science, alumni of the University Pierre and Marie Curie Paris 6 Jussieu)
 largely inspired from "Art Attack" by Vincent Stahl (www.stahlforce.com)
 
-project under GPL licence
+project under GPL licence (version 2)
 
-requires OpenGL 1.3 and Java Runtime Environment 1.6
+requires OpenGL 1.3 and Java Runtime Environment 1.7
 
-please report any bug: gouessej@yahoo.fr
+please report any bug: http://gouessej.wordpress.com
 
 
 Special thanks to:
