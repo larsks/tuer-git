@@ -255,7 +255,6 @@
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
-		<antcall target="install-jsch" />
 		<antcall target="upload" />
 	</target>
 	<!-- ================================================================= -->
@@ -645,17 +644,13 @@
 		</zip>
 	</target>
 	<!-- ================================================================= -->
-	<!-- Install JSCH                                                      -->
-	<!-- ================================================================= -->
-	<target name="install-jsch">
-		<!-- jsch-0.1.50.jar is required to use scp -->
-		<get src="http://downloads.sourceforge.net/project/jsch/jsch.jar/0.1.50/jsch-0.1.50.jar" dest="${ant.home}/lib/" verbose="true" usetimestamp="true" skipexisting="true" />
-		<!-- N.B: it's a bit hacky, scp may fail the very first time until Ant classpath gets refreshed -->
-	</target>
-	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
 	<!-- ================================================================= -->
 	<target name="upload">
+		<!-- Loads the ant classloader task (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html)-->
+		<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
+		<!-- Loads jsch-0.1.50.jar which is required to use the scp task -->
+		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
