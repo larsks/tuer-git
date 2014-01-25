@@ -184,6 +184,140 @@
 			<delete dir="${destdir}/META-INF" />
 		</sequential>
 	</macrodef>
+	<macrodef name="create-jogamp-fatjar">
+		<attribute name="gluegen-rt-jars-dir" />
+		<attribute name="joal-jars-dir" />
+		<attribute name="jogl-jars-dir" />
+		<attribute name="dest" />
+		<sequential>
+			<delete file="@{dest}" failonerror="false" />
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-linux-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/linux-i586">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-linux-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/linux-amd64">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-macosx-universal.jar" dest="@{gluegen-rt-jars-dir}/natives/macosx-universal">
+				<patternset>
+					<include name="*.dylib" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-solaris-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/solaris-i586">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-solaris-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/solaris-amd64">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-windows-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/windows-i586">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-windows-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/windows-amd64">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-linux-i586.jar" dest="@{joal-jars-dir}/natives/linux-i586">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-linux-amd64.jar" dest="@{joal-jars-dir}/natives/linux-amd64">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-macosx-universal.jar" dest="@{joal-jars-dir}/natives/macosx-universal">
+				<patternset>
+					<include name="*.dylib" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-solaris-i586.jar" dest="@{joal-jars-dir}/natives/solaris-i586">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-solaris-amd64.jar" dest="@{joal-jars-dir}/natives/solaris-amd64">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-windows-i586.jar" dest="@{joal-jars-dir}/natives/windows-i586">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{joal-jars-dir}/joal-natives-windows-amd64.jar" dest="@{joal-jars-dir}/natives/windows-amd64">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-linux-i586.jar" dest="@{jogl-jars-dir}/natives/linux-i586">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-linux-amd64.jar" dest="@{jogl-jars-dir}/natives/linux-amd64">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-macosx-universal.jar" dest="@{jogl-jars-dir}/natives/macosx-universal">
+				<patternset>
+					<include name="*.dylib" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-solaris-i586.jar" dest="@{jogl-jars-dir}/natives/solaris-i586">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-solaris-amd64.jar" dest="@{jogl-jars-dir}/natives/solaris-amd64">
+				<patternset>
+					<include name="*.so" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-windows-i586.jar" dest="@{jogl-jars-dir}/natives/windows-i586">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<unzip src="@{jogl-jars-dir}/jogl-all-natives-windows-amd64.jar" dest="@{jogl-jars-dir}/natives/windows-amd64">
+				<patternset>
+					<include name="*.dll" />
+				</patternset>
+			</unzip>
+			<zip destfile="@{dest}">
+				<zipgroupfileset dir="@{gluegen-rt-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
+				<zipgroupfileset dir="@{joal-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
+				<zipgroupfileset dir="@{jogl-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
+				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.so" />
+				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.dylib" />
+				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.dll" />
+				<zipfileset dir="@{joal-jars-dir}" includes="**/*.so" />
+				<zipfileset dir="@{joal-jars-dir}" includes="**/*.dylib" />
+				<zipfileset dir="@{joal-jars-dir}" includes="**/*.dll" />
+				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.so" />
+				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.dylib" />
+				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.dll" />
+			</zip>
+			<delete dir="@{gluegen-rt-jars-dir}/natives" />
+			<delete dir="@{joal-jars-dir}/natives" />
+			<delete dir="@{jogl-jars-dir}/natives" />
+		</sequential>
+	</macrodef>
+	<target name="create-jogamp-fatjar">
+		<create-jogamp-fatjar gluegen-rt-jars-dir="lib/gluegen-rt" joal-jars-dir="lib/joal" jogl-jars-dir="lib/jogl" dest="${destdir}/jogamp.jar" />
+	</target>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.7 or higher.">
 			<condition>
