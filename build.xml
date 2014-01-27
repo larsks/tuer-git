@@ -19,6 +19,10 @@
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir=".">
+	<!-- external tasks -->
+	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
+	<!-- Properties -->
 	<property name="bindir" value="."/>
 	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
@@ -459,53 +463,12 @@
 			<path refid="joal.natives.path" />
 		</copy>
 		<!-- repurposes the JARs of the third party libraries, overrides the permissions and codebase manifest attributes -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/fettle-0.7.0.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/guava-14.0.1.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-core-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-math-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-savable-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-extras-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-jogl-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/ardor3d-ui-${ardor3d-version}.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/CodecJOrbis.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/LibraryJavaSound.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/LibraryJOAL.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/SoundSystem.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-i586.jar" />
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparc.jar"/> -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/> -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-macosx-universal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-linux-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-linux-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-solaris-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-solaris-i586.jar" />
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-solaris-sparc.jar"/> -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-solaris-sparcv9.jar"/> -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-macosx-universal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-windows-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/joal-natives-windows-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-i586.jar" />
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/> -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-macosx-universal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-i586.jar" />
+		<for param="file">
+			<path refid="project.sign.jars.path"/>
+			<sequential>
+				<override-permissions-and-codebase-manifest-attributes jar="@{file}" />
+			</sequential>
+		</for>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Sign JARs                                                         -->
@@ -781,9 +744,8 @@
 	<!-- Upload                                                            -->
 	<!-- ================================================================= -->
 	<target name="upload">
-		<!-- Loads the ant classloader task (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html)-->
-		<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
-		<!-- Loads jsch-0.1.50.jar which is required to use the scp task -->
+		<!-- Loads jsch-0.1.50.jar (which is required to use the optional scp task) into the system classloader
+		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
 		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
 		<input message="Please enter the password:" addproperty="sftp-password"/>
