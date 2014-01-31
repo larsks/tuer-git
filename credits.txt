@@ -22,5 +22,5 @@ Tobias Knerr (maintainer of OSM2World, the tool I use to convert OSM files into 
 Psionic3D (artist who drew most of the weapons)
 Oto the cleaner (artist who drew some outdoor environments)
 Markus Borbély (artist who drew the rocket launcher under Creative Commons BY-SA)
-Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons Sampling Plus 1.0 License)
+Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons BY-SA)
 YummyPepsi (artist of DeviantART who created the texture of the asphalt under Creative Commons BY-SA)
