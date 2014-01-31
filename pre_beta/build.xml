@@ -79,43 +79,31 @@
 		<pathelement path="${bindir}"/>
 		<path refid="project.lib.path"/>
 	</path>
-	<path id="gluegen-rt.natives.path">
+	<path id="jogamp.natives.path">
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar"/>
 		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar"/>
-	</path>
-	<path id="jogl.natives.path">
 		<pathelement location="lib/jogl/jogl-all-natives-linux-amd64.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-linux-i586.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-solaris-amd64.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="lib/jogl/jogl-all-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="lib/jogl/jogl-all-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="lib/jogl/jogl-all-natives-macosx-universal.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-windows-amd64.jar"/>
 		<pathelement location="lib/jogl/jogl-all-natives-windows-i586.jar"/>
-	</path>
-	<path id="joal.natives.path">
 		<pathelement location="lib/joal/joal-natives-linux-amd64.jar"/>
 		<pathelement location="lib/joal/joal-natives-linux-i586.jar"/>
 		<pathelement location="lib/joal/joal-natives-solaris-amd64.jar"/>
 		<pathelement location="lib/joal/joal-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="lib/joal/joal-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="lib/joal/joal-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="lib/joal/joal-natives-macosx-universal.jar"/>
 		<pathelement location="lib/joal/joal-natives-windows-amd64.jar"/>
 		<pathelement location="lib/joal/joal-natives-windows-i586.jar"/>
 	</path>
-	<path id="project.sign.jars.path">
+	<!-- TODO use a flatten mapper to build this path (project.lib.path + jogamp.natives.path + tuer + jfpsm) -->
+	<path id="project.signed.jars.path">
 		<pathelement location="${destdir}/fettle-0.7.0.jar" />
 		<pathelement location="${destdir}/guava-14.0.1.jar" />
 		<pathelement location="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
@@ -136,9 +124,6 @@
 		<pathelement location="${destdir}/jogl-all-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="${destdir}/jogl-all-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="${destdir}/jogl-all-natives-macosx-universal.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-windows-amd64.jar"/>
 		<pathelement location="${destdir}/jogl-all-natives-windows-i586.jar"/>
@@ -147,9 +132,6 @@
 		<pathelement location="${destdir}/joal-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/joal-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/joal-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="${destdir}/joal-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="${destdir}/joal-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="${destdir}/joal-natives-macosx-universal.jar"/>
 		<pathelement location="${destdir}/joal-natives-windows-amd64.jar"/>
 		<pathelement location="${destdir}/joal-natives-windows-i586.jar"/>
@@ -158,9 +140,6 @@
 		<pathelement location="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <pathelement location="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/> -->
-		<!-- <pathelement location="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
 		<pathelement location="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
 		<pathelement location="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
@@ -458,13 +437,11 @@
 		<copy todir="${destdir}" flatten="true" overwrite="true">
 			<path refid="project.lib.path" />
 			<!-- copies these JARs to host JOGL, JOAL and GlueGen (instead of using JogAmp signed JARs hosted on its servers) -->
-			<path refid="gluegen-rt.natives.path" />
-			<path refid="jogl.natives.path" />
-			<path refid="joal.natives.path" />
+			<path refid="jogamp.natives.path" />
 		</copy>
 		<!-- repurposes the JARs of the third party libraries, overrides the permissions and codebase manifest attributes -->
 		<for param="file">
-			<path refid="project.sign.jars.path"/>
+			<path refid="project.signed.jars.path"/>
 			<sequential>
 				<override-permissions-and-codebase-manifest-attributes jar="@{file}" />
 			</sequential>
@@ -491,7 +468,7 @@
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
-			<path refid="project.sign.jars.path"/>
+			<path refid="project.signed.jars.path"/>
 		</signjar>
 		<!-- deletes the keystore if any -->
 		<delete file="${keystore}" failonerror="false" />
@@ -519,7 +496,7 @@
 				</security>
 				<update check="always" policy="always"/>
 				<resources>
-					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m"/>
+					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>
 					<property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
@@ -632,7 +609,7 @@
 				</security>
 				<update check="always" policy="always"/>
 				<resources>
-					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m"/>
+					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>
 					<property name="sun.nio.MaxDirectMemorySize" value="128M"/>
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
@@ -775,7 +752,7 @@
 			<dirset dir="lib/joal/openal-soft-1.15.1-bin" />
 		</delete>
 		<delete failonerror="false">
-			<path refid="project.sign.jars.path"/>
+			<path refid="project.signed.jars.path"/>
 		</delete>
 	</target>
 	<!-- =================================================================== -->
