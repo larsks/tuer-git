@@ -197,7 +197,7 @@ public abstract class EntityManager extends JPanel{
 	
 	protected void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{
 		//prevents the user from collapsing the root
-        if(event.getPath().getLastPathComponent() == tree.getModel().getRoot())
+        if(event.getPath().getLastPathComponent()==tree.getModel().getRoot())
             throw new ExpandVetoException(event);
 	}
 }
