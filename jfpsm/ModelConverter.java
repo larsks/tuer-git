@@ -24,6 +24,8 @@ public class ModelConverter extends JFPSMToolUserObject{
 
 	private static final long serialVersionUID=1L;
 	
+	private transient boolean dirty;
+	
 	private String convertibleModelFilePath;
 	
 	private String convertedModelDirectoryPath;
@@ -38,6 +40,7 @@ public class ModelConverter extends JFPSMToolUserObject{
 	
 	public ModelConverter(final String name){
 		super(name);
+		dirty=true;
 	}
 	
 	@Override
@@ -51,6 +54,7 @@ public class ModelConverter extends JFPSMToolUserObject{
 
 	public void setConvertibleModelFilePath(String convertibleModelFilePath){
 		this.convertibleModelFilePath=convertibleModelFilePath;
+		dirty=true;
 	}
 
 	public String getConvertedModelDirectoryPath(){
@@ -59,6 +63,7 @@ public class ModelConverter extends JFPSMToolUserObject{
 
 	public void setConvertedModelDirectoryPath(String convertedModelDirectoryPath){
 		this.convertedModelDirectoryPath=convertedModelDirectoryPath;
+		dirty=true;
 	}
 
 	public String getConvertedModelFilename(){
@@ -67,6 +72,7 @@ public class ModelConverter extends JFPSMToolUserObject{
 
 	public void setConvertedModelFilename(String convertedModelFilename){
 		this.convertedModelFilename=convertedModelFilename;
+		dirty=true;
 	}
 
 	public ModelFileFormat getConvertedModelFileFormat(){
@@ -75,18 +81,23 @@ public class ModelConverter extends JFPSMToolUserObject{
 
 	public void setConvertedModelFileFormat(ModelFileFormat convertedModelFileFormat){
 		this.convertedModelFileFormat=convertedModelFileFormat;
+		dirty=true;
 	}
 
 	@Override
 	public boolean isDirty(){
-		return(false);
+		return(dirty);
 	}
 
 	@Override
-	public void markDirty(){}
-
-	@Override
-	public void unmarkDirty(){}
+    public final void unmarkDirty(){
+        dirty=false;
+    }
+    
+    @Override
+    public final void markDirty(){
+        dirty=true;
+    }
 
 	@Override
 	boolean isRemovable(){
