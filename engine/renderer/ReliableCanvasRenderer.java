@@ -35,15 +35,13 @@ import com.ardor3d.renderer.jogl.JoglRenderer;
  *
  */
 public class ReliableCanvasRenderer extends JoglCanvasRenderer{
-	
-	private boolean initializationMakeCurrentContextCallDone,initializationReleaseCurrentContextDone;
 
 	public ReliableCanvasRenderer(Scene scene){
 		super(scene);
 	}
 
 	public ReliableCanvasRenderer(Scene scene,boolean useDebug){
-		super(scene,useDebug,new CapsUtil());
+		super(scene,useDebug,new CapsUtil(),false);
 	}
 	
 	@Override
@@ -90,21 +88,5 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
                  }
             }
         return(realCaps);
-	}
-	
-	@Override
-	public void makeCurrentContext(){
-		if(!initializationMakeCurrentContextCallDone&&!initializationReleaseCurrentContextDone)
-		    {super.makeCurrentContext();
-			 initializationMakeCurrentContextCallDone=true;
-		    }
-	}
-	
-	@Override
-	public void releaseCurrentContext(){
-		if(initializationMakeCurrentContextCallDone&&!initializationReleaseCurrentContextDone)
-		    {super.releaseCurrentContext();
-			 initializationReleaseCurrentContextDone=true;
-		    }
 	}
 }
