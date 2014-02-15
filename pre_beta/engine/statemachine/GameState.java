@@ -1336,7 +1336,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/pistol9mn_shot.ogg","/sounds/pistol9mn_reload.ogg","PISTOL_9MM",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
+        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/pistol9mm_shot.ogg","/sounds/pistol9mm_reload.ogg","PISTOL_9MM",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"PISTOL_10MM",true,10,ammunitionFactory.get("BULLET_10MM"),1,500,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg","MAG_60",true,30,ammunitionFactory.get("BULLET_9MM"),1,100,true);
         weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"UZI",true,20,ammunitionFactory.get("BULLET_9MM"),1,100,true);
