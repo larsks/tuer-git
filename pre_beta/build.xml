@@ -520,74 +520,74 @@
 					<jar href="jogl-all.jar" download="eager" main="false"/>
 				</resources>
 				<resources os="Linux" arch="i386">
-					<nativelib href = "joal-natives-linux-i586.jar" />
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+					<jar href="joal-natives-linux-i586.jar" />
+					<jar href="jogl-all-natives-linux-i586.jar" />
+					<jar href="gluegen-rt-natives-linux-i586.jar" />
 				</resources>
 				<resources os="Linux" arch="x86">
-					<nativelib href = "joal-natives-linux-i586.jar" />
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+					<jar href="joal-natives-linux-i586.jar" />
+					<jar href="jogl-all-natives-linux-i586.jar" />
+					<jar href="gluegen-rt-natives-linux-i586.jar" />
 				</resources>
 				<resources os="Linux" arch="amd64">
-					<nativelib href = "joal-natives-linux-amd64.jar" />
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+					<jar href="joal-natives-linux-amd64.jar" />
+					<jar href="jogl-all-natives-linux-amd64.jar" />
+					<jar href="gluegen-rt-natives-linux-amd64.jar" />
 				</resources>
 				<resources os="Linux" arch="x86_64">
-					<nativelib href = "joal-natives-linux-amd64.jar" />
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+					<jar href="joal-natives-linux-amd64.jar" />
+					<jar href="jogl-all-natives-linux-amd64.jar" />
+					<jar href="gluegen-rt-natives-linux-amd64.jar" />
 				</resources>
 				<resources os="SunOS" arch="sparc">
-					<nativelib href = "joal-natives-solaris-sparc.jar" />
-					<nativelib href = "jogl-all-natives-solaris-sparc.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparc.jar" />
+					<jar href="joal-natives-solaris-sparc.jar" />
+					<jar href="jogl-all-natives-solaris-sparc.jar" />
+					<jar href="gluegen-rt-natives-solaris-sparc.jar" />
 				</resources>
 				<resources os="SunOS" arch="sparcv9">
-					<nativelib href = "joal-natives-solaris-sparcv9.jar" />
-					<nativelib href = "jogl-all-natives-solaris-sparcv9.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparcv9.jar" />
+					<jar href="joal-natives-solaris-sparcv9.jar" />
+					<jar href="jogl-all-natives-solaris-sparcv9.jar" />
+					<jar href="gluegen-rt-natives-solaris-sparcv9.jar" />
 				</resources>
 				<resources os="SunOS" arch="x86">
-					<nativelib href = "joal-natives-solaris-i586.jar" />
-					<nativelib href = "jogl-all-natives-solaris-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-i586.jar" />
+					<jar href="joal-natives-solaris-i586.jar" />
+					<jar href="jogl-all-natives-solaris-i586.jar" />
+					<jar href="gluegen-rt-natives-solaris-i586.jar" />
 				</resources>
 				<resources os="SunOS" arch="amd64">
-					<nativelib href = "joal-natives-solaris-amd64.jar" />
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+					<jar href="joal-natives-solaris-amd64.jar" />
+					<jar href="jogl-all-natives-solaris-amd64.jar" />
+					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
 				<resources os="SunOS" arch="x86_64">
-					<nativelib href = "joal-natives-solaris-amd64.jar" />
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+					<jar href="joal-natives-solaris-amd64.jar" />
+					<jar href="jogl-all-natives-solaris-amd64.jar" />
+					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
 				<resources os="Mac OS X" arch="i386">
-					<nativelib href = "joal-natives-macosx-universal.jar" />
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+					<jar href="joal-natives-macosx-universal.jar" />
+					<jar href="jogl-all-natives-macosx-universal.jar" />
+					<jar href="gluegen-rt-natives-macosx-universal.jar" />
 				</resources>
 				<resources os="Mac OS X" arch="x86_64">
-					<nativelib href = "joal-natives-macosx-universal.jar" />
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+					<jar href="joal-natives-macosx-universal.jar" />
+					<jar href="jogl-all-natives-macosx-universal.jar" />
+					<jar href="gluegen-rt-natives-macosx-universal.jar" />
 				</resources>
 				<resources os="Windows" arch="x86">
-					<nativelib href = "joal-natives-windows-i586.jar" />
-					<nativelib href = "jogl-all-natives-windows-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-i586.jar" />
+					<jar href="joal-natives-windows-i586.jar" />
+					<jar href="jogl-all-natives-windows-i586.jar" />
+					<jar href="gluegen-rt-natives-windows-i586.jar" />
 				</resources>
 				<resources os="Windows" arch="amd64">
-					<nativelib href = "joal-natives-windows-amd64.jar" />
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+					<jar href="joal-natives-windows-amd64.jar" />
+					<jar href="jogl-all-natives-windows-amd64.jar" />
+					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<resources os="Windows" arch="x86_64">
-					<nativelib href = "joal-natives-windows-amd64.jar" />
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+					<jar href="joal-natives-windows-amd64.jar" />
+					<jar href="jogl-all-natives-windows-amd64.jar" />
+					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<application-desc main-class="${tuer-main-class}" />
 			</jnlp>
@@ -633,74 +633,74 @@
 					<jar href="jogl-all.jar" download="eager" main="false"/>
 				</resources>
 				<resources os="Linux" arch="i386">
-					<nativelib href = "joal-natives-linux-i586.jar" />
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+					<jar href="joal-natives-linux-i586.jar" />
+					<jar href="jogl-all-natives-linux-i586.jar" />
+					<jar href="gluegen-rt-natives-linux-i586.jar" />
 				</resources>
 				<resources os="Linux" arch="x86">
-					<nativelib href = "joal-natives-linux-i586.jar" />
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
+					<jar href="joal-natives-linux-i586.jar" />
+					<jar href="jogl-all-natives-linux-i586.jar" />
+					<jar href="gluegen-rt-natives-linux-i586.jar" />
 				</resources>
 				<resources os="Linux" arch="amd64">
-					<nativelib href = "joal-natives-linux-amd64.jar" />
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+					<jar href="joal-natives-linux-amd64.jar" />
+					<jar href="jogl-all-natives-linux-amd64.jar" />
+					<jar href="gluegen-rt-natives-linux-amd64.jar" />
 				</resources>
 				<resources os="Linux" arch="x86_64">
-					<nativelib href = "joal-natives-linux-amd64.jar" />
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
+					<jar href="joal-natives-linux-amd64.jar" />
+					<jar href="jogl-all-natives-linux-amd64.jar" />
+					<jar href="gluegen-rt-natives-linux-amd64.jar" />
 				</resources>
 				<resources os="SunOS" arch="sparc">
-					<nativelib href = "joal-natives-solaris-sparc.jar" />
-					<nativelib href = "jogl-all-natives-solaris-sparc.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparc.jar" />
+					<jar href="joal-natives-solaris-sparc.jar" />
+					<jar href="jogl-all-natives-solaris-sparc.jar" />
+					<jar href="gluegen-rt-natives-solaris-sparc.jar" />
 				</resources>
 				<resources os="SunOS" arch="sparcv9">
-					<nativelib href = "joal-natives-solaris-sparcv9.jar" />
-					<nativelib href = "jogl-all-natives-solaris-sparcv9.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparcv9.jar" />
+					<jar href="joal-natives-solaris-sparcv9.jar" />
+					<jar href="jogl-all-natives-solaris-sparcv9.jar" />
+					<jar href="gluegen-rt-natives-solaris-sparcv9.jar" />
 				</resources>
 				<resources os="SunOS" arch="x86">
-					<nativelib href = "joal-natives-solaris-i586.jar" />
-					<nativelib href = "jogl-all-natives-solaris-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-i586.jar" />
+					<jar href="joal-natives-solaris-i586.jar" />
+					<jar href="jogl-all-natives-solaris-i586.jar" />
+					<jar href="gluegen-rt-natives-solaris-i586.jar" />
 				</resources>
 				<resources os="SunOS" arch="amd64">
-					<nativelib href = "joal-natives-solaris-amd64.jar" />
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+					<jar href="joal-natives-solaris-amd64.jar" />
+					<jar href="jogl-all-natives-solaris-amd64.jar" />
+					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
 				<resources os="SunOS" arch="x86_64">
-					<nativelib href = "joal-natives-solaris-amd64.jar" />
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
+					<jar href="joal-natives-solaris-amd64.jar" />
+					<jar href="jogl-all-natives-solaris-amd64.jar" />
+					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
 				</resources>
 				<resources os="Mac OS X" arch="i386">
-					<nativelib href = "joal-natives-macosx-universal.jar" />
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+					<jar href="joal-natives-macosx-universal.jar" />
+					<jar href="jogl-all-natives-macosx-universal.jar" />
+					<jar href="gluegen-rt-natives-macosx-universal.jar" />
 				</resources>
 				<resources os="Mac OS X" arch="x86_64">
-					<nativelib href = "joal-natives-macosx-universal.jar" />
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
+					<jar href="joal-natives-macosx-universal.jar" />
+					<jar href="jogl-all-natives-macosx-universal.jar" />
+					<jar href="gluegen-rt-natives-macosx-universal.jar" />
 				</resources>
 				<resources os="Windows" arch="x86">
-					<nativelib href = "joal-natives-windows-i586.jar" />
-					<nativelib href = "jogl-all-natives-windows-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-i586.jar" />
+					<jar href="joal-natives-windows-i586.jar" />
+					<jar href="jogl-all-natives-windows-i586.jar" />
+					<jar href="gluegen-rt-natives-windows-i586.jar" />
 				</resources>
 				<resources os="Windows" arch="amd64">
-					<nativelib href = "joal-natives-windows-amd64.jar" />
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+					<jar href="joal-natives-windows-amd64.jar" />
+					<jar href="jogl-all-natives-windows-amd64.jar" />
+					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<resources os="Windows" arch="x86_64">
-					<nativelib href = "joal-natives-windows-amd64.jar" />
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+					<jar href="joal-natives-windows-amd64.jar" />
+					<jar href="jogl-all-natives-windows-amd64.jar" />
+					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<application-desc main-class="${jfpsm-main-class}" />
 			</jnlp>
