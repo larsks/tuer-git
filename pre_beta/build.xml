@@ -501,6 +501,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
+			        <property name="java.ext.dirs" value="" />
 					<jar href="${tuer-jar-filename}" download="eager" main="true"/>
 					<jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
 					<jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
@@ -614,6 +615,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
+			        <property name="java.ext.dirs" value="" />
 					<property name="sun.awt.noerasebackground" value="true"/>
 					<jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
 					<jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
@@ -767,6 +769,7 @@
 			<jvmarg value="-splash:${jfpsm-splashscreen-image}"/>
 			<jvmarg value="-Xmx512m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
+			<jvmarg value="-Djava.ext.dirs="/>
 		</java>
 	</target>
 	<target name="run-tuer" description="Runs TUER">
@@ -777,6 +780,7 @@
 			<classpath refid="project.class.path"/>
 			<jvmarg value="-Xmx256m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
+			<jvmarg value="-Djava.ext.dirs="/>
 		</java>
 	</target>
 </project>
