@@ -18,10 +18,11 @@
 <!-- Ant 1.8 build file                                                    -->
 <!-- ===================================================================== -->
 
-<project name="TUER" default="build" basedir=".">
+<project name="TUER" default="build" basedir="." xmlns:redline="antlib:org.redline_rpm">
 	<!-- external tasks -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
+	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.10.jar"/>
 	<!-- Properties -->
 	<property name="bindir" value="."/>
 	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
@@ -718,6 +719,14 @@
 		<zip destfile="${destdir}/${tuer-zip-filename}">
 			<fileset dir="." excludes="**/*.class,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
 		</zip>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Create RPM                                                        -->
+	<!-- ================================================================= -->
+	<target name="create-rpm">
+		<!--<redline:rpm group="Games" name="tuer" version="0" destination="${destdir}">
+		    
+		</redline:rpm>-->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
