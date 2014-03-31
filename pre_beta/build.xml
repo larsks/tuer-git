@@ -22,7 +22,7 @@
 	<!-- external tasks -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
-	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.10.jar"/>
+	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.15.jar"/>
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
 	<!-- Properties -->
 	<property name="bindir" value="."/>
