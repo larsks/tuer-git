@@ -124,35 +124,35 @@ public final class Ardor3DGameServiceProvider implements Scene{
     	
     	protected final String filenameWithoutExtension;
     	
-    	protected final String url;
+    	protected final String alternativeCommand;
 
-    	private DesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
+    	private DesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String alternativeCommand){
     		this.filenameWithoutExtension=filenameWithoutExtension;
-    		this.url=url;
+    		this.alternativeCommand=alternativeCommand;
     	}
     }
     
     private static final class LaunchDesktopShortcutCreationRunnable extends DesktopShortcutCreationRunnable{
     	
-    	private LaunchDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
-    		super(filenameWithoutExtension,url);
+    	private LaunchDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String alternativeCommand){
+    		super(filenameWithoutExtension,alternativeCommand);
     	}
     	
     	@Override
 		public void run() {
-    		DesktopIntegration.createLaunchDesktopShortcut(filenameWithoutExtension,url);
+    		DesktopIntegration.createLaunchDesktopShortcut(filenameWithoutExtension,alternativeCommand);
 		}
     }
     
     private static final class UninstallDesktopShortcutCreationRunnable extends DesktopShortcutCreationRunnable{
     	
-    	private UninstallDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String url){
-    		super(filenameWithoutExtension,url);
+    	private UninstallDesktopShortcutCreationRunnable(final String filenameWithoutExtension,final String alternativeCommand){
+    		super(filenameWithoutExtension,alternativeCommand);
     	}
     	
     	@Override
 		public void run() {
-    		DesktopIntegration.createUninstallDesktopShortcut(filenameWithoutExtension,url);
+    		DesktopIntegration.createUninstallDesktopShortcut(filenameWithoutExtension,alternativeCommand);
 		}
     }
     
@@ -306,9 +306,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
         {urise.printStackTrace();}
         final LaunchDesktopShortcutCreationRunnable launchRunnable;
         final UninstallDesktopShortcutCreationRunnable uninstallRunnable;
-        if(DesktopIntegration.isDesktopShortcutCreationSupported())
-            {launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
-        	 uninstallRunnable=new UninstallDesktopShortcutCreationRunnable("uninstall_TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+        if(DesktopIntegration.isDesktopShortcutCreationSupported()&&!DesktopIntegration.useJNLP())
+            {launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","tuer");
+             uninstallRunnable=null;
             }
         else
             {launchRunnable=null;

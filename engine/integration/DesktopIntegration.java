@@ -31,15 +31,22 @@ public final class DesktopIntegration {
 	
 	private static final DesktopIntegration instance=new DesktopIntegration();
 	
+	private static final String UNDEFINED_COMMAND_TAG="UNDEFINED_COMMAND_TAG";
+	
 	private final String desktopPath;
 	
+	public static final boolean useJNLP(){
+		final String classloaderClassname=Thread.currentThread().getContextClassLoader().getClass().getCanonicalName();
+		return(classloaderClassname.equals("sun.plugin2.applet.JNLP2ClassLoader")||classloaderClassname.equals("com.sun.jnlp.JNLPClassLoader"));
+	}
+	
 	public enum OS{
-		Linux("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
+		Linux("desktop",new String[]{"[Desktop Entry]","Comment=","Exec="+UNDEFINED_COMMAND_TAG+" ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use alias file format as it is very complicated to create
-		Mac("sh",new String[]{"javaws "},-1,0),
-		Unix("desktop",new String[]{"[Desktop Entry]","Comment=","Exec=javaws ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
+		Mac("sh",new String[]{UNDEFINED_COMMAND_TAG+" "},-1,0),
+		Unix("desktop",new String[]{"[Desktop Entry]","Comment=","Exec="+UNDEFINED_COMMAND_TAG+" ","GenericName=","Icon=","MimeType=","Name=","Path=","StartupNotify=false","Terminal=false","TerminalOptions=","Type=Application","X-DBUS-ServiceName=","X-DBUS-StartupType=","X-KDE-SubstituteUID=false","X-KDE-Username="},6,2),
 		//do not use LNK file format as it differs depending on the version
-		Windows("bat",new String[]{"\""+System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+"javaws.exe\" "},-1,0);
+		Windows("bat",new String[]{"\""+System.getProperty("java.home")+System.getProperty("file.separator")+"bin"+System.getProperty("file.separator")+UNDEFINED_COMMAND_TAG+"\" "},-1,0);
 		
 		private final String desktopShortcutFileExtension;
 		
@@ -93,7 +100,8 @@ public final class DesktopIntegration {
 				else
 					operatingSystem=OS.Unix;		    	 
 		if(operatingSystem.equals(OS.Linux)||operatingSystem.equals(OS.Unix))
-		    {if(operatingSystem.equals(OS.Linux))
+		    {//FIXME rather use "xdg-user-dir DESKTOP" instead of this complicated code
+			 if(operatingSystem.equals(OS.Linux))
 			     logger.info("operating system family: Linux");
 		     else
 		    	 if(osName.startsWith("solaris")||osName.startsWith("sunos")||osName.startsWith("hp-ux")||
@@ -316,7 +324,7 @@ public final class DesktopIntegration {
 			        	       desktopPath=registryValue;
 			                  }
 			              else
-			        	      {//this is the default desktop folder on Windows Vista and 7, whatever the language
+			        	      {//this is the default desktop folder on Windows Vista, 7 and 8, whatever the language
 			        	       final String modernWindowsDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
 			        	       if(new File(modernWindowsDesktopFolderPath).exists())
 		    		               {logger.info("usual default desktop path: "+modernWindowsDesktopFolderPath);
@@ -349,15 +357,15 @@ public final class DesktopIntegration {
 		return(instance.desktopPath);
 	}
 	
-	public static final boolean createLaunchDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
-		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,javaWebStartJNLPFileUrl,null,instance.desktopPath));
+	public static final boolean createLaunchDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String command){
+		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,instance.desktopPath,command));
 	}
 	
-	public static final boolean createUninstallDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl){
-		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,javaWebStartJNLPFileUrl,"-uninstall",instance.desktopPath));
+	public static final boolean createUninstallDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String command){
+		return(createDesktopShortcut(desktopShortcutFilenameWithoutExtension,instance.desktopPath,command));
 	}
 	
-	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String javaWebStartJNLPFileUrl,final String optionalFlagsForJavaWebStart,final String desktopShortcutFilepath){
+	public static final boolean createDesktopShortcut(final String desktopShortcutFilenameWithoutExtension,final String desktopShortcutFilepath,final String command){
 		final boolean success;
 		if(!isDesktopShortcutCreationSupported())
 			{logger.warning("desktop shortcuts are not supported by this operating system");
@@ -394,7 +402,7 @@ public final class DesktopIntegration {
 				           System.arraycopy(src,0,desktopShortcutFileContent,0,src.length);
 				           //fills the future content of the file with the parameters
 				           final int desktopShortcutFileExecutableCommandLineIndex=instance.operatingSystem.getDesktopShortcutFileExecutableCommandLineIndex();
-				           desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]+((optionalFlagsForJavaWebStart!=null&&!optionalFlagsForJavaWebStart.isEmpty())?optionalFlagsForJavaWebStart+" ":"")+javaWebStartJNLPFileUrl;
+				           desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex]=desktopShortcutFileContent[desktopShortcutFileExecutableCommandLineIndex].replace("UNDEFINED_COMMAND_TAG",command);
 				           final int desktopShortcutFileNameLineIndex=instance.operatingSystem.getDesktopShortcutFileNameLineIndex();
 				           if(desktopShortcutFileNameLineIndex!=-1)
 				               desktopShortcutFileContent[desktopShortcutFileNameLineIndex]=desktopShortcutFileContent[desktopShortcutFileNameLineIndex]+desktopShortcutFilenameWithoutExtension;
@@ -428,7 +436,7 @@ public final class DesktopIntegration {
 	}
 
 	public static final void main(String[] args){
-		createLaunchDesktopShortcut("TUER","http://tuer.sourceforge.net/very_experimental/tuer.jnlp");
+		createLaunchDesktopShortcut("TUER","tuer");
 	}
 	
 	
