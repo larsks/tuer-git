@@ -13,10 +13,8 @@
 */
 package engine.integration;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -95,13 +93,12 @@ public final class DesktopIntegration {
 			if(osName.startsWith("mac"))
 				operatingSystem=OS.Mac;
 			else
-				if(osName.startsWith("windows"))
+				if(osName.startsWith("windows")||osName.startsWith("Windows"))
 					operatingSystem=OS.Windows;
 				else
 					operatingSystem=OS.Unix;		    	 
 		if(operatingSystem.equals(OS.Linux)||operatingSystem.equals(OS.Unix))
-		    {//FIXME rather use "xdg-user-dir DESKTOP" instead of this complicated code
-			 if(operatingSystem.equals(OS.Linux))
+		    {if(operatingSystem.equals(OS.Linux))
 			     logger.info("operating system family: Linux");
 		     else
 		    	 if(osName.startsWith("solaris")||osName.startsWith("sunos")||osName.startsWith("hp-ux")||
@@ -111,69 +108,32 @@ public final class DesktopIntegration {
 		    		 logger.warning("operating system family: Unix");
 		    	 else
 		    		 logger.warning("unknown operating system family, maybe Unix");
-			 //XDG_DESKTOP_DIR is the environment variable that contains the path of the desktop directory on Linux
-			 String XDG_DESKTOP_DIR=System.getenv("XDG_DESKTOP_DIR");
-		     /**
-		      * workaround of a KDE bug. GNOME fills this environment variable correctly, not KDE.
-		      */		     
-		     if(XDG_DESKTOP_DIR==null||XDG_DESKTOP_DIR.equals(""))
-		         {logger.warning("XDG_DESKTOP_DIR is not set, use a workaround for non-GNOME window managers");
-		    	  //this script contains the configuration of the user directories including the directory used by the desktop
-		    	  final String configUserDirsScriptPath=userHome+System.getProperty("file.separator")+".config/user-dirs.dirs";
-		    	  final File configUserDirsScript=new File(configUserDirsScriptPath);
-		    	  //if this script exists
-		    	  if(configUserDirsScript.exists())
-		    	      {logger.info(configUserDirsScriptPath+" exists, parse it to find XDG_DESKTOP_DIR");
-		    		   //N.B: do not source the script to be as neutral as possible (to avoid changing the environment)
-		    		   try(BufferedReader reader=new BufferedReader(new FileReader(configUserDirsScript)))
-		    	          {//reads this file, line by line
-		    	           String line=null;
-		    	           while((line=reader.readLine())!=null)
-		    	        	   if(line.startsWith("XDG_DESKTOP_DIR"))
-		    	                   {final String[] splitLine=line.split("=");
-		    	                    if(splitLine.length==2)
-		    	                    	XDG_DESKTOP_DIR=splitLine[1].replaceAll("\"","");
-		    	        	        break;
-		    	                   }
-					      } 
-		    	       catch(FileNotFoundException fnfe) 
-					   {fnfe.printStackTrace();}
-		    	       catch(IOException ioe)
-		    	       {ioe.printStackTrace();}
-		    	      }
-		    	  else
-		    		  {logger.warning(configUserDirsScriptPath+" does not exist, look at the default values of the operating system");
-		    		   //this script contains the system-wide default values for XDG user directories
-		    		   final String defaultConfigUsersDirsScriptPath="/etc/xdg/user-dirs.defaults";
-		    		   final File defaultConfigUsersDirsScript=new File(defaultConfigUsersDirsScriptPath);
-		    		   if(defaultConfigUsersDirsScript.exists())
-		    		       {logger.info(defaultConfigUsersDirsScript+" exists, parse it to find the DESKTOP tag");
-		    			    //N.B: do not source the script to be as neutral as possible (to avoid changing the environment)
-			    		    try(BufferedReader reader=new BufferedReader(new FileReader(defaultConfigUsersDirsScript)))
-			    	           {//reads this file, line by line
-			    	            String line=null;
-			    	            while((line=reader.readLine())!=null)
-			    	         	    if(line.startsWith("DESKTOP"))
-			    	                    {final String[] splitLine=line.split("=");
-			    	                     if(splitLine.length==2)
-			    	                         XDG_DESKTOP_DIR=userHome+System.getProperty("file.separator")+splitLine[1].replaceAll("\"","");
-			    	        	         break;
-			    	                    }
-			    	            reader.close();
-						       } 
-			    	        catch(FileNotFoundException fnfe) 
-						    {fnfe.printStackTrace();}
-			    	        catch(IOException ioe)
-			    	        {ioe.printStackTrace();}		    			    
-		    		       }
-		    		   else
-		    			   logger.warning(defaultConfigUsersDirsScriptPath+" does not exist. There is no way to get the value of XDG_DESKTOP_DIR");
-		    		  }
-		         }
-		     else
-		    	 logger.info("XDG_DESKTOP_DIR is set, use its value");
-		     if(XDG_DESKTOP_DIR==null||XDG_DESKTOP_DIR.equals(""))
-		    	 {logger.warning("XDG_DESKTOP_DIR is not set");
+			 //any window manager following the FreeDesktop specification supports the command below
+			 String XDG_DESKTOP_DIR=null;
+			 try{Process process=Runtime.getRuntime().exec("xdg-user-dir DESKTOP");
+	             StreamReader reader=new StreamReader(process.getInputStream());
+                 reader.start();
+                 process.waitFor();
+                 reader.join();
+                 XDG_DESKTOP_DIR=reader.getResult();
+                 if(XDG_DESKTOP_DIR!=null)
+                	 XDG_DESKTOP_DIR=XDG_DESKTOP_DIR.replace(System.getProperty("line.separator"),"");
+	            }
+	         catch(Exception e)
+	         {e.printStackTrace();}
+			 final boolean desktopDirSet=XDG_DESKTOP_DIR!=null&&!XDG_DESKTOP_DIR.isEmpty();
+			 final boolean desktopDirDenotesExistingDir;
+			 if(desktopDirSet)
+			     {final File desktopDirFile=new File(XDG_DESKTOP_DIR);
+			      desktopDirDenotesExistingDir=desktopDirFile.exists()&&desktopDirFile.isDirectory();
+			     }
+			 else
+				 desktopDirDenotesExistingDir=false;
+		     if(!desktopDirSet||!desktopDirDenotesExistingDir)
+		    	 {if(!desktopDirSet)
+		    	      logger.warning("XDG_DESKTOP_DIR is not set");
+		    	  if(!desktopDirDenotesExistingDir)
+		    		  logger.warning("XDG_DESKTOP_DIR doesn't denote an existing directory: "+XDG_DESKTOP_DIR);
 		    	  final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
 		    	  if(new File(defaultDesktopFolderPath).exists())
 		    	      {logger.info("use the default desktop folder: "+defaultDesktopFolderPath);
@@ -185,42 +145,8 @@ public final class DesktopIntegration {
 		    		  }
 		    	 }
 		     else
-		    	 {logger.info("XDG_DESKTOP_DIR raw value: "+XDG_DESKTOP_DIR);
-		    	  /**
-		    	   * XDG_DESKTOP_DIR can contain some references to other environment variables. These references have 
-		    	   * to be replaced by their values to get the absolute path of the desktop directory
-		    	   */
-		    	  Map<String,String> environmentVarsMap=System.getenv();
-		    	  String environmentVariable;
-		    	  int indexOfEnvironmentVariableOccurrence;
-		    	  for(Entry<String,String> entry:environmentVarsMap.entrySet())
-		    	      {environmentVariable=entry.getKey();
-		    	       /**
-		    	        * It uses indexOf() and substring() because replaceAll() cannot be used as this method uses 
-		    	        * regular expressions and interprets '$' as a punctuation character which is often in the names of
-		    	        * environment variables.
-		    	        */
-		    	       indexOfEnvironmentVariableOccurrence=XDG_DESKTOP_DIR.indexOf(environmentVariable);
-		    	       if(indexOfEnvironmentVariableOccurrence!=-1)
-		    	    	   XDG_DESKTOP_DIR=entry.getValue()+XDG_DESKTOP_DIR.substring(indexOfEnvironmentVariableOccurrence+environmentVariable.length(),XDG_DESKTOP_DIR.length());
-		    	      }
-		    	  logger.info("XDG_DESKTOP_DIR value: "+XDG_DESKTOP_DIR);
-		    	  if(new File(XDG_DESKTOP_DIR).exists())
-		              {logger.info("XDG_DESKTOP_DIR denotes an existing directory");
-		    		   desktopPath=XDG_DESKTOP_DIR;
-		              }
-		    	  else
-		    		  {logger.info("XDG_DESKTOP_DIR does not denote an existing directory");
-		    		   final String defaultDesktopFolderPath=userHome+System.getProperty("file.separator")+"Desktop";
-			    	   if(new File(defaultDesktopFolderPath).exists())
-			    	       {logger.info("use the default desktop folder: "+defaultDesktopFolderPath);
-			    		    desktopPath=defaultDesktopFolderPath;
-			    	       }
-			    	   else
-			    		   {logger.warning("the default desktop folder "+defaultDesktopFolderPath+" does not exist");
-			    		    desktopPath=null;
-			    		   }
-		    		  }
+		    	 {desktopPath=XDG_DESKTOP_DIR;
+		    	  logger.info("XDG_DESKTOP_DIR denotes an existing directory: "+XDG_DESKTOP_DIR);
 		    	 }
 		    }
 		else
@@ -275,6 +201,8 @@ public final class DesktopIntegration {
 		                      process.waitFor();
 		                      reader.join();
 		                      specialFolderValue=reader.getResult();
+		                      if(specialFolderValue!=null)
+		                    	  specialFolderValue=specialFolderValue.replace(System.getProperty("line.separator"),"");
 		    		         }
 		    		      catch(Exception e)
 		    		      {e.printStackTrace();}
@@ -296,6 +224,7 @@ public final class DesktopIntegration {
 			                  process.waitFor();
 			                  reader.join();
 			                  String result=reader.getResult();
+			                  result=result.replace(System.getProperty("line.separator"),"");
 			                  int p=result.indexOf(REGSTR_TOKEN);
 			                  if(p!=-1)
 			            	      {//get the raw value
