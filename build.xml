@@ -494,7 +494,6 @@
 			        <icon kind="shortcut" href="tuerLogo.png"/>
 	                <shortcut online="false" install="true">
 	                    <desktop/>
-	                    <menu submenu="Games"/>
 	                </shortcut>
 					<offline-allowed/>
 				</information>
