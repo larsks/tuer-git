@@ -763,10 +763,6 @@
 		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
 		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
 		<delete file="${destdir}/${jfpsm-jnlp-filename}" failonerror="false" />
-		<delete file="lib/joal/openal-soft-1.15.1-bin.zip" failonerror="false" />
-		<delete failonerror="false">
-			<dirset dir="lib/joal/openal-soft-1.15.1-bin" />
-		</delete>
 		<delete failonerror="false">
 			<path refid="project.signed.jars.path"/>
 		</delete>
