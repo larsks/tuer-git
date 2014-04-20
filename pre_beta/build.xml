@@ -364,6 +364,10 @@
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
 	<target name="dist" depends="compile" description="Creates the deployable files and uploads them onto the server(s)">
+		<!-- Creates the destination directory -->
+		<mkdir dir="${destdir}"/>
+		<!-- Copies the logo into it -->
+		<copy file="images/tuerLogo.png" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications and prepares the JARs of the libraries -->
 		<antcall target="create-jars" />
 		<antcall target="prepare-third-party-jars" />
@@ -759,13 +763,7 @@
 		<delete failonerror="false">
 			<fileset dir="${bindir}" includes="**/*.class" />
 		</delete>
-		<delete file="${keystore}" failonerror="false" />
-		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
-		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
-		<delete file="${destdir}/${jfpsm-jnlp-filename}" failonerror="false" />
-		<delete failonerror="false">
-			<path refid="project.signed.jars.path"/>
-		</delete>
+		<delete dir="${destdir}" failonerror="false" />
 	</target>
 	<!-- =================================================================== -->
 	<!-- Run Targets                                                         -->
