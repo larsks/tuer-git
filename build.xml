@@ -26,7 +26,7 @@
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
 	<!-- Properties -->
 	<property name="bindir" value="."/>
-	<!-- directory containing signed JARs, JNPL files and images that are used in the deployed product -->
+	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="."/>
@@ -104,205 +104,6 @@
 		<pathelement location="lib/joal/joal-natives-windows-amd64.jar"/>
 		<pathelement location="lib/joal/joal-natives-windows-i586.jar"/>
 	</path>
-	<!-- TODO use a flatten mapper to build this path (project.lib.path + jogamp.natives.path + tuer + jfpsm) -->
-	<path id="project.signed.jars.path">
-		<pathelement location="${destdir}/fettle-0.7.0.jar" />
-		<pathelement location="${destdir}/guava-14.0.1.jar" />
-		<pathelement location="${destdir}/ardor3d-collada-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-core-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-math-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-savable-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-extras-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-jogl-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/ardor3d-ui-${ardor3d-version}.jar" />
-		<pathelement location="${destdir}/${tuer-jar-filename}"/>
-		<pathelement location="${destdir}/${jfpsm-jar-filename}"/>
-		<pathelement location="${destdir}/CodecJOrbis.jar"/>
-		<pathelement location="${destdir}/LibraryJavaSound.jar"/>
-		<pathelement location="${destdir}/LibraryJOAL.jar"/>
-		<pathelement location="${destdir}/SoundSystem.jar"/>
-		<pathelement location="${destdir}/jogl-all.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-linux-amd64.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-linux-i586.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-macosx-universal.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-windows-amd64.jar"/>
-		<pathelement location="${destdir}/jogl-all-natives-windows-i586.jar"/>
-		<pathelement location="${destdir}/joal.jar"/>
-		<pathelement location="${destdir}/joal-natives-linux-amd64.jar"/>
-		<pathelement location="${destdir}/joal-natives-linux-i586.jar"/>
-		<pathelement location="${destdir}/joal-natives-solaris-amd64.jar"/>
-		<pathelement location="${destdir}/joal-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/joal-natives-macosx-universal.jar"/>
-		<pathelement location="${destdir}/joal-natives-windows-amd64.jar"/>
-		<pathelement location="${destdir}/joal-natives-windows-i586.jar"/>
-		<pathelement location="${destdir}/gluegen-rt.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-		<pathelement location="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-	</path>
-	<macrodef name="override-permissions-and-codebase-manifest-attributes">
-		<attribute name="jar" />
-		<sequential>
-			<!-- extracts the manifest from the jar -->
-			<unzip src="@{jar}" dest="${destdir}">
-				<patternset>
-					<include name="META-INF/MANIFEST.MF" />
-				</patternset>
-			</unzip>
-			<!-- updates the manifest -->
-			<manifest mode="update" file="${destdir}/META-INF/MANIFEST.MF">
-				<attribute name="Trusted-Only" value="true"/>
-				<attribute name="Trusted-Library" value="false"/>
-				<attribute name="Permissions" value="all-permissions" />
-				<attribute name="Codebase" value="${codebase-url}" />
-			</manifest>
-			<!-- updates the JAR -->
-			<jar update="true" destFile="@{jar}" manifest="${destdir}/META-INF/MANIFEST.MF" />
-			<!-- deletes the temporary manifest -->
-			<delete file="${destdir}/META-INF/MANIFEST.MF" />
-			<delete dir="${destdir}/META-INF" />
-		</sequential>
-	</macrodef>
-	<macrodef name="create-jogamp-fatjar">
-		<attribute name="gluegen-rt-jars-dir" />
-		<attribute name="joal-jars-dir" />
-		<attribute name="jogl-jars-dir" />
-		<attribute name="dest" />
-		<sequential>
-			<delete file="@{dest}" failonerror="false" />
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-linux-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/linux-i586">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-linux-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/linux-amd64">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-macosx-universal.jar" dest="@{gluegen-rt-jars-dir}/natives/macosx-universal">
-				<patternset>
-					<include name="*.dylib" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-solaris-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/solaris-i586">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-solaris-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/solaris-amd64">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-windows-i586.jar" dest="@{gluegen-rt-jars-dir}/natives/windows-i586">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{gluegen-rt-jars-dir}/gluegen-rt-natives-windows-amd64.jar" dest="@{gluegen-rt-jars-dir}/natives/windows-amd64">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-linux-i586.jar" dest="@{joal-jars-dir}/natives/linux-i586">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-linux-amd64.jar" dest="@{joal-jars-dir}/natives/linux-amd64">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-macosx-universal.jar" dest="@{joal-jars-dir}/natives/macosx-universal">
-				<patternset>
-					<include name="*.dylib" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-solaris-i586.jar" dest="@{joal-jars-dir}/natives/solaris-i586">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-solaris-amd64.jar" dest="@{joal-jars-dir}/natives/solaris-amd64">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-windows-i586.jar" dest="@{joal-jars-dir}/natives/windows-i586">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{joal-jars-dir}/joal-natives-windows-amd64.jar" dest="@{joal-jars-dir}/natives/windows-amd64">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-linux-i586.jar" dest="@{jogl-jars-dir}/natives/linux-i586">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-linux-amd64.jar" dest="@{jogl-jars-dir}/natives/linux-amd64">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-macosx-universal.jar" dest="@{jogl-jars-dir}/natives/macosx-universal">
-				<patternset>
-					<include name="*.dylib" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-solaris-i586.jar" dest="@{jogl-jars-dir}/natives/solaris-i586">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-solaris-amd64.jar" dest="@{jogl-jars-dir}/natives/solaris-amd64">
-				<patternset>
-					<include name="*.so" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-windows-i586.jar" dest="@{jogl-jars-dir}/natives/windows-i586">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<unzip src="@{jogl-jars-dir}/jogl-all-natives-windows-amd64.jar" dest="@{jogl-jars-dir}/natives/windows-amd64">
-				<patternset>
-					<include name="*.dll" />
-				</patternset>
-			</unzip>
-			<zip destfile="@{dest}">
-				<zipgroupfileset dir="@{gluegen-rt-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
-				<zipgroupfileset dir="@{joal-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
-				<zipgroupfileset dir="@{jogl-jars-dir}" includes="*.jar" excludes="*-natives-*.jar" />
-				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.so" />
-				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.dylib" />
-				<zipfileset dir="@{gluegen-rt-jars-dir}" includes="**/*.dll" />
-				<zipfileset dir="@{joal-jars-dir}" includes="**/*.so" />
-				<zipfileset dir="@{joal-jars-dir}" includes="**/*.dylib" />
-				<zipfileset dir="@{joal-jars-dir}" includes="**/*.dll" />
-				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.so" />
-				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.dylib" />
-				<zipfileset dir="@{jogl-jars-dir}" includes="**/*.dll" />
-			</zip>
-			<delete dir="@{gluegen-rt-jars-dir}/natives" />
-			<delete dir="@{joal-jars-dir}/natives" />
-			<delete dir="@{jogl-jars-dir}/natives" />
-		</sequential>
-	</macrodef>
-	<target name="create-jogamp-fatjar">
-		<create-jogamp-fatjar gluegen-rt-jars-dir="lib/gluegen-rt" joal-jars-dir="lib/joal" jogl-jars-dir="lib/jogl" dest="${destdir}/jogamp.jar" />
-	</target>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.7 or higher.">
 			<condition>
@@ -368,9 +169,8 @@
 		<mkdir dir="${destdir}"/>
 		<!-- Copies the logo into it -->
 		<copy file="images/tuerLogo.png" todir="${destdir}" overwrite="true" />
-		<!-- Creates the JARs of the applications and prepares the JARs of the libraries -->
+		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
-		<antcall target="prepare-third-party-jars" />
 		<!-- Signs them -->
 		<antcall target="sign-jars" />
 		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
@@ -384,9 +184,48 @@
 	<!-- Create JARs                                                       -->
 	<!-- ================================================================= -->
 	<target name="create-jars">
-		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" 
-			includes="**/*.class" 
-			compress="false">
+		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+			<!-- Fat JAR -->
+			<!-- Gluegen, JOAL and JOGL -->
+			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64" />
+			<zipfileset src="lib/joal/joal.jar" includes="**/*.class" />
+			<zipfileset src="lib/joal/joal-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
+			<zipfileset src="lib/joal/joal-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/joal/joal-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
+			<zipfileset src="lib/joal/joal-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
+			<zipfileset src="lib/joal/joal-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
+			<zipfileset src="lib/joal/joal-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586" />
+			<zipfileset src="lib/joal/joal-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64" />
+			<zipfileset src="lib/jogl/jogl-all.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp" />
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/jogl/jogl-all-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
+			<zipfileset src="lib/jogl/jogl-all-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
+			<zipfileset src="lib/jogl/jogl-all-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
+			<zipfileset src="lib/jogl/jogl-all-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586" />
+			<zipfileset src="lib/jogl/jogl-all-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64" />
+			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
+			<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-savable-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
+			<zipfileset src="lib/google-collect/guava-14.0.1.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/LibraryJavaSound.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
+			<!-- the rest of the files (not within JARs) -->
 			<exclude name="**/gpl.txt" />
 			<!-- the collada models are not yet used -->
 			<exclude name="**/dae/*" />
@@ -394,18 +233,57 @@
 			<exclude name="**/build.xml" />
 			<exclude name="**/*.py" />
 			<manifest>
-				<attribute name="Application-Name" value="${jfpsm-application-name}"/>
-				<attribute name="Main-Class" value="${jfpsm-main-class}"/>
-				<attribute name="SplashScreen-Image" value="${jfpsm-splashscreen-image}"/>
-				<attribute name="Trusted-Only" value="true"/>
-				<attribute name="Trusted-Library" value="false"/>
+				<attribute name="Application-Name" value="${jfpsm-application-name}" />
+				<attribute name="Main-Class" value="${jfpsm-main-class}" />
+				<attribute name="SplashScreen-Image" value="${jfpsm-splashscreen-image}" />
+				<attribute name="Trusted-Only" value="true" />
+				<attribute name="Trusted-Library" value="false" />
 				<attribute name="Permissions" value="all-permissions"/>
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" 
-			includes="**/*.class"
-			compress="false">
+		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+			<!-- Fat JAR -->
+			<!-- Gluegen, JOAL and JOGL -->
+			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586"/>
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64"/>
+			<zipfileset src="lib/joal/joal.jar" includes="**/*.class" />
+			<zipfileset src="lib/joal/joal-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
+			<zipfileset src="lib/joal/joal-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/joal/joal-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
+			<zipfileset src="lib/joal/joal-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
+			<zipfileset src="lib/joal/joal-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
+			<zipfileset src="lib/joal/joal-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586" />
+			<zipfileset src="lib/joal/joal-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64" />
+			<zipfileset src="lib/jogl/jogl-all.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp" />
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-windows-i586.jar" includes="*.dll" prefix="natives/windows-i586"/>
+			<zipfileset src="lib/jogl/jogl-all-natives-windows-amd64.jar" includes="*.dll" prefix="natives/windows-amd64"/>
+			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
+			<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-savable-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
+			<zipfileset src="lib/google-collect/guava-14.0.1.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/LibraryJavaSound.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
+			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
+			<!-- the rest of the files (not within JARs) -->
 			<include name="**/*.bmp" />
 			<include name="**/*.png" />
 			<include name="**/*.jpg" />
@@ -436,24 +314,6 @@
 		</jar>
 	</target>
 	<!-- ================================================================= -->
-	<!-- Prepare third party JARs                                          -->
-	<!-- ================================================================= -->
-	<target name="prepare-third-party-jars">
-		<!-- copies these JARs into the local destination directory (to avoid mixing unsigned JARs with signed JARs) -->
-		<copy todir="${destdir}" flatten="true" overwrite="true">
-			<path refid="project.lib.path" />
-			<!-- copies these JARs to host JOGL, JOAL and GlueGen (instead of using JogAmp signed JARs hosted on its servers) -->
-			<path refid="jogamp.natives.path" />
-		</copy>
-		<!-- repurposes the JARs of the third party libraries, overrides the permissions and codebase manifest attributes -->
-		<for param="file">
-			<path refid="project.signed.jars.path"/>
-			<sequential>
-				<override-permissions-and-codebase-manifest-attributes jar="@{file}" />
-			</sequential>
-		</for>
-	</target>
-	<!-- ================================================================= -->
 	<!-- Sign JARs                                                         -->
 	<!-- ================================================================= -->
 	<target name="sign-jars">
@@ -474,7 +334,10 @@
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
-			<path refid="project.signed.jars.path"/>
+			<path>
+			    <pathelement location="${destdir}/${tuer-jar-filename}"/>
+			    <pathelement location="${destdir}/${jfpsm-jar-filename}"/>
+		    </path>
 		</signjar>
 		<!-- deletes the keystore if any -->
 		<delete file="${keystore}" failonerror="false" />
@@ -495,10 +358,10 @@
 					<description kind="short">kill them all!!</description>
 					<icon kind="default" href="tuerLogo.png"/>
 					<icon kind="splash" href="tuerLogo.png"/>
-			        <icon kind="shortcut" href="tuerLogo.png"/>
-	                <shortcut online="false" install="true">
-	                    <desktop/>
-	                </shortcut>
+					<icon kind="shortcut" href="tuerLogo.png"/>
+					<shortcut online="false" install="true">
+						<desktop/>
+					</shortcut>
 					<offline-allowed/>
 				</information>
 				<security>
@@ -511,94 +374,8 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
-			        <property name="java.ext.dirs" value="" />
+					<property name="java.ext.dirs" value="" />
 					<jar href="${tuer-jar-filename}" download="eager" main="true"/>
-					<jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-savable-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-extras-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-					<jar href="guava-14.0.1.jar" download="eager" main="false"/>
-					<jar href="CodecJOrbis.jar" download="eager" main="false"/>
-					<jar href="LibraryJavaSound.jar" download="eager" main="false"/>
-					<jar href="LibraryJOAL.jar" download="eager" main="false"/>
-					<jar href="SoundSystem.jar" download="eager" main="false"/>
-					<jar href="gluegen-rt.jar" download="eager" main="false"/>
-					<jar href="joal.jar" download="eager" main="false"/>
-					<jar href="jogl-all.jar" download="eager" main="false"/>
-				</resources>
-				<resources os="Linux" arch="i386">
-					<jar href="joal-natives-linux-i586.jar" />
-					<jar href="jogl-all-natives-linux-i586.jar" />
-					<jar href="gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="x86">
-					<jar href="joal-natives-linux-i586.jar" />
-					<jar href="jogl-all-natives-linux-i586.jar" />
-					<jar href="gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="amd64">
-					<jar href="joal-natives-linux-amd64.jar" />
-					<jar href="jogl-all-natives-linux-amd64.jar" />
-					<jar href="gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="Linux" arch="x86_64">
-					<jar href="joal-natives-linux-amd64.jar" />
-					<jar href="jogl-all-natives-linux-amd64.jar" />
-					<jar href="gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparc">
-					<jar href="joal-natives-solaris-sparc.jar" />
-					<jar href="jogl-all-natives-solaris-sparc.jar" />
-					<jar href="gluegen-rt-natives-solaris-sparc.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparcv9">
-					<jar href="joal-natives-solaris-sparcv9.jar" />
-					<jar href="jogl-all-natives-solaris-sparcv9.jar" />
-					<jar href="gluegen-rt-natives-solaris-sparcv9.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86">
-					<jar href="joal-natives-solaris-i586.jar" />
-					<jar href="jogl-all-natives-solaris-i586.jar" />
-					<jar href="gluegen-rt-natives-solaris-i586.jar" />
-				</resources>
-				<resources os="SunOS" arch="amd64">
-					<jar href="joal-natives-solaris-amd64.jar" />
-					<jar href="jogl-all-natives-solaris-amd64.jar" />
-					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86_64">
-					<jar href="joal-natives-solaris-amd64.jar" />
-					<jar href="jogl-all-natives-solaris-amd64.jar" />
-					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="i386">
-					<jar href="joal-natives-macosx-universal.jar" />
-					<jar href="jogl-all-natives-macosx-universal.jar" />
-					<jar href="gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="x86_64">
-					<jar href="joal-natives-macosx-universal.jar" />
-					<jar href="jogl-all-natives-macosx-universal.jar" />
-					<jar href="gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Windows" arch="x86">
-					<jar href="joal-natives-windows-i586.jar" />
-					<jar href="jogl-all-natives-windows-i586.jar" />
-					<jar href="gluegen-rt-natives-windows-i586.jar" />
-				</resources>
-				<resources os="Windows" arch="amd64">
-					<jar href="joal-natives-windows-amd64.jar" />
-					<jar href="jogl-all-natives-windows-amd64.jar" />
-					<jar href="gluegen-rt-natives-windows-amd64.jar" />
-				</resources>
-				<resources os="Windows" arch="x86_64">
-					<jar href="joal-natives-windows-amd64.jar" />
-					<jar href="jogl-all-natives-windows-amd64.jar" />
-					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<application-desc main-class="${tuer-main-class}" />
 			</jnlp>
@@ -625,94 +402,9 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
-			        <property name="java.ext.dirs" value="" />
+					<property name="java.ext.dirs" value="" />
 					<property name="sun.awt.noerasebackground" value="true"/>
 					<jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
-					<jar href="ardor3d-collada-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-core-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-math-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-savable-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-jogl-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="ardor3d-ui-${ardor3d-version}.jar" download="eager" main="false"/>
-					<jar href="fettle-0.7.0.jar" download="eager" main="false"/>
-					<jar href="guava-14.0.1.jar" download="eager" main="false"/>
-					<jar href="CodecJOrbis.jar" download="eager" main="false"/>
-					<jar href="LibraryJavaSound.jar" download="eager" main="false"/>
-					<jar href="LibraryJOAL.jar" download="eager" main="false"/>
-					<jar href="SoundSystem.jar" download="eager" main="false"/>
-					<jar href="gluegen-rt.jar" download="eager" main="false"/>
-					<jar href="joal.jar" download="eager" main="false"/>
-					<jar href="jogl-all.jar" download="eager" main="false"/>
-				</resources>
-				<resources os="Linux" arch="i386">
-					<jar href="joal-natives-linux-i586.jar" />
-					<jar href="jogl-all-natives-linux-i586.jar" />
-					<jar href="gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="x86">
-					<jar href="joal-natives-linux-i586.jar" />
-					<jar href="jogl-all-natives-linux-i586.jar" />
-					<jar href="gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="amd64">
-					<jar href="joal-natives-linux-amd64.jar" />
-					<jar href="jogl-all-natives-linux-amd64.jar" />
-					<jar href="gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="Linux" arch="x86_64">
-					<jar href="joal-natives-linux-amd64.jar" />
-					<jar href="jogl-all-natives-linux-amd64.jar" />
-					<jar href="gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparc">
-					<jar href="joal-natives-solaris-sparc.jar" />
-					<jar href="jogl-all-natives-solaris-sparc.jar" />
-					<jar href="gluegen-rt-natives-solaris-sparc.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparcv9">
-					<jar href="joal-natives-solaris-sparcv9.jar" />
-					<jar href="jogl-all-natives-solaris-sparcv9.jar" />
-					<jar href="gluegen-rt-natives-solaris-sparcv9.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86">
-					<jar href="joal-natives-solaris-i586.jar" />
-					<jar href="jogl-all-natives-solaris-i586.jar" />
-					<jar href="gluegen-rt-natives-solaris-i586.jar" />
-				</resources>
-				<resources os="SunOS" arch="amd64">
-					<jar href="joal-natives-solaris-amd64.jar" />
-					<jar href="jogl-all-natives-solaris-amd64.jar" />
-					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86_64">
-					<jar href="joal-natives-solaris-amd64.jar" />
-					<jar href="jogl-all-natives-solaris-amd64.jar" />
-					<jar href="gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="i386">
-					<jar href="joal-natives-macosx-universal.jar" />
-					<jar href="jogl-all-natives-macosx-universal.jar" />
-					<jar href="gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="x86_64">
-					<jar href="joal-natives-macosx-universal.jar" />
-					<jar href="jogl-all-natives-macosx-universal.jar" />
-					<jar href="gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Windows" arch="x86">
-					<jar href="joal-natives-windows-i586.jar" />
-					<jar href="jogl-all-natives-windows-i586.jar" />
-					<jar href="gluegen-rt-natives-windows-i586.jar" />
-				</resources>
-				<resources os="Windows" arch="amd64">
-					<jar href="joal-natives-windows-amd64.jar" />
-					<jar href="jogl-all-natives-windows-amd64.jar" />
-					<jar href="gluegen-rt-natives-windows-amd64.jar" />
-				</resources>
-				<resources os="Windows" arch="x86_64">
-					<jar href="joal-natives-windows-amd64.jar" />
-					<jar href="jogl-all-natives-windows-amd64.jar" />
-					<jar href="gluegen-rt-natives-windows-amd64.jar" />
 				</resources>
 				<application-desc main-class="${jfpsm-main-class}" />
 			</jnlp>
