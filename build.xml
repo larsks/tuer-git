@@ -54,7 +54,7 @@
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1/jar -->
-	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_771-joal_520-jogl_1217-jocl_923/jar" />
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_785-joal_531-jogl_1247-jocl_952/jar" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
@@ -102,6 +102,8 @@
 		<!-- updates the local files -->
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-amd64.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-armv6.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-armv6hf.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-linux-i586.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-macosx-universal.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-solaris-amd64.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
@@ -110,6 +112,8 @@
 		<get src="${jogamp-unsigned-jars-url}/gluegen-rt-natives-windows-i586.jar" dest="lib/gluegen-rt" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-armv6.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-armv6hf.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-linux-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-macosx-universal.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-solaris-amd64.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
@@ -118,6 +122,8 @@
 		<get src="${jogamp-unsigned-jars-url}/joal-natives-windows-i586.jar" dest="lib/joal" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-armv6.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-armv6hf.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-linux-i586.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-macosx-universal.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
 		<get src="${jogamp-unsigned-jars-url}/jogl-all-natives-solaris-amd64.jar" dest="lib/jogl" verbose="true" usetimestamp="true" skipexisting="false" />
@@ -169,6 +175,8 @@
 			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class" />
 			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
 			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-armv6.jar" includes="*.so" prefix="natives/linux-armv6" />
+			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-linux-armv6hf.jar" includes="*.so" prefix="natives/linux-armv6hf" />
 			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
 			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
 			<zipfileset src="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
@@ -177,6 +185,8 @@
 			<zipfileset src="lib/joal/joal.jar" includes="**/*.class" />
 			<zipfileset src="lib/joal/joal-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
 			<zipfileset src="lib/joal/joal-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/joal/joal-natives-linux-armv6.jar" includes="*.so" prefix="natives/linux-armv6" />
+			<zipfileset src="lib/joal/joal-natives-linux-armv6hf.jar" includes="*.so" prefix="natives/linux-armv6hf" />
 			<zipfileset src="lib/joal/joal-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
 			<zipfileset src="lib/joal/joal-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
 			<zipfileset src="lib/joal/joal-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
@@ -185,6 +195,8 @@
 			<zipfileset src="lib/jogl/jogl-all.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp" />
 			<zipfileset src="lib/jogl/jogl-all-natives-linux-i586.jar" includes="*.so" prefix="natives/linux-i586" />
 			<zipfileset src="lib/jogl/jogl-all-natives-linux-amd64.jar" includes="*.so" prefix="natives/linux-amd64" />
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-armv6.jar" includes="*.so" prefix="natives/linux-armv6" />
+			<zipfileset src="lib/jogl/jogl-all-natives-linux-armv6hf.jar" includes="*.so" prefix="natives/linux-armv6hf" />
 			<zipfileset src="lib/jogl/jogl-all-natives-macosx-universal.jar" includes="*.jnilib" prefix="natives/macosx-universal" />
 			<zipfileset src="lib/jogl/jogl-all-natives-solaris-i586.jar" includes="*.so" prefix="natives/solaris-i586" />
 			<zipfileset src="lib/jogl/jogl-all-natives-solaris-amd64.jar" includes="*.so" prefix="natives/solaris-amd64" />
