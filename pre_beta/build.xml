@@ -58,7 +58,9 @@
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
 	<property name="sftp-pfs-remotedir" value="/home/pfs/project/tuer/tuer/" />
-	<path id="project.lib.path">
+	<path id="project.class.path">
+		<!-- N.B: do not add java.class.path -->
+		<pathelement path="${bindir}"/>
 		<pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar"/>
@@ -75,34 +77,6 @@
 		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="lib/pss/LibraryJOAL.jar"/>
 		<pathelement location="lib/pss/SoundSystem.jar"/>
-	</path>
-	<path id="project.class.path">
-		<!-- N.B: do not add java.class.path -->
-		<pathelement path="${bindir}"/>
-		<path refid="project.lib.path"/>
-	</path>
-	<path id="jogamp.natives.path">
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-linux-amd64.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-linux-i586.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-solaris-amd64.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-solaris-i586.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-macosx-universal.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-windows-amd64.jar"/>
-		<pathelement location="lib/jogl/jogl-all-natives-windows-i586.jar"/>
-		<pathelement location="lib/joal/joal-natives-linux-amd64.jar"/>
-		<pathelement location="lib/joal/joal-natives-linux-i586.jar"/>
-		<pathelement location="lib/joal/joal-natives-solaris-amd64.jar"/>
-		<pathelement location="lib/joal/joal-natives-solaris-i586.jar"/>
-		<pathelement location="lib/joal/joal-natives-macosx-universal.jar"/>
-		<pathelement location="lib/joal/joal-natives-windows-amd64.jar"/>
-		<pathelement location="lib/joal/joal-natives-windows-i586.jar"/>
 	</path>
 	<target name="check-java-version" description="Checks the Java version">
 		<fail message="Please use Java SDK 1.7 or higher.">
