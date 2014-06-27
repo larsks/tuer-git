@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+
+import javax.media.nativewindow.util.SurfaceSize;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
+
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
@@ -59,6 +62,7 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
+
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.renderer.ReliableCanvasRenderer;
@@ -219,10 +223,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
         Display display=NewtFactory.createDisplay(null);
         Screen screen=NewtFactory.createScreen(display,0);
         screen.addReference();
-        final int screenWidth=screen.getWidth();
-        final int screenHeight=screen.getHeight();
         //FIXME is it really the main monitor?
-        final int bitDepth=screen.getMonitorDevices().get(0).queryCurrentMode().getSurfaceSize().getBitsPerPixel();
+        final SurfaceSize surfaceSize=screen.getMonitorDevices().get(0).queryCurrentMode().getSurfaceSize();
+        final int mainMonitorWidth=surfaceSize.getResolution().getWidth();
+        final int mainMonitorHeight=surfaceSize.getResolution().getHeight();
+        final int bitDepth=surfaceSize.getBitsPerPixel();
         screen.removeReference();
         
         //initializes the settings, the full-screen mode is enabled
@@ -231,7 +236,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
          * slow software renderer with a bad support of OpenGL
          */
         final int depthBits=24;
-        final DisplaySettings settings=new DisplaySettings(screenWidth,screenHeight,bitDepth,0,0,depthBits,0,0,true,false);
+        final DisplaySettings settings=new DisplaySettings(mainMonitorWidth,mainMonitorHeight,bitDepth,0,0,depthBits,0,0,true,false);
         //setups the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new ReliableCanvasRenderer(this);
         //creates a canvas      
