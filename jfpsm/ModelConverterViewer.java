@@ -378,6 +378,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			    	     throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
 			     }
 			     publish("Loading successful");
+			     //FIXME call dialog.setValue(50) on the EDT
 			     switch(outputModelFileFormat)
 			     {
 			         case ARDOR3D_BINARY:
@@ -399,6 +400,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
 			     }
 			     publish("Conversion successful");
+			     //FIXME call dialog.setValue(100) on the EDT
 			     return(convertible);
 			}
 			catch(Exception e)
@@ -409,6 +411,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			         done();
 			     }
 			 });
+			 //FIXME the exception shouldn't be rethrown here because the SwingWorker just silently stops itself without reporting anything
 			 throw e;
 			}
 		}
@@ -421,7 +424,6 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
     			 builder.append(" ");
     			}
     		dialog.setText(builder.toString().trim());
-    		dialog.setValue(100);
 		}
 		
 		@Override
