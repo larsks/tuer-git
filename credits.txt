@@ -24,5 +24,5 @@ Markus Borbély (artist who drew the rocket launcher under Creative Commons BY-N
 Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons BY-NC-SA)
 YummyPepsi (artist of DeviantART who created the texture of the asphalt under Creative Commons BY-NC-SA)
 
-Java is a registered trademark of Oracle and/or its affiliates. Truly Unusual Experience of Revolution is a trademark of Julien Gouesse.
+Java is a registered trademark of Oracle and/or its affiliates. Truly Unusual Experience of Revolution is a registered trademark of Julien Gouesse.
 Other names may be trademarks of their respective owners.
