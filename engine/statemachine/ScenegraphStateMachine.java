@@ -70,10 +70,26 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
      * */    
     private final SoundManager soundManager;
     
+    /**
+     * Constructor
+     * 
+     * @param parent
+     * @param canvas
+     * @param physicalLayer
+     * @param mouseManager
+     * @param toggleScreenModeAction
+     * @param launchRunnable
+     * @param uninstallRunnable
+     * @param gameShortName
+     * @param gameFullName
+     * @param creditsContent
+     * @param defaultActionMap
+     * @param defaultMouseAndKeyboardSettings
+     */
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
             final TriggerAction toggleScreenModeAction,final Runnable launchRunnable,
-            final Runnable uninstallRunnable,final String creditsContent,
+            final Runnable uninstallRunnable,final String gameShortName,final String gameFullName,final String creditsContent,
             final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings){
         super(ScenegraphState.class,String.class,new ScenegraphState());
         fontStore=new FontStore();
@@ -189,8 +205,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
         final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,soundManager,fontStore);
         final InitializationState initializationState=new InitializationState(canvas,physicalLayer,initializationToExitGameTriggerAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
-        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,introductionToExitGameTriggerAction,introductionToMainMenuTriggerAction,soundManager,fontStore);
-        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,mainMenuToExitGameTriggerAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
+        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,introductionToExitGameTriggerAction,introductionToMainMenuTriggerAction,soundManager,fontStore,gameShortName);
+        final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,mainMenuToExitGameTriggerAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,gameFullName,creditsContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,gameToGameOverTriggerAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,loadingDisplayToGameTriggerAction,loadingDisplayToUnloadingDisplayTriggerAction,soundManager,taskManager,new StateInitializationRunnable<>(gameState),fontStore);
         final PauseMenuState pauseMenuState=new PauseMenuState(canvas,physicalLayer,mouseManager,pauseMenuToGameTriggerAction,pauseMenuToGameOverTriggerAction,pauseMenuToUnloadingDisplayTriggerAction,soundManager,fontStore);

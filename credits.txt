@@ -4,7 +4,7 @@ pre-beta version
 Single player first person shooter 
 created by Julien Gouesse (engineer in computer science specialized in 3D Java visualization)
 
-project whose source code is under GPL V2 and whose artworks are under Creative Commons BY-NC-SA (free for non commercial purposes)
+project whose source code is under GPL V2 and whose artworks are under Creative Commons BY-NC-SA 4.0 (free for non commercial purposes)
 
 requires OpenGL 1.3 and Java Runtime Environment 1.7
 
@@ -24,5 +24,5 @@ Markus Borbély (artist who drew the rocket launcher under Creative Commons BY-N
 Sergenious (artist of freesound.org who created the noise of the teleporter under Creative Commons BY-NC-SA)
 YummyPepsi (artist of DeviantART who created the texture of the asphalt under Creative Commons BY-NC-SA)
 
-Java is a registered trademark of Oracle and/or its affiliates. Truly Unusual Experience of Revolution is a registered trademark of Julien Gouesse.
-Other names may be trademarks of their respective owners.
+Java is a registered trademark of Oracle and/or its affiliates. Truly Unusual Experience of Revolution is Julien Gouesse's registered trademark. 
+JFPSM is Julien Gouesse's trademark. Other names may be trademarks of their respective owners.

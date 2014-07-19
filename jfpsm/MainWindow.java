@@ -42,6 +42,15 @@ import javax.swing.WindowConstants;
  * @author Julien Gouesse
  */
 public final class MainWindow{
+	
+	/**short name of the editor (which should be modified in order to avoid any trademark infringement)*/
+	private static final String EDITOR_SHORT_NAME="JFPSM";
+	
+	/**full name of the editor*/
+	private static final String EDITOR_FULL_NAME="Java First Person Shooter Maker";
+	
+	/**editor title used in the main application frame*/
+	private static final String EDITOR_TITLE=EDITOR_SHORT_NAME+": "+EDITOR_FULL_NAME;
     
     private JFrame applicativeFrame;
     
@@ -57,7 +66,7 @@ public final class MainWindow{
      */
     public MainWindow(JFrame applicativeFrame){
     	this.applicativeFrame=applicativeFrame;
-    	applicativeFrame.setTitle("JFPSM: Java First Person Shooter Maker");
+    	applicativeFrame.setTitle(EDITOR_TITLE);
         //forces the use of English in the whole application
         JComponent.setDefaultLocale(Locale.ENGLISH);
         UIManager.getDefaults().setDefaultLocale(Locale.ENGLISH);

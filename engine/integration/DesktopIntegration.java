@@ -367,10 +367,6 @@ public final class DesktopIntegration {
 	public static final OS getOperatingSystem() {
 	    return instance.operatingSystem;
 	}
-
-	public static final void main(String[] args){
-		createLaunchDesktopShortcut("TUER","tuer");
-	}
 	
 	
 	private static class StreamReader extends Thread {

@@ -72,7 +72,7 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
                 	       final Method showMessageDialogMethod=jOptionPaneClass.getMethod("showMessageDialog",componentClass,Object.class,String.class,int.class);
                 	       //prevents the use of this crap, recommends to the end user to install a proper OpenGL driver
                 	       showMessageDialogMethod.invoke(null,null,
-               				    "TUER cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
+               				    "The game cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
             				    "OpenGL driver error",0);
 					      }
                 	   catch(ClassNotFoundException cnfe)

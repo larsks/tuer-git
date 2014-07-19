@@ -76,6 +76,15 @@ import engine.statemachine.ScenegraphStateMachine;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 
+	/**short name of the game*/
+	private static final String GAME_SHORT_NAME="TUER";
+	
+	/**full name of the game (which should be modified in order to avoid any trademark infringement)*/
+	private static final String GAME_FULL_NAME="Truly Unusual Experience of Revolution";
+	
+	/**game title, visible only in windowed mode*/
+	private static final String GAME_TITLE=GAME_SHORT_NAME+": "+GAME_FULL_NAME;
+	
     /**native window, not the GL surface itself*/
     private final NativeCanvas canvas;
     
@@ -278,7 +287,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
      * Initializes our scene.
      */
     private final void init(){
-        canvas.setTitle("Truly Unusual Experience of Revolution");
+        canvas.setTitle(GAME_TITLE);
         //refreshes the frustum when the window is resized
         ((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter(){
 			@Override
@@ -318,7 +327,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final LaunchDesktopShortcutCreationRunnable launchRunnable;
         final UninstallDesktopShortcutCreationRunnable uninstallRunnable;
         if(DesktopIntegration.isDesktopShortcutCreationSupported()&&!DesktopIntegration.useJNLP())
-            {launchRunnable=new LaunchDesktopShortcutCreationRunnable("TUER","tuer");
+            {launchRunnable=/*new LaunchDesktopShortcutCreationRunnable("????","????")*/null;
              uninstallRunnable=null;
             }
         else
@@ -327,7 +336,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         final String creditsContent=getTextFileContent("/credits.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,creditsContent,null,null);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,GAME_SHORT_NAME,GAME_FULL_NAME,creditsContent,null,null);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
