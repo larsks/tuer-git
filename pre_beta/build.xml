@@ -19,8 +19,8 @@
  -->
 
 <!-- ===================================================================== -->
-<!-- TUER                                                                  -->
-<!-- Ant 1.8 build file                                                    -->
+<!-- First person shooter and editor                                       -->
+<!-- Ant 1.9 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="TUER" default="build" basedir="." xmlns:redline="antlib:org.redline_rpm">
@@ -46,11 +46,12 @@
 	<property name="tuer-jar-filename" value="tuer.jar" />
 	<property name="tuer-zip-filename" value="tuer.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
-	<property name="jfpsm-application-name" value="Java First Person Shooter Maker"/>
-	<property name="jfpsm-main-class" value="connection.JFPSMServiceProvider"/>
-	<property name="jfpsm-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
-	<property name="jfpsm-jnlp-filename" value="jfpsm.jnlp" />
-	<property name="jfpsm-jar-filename" value="jfpsm.jar" />
+	<property name="editor-application-name" value="Java First Person Shooter Maker"/>
+	<property name="editor-short-application-name" value="JFPSM"/>
+	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
+	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
+	<property name="editor-jnlp-filename" value="jfpsm.jnlp" />
+	<property name="editor-jar-filename" value="jfpsm.jar" />
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1/jar -->
@@ -169,7 +170,7 @@
 	<!-- Create JARs                                                       -->
 	<!-- ================================================================= -->
 	<target name="create-jars">
-		<jar destfile="${destdir}/${jfpsm-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- Gluegen, JOAL and JOGL -->
 			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class" />
@@ -224,9 +225,9 @@
 			<exclude name="**/build.xml" />
 			<exclude name="**/*.py" />
 			<manifest>
-				<attribute name="Application-Name" value="${jfpsm-application-name}" />
-				<attribute name="Main-Class" value="${jfpsm-main-class}" />
-				<attribute name="SplashScreen-Image" value="${jfpsm-splashscreen-image}" />
+				<attribute name="Application-Name" value="${editor-application-name}" />
+				<attribute name="Main-Class" value="${editor-main-class}" />
+				<attribute name="SplashScreen-Image" value="${editor-splashscreen-image}" />
 				<attribute name="Trusted-Only" value="true" />
 				<attribute name="Trusted-Library" value="false" />
 				<attribute name="Permissions" value="all-permissions"/>
@@ -282,7 +283,7 @@
 			<include name="**/controls.txt" />
 			<include name="**/credits.txt" />
 			<include name="**/sounds/*.ogg" />
-			<!-- TUER does not need JFPSM classes -->
+			<!-- the game does not need the classes of the editor -->
 			<exclude name="**/jfpsm/*.class" />
 			<exclude name="**/connection/*.class" />
 			<!-- the collada models -->
@@ -327,7 +328,7 @@
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 			<path>
 			    <pathelement location="${destdir}/${tuer-jar-filename}"/>
-			    <pathelement location="${destdir}/${jfpsm-jar-filename}"/>
+			    <pathelement location="${destdir}/${editor-jar-filename}"/>
 		    </path>
 		</signjar>
 		<!-- deletes the keystore if any -->
@@ -372,15 +373,15 @@
 			</jnlp>
 			]]>
 		</echo>
-		<echo file="${destdir}/${jfpsm-jnlp-filename}">
+		<echo file="${destdir}/${editor-jnlp-filename}">
 			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
-			<jnlp spec="1.0+" codebase="${codebase-url}" href="${jfpsm-jnlp-filename}">
+			<jnlp spec="1.0+" codebase="${codebase-url}" href="${editor-jnlp-filename}">
 				<information>
-					<title>${jfpsm-application-name}</title>
+					<title>${editor-application-name}</title>
 					<vendor>${vendor}</vendor>
 					<homepage href="${homepage-url}"/>
-					<description>Java First Person Shooter Maker</description>
-					<description kind="short">JFPSM</description>
+					<description>${editor-application-name}</description>
+					<description kind="short">${editor-short-application-name}</description>
 					<offline-allowed/>
 				</information>
 				<security>
@@ -395,9 +396,9 @@
 					<property name="sun.java2d.opengl" value="false"/>
 					<property name="java.ext.dirs" value="" />
 					<property name="sun.awt.noerasebackground" value="true"/>
-					<jar href="${jfpsm-jar-filename}" download="eager" main="true"/>
+					<jar href="${editor-jar-filename}" download="eager" main="true"/>
 				</resources>
-				<application-desc main-class="${jfpsm-main-class}" />
+				<application-desc main-class="${editor-main-class}" />
 			</jnlp>
 			]]>
 		</echo>
@@ -451,8 +452,8 @@
 	<!-- =================================================================== -->
 	<!-- Run Targets                                                         -->
 	<!-- =================================================================== -->
-	<target name="run-jfpsm" description="Runs JFPSM">
-		<java classname="${jfpsm-main-class}"
+	<target name="run-editor" description="Runs the editor">
+		<java classname="${editor-main-class}"
 			  fork="true"
 			  dir="${bindir}"
 			  failonerror="true">

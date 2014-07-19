@@ -62,7 +62,7 @@ import com.ardor3d.util.resource.URLResourceSource;
  */
 public class ObjToArdorConverter{
 	
-	//FIXME code duplication, already used in JFPSM
+	//FIXME code duplication, already used in the editor
 	private static final class DirectBinaryExporter extends BinaryExporter{
         @Override
 		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
