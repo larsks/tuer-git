@@ -69,7 +69,9 @@ import engine.renderer.ReliableCanvasRenderer;
 import engine.statemachine.ScenegraphStateMachine;
 
 /**
- * General entry point of an application created by JFPSM
+ * General entry point of a game created by the editor
+ * 
+ * @author Julien Gouesse
  * 
  */
 public final class Ardor3DGameServiceProvider implements Scene{
