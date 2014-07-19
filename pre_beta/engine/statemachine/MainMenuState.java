@@ -43,6 +43,7 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
+
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
 import engine.input.ActionMap;
@@ -111,6 +112,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param soundManager sound manager
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
+     * @param gameFullName full name of the game
      * @param creditsContent credits content (may be null)
      * @param fontStore store that contains fonts
      * @param toggleScreenModeAction action allowing to modify the windowing mode
@@ -123,7 +125,7 @@ public final class MainMenuState extends ScenegraphState{
                   final MouseManager mouseManager,
                   final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
-                  final Runnable uninstallRunnable,final String creditsContent,
+                  final Runnable uninstallRunnable,final String gameFullName,final String creditsContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
       			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
       			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
@@ -165,7 +167,7 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final BMText textNode=new BMText("gameTitleNode","Truly Unusual Experience of Revolution",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gameTitleNode",gameFullName,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));

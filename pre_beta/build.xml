@@ -23,30 +23,36 @@
 <!-- Ant 1.9 build file                                                    -->
 <!-- ===================================================================== -->
 
-<project name="TUER" default="build" basedir="." xmlns:redline="antlib:org.redline_rpm">
+<project name="First person shooter and editor" default="build" basedir="." xmlns:redline="antlib:org.redline_rpm">
 	<!-- external tasks -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.15.jar"/>
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
+	<!-- Branding properties (brands, logos) -->
+	<property file="branding.properties"/>
 	<!-- Properties -->
 	<property name="bindir" value="."/>
 	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="."/>
-	<property name="homepage-url" value="http://tuer.sourceforge.net" />
+	<property name="project_unix_name" value="tuer"/>
+	<property name="homepage-url" value="http://${project_unix_name}.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<property name="tuer-application-name" value="Truly Unusual Experience of Revolution"/>
-	<property name="tuer-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
-	<property name="tuer-jnlp-filename" value="tuer.jnlp" />
-	<property name="tuer-jar-filename" value="tuer.jar" />
-	<property name="tuer-zip-filename" value="tuer.zip" />
+	<!-- full name of the game (which should be modified in order to avoid any trademark infringement) -->
+	<property name="game-application-name" value="Truly Unusual Experience of Revolution"/>
+	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
+	<property name="game-jnlp-filename" value="${project_unix_name}.jnlp" />
+	<property name="game-jar-filename" value="${project_unix_name}.jar" />
+	<property name="game-zip-filename" value="${project_unix_name}.zip" />
+	<property name="game-logo-filename" value="${project_unix_name}Logo.png"/>
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-application-name" value="Java First Person Shooter Maker"/>
+	<!-- short name of the editor (which should be modified in order to avoid any trademark infringement) -->
 	<property name="editor-short-application-name" value="JFPSM"/>
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -60,10 +66,10 @@
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
 	<property name="sftp-server" value="web.sourceforge.net" />
-	<property name="sftp-remotedir" value="/home/project-web/tuer/htdocs/very_experimental" />
+	<property name="sftp-remotedir" value="/home/project-web/${project_unix_name}/htdocs/very_experimental" />
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
-	<property name="sftp-pfs-remotedir" value="/home/pfs/project/tuer/tuer/" />
+	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project_unix_name}/${project_unix_name}/" />
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
@@ -154,7 +160,7 @@
 		<!-- Creates the destination directory -->
 		<mkdir dir="${destdir}"/>
 		<!-- Copies the logo into it -->
-		<copy file="images/tuerLogo.png" todir="${destdir}" overwrite="true" />
+		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
 		<!-- Signs them -->
@@ -234,7 +240,7 @@
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${destdir}/${tuer-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+		<jar destfile="${destdir}/${game-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- Gluegen, JOAL and JOGL -->
 			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class"/>
@@ -296,8 +302,8 @@
 			<!-- miscellaneous libraries -->
 			<exclude name="**/lib/**" />
 			<manifest>
-				<attribute name="Application-Name" value="${tuer-application-name}"/>
-				<attribute name="Main-Class" value="${tuer-main-class}"/>
+				<attribute name="Application-Name" value="${game-application-name}"/>
+				<attribute name="Main-Class" value="${game-main-class}"/>
 				<attribute name="Trusted-Only" value="true"/>
 				<attribute name="Trusted-Library" value="false"/>
 				<attribute name="Permissions" value="all-permissions"/>
@@ -327,7 +333,7 @@
 		<!-- uses this keystore to sign the JARs -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 			<path>
-			    <pathelement location="${destdir}/${tuer-jar-filename}"/>
+			    <pathelement location="${destdir}/${game-jar-filename}"/>
 			    <pathelement location="${destdir}/${editor-jar-filename}"/>
 		    </path>
 		</signjar>
@@ -339,18 +345,18 @@
 	<!-- ================================================================= -->
 	<target name="create-jnlp-files">
 		<!-- generate the JNLP files used by Java Web Start -->
-		<echo file="${destdir}/${tuer-jnlp-filename}">
+		<echo file="${destdir}/${game-jnlp-filename}">
 			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
-			<jnlp spec="1.0+" codebase="${codebase-url}" href="${tuer-jnlp-filename}">
+			<jnlp spec="1.0+" codebase="${codebase-url}" href="${game-jnlp-filename}">
 				<information>
-					<title>${tuer-application-name}</title>
+					<title>${game-application-name}</title>
 					<vendor>${vendor}</vendor>
 					<homepage href="${homepage-url}"/>
 					<description>Small Quake-like written in Java + JOGL</description>
 					<description kind="short">kill them all!!</description>
-					<icon kind="default" href="tuerLogo.png"/>
-					<icon kind="splash" href="tuerLogo.png"/>
-					<icon kind="shortcut" href="tuerLogo.png"/>
+					<icon kind="default" href="${game-logo-filename}"/>
+					<icon kind="splash" href="${game-logo-filename}"/>
+					<icon kind="shortcut" href="${game-logo-filename}"/>
 					<shortcut online="false" install="true">
 						<desktop/>
 					</shortcut>
@@ -367,9 +373,9 @@
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
 					<property name="java.ext.dirs" value="" />
-					<jar href="${tuer-jar-filename}" download="eager" main="true"/>
+					<jar href="${game-jar-filename}" download="eager" main="true"/>
 				</resources>
-				<application-desc main-class="${tuer-main-class}" />
+				<application-desc main-class="${game-main-class}" />
 			</jnlp>
 			]]>
 		</echo>
@@ -407,9 +413,9 @@
 	<!-- Create archive                                                    -->
 	<!-- ================================================================= -->
 	<target name="create-archive">
-		<delete file="${destdir}/${tuer-zip-filename}" failonerror="false" />
+		<delete file="${destdir}/${game-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
-		<zip destfile="${destdir}/${tuer-zip-filename}">
+		<zip destfile="${destdir}/${game-zip-filename}">
 			<fileset dir="." excludes="**/*.class,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
 		</zip>
 	</target>
@@ -417,7 +423,7 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
-		<!--<redline:rpm group="Games" name="tuer" version="0" destination="${destdir}">
+		<!--<redline:rpm group="Games" name="${project_unix_name}" version="0" destination="${destdir}">
 		    
 		</redline:rpm>-->
 	</target>
@@ -433,11 +439,11 @@
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the archive onto the SFTP server in the Project file release -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-			<fileset file="${destdir}/${tuer-zip-filename}" />
+			<fileset file="${destdir}/${game-zip-filename}" />
 		</scp>
 		<!-- Uploads the files onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-			<fileset dir="${destdir}" includes="**/*" excludes="${tuer-zip-filename}" />
+			<fileset dir="${destdir}" includes="**/*" excludes="${game-zip-filename}" />
 		</scp>
 	</target>
 	<!-- ================================================================= -->
@@ -464,8 +470,8 @@
 			<jvmarg value="-Djava.ext.dirs="/>
 		</java>
 	</target>
-	<target name="run-tuer" description="Runs TUER">
-		<java classname="${tuer-main-class}"
+	<target name="run-game" description="Runs the game">
+		<java classname="${game-main-class}"
 			  fork="true"
 			  dir="${bindir}"
 			  failonerror="true">
