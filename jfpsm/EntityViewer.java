@@ -52,6 +52,18 @@ public class EntityViewer extends JPanel{
     private final ProjectManager projectManager;
     
     private final ToolManager toolManager;
+    
+    /**
+     * flag indicating whether to use a workaround for an OpenJDK bug: Graphics.drawLine() adds an unwanted extra pixel at the beginning of the line
+     */
+    private static final boolean drawlineBugWorkaroundEnabled;
+    
+    static{
+    	//detects whether the current JVM is OpenJDK: http://stackoverflow.com/a/18046921
+    	final boolean isOpenJDK=System.getProperty("java.runtime.name").contains("OpenJDK")||System.getProperty("java.vm.name").contains("OpenJDK");
+    	//enables the workaround only for OpenJDK as Oracle Java isn't concerned
+    	drawlineBugWorkaroundEnabled=isOpenJDK;
+    }
 
     
     public EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
@@ -166,6 +178,13 @@ public class EntityViewer extends JPanel{
     	return(success);
     }
     
+    /**
+     * Close button largely inspired of this Oracle's example: 
+     * http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabComponentsDemoProject/src/components/ButtonTabComponent.java
+     * 
+     * @author Julien Gouesse
+     *
+     */
     private static final class CloseButton extends JButton{
     	
     	private static final long serialVersionUID = 1L;
@@ -198,10 +217,13 @@ public class EntityViewer extends JPanel{
                 g2.setColor(Color.RED);
             else
             	g2.setColor(Color.BLACK);
-            //FIXME there is still a problem with the drawing of the crossed lines
-            final int delta=3;
-            g2.drawLine(delta,delta,getWidth()-delta-1,getHeight()-delta-1);
-            g2.drawLine(getWidth()-delta-1,delta,delta,getHeight()-delta-1);
+            final int delta=3,bias=drawlineBugWorkaroundEnabled?1:0;
+            /**
+             * <code>bias</code> is used as a workaround for an OpenJDK bug: Graphics.drawLine() adds an unwanted extra pixel at the beginning of 
+             * the line.
+             */
+            g2.drawLine(delta+bias,delta+bias,getWidth()-delta-1,getHeight()-delta-1);
+       	    g2.drawLine(getWidth()-delta-1-bias,delta+bias,delta,getHeight()-delta-1);
             g2.dispose();
         }
     }
