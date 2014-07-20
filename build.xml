@@ -224,7 +224,9 @@
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
 			<!-- the rest of the files (not within JARs) -->
-			<exclude name="**/gpl.txt" />
+			<include name="**/LICENSE.txt" />
+			<include name="**/NOTICE.txt" />
+			<include name="**/README.txt" />
 			<!-- the collada models are not yet used -->
 			<exclude name="**/dae/*" />
 			<!-- ANT file -->
@@ -286,8 +288,6 @@
 			<include name="**/*.png" />
 			<include name="**/*.jpg" />
 			<include name="**/*.fnt" />
-			<include name="**/controls.txt" />
-			<include name="**/credits.txt" />
 			<include name="**/sounds/*.ogg" />
 			<!-- the game does not need the classes of the editor -->
 			<exclude name="**/jfpsm/*.class" />
@@ -295,7 +295,9 @@
 			<!-- the collada models -->
 			<!--<include name="**/dae/*.dae" />-->
 			<include name="**/abin/*.abin" />
-			<exclude name="**/gpl.txt" />
+			<include name="**/LICENSE.txt" />
+			<include name="**/NOTICE.txt" />
+			<include name="**/README.txt" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<exclude name="**/*.py" />

@@ -87,7 +87,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel profilePanel;
     
-    private final UIPanel creditsPanel;
+    private final UIPanel readmePanel;
     
     private final UIPanel storyModePanel;
     
@@ -113,7 +113,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
      * @param gameFullName full name of the game
-     * @param creditsContent credits content (may be null)
+     * @param readmeContent "read me" content (may be null)
      * @param fontStore store that contains fonts
      * @param toggleScreenModeAction action allowing to modify the windowing mode
      * @param defaultActionMap default action map, which should not be modified, used to reset the custom action map to its default value
@@ -125,7 +125,7 @@ public final class MainMenuState extends ScenegraphState{
                   final MouseManager mouseManager,
                   final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction,
                   final SoundManager soundManager,final Runnable launchRunnable,
-                  final Runnable uninstallRunnable,final String gameFullName,final String creditsContent,
+                  final Runnable uninstallRunnable,final String gameFullName,final String readmeContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
       			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
       			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
@@ -146,10 +146,10 @@ public final class MainMenuState extends ScenegraphState{
         else
         	controlsPanel=null;
         profilePanel=createProfilePanel();
-        if(creditsContent!=null)
-            creditsPanel=createCreditsPanel(creditsContent);
+        if(readmeContent!=null)
+            readmePanel=createReadmePanel(readmeContent);
         else
-        	creditsPanel=null;
+        	readmePanel=null;
         displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction);
         soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
@@ -553,18 +553,18 @@ public final class MainMenuState extends ScenegraphState{
             }
         else
         	profileButton=null;
-        final UIButton creditsButton;
-        if(creditsPanel!=null)
-            {creditsButton=new UIButton("Credits");
-             creditsButton.addActionListener(new ActionListener(){           
+        final UIButton readmeButton;
+        if(readmePanel!=null)
+            {readmeButton=new UIButton("Read me");
+             readmeButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
-                     showPanelInMainFrame(creditsPanel);
+                     showPanelInMainFrame(readmePanel);
                  }
              });
             }
         else
-        	creditsButton=null;
+        	readmeButton=null;
         final UIButton backButton=new UIButton("Back");
         backButton.addActionListener(new ActionListener(){           
             @Override
@@ -582,8 +582,8 @@ public final class MainMenuState extends ScenegraphState{
             optionsMenuPanel.add(controlsButton);
         if(profileButton!=null)
         	optionsMenuPanel.add(profileButton);
-        if(creditsButton!=null)
-        	optionsMenuPanel.add(creditsButton);
+        if(readmeButton!=null)
+        	optionsMenuPanel.add(readmeButton);
         optionsMenuPanel.add(backButton);
     	return(optionsMenuPanel);
     }
@@ -735,23 +735,48 @@ public final class MainMenuState extends ScenegraphState{
     }
     
     /**
+     * Creates a panel that displays a text
      * 
-     * @param creditsContent credits content (cannot be null)
+     * @param textualContent text displaying in this panel
+     * @param backButtonActionListener listener used when pressing the "Back" button
      * @return
      */
-    private final UIPanel createCreditsPanel(final String creditsContent){
-    	final UILabel label=new UILabel(creditsContent);
+    private final UIPanel createTextualPanel(final String textualContent,final ActionListener backButtonActionListener){
+    	final UILabel label=new UILabel(textualContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
         final UIButton backButton=new UIButton("Back");
-        backButton.addActionListener(new ActionListener(){           
+        backButton.addActionListener(backButtonActionListener);
+        textualPanel.add(backButton);
+        return(textualPanel);
+    }
+    
+    /**
+     * Creates a panel that displays a text and goes back to the options menu panel when pressing the "Back" button
+     * 
+     * @param textualContent textualContent text displaying in this panel
+     * @return
+     */
+    private final UIPanel createTextualPanelWithBackButtonShowingOptionsMenuPanel(final String textualContent){
+    	final ActionListener backButtonActionListener=new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(optionsMenuPanel);
             }
-        });
-        textualPanel.add(backButton);
+        };
+        final UIPanel textualPanel=createTextualPanel(textualContent,backButtonActionListener);
         return(textualPanel);
+    }
+    
+    /**
+     * Creates a panel that displays the "read me" content
+     * 
+     * @param readmeContent "read me" content (cannot be null)
+     * @return
+     */
+    private final UIPanel createReadmePanel(final String readmeContent){
+        final UIPanel readmePanel=createTextualPanelWithBackButtonShowingOptionsMenuPanel(readmeContent);
+        return(readmePanel);
     }
     
     private final UIHud createHud(){
