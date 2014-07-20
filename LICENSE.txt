@@ -565,3 +565,7 @@ owner is strictly forbidden. Nevertheless, using the Unix name of this game
 ("tuer") to designate it is highly recommended.
 
 JFPSM is Julien Gouesse's trademark.
+
+Please replace all names in the file "branding.properties" by your own ones if 
+you want to make a fork or a mod of this project (not if you just want to 
+rebuild and redistribute it as is without modification)
