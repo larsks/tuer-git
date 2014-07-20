@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.util.Properties;
 
 import javax.media.nativewindow.util.SurfaceSize;
 import javax.media.opengl.GLAutoDrawable;
@@ -76,14 +77,20 @@ import engine.statemachine.ScenegraphStateMachine;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 
-	/**short name of the game*/
-	private static final String GAME_SHORT_NAME="TUER";
+	/**path of the branding property file*/
+	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
 	
-	/**full name of the game (which should be modified in order to avoid any trademark infringement)*/
-	private static final String GAME_FULL_NAME="Truly Unusual Experience of Revolution";
+	/**storage of branding properties*/
+	private static Properties BRANDING_PROPERTIES=null;
+	
+	/**short name of the game*/
+	private static final String GAME_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-short-name");
+	
+	/**full name of the game*/
+	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
 	
 	/**game title, visible only in windowed mode*/
-	private static final String GAME_TITLE=GAME_SHORT_NAME+": "+GAME_FULL_NAME;
+	private static final String GAME_TITLE=GAME_SHORT_NAME+": "+GAME_LONG_NAME;
 	
     /**native window, not the GL surface itself*/
     private final NativeCanvas canvas;
@@ -336,7 +343,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
         final String readmeContent=getTextFileContent("/README.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,GAME_SHORT_NAME,GAME_FULL_NAME,readmeContent,null,null);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,readmeContent,null,null);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
@@ -365,9 +372,27 @@ public final class Ardor3DGameServiceProvider implements Scene{
     }
     
     //TODO move this method into a separate class in order to avoid mixing scene services and file services
+    private static final String getPropertyValue(final String path,final String propertyKey){
+    	if(propertyKey==null)
+    	    throw new IllegalArgumentException("Cannot find a property whose key is null");
+    	if(BRANDING_PROPERTIES==null)
+    	    {BRANDING_PROPERTIES=new Properties();
+    	     try(InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
+    	    	 BRANDING_PROPERTIES.load(stream);
+    	     }
+    	     catch(IOException ioe)
+    	     {throw new RuntimeException("Failed in loading the property file "+path,ioe);}
+    	    }
+    	final String propertyValue=BRANDING_PROPERTIES.getProperty(propertyKey);
+    	if(propertyValue==null)
+    		throw new RuntimeException("Property "+propertyKey+" not found");
+    	return(propertyValue);
+    }
+    
+    //TODO move this method into a separate class in order to avoid mixing scene services and file services
     private final String getTextFileContent(final String path){
     	String result=null;
-    	try(InputStream stream=getClass().getResourceAsStream(path)){        
+    	try(InputStream stream=getClass().getResourceAsStream(path)){
             try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream))){
         	    String line;
                 StringBuilder textContent=new StringBuilder();
@@ -380,7 +405,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             }
     	} 
     	catch(IOException ioe)
-    	{ioe.printStackTrace();}
+    	{throw new RuntimeException("Failed in reading the file "+path,ioe);}
         return(result);
     }
 }

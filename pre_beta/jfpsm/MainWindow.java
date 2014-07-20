@@ -24,7 +24,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -35,6 +38,8 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import engine.service.Ardor3DGameServiceProvider;
+
 /**
  * main class of the application, it handles several components: the project manager and the viewer.
  * It contains the entry point of the program. 
@@ -43,14 +48,20 @@ import javax.swing.WindowConstants;
  */
 public final class MainWindow{
 	
-	/**short name of the editor (which should be modified in order to avoid any trademark infringement)*/
-	private static final String EDITOR_SHORT_NAME="JFPSM";
+	/**path of the branding property file*/
+	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
+	
+	/**storage of branding properties*/
+	private static Properties BRANDING_PROPERTIES=null;
+	
+	/**short name of the editor*/
+	private static final String EDITOR_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"editor-short-name");
 	
 	/**full name of the editor*/
-	private static final String EDITOR_FULL_NAME="Java First Person Shooter Maker";
+	private static final String EDITOR_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"editor-long-name");
 	
 	/**editor title used in the main application frame*/
-	private static final String EDITOR_TITLE=EDITOR_SHORT_NAME+": "+EDITOR_FULL_NAME;
+	private static final String EDITOR_TITLE=EDITOR_SHORT_NAME+": "+EDITOR_LONG_NAME;
     
     private JFrame applicativeFrame;
     
@@ -201,5 +212,23 @@ public final class MainWindow{
          //forces the exit
          mainWindow.quit(false);
         }
+    }
+    
+    //TODO move this method into a separate class in order to avoid mixing scene services and file services
+    private static final String getPropertyValue(final String path,final String propertyKey){
+    	if(propertyKey==null)
+    	    throw new IllegalArgumentException("Cannot find a property whose key is null");
+    	if(BRANDING_PROPERTIES==null)
+    	    {BRANDING_PROPERTIES=new Properties();
+    	     try(InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
+    	    	 BRANDING_PROPERTIES.load(stream);
+    	     }
+    	     catch(IOException ioe)
+    	     {throw new RuntimeException("Failed in loading the property file "+path,ioe);}
+    	    }
+    	final String propertyValue=BRANDING_PROPERTIES.getProperty(propertyKey);
+    	if(propertyValue==null)
+    		throw new RuntimeException("Property "+propertyKey+" not found");
+    	return(propertyValue);
     }
 }

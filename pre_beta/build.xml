@@ -29,31 +29,33 @@
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.15.jar"/>
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
-	<!-- Branding properties (brands, logos) -->
-	<property file="branding.properties"/>
+	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
+	<if>
+	    <available file="branding.properties" />
+		<then>
+		    <property file="branding.properties" />
+		</then>
+		<else>
+			<fail message="The branding property file is missing" />
+		</else>
+	</if>
 	<!-- Properties -->
 	<property name="bindir" value="."/>
 	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="."/>
-	<property name="project_unix_name" value="tuer"/>
-	<property name="homepage-url" value="http://${project_unix_name}.sourceforge.net" />
+	<property name="homepage-url" value="http://${project-unix-name}.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<!-- full name of the game (which should be modified in order to avoid any trademark infringement) -->
-	<property name="game-application-name" value="Truly Unusual Experience of Revolution"/>
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
-	<property name="game-jnlp-filename" value="${project_unix_name}.jnlp" />
-	<property name="game-jar-filename" value="${project_unix_name}.jar" />
-	<property name="game-zip-filename" value="${project_unix_name}.zip" />
-	<property name="game-logo-filename" value="${project_unix_name}Logo.png"/>
+	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
+	<property name="game-jar-filename" value="${project-unix-name}.jar" />
+	<property name="game-zip-filename" value="${project-unix-name}.zip" />
+	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
-	<property name="editor-application-name" value="Java First Person Shooter Maker"/>
-	<!-- short name of the editor (which should be modified in order to avoid any trademark infringement) -->
-	<property name="editor-short-application-name" value="JFPSM"/>
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
 	<property name="editor-jnlp-filename" value="jfpsm.jnlp" />
@@ -66,10 +68,10 @@
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
 	<property name="sftp-server" value="web.sourceforge.net" />
-	<property name="sftp-remotedir" value="/home/project-web/${project_unix_name}/htdocs/very_experimental" />
+	<property name="sftp-remotedir" value="/home/project-web/${project-unix-name}/htdocs/very_experimental" />
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
-	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project_unix_name}/${project_unix_name}/" />
+	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/" />
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
@@ -227,13 +229,14 @@
 			<include name="**/LICENSE.txt" />
 			<include name="**/NOTICE.txt" />
 			<include name="**/README.txt" />
+			<include name="**/branding.properties" />
 			<!-- the collada models are not yet used -->
 			<exclude name="**/dae/*" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<exclude name="**/*.py" />
 			<manifest>
-				<attribute name="Application-Name" value="${editor-application-name}" />
+				<attribute name="Application-Name" value="${editor-long-name}" />
 				<attribute name="Main-Class" value="${editor-main-class}" />
 				<attribute name="SplashScreen-Image" value="${editor-splashscreen-image}" />
 				<attribute name="Trusted-Only" value="true" />
@@ -298,13 +301,14 @@
 			<include name="**/LICENSE.txt" />
 			<include name="**/NOTICE.txt" />
 			<include name="**/README.txt" />
+			<include name="**/branding.properties" />
 			<!-- ANT file -->
 			<exclude name="**/build.xml" />
 			<exclude name="**/*.py" />
 			<!-- miscellaneous libraries -->
 			<exclude name="**/lib/**" />
 			<manifest>
-				<attribute name="Application-Name" value="${game-application-name}"/>
+				<attribute name="Application-Name" value="${game-long-name}"/>
 				<attribute name="Main-Class" value="${game-main-class}"/>
 				<attribute name="Trusted-Only" value="true"/>
 				<attribute name="Trusted-Library" value="false"/>
@@ -351,7 +355,7 @@
 			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
 			<jnlp spec="1.0+" codebase="${codebase-url}" href="${game-jnlp-filename}">
 				<information>
-					<title>${game-application-name}</title>
+					<title>${game-long-name}</title>
 					<vendor>${vendor}</vendor>
 					<homepage href="${homepage-url}"/>
 					<description>Small Quake-like written in Java + JOGL</description>
@@ -385,11 +389,11 @@
 			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
 			<jnlp spec="1.0+" codebase="${codebase-url}" href="${editor-jnlp-filename}">
 				<information>
-					<title>${editor-application-name}</title>
+					<title>${editor-long-name}</title>
 					<vendor>${vendor}</vendor>
 					<homepage href="${homepage-url}"/>
-					<description>${editor-application-name}</description>
-					<description kind="short">${editor-short-application-name}</description>
+					<description>${editor-long-name}</description>
+					<description kind="short">${editor-short-name}</description>
 					<offline-allowed/>
 				</information>
 				<security>
@@ -425,7 +429,7 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
-		<!--<redline:rpm group="Games" name="${project_unix_name}" version="0" destination="${destdir}">
+		<!--<redline:rpm group="Games" name="${project-unix-name}" version="0" destination="${destdir}">
 		    
 		</redline:rpm>-->
 	</target>
