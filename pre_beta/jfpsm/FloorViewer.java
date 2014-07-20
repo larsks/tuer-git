@@ -21,6 +21,12 @@ import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import javax.swing.JSplitPane;
 
+/**
+ * floor viewer
+ * 
+ * @author Julien Gouesse
+ *
+ */
 final class FloorViewer extends JFPSMProjectUserObjectViewer{
 
     

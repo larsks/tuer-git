@@ -334,9 +334,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
             {launchRunnable=null;
         	 uninstallRunnable=null;
             }
-        final String creditsContent=getTextFileContent("/credits.txt");
+        final String readmeContent=getTextFileContent("/README.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
-        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,GAME_SHORT_NAME,GAME_FULL_NAME,creditsContent,null,null);
+        scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,uninstallRunnable,GAME_SHORT_NAME,GAME_FULL_NAME,readmeContent,null,null);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
