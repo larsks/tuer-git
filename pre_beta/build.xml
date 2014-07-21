@@ -470,7 +470,7 @@
 			  dir="${bindir}"
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
-			<jvmarg value="-splash:${jfpsm-splashscreen-image}"/>
+			<jvmarg value="-splash:${editor-splashscreen-image}"/>
 			<jvmarg value="-Xmx512m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
 			<jvmarg value="-Djava.ext.dirs="/>
