@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -24,8 +25,11 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 /**
@@ -34,9 +38,11 @@ import javax.swing.SwingUtilities;
  * @author Julien Gouesse
  *
  */
-public class ImageViewer extends JScrollPane{
+public class ImageViewer extends JPanel{
 
 	private static final long serialVersionUID=1L;
+	
+	private final JScrollPane scrollPane;
 	
 	private boolean zoomEnabled;
 	
@@ -44,7 +50,9 @@ public class ImageViewer extends JScrollPane{
 	
 	public ImageViewer(final BufferedImage image){
 		super();
-		setViewportView(new DummyImagePanel(image));
+		setLayout(new BorderLayout());
+		this.scrollPane=new JScrollPane();
+		this.scrollPane.setViewportView(new DummyImagePanel(image));
 		final MouseAdapter mouseAdapter=new MouseAdapter(){
 			
 			@Override
@@ -67,6 +75,10 @@ public class ImageViewer extends JScrollPane{
 				ImageViewer.this.mouseReleased(me);
 			}
 		};
+		add(scrollPane,BorderLayout.CENTER);
+		final JToolBar toolBar=new JToolBar(JToolBar.VERTICAL);
+		toolBar.add(new JButton("Z"));
+		add(toolBar,BorderLayout.WEST);
 		addMouseListener(mouseAdapter);
 		addMouseMotionListener(mouseAdapter);
 	}
@@ -99,10 +111,10 @@ public class ImageViewer extends JScrollPane{
 		if(SwingUtilities.isRightMouseButton(me))
 	        {final int deltaX=me.getPoint().x-lastDragPoint.x;
 	         final int deltaY=me.getPoint().y-lastDragPoint.y;
-		     if(getHorizontalScrollBar().isVisible())
-			     getHorizontalScrollBar().setValue(getHorizontalScrollBar().getValue()+deltaX);
-		     if(getVerticalScrollBar().isVisible())
-			     getVerticalScrollBar().setValue(getVerticalScrollBar().getValue()+deltaY);
+		     if(scrollPane.getHorizontalScrollBar().isVisible())
+		    	 scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue()+deltaX);
+		     if(scrollPane.getVerticalScrollBar().isVisible())
+		    	 scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getValue()+deltaY);
 	         lastDragPoint=me.getPoint();
 	        }
 	}
