@@ -21,9 +21,13 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
@@ -77,10 +81,33 @@ public class ImageViewer extends JPanel{
 		};
 		add(scrollPane,BorderLayout.CENTER);
 		final JToolBar toolBar=new JToolBar(JToolBar.VERTICAL);
-		toolBar.add(new JButton("Z"));
+		final JButton normalModeButton=new JButton(" ");
+		normalModeButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				normalModeButtonActionPerformed(ae);
+			}
+		});
+		final JButton zoomModeButton=new JButton("Z");
+		zoomModeButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				zoomModeButtonActionPerformed(ae);
+			}
+		});
+		toolBar.add(normalModeButton);
+		toolBar.add(zoomModeButton);
 		add(toolBar,BorderLayout.WEST);
-		addMouseListener(mouseAdapter);
-		addMouseMotionListener(mouseAdapter);
+		this.scrollPane.addMouseListener(mouseAdapter);
+		this.scrollPane.addMouseMotionListener(mouseAdapter);
+	}
+	
+	private void normalModeButtonActionPerformed(ActionEvent ae){
+		setZoomEnabled(false);
+	}
+	
+	private void zoomModeButtonActionPerformed(ActionEvent ae){
+		setZoomEnabled(true);
 	}
 	
 	public void setZoomEnabled(final boolean zoomEnabled){
@@ -101,29 +128,40 @@ public class ImageViewer extends JPanel{
 	}
 	
 	private void mousePressed(MouseEvent me){
-		if(SwingUtilities.isRightMouseButton(me))
-		    {lastDragPoint=me.getPoint();
-		     setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-		    }
+		try{if(SwingUtilities.isRightMouseButton(me))
+		        setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+		    if(SwingUtilities.isLeftMouseButton(me)&&zoomEnabled)
+		    	setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		   }
+		finally
+		{lastDragPoint=me.getPoint();}
 	}
 	
 	private void mouseDragged(MouseEvent me){
-		if(SwingUtilities.isRightMouseButton(me))
-	        {final int deltaX=me.getPoint().x-lastDragPoint.x;
-	         final int deltaY=me.getPoint().y-lastDragPoint.y;
-		     if(scrollPane.getHorizontalScrollBar().isVisible())
-		    	 scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue()+deltaX);
-		     if(scrollPane.getVerticalScrollBar().isVisible())
-		    	 scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getValue()+deltaY);
-	         lastDragPoint=me.getPoint();
-	        }
+		try{if(SwingUtilities.isRightMouseButton(me))
+	            {final int deltaX=me.getPoint().x-lastDragPoint.x;
+	             final int deltaY=me.getPoint().y-lastDragPoint.y;
+		         if(scrollPane.getHorizontalScrollBar().isVisible())
+		    	     scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue()+deltaX);
+		         if(scrollPane.getVerticalScrollBar().isVisible())
+		    	     scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getValue()+deltaY);
+	            }
+		   }
+		finally
+		{lastDragPoint=me.getPoint();}
 	}
 	
 	private void mouseReleased(MouseEvent me){
-		if(SwingUtilities.isRightMouseButton(me))
-		    {lastDragPoint=null;
+		try{
+			
+		   }
+		finally
+		{lastDragPoint=null;
+		 if(zoomEnabled)
+			 setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		 else
 		     setCursor(Cursor.getDefaultCursor());
-		    }
+		}
 	}
 	
 	/**
@@ -135,16 +173,27 @@ public class ImageViewer extends JPanel{
 		
 		private final BufferedImage image;
 		
+		private AffineTransform transform;
+		
 		private DummyImagePanel(final BufferedImage image){
 			super();
 			this.image=image;
+			this.transform=new AffineTransform();
 			setPreferredSize(new Dimension(image.getWidth(),image.getHeight()));
+		}
+		
+		AffineTransform getTransform(){
+			return(transform);
+		}
+		
+		void setTransform(final AffineTransform transform){
+			this.transform=transform;
 		}
 		
 		@Override
 		protected void paintComponent(Graphics g){
 			super.paintComponent(g);
-			g.drawImage(image,0,0,null);
+			((Graphics2D)g).drawImage(image,transform,null);
 		}
 	}
 }
