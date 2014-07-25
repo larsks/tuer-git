@@ -50,6 +50,7 @@
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
+	<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
@@ -432,6 +433,28 @@
 		<!--<redline:rpm group="Games" name="${project-unix-name}" version="0" destination="${destdir}">
 		    
 		</redline:rpm>-->
+	</target>
+	<!-- ================================================================= -->
+	<!-- Create APP                                                        -->
+	<!-- ================================================================= -->
+	<target name="create-app">
+		<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
+			<jvmarg value="-Xmx256m"/>
+			<arg value="-platform"/>
+			<arg value="mac"/>
+		    <arg value="-executable"/>
+			<arg value="${game-short-name}"/>
+		    <arg value="-appjar"/>
+			<arg value="${destdir}/${game-jar-filename}"/>
+			<arg value="-mainclass"/>
+			<arg value="${game-main-class}"/>
+			<arg value="-outdir"/>
+			<arg value="${destdir}/${game-short-name}.app"/>
+			<arg value="-vmargs"/>
+			<arg value="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="/>
+			<arg value="-jdk"/>
+			<arg value="${openjdk-macosx-universal-build-url}"/>
+	    </java>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
