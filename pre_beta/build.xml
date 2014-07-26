@@ -56,6 +56,8 @@
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
+	<property name="game-app-dirname" value="${project-unix-name}.app" />
+	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -166,7 +168,9 @@
 		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
-		<!-- Signs them -->
+		<!-- Creates the zipped Mac OS X application bundle -->
+		<antcall target="create-app" />
+		<!-- Signs the JARs -->
 		<antcall target="sign-jars" />
 		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
 		<antcall target="create-jnlp-files" />
@@ -423,7 +427,7 @@
 		<delete file="${destdir}/${game-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
 		<zip destfile="${destdir}/${game-zip-filename}">
-			<fileset dir="." excludes="**/*.class,**/target/*.jar,**/target/*.jnlp,${keystore},**/*.py"/>
+			<fileset dir="." excludes="**/*.class,**/target/*,${keystore},**/*.py"/>
 		</zip>
 	</target>
 	<!-- ================================================================= -->
@@ -438,6 +442,7 @@
 	<!-- Create APP                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-app">
+		<!-- Creates the Mac OS X application bundle which is a directory -->
 		<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
 			<jvmarg value="-Xmx256m"/>
 			<arg value="-platform"/>
@@ -449,12 +454,21 @@
 			<arg value="-mainclass"/>
 			<arg value="${game-main-class}"/>
 			<arg value="-outdir"/>
-			<arg value="${destdir}/${game-short-name}.app"/>
+			<arg value="${destdir}/${game-app-dirname}"/>
 			<arg value="-vmargs"/>
 			<arg value="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="/>
 			<arg value="-jdk"/>
 			<arg value="${openjdk-macosx-universal-build-url}"/>
 	    </java>
+		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
+		<!-- (a PNG file can be converted into an icns file with http://iconverticons.com/ which uses http://icns.sourceforge.net/) -->
+		<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />
+		<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
+		<zip destfile="${destdir}/${game-app-zip-filename}">
+		    <zipfileset dir="${destdir}/${game-app-dirname}" prefix="${game-app-dirname}"/>
+		</zip>
+		<!-- Deletes the directory, only keeps the ZIP archive -->
+		<delete dir="${destdir}/${game-app-dirname}" failonerror="false" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
