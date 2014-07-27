@@ -31,9 +31,9 @@
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
-	    <available file="branding.properties" />
+		<available file="branding.properties" />
 		<then>
-		    <property file="branding.properties" />
+			<property file="branding.properties" />
 		</then>
 		<else>
 			<fail message="The branding property file is missing" />
@@ -52,6 +52,7 @@
 	<property name="keystore" value="${destdir}/key"/>
 	<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
+	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
@@ -344,9 +345,9 @@
 		<!-- uses this keystore to sign the JARs -->
 		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 			<path>
-			    <pathelement location="${destdir}/${game-jar-filename}"/>
-			    <pathelement location="${destdir}/${editor-jar-filename}"/>
-		    </path>
+				<pathelement location="${destdir}/${game-jar-filename}"/>
+				<pathelement location="${destdir}/${editor-jar-filename}"/>
+			</path>
 		</signjar>
 		<!-- deletes the keystore if any -->
 		<delete file="${keystore}" failonerror="false" />
@@ -441,31 +442,297 @@
 	<!-- ================================================================= -->
 	<!-- Create APP                                                        -->
 	<!-- ================================================================= -->
+	<macrodef name="packr">
+		<attribute name="platform" description="one of windows, linux32, linux64, mac"/>
+		<attribute name="executable" description="name of the native executable, without extension such as .exe"/>
+		<attribute name="appjar" description="file location of the JAR to package"/>
+		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names"/>
+		<attribute name="outdir" description="output directory"/>
+		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
+		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
+		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
+		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a package name"/>
+		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
+		<attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
+		<sequential>
+			<if>
+				<equals arg1="@{platform}" arg2="mac" />
+				<then>
+					<var name="contentstarget" value="@{outdir}/Contents/MacOS" />
+					<var name="resourcestarget" value="@{outdir}/Contents/Resources" />
+				</then>
+				<else>
+					<var name="contentstarget" value="@{outdir}" />
+					<var name="resourcestarget" value="@{outdir}" />
+				</else>
+			</if>
+			<if>
+				<equals arg1="@{antreimplementationenabled}" arg2="true" />
+				<then>
+					<fail message="Invalid platform, must be linux32, linux64, mac or windows">
+						<condition>
+							<not>
+								<or>
+									<equals arg1="@{platform}" arg2="linux32" />
+									<equals arg1="@{platform}" arg2="linux64" />
+									<equals arg1="@{platform}" arg2="mac" />
+									<equals arg1="@{platform}" arg2="windows" />
+								</or>
+							</not>
+						</condition>
+					</fail>
+					<!-- TODO add tons of checks -->
+					<if>
+						<available file="@{outdir}" />
+						<then>
+							<fail message="Output directory equals working directory, aborting">
+								<condition>
+									<equals arg1="@{outdir}" arg2="." />
+								</condition>
+							</fail>
+							<echo message="Output directory '@{outdir}' exists, deleting" />
+							<delete dir="@{outdir}" failonerror="false" />
+						</then>
+					</if>
+					<mkdir dir="@{outdir}" />
+					<if>
+						<equals arg1="@{platform}" arg2="mac" />
+						<then>
+							<if>
+								<equals arg1="@{iconsfile}" arg2="" />
+								<then>
+									<var name="iconsfile" value="icons.icns" />
+								</then>
+								<else>
+									<local name="iconsfilebasename" />
+									<basename property="iconsfilebasename" file="@{iconsfile}" />
+									<var name="iconsfile" value="${iconsfilebasename}" />
+								</else>
+							</if>
+							<mkdir dir="@{outdir}/Contents/Resources" />
+							<mkdir dir="@{outdir}/Contents/MacOS" />
+							<echo file="@{outdir}/Contents/Info.plist">
+								<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+								<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+								<plist version="1.0">
+									<dict>
+										<key>CFBundleGetInfoString</key>
+										<string>@{executable}</string>
+										<key>CFBundleExecutable</key>
+										<string>@{executable}</string>
+										<key>CFBundleIdentifier</key>
+										<string>@{bundleIdentifier}</string>
+										<key>CFBundleName</key>
+										<string>@{executable}</string>
+										<key>CFBundleIconFile</key>
+										<string>${iconsfile}</string>
+										<key>CFBundleShortVersionString</key>
+										<string>1.0</string>
+										<key>CFBundleInfoDictionaryVersion</key>
+										<string>6.0</string>
+										<key>CFBundlePackageType</key>
+										<string>APPL</string>
+										<key>IFMajorVersion</key>
+										<integer>0</integer>
+										<key>IFMinorVersion</key>
+										<integer>1</integer>
+									</dict>
+								</plist>
+			                   ]]>
+			                </echo>
+						</then>
+					</if>
+					<copy file="@{appjar}" todir="${contentstarget}" />
+					<local name="appjarbasename" />
+					<basename property="appjarbasename" file="@{appjar}" />
+					<var name="vmargsstring" value="" />
+					<!--<propertyregex property="vmargsstring" override="true" input="@{vmargs}" regexp=";" replace=",${line.separator}" defaultValue="" global="true" />-->
+					<for list="@{vmargs}" delimiter=";" param="vmarg">
+						<sequential>
+							<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;,${line.separator}" />
+						</sequential>
+					</for>
+					<echo file="${contentstarget}/config.json">
+						<![CDATA[{
+						   "jar": "${appjarbasename}",
+						   "mainClass": "@{mainclass}",
+						   "vmArgs": [
+						      ${vmargsstring}
+						   ]}
+					    ]]>
+					</echo>
+					<if>
+						<equals arg1="@{platform}" arg2="linux32" />
+						<then>
+							<var name="exesrcfilename" value="packr-linux" />
+							<var name="exedstfilename" value="@{executable}" />
+						</then>
+						<else>
+							<if>
+								<equals arg1="@{platform}" arg2="linux64" />
+								<then>
+									<var name="exesrcfilename" value="packr-linux-x64" />
+									<var name="exedstfilename" value="@{executable}" />
+								</then>
+								<else>
+									<if>
+										<equals arg1="@{platform}" arg2="mac" />
+										<then>
+											<var name="exesrcfilename" value="packr-mac" />
+											<var name="exedstfilename" value="@{executable}" />
+										</then>
+										<else>
+											<if>
+												<equals arg1="@{platform}" arg2="windows" />
+												<then>
+													<var name="exesrcfilename" value="packr-windows.exe" />
+													<var name="exedstfilename" value="@{executable}.exe" />
+												</then>
+												<else>
+													<fail message="Unsupported platform @{platform}" />
+												</else>
+											</if>
+										</else>
+									</if>
+								</else>
+							</if>
+						</else>
+					</if>
+					<unzip src="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" dest="${contentstarget}">
+						<patternset>
+							<include name="${exesrcfilename}"/>
+						</patternset>
+					</unzip>
+					<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
+					<chmod file="${contentstarget}/${exedstfilename}" perm="ugo+rx" />
+					<if>
+						<available file="@{jdk}" />
+						<then>
+							<var name="jdkFile" value="@{jdk}" />
+						</then>
+						<else>
+							<get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
+							<var name="jdkFile" value="${contentstarget}/jdk.zip" />
+						</else>
+					</if>
+					<mkdir dir="${contentstarget}/tmp" />
+					<!-- File permissions are lost when unzipping the archive -->
+					<unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
+					<mkdir dir="${contentstarget}/jre" />
+					<!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
+					<for param="dir">
+						<path>
+							<dirset dir="${contentstarget}/tmp/" />
+						</path>
+						<sequential>
+							<if>
+								<available file="@{dir}/jre/bin" />
+								<then>
+									<copy todir="${contentstarget}/jre" failonerror="true">
+										<fileset dir="@{dir}/jre" />
+									</copy>
+								</then>
+							</if>
+						</sequential>
+					</for>
+					<delete dir="${contentstarget}/tmp" failonerror="true" />
+					<delete file="${contentstarget}/jdk.zip" failonerror="true" />
+					<for list="@{resources}" delimiter=";" param="resource">
+						<sequential>
+							<copy file="@{resource}" todir="${contentstarget}" />
+						</sequential>
+					</for>
+					<if>
+						<not>
+							<equals arg1="@{minimizejre}" arg2="" />
+						</not>
+						<then>
+							<echo message="JRE minimization not implemented yet, 'minimizejre=@{minimizejre}' ignored" />
+						</then>
+					</if>
+				</then>
+				<else>
+					<if>
+						<equals arg1="@{minimizejre}" arg2="" />
+						<then>
+							<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
+								<arg value="-platform" />
+								<arg value="@{platform}" />
+								<arg value="-executable" />
+								<arg value="@{executable}" />
+								<arg value="-appjar" />
+								<arg value="@{appjar}" />
+								<arg value="-mainclass" />
+								<arg value="@{mainclass}" />
+								<arg value="-outdir" />
+								<arg value="@{outdir}" />
+								<arg value="-vmargs" />
+								<arg value="@{vmargs}" />
+								<arg value="-jdk" />
+								<arg value="@{jdk}" />
+								<arg value="-resources" />
+								<arg value="@{resources}" />
+							</java>
+						</then>
+						<else>
+							<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
+								<arg value="-platform" />
+								<arg value="@{platform}" />
+								<arg value="-executable" />
+								<arg value="@{executable}" />
+								<arg value="-appjar" />
+								<arg value="@{appjar}" />
+								<arg value="-mainclass" />
+								<arg value="@{mainclass}" />
+								<arg value="-outdir" />
+								<arg value="@{outdir}" />
+								<arg value="-vmargs" />
+								<arg value="@{vmargs}" />
+								<arg value="-jdk" />
+								<arg value="@{jdk}" />
+								<arg value="-resources" />
+								<arg value="@{resources}" />
+								<arg value="-minimizejre" />
+								<arg value="@{minimizejre}" />
+							</java>
+						</else>
+					</if>
+					<!-- TODO test this option -->
+					<!--<if>
+						<equals arg1="@{platform}" arg2="mac" />
+						<then>
+							<replace file="@{outdir}/Contents/Info.plist" token="@{bundleIdentifier}" value="@{bundleIdentifier}"/>
+						</then>
+					</if>-->
+				</else>
+			</if>
+			<if>
+				<available file="@{iconsfile}" />
+				<then>
+					<echo message="icons file '@{iconsfile}' exists, copying" />
+					<copy file="@{iconsfile}" todir="${resourcestarget}" />
+				</then>
+				<else>
+					<echo message="icons file '@{iconsfile}' not found, no icons file for the application bundle" />
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
 	<target name="create-app">
 		<!-- Creates the Mac OS X application bundle which is a directory -->
-		<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
-			<jvmarg value="-Xmx256m"/>
-			<arg value="-platform"/>
-			<arg value="mac"/>
-		    <arg value="-executable"/>
-			<arg value="${game-short-name}"/>
-		    <arg value="-appjar"/>
-			<arg value="${destdir}/${game-jar-filename}"/>
-			<arg value="-mainclass"/>
-			<arg value="${game-main-class}"/>
-			<arg value="-outdir"/>
-			<arg value="${destdir}/${game-app-dirname}"/>
-			<arg value="-vmargs"/>
-			<arg value="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="/>
-			<arg value="-jdk"/>
-			<arg value="${openjdk-macosx-universal-build-url}"/>
-	    </java>
+		<packr platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/icons.icns" antreimplementationenabled="true" />
 		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 		<!-- (a PNG file can be converted into an icns file with http://iconverticons.com/ which uses http://icns.sourceforge.net/) -->
-		<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />
+		<!--<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />-->
 		<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 		<zip destfile="${destdir}/${game-app-zip-filename}">
-		    <zipfileset dir="${destdir}/${game-app-dirname}" prefix="${game-app-dirname}"/>
+			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/Resources" prefix="${game-app-dirname}/Contents/Resources"/>
+			<zipfileset file="${destdir}/${game-app-dirname}/Contents/Info.plist" prefix="${game-app-dirname}/Contents/"/>
+			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/MacOS/jre" prefix="${game-app-dirname}/Contents/MacOS/jre"/>
+			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/config.json" prefix="${game-app-dirname}/Contents/MacOS/"/>
+			<zipfileset filemode="555" file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-short-name}" prefix="${game-app-dirname}/Contents/MacOS/"/>
+			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-jar-filename}" prefix="${game-app-dirname}/Contents/MacOS/"/>
 		</zip>
 		<!-- Deletes the directory, only keeps the ZIP archive -->
 		<delete dir="${destdir}/${game-app-dirname}" failonerror="false" />
