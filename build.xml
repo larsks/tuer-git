@@ -553,7 +553,6 @@
 							<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
 						</sequential>
 					</for>
-					<echo message="${vmargscount}" />
 					<var name="vmargindex" value="0" />
 					<math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
 					<for list="@{vmargs}" delimiter=";" param="vmarg">
@@ -568,7 +567,6 @@
 								</then>
 							</if>
 							<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int"/>
-							<echo message="${vmargindex}" />
 						</sequential>
 					</for>
 					<echo file="${contentstarget}/config.json">
