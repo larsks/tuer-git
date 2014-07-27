@@ -547,10 +547,28 @@
 					<local name="appjarbasename" />
 					<basename property="appjarbasename" file="@{appjar}" />
 					<var name="vmargsstring" value="" />
-					<!--<propertyregex property="vmargsstring" override="true" input="@{vmargs}" regexp=";" replace=",${line.separator}" defaultValue="" global="true" />-->
+					<var name="vmargscount" value="0" />
 					<for list="@{vmargs}" delimiter=";" param="vmarg">
 						<sequential>
-							<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;,${line.separator}" />
+							<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
+						</sequential>
+					</for>
+					<echo message="${vmargscount}" />
+					<var name="vmargindex" value="0" />
+					<math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
+					<for list="@{vmargs}" delimiter=";" param="vmarg">
+						<sequential>
+							<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;" />
+							<if>
+								<not>
+								    <equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
+								</not>
+								<then>
+								    <var name="vmargsstring" value="${vmargsstring},${line.separator}" />
+								</then>
+							</if>
+							<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int"/>
+							<echo message="${vmargindex}" />
 						</sequential>
 					</for>
 					<echo file="${contentstarget}/config.json">
