@@ -738,7 +738,7 @@ public final class ProjectManager extends EntityManager{
                       }
                  }
              //updates the display
-             mainWindow.getEntityViewer(). repaint();
+             mainWindow.getEntityViewer().repaint();
             }
     }
     
