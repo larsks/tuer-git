@@ -9,6 +9,7 @@ JogAmp's Ardor3D Continuation under libpng/zlib license
 Paul Lamb's 3D sound system under a custom open source license
 Fettle under MIT license
 OSM2World under LGPL
+Packr under Apache License version 2.0
 
 --------------------------------------------------------------------------------
 --------------------- Licenses of the third party contents ---------------------
