@@ -29,6 +29,7 @@
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.15.jar"/>
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
+	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
 		<available file="branding.properties" />
@@ -57,6 +58,7 @@
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
+	<property name="game-small-logo-filename" value="${project-unix-name}SmallLogo.png"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
@@ -736,8 +738,9 @@
 		</sequential>
 	</macrodef>
 	<target name="create-app">
+		<convertimage src="images/${game-small-logo-filename}" dst="${destdir}/icons.icns" />
 		<!-- Creates the Mac OS X application bundle which is a directory -->
-		<packr platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/icons.icns" antreimplementationenabled="true" />
+		<packr platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" antreimplementationenabled="true" />
 		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 		<!-- (a PNG file can be converted into an icns file with http://iconverticons.com/ which uses http://icns.sourceforge.net/) -->
 		<!--<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />-->
@@ -750,8 +753,9 @@
 			<zipfileset filemode="555" file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-short-name}" prefix="${game-app-dirname}/Contents/MacOS/"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-jar-filename}" prefix="${game-app-dirname}/Contents/MacOS/"/>
 		</zip>
-		<!-- Deletes the directory, only keeps the ZIP archive -->
-		<delete dir="${destdir}/${game-app-dirname}" failonerror="false" />
+		<!-- Deletes the directory and the icon(s) in proprietary format(s), only keeps the ZIP archive -->
+		<delete file="${destdir}/icons.icns" failonerror="true" />
+		<delete dir="${destdir}/${game-app-dirname}" failonerror="true" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
