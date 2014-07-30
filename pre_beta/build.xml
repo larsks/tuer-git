@@ -58,7 +58,6 @@
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
-	<property name="game-small-logo-filename" value="${project-unix-name}SmallLogo.png"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
@@ -738,7 +737,7 @@
 		</sequential>
 	</macrodef>
 	<target name="create-app">
-		<convertimage src="images/${game-small-logo-filename}" dst="${destdir}/icons.icns" />
+		<convertimage src="images/${game-logo-filename}" dst="${destdir}/icons.icns" sourceImageDuplicationAndRescaleEnabled="true" />
 		<!-- Creates the Mac OS X application bundle which is a directory -->
 		<packr platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" antreimplementationenabled="true" />
 		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
