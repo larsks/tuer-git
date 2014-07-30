@@ -56,14 +56,15 @@ public class EntityViewer extends JPanel{
     /**
      * flag indicating whether to use a workaround for an OpenJDK bug: Graphics.drawLine() adds an unwanted extra pixel at the beginning of the line
      */
-    private static final boolean drawlineBugWorkaroundEnabled;
+    private static final boolean drawlineBugWorkaroundEnabled=false;
     
-    static{
+    //the bug doesn't affect all OpenJDK builds
+    /*static{
     	//detects whether the current JVM is OpenJDK: http://stackoverflow.com/a/18046921
     	final boolean isOpenJDK=System.getProperty("java.runtime.name").contains("OpenJDK")||System.getProperty("java.vm.name").contains("OpenJDK");
     	//enables the workaround only for OpenJDK as Oracle Java isn't concerned
     	drawlineBugWorkaroundEnabled=isOpenJDK;
-    }
+    }*/
 
     
     public EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
