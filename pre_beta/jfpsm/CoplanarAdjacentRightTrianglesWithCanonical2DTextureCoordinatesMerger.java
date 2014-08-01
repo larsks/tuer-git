@@ -707,8 +707,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 				                    		      mergedAdjacentTrisVerticesIndices[5]=localIndex;
 				                    	 }
 			    			    	 //updates texture coordinates equal to 1
-			    			    	 u=(double)columnCount;
-			    			    	 v=(double)rowCount;
+			    			    	 u=columnCount;
+			    			    	 v=rowCount;
 			    			    	 for(int localIndex=0;localIndex<4;localIndex++)
 			    			    	     {if(mergedAdjacentTrisTextureCoords[localIndex].getX()==1)
 			    			    	    	  mergedAdjacentTrisTextureCoords[localIndex].setX(u);
