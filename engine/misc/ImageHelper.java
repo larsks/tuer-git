@@ -33,6 +33,7 @@ public class ImageHelper {
 		return(result.fromIntRGBA(rgba));
 	}
 	
+	@SuppressWarnings("cast")
 	public int getARGB(final Image img,final int x,final int y){
 		final ByteBuffer imgData=img.getData(0);
 		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());
@@ -72,6 +73,7 @@ public class ImageHelper {
 		return(argb);
 	}
 	
+	@SuppressWarnings("cast")
 	public int getRGBA(final Image img,final int x,final int y){
 		final ByteBuffer imgData=img.getData(0);
 		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());

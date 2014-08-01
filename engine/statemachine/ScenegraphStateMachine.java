@@ -18,6 +18,7 @@
 package engine.statemachine;
 
 import java.util.Collections;
+
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseButton;
@@ -27,6 +28,7 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
+
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.BasicConditions;
@@ -86,6 +88,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
      * @param defaultActionMap
      * @param defaultMouseAndKeyboardSettings
      */
+    @SuppressWarnings("cast")
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
             final TriggerAction toggleScreenModeAction,final Runnable launchRunnable,
@@ -183,7 +186,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final TransitionTriggerAction<ScenegraphState,String> introductionToMainMenuTriggerAction=new TransitionTriggerAction<>(internalStateMachine,introductionToMainMenuEvent,renderContext);
         final TransitionTriggerAction<ScenegraphState,String> mainMenuToLoadingDisplayTriggerAction=new TransitionTriggerAction<>(internalStateMachine,mainMenuToLoadingDisplayEvent,new Arguments(new int[]{-1}),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> loadingDisplayToGameTriggerAction=new TransitionTriggerAction<>(internalStateMachine,loadingDisplayToGameEvent,renderContext);      
-        final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerAction=new TransitionTriggerAction<>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.NO_PRESELECTED_MENU_ITEM,(Object)new GameStatistics[1]),renderContext);
+        
+		final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerAction=new TransitionTriggerAction<>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.NO_PRESELECTED_MENU_ITEM,(Object)new GameStatistics[1]),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> gameToPauseMenuTriggerActionForExitConfirm=new TransitionTriggerAction<>(internalStateMachine,gameToPauseMenuEvent,new Arguments(new int[]{-1,-1},PauseMenuStateEntryAction.EXIT_CONFIRM_TAG,(Object)new GameStatistics[1]),renderContext);
         final TransitionTriggerAction<ScenegraphState,String> pauseMenuToGameTriggerAction=new TransitionTriggerAction<>(internalStateMachine,pauseMenuToGameEvent,renderContext);
         //uses an argument of a transition to pass the figures to the game over state
