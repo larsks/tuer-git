@@ -171,7 +171,7 @@ public final class ControlsPanel extends UIPanel{
 	}
 	
 	protected double fromSliderModelToMouseRotationModel(final int value){
-		final double mouseRotationModelValue=((double)value)/1000.0d;
+		final double mouseRotationModelValue=value/1000.0d;
 		return(mouseRotationModelValue);
 	}
 	
@@ -187,7 +187,7 @@ public final class ControlsPanel extends UIPanel{
 	}
 	
 	protected double fromSliderModelToKeyRotationModel(final int value){
-		final double mouseRotationModelValue=((double)value)/10.0d;
+		final double mouseRotationModelValue=value/10.0d;
 		return(mouseRotationModelValue);
 	}
 	
