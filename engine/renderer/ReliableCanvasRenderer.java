@@ -19,14 +19,12 @@ package engine.renderer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import javax.media.opengl.GLProfile;
-
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.CapsUtil;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 import com.ardor3d.renderer.jogl.JoglRenderer;
+import com.jogamp.common.os.Platform;
 
 /**
  * Canvas renderer enhanced for higher frame rates especially 
@@ -65,7 +63,7 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
              //checks whether Microsoft’s generic software emulation driver (OpenGL emulation through Direct3D) is installed
         	 if(vendor!=null&&renderer!=null&&vendor.equalsIgnoreCase("Microsoft Corporation")&&
         		realCaps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
-                 {if(GLProfile.isAWTAvailable())
+                 {if(Platform.AWT_AVAILABLE)
                       {//uses Java Reflection to remove this dependency at runtime
                 	   try{final Class<?> jOptionPaneClass=Class.forName("javax.swing.JOptionPane");
                 	       final Class<?> componentClass=Class.forName("java.awt.Component");
