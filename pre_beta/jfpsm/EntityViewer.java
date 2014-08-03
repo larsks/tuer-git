@@ -56,15 +56,18 @@ public class EntityViewer extends JPanel{
     /**
      * flag indicating whether to use a workaround for an OpenJDK bug: Graphics.drawLine() adds an unwanted extra pixel at the beginning of the line
      */
-    private static final boolean drawlineBugWorkaroundEnabled=false;
+    private static final boolean drawlineBugWorkaroundEnabled;
     
-    //the bug doesn't affect all OpenJDK builds
-    /*static{
+    static{
     	//detects whether the current JVM is OpenJDK: http://stackoverflow.com/a/18046921
     	final boolean isOpenJDK=System.getProperty("java.runtime.name").contains("OpenJDK")||System.getProperty("java.vm.name").contains("OpenJDK");
-    	//enables the workaround only for OpenJDK as Oracle Java isn't concerned
-    	drawlineBugWorkaroundEnabled=isOpenJDK;
-    }*/
+    	//detects whether the current JVM runs under Mageia Linux 4
+    	final boolean isMageia4=System.getProperty("os.version").endsWith("mga4");
+    	//detects whether the current JVM is the update 60 or 65
+    	final boolean isUpdate60or65=System.getProperty("java.version").equals("1.7.0_60")||System.getProperty("java.version").equals("1.7.0_65");
+    	//enables the workaround only for OpenJDK 1.7 u60 or u65 under Mageia Linux
+    	drawlineBugWorkaroundEnabled=isOpenJDK&&isUpdate60or65&&isMageia4;
+    }
 
     
     public EntityViewer(final ProjectManager projectManager,final ToolManager toolManager){
@@ -219,10 +222,7 @@ public class EntityViewer extends JPanel{
             else
             	g2.setColor(Color.BLACK);
             final int delta=3,bias=drawlineBugWorkaroundEnabled?1:0;
-            /**
-             * <code>bias</code> is used as a workaround for an OpenJDK bug: Graphics.drawLine() adds an unwanted extra pixel at the beginning of 
-             * the line.
-             */
+            //bias is used as a workaround
             g2.drawLine(delta+bias,delta+bias,getWidth()-delta-1,getHeight()-delta-1);
        	    g2.drawLine(getWidth()-delta-1-bias,delta+bias,delta,getHeight()-delta-1);
             g2.dispose();
