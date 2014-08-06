@@ -385,6 +385,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
+			        <property name="sun.java2d.xrender" value="true"/>
 					<property name="java.ext.dirs" value="" />
 					<jar href="${game-jar-filename}" download="eager" main="true"/>
 				</resources>
@@ -413,6 +414,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
+			        <property name="sun.java2d.xrender" value="true"/>
 					<property name="java.ext.dirs" value="" />
 					<property name="sun.awt.noerasebackground" value="true"/>
 					<jar href="${editor-jar-filename}" download="eager" main="true"/>
