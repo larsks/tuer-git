@@ -65,10 +65,10 @@
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
 	<property name="editor-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="editor-jar-filename" value="jfpsm.jar" />
-	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_737-joal_492-jogl_1120-jocl_867/jar -->
+	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_813-joal_557-jogl_1322-jocl_995/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.1.1/jar -->
-	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_813-joal_557-jogl_1322-jocl_995/jar" />
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/v2.2.0/jar" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
