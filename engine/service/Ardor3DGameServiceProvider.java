@@ -17,11 +17,15 @@
  */
 package engine.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Properties;
 
 import javax.media.nativewindow.util.SurfaceSize;
@@ -391,21 +395,15 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     //TODO move this method into a separate class in order to avoid mixing scene services and file services
     private final String getTextFileContent(final String path){
-    	String result=null;
-    	try(InputStream stream=getClass().getResourceAsStream(path)){
-            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream))){
-        	    String line;
-                StringBuilder textContent=new StringBuilder();
-        	    try{while((line=bufferedReader.readLine())!=null)
-                        textContent.append(line+"\n");
-                }
-                catch(IOException ioe)
-                {ioe.printStackTrace();}
-        	    result=textContent.toString();
-            }
-    	} 
-    	catch(IOException ioe)
-    	{throw new RuntimeException("Failed in reading the file "+path,ioe);}
-        return(result);
+        try{final URL url=getClass().getResource(path);
+            final Path pathObj=Paths.get(url.toURI());
+            final List<String> lines=Files.readAllLines(pathObj,Charset.forName("UTF-8"));
+            final StringBuilder textContent=new StringBuilder();
+            for(String line:lines)
+            	textContent.append(line+"\n");
+            return(textContent.toString());
+           }
+        catch(URISyntaxException|IOException e)
+        {throw new RuntimeException("Failed in reading the file "+path,e);}
     }
 }
