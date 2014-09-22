@@ -51,6 +51,11 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 		return new ReliableRenderer();
 	}
 
+	/**
+	 * TODO Remove this method as JogAmp's Ardor3D Continuation already supports OpenGL 1.1. This game uses no fancy 
+	 * feature, it should work as is. Then, only a warning should be displayed when the crappy Microsoft driver is 
+	 * detected
+	 */
 	@Override
 	public final JoglContextCapabilities createContextCapabilities(){
 		final JoglContextCapabilities defaultCaps = super.createContextCapabilities();
