@@ -19,6 +19,12 @@ package engine.renderer;
 
 import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 
+/**
+ * Context capabilities with some management of wrong values returned by some OpenGL drivers
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class ReliableContextCapabilities extends JoglContextCapabilities{
 
 	public ReliableContextCapabilities(final JoglContextCapabilities defaultCaps){
