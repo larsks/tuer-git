@@ -36,6 +36,7 @@ import com.ardor3d.extension.ui.util.ButtonGroup;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.input.logical.TriggerAction;
+import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.ContextManager;
@@ -174,10 +175,17 @@ public class DisplaySettingsPanel extends UIPanel{
             	onBackButtonActionPerformed(event);
             }
         });
+        final ContextCapabilities caps=ContextManager.getCurrentContext().getCapabilities();
         final UILabel firstEmptyLabel=new UILabel(" ");
-        final UILabel secondEmptyLabel=new UILabel(" ");
+        final UILabel crappyDriverWarningLabel=new UILabel(" ");
+        //checks whether Microsoft’s generic software emulation driver (OpenGL emulation through Direct3D) is installed
+        if(caps.getDisplayVendor().equalsIgnoreCase("Microsoft Corporation")&&caps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
+            {//recommends to the end user to install a proper OpenGL driver instead of this crap
+        	 final String warning="The game might crash or run very slowly with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).";
+        	 crappyDriverWarningLabel.setText(warning);
+        	 crappyDriverWarningLabel.setForegroundColor(ColorRGBA.RED);
+            }
         final UIPanel openglGraphicalCardDriverInfoPanel=new UIPanel(new RowLayout(false));
-    	final ContextCapabilities caps=ContextManager.getCurrentContext().getCapabilities();
     	final UILabel openglDriverLabel=new UILabel("OpenGL Driver");
     	final UILabel vendorLabel=new UILabel("Vendor: "+caps.getDisplayVendor());
     	final UILabel rendererLabel=new UILabel("Renderer: "+caps.getDisplayRenderer());
@@ -188,7 +196,7 @@ public class DisplaySettingsPanel extends UIPanel{
     	openglGraphicalCardDriverInfoPanel.add(vendorLabel);
     	openglGraphicalCardDriverInfoPanel.add(rendererLabel);
     	openglGraphicalCardDriverInfoPanel.add(versionLabel);
-    	openglGraphicalCardDriverInfoPanel.add(secondEmptyLabel);
+    	openglGraphicalCardDriverInfoPanel.add(crappyDriverWarningLabel);
     	openglGraphicalCardDriverInfoPanel.add(joglVersionLabel);
         add(windowingModeButton);
         add(vSyncPanel);
