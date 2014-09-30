@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
 import com.ardor3d.extension.ui.UILabel;
@@ -36,13 +37,22 @@ import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.renderer.Camera;
+import com.ardor3d.renderer.ContextCapabilities;
+import com.ardor3d.renderer.ContextManager;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.jogamp.newt.MonitorDevice;
 import com.jogamp.newt.MonitorMode;
 import com.jogamp.newt.util.MonitorModeUtil;
+import com.jogamp.opengl.JoglVersion;
 
+/**
+ * panel of the display settings (vertical synchronization, refresh rate, screen resolution, ...)
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class DisplaySettingsPanel extends UIPanel{
 
 	private final MainMenuState mainMenuState;
@@ -164,12 +174,29 @@ public class DisplaySettingsPanel extends UIPanel{
             	onBackButtonActionPerformed(event);
             }
         });
+        final UILabel firstEmptyLabel=new UILabel(" ");
+        final UILabel secondEmptyLabel=new UILabel(" ");
+        final UIPanel openglGraphicalCardDriverInfoPanel=new UIPanel(new RowLayout(false));
+    	final ContextCapabilities caps=ContextManager.getCurrentContext().getCapabilities();
+    	final UILabel openglDriverLabel=new UILabel("OpenGL Driver");
+    	final UILabel vendorLabel=new UILabel("Vendor: "+caps.getDisplayVendor());
+    	final UILabel rendererLabel=new UILabel("Renderer: "+caps.getDisplayRenderer());
+    	final UILabel versionLabel=new UILabel("Version: "+caps.getDisplayVersion());
+    	final UILabel joglVersionLabel=new UILabel("JOGL Version: "+JoglVersion.getInstance().getImplementationVersion());
+    	openglGraphicalCardDriverInfoPanel.add(firstEmptyLabel);
+    	openglGraphicalCardDriverInfoPanel.add(openglDriverLabel);
+    	openglGraphicalCardDriverInfoPanel.add(vendorLabel);
+    	openglGraphicalCardDriverInfoPanel.add(rendererLabel);
+    	openglGraphicalCardDriverInfoPanel.add(versionLabel);
+    	openglGraphicalCardDriverInfoPanel.add(secondEmptyLabel);
+    	openglGraphicalCardDriverInfoPanel.add(joglVersionLabel);
         add(windowingModeButton);
         add(vSyncPanel);
         add(screenModesLabel);
         add(displayModesCombo);
         if(rotationsPanel!=null)
             add(rotationsPanel);
+        add(openglGraphicalCardDriverInfoPanel);
         add(backButton);
 	}
 	
