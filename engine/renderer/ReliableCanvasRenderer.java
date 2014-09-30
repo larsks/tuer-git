@@ -17,21 +17,16 @@
  */
 package engine.renderer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.CapsUtil;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;
 import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 import com.ardor3d.renderer.jogl.JoglRenderer;
-import com.jogamp.common.os.Platform;
 
 /**
  * Canvas renderer enhanced for higher frame rates especially 
  * when the vertical synchronization is turned off by avoiding explicit 
- * OpenGL context operations. It warns the user and quits if he runs 
- * the application with a very bad driver that emulates OpenGL 
- * which is a lot slower than real drivers
+ * OpenGL context operations.
  * 
  * @author Julien Gouesse
  *
@@ -51,17 +46,16 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
 		return new ReliableRenderer();
 	}
 
-	/**
-	 * TODO Remove this method as JogAmp's Ardor3D Continuation already supports OpenGL 1.1. This game uses no fancy 
-	 * feature, it should work as is. Then, only a warning should be displayed when the crappy Microsoft driver is 
-	 * detected
-	 */
 	@Override
 	public final JoglContextCapabilities createContextCapabilities(){
 		final JoglContextCapabilities defaultCaps = super.createContextCapabilities();
         final ReliableContextCapabilities realCaps = new ReliableContextCapabilities(defaultCaps);
+        /**
+    	 * TODO Remove this code as JogAmp's Ardor3D Continuation already supports OpenGL 1.1. This game uses no fancy 
+    	 * feature, it should work as is. Test it before definitely removing this piece of code
+    	 */
         //checks if the operating system is Windows
-        if(System.getProperty("os.name").toLowerCase().startsWith("windows"))
+        /*if(System.getProperty("os.name").toLowerCase().startsWith("windows"))
             {//gets some information about the OpenGL driver
         	 final String vendor=realCaps.getDisplayVendor();
         	 final String renderer=realCaps.getDisplayRenderer();
@@ -93,7 +87,7 @@ public class ReliableCanvasRenderer extends JoglCanvasRenderer{
                       }
         		  System.exit(0);
                  }
-            }
+            }*/
         return(realCaps);
 	}
 }
