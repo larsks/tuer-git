@@ -170,6 +170,10 @@
 		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
+		<!-- Creates the RPM (GNU Linux) package -->
+		<antcall target="create-rpm" />
+		<!-- Creates the DEB (GNU Linux) package -->
+		<antcall target="create-deb" />
 		<!-- Creates the zipped Mac OS X application bundle -->
 		<antcall target="create-app" />
 		<!-- Signs the JARs -->
