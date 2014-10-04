@@ -28,6 +28,7 @@
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask" classpath="lib/ant/redline-1.1.16.jar" />
+	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask" classpath="lib/ant/jdeb-1.3.jar"/>
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
