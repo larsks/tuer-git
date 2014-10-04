@@ -23,11 +23,11 @@
 <!-- Ant 1.9 build file                                                    -->
 <!-- ===================================================================== -->
 
-<project name="First person shooter and editor" default="build" basedir="." xmlns:redline="antlib:org.redline_rpm">
+<project name="First person shooter and editor" default="build" basedir=".">
 	<!-- external tasks -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
-	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.16.jar"/>
+	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask" classpath="lib/ant/redline-1.1.16.jar" />
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
@@ -438,9 +438,10 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
-		<!--<redline:rpm group="Games" name="${project-unix-name}" version="0" destination="${destdir}">
-		    
-		</redline:rpm>-->
+		<!--<pure-java-rpm group="Games" name="${project-unix-name}" version="0" destination="${destdir}">
+		    <zipfileset prefix="/usr/share/games/${project-unix-name}" file="${destdir}/${game-jar-filename}"/>
+		    <depends name="java" version=">= 1.7"/>
+		</pure-java-rpm>-->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create APP                                                        -->
