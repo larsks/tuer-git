@@ -60,6 +60,8 @@
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
+	<property name="game-description" value="Small Quake-like written in Java and JogAmp's Ardor3D Continuation" />
+	<property name="game-short-description" value="Kill them all!!" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -365,8 +367,8 @@
 					<title>${game-long-name}</title>
 					<vendor>${vendor}</vendor>
 					<homepage href="${homepage-url}"/>
-					<description>Small Quake-like written in Java + JOGL</description>
-					<description kind="short">kill them all!!</description>
+					<description>${game-description}</description>
+					<description kind="short">${game-short-description}</description>
 					<icon kind="default" href="${game-logo-filename}"/>
 					<icon kind="splash" href="${game-logo-filename}"/>
 					<icon kind="shortcut" href="${game-logo-filename}"/>
