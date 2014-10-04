@@ -27,7 +27,7 @@
 	<!-- external tasks -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
-	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.15.jar"/>
+	<taskdef resource="org/redline_rpm/antlib.xml" classpath="lib/ant/redline-1.1.16.jar"/>
 	<taskdef resource="antlib.xml" classpath="lib/ant/jpkg-combined.jar"/>
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
