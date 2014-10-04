@@ -444,6 +444,30 @@
 		</pure-java-rpm>-->
 	</target>
 	<!-- ================================================================= -->
+	<!-- Create DEB                                                        -->
+	<!-- ================================================================= -->
+	<target name="create-deb">
+	    <!--<delete failonerror="false" file="${destdir}/control" />
+	    <echo file="${destdir}/control">
+	        <![CDATA[
+	        Package: ${project-unix-name}
+	        Version: 0
+	        Section: Games
+	        Priority: low
+	        Architecture: all
+	        Description: ${game-description}
+	        Maintainer: gouessej@orange.fr
+
+	        ]]>
+	    </echo>
+	    <pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}/control" verbose="true">
+	        <data src="${destdir}/${game-jar-filename}" type="file">
+	            <mapper type="perm" prefix="/usr/share/games/${project-unix-name}"/>
+	        </data>
+	    </pure-java-deb>
+	    <delete failonerror="false" file="${destdir}/control" />-->
+	</target>
+	<!-- ================================================================= -->
 	<!-- Create APP                                                        -->
 	<!-- ================================================================= -->
 	<macrodef name="packr">
