@@ -183,9 +183,9 @@
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
 		<!-- Creates the RPM (GNU Linux) package -->
-		<antcall target="create-rpm" />
+		<!--<antcall target="create-rpm" />-->
 		<!-- Creates the DEB (GNU Linux) package -->
-		<antcall target="create-deb" />
+		<!--<antcall target="create-deb" />-->
 		<!-- Creates the zipped Mac OS X application bundle -->
 		<antcall target="create-app" />
 		<!-- Signs the JARs -->
@@ -454,24 +454,24 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
-		<!--<pure-java-rpm group="Games" name="${project-unix-name}" version="0" destination="${destdir}">
+		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="NOARCH" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 		    <zipfileset prefix="/usr/share/games/${project-unix-name}" file="${destdir}/${game-jar-filename}"/>
 		    <depends name="java" version=">= 1.7"/>
-		</pure-java-rpm>-->
+		</pure-java-rpm>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create DEB                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-deb">
-	    <!--<delete failonerror="false" file="${destdir}/control" />
+	    <delete failonerror="false" file="${destdir}/control" />
 	    <echo file="${destdir}/control">
 	        <![CDATA[
 	        Package: ${project-unix-name}
-	        Version: 0
+	        Version: 0.0
 	        Section: Games
 	        Priority: low
 	        Architecture: all
-	        Description: ${game-description}
+	        Description: ${game-long-description}
 	        Maintainer: gouessej@orange.fr
 
 	        ]]>
@@ -481,7 +481,7 @@
 	            <mapper type="perm" prefix="/usr/share/games/${project-unix-name}"/>
 	        </data>
 	    </pure-java-deb>
-	    <delete failonerror="false" file="${destdir}/control" />-->
+	    <delete failonerror="false" file="${destdir}/control" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create APP                                                        -->
