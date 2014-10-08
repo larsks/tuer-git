@@ -40,7 +40,14 @@
 	    </classpath>
 	</taskdef>
 	<!-- pure Java implementation of the DEB package builder -->
-	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask" classpath="lib/ant/jdeb-1.3.jar"/>
+	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask">
+		<classpath>
+			<pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
+			<pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
+			<pathelement path="lib/ant/commons-io-2.4.jar"/>
+			<pathelement path="lib/ant/jdeb-1.3.jar"/>
+		</classpath>
+	</taskdef>
 	<!-- task of image format conversion -->
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
