@@ -35,6 +35,7 @@
 	        <pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
 	    	<pathelement path="lib/ant/slf4j-api-1.7.7.jar"/>
 	    	<pathelement path="lib/ant/slf4j-simple-1.7.7.jar"/>
+	    	<pathelement path="lib/ant/xz-1.4.jar"/>
 	    	<pathelement path="lib/ant/redline-1.1.16.jar"/>
 	    </classpath>
 	</taskdef>
