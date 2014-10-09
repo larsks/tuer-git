@@ -472,19 +472,15 @@
 	<!-- ================================================================= -->
 	<target name="create-deb">
 	    <delete failonerror="false" file="${destdir}/control" />
-	    <echo file="${destdir}/control">
-	        <![CDATA[
-	        Package: ${project-unix-name}
-	        Version: 0.0
-	        Section: Games
-	        Priority: low
-	        Architecture: all
-	        Description: ${game-long-description}
-	        Maintainer: gouessej@orange.fr
-
-	        ]]>
+	    <echo file="${destdir}/control"><![CDATA[Package: ${project-unix-name}
+Version: 0.0
+Section: Games
+Priority: low
+Architecture: all
+Description: ${game-long-description}
+Maintainer: gouessej@orange.fr]]>
 	    </echo>
-	    <pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}/control" verbose="true">
+	    <pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}" verbose="true">
 	        <data src="${destdir}/${game-jar-filename}" type="file">
 	            <mapper type="perm" prefix="/usr/share/games/${project-unix-name}"/>
 	        </data>
