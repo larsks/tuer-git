@@ -463,7 +463,7 @@
 	<!-- ================================================================= -->
 	<target name="create-rpm">
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="NOARCH" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-		    <zipfileset prefix="/usr/share/games/${project-unix-name}" file="${destdir}/${game-jar-filename}"/>
+		    <zipfileset prefix="/usr/share/${project-unix-name}" file="${destdir}/${game-jar-filename}"/>
 		    <depends name="java" version=">= 1.7"/>
 		</pure-java-rpm>
 	</target>
@@ -482,7 +482,7 @@ Maintainer: gouessej@orange.fr]]>
 	    </echo>
 	    <pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}" verbose="true">
 	        <data src="${destdir}/${game-jar-filename}" type="file">
-	            <mapper type="perm" prefix="/usr/share/games/${project-unix-name}"/>
+	            <mapper type="perm" prefix="/usr/share/${project-unix-name}"/>
 	        </data>
 	    </pure-java-deb>
 	    <delete failonerror="false" file="${destdir}/control" />
