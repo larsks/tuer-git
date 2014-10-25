@@ -466,14 +466,19 @@
 	<target name="create-rpm">
 		<packr platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-i586-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" antreimplementationenabled="true" />
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-		    <zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux32_game"/>
+			<zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux32_game">
+			    <exclude name="**/${project-unix-name}"/>
+			</zipfileset>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
 		<packr platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" antreimplementationenabled="true" />
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-		    <zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux64_game"/>
-			<!-- FIXME: keep the filemode so that the file remains executable -->
+		    <zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux64_game">
+		        <exclude name="**/${project-unix-name}"/>
+		    </zipfileset>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
