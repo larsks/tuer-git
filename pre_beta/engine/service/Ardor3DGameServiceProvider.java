@@ -23,15 +23,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+
 import javax.media.nativewindow.util.SurfaceSize;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
+
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
@@ -395,9 +400,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
     
     //TODO move this method into a separate class in order to avoid mixing scene services and file services
     private final String getTextFileContent(final String path){
-        try{final URL url=getClass().getResource(path);
+        @SuppressWarnings("resource")
+		FileSystem zipFs=null;
+    	try{final URL url=getClass().getResource(path);
             final URI uri=url.toURI();
-            final Path pathObj=Paths.get(uri);
+            Path pathObj=null;
+            try{pathObj=Paths.get(uri);}
+            catch(FileSystemNotFoundException e)
+            {zipFs=FileSystems.newFileSystem(uri,Collections.<String,Object>emptyMap());
+             pathObj=Paths.get(uri);
+            }
             final List<String> lines=Files.readAllLines(pathObj,Charset.forName("UTF-8"));
             final StringBuilder textContent=new StringBuilder();
             for(String line:lines)
@@ -406,23 +418,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
            }
         catch(URISyntaxException|IOException e)
         {throw new RuntimeException("Failed in reading the file "+path,e);}
-        catch(FileSystemNotFoundException e)
-        {try{final URL url=getClass().getResource(path);
-        	 final URI uri=url.toURI();
-             // workaround of the bug http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7181278
-        	 String spec = uri.getRawSchemeSpecificPart();
-             final int sep = spec.indexOf("!/");
-             if(sep!=-1)
-            	 spec=spec.substring(0, sep);
-             final Path pathObj=Paths.get(new URI(spec)).toAbsolutePath();
-             final List<String> lines=Files.readAllLines(pathObj,Charset.forName("UTF-8"));
-             final StringBuilder textContent=new StringBuilder();
-             for(String line:lines)
-             	textContent.append(line+"\n");
-             return(textContent.toString());
-            }
-         catch(URISyntaxException|IOException ee)
-         {throw new RuntimeException("Failed in reading the file "+path,ee);}
-        }
+    	finally
+    	{try{if(zipFs!=null) 
+    		     zipFs.close();
+    	    }
+    	 catch(IOException e){}
+    	}
     }
 }
