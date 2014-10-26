@@ -30,14 +30,14 @@
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<!-- pure Java implementation of the RPM package builder -->
 	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask">
-	    <classpath>
-	    	<pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
-	        <pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
-	    	<pathelement path="lib/ant/slf4j-api-1.7.7.jar"/>
-	    	<pathelement path="lib/ant/slf4j-simple-1.7.7.jar"/>
-	    	<pathelement path="lib/ant/xz-1.4.jar"/>
-	    	<pathelement path="lib/ant/redline-1.1.16.jar"/>
-	    </classpath>
+		<classpath>
+			<pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
+			<pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
+			<pathelement path="lib/ant/slf4j-api-1.7.7.jar"/>
+			<pathelement path="lib/ant/slf4j-simple-1.7.7.jar"/>
+			<pathelement path="lib/ant/xz-1.4.jar"/>
+			<pathelement path="lib/ant/redline-1.1.16.jar"/>
+		</classpath>
 	</taskdef>
 	<!-- pure Java implementation of the DEB package builder -->
 	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask">
@@ -411,7 +411,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
-			        <property name="sun.java2d.xrender" value="true"/>
+					<property name="sun.java2d.xrender" value="true"/>
 					<property name="java.ext.dirs" value="" />
 					<jar href="${game-jar-filename}" download="eager" main="true"/>
 				</resources>
@@ -440,7 +440,7 @@
 					<property name="sun.java2d.noddraw" value="true"/>
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
-			        <property name="sun.java2d.xrender" value="true"/>
+					<property name="sun.java2d.xrender" value="true"/>
 					<property name="java.ext.dirs" value="" />
 					<property name="sun.awt.noerasebackground" value="true"/>
 					<jar href="${editor-jar-filename}" download="eager" main="true"/>
@@ -476,9 +476,8 @@
 				<exclude name="**/${project-unix-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/bin" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
-			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
 		<jndt platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
@@ -493,9 +492,8 @@
 				<exclude name="**/${project-unix-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/bin" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
-			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
 	</target>
@@ -534,6 +532,7 @@ Maintainer: gouessej@orange.fr]]>
 		<attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="appabsolutepath" default="" description="absolute path of the application, cannot be empty if nativelauncherenabled is set to false"/>
+		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<sequential>
 			<if>
 				<equals arg1="@{platform}" arg2="mac" />
@@ -682,8 +681,20 @@ ${vmargsstring}
 							</echo>
 						</then>
 						<else>
+							<var name="altvmargs" value="" />
+							<if>
+							    <equals arg1="@{useserverjre}" arg2="true" />
+								<then>
+									<var name="altvmargs" value="-server;@{vmargs}" />
+									<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
+									<math result="vmarglastindex" operand1="${vmarglastindex}" operation="+" operand2="1" datatype="int"/>
+								</then>
+								<else>
+									<var name="altvmargs" value="@{vmargs}" />
+								</else>
+							</if>
 							<!-- uses ' ' as a separator to feed the script -->
-							<for list="@{vmargs}" delimiter=";" param="vmarg">
+							<for list="${altvmargs}" delimiter=";" param="vmarg">
 								<sequential>
 									<var name="vmargsstring" value="${vmargsstring}@{vmarg}" />
 									<if>
@@ -702,29 +713,52 @@ ${vmargsstring}
 					<if>
 						<equals arg1="@{platform}" arg2="linux32" />
 						<then>
-							<var name="exesrcfilename" value="packr-linux" />
+							<if>
+							    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+							    <then>
+							        <var name="exesrcfilename" value="packr-linux" />
+							    </then>
+							</if>
 							<var name="exedstfilename" value="@{executable}" />
 						</then>
 						<else>
 							<if>
 								<equals arg1="@{platform}" arg2="linux64" />
 								<then>
-									<var name="exesrcfilename" value="packr-linux-x64" />
+									<if>
+									    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+									    <then>
+									         <var name="exesrcfilename" value="packr-linux-x64" />
+									    </then>
+									</if>
 									<var name="exedstfilename" value="@{executable}" />
 								</then>
 								<else>
 									<if>
 										<equals arg1="@{platform}" arg2="mac" />
 										<then>
-											<var name="exesrcfilename" value="packr-mac" />
+											<if>
+											    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+											    <then>
+											        <var name="exesrcfilename" value="packr-mac" />
+											    </then>
+											</if>
 											<var name="exedstfilename" value="@{executable}" />
 										</then>
 										<else>
 											<if>
 												<equals arg1="@{platform}" arg2="windows" />
 												<then>
-													<var name="exesrcfilename" value="packr-windows.exe" />
-													<var name="exedstfilename" value="@{executable}.exe" />
+													<if>
+													    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+													    <then>
+													        <var name="exesrcfilename" value="packr-windows.exe" />
+													        <var name="exedstfilename" value="@{executable}.exe" />
+													    </then>
+														<else>
+															<var name="exedstfilename" value="@{executable}.bat" />
+														</else>
+													</if>
 												</then>
 												<else>
 													<fail message="Unsupported platform @{platform}" />
@@ -745,24 +779,25 @@ ${vmargsstring}
 									<include name="${exesrcfilename}"/>
 								</patternset>
 							</unzip>
+							<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
 						</then>
 						<else>
-							<!-- TODO use a different delimiter and a different java executable under Windows -->
+							<!-- TODO use a different file separator under Windows -->
 							<if>
 								<equals arg1="@{jdk}" arg2="" />
 								<then>
 									<!-- uses the system JRE if any -->
-									<echo file="${contentstarget}/${exesrcfilename}">java -server -jar @{appabsolutepath}/${appjarbasename} ${vmargsstring}</echo>
+									<echo file="${contentstarget}/${exedstfilename}">java ${vmargsstring} -jar @{appabsolutepath}/${appjarbasename}</echo>
 								</then>
 								<else>
 									<!-- uses the packaged JRE -->
-									<echo file="${contentstarget}/${exesrcfilename}">@{appabsolutepath}/jre/bin/java -server -jar @{appabsolutepath}/${appjarbasename} ${vmargsstring}</echo>
+									<echo file="${contentstarget}/${exedstfilename}">@{appabsolutepath}/jre/bin/java ${vmargsstring} -jar @{appabsolutepath}/${appjarbasename}</echo>
 								</else>
 							</if>
 						</else>
 					</if>
-					<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
-					<chmod file="${contentstarget}/${exedstfilename}" perm="ugo+rx" />
+					<!-- ensures that the native launcher or the script is executable -->
+					<chmod file="${contentstarget}/${exedstfilename}" perm="755" />
 					<if>
 						<available file="@{jdk}" />
 						<then>
@@ -790,7 +825,7 @@ ${vmargsstring}
 										<fileset dir="@{dir}/jre" />
 									</copy>
 									<!-- drives "java" executable anew -->
-									<chmod file="${contentstarget}/jre/bin/java" perm="ugo+rx" />
+									<chmod file="${contentstarget}/jre/bin/java" perm="755" />
 								</then>
 							</if>
 						</sequential>
@@ -812,6 +847,28 @@ ${vmargsstring}
 					</if>
 				</then>
 				<else>
+					<if>
+						<equals arg1="@{useserverjre}" arg2="false" />
+						<then>
+							<echo message="impossible to use the client Hotspot VM with PackR, 'useserverjre=@{useserverjre}' ignored" />
+						</then>
+					</if>
+					<if>
+						<not>
+							<equals arg1="@{appabsolutepath}" arg2="" />
+						</not>
+						<then>
+							<echo message="the application absolute path is not used by PackR, 'appabsolutepath=@{appabsolutepath}' ignored" />
+						</then>
+					</if>
+					<if>
+						<not>
+							<equals arg1="@{nativelauncherenabled}" arg2="false" />
+						</not>
+						<then>
+							<echo message="the native launcher is mandatory for PackR, 'nativelauncherenabled=@{nativelauncherenabled}' ignored" />
+						</then>
+					</if>
 					<if>
 						<equals arg1="@{minimizejre}" arg2="" />
 						<then>
@@ -893,7 +950,7 @@ ${vmargsstring}
 			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/Resources" prefix="${game-app-dirname}/Contents/Resources"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/Info.plist" prefix="${game-app-dirname}/Contents/"/>
 			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/MacOS/jre" prefix="${game-app-dirname}/Contents/MacOS/jre">
-			    <exclude name="**/java"/>
+				<exclude name="**/java"/>
 			</zipfileset>
 			<zipfileset filemode="755" file="${destdir}/${game-app-dirname}/Contents/MacOS/jre/bin/java" prefix="${game-app-dirname}/Contents/MacOS/jre/bin"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/config.json" prefix="${game-app-dirname}/Contents/MacOS/"/>
