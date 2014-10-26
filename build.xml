@@ -892,9 +892,12 @@ ${vmargsstring}
 		<zip destfile="${destdir}/${game-app-zip-filename}">
 			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/Resources" prefix="${game-app-dirname}/Contents/Resources"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/Info.plist" prefix="${game-app-dirname}/Contents/"/>
-			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/MacOS/jre" prefix="${game-app-dirname}/Contents/MacOS/jre"/>
+			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/MacOS/jre" prefix="${game-app-dirname}/Contents/MacOS/jre">
+			    <exclude name="**/java"/>
+			</zipfileset>
+			<zipfileset filemode="755" file="${destdir}/${game-app-dirname}/Contents/MacOS/jre/bin/java" prefix="${game-app-dirname}/Contents/MacOS/jre/bin"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/config.json" prefix="${game-app-dirname}/Contents/MacOS/"/>
-			<zipfileset filemode="555" file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-short-name}" prefix="${game-app-dirname}/Contents/MacOS/"/>
+			<zipfileset filemode="755" file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-short-name}" prefix="${game-app-dirname}/Contents/MacOS/"/>
 			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-jar-filename}" prefix="${game-app-dirname}/Contents/MacOS/"/>
 		</zip>
 		<!-- Deletes the directory and the icon(s) in proprietary format(s), only keeps the ZIP archive -->
