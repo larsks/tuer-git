@@ -789,16 +789,34 @@ ${vmargsstring}
 							<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
 						</then>
 						<else>
-							<!-- TODO use a different file separator under Windows -->
+							<!-- computes the platform dependent paths -->
+							<path id="appjarpath">
+							    <pathelement location="@{appabsolutepath}/${appjarbasename}"/>
+							</path>
+							<path id="appjrepath">
+							    <pathelement location="@{appabsolutepath}/jre/bin/java"/>
+							</path>
+							<if>
+								<equals arg1="@{platform}" arg2="windows" />
+								<then>
+									<pathconvert targetos="windows" property="osspecificappjarpath" refid="appjarpath"/>
+									<pathconvert targetos="windows" property="osspecificappjrepath" refid="appjrepath"/>
+								</then>
+								<else>
+				                    <pathconvert targetos="unix" property="osspecificappjarpath" refid="appjarpath"/>
+									<pathconvert targetos="unix" property="osspecificappjrepath" refid="appjrepath"/>
+								</else>
+							</if>
+							<!-- creates the platform dependent script -->
 							<if>
 								<equals arg1="@{jdk}" arg2="" />
 								<then>
 									<!-- uses the system JRE if any -->
-									<echo file="${contentstarget}/${exedstfilename}">java ${vmargsstring} -jar @{appabsolutepath}/${appjarbasename}</echo>
+									<echo file="${contentstarget}/${exedstfilename}">java ${vmargsstring} -jar ${osspecificappjarpath}</echo>
 								</then>
 								<else>
 									<!-- uses the packaged JRE -->
-									<echo file="${contentstarget}/${exedstfilename}">@{appabsolutepath}/jre/bin/java ${vmargsstring} -jar @{appabsolutepath}/${appjarbasename}</echo>
+									<echo file="${contentstarget}/${exedstfilename}">${osspecificappjrepath} ${vmargsstring} -jar ${osspecificappjarpath}</echo>
 								</else>
 							</if>
 						</else>
