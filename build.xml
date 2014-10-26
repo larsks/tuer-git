@@ -464,21 +464,37 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
-		<packr platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-i586-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" antreimplementationenabled="true" />
-		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
+		<jndt platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
+			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
+			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
+			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
+			antreimplementationenabled="true" nativelauncherenabled="false" appabsolutepath="/usr/share/${project-unix-name}"/>
+		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
+			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
+			release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 			<zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux32_game">
-			    <exclude name="**/${project-unix-name}"/>
+				<exclude name="**/${project-unix-name}"/>
+				<exclude name="**/java"/>
 			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
-		<packr platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" antreimplementationenabled="true" />
-		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-		    <zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux64_game">
-		        <exclude name="**/${project-unix-name}"/>
-		    </zipfileset>
+		<jndt platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
+			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
+			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
+			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
+			antreimplementationenabled="true" nativelauncherenabled="false" appabsolutepath="/usr/share/${project-unix-name}"/>
+		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
+			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
+			release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
+			<zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux64_game">
+				<exclude name="**/${project-unix-name}"/>
+				<exclude name="**/java"/>
+			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
@@ -495,18 +511,15 @@ Priority: low
 Architecture: all
 Description: ${game-long-description}
 Maintainer: gouessej@orange.fr]]>
-	    </echo>
-	    <pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}" verbose="true">
-	        <data src="${destdir}/${game-jar-filename}" type="file">
-	            <mapper type="perm" prefix="/usr/share/${project-unix-name}"/>
-	        </data>
-	    </pure-java-deb>
-	    <delete failonerror="false" file="${destdir}/control" />
+		</echo>
+		<pure-java-deb destfile="${destdir}/${project-unix-name}.deb" control="${destdir}" verbose="true">
+			<data src="${destdir}/${game-jar-filename}" type="file">
+				<mapper type="perm" prefix="/usr/share/${project-unix-name}"/>
+			</data>
+		</pure-java-deb>
+		<delete failonerror="false" file="${destdir}/control" />
 	</target>
-	<!-- ================================================================= -->
-	<!-- Create APP                                                        -->
-	<!-- ================================================================= -->
-	<macrodef name="packr">
+	<macrodef name="jndt">
 		<attribute name="platform" description="one of windows, linux32, linux64, mac"/>
 		<attribute name="executable" description="name of the native executable, without extension such as .exe"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
@@ -519,6 +532,8 @@ Maintainer: gouessej@orange.fr]]>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
 		<attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
+		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
+		<attribute name="appabsolutepath" default="" description="absolute path of the application, cannot be empty if nativelauncherenabled is set to false"/>
 		<sequential>
 			<if>
 				<equals arg1="@{platform}" arg2="mac" />
@@ -547,6 +562,24 @@ Maintainer: gouessej@orange.fr]]>
 						</condition>
 					</fail>
 					<!-- TODO add tons of checks -->
+					<if>
+						<and>
+							<equals arg1="@{nativelauncherenabled}" arg2="true" />
+							<equals arg1="@{jdk}" arg2="" />
+						</and>
+						<then>
+							<fail message="jdk must not be empty when nativelauncherenabled is set to true"/>
+						</then>
+					</if>
+					<if>
+						<and>
+							<equals arg1="@{nativelauncherenabled}" arg2="false" />
+							<equals arg1="@{appabsolutepath}" arg2="" />
+						</and>
+						<then>
+							<fail message="appabsolutepath must not be empty when nativelauncherenabled is set to false"/>
+						</then>
+					</if>
 					<if>
 						<available file="@{outdir}" />
 						<then>
@@ -619,29 +652,53 @@ Maintainer: gouessej@orange.fr]]>
 					</for>
 					<var name="vmargindex" value="0" />
 					<math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
-					<for list="@{vmargs}" delimiter=";" param="vmarg">
-						<sequential>
-							<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;" />
-							<if>
-								<not>
-								    <equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
-								</not>
-								<then>
-								    <var name="vmargsstring" value="${vmargsstring},${line.separator}" />
-								</then>
-							</if>
-							<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int"/>
-						</sequential>
-					</for>
-					<echo file="${contentstarget}/config.json">
-						<![CDATA[{
-						   "jar": "${appjarbasename}",
-						   "mainClass": "@{mainclass}",
-						   "vmArgs": [
-						      ${vmargsstring}
-						   ]}
-					    ]]>
-					</echo>
+					<if>
+						<equals arg1="@{nativelauncherenabled}" arg2="true" />
+						<then>
+							<!-- puts the double quotes around each argument and uses ',\n' as a separator to feed the native launcher -->
+							<for list="@{vmargs}" delimiter=";" param="vmarg">
+								<sequential>
+									<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;" />
+									<if>
+										<not>
+											<equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
+										</not>
+										<then>
+											<var name="vmargsstring" value="${vmargsstring},${line.separator}" />
+										</then>
+									</if>
+									<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
+								</sequential>
+							</for>
+							<!-- this JSON file is read by the native launcher -->
+							<echo file="${contentstarget}/config.json">
+								<![CDATA[{
+"jar": "${appjarbasename}",
+"mainClass": "@{mainclass}",
+"vmArgs": [
+${vmargsstring}
+]}
+]]>
+							</echo>
+						</then>
+						<else>
+							<!-- uses ' ' as a separator to feed the script -->
+							<for list="@{vmargs}" delimiter=";" param="vmarg">
+								<sequential>
+									<var name="vmargsstring" value="${vmargsstring}@{vmarg}" />
+									<if>
+										<not>
+											<equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
+										</not>
+										<then>
+											<var name="vmargsstring" value="${vmargsstring} " />
+										</then>
+									</if>
+									<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
+								</sequential>
+							</for>
+						</else>
+					</if>
 					<if>
 						<equals arg1="@{platform}" arg2="linux32" />
 						<then>
@@ -679,11 +736,31 @@ Maintainer: gouessej@orange.fr]]>
 							</if>
 						</else>
 					</if>
-					<unzip src="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" dest="${contentstarget}">
-						<patternset>
-							<include name="${exesrcfilename}"/>
-						</patternset>
-					</unzip>
+					<if>
+						<equals arg1="@{nativelauncherenabled}" arg2="true" />
+						<then>
+							<!-- extracts the executable of the native launcher from PackR's JAR -->
+							<unzip src="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" dest="${contentstarget}">
+								<patternset>
+									<include name="${exesrcfilename}"/>
+								</patternset>
+							</unzip>
+						</then>
+						<else>
+							<!-- TODO use a different delimiter and a different java executable under Windows -->
+							<if>
+								<equals arg1="@{jdk}" arg2="" />
+								<then>
+									<!-- uses the system JRE if any -->
+									<echo file="${contentstarget}/${exesrcfilename}">java -server -jar @{appabsolutepath}/${appjarbasename} ${vmargsstring}</echo>
+								</then>
+								<else>
+									<!-- uses the packaged JRE -->
+									<echo file="${contentstarget}/${exesrcfilename}">@{appabsolutepath}/jre/bin/java -server -jar @{appabsolutepath}/${appjarbasename} ${vmargsstring}</echo>
+								</else>
+							</if>
+						</else>
+					</if>
 					<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
 					<chmod file="${contentstarget}/${exedstfilename}" perm="ugo+rx" />
 					<if>
@@ -697,7 +774,7 @@ Maintainer: gouessej@orange.fr]]>
 						</else>
 					</if>
 					<mkdir dir="${contentstarget}/tmp" />
-					<!-- File permissions are lost when unzipping the archive -->
+					<!-- the file permissions are lost when unzipping the archive -->
 					<unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
 					<mkdir dir="${contentstarget}/jre" />
 					<!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
@@ -712,6 +789,8 @@ Maintainer: gouessej@orange.fr]]>
 									<copy todir="${contentstarget}/jre" failonerror="true">
 										<fileset dir="@{dir}/jre" />
 									</copy>
+									<!-- drives "java" executable anew -->
+									<chmod file="${contentstarget}/jre/bin/java" perm="ugo+rx" />
 								</then>
 							</if>
 						</sequential>
@@ -799,10 +878,13 @@ Maintainer: gouessej@orange.fr]]>
 			</if>
 		</sequential>
 	</macrodef>
+	<!-- ================================================================= -->
+	<!-- Create APP                                                        -->
+	<!-- ================================================================= -->
 	<target name="create-app">
 		<convertimage src="images/${game-logo-filename}" dst="${destdir}/icons.icns" sourceImageDuplicationAndRescaleEnabled="true" />
 		<!-- Creates the Mac OS X application bundle which is a directory -->
-		<packr platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" antreimplementationenabled="true" />
+		<jndt platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" antreimplementationenabled="true" />
 		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 		<!-- (a PNG file can be converted into an icns file with http://iconverticons.com/ which uses http://icns.sourceforge.net/) -->
 		<!--<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />-->
