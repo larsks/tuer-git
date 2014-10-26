@@ -534,6 +534,7 @@ Maintainer: gouessej@orange.fr]]>
 		<attribute name="appabsolutepath" default="" description="absolute path of the application, cannot be empty if nativelauncherenabled is set to false"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<sequential>
+			<!-- Mac has a distinct directory layout -->
 			<if>
 				<equals arg1="@{platform}" arg2="mac" />
 				<then>
@@ -545,6 +546,7 @@ Maintainer: gouessej@orange.fr]]>
 					<var name="resourcestarget" value="@{outdir}" />
 				</else>
 			</if>
+			<!-- checks which implementation to use -->
 			<if>
 				<equals arg1="@{antreimplementationenabled}" arg2="true" />
 				<then>
@@ -591,7 +593,9 @@ Maintainer: gouessej@orange.fr]]>
 							<delete dir="@{outdir}" failonerror="false" />
 						</then>
 					</if>
+					<!-- creates the application directory -->
 					<mkdir dir="@{outdir}" />
+					<!-- creates Mac specific files if needed -->
 					<if>
 						<equals arg1="@{platform}" arg2="mac" />
 						<then>
@@ -639,9 +643,11 @@ Maintainer: gouessej@orange.fr]]>
 			                </echo>
 						</then>
 					</if>
+					<!-- handles the other files of the application directory -->
 					<copy file="@{appjar}" todir="${contentstarget}" />
 					<local name="appjarbasename" />
 					<basename property="appjarbasename" file="@{appjar}" />
+					<!-- handles the VM arguments -->
 					<var name="vmargsstring" value="" />
 					<var name="vmargscount" value="0" />
 					<for list="@{vmargs}" delimiter=";" param="vmarg">
@@ -710,6 +716,7 @@ ${vmargsstring}
 							</for>
 						</else>
 					</if>
+					<!-- handles the native launcher or the script -->
 					<if>
 						<equals arg1="@{platform}" arg2="linux32" />
 						<then>
@@ -798,15 +805,23 @@ ${vmargsstring}
 					</if>
 					<!-- ensures that the native launcher or the script is executable -->
 					<chmod file="${contentstarget}/${exedstfilename}" perm="755" />
+					<!-- handles the packaged JRE (extracts it from the JDK) if any -->
 					<if>
-						<available file="@{jdk}" />
+						<not>
+						    <equals arg1="@{jdk}" arg2="" />
+						</not>
 						<then>
-							<var name="jdkFile" value="@{jdk}" />
+						    <if>
+						        <available file="@{jdk}" />
+						        <then>
+							        <var name="jdkFile" value="@{jdk}" />
+						        </then>
+						        <else>
+							        <get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
+							        <var name="jdkFile" value="${contentstarget}/jdk.zip" />
+						        </else>
+					        </if>
 						</then>
-						<else>
-							<get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
-							<var name="jdkFile" value="${contentstarget}/jdk.zip" />
-						</else>
 					</if>
 					<mkdir dir="${contentstarget}/tmp" />
 					<!-- the file permissions are lost when unzipping the archive -->
@@ -832,11 +847,13 @@ ${vmargsstring}
 					</for>
 					<delete dir="${contentstarget}/tmp" failonerror="true" />
 					<delete file="${contentstarget}/jdk.zip" failonerror="true" />
+					<!-- handles the resources if any -->
 					<for list="@{resources}" delimiter=";" param="resource">
 						<sequential>
 							<copy file="@{resource}" todir="${contentstarget}" />
 						</sequential>
 					</for>
+					<!-- handles the minimization (not implemented yet) -->
 					<if>
 						<not>
 							<equals arg1="@{minimizejre}" arg2="" />
