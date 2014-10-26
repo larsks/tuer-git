@@ -193,7 +193,7 @@
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
 		<!-- Creates the RPM (GNU Linux) package -->
-		<!--<antcall target="create-rpm" />-->
+		<antcall target="create-rpm" />
 		<!-- Creates the DEB (GNU Linux) package -->
 		<!--<antcall target="create-deb" />-->
 		<!-- Creates the zipped Mac OS X application bundle -->
@@ -468,7 +468,7 @@
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
-			antreimplementationenabled="true" nativelauncherenabled="false" appabsolutepath="/usr/share/${project-unix-name}"/>
+			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
 			release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
@@ -476,15 +476,16 @@
 				<exclude name="**/${project-unix-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/bin" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
+			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
 		<jndt platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
-			antreimplementationenabled="true" nativelauncherenabled="false" appabsolutepath="/usr/share/${project-unix-name}"/>
+			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
 			release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
@@ -492,8 +493,9 @@
 				<exclude name="**/${project-unix-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/bin" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
+			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
 	</target>
@@ -531,7 +533,6 @@ Maintainer: gouessej@orange.fr]]>
 		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
 		<attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-		<attribute name="appabsolutepath" default="" description="absolute path of the application, cannot be empty if nativelauncherenabled is set to false"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<sequential>
 			<!-- Mac has a distinct directory layout -->
@@ -570,15 +571,6 @@ Maintainer: gouessej@orange.fr]]>
 						</and>
 						<then>
 							<fail message="jdk must not be empty when nativelauncherenabled is set to true"/>
-						</then>
-					</if>
-					<if>
-						<and>
-							<equals arg1="@{nativelauncherenabled}" arg2="false" />
-							<equals arg1="@{appabsolutepath}" arg2="" />
-						</and>
-						<then>
-							<fail message="appabsolutepath must not be empty when nativelauncherenabled is set to false"/>
 						</then>
 					</if>
 					<if>
@@ -789,34 +781,68 @@ ${vmargsstring}
 							<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
 						</then>
 						<else>
-							<!-- computes the platform dependent paths -->
-							<path id="appjarpath">
-							    <pathelement location="@{appabsolutepath}/${appjarbasename}"/>
-							</path>
-							<path id="appjrepath">
-							    <pathelement location="@{appabsolutepath}/jre/bin/java"/>
-							</path>
-							<if>
-								<equals arg1="@{platform}" arg2="windows" />
-								<then>
-									<pathconvert targetos="windows" property="osspecificappjarpath" refid="appjarpath"/>
-									<pathconvert targetos="windows" property="osspecificappjrepath" refid="appjrepath"/>
-								</then>
-								<else>
-				                    <pathconvert targetos="unix" property="osspecificappjarpath" refid="appjarpath"/>
-									<pathconvert targetos="unix" property="osspecificappjrepath" refid="appjrepath"/>
-								</else>
-							</if>
 							<!-- creates the platform dependent script -->
 							<if>
-								<equals arg1="@{jdk}" arg2="" />
-								<then>
-									<!-- uses the system JRE if any -->
-									<echo file="${contentstarget}/${exedstfilename}">java ${vmargsstring} -jar ${osspecificappjarpath}</echo>
-								</then>
+							    <equals arg1="@{platform}" arg2="windows" />
+							    <then>
+							    	<if>
+							    	    <equals arg1="@{jdk}" arg2="" />
+							    	    <then>
+							    	        <!-- uses the system JRE if any -->
+							    	        <echo file="${contentstarget}/${exedstfilename}">
+							    	        	<![CDATA[
+java.exe ${vmargsstring} -jar ${appjarbasename}
+							    	        	]]>
+							    	        </echo>
+							    	    </then>
+							    		<else>
+							    		    <!-- uses the packaged JRE -->
+							    		    <echo file="${contentstarget}/${exedstfilename}">
+							    		    	<![CDATA[
+jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}
+							    		    	]]>
+							    		    </echo>
+							    		</else>
+							        </if>
+							    </then>
 								<else>
-									<!-- uses the packaged JRE -->
-									<echo file="${contentstarget}/${exedstfilename}">${osspecificappjrepath} ${vmargsstring} -jar ${osspecificappjarpath}</echo>
+								    <if>
+								        <equals arg1="@{jdk}" arg2="" />
+								        <then>
+									        <!-- uses the system JRE if any -->
+									        <echo file="${contentstarget}/${exedstfilename}">
+										<![CDATA[
+#!/usr/bin/bash
+#code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$APP_LAUNCHER_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
+										]]>
+									        </echo>
+								        </then>
+								        <else>
+									        <!-- uses the packaged JRE -->
+									        <echo file="${contentstarget}/${exedstfilename}">
+										<![CDATA[
+#!/usr/bin/bash
+#code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$APP_LAUNCHER_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+$APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
+										]]>
+									        </echo>
+								        </else>
+							        </if>
 								</else>
 							</if>
 						</else>
@@ -886,14 +912,6 @@ ${vmargsstring}
 						<equals arg1="@{useserverjre}" arg2="false" />
 						<then>
 							<echo message="impossible to use the client Hotspot VM with PackR, 'useserverjre=@{useserverjre}' ignored" />
-						</then>
-					</if>
-					<if>
-						<not>
-							<equals arg1="@{appabsolutepath}" arg2="" />
-						</not>
-						<then>
-							<echo message="the application absolute path is not used by PackR, 'appabsolutepath=@{appabsolutepath}' ignored" />
 						</then>
 					</if>
 					<if>
