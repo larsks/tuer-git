@@ -80,6 +80,7 @@
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
+	<property name="game-scalable-logo-filename" value="${project-unix-name}Logo.svg"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
@@ -464,6 +465,14 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
+		<echo file="${destdir}/${project-unix-name}.desktop"><![CDATA[[Desktop Entry]
+Name=${game-long-name}
+Comment=${game-short-description}
+Exec=${project-unix-name}
+Icon=${project-unix-name}
+Terminal=false
+Type=Application
+Categories=Game;]]></echo>
 		<jndt platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
@@ -478,6 +487,8 @@
 			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
+			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
+			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
@@ -495,9 +506,12 @@
 			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
+			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
+			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
+		<delete file="${destdir}/${project-unix-name}.desktop" failonerror="true" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create DEB                                                        -->
@@ -784,6 +798,8 @@ ${vmargsstring}
 							<!-- creates the platform dependent script -->
 							<if>
 							    <equals arg1="@{platform}" arg2="windows" />
+								<!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
+								<!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
 							    <then>
 							    	<if>
 							    	    <equals arg1="@{jdk}" arg2="" />
