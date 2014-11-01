@@ -465,11 +465,12 @@
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
+		<basename file="${game-logo-filename}" property="game-icon-name" suffix=".png"/>
 		<echo file="${destdir}/${project-unix-name}.desktop"><![CDATA[[Desktop Entry]
 Name=${game-long-name}
 Comment=${game-short-description}
 Exec=${project-unix-name}
-Icon=${project-unix-name}
+Icon=${game-icon-name}
 Terminal=false
 Type=Application
 Categories=Game;]]></echo>
@@ -489,6 +490,7 @@ Categories=Game;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
+			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
@@ -508,6 +510,7 @@ Categories=Game;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
+			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
