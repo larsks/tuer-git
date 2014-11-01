@@ -473,7 +473,7 @@ Exec=${project-unix-name}
 Icon=${game-icon-name}
 Terminal=false
 Type=Application
-Categories=Game;]]></echo>
+Categories=Game;Shooter;]]></echo>
 		<jndt platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
