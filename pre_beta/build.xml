@@ -80,7 +80,6 @@
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-zip-filename" value="${project-unix-name}.zip" />
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
-	<property name="game-scalable-logo-filename" value="${project-unix-name}Logo.svg"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
@@ -489,7 +488,6 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
-			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
@@ -509,7 +507,6 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
-			<zipfileset prefix="/usr/share/icons/hicolor/scalable/apps" file="images/${game-scalable-logo-filename}"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
