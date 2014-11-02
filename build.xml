@@ -489,6 +489,9 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="LICENSE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="NOTICE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="README.txt"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
@@ -508,6 +511,9 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
 			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="LICENSE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="NOTICE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="README.txt"/>
 			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
