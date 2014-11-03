@@ -460,64 +460,104 @@
 			<fileset dir="." excludes="**/*.class,**/target/*,${keystore},**/*.py"/>
 		</zip>
 	</target>
+	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
+	<macrodef name="to-package-name">
+		<attribute name="property" description="The name of the property to set that will contain the package name (output)" />
+		<attribute name="input" description="The input string to be used as a package name if possible" />
+		<sequential>
+			<var name="@{property}" value="@{input}"/>
+			<!-- Removes any character that isn't a letter of the English alphabet from the package name -->
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="/[^a-zA-Z]/gi" replace=""/>
+			<!-- Ensures that the package name is lowercase -->
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="A" replace="a"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="B" replace="b"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="C" replace="c"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="D" replace="d"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="E" replace="e"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="F" replace="f"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="G" replace="g"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="H" replace="h"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="I" replace="i"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="J" replace="j"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="K" replace="k"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="L" replace="l"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="M" replace="m"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="N" replace="n"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="O" replace="o"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="P" replace="p"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Q" replace="q"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="R" replace="r"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="S" replace="s"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="T" replace="t"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="U" replace="u"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="V" replace="v"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="W" replace="w"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="X" replace="x"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Y" replace="y"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Z" replace="z"/>
+	    </sequential>
+	</macrodef>
 	<!-- ================================================================= -->
 	<!-- Create RPM                                                        -->
 	<!-- ================================================================= -->
 	<target name="create-rpm">
+		<!-- The package name must respect the RPM Naming Convention -->
+		<to-package-name property="game-package-name" input="${game-short-name}"/>
+		<!-- Removes the extension from the icon name. FIXME: remove any extension -->
 		<basename file="${game-logo-filename}" property="game-icon-name" suffix=".png"/>
-		<echo file="${destdir}/${project-unix-name}.desktop"><![CDATA[[Desktop Entry]
+		<echo file="${destdir}/${game-package-name}.desktop"><![CDATA[[Desktop Entry]
 Name=${game-long-name}
 Comment=${game-short-description}
-Exec=${project-unix-name}
+Exec=${game-package-name}
 Icon=${game-icon-name}
 Terminal=false
 Type=Application
 Categories=Game;Shooter;]]></echo>
-		<jndt platform="linux32" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
+		<jndt platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
-			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
+			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}"
 			release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-			<zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux32_game">
-				<exclude name="**/${project-unix-name}"/>
+			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux32_game">
+				<exclude name="**/${game-package-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux32_game/${project-unix-name}"/>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
-			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
+			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
+			<zipfileset prefix="/usr/share/applications" file="${destdir}/${game-package-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="LICENSE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="NOTICE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="README.txt"/>
-			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="LICENSE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="NOTICE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
+			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
-		<jndt platform="linux64" executable="${project-unix-name}" appjar="${destdir}/${game-jar-filename}" 
+		<jndt platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
-			summary="${game-short-description}" group="Games" provides="${project-unix-name}" name="${project-unix-name}" 
+			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}" 
 			release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-			<zipfileset prefix="/usr/share/${project-unix-name}" dir="${destdir}/tmp_linux64_game">
-				<exclude name="**/${project-unix-name}"/>
+			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux64_game">
+				<exclude name="**/${game-package-name}"/>
 				<exclude name="**/java"/>
 			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}" file="${destdir}/tmp_linux64_game/${project-unix-name}"/>
-			<zipfileset filemode="755" prefix="/usr/share/${project-unix-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
-			<zipfileset prefix="/usr/share/applications" file="${destdir}/${project-unix-name}.desktop"/>
+			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
+			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
+			<zipfileset prefix="/usr/share/applications" file="${destdir}/${game-package-name}.desktop"/>
 			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="LICENSE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="NOTICE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${project-unix-name}" file="README.txt"/>
-			<link path="/usr/bin/${project-unix-name}" target="/usr/share/${project-unix-name}/${project-unix-name}"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="LICENSE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="NOTICE.txt"/>
+			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
+			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-rpm>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
-		<delete file="${destdir}/${project-unix-name}.desktop" failonerror="true" />
+		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create DEB                                                        -->
