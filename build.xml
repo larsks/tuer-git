@@ -577,7 +577,8 @@ Icon=${game-icon-name}
 Terminal=false
 Type=Application
 Categories=Game;Shooter;]]></echo>
-	    <echo file="${destdir}/control"><![CDATA[Package: ${game-package-name}
+		<mkdir dir="${destdir}/controldir"/>
+	    <echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
 Version: 0.0
 Section: Games
 Priority: low
@@ -592,8 +593,11 @@ Description: ${game-long-description}]]></echo>
 		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-i586-build-url}" 
 		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}" verbose="true">
-			<!-- TODO: add the rest of the JRE -->
+		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}/controldir" verbose="true">
+			<!-- FIXME: initially exclude java and the native launcher from the data -->
+			<data src="${destdir}/tmp_linux32_game" type="directory">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+			</data>
 			<data src="${destdir}/${game-jar-filename}" type="file">
 				<mapper type="perm" prefix="/usr/share/${game-package-name}"/>
 			</data>
@@ -618,11 +622,11 @@ Description: ${game-long-description}]]></echo>
 			<data src="README.txt" type="file">
 			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
 			</data>
-			<!-- TODO: add the symbolic link -->
+			<link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-deb>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
 		<delete failonerror="false" file="${destdir}/control" />
-		<echo file="${destdir}/control"><![CDATA[Package: ${game-package-name}
+		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
 Version: 0.0
 Section: Games
 Priority: low
@@ -637,8 +641,11 @@ Description: ${game-long-description}]]></echo>
 		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
 		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.amd64.deb" control="${destdir}" verbose="true">
-			<!-- TODO: add the rest of the JRE -->
+		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.amd64.deb" control="${destdir}/controldir" verbose="true">
+			<!-- FIXME: initially exclude java and the native launcher from the data -->
+			<data src="${destdir}/tmp_linux64_game" type="directory">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+			</data>
 			<data src="${destdir}/${game-jar-filename}" type="file">
 			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
 			</data>
@@ -663,10 +670,10 @@ Description: ${game-long-description}]]></echo>
 			<data src="README.txt" type="file">
 			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
 			</data>
-			<!-- TODO: add the symbolic link -->
+			<link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-deb>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
-		<delete failonerror="false" file="${destdir}/control" />
+		<delete failonerror="false" dir="${destdir}/controldir" />
 		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
 	</target>
 	<macrodef name="jndt">
