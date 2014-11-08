@@ -199,7 +199,7 @@
 		<!-- Creates the GNU Linux packages -->
 		<antcall target="create-linux-pkgs" />
 		<!-- Creates the zipped Mac OS X application bundle -->
-		<antcall target="create-app" />
+		<antcall target="create-os-x-app" />
 		<!-- Signs the JARs -->
 		<antcall target="sign-jars" />
 		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
@@ -727,7 +727,7 @@ Description: ${game-long-description}]]></echo>
 		<attribute name="platform" description="one of windows, linux32, linux64, mac"/>
 		<attribute name="executable" description="name of the native executable, without extension such as .exe"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
-		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names"/>
+		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
@@ -1195,26 +1195,42 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		</sequential>
 	</macrodef>
 	<!-- ================================================================= -->
-	<!-- Create APP                                                        -->
+	<!-- Create OS X APP                                                   -->
 	<!-- ================================================================= -->
-	<target name="create-app">
+	<target name="create-os-x-app">
+		<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 		<convertimage src="images/${game-logo-filename}" dst="${destdir}/icons.icns" sourceImageDuplicationAndRescaleEnabled="true" />
+		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<!-- Creates the Mac OS X application bundle which is a directory -->
-		<jndt platform="mac" executable="${game-short-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" outdir="${destdir}/${game-app-dirname}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" antreimplementationenabled="true" />
-		<!-- Copies the icon file into the expected subdirectory. N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
-		<!-- (a PNG file can be converted into an icns file with http://iconverticons.com/ which uses http://icns.sourceforge.net/) -->
-		<!--<copy file="images/icons.icns" todir="${destdir}/${game-app-dirname}/Contents/Resources" overwrite="true" />-->
+		<jndt platform="mac" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" 
+			outdir="${destdir}/${game-package-name}.app" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+			jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" 
+			antreimplementationenabled="true" nativelauncherenabled="true"/>
 		<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 		<zip destfile="${destdir}/${game-app-zip-filename}">
-			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/Resources" prefix="${game-app-dirname}/Contents/Resources"/>
-			<zipfileset file="${destdir}/${game-app-dirname}/Contents/Info.plist" prefix="${game-app-dirname}/Contents/"/>
-			<zipfileset dir="${destdir}/${game-app-dirname}/Contents/MacOS/jre" prefix="${game-app-dirname}/Contents/MacOS/jre">
-				<exclude name="**/java"/>
+			<zipfileset dir="${destdir}/${game-package-name}.app/Contents/Resources" prefix="${game-package-name}.app/Contents/Resources"/>
+			<zipfileset file="${destdir}/${game-package-name}.app/Contents/Info.plist" prefix="${game-package-name}.app/Contents/"/>
+			<zipfileset dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre" prefix="${game-package-name}.app/Contents/MacOS/jre">
+				<exclude name="**/bin/*"/>
+				<exclude name="**/lib/*.dylib"/>
+				<!--<exclude name="**/lib/client/*.dylib"/>-->
+				<exclude name="**/lib/headless/*.dylib"/>
+				<exclude name="**/lib/jli/*.dylib"/>
+				<exclude name="**/lib/lwawt/*.dylib"/>
+				<exclude name="**/lib/server/*.dylib"/>
+				<exclude name="**/lib/xawt/*.dylib"/>
 			</zipfileset>
-			<zipfileset filemode="755" file="${destdir}/${game-app-dirname}/Contents/MacOS/jre/bin/java" prefix="${game-app-dirname}/Contents/MacOS/jre/bin"/>
-			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/config.json" prefix="${game-app-dirname}/Contents/MacOS/"/>
-			<zipfileset filemode="755" file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-short-name}" prefix="${game-app-dirname}/Contents/MacOS/"/>
-			<zipfileset file="${destdir}/${game-app-dirname}/Contents/MacOS/${game-jar-filename}" prefix="${game-app-dirname}/Contents/MacOS/"/>
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/bin" file="${destdir}/${game-package-name}.app/Contents/MacOS/jre/bin/java" />
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/${game-short-name}" />
+			<zipfileset prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/config.json" />
+			<zipfileset prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/${game-jar-filename}" />
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib" includes="*.dylib"/>
+			<!--<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/client" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/client" includes="*.dylib"/>-->
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/headless" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/headless" includes="*.dylib"/>
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/jli" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/jli" includes="*.dylib"/>
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/lwawt" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/lwawt" includes="*.dylib"/>
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/server" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/server" includes="*.dylib"/>
+			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/xawt" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/xawt" includes="*.dylib"/>
 		</zip>
 		<!-- Deletes the directory and the icon(s) in proprietary format(s), only keeps the ZIP archive -->
 		<delete file="${destdir}/icons.icns" failonerror="true" />
