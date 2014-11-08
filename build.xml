@@ -560,8 +560,8 @@ Depends:
 Homepage: ${homepage-url}
 Description: ${game-long-description}]]></echo>
 		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}/controldir" verbose="true">
-		    <!-- FIXME: initially exclude java and the native launcher from the data -->
-		    <data src="${destdir}/tmp_linux32_game" type="directory">
+		    <data src="${destdir}/tmp_linux32_game" type="directory" 
+		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/i386/*.so,**/jre/lib/i386/client/*.so,**/jre/lib/i386/headless/*.so,**/jre/lib/i386/jli/*.so,**/jre/lib/i386/server/*.so,**/jre/lib/i386/xawt/*.so">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
 		    </data>
 		    <data src="${destdir}/${game-jar-filename}" type="file">
@@ -573,6 +573,24 @@ Description: ${game-long-description}]]></echo>
 		    <data src="${destdir}/tmp_linux32_game/jre/bin/java" type="file">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
 		    </data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/client" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/client" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/headless" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/headless" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/jli" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/jli" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/server" type="directory" includes="*.so">
+				<mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/server" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/xawt" type="directory" includes="*.so">
+				<mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/xawt" filemode="755"/>
+			</data>
 		    <data src="${destdir}/${game-package-name}.desktop" type="file">
 		        <mapper type="perm" prefix="/usr/share/applications"/>
 		    </data>
@@ -663,8 +681,8 @@ Depends:
 Homepage: ${homepage-url}
 Description: ${game-long-description}]]></echo>
 		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.amd64.deb" control="${destdir}/controldir" verbose="true">
-		    <!-- FIXME: initially exclude java and the native launcher from the data -->
-		    <data src="${destdir}/tmp_linux64_game" type="directory">
+		    <data src="${destdir}/tmp_linux64_game" type="directory" 
+		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/amd64/*.so,**/jre/lib/amd64/headless/*.so,**/jre/lib/amd64/jli/*.so,**/jre/lib/amd64/server/*.so,**/jre/lib/amd64/xawt/*.so">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
 		    </data>
 		    <data src="${destdir}/${game-jar-filename}" type="file">
@@ -676,6 +694,24 @@ Description: ${game-long-description}]]></echo>
 		    <data src="${destdir}/tmp_linux64_game/jre/bin/java" type="file">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
 		    </data>
+			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64" filemode="755"/>
+			</data>
+			<!--<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/client" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/client" filemode="755"/>
+			</data>-->
+			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/headless" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/headless" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/jli" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/jli" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/server" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/server" filemode="755"/>
+			</data>
+			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/xawt" type="directory" includes="*.so">
+			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/xawt" filemode="755"/>
+			</data>
 		    <data src="${destdir}/${game-package-name}.desktop" type="file">
 		        <mapper type="perm" prefix="/usr/share/applications"/>
 		    </data>
