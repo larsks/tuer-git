@@ -75,6 +75,8 @@
 	<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
 	<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
 	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
+	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
+	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
@@ -200,6 +202,8 @@
 		<antcall target="create-linux-pkgs" />
 		<!-- Creates the zipped Mac OS X application bundle -->
 		<antcall target="create-os-x-app" />
+		<!-- Creates the Microsoft Windows packages -->
+		<antcall target="create-windows-pkgs" />
 		<!-- Signs the JARs -->
 		<antcall target="sign-jars" />
 		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
@@ -761,6 +765,58 @@ Description: ${game-long-description}]]></echo>
 		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
 		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
 	</target>
+	<!-- ================================================================= -->
+	<!-- Create Microsoft Windows packages (MSI, zip)                      -->
+	<!-- ================================================================= -->
+	<target name="create-windows-pkgs">
+		<to-package-name property="game-package-name" input="${game-short-name}"/>
+		<convertimage src="images/${game-logo-filename}" dst="${destdir}/${game-package-name}Logo.ico" />
+		<jndt platform="windows" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
+		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_windows32_game" 
+		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-windows-i586-build-url}" 
+		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-package-name}Logo.ico" 
+		    antreimplementationenabled="true" nativelauncherenabled="false"/>
+		<zip destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.zip">
+			<zipfileset dir="${destdir}/tmp_windows32_game">
+			    <exclude name="**/${game-package-name}"/>
+			    <exclude name="**/jre/bin/server/*.dll"/>
+			    <exclude name="**/jre/bin/*.dll"/>
+			    <exclude name="**/jre/bin/*.exe"/>
+			</zipfileset>
+			<zipfileset filemode="755" file="${destdir}/tmp_windows32_game/${game-package-name}"/>
+			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows32_game/jre/bin/java.exe"/>
+			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows32_game/jre/bin/javaw.exe"/>
+			<zipfileset filemode="755" prefix="jre/bin" dir="${destdir}/tmp_windows32_game/jre/bin" includes="*.dll"/>
+			<zipfileset filemode="755" prefix="jre/bin/server" dir="${destdir}/tmp_windows32_game/jre/bin/server" includes="*.dll"/>
+			<zipfileset file="LICENSE.txt"/>
+			<zipfileset file="NOTICE.txt"/>
+			<zipfileset file="README.txt"/>
+		</zip>
+		<delete dir="${destdir}/tmp_windows32_game" failonerror="true" />
+		<jndt platform="windows" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
+		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_windows64_game" 
+		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-windows-amd64-build-url}" 
+		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-package-name}Logo.ico" 
+		    antreimplementationenabled="true" nativelauncherenabled="false"/>
+		<zip destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.zip">
+			<zipfileset dir="${destdir}/tmp_windows64_game">
+			    <exclude name="**/${game-package-name}"/>
+			    <exclude name="**/jre/bin/server/*.dll"/>
+			    <exclude name="**/jre/bin/*.dll"/>
+			    <exclude name="**/jre/bin/*.exe"/>
+			</zipfileset>
+			<zipfileset filemode="755" file="${destdir}/tmp_windows64_game/${game-package-name}"/>
+			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows64_game/jre/bin/java.exe"/>
+			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows64_game/jre/bin/javaw.exe"/>
+			<zipfileset filemode="755" prefix="jre/bin" dir="${destdir}/tmp_windows64_game/jre/bin" includes="*.dll"/>
+			<zipfileset filemode="755" prefix="jre/bin/server" dir="${destdir}/tmp_windows64_game/jre/bin/server" includes="*.dll"/>
+			<zipfileset file="LICENSE.txt"/>
+			<zipfileset file="NOTICE.txt"/>
+			<zipfileset file="README.txt"/>
+		</zip>
+		<delete dir="${destdir}/tmp_windows64_game" failonerror="true" />
+		<delete file="${destdir}/${game-package-name}Logo.ico" failonerror="true" />
+	</target>
 	<macrodef name="jndt">
 		<attribute name="platform" description="one of windows, linux32, linux64, mac"/>
 		<attribute name="executable" description="name of the native executable, without extension such as .exe"/>
@@ -1033,19 +1089,11 @@ ${vmargsstring}
 							    	    <equals arg1="@{jdk}" arg2="" />
 							    	    <then>
 							    	        <!-- uses the system JRE if any -->
-							    	        <echo file="${contentstarget}/${exedstfilename}">
-							    	        	<![CDATA[
-java.exe ${vmargsstring} -jar ${appjarbasename}
-							    	        	]]>
-							    	        </echo>
+							    	        <echo file="${contentstarget}/${exedstfilename}"><![CDATA[java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
 							    	    </then>
 							    		<else>
 							    		    <!-- uses the packaged JRE -->
-							    		    <echo file="${contentstarget}/${exedstfilename}">
-							    		    	<![CDATA[
-jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}
-							    		    	]]>
-							    		    </echo>
+							    		    <echo file="${contentstarget}/${exedstfilename}"><![CDATA[jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
 							    		</else>
 							        </if>
 							    </then>
