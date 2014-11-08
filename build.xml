@@ -84,6 +84,8 @@
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
+	<property name="game-32-bit-tar-gzip-archive-filename" value="${project-unix-name}-i386.tar.gz" />
+	<property name="game-64-bit-tar-gzip-archive-filename" value="${project-unix-name}-amd64.tar.gz" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -194,10 +196,8 @@
 		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
-		<!-- Creates the RPM (GNU Linux) package -->
-		<antcall target="create-rpm" />
-		<!-- Creates the DEB (GNU Linux) package -->
-		<!--<antcall target="create-deb" />-->
+		<!-- Creates the GNU Linux packages -->
+		<antcall target="create-linux-pkgs" />
 		<!-- Creates the zipped Mac OS X application bundle -->
 		<antcall target="create-app" />
 		<!-- Signs the JARs -->
@@ -500,9 +500,9 @@
 	    </sequential>
 	</macrodef>
 	<!-- ================================================================= -->
-	<!-- Create RPM                                                        -->
+	<!-- Create GNU Linux packages (RPM, DEB, tar.gz)                      -->
 	<!-- ================================================================= -->
-	<target name="create-rpm">
+	<target name="create-linux-pkgs">
 		<!-- The package name must respect the RPM Naming Convention -->
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<!-- Removes the extension from the icon name. FIXME: remove any extension -->
@@ -536,6 +536,60 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
 			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-rpm>
+		<mkdir dir="${destdir}/controldir"/>
+		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
+Version: 0.0
+Section: Games
+Priority: low
+Architecture: i386
+Description: ${game-long-description}
+Maintainer: ${vendor} <${email}>
+Depends: 
+Homepage: ${homepage-url}
+Description: ${game-long-description}]]></echo>
+		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}/controldir" verbose="true">
+		    <!-- FIXME: initially exclude java and the native launcher from the data -->
+		    <data src="${destdir}/tmp_linux32_game" type="directory">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+		    </data>
+		    <data src="${destdir}/${game-jar-filename}" type="file">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+		    </data>
+		    <data src="${destdir}/tmp_linux32_game/${game-package-name}" type="file">
+		        <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
+		    </data>
+		    <data src="${destdir}/tmp_linux32_game/jre/bin/java" type="file">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
+		    </data>
+		    <data src="${destdir}/${game-package-name}.desktop" type="file">
+		        <mapper type="perm" prefix="/usr/share/applications"/>
+		    </data>
+		    <data src="images/${game-logo-filename}" type="file">
+		        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+		    </data>
+		    <data src="LICENSE.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <data src="NOTICE.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <data src="README.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
+		</pure-java-deb>
+		<delete failonerror="false" dir="${destdir}/controldir" />
+		<tar destfile="${destdir}/${game-32-bit-tar-gzip-archive-filename}" compression="gzip">
+			<zipfileset dir="${destdir}/tmp_linux32_game">
+			    <exclude name="**/${game-package-name}"/>
+			    <exclude name="**/java"/>
+			</zipfileset>
+			<zipfileset filemode="755" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
+			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
+			<zipfileset file="LICENSE.txt"/>
+			<zipfileset file="NOTICE.txt"/>
+			<zipfileset file="README.txt"/>
+		</tar>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
 		<jndt platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
@@ -558,74 +612,7 @@ Categories=Game;Shooter;]]></echo>
 			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
 			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-rpm>
-		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
-		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
-	</target>
-	<!-- ================================================================= -->
-	<!-- Create DEB                                                        -->
-	<!-- ================================================================= -->
-	<target name="create-deb">
-		<!-- The package name must respect the Debian Naming Convention -->
-		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<!-- Removes the extension from the icon name. FIXME: remove any extension -->
-		<basename file="${game-logo-filename}" property="game-icon-name" suffix=".png"/>
-		<echo file="${destdir}/${game-package-name}.desktop"><![CDATA[[Desktop Entry]
-Name=${game-long-name}
-Comment=${game-short-description}
-Exec=${game-package-name}
-Icon=${game-icon-name}
-Terminal=false
-Type=Application
-Categories=Game;Shooter;]]></echo>
 		<mkdir dir="${destdir}/controldir"/>
-	    <echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
-Version: 0.0
-Section: Games
-Priority: low
-Architecture: i386
-Description: ${game-long-description}
-Maintainer: ${vendor} <${email}>
-Depends: 
-Homepage: ${homepage-url}
-Description: ${game-long-description}]]></echo>
-		<jndt platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
-		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-i586-build-url}" 
-		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}/controldir" verbose="true">
-			<!-- FIXME: initially exclude java and the native launcher from the data -->
-			<data src="${destdir}/tmp_linux32_game" type="directory">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-			</data>
-			<data src="${destdir}/${game-jar-filename}" type="file">
-				<mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/${game-package-name}" type="file">
-			    <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/bin/java" type="file">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
-			</data>
-			<data src="${destdir}/${game-package-name}.desktop" type="file">
-			    <mapper type="perm" prefix="/usr/share/applications"/>
-			</data>
-			<data src="images/${game-logo-filename}" type="file">
-			    <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			</data>
-			<data src="LICENSE.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<data src="NOTICE.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<data src="README.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
-		</pure-java-deb>
-		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
-		<delete failonerror="false" file="${destdir}/control" />
 		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
 Version: 0.0
 Section: Games
@@ -636,44 +623,50 @@ Maintainer: ${vendor} <${email}>
 Depends: 
 Homepage: ${homepage-url}
 Description: ${game-long-description}]]></echo>
-		<jndt platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
-		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
-		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.amd64.deb" control="${destdir}/controldir" verbose="true">
-			<!-- FIXME: initially exclude java and the native launcher from the data -->
-			<data src="${destdir}/tmp_linux64_game" type="directory">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-			</data>
-			<data src="${destdir}/${game-jar-filename}" type="file">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-			</data>
-			<data src="${destdir}/tmp_linux64_game/${game-package-name}" type="file">
-			    <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux64_game/jre/bin/java" type="file">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
-			</data>
-			<data src="${destdir}/${game-package-name}.desktop" type="file">
-			    <mapper type="perm" prefix="/usr/share/applications"/>
-			</data>
-			<data src="images/${game-logo-filename}" type="file">
-			    <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			</data>
-			<data src="LICENSE.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<data src="NOTICE.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<data src="README.txt" type="file">
-			    <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-			</data>
-			<link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
+		    <!-- FIXME: initially exclude java and the native launcher from the data -->
+		    <data src="${destdir}/tmp_linux64_game" type="directory">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+		    </data>
+		    <data src="${destdir}/${game-jar-filename}" type="file">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
+		    </data>
+		    <data src="${destdir}/tmp_linux64_game/${game-package-name}" type="file">
+		        <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
+		    </data>
+		    <data src="${destdir}/tmp_linux64_game/jre/bin/java" type="file">
+		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
+		    </data>
+		    <data src="${destdir}/${game-package-name}.desktop" type="file">
+		        <mapper type="perm" prefix="/usr/share/applications"/>
+		    </data>
+		    <data src="images/${game-logo-filename}" type="file">
+		        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+		    </data>
+		    <data src="LICENSE.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <data src="NOTICE.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <data src="README.txt" type="file">
+		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
+		    </data>
+		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-deb>
-		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
 		<delete failonerror="false" dir="${destdir}/controldir" />
+		<tar destfile="${destdir}/${game-64-bit-tar-gzip-archive-filename}" compression="gzip">
+		    <zipfileset dir="${destdir}/tmp_linux64_game">
+		        <exclude name="**/${game-package-name}"/>
+		        <exclude name="**/java"/>
+		    </zipfileset>
+		    <zipfileset filemode="755" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
+		    <zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
+		    <zipfileset file="LICENSE.txt"/>
+		    <zipfileset file="NOTICE.txt"/>
+		    <zipfileset file="README.txt"/>
+		</tar>
+		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
 		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
 	</target>
 	<macrodef name="jndt">
