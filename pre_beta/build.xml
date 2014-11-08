@@ -525,7 +525,7 @@ Categories=Game;Shooter;]]></echo>
 			release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux32_game">
 				<exclude name="**/${game-package-name}"/>
-				<exclude name="**/java"/>
+				<exclude name="**/jre/bin/*"/>
 			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
@@ -578,11 +578,14 @@ Description: ${game-long-description}]]></echo>
 		    </data>
 		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-deb>
+		<delete failonerror="false">
+		    <fileset dir="${destdir}" includes="*.changes"/>
+		</delete>
 		<delete failonerror="false" dir="${destdir}/controldir" />
 		<tar destfile="${destdir}/${game-32-bit-tar-gzip-archive-filename}" compression="gzip">
 			<zipfileset dir="${destdir}/tmp_linux32_game">
 			    <exclude name="**/${game-package-name}"/>
-			    <exclude name="**/java"/>
+			    <exclude name="**/jre/bin/*"/>
 			</zipfileset>
 			<zipfileset filemode="755" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
 			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
@@ -601,7 +604,7 @@ Description: ${game-long-description}]]></echo>
 			release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux64_game">
 				<exclude name="**/${game-package-name}"/>
-				<exclude name="**/java"/>
+				<exclude name="**/jre/bin/*"/>
 			</zipfileset>
 			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
 			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
@@ -654,11 +657,14 @@ Description: ${game-long-description}]]></echo>
 		    </data>
 		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
 		</pure-java-deb>
+		<delete failonerror="false">
+		    <fileset dir="${destdir}" includes="*.changes"/>
+		</delete>
 		<delete failonerror="false" dir="${destdir}/controldir" />
 		<tar destfile="${destdir}/${game-64-bit-tar-gzip-archive-filename}" compression="gzip">
 		    <zipfileset dir="${destdir}/tmp_linux64_game">
 		        <exclude name="**/${game-package-name}"/>
-		        <exclude name="**/java"/>
+		        <exclude name="**/jre/bin/*"/>
 		    </zipfileset>
 		    <zipfileset filemode="755" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
 		    <zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
