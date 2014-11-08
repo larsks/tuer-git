@@ -84,8 +84,8 @@
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="game-app-dirname" value="${project-unix-name}.app" />
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
-	<property name="game-32-bit-tar-gzip-archive-filename" value="${project-unix-name}-i386.tar.gz" />
-	<property name="game-64-bit-tar-gzip-archive-filename" value="${project-unix-name}-amd64.tar.gz" />
+	<property name="game-version" value="0" />
+	<property name="game-release" value="0" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -524,7 +524,7 @@ Categories=Game;Shooter;]]></echo>
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}"
-			release="0" version="0" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
+			version="${game-version}" release="${game-release}" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux32_game">
 				<exclude name="**/${game-package-name}"/>
 				<exclude name="**/jre/bin/*"/>
@@ -552,7 +552,7 @@ Categories=Game;Shooter;]]></echo>
 		</pure-java-rpm>
 		<mkdir dir="${destdir}/controldir"/>
 		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
-Version: 0.0
+Version: ${game-version}.${game-release}
 Section: Games
 Priority: low
 Architecture: i386
@@ -561,7 +561,7 @@ Maintainer: ${vendor} <${email}>
 Depends: 
 Homepage: ${homepage-url}
 Description: ${game-long-description}]]></echo>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.i386.deb" control="${destdir}/controldir" verbose="true">
+		<pure-java-deb destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.deb" control="${destdir}/controldir" verbose="true">
 		    <data src="${destdir}/tmp_linux32_game" type="directory" 
 		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/i386/*.so,**/jre/lib/i386/client/*.so,**/jre/lib/i386/headless/*.so,**/jre/lib/i386/jli/*.so,**/jre/lib/i386/server/*.so,**/jre/lib/i386/xawt/*.so">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
@@ -614,7 +614,7 @@ Description: ${game-long-description}]]></echo>
 		    <fileset dir="${destdir}" includes="*.changes"/>
 		</delete>
 		<delete failonerror="false" dir="${destdir}/controldir" />
-		<tar destfile="${destdir}/${game-32-bit-tar-gzip-archive-filename}" compression="gzip">
+		<tar destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.tar.gz" compression="gzip">
 			<zipfileset dir="${destdir}/tmp_linux32_game">
 			    <exclude name="**/${game-package-name}"/>
 			    <exclude name="**/jre/bin/*"/>
@@ -645,7 +645,7 @@ Description: ${game-long-description}]]></echo>
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}" 
-			release="0" version="0" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
+			version="${game-version}" release="${game-release}" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
 			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux64_game">
 				<exclude name="**/${game-package-name}"/>
 				<exclude name="**/jre/bin/*"/>
@@ -673,7 +673,7 @@ Description: ${game-long-description}]]></echo>
 		</pure-java-rpm>
 		<mkdir dir="${destdir}/controldir"/>
 		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
-Version: 0.0
+Version: ${game-version}.${game-release}
 Section: Games
 Priority: low
 Architecture: amd64
@@ -682,7 +682,7 @@ Maintainer: ${vendor} <${email}>
 Depends: 
 Homepage: ${homepage-url}
 Description: ${game-long-description}]]></echo>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-0-0.amd64.deb" control="${destdir}/controldir" verbose="true">
+		<pure-java-deb destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.deb" control="${destdir}/controldir" verbose="true">
 		    <data src="${destdir}/tmp_linux64_game" type="directory" 
 		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/amd64/*.so,**/jre/lib/amd64/headless/*.so,**/jre/lib/amd64/jli/*.so,**/jre/lib/amd64/server/*.so,**/jre/lib/amd64/xawt/*.so">
 		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
@@ -735,7 +735,7 @@ Description: ${game-long-description}]]></echo>
 		    <fileset dir="${destdir}" includes="*.changes"/>
 		</delete>
 		<delete failonerror="false" dir="${destdir}/controldir" />
-		<tar destfile="${destdir}/${game-64-bit-tar-gzip-archive-filename}" compression="gzip">
+		<tar destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.tar.gz" compression="gzip">
 		    <zipfileset dir="${destdir}/tmp_linux64_game">
 		        <exclude name="**/${game-package-name}"/>
 		        <exclude name="**/jre/bin/*"/>
