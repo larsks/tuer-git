@@ -359,7 +359,9 @@
 		<!-- deletes the keystore if any -->
 		<delete file="${keystore}" failonerror="false" />
 		<!-- gets the storepass -->
-		<input message="Please enter the store pass:" addproperty="storepass" />
+		<input message="Please enter the store pass:" addproperty="storepass">
+			<handler type="secure"/>
+		</input>
 		<!-- creates the keystore -->
 		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}">
 			<dname>
@@ -1280,7 +1282,9 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
 		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
-		<input message="Please enter the password:" addproperty="sftp-password"/>
+		<input message="Please enter the password:" addproperty="sftp-password">
+			<handler type="secure"/>
+		</input>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the archive onto the SFTP server in the Project file release -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
