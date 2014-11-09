@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
     Copyright (c) 2006-2014 Julien Gouesse
@@ -24,6 +24,7 @@
 <!-- ===================================================================== -->
 
 <project name="First person shooter and editor" default="build" basedir=".">
+	<import file="jndt.xml"/>
 	<!-- external tasks -->
 	<!-- task that allows the use of optional tasks without modifying the Ant install by modifying the classpath at runtime -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
@@ -125,13 +126,21 @@
 		<pathelement location="lib/pss/LibraryJOAL.jar"/>
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
-	<target name="check-java-version" description="Checks the Java version">
+	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
+		<fail message="Please build using Ant 1.8.4 or higher.">
+		    <condition>
+		        <not>
+		            <antversion atleast="1.8.4"/>
+		        </not>
+		    </condition>
+		</fail>
 		<fail message="Please use Java SDK 1.7 or higher.">
 			<condition>
 				<not>
 					<or>
-						<equals arg1="${ant.java.version}" arg2="1.7" />
-						<equals arg1="${ant.java.version}" arg2="1.8" />
+						<equals arg1="${ant.java.version}" arg2="1.7"/>
+						<equals arg1="${ant.java.version}" arg2="1.8"/>
+						<equals arg1="${ant.java.version}" arg2="1.9"/>
 					</or>
 				</not>
 			</condition>
@@ -468,43 +477,6 @@
 			<fileset dir="." excludes="**/*.class,**/target/*,${keystore},**/*.py"/>
 		</zip>
 	</target>
-	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
-	<macrodef name="to-package-name">
-		<attribute name="property" description="The name of the property to set that will contain the package name (output)" />
-		<attribute name="input" description="The input string to be used as a package name if possible" />
-		<sequential>
-			<var name="@{property}" value="@{input}"/>
-			<!-- Removes any character that isn't a letter of the English alphabet from the package name -->
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="/[^a-zA-Z]/gi" replace=""/>
-			<!-- Ensures that the package name is lowercase -->
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="A" replace="a"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="B" replace="b"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="C" replace="c"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="D" replace="d"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="E" replace="e"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="F" replace="f"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="G" replace="g"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="H" replace="h"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="I" replace="i"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="J" replace="j"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="K" replace="k"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="L" replace="l"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="M" replace="m"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="N" replace="n"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="O" replace="o"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="P" replace="p"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Q" replace="q"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="R" replace="r"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="S" replace="s"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="T" replace="t"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="U" replace="u"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="V" replace="v"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="W" replace="w"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="X" replace="x"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Y" replace="y"/>
-			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Z" replace="z"/>
-	    </sequential>
-	</macrodef>
 	<!-- ================================================================= -->
 	<!-- Create GNU Linux packages (RPM, DEB, tar.gz)                      -->
 	<!-- ================================================================= -->
@@ -521,7 +493,7 @@ Icon=${game-icon-name}
 Terminal=false
 Type=Application
 Categories=Game;Shooter;]]></echo>
-		<jndt platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
+		<create-app-dir platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
@@ -642,7 +614,7 @@ Description: ${game-long-description}]]></echo>
 			<zipfileset file="README.txt"/>
 		</tar>
 		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
-		<jndt platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
+		<create-app-dir platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
 			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
@@ -770,557 +742,27 @@ Description: ${game-long-description}]]></echo>
 	<!-- ================================================================= -->
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<convertimage src="images/${game-logo-filename}" dst="${destdir}/${game-package-name}Logo.ico" />
-		<jndt platform="windows" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_windows32_game" 
-		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-windows-i586-build-url}" 
-		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-package-name}Logo.ico" 
+		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		    appzip="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.zip" mainclass="${game-main-class-for-packr}" 
+		    outdir="${destdir}/tmp_windows32_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<zip destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.zip">
-			<zipfileset dir="${destdir}/tmp_windows32_game">
-			    <exclude name="**/${game-package-name}"/>
-			    <exclude name="**/jre/bin/server/*.dll"/>
-			    <exclude name="**/jre/bin/*.dll"/>
-			    <exclude name="**/jre/bin/*.exe"/>
-			</zipfileset>
-			<zipfileset filemode="755" file="${destdir}/tmp_windows32_game/${game-package-name}"/>
-			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows32_game/jre/bin/java.exe"/>
-			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows32_game/jre/bin/javaw.exe"/>
-			<zipfileset filemode="755" prefix="jre/bin" dir="${destdir}/tmp_windows32_game/jre/bin" includes="*.dll"/>
-			<zipfileset filemode="755" prefix="jre/bin/server" dir="${destdir}/tmp_windows32_game/jre/bin/server" includes="*.dll"/>
-			<zipfileset file="LICENSE.txt"/>
-			<zipfileset file="NOTICE.txt"/>
-			<zipfileset file="README.txt"/>
-		</zip>
-		<delete dir="${destdir}/tmp_windows32_game" failonerror="true" />
-		<jndt platform="windows" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-		    mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_windows64_game" 
-		    vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-windows-amd64-build-url}" 
-		    bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-package-name}Logo.ico" 
+		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		    appzip="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.zip" mainclass="${game-main-class-for-packr}" 
+		    outdir="${destdir}/tmp_windows64_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<zip destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.zip">
-			<zipfileset dir="${destdir}/tmp_windows64_game">
-			    <exclude name="**/${game-package-name}"/>
-			    <exclude name="**/jre/bin/server/*.dll"/>
-			    <exclude name="**/jre/bin/*.dll"/>
-			    <exclude name="**/jre/bin/*.exe"/>
-			</zipfileset>
-			<zipfileset filemode="755" file="${destdir}/tmp_windows64_game/${game-package-name}"/>
-			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows64_game/jre/bin/java.exe"/>
-			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_windows64_game/jre/bin/javaw.exe"/>
-			<zipfileset filemode="755" prefix="jre/bin" dir="${destdir}/tmp_windows64_game/jre/bin" includes="*.dll"/>
-			<zipfileset filemode="755" prefix="jre/bin/server" dir="${destdir}/tmp_windows64_game/jre/bin/server" includes="*.dll"/>
-			<zipfileset file="LICENSE.txt"/>
-			<zipfileset file="NOTICE.txt"/>
-			<zipfileset file="README.txt"/>
-		</zip>
-		<delete dir="${destdir}/tmp_windows64_game" failonerror="true" />
-		<delete file="${destdir}/${game-package-name}Logo.ico" failonerror="true" />
 	</target>
-	<macrodef name="jndt">
-		<attribute name="platform" description="one of windows, linux32, linux64, mac"/>
-		<attribute name="executable" description="name of the native executable, without extension such as .exe"/>
-		<attribute name="appjar" description="file location of the JAR to package"/>
-		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
-		<attribute name="outdir" description="output directory"/>
-		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
-		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
-		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
-		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a package name"/>
-		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
-		<attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
-		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-		<sequential>
-			<!-- Mac has a distinct directory layout -->
-			<if>
-				<equals arg1="@{platform}" arg2="mac" />
-				<then>
-					<var name="contentstarget" value="@{outdir}/Contents/MacOS" />
-					<var name="resourcestarget" value="@{outdir}/Contents/Resources" />
-				</then>
-				<else>
-					<var name="contentstarget" value="@{outdir}" />
-					<var name="resourcestarget" value="@{outdir}" />
-				</else>
-			</if>
-			<!-- checks which implementation to use -->
-			<if>
-				<equals arg1="@{antreimplementationenabled}" arg2="true" />
-				<then>
-					<fail message="Invalid platform, must be linux32, linux64, mac or windows">
-						<condition>
-							<not>
-								<or>
-									<equals arg1="@{platform}" arg2="linux32" />
-									<equals arg1="@{platform}" arg2="linux64" />
-									<equals arg1="@{platform}" arg2="mac" />
-									<equals arg1="@{platform}" arg2="windows" />
-								</or>
-							</not>
-						</condition>
-					</fail>
-					<!-- TODO add tons of checks -->
-					<if>
-						<and>
-							<equals arg1="@{nativelauncherenabled}" arg2="true" />
-							<equals arg1="@{jdk}" arg2="" />
-						</and>
-						<then>
-							<fail message="jdk must not be empty when nativelauncherenabled is set to true"/>
-						</then>
-					</if>
-					<if>
-						<available file="@{outdir}" />
-						<then>
-							<fail message="Output directory equals working directory, aborting">
-								<condition>
-									<equals arg1="@{outdir}" arg2="." />
-								</condition>
-							</fail>
-							<echo message="Output directory '@{outdir}' exists, deleting" />
-							<delete dir="@{outdir}" failonerror="false" />
-						</then>
-					</if>
-					<!-- creates the application directory -->
-					<mkdir dir="@{outdir}" />
-					<!-- creates Mac specific files if needed -->
-					<if>
-						<equals arg1="@{platform}" arg2="mac" />
-						<then>
-							<if>
-								<equals arg1="@{iconsfile}" arg2="" />
-								<then>
-									<var name="iconsfile" value="icons.icns" />
-								</then>
-								<else>
-									<local name="iconsfilebasename" />
-									<basename property="iconsfilebasename" file="@{iconsfile}" />
-									<var name="iconsfile" value="${iconsfilebasename}" />
-								</else>
-							</if>
-							<mkdir dir="@{outdir}/Contents/Resources" />
-							<mkdir dir="@{outdir}/Contents/MacOS" />
-							<echo file="@{outdir}/Contents/Info.plist">
-								<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-								<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-								<plist version="1.0">
-									<dict>
-										<key>CFBundleGetInfoString</key>
-										<string>@{executable}</string>
-										<key>CFBundleExecutable</key>
-										<string>@{executable}</string>
-										<key>CFBundleIdentifier</key>
-										<string>@{bundleIdentifier}</string>
-										<key>CFBundleName</key>
-										<string>@{executable}</string>
-										<key>CFBundleIconFile</key>
-										<string>${iconsfile}</string>
-										<key>CFBundleShortVersionString</key>
-										<string>1.0</string>
-										<key>CFBundleInfoDictionaryVersion</key>
-										<string>6.0</string>
-										<key>CFBundlePackageType</key>
-										<string>APPL</string>
-										<key>IFMajorVersion</key>
-										<integer>0</integer>
-										<key>IFMinorVersion</key>
-										<integer>1</integer>
-									</dict>
-								</plist>
-			                   ]]>
-			                </echo>
-						</then>
-					</if>
-					<!-- handles the other files of the application directory -->
-					<copy file="@{appjar}" todir="${contentstarget}" />
-					<local name="appjarbasename" />
-					<basename property="appjarbasename" file="@{appjar}" />
-					<!-- handles the VM arguments -->
-					<var name="vmargsstring" value="" />
-					<var name="vmargscount" value="0" />
-					<for list="@{vmargs}" delimiter=";" param="vmarg">
-						<sequential>
-							<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
-						</sequential>
-					</for>
-					<var name="vmargindex" value="0" />
-					<math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
-					<if>
-						<equals arg1="@{nativelauncherenabled}" arg2="true" />
-						<then>
-							<!-- puts the double quotes around each argument and uses ',\n' as a separator to feed the native launcher -->
-							<for list="@{vmargs}" delimiter=";" param="vmarg">
-								<sequential>
-									<var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;" />
-									<if>
-										<not>
-											<equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
-										</not>
-										<then>
-											<var name="vmargsstring" value="${vmargsstring},${line.separator}" />
-										</then>
-									</if>
-									<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
-								</sequential>
-							</for>
-							<!-- this JSON file is read by the native launcher -->
-							<echo file="${contentstarget}/config.json">
-								<![CDATA[{
-"jar": "${appjarbasename}",
-"mainClass": "@{mainclass}",
-"vmArgs": [
-${vmargsstring}
-]}
-]]>
-							</echo>
-						</then>
-						<else>
-							<var name="altvmargs" value="" />
-							<if>
-							    <equals arg1="@{useserverjre}" arg2="true" />
-								<then>
-									<var name="altvmargs" value="-server;@{vmargs}" />
-									<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
-									<math result="vmarglastindex" operand1="${vmarglastindex}" operation="+" operand2="1" datatype="int"/>
-								</then>
-								<else>
-									<var name="altvmargs" value="@{vmargs}" />
-								</else>
-							</if>
-							<!-- uses ' ' as a separator to feed the script -->
-							<for list="${altvmargs}" delimiter=";" param="vmarg">
-								<sequential>
-									<var name="vmargsstring" value="${vmargsstring}@{vmarg}" />
-									<if>
-										<not>
-											<equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
-										</not>
-										<then>
-											<var name="vmargsstring" value="${vmargsstring} " />
-										</then>
-									</if>
-									<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
-								</sequential>
-							</for>
-						</else>
-					</if>
-					<!-- handles the native launcher or the script -->
-					<if>
-						<equals arg1="@{platform}" arg2="linux32" />
-						<then>
-							<if>
-							    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-							    <then>
-							        <var name="exesrcfilename" value="packr-linux" />
-							    </then>
-							</if>
-							<var name="exedstfilename" value="@{executable}" />
-						</then>
-						<else>
-							<if>
-								<equals arg1="@{platform}" arg2="linux64" />
-								<then>
-									<if>
-									    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-									    <then>
-									         <var name="exesrcfilename" value="packr-linux-x64" />
-									    </then>
-									</if>
-									<var name="exedstfilename" value="@{executable}" />
-								</then>
-								<else>
-									<if>
-										<equals arg1="@{platform}" arg2="mac" />
-										<then>
-											<if>
-											    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-											    <then>
-											        <var name="exesrcfilename" value="packr-mac" />
-											    </then>
-											</if>
-											<var name="exedstfilename" value="@{executable}" />
-										</then>
-										<else>
-											<if>
-												<equals arg1="@{platform}" arg2="windows" />
-												<then>
-													<if>
-													    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-													    <then>
-													        <var name="exesrcfilename" value="packr-windows.exe" />
-													        <var name="exedstfilename" value="@{executable}.exe" />
-													    </then>
-														<else>
-															<var name="exedstfilename" value="@{executable}.bat" />
-														</else>
-													</if>
-												</then>
-												<else>
-													<fail message="Unsupported platform @{platform}" />
-												</else>
-											</if>
-										</else>
-									</if>
-								</else>
-							</if>
-						</else>
-					</if>
-					<if>
-						<equals arg1="@{nativelauncherenabled}" arg2="true" />
-						<then>
-							<!-- extracts the executable of the native launcher from PackR's JAR -->
-							<unzip src="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" dest="${contentstarget}">
-								<patternset>
-									<include name="${exesrcfilename}"/>
-								</patternset>
-							</unzip>
-							<move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
-						</then>
-						<else>
-							<!-- creates the platform dependent script -->
-							<if>
-							    <equals arg1="@{platform}" arg2="windows" />
-								<!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
-								<!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
-							    <then>
-							    	<if>
-							    	    <equals arg1="@{jdk}" arg2="" />
-							    	    <then>
-							    	        <!-- uses the system JRE if any -->
-							    	        <echo file="${contentstarget}/${exedstfilename}"><![CDATA[java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
-							    	    </then>
-							    		<else>
-							    		    <!-- uses the packaged JRE -->
-							    		    <echo file="${contentstarget}/${exedstfilename}"><![CDATA[jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
-							    		</else>
-							        </if>
-							    </then>
-								<else>
-								    <if>
-								        <equals arg1="@{jdk}" arg2="" />
-								        <then>
-									        <!-- uses the system JRE if any -->
-									        <echo file="${contentstarget}/${exedstfilename}">
-										<![CDATA[
-#!/usr/bin/bash
-#code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /* ]] && SOURCE="$APP_LAUNCHER_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
-										]]>
-									        </echo>
-								        </then>
-								        <else>
-									        <!-- uses the packaged JRE -->
-									        <echo file="${contentstarget}/${exedstfilename}">
-										<![CDATA[
-#!/usr/bin/bash
-#code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /* ]] && SOURCE="$APP_LAUNCHER_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-$APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
-										]]>
-									        </echo>
-								        </else>
-							        </if>
-								</else>
-							</if>
-						</else>
-					</if>
-					<!-- ensures that the native launcher or the script is executable -->
-					<chmod file="${contentstarget}/${exedstfilename}" perm="755" />
-					<!-- handles the packaged JRE (extracts it from the JDK) if any -->
-					<if>
-						<not>
-						    <equals arg1="@{jdk}" arg2="" />
-						</not>
-						<then>
-						    <if>
-						        <available file="@{jdk}" />
-						        <then>
-							        <var name="jdkFile" value="@{jdk}" />
-						        </then>
-						        <else>
-							        <get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
-							        <var name="jdkFile" value="${contentstarget}/jdk.zip" />
-						        </else>
-					        </if>
-						</then>
-					</if>
-					<mkdir dir="${contentstarget}/tmp" />
-					<!-- the file permissions are lost when unzipping the archive -->
-					<unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
-					<mkdir dir="${contentstarget}/jre" />
-					<!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
-					<for param="dir">
-						<path>
-							<dirset dir="${contentstarget}/tmp/" />
-						</path>
-						<sequential>
-							<if>
-								<available file="@{dir}/jre/bin" />
-								<then>
-									<copy todir="${contentstarget}/jre" failonerror="true">
-										<fileset dir="@{dir}/jre" />
-									</copy>
-									<!-- drives "java" executable anew -->
-									<chmod file="${contentstarget}/jre/bin/java" perm="755" />
-								</then>
-							</if>
-						</sequential>
-					</for>
-					<delete dir="${contentstarget}/tmp" failonerror="true" />
-					<delete file="${contentstarget}/jdk.zip" failonerror="true" />
-					<!-- handles the resources if any -->
-					<for list="@{resources}" delimiter=";" param="resource">
-						<sequential>
-							<copy file="@{resource}" todir="${contentstarget}" />
-						</sequential>
-					</for>
-					<!-- handles the minimization (not implemented yet) -->
-					<if>
-						<not>
-							<equals arg1="@{minimizejre}" arg2="" />
-						</not>
-						<then>
-							<echo message="JRE minimization not implemented yet, 'minimizejre=@{minimizejre}' ignored" />
-						</then>
-					</if>
-				</then>
-				<else>
-					<if>
-						<equals arg1="@{useserverjre}" arg2="false" />
-						<then>
-							<echo message="impossible to use the client Hotspot VM with PackR, 'useserverjre=@{useserverjre}' ignored" />
-						</then>
-					</if>
-					<if>
-						<not>
-							<equals arg1="@{nativelauncherenabled}" arg2="false" />
-						</not>
-						<then>
-							<echo message="the native launcher is mandatory for PackR, 'nativelauncherenabled=@{nativelauncherenabled}' ignored" />
-						</then>
-					</if>
-					<if>
-						<equals arg1="@{minimizejre}" arg2="" />
-						<then>
-							<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
-								<arg value="-platform" />
-								<arg value="@{platform}" />
-								<arg value="-executable" />
-								<arg value="@{executable}" />
-								<arg value="-appjar" />
-								<arg value="@{appjar}" />
-								<arg value="-mainclass" />
-								<arg value="@{mainclass}" />
-								<arg value="-outdir" />
-								<arg value="@{outdir}" />
-								<arg value="-vmargs" />
-								<arg value="@{vmargs}" />
-								<arg value="-jdk" />
-								<arg value="@{jdk}" />
-								<arg value="-resources" />
-								<arg value="@{resources}" />
-							</java>
-						</then>
-						<else>
-							<java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
-								<arg value="-platform" />
-								<arg value="@{platform}" />
-								<arg value="-executable" />
-								<arg value="@{executable}" />
-								<arg value="-appjar" />
-								<arg value="@{appjar}" />
-								<arg value="-mainclass" />
-								<arg value="@{mainclass}" />
-								<arg value="-outdir" />
-								<arg value="@{outdir}" />
-								<arg value="-vmargs" />
-								<arg value="@{vmargs}" />
-								<arg value="-jdk" />
-								<arg value="@{jdk}" />
-								<arg value="-resources" />
-								<arg value="@{resources}" />
-								<arg value="-minimizejre" />
-								<arg value="@{minimizejre}" />
-							</java>
-						</else>
-					</if>
-					<!-- TODO test this option -->
-					<!--<if>
-						<equals arg1="@{platform}" arg2="mac" />
-						<then>
-							<replace file="@{outdir}/Contents/Info.plist" token="@{bundleIdentifier}" value="@{bundleIdentifier}"/>
-						</then>
-					</if>-->
-				</else>
-			</if>
-			<if>
-				<available file="@{iconsfile}" />
-				<then>
-					<echo message="icons file '@{iconsfile}' exists, copying" />
-					<copy file="@{iconsfile}" todir="${resourcestarget}" />
-				</then>
-				<else>
-					<echo message="icons file '@{iconsfile}' not found, no icons file for the application bundle" />
-				</else>
-			</if>
-		</sequential>
-	</macrodef>
 	<!-- ================================================================= -->
 	<!-- Create OS X APP                                                   -->
 	<!-- ================================================================= -->
 	<target name="create-os-x-app">
-		<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
-		<convertimage src="images/${game-logo-filename}" dst="${destdir}/icons.icns" sourceImageDuplicationAndRescaleEnabled="true" />
-		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<!-- Creates the Mac OS X application bundle which is a directory -->
-		<jndt platform="mac" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" mainclass="${game-main-class-for-packr}" 
-			outdir="${destdir}/${game-package-name}.app" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-			jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/icons.icns" 
-			antreimplementationenabled="true" nativelauncherenabled="true"/>
-		<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
-		<zip destfile="${destdir}/${game-app-zip-filename}">
-			<zipfileset dir="${destdir}/${game-package-name}.app/Contents/Resources" prefix="${game-package-name}.app/Contents/Resources"/>
-			<zipfileset file="${destdir}/${game-package-name}.app/Contents/Info.plist" prefix="${game-package-name}.app/Contents/"/>
-			<zipfileset dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre" prefix="${game-package-name}.app/Contents/MacOS/jre">
-				<exclude name="**/bin/*"/>
-				<exclude name="**/lib/*.dylib"/>
-				<!--<exclude name="**/lib/client/*.dylib"/>-->
-				<exclude name="**/lib/headless/*.dylib"/>
-				<exclude name="**/lib/jli/*.dylib"/>
-				<exclude name="**/lib/lwawt/*.dylib"/>
-				<exclude name="**/lib/server/*.dylib"/>
-				<exclude name="**/lib/xawt/*.dylib"/>
-			</zipfileset>
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/bin" file="${destdir}/${game-package-name}.app/Contents/MacOS/jre/bin/java" />
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/${game-short-name}" />
-			<zipfileset prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/config.json" />
-			<zipfileset prefix="${game-package-name}.app/Contents/MacOS/" file="${destdir}/${game-package-name}.app/Contents/MacOS/${game-jar-filename}" />
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib" includes="*.dylib"/>
-			<!--<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/client" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/client" includes="*.dylib"/>-->
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/headless" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/headless" includes="*.dylib"/>
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/jli" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/jli" includes="*.dylib"/>
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/lwawt" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/lwawt" includes="*.dylib"/>
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/server" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/server" includes="*.dylib"/>
-			<zipfileset filemode="755" prefix="${game-package-name}.app/Contents/MacOS/jre/lib/xawt" dir="${destdir}/${game-package-name}.app/Contents/MacOS/jre/lib/xawt" includes="*.dylib"/>
-		</zip>
-		<!-- Deletes the directory and the icon(s) in proprietary format(s), only keeps the ZIP archive -->
-		<delete file="${destdir}/icons.icns" failonerror="true" />
-		<delete dir="${destdir}/${game-app-dirname}" failonerror="true" />
+	    <to-package-name property="game-package-name" input="${game-short-name}"/>
+		<create-os-x-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
+		  	appzip="${destdir}/${game-app-zip-filename}" mainclass="${game-main-class-for-packr}" 
+            outdir="${destdir}/${game-package-name}.app" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+            jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
+            antreimplementationenabled="true" nativelauncherenabled="true"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
