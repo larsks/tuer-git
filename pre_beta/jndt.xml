@@ -91,7 +91,7 @@
         <attribute name="platform" description="one of windows, linux32, linux64, mac"/>
         <attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
         <attribute name="appjar" description="file location of the JAR to package"/>
-        <attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+        <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
         <attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
         <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
@@ -668,8 +668,8 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
 		<attribute name="appzip" description="application bundle zip archive"/>
-		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
-		<attribute name="outdir" description="output directory, must end with .app"/>
+		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
@@ -680,17 +680,37 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 	    <attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
+		<attribute name="categories" default="" description="list of categories separated by a ';', used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
+		<attribute name="comment" default="" description="comment of the shortcut"/>
+		<attribute name="vendor" default="" description="vendor"/>
+		<attribute name="packager" default="" description="packager"/>
+		<attribute name="license" default="" description="license"/>
+		<attribute name="summary" default="" description="summary"/>
+		<attribute name="group" default="" description="group"/>
+		<attribute name="version" default="0" description="version"/>
+		<attribute name="release" default="0" description="release"/>
+		<attribute name="host" default="" description="host (codebase)"/>
+		<attribute name="url" default="" description="homepage url"/>
+		<attribute name="email" default="" description="email"/>
 		<sequential>
 	    	<if>
 	    	    <equals arg1="@{bitness}" arg2="32" />
 	    		<then>
 	    		    <var name="platform" value="linux32"/>
+	    			<var name="rpmarchitecture" value="I386"/>
+	    			<var name="debarchitecture" value="i386"/>
+	    			<var name="jrearchitecture" value="i386"/>
+	    			<var name="tararchitecture" value="i386"/>
 	    		</then>
 	    		<else>
 	    			<if>
 	    			    <equals arg1="@{bitness}" arg2="64" />
 	    			    <then>
 	    			    	<var name="platform" value="linux64"/>
+	    			    	<var name="rpmarchitecture" value="X86_64"/>
+	    			    	<var name="debarchitecture" value="amd64"/>
+	    			    	<var name="jrearchitecture" value="amd64"/>
+	    			    	<var name="tararchitecture" value="amd64"/>
 	    			    </then>
 	    			    <else>
 	    			        <fail message="unknown bitness '@{bitness}'" />
@@ -699,14 +719,140 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    		</else>
 	    	</if>
 			<to-package-name property="package-name" input="@{appname}"/>
+			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
 			<create-app-dir platform="${platform}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-			    outdir="@{outdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" 
-			    antreimplementationenabled="true" nativelauncherenabled="false"/>
-			<!-- TODO: RPM -->
-			<!-- TODO: DEB -->
-			<!-- TODO: tar.gz -->
+			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
+			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
+			<!-- Removes the extension from the icon name. FIXME: remove any extension -->
+			<basename file="@{iconsfile}" property="icon-name" suffix=".png"/>
+			<!-- Creates the .desktop file for the shortcut -->
+			<echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
+Name=@{appname}
+Comment=@{comment}
+Exec=@{executable}
+Icon=${icon-name}
+Terminal=false
+Type=Application
+Categories=@{categories}]]></echo>
+			<!-- RPM -->
+			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			        <exclude name="**/@{executable}"/>
+			        <exclude name="**/jre/bin/*"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/*.so"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/client/*.so"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/headless/*.so"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/jli/*.so"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/server/*.so"/>
+			        <exclude name="**/jre/lib/${jrearchitecture}/xawt/*.so"/>
+			    </zipfileset>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" file="${appdir}/jre/bin/java"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/client" dir="${appdir}/jre/lib/${jrearchitecture}/client" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/headless" dir="${appdir}/jre/lib/${jrearchitecture}/headless" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/jli" dir="${appdir}/jre/lib/${jrearchitecture}/jli" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/server" dir="${appdir}/jre/lib/${jrearchitecture}/server" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/xawt" dir="${appdir}/jre/lib/${jrearchitecture}/xawt" includes="*.so"/>
+			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
+			    <zipfileset prefix="/usr/share/doc/${package-name}" file="LICENSE.txt"/>
+			    <zipfileset prefix="/usr/share/doc/${package-name}" file="NOTICE.txt"/>
+			    <zipfileset prefix="/usr/share/doc/${package-name}" file="README.txt"/>
+			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			</pure-java-rpm>
+			<!-- DEB -->
+			<mkdir dir="@{outdir}/controldir"/>
+			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
+Version: @{version}.@{release}
+Section: @{group}
+Priority: low
+Architecture: ${debarchitecture}
+Description: @{description}
+Maintainer: @{packager} <@{email}>
+Depends: 
+Homepage: @{url}]]></echo>
+			<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			    <data src="${appdir}" type="directory" 
+			        excludes="**/jre/bin/*,**/@{executable},**/jre/lib/${jrearchitecture}/*.so,**/jre/lib/${jrearchitecture}/client/*.so,**/jre/lib/${jrearchitecture}/headless/*.so,**/jre/lib/${jrearchitecture}/jli/*.so,**/jre/lib/${jrearchitecture}/server/*.so,**/jre/lib/${jrearchitecture}/xawt/*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    </data>
+			    <data src="@{appjar}" type="file">
+			        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    </data>
+			    <data src="${appdir}/${package-name}" type="file">
+			        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/bin/java" type="file">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}/client" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/client" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}/headless" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/headless" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}/jli" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/jli" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}/server" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/server" filemode="755"/>
+			    </data>
+			    <data src="${appdir}/jre/lib/${jrearchitecture}/xawt" type="directory" includes="*.so">
+			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}/xawt" filemode="755"/>
+			    </data>
+			    <data src="@{outdir}/${package-name}.desktop" type="file">
+			        <mapper type="perm" prefix="/usr/share/applications"/>
+			    </data>
+			    <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
+			        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+			    </data>
+			    <data src="LICENSE.txt" type="file">
+			        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    </data>
+			    <data src="NOTICE.txt" type="file">
+			        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    </data>
+			    <data src="README.txt" type="file">
+			        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    </data>
+			    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			</pure-java-deb>
+			<delete failonerror="false">
+			    <fileset dir="@{outdir}" includes="*.changes"/>
+			</delete>
+			<delete dir="@{outdir}/controldir" failonerror="false"/>
+			<!-- tar.gz -->
+			<tar destfile="@{outdir}/${package-name}-@{version}-@{release}.${tararchitecture}.tar.gz" compression="gzip">
+			    <zipfileset dir="${appdir}">
+			        <exclude name="**/@{executable}"/>
+			        <exclude name="**/jre/bin/*"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/*.so"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/client/*.so"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/headless/*.so"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/jli/*.so"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/server/*.so"/>
+			    	<exclude name="**/jre/lib/${jrearchitecture}/xawt/*.so"/>
+			    </zipfileset>
+			    <zipfileset filemode="755" file="${appdir}/@{executable}"/>
+			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/java"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}/client" dir="${appdir}/jre/lib/${jrearchitecture}/client" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}/headless" dir="${appdir}/jre/lib/${jrearchitecture}/headless" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}/jli" dir="${appdir}/jre/lib/${jrearchitecture}/jli" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}/server" dir="${appdir}/jre/lib/${jrearchitecture}/server" includes="*.so"/>
+			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}/xawt" dir="${appdir}/jre/lib/${jrearchitecture}/xawt" includes="*.so"/>
+			    <zipfileset file="LICENSE.txt"/>
+			    <zipfileset file="NOTICE.txt"/>
+			    <zipfileset file="README.txt"/>
+			</tar>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
-			<delete dir="@{outdir}" failonerror="true" />
+			<delete dir="${appdir}" failonerror="true" />
 	    </sequential>
 	</macrodef>
 	<macrodef name="create-os-x-app-bundle" description="creates a zipped APP file for Mac OS X">
@@ -714,8 +860,8 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
 		<attribute name="appzip" description="application bundle zip archive"/>
-		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
-		<attribute name="outdir" description="output directory, must end with .app"/>
+		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
@@ -726,20 +872,20 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<sequential>
-			<!-- TODO check that outdir ends with .app -->
 			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
+			<var name="appdir" value="@{outdir}/${package-name}.app"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
 			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-			    outdir="@{outdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" 
-			    antreimplementationenabled="true" nativelauncherenabled="true"/>
+			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
+				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 			<local name="appjarbasename" />
 			<basename property="appjarbasename" file="@{appjar}"/>
 			<zip destfile="@{appzip}">
-			    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="@{outdir}/Contents/Resources"/>
-			    <zipfileset prefix="${package-name}.app/Contents/" file="@{outdir}/Contents/Info.plist"/>
-			    <zipfileset prefix="${package-name}.app/Contents/MacOS/jre" dir="@{outdir}/Contents/MacOS/jre">
+			    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+			    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+			    <zipfileset prefix="${package-name}.app/Contents/MacOS/jre" dir="${appdir}/Contents/MacOS/jre">
 			        <exclude name="**/bin/*"/>
 			        <exclude name="**/lib/*.dylib"/>
 			        <!--<exclude name="**/lib/client/*.dylib"/>-->
@@ -749,23 +895,23 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 			        <exclude name="**/lib/server/*.dylib"/>
 			        <exclude name="**/lib/xawt/*.dylib"/>
 			    </zipfileset>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" file="@{outdir}/Contents/MacOS/jre/bin/java"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="@{outdir}/Contents/MacOS/@{executable}"/>
-			    <zipfileset prefix="${package-name}.app/Contents/MacOS/" file="@{outdir}/Contents/MacOS/config.json"/>
-			    <zipfileset prefix="${package-name}.app/Contents/MacOS/" file="@{outdir}/Contents/MacOS/${appjarbasename}"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="@{outdir}/Contents/MacOS/jre/lib" includes="*.dylib"/>
-			    <!--<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/client" dir="@{outdir}/Contents/MacOS/jre/lib/client" includes="*.dylib"/>-->
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/headless" dir="@{outdir}/Contents/MacOS/jre/lib/headless" includes="*.dylib"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/jli" dir="@{outdir}/Contents/MacOS/jre/lib/jli" includes="*.dylib"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/lwawt" dir="@{outdir}/Contents/MacOS/jre/lib/lwawt" includes="*.dylib"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/server" dir="@{outdir}/Contents/MacOS/jre/lib/server" includes="*.dylib"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/xawt" dir="@{outdir}/Contents/MacOS/jre/lib/xawt" includes="*.dylib"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" file="${appdir}/Contents/MacOS/jre/bin/java"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+			    <zipfileset prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/config.json"/>
+			    <zipfileset prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/${appjarbasename}"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib"/>
+			    <!--<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/client" dir="${appdir}/Contents/MacOS/jre/lib/client" includes="*.dylib"/>-->
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/headless" dir="${appdir}/Contents/MacOS/jre/lib/headless" includes="*.dylib"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/jli" dir="${appdir}/Contents/MacOS/jre/lib/jli" includes="*.dylib"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/lwawt" dir="${appdir}/Contents/MacOS/jre/lib/lwawt" includes="*.dylib"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/server" dir="${appdir}/Contents/MacOS/jre/lib/server" includes="*.dylib"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib/xawt" dir="${appdir}/Contents/MacOS/jre/lib/xawt" includes="*.dylib"/>
 				<zipfileset prefix="${package-name}.app/Contents/MacOS/" file="LICENSE.txt"/>
 				<zipfileset prefix="${package-name}.app/Contents/MacOS/" file="NOTICE.txt"/>
 				<zipfileset prefix="${package-name}.app/Contents/MacOS/" file="README.txt"/>
 			</zip>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
-			<delete dir="@{outdir}" failonerror="true" />
+			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
 	<macrodef name="create-windows-app-bundle" description="creates a zipped application archive for Microsoft Windows">
@@ -773,7 +919,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
 		<attribute name="appzip" description="application bundle zip archive"/>
-		<attribute name="mainclass" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
@@ -787,8 +933,8 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<sequential>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<create-app-dir platform="windows" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-                outdir="@{outdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" 
-                antreimplementationenabled="true" nativelauncherenabled="false"/>
+                outdir="@{outdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
+				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<zip destfile="@{appzip}">
 			    <zipfileset dir="@{outdir}">
 			        <exclude name="**/@{executable}"/>
