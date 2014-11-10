@@ -760,7 +760,7 @@ Description: ${game-long-description}]]></echo>
 	    <to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
 		  	appzip="${destdir}/${game-app-zip-filename}" mainclass="${game-main-class-for-packr}" 
-            outdir="${destdir}/${game-package-name}.app" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+            outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
             jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
             antreimplementationenabled="true" nativelauncherenabled="true"/>
 	</target>
