@@ -56,17 +56,15 @@
 	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
 	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
 	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
+	<property name="game-version" value="0.0" />
+	<property name="game-release" value="0" />
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
-	<property name="game-zip-filename" value="${project-unix-name}.zip" />
+	<property name="game-src-zip-filename" value="${project-unix-name}-@{version}-@{release}.src.zip" />
 	<!-- The logo of the game must be a PNG file composed of 64 * 64 pixels -->
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
-	<property name="game-app-dirname" value="${project-unix-name}.app" />
-	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
-	<property name="game-version" value="0" />
-	<property name="game-release" value="0" />
 	<property name="game-bundle-identifier" value="net.sourceforge.tuer" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
@@ -450,9 +448,9 @@
 	<!-- Create archive                                                    -->
 	<!-- ================================================================= -->
 	<target name="create-archive">
-		<delete file="${destdir}/${game-zip-filename}" failonerror="false" />
+		<delete file="${destdir}/${game-src-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
-		<zip destfile="${destdir}/${game-zip-filename}">
+		<zip destfile="${destdir}/${game-src-zip-filename}">
 			<fileset dir="." excludes="**/*.class,**/target/*,${keystore},**/*.py"/>
 		</zip>
 	</target>
@@ -466,13 +464,13 @@
 		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"
 			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
-			summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+			summary="${game-short-description}" description="${game-long-description}" group="Applications/Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"
 		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
-		    summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+		    summary="${game-short-description}" description="${game-long-description}" group="Applications/Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create Microsoft Windows packages (MSI, zip)                      -->
@@ -513,11 +511,11 @@
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the archive onto the SFTP server in the Project file release -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-			<fileset file="${destdir}/${game-zip-filename}" />
+			<fileset file="${destdir}/${game-src-zip-filename}" />
 		</scp>
 		<!-- Uploads the files onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-			<fileset dir="${destdir}" includes="**/*" excludes="${game-zip-filename}" />
+			<fileset dir="${destdir}" includes="**/*" excludes="${game-src-zip-filename}" />
 		</scp>
 	</target>
 	<!-- ================================================================= -->
