@@ -29,28 +29,6 @@
 	<!-- task that allows the use of optional tasks without modifying the Ant install by modifying the classpath at runtime -->
 	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
-	<!-- pure Java implementation of the RPM package builder -->
-	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask">
-		<classpath>
-			<pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
-			<pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
-			<pathelement path="lib/ant/slf4j-api-1.7.7.jar"/>
-			<pathelement path="lib/ant/slf4j-simple-1.7.7.jar"/>
-			<pathelement path="lib/ant/xz-1.4.jar"/>
-			<pathelement path="lib/ant/redline-1.1.16.jar"/>
-		</classpath>
-	</taskdef>
-	<!-- pure Java implementation of the DEB package builder -->
-	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask">
-		<classpath>
-			<pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
-			<pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
-			<pathelement path="lib/ant/commons-io-2.4.jar"/>
-			<pathelement path="lib/ant/jdeb-1.3.jar"/>
-		</classpath>
-	</taskdef>
-	<!-- task of image format conversion -->
-	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
 		<available file="branding.properties" />
@@ -481,277 +459,20 @@
 	<!-- ================================================================= -->
 	<!-- Create GNU Linux packages (RPM, DEB, tar.gz)                      -->
 	<!-- ================================================================= -->
-	<target name="create-linux-pkgs_">
+	<target name="create-linux-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
+		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"
 			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
 			summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
+		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"
 		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
 		    summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
-	</target>
-	<target name="create-linux-pkgs">
-		<!-- The package name must respect the RPM Naming Convention -->
-		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<!-- Removes the extension from the icon name. FIXME: remove any extension -->
-		<basename file="${game-logo-filename}" property="game-icon-name" suffix=".png"/>
-		<echo file="${destdir}/${game-package-name}.desktop"><![CDATA[[Desktop Entry]
-Name=${game-long-name}
-Comment=${game-short-description}
-Exec=${game-package-name}
-Icon=${game-icon-name}
-Terminal=false
-Type=Application
-Categories=Game;Shooter;]]></echo>
-		<create-app-dir platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
-			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
-			bundleidentifier="${game-bundle-identifier}" iconsfile="${destdir}/${game-logo-filename}" 
-			antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
-			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}"
-			version="${game-version}" release="${game-release}" architecture="I386" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux32_game">
-				<exclude name="**/${game-package-name}"/>
-				<exclude name="**/jre/bin/*"/>
-				<exclude name="**/jre/lib/i386/*.so"/>
-				<exclude name="**/jre/lib/i386/client/*.so"/>
-			    <exclude name="**/jre/lib/i386/headless/*.so"/>
-				<exclude name="**/jre/lib/i386/jli/*.so"/>
-				<exclude name="**/jre/lib/i386/server/*.so"/>
-				<exclude name="**/jre/lib/i386/xawt/*.so"/>
-			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386" dir="${destdir}/tmp_linux32_game/jre/lib/i386" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386/client" dir="${destdir}/tmp_linux32_game/jre/lib/i386/client" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386/headless" dir="${destdir}/tmp_linux32_game/jre/lib/i386/headless" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386/jli" dir="${destdir}/tmp_linux32_game/jre/lib/i386/jli" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386/server" dir="${destdir}/tmp_linux32_game/jre/lib/i386/server" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/i386/xawt" dir="${destdir}/tmp_linux32_game/jre/lib/i386/xawt" includes="*.so"/>
-			<zipfileset prefix="/usr/share/applications" file="${destdir}/${game-package-name}.desktop"/>
-			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="LICENSE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="NOTICE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
-			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
-		</pure-java-rpm>
-		<mkdir dir="${destdir}/controldir"/>
-		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
-Version: ${game-version}.${game-release}
-Section: Games
-Priority: low
-Architecture: i386
-Description: ${game-long-description}
-Maintainer: ${vendor} <${email}>
-Depends: 
-Homepage: ${homepage-url}
-Description: ${game-long-description}]]></echo>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.deb" control="${destdir}/controldir" verbose="true">
-		    <data src="${destdir}/tmp_linux32_game" type="directory" 
-		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/i386/*.so,**/jre/lib/i386/client/*.so,**/jre/lib/i386/headless/*.so,**/jre/lib/i386/jli/*.so,**/jre/lib/i386/server/*.so,**/jre/lib/i386/xawt/*.so">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-		    </data>
-		    <data src="${destdir}/${game-jar-filename}" type="file">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-		    </data>
-		    <data src="${destdir}/tmp_linux32_game/${game-package-name}" type="file">
-		        <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
-		    </data>
-		    <data src="${destdir}/tmp_linux32_game/jre/bin/java" type="file">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
-		    </data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/client" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/client" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/headless" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/headless" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/jli" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/jli" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/server" type="directory" includes="*.so">
-				<mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/server" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux32_game/jre/lib/i386/xawt" type="directory" includes="*.so">
-				<mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/i386/xawt" filemode="755"/>
-			</data>
-		    <data src="${destdir}/${game-package-name}.desktop" type="file">
-		        <mapper type="perm" prefix="/usr/share/applications"/>
-		    </data>
-		    <data src="images/${game-logo-filename}" type="file">
-		        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-		    </data>
-		    <data src="LICENSE.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <data src="NOTICE.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <data src="README.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
-		</pure-java-deb>
-		<delete failonerror="false">
-		    <fileset dir="${destdir}" includes="*.changes"/>
-		</delete>
-		<delete failonerror="false" dir="${destdir}/controldir" />
-		<tar destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.tar.gz" compression="gzip">
-			<zipfileset dir="${destdir}/tmp_linux32_game">
-			    <exclude name="**/${game-package-name}"/>
-			    <exclude name="**/jre/bin/*"/>
-				<exclude name="**/jre/lib/i386/*.so"/>
-			    <exclude name="**/jre/lib/i386/client/*.so"/>
-				<exclude name="**/jre/lib/i386/headless/*.so"/>
-				<exclude name="**/jre/lib/i386/jli/*.so"/>
-				<exclude name="**/jre/lib/i386/server/*.so"/>
-				<exclude name="**/jre/lib/i386/xawt/*.so"/>
-			</zipfileset>
-			<zipfileset filemode="755" file="${destdir}/tmp_linux32_game/${game-package-name}"/>
-			<zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux32_game/jre/bin/java"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386" dir="${destdir}/tmp_linux32_game/jre/lib/i386" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386/client" dir="${destdir}/tmp_linux32_game/jre/lib/i386/client" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386/headless" dir="${destdir}/tmp_linux32_game/jre/lib/i386/headless" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386/jli" dir="${destdir}/tmp_linux32_game/jre/lib/i386/jli" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386/server" dir="${destdir}/tmp_linux32_game/jre/lib/i386/server" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/i386/xawt" dir="${destdir}/tmp_linux32_game/jre/lib/i386/xawt" includes="*.so"/>
-			<zipfileset file="LICENSE.txt"/>
-			<zipfileset file="NOTICE.txt"/>
-			<zipfileset file="README.txt"/>
-		</tar>
-		<delete dir="${destdir}/tmp_linux32_game" failonerror="true" />
-		<create-app-dir platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
-			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
-			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
-			bundleidentifier="${game-bundle-identifier}" iconsfile="${destdir}/${game-logo-filename}" 
-			antreimplementationenabled="true" nativelauncherenabled="false"/>
-		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
-			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}" 
-			version="${game-version}" release="${game-release}" architecture="X86_64" destination="${destdir}" host="${codebase-url}" url="${homepage-url}" type="BINARY">
-			<zipfileset prefix="/usr/share/${game-package-name}" dir="${destdir}/tmp_linux64_game">
-				<exclude name="**/${game-package-name}"/>
-				<exclude name="**/jre/bin/*"/>
-				<exclude name="**/jre/lib/amd64/*.so"/>
-				<!--<exclude name="**/jre/lib/amd64/client/*.so"/>-->
-				<exclude name="**/jre/lib/amd64/headless/*.so"/>
-				<exclude name="**/jre/lib/amd64/jli/*.so"/>
-				<exclude name="**/jre/lib/amd64/server/*.so"/>
-				<exclude name="**/jre/lib/amd64/xawt/*.so"/>
-			</zipfileset>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64" dir="${destdir}/tmp_linux64_game/jre/lib/amd64" includes="*.so"/>
-			<!--<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64/client" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/client" includes="*.so"/>-->
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64/headless" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/headless" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64/jli" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/jli" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64/server" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/server" includes="*.so"/>
-			<zipfileset filemode="755" prefix="/usr/share/${game-package-name}/jre/lib/amd64/xawt" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/xawt" includes="*.so"/>
-			<zipfileset prefix="/usr/share/applications" file="${destdir}/${game-package-name}.desktop"/>
-			<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="images/${game-logo-filename}"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="LICENSE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="NOTICE.txt"/>
-			<zipfileset prefix="/usr/share/doc/${game-package-name}" file="README.txt"/>
-			<link path="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
-		</pure-java-rpm>
-		<mkdir dir="${destdir}/controldir"/>
-		<echo file="${destdir}/controldir/control"><![CDATA[Package: ${game-package-name}
-Version: ${game-version}.${game-release}
-Section: Games
-Priority: low
-Architecture: amd64
-Description: ${game-long-description}
-Maintainer: ${vendor} <${email}>
-Depends: 
-Homepage: ${homepage-url}
-Description: ${game-long-description}]]></echo>
-		<pure-java-deb destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.deb" control="${destdir}/controldir" verbose="true">
-		    <data src="${destdir}/tmp_linux64_game" type="directory" 
-		    	excludes="**/jre/bin/*,**/${game-package-name},**/jre/lib/amd64/*.so,**/jre/lib/amd64/headless/*.so,**/jre/lib/amd64/jli/*.so,**/jre/lib/amd64/server/*.so,**/jre/lib/amd64/xawt/*.so">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-		    </data>
-		    <data src="${destdir}/${game-jar-filename}" type="file">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}"/>
-		    </data>
-		    <data src="${destdir}/tmp_linux64_game/${game-package-name}" type="file">
-		        <mapper type="perm" prefix="usr/share/${game-package-name}" filemode="755"/>
-		    </data>
-		    <data src="${destdir}/tmp_linux64_game/jre/bin/java" type="file">
-		        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/bin" filemode="755"/>
-		    </data>
-			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64" filemode="755"/>
-			</data>
-			<!--<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/client" type="directory" includes="*.so">
-			        <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/client" filemode="755"/>
-			</data>-->
-			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/headless" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/headless" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/jli" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/jli" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/server" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/server" filemode="755"/>
-			</data>
-			<data src="${destdir}/tmp_linux64_game/jre/lib/amd64/xawt" type="directory" includes="*.so">
-			    <mapper type="perm" prefix="/usr/share/${game-package-name}/jre/lib/amd64/xawt" filemode="755"/>
-			</data>
-		    <data src="${destdir}/${game-package-name}.desktop" type="file">
-		        <mapper type="perm" prefix="/usr/share/applications"/>
-		    </data>
-		    <data src="images/${game-logo-filename}" type="file">
-		        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-		    </data>
-		    <data src="LICENSE.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <data src="NOTICE.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <data src="README.txt" type="file">
-		        <mapper type="perm" prefix="/usr/share/doc/${game-package-name}"/>
-		    </data>
-		    <link symbolic="true" name="/usr/bin/${game-package-name}" target="/usr/share/${game-package-name}/${game-package-name}"/>
-		</pure-java-deb>
-		<delete failonerror="false">
-		    <fileset dir="${destdir}" includes="*.changes"/>
-		</delete>
-		<delete failonerror="false" dir="${destdir}/controldir" />
-		<tar destfile="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.tar.gz" compression="gzip">
-		    <zipfileset dir="${destdir}/tmp_linux64_game">
-		        <exclude name="**/${game-package-name}"/>
-		        <exclude name="**/jre/bin/*"/>
-		    	<exclude name="**/jre/lib/amd64/*.so"/>
-		    	<!--<exclude name="**/jre/lib/amd64/client/*.so"/>-->
-		    	<exclude name="**/jre/lib/amd64/headless/*.so"/>
-		    	<exclude name="**/jre/lib/amd64/jli/*.so"/>
-		    	<exclude name="**/jre/lib/amd64/server/*.so"/>
-		    	<exclude name="**/jre/lib/amd64/xawt/*.so"/>
-		    </zipfileset>
-		    <zipfileset filemode="755" file="${destdir}/tmp_linux64_game/${game-package-name}"/>
-		    <zipfileset filemode="755" prefix="jre/bin" file="${destdir}/tmp_linux64_game/jre/bin/java"/>
-			<zipfileset filemode="755" prefix="jre/lib/amd64" dir="${destdir}/tmp_linux64_game/jre/lib/amd64" includes="*.so"/>
-			<!--<zipfileset filemode="755" prefix="jre/lib/amd64/client" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/client" includes="*.so"/>-->
-			<zipfileset filemode="755" prefix="jre/lib/amd64/headless" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/headless" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/amd64/jli" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/jli" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/amd64/server" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/server" includes="*.so"/>
-			<zipfileset filemode="755" prefix="jre/lib/amd64/xawt" dir="${destdir}/tmp_linux64_game/jre/lib/amd64/xawt" includes="*.so"/>
-		    <zipfileset file="LICENSE.txt"/>
-		    <zipfileset file="NOTICE.txt"/>
-		    <zipfileset file="README.txt"/>
-		</tar>
-		<delete dir="${destdir}/tmp_linux64_game" failonerror="true" />
-		<delete file="${destdir}/${game-package-name}.desktop" failonerror="true" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create Microsoft Windows packages (MSI, zip)                      -->
@@ -759,11 +480,11 @@ Description: ${game-long-description}]]></echo>
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"/>
 	</target>
@@ -773,9 +494,10 @@ Description: ${game-long-description}]]></echo>
 	<target name="create-os-x-app">
 	    <to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
-		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-            jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
-            antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" release="${game-release}"/>
+		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
+			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
+			iconsfile="images/${game-logo-filename}" antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" 
+			release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
