@@ -20,7 +20,7 @@
 
 <!-- ===================================================================== -->
 <!-- First person shooter and editor                                       -->
-<!-- Ant 1.9 build file                                                    -->
+<!-- Ant 1.8 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="First person shooter and editor" default="build" basedir=".">
@@ -89,6 +89,7 @@
 	<property name="game-app-zip-filename" value="${game-app-dirname}.zip" />
 	<property name="game-version" value="0" />
 	<property name="game-release" value="0" />
+	<property name="game-bundle-identifier" value="net.sourceforge.tuer" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
@@ -480,6 +481,21 @@
 	<!-- ================================================================= -->
 	<!-- Create GNU Linux packages (RPM, DEB, tar.gz)                      -->
 	<!-- ================================================================= -->
+	<target name="create-linux-pkgs_">
+		<to-package-name property="game-package-name" input="${game-short-name}"/>
+		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"
+			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
+			summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"
+		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
+		    summary="${game-short-description}" description="${game-long-description}" group="Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+	</target>
 	<target name="create-linux-pkgs">
 		<!-- The package name must respect the RPM Naming Convention -->
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
@@ -496,7 +512,7 @@ Categories=Game;Shooter;]]></echo>
 		<create-app-dir platform="linux32" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux32_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="	jdk="${openjdk-linux-i586-build-url}" 
-			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
+			bundleidentifier="${game-bundle-identifier}" iconsfile="${destdir}/${game-logo-filename}" 
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}"
@@ -617,7 +633,7 @@ Description: ${game-long-description}]]></echo>
 		<create-app-dir platform="linux64" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" 
 			mainclass="${game-main-class-for-packr}" outdir="${destdir}/tmp_linux64_game" 
 			vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" jdk="${openjdk-linux-amd64-build-url}" 
-			bundleidentifier="net.sourceforge.tuer" iconsfile="${destdir}/${game-logo-filename}" 
+			bundleidentifier="${game-bundle-identifier}" iconsfile="${destdir}/${game-logo-filename}" 
 			antreimplementationenabled="true" nativelauncherenabled="false"/>
 		<pure-java-rpm vendor="${vendor}" packager="${vendor}" license="GPL" description="${game-long-description}" 
 			summary="${game-short-description}" group="Games" provides="${game-package-name}" name="${game-package-name}" 
@@ -743,15 +759,13 @@ Description: ${game-long-description}]]></echo>
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    appzip="${destdir}/${game-package-name}-${game-version}-${game-release}.i386.zip" mainclass="${game-main-class-for-packr}" 
-		    outdir="${destdir}/tmp_windows32_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false"/>
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    appzip="${destdir}/${game-package-name}-${game-version}-${game-release}.amd64.zip" mainclass="${game-main-class-for-packr}" 
-		    outdir="${destdir}/tmp_windows64_game" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false"/>
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create OS X APP                                                   -->
@@ -759,10 +773,9 @@ Description: ${game-long-description}]]></echo>
 	<target name="create-os-x-app">
 	    <to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
-		  	appzip="${destdir}/${game-app-zip-filename}" mainclass="${game-main-class-for-packr}" 
-            outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
-            jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="net.sourceforge.tuer" iconsfile="images/${game-logo-filename}" 
-            antreimplementationenabled="true" nativelauncherenabled="true"/>
+		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" 
+            jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+            antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload                                                            -->
