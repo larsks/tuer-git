@@ -761,7 +761,7 @@ Categories=@{categories}]]></echo>
 			            	</copy>
 			            </then>
 			            <else>
-			                <echo message="'docdir' not found, skipped"/>
+			                <echo message="'docdir' @{docdir} not found, skipped"/>
 			            </else>
 			        </if>
 			    </then>
@@ -875,6 +875,27 @@ Homepage: @{url}]]></echo>
 			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
+			<!-- Handles the documentation -->
+			<var name="tmpdocdir" value="@{outdir}/doc"/>
+			<mkdir dir="${tmpdocdir}"/>
+			<if>
+			    <not>
+			        <equals arg1="@{docdir}" arg2=""/>
+			    </not>
+			    <then>
+			        <if>
+			            <available file="@{docdir}"/>
+			            <then>
+			                <copy todir="${tmpdocdir}">
+			                    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
+			                </copy>
+			            </then>
+			            <else>
+			                <echo message="'docdir' @{docdir} not found, skipped"/>
+			            </else>
+			        </if>
+			    </then>
+			</if>
 			<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 			<zip destfile="${appzip}">
 			    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
@@ -888,26 +909,10 @@ Homepage: @{url}]]></echo>
 			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" file="${appdir}/Contents/MacOS/jre/bin/java"/>
 			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
 				<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+				<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
-			<if>
-			    <not>
-			        <equals arg1="@{docdir}" arg2=""/>
-			    </not>
-			    <then>
-			        <if>
-			            <available file="@{docdir}"/>
-			            <then>
-			                <zip destfile="${appzip}" update="true">
-			                    <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="@{docdir}" includes="@{docdirincludes}"/>
-			                </zip>
-			            </then>
-			            <else>
-			                <echo message="'docdir' not found, skipped"/>
-			            </else>
-			        </if>
-			    </then>
-			</if>
-			<!-- Deletes the directory, only keeps the ZIP archive -->
+			<!-- Deletes the directories, only keeps the ZIP archive -->
+			<delete dir="${tmpdocdir}" failonerror="true" />
 			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
@@ -967,6 +972,28 @@ Homepage: @{url}]]></echo>
 					<var name="exeextension" value=".exe"/>
 				</else>
 			</if>
+			<!-- Handles the documentation -->
+			<var name="tmpdocdir" value="@{outdir}/doc"/>
+			<mkdir dir="${tmpdocdir}"/>
+			<if>
+			    <not>
+			        <equals arg1="@{docdir}" arg2=""/>
+			    </not>
+			    <then>
+			        <if>
+			            <available file="@{docdir}"/>
+			            <then>
+			                <copy todir="${tmpdocdir}">
+			                    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
+			                </copy>
+			            </then>
+			            <else>
+			                <echo message="'docdir' @{docdir} not found, skipped"/>
+			            </else>
+			        </if>
+			    </then>
+			</if>
+			<!-- Creates the zip archive -->
 			<zip destfile="${appzip}">
 			    <zipfileset dir="${appdir}">
 			        <exclude name="@{executable}${exeextension}"/>
@@ -978,26 +1005,10 @@ Homepage: @{url}]]></echo>
 			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/java.exe"/>
 			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/javaw.exe"/>
 			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
-			<if>
-			    <not>
-				    <equals arg1="@{docdir}" arg2=""/>
-				</not>
-				<then>
-				    <if>
-				    	<available file="@{docdir}"/>
-				        <then>
-				        	<zip destfile="${appzip}" update="true">
-				        		<zipfileset dir="@{docdir}" includes="@{docdirincludes}"/>
-				        	</zip>
-				        </then>
-				    	<else>
-				    	    <echo message="'docdir' not found, skipped"/>
-				    	</else>
-				    </if>
-				</then>
-			</if>
-			<!-- Deletes the directory, only keeps the ZIP archive -->
+			<!-- Deletes the directories, only keeps the ZIP archive -->
+			<delete dir="${tmpdocdir}" failonerror="true" />
 			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
