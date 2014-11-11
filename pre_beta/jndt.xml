@@ -745,6 +745,27 @@ Icon=${icon-name}
 Terminal=false
 Type=Application
 Categories=@{categories}]]></echo>
+			<!-- Handles the documentation -->
+			<var name="tmpdocdir" value="@{outdir}/doc"/>
+			<mkdir dir="${tmpdocdir}"/>
+			<if>
+			    <not>
+			        <equals arg1="@{docdir}" arg2=""/>
+			    </not>
+			    <then>
+			        <if>
+			            <available file="@{docdir}"/>
+			            <then>
+			            	<copy todir="${tmpdocdir}">
+			            	    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
+			            	</copy>
+			            </then>
+			            <else>
+			                <echo message="'docdir' not found, skipped"/>
+			            </else>
+			        </if>
+			    </then>
+			</if>
 			<!-- RPM -->
 			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
@@ -760,7 +781,7 @@ Categories=@{categories}]]></echo>
 			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
-				<!-- FIXME handle docdir and docdirincludes, put docs into /usr/share/doc/${package-name} -->
+				<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			</pure-java-rpm>
 			<!-- DEB -->
@@ -797,7 +818,9 @@ Homepage: @{url}]]></echo>
 			    <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
 			        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
 			    </data>
-				<!-- FIXME handle docdir and docdirincludes, put docs into /usr/share/doc/${package-name} -->
+				<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+				    <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+				</data>
 			    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			</pure-java-deb>
 			<delete failonerror="false">
@@ -816,9 +839,11 @@ Homepage: @{url}]]></echo>
 			    <zipfileset filemode="755" file="${appdir}/@{executable}"/>
 			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/java"/>
 			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</tar>
-			<!-- FIXME handle docdir and docdirincludes -->
 			<!-- Deletes the directory, only keeps the ZIP archive -->
+			<delete file="@{outdir}/${package-name}.desktop" failonerror="true" />
+			<delete dir="${tmpdocdir}" failonerror="true" />
 			<delete dir="${appdir}" failonerror="true" />
 	    </sequential>
 	</macrodef>
