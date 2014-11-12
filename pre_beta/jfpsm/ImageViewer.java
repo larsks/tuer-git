@@ -50,13 +50,16 @@ public class ImageViewer extends JPanel{
 	
 	private boolean zoomEnabled;
 	
-	private transient Point lastDragPoint;
+	private Point lastDragPoint;
+	
+	private final DummyImagePanel dummyImagePanel;
 	
 	public ImageViewer(final BufferedImage image){
 		super();
 		setLayout(new BorderLayout());
 		this.scrollPane=new JScrollPane();
-		this.scrollPane.setViewportView(new DummyImagePanel(image));
+		this.dummyImagePanel=new DummyImagePanel(image);
+		this.scrollPane.setViewportView(dummyImagePanel);
 		final MouseAdapter mouseAdapter=new MouseAdapter(){
 			
 			@Override
@@ -123,7 +126,7 @@ public class ImageViewer extends JPanel{
 	private void mouseClicked(MouseEvent me){
 		if(SwingUtilities.isLeftMouseButton(me)&&zoomEnabled)
 		    {//TODO
-			 
+			 //dummyImagePanel.transform=;
 		    }
 	}
 	
