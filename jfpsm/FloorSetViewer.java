@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+//import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
 public class FloorSetViewer extends JFPSMProjectUserObjectViewer{
@@ -26,6 +27,8 @@ public class FloorSetViewer extends JFPSMProjectUserObjectViewer{
 	
 	public FloorSetViewer(final FloorSet floorSet,final Project project,final ProjectManager projectManager){
 		super(floorSet, project, projectManager);
-		setLayout(new GridLayout(1,1));
+		setLayout(new GridLayout());
+		//setLayout(new BorderLayout());
+		//add(new ImageViewer(floorSet.getFloorsList().get(0).getMap(MapType.CONTAINER_MAP).getImage()),BorderLayout.CENTER);
 	}
 }
