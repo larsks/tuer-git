@@ -887,7 +887,7 @@ Homepage: @{url}]]></echo>
 			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="appzip" value="@{outdir}/${package-name}-@{version}-@{release}-universal.app.zip"/>
+			<var name="appzip" value="@{outdir}/${package-name}-@{version}-@{release}.universal.app.zip"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
 			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
