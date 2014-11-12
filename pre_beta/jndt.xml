@@ -789,7 +789,7 @@ Categories=@{categories}]]></echo>
 			    	<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
 			    </zipfileset>
 			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" file="${appdir}/jre/bin/java"/>
+				<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
@@ -815,10 +815,10 @@ Homepage: @{url}]]></echo>
 			    <data src="@{appjar}" type="file">
 			        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    </data>
-			    <data src="${appdir}/${package-name}" type="file">
+			    <data src="${appdir}/@{executable}" type="file">
 			        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
 			    </data>
-			    <data src="${appdir}/jre/bin/java" type="file">
+			    <data src="${appdir}/jre/bin" type="directory" includes="*">
 			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
 			    </data>
 			    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
@@ -849,7 +849,7 @@ Homepage: @{url}]]></echo>
 			    	<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
 			    </zipfileset>
 			    <zipfileset filemode="755" file="${appdir}/@{executable}"/>
-			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/java"/>
+			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</tar>
@@ -933,8 +933,8 @@ Homepage: @{url}]]></echo>
 			        <exclude name="jre/lib/*.dylib"/>
 			    	<exclude name="jre/lib/**/*.dylib"/>
 			    </zipfileset>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" file="${appdir}/Contents/MacOS/jre/bin/java"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+				<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
 				<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
 				<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
@@ -1044,8 +1044,7 @@ Homepage: @{url}]]></echo>
 			        <exclude name="jre/bin/*.exe"/>
 			    </zipfileset>
 			    <zipfileset filemode="755" file="${appdir}/@{executable}${exeextension}"/>
-			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/java.exe"/>
-			    <zipfileset filemode="755" prefix="jre/bin" file="${appdir}/jre/bin/javaw.exe"/>
+			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
 			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
 				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
