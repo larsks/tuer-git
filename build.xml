@@ -56,13 +56,13 @@
 	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
 	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
 	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
-	<property name="game-version" value="0.0" />
+	<property name="game-version" value="0.0.0" />
 	<property name="game-release" value="0" />
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
-	<property name="game-src-zip-filename" value="${project-unix-name}-@{version}-@{release}.src.zip" />
+	<property name="game-src-zip-filename" value="${project-unix-name}-${game-version}-${game-release}.src.zip" />
 	<!-- The logo of the game must be a PNG file composed of 64 * 64 pixels -->
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="game-bundle-identifier" value="net.sourceforge.tuer" />
@@ -82,7 +82,7 @@
 	<property name="sftp-remotedir" value="/home/project-web/${project-unix-name}/htdocs/very_experimental" />
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
-	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/" />
+	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/${project-unix-name}-${game-version}"/><!-- N.B: no release number in the directory name -->
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
@@ -349,9 +349,7 @@
 		<!-- deletes the keystore if any -->
 		<delete file="${keystore}" failonerror="false" />
 		<!-- gets the storepass -->
-		<input message="Please enter the store pass:" addproperty="storepass">
-			<handler type="secure"/>
-		</input>
+		<input message="Please enter the store pass:" addproperty="storepass"/>
 		<!-- creates the keystore -->
 		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}">
 			<dname>
@@ -505,17 +503,18 @@
 		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
 		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
-		<input message="Please enter the password:" addproperty="sftp-password">
-			<handler type="secure"/>
-		</input>
+		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
-		<!-- Uploads the archive onto the SFTP server in the Project file release -->
+		<!-- Uploads the packages and the archives (the binaries and the source code) onto the SFTP server in the Project file release -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-			<fileset file="${destdir}/${game-src-zip-filename}" />
+			<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" excludes="${game-src-zip-filename}" />
 		</scp>
-		<!-- Uploads the files onto the SFTP server in the Project Web Space -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
+		    <fileset file="${destdir}/${game-src-zip-filename}" />
+		</scp>
+		<!-- Uploads the other files just by Java Webstart onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-			<fileset dir="${destdir}" includes="**/*" excludes="${game-src-zip-filename}" />
+			<fileset dir="${destdir}" includes="*" excludes="${project-unix-name}-${game-version}-${game-release}.*" />
 		</scp>
 	</target>
 	<!-- ================================================================= -->
