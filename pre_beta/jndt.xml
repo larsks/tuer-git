@@ -27,6 +27,7 @@
     <description>JNDT: Java Native Deployment Toolkit</description>
 	<property name="jndtlibdir" value="lib/ant" />
 	<property name="packrlibpath" value="${jndtlibdir}/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" />
+	<property name="commonsimaginglibpath" value="${jndtlibdir}/commons-imaging-1.0-SNAPSHOT.jar" />
  	<!-- External tasks of Ant-Contrib -->
  	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<!-- pure Java implementation of the RPM package builder -->
@@ -50,7 +51,7 @@
 	    </classpath>
 	</taskdef>
 	<!-- task of image format conversion -->
-	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="lib/commons-imaging/commons-imaging-1.0-SNAPSHOT.jar"/>
+	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="${commonsimaginglibpath}"/>
  	
 	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
 	<macrodef name="to-package-name">
