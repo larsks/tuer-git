@@ -748,8 +748,6 @@ Terminal=false
 Type=Application
 Categories=@{categories}]]></echo>
 			<!-- Handles the documentation -->
-			<var name="tmpdocdir" value="@{outdir}/doc"/>
-			<mkdir dir="${tmpdocdir}"/>
 			<if>
 			    <not>
 			        <equals arg1="@{docdir}" arg2=""/>
@@ -758,15 +756,27 @@ Categories=@{categories}]]></echo>
 			        <if>
 			            <available file="@{docdir}"/>
 			            <then>
-			            	<copy todir="${tmpdocdir}">
-			            	    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
-			            	</copy>
+			                <var name="useemptydocdir" value="false"/>
 			            </then>
 			            <else>
+			                <var name="useemptydocdir" value="true"/>
 			                <echo message="'docdir' @{docdir} not found, skipped"/>
 			            </else>
 			        </if>
 			    </then>
+			    <else>
+			        <var name="useemptydocdir" value="true"/>
+			    </else>
+			</if>
+			<if>
+			    <equals arg1="${useemptydocdir}" arg2="true"/>
+			    <then>
+			        <var name="tmpdocdir" value="@{outdir}/emptydir"/>
+			        <mkdir dir="${tmpdocdir}"/>
+			    </then>
+			    <else>
+			        <var name="tmpdocdir" value="@{docdir}"/>
+			    </else>
 			</if>
 			<!-- RPM --><!-- FIXME handle the dependencies: see "depends" -->
 			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
@@ -845,7 +855,12 @@ Homepage: @{url}]]></echo>
 			</tar>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
 			<delete file="@{outdir}/${package-name}.desktop" failonerror="true" />
-			<delete dir="${tmpdocdir}" failonerror="true" />
+			<if>
+			    <equals arg1="${useemptydocdir}" arg2="true"/>
+			    <then>
+			        <delete dir="${tmpdocdir}" failonerror="true" />
+			    </then>
+			</if>
 			<delete dir="${appdir}" failonerror="true" />
 	    </sequential>
 	</macrodef>
@@ -878,8 +893,6 @@ Homepage: @{url}]]></echo>
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<!-- Handles the documentation -->
-			<var name="tmpdocdir" value="@{outdir}/doc"/>
-			<mkdir dir="${tmpdocdir}"/>
 			<if>
 			    <not>
 			        <equals arg1="@{docdir}" arg2=""/>
@@ -888,15 +901,27 @@ Homepage: @{url}]]></echo>
 			        <if>
 			            <available file="@{docdir}"/>
 			            <then>
-			                <copy todir="${tmpdocdir}">
-			                    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
-			                </copy>
+			                <var name="useemptydocdir" value="false"/>
 			            </then>
 			            <else>
+			                <var name="useemptydocdir" value="true"/>
 			                <echo message="'docdir' @{docdir} not found, skipped"/>
 			            </else>
 			        </if>
 			    </then>
+			    <else>
+			        <var name="useemptydocdir" value="true"/>
+			    </else>
+			</if>
+			<if>
+			    <equals arg1="${useemptydocdir}" arg2="true"/>
+			    <then>
+			        <var name="tmpdocdir" value="@{outdir}/emptydir"/>
+			        <mkdir dir="${tmpdocdir}"/>
+			    </then>
+			    <else>
+			        <var name="tmpdocdir" value="@{docdir}"/>
+			    </else>
 			</if>
 			<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 			<zip destfile="${appzip}">
@@ -914,7 +939,12 @@ Homepage: @{url}]]></echo>
 				<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
 			<!-- Deletes the directories, only keeps the ZIP archive -->
-			<delete dir="${tmpdocdir}" failonerror="true" />
+			<if>
+			    <equals arg1="${useemptydocdir}" arg2="true"/>
+			    <then>
+			        <delete dir="${tmpdocdir}" failonerror="true" />
+			    </then>
+			</if>
 			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
@@ -975,8 +1005,6 @@ Homepage: @{url}]]></echo>
 				</else>
 			</if>
 			<!-- Handles the documentation -->
-			<var name="tmpdocdir" value="@{outdir}/doc"/>
-			<mkdir dir="${tmpdocdir}"/>
 			<if>
 			    <not>
 			        <equals arg1="@{docdir}" arg2=""/>
@@ -985,15 +1013,27 @@ Homepage: @{url}]]></echo>
 			        <if>
 			            <available file="@{docdir}"/>
 			            <then>
-			                <copy todir="${tmpdocdir}">
-			                    <fileset dir="@{docdir}" includes="@{docdirincludes}"/>
-			                </copy>
+			            	<var name="useemptydocdir" value="false"/>
 			            </then>
 			            <else>
+			            	<var name="useemptydocdir" value="true"/>
 			                <echo message="'docdir' @{docdir} not found, skipped"/>
 			            </else>
 			        </if>
 			    </then>
+				<else>
+					<var name="useemptydocdir" value="true"/>
+				</else>
+			</if>
+			<if>
+			    <equals arg1="${useemptydocdir}" arg2="true"/>
+				<then>
+					<var name="tmpdocdir" value="@{outdir}/emptydir"/>
+					<mkdir dir="${tmpdocdir}"/>
+				</then>
+				<else>
+					<var name="tmpdocdir" value="@{docdir}"/>
+				</else>
 			</if>
 			<!-- Creates the zip archive -->
 			<zip destfile="${appzip}">
@@ -1010,8 +1050,13 @@ Homepage: @{url}]]></echo>
 				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			</zip>
 			<!-- Deletes the directories, only keeps the ZIP archive -->
-			<delete dir="${tmpdocdir}" failonerror="true" />
-			<delete dir="${appdir}" failonerror="true" />
+			<if>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
+			    <then>
+			        <delete dir="${tmpdocdir}" failonerror="true" />
+				</then>
+			</if>
+		    <delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
  </project>
