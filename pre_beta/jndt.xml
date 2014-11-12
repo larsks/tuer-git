@@ -25,26 +25,28 @@
 
 <project name="jndt" basedir=".">
     <description>JNDT: Java Native Deployment Toolkit</description>
+	<property name="jndtlibdir" value="lib/ant" />
+	<property name="packrlibpath" value="${jndtlibdir}/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" />
  	<!-- External tasks of Ant-Contrib -->
  	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<!-- pure Java implementation of the RPM package builder -->
 	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask">
 	    <classpath>
-	        <pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
-	        <pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
-	        <pathelement path="lib/ant/slf4j-api-1.7.7.jar"/>
-	        <pathelement path="lib/ant/slf4j-simple-1.7.7.jar"/>
-	        <pathelement path="lib/ant/xz-1.4.jar"/>
-	        <pathelement path="lib/ant/redline-1.1.16.jar"/>
+	        <pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
+	        <pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
+	        <pathelement location="${jndtlibdir}/slf4j-api-1.7.7.jar"/>
+	        <pathelement location="${jndtlibdir}/slf4j-simple-1.7.7.jar"/>
+	        <pathelement location="${jndtlibdir}/xz-1.4.jar"/>
+	        <pathelement location="${jndtlibdir}/redline-1.1.16.jar"/>
 	    </classpath>
 	</taskdef>
 	<!-- pure Java implementation of the DEB package builder -->
 	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask">
 	    <classpath>
-	        <pathelement path="lib/ant/bcpg-jdk15on-151.jar"/>
-	        <pathelement path="lib/ant/commons-compress-1.8.1.jar"/>
-	        <pathelement path="lib/ant/commons-io-2.4.jar"/>
-	        <pathelement path="lib/ant/jdeb-1.3.jar"/>
+	        <pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
+	        <pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
+	        <pathelement location="${jndtlibdir}/commons-io-2.4.jar"/>
+	        <pathelement location="${jndtlibdir}/jdeb-1.3.jar"/>
 	    </classpath>
 	</taskdef>
 	<!-- task of image format conversion -->
@@ -154,11 +156,11 @@
                 	    <and>
                 	        <equals arg1="@{nativelauncherenabled}" arg2="true" />
                 	        <not>
-                	            <available file="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar"/>
+                	            <available file="${packrlibpath}"/>
                 	        </not>
                 	    </and>
                 	    <then>
-                	        <fail message="PackR JAR missing in lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar, required as antreimplementationenabled=true and nativelauncherenabled=true"/>
+                	        <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=true and nativelauncherenabled=true"/>
                 	    </then>
                 	</if>
                 	<if>
@@ -465,7 +467,7 @@ ${vmargsstring}
                         <equals arg1="@{nativelauncherenabled}" arg2="true" />
                         <then>
                             <!-- extracts the executable of the native launcher from PackR's JAR -->
-                            <unzip src="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" dest="${contentstarget}">
+                            <unzip src="${packrlibpath}" dest="${contentstarget}">
                                 <patternset>
                                     <include name="${exesrcfilename}"/>
                                 </patternset>
@@ -596,10 +598,10 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 <else>
                 	<if>
                 		<not>
-                	        <available file="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar"/>
+                	        <available file="${packrlibpath}"/>
                 	    </not>
                 		<then>
-                		    <fail message="PackR JAR missing in lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar, required as antreimplementationenabled=false"/>
+                		    <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=false"/>
                 		</then>
                 	</if>
                     <if>
@@ -619,7 +621,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                     <if>
                         <equals arg1="@{minimizejre}" arg2="" />
                         <then>
-                            <java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
+                            <java jar="${packrlibpath}" fork="true" failonerror="true">
                                 <arg value="-platform" />
                                 <arg value="@{platform}" />
                                 <arg value="-executable" />
@@ -639,7 +641,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                             </java>
                         </then>
                         <else>
-                            <java jar="lib/packr/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" fork="true" failonerror="true">
+                            <java jar="${packrlibpath}" fork="true" failonerror="true">
                                 <arg value="-platform" />
                                 <arg value="@{platform}" />
                                 <arg value="-executable" />
@@ -690,16 +692,16 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    <attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
 		<attribute name="categories" default="" description="list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
 		<attribute name="comment" default="" description="comment of the shortcut"/>
-		<attribute name="vendor" default="" description="vendor"/>
-		<attribute name="packager" default="" description="packager"/>
+		<attribute name="vendor" default="" description="organization that distributes the software"/>
+		<attribute name="packager" default="" description="organization that actually packaged the software"/>
 		<attribute name="license" default="" description="license"/>
-		<attribute name="summary" default="" description="summary"/>
-		<attribute name="description" default="" description="description"/>
-		<attribute name="group" default="" description="group"/>
-		<attribute name="version" default="0" description="version"/>
+		<attribute name="summary" default="" description="shirt description of the packaged software (generally on a single line)"/>
+		<attribute name="description" default="" description="detailed description of the packaged software (can take up more than one line)"/>
+		<attribute name="group" default="Applications" description="string composed of a series of words separated by slashes that defines how the packaged software should be grouped with other packages"/>
+		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="host" default="" description="host (codebase)"/>
-		<attribute name="url" default="" description="homepage url"/>
+		<attribute name="url" default="" description="homepage url, generally pointing to the documentation of the software being packaged"/>
 		<attribute name="email" default="" description="email"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
@@ -766,7 +768,7 @@ Categories=@{categories}]]></echo>
 			        </if>
 			    </then>
 			</if>
-			<!-- RPM -->
+			<!-- RPM --><!-- FIXME handle the dependencies: see "depends" -->
 			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
 			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
@@ -784,7 +786,7 @@ Categories=@{categories}]]></echo>
 				<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			</pure-java-rpm>
-			<!-- DEB -->
+			<!-- DEB --><!-- FIXME handle the dependencies: see "depends" -->
 			<mkdir dir="@{outdir}/controldir"/>
 			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
 Version: @{version}.@{release}
@@ -862,7 +864,7 @@ Homepage: @{url}]]></echo>
 		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-		<attribute name="version" default="0" description="version"/>
+		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
@@ -931,7 +933,7 @@ Homepage: @{url}]]></echo>
 		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-		<attribute name="version" default="0" description="version"/>
+		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
