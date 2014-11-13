@@ -58,6 +58,9 @@
 	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
 	<property name="game-version" value="0.0.0" />
 	<property name="game-release" value="0" />
+	<property name="game-group" value="Applications/Games" />
+	<property name="game-section" value="games" />
+	<property name="game-license" value="GPL" />
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
 	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
@@ -461,14 +464,16 @@
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="32" version="${game-version}" release="${game-release}"
-			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
-			summary="${game-short-description}" description="${game-long-description}" group="Applications/Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
+			summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}" 
+			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" bitness="64" version="${game-version}" release="${game-release}"
-		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="GPL" 
-		    summary="${game-short-description}" description="${game-long-description}" group="Applications/Games" host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
+		    summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}"
+			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create Microsoft Windows packages (MSI, zip)                      -->
