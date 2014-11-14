@@ -853,8 +853,8 @@ Multi-Arch: @{multiarch}]]></echo>
 			</delete>
 			<delete dir="@{outdir}/controldir" failonerror="false"/>
 			<!-- tar.gz -->
-			<var name="apptargz" value="@{outdir}/${package-name}-@{version}-@{release}.${tararchitecture}.tar.gz"/>
-			<tar destfile="${apptargz}" compression="gzip">
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${tararchitecture}.tar.gz"/>
+			<tar destfile="${apparchive}" compression="gzip">
 			    <zipfileset dir="${appdir}">
 			        <exclude name="@{executable}"/>
 			        <exclude name="jre/bin/*"/>
@@ -900,7 +900,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="appzip" value="@{outdir}/${package-name}-@{version}-@{release}.universal.app.zip"/>
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.universal.zip"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
 			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
@@ -937,7 +937,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    </else>
 			</if>
 			<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
-			<zip destfile="${appzip}">
+			<zip destfile="${apparchive}">
 			    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
 			    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
 			    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
@@ -1001,7 +1001,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    </else>
 			</if>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="appzip" value="@{outdir}/${package-name}-@{version}-@{release}.${ziparchitecture}.zip"/>
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.${ziparchitecture}.zip"/>
 			<create-app-dir platform="windows" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
                 outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
@@ -1049,7 +1049,7 @@ Multi-Arch: @{multiarch}]]></echo>
 				</else>
 			</if>
 			<!-- Creates the zip archive -->
-			<zip destfile="${appzip}">
+			<zip destfile="${apparchive}">
 			    <zipfileset dir="${appdir}">
 			        <exclude name="@{executable}${exeextension}"/>
 			        <exclude name="jre/bin/*.dll"/>
