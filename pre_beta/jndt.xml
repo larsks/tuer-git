@@ -89,6 +89,40 @@
 	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Z" replace="z"/>
 	    </sequential>
 	</macrodef>
+	<macrodef name="to-archive-extension">
+		<attribute name="property" description="The name of the property to set that will contain the archive extension (output)" />
+		<attribute name="input" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
+		<sequential>
+			<if>
+				<or>
+			        <equals arg1="@{input}" arg2="zip"/>
+				    <equals arg1="@{input}" arg2="tar"/>
+				</or>
+			    <then>
+			        <var name="@{property}" value="@{input}"/>
+			    </then>
+			    <else>
+			        <if>
+			            <equals arg1="@{input}" arg2="gzip"/>
+			            <then>
+			                <var name="@{property}" value="tar.gz"/>
+			            </then>
+			            <else>
+			                <if>
+			                    <equals arg1="@{input}" arg2="bzip2"/>
+			                    <then>
+			                        <var name="@{property}" value="tar.bz2"/>
+			                    </then>
+			                    <else>
+			                        <fail message="archive file format @{input} unsupported"/>
+			                    </else>
+			                </if>      
+			            </else>
+			        </if>
+			    </else>
+			</if>
+		</sequential>
+	</macrodef>
     <macrodef name="create-app-dir" description="Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...)">
         <attribute name="platform" description="one of windows, linux32, linux64, mac"/>
         <attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
@@ -712,6 +746,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="multiarch" default="no" description="support of multiple architecture, see https://wiki.ubuntu.com/MultiarchSpec"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
+		<attribute name="archivefileformat" default="gzip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<element name="depends" optional="true" implicit="false" description="dependencies of the Redhat package, with a 'name' and 'version' attribute"/>
 		<sequential>
 	    	<if>
@@ -721,7 +756,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    			<var name="rpmarchitecture" value="I386"/>
 	    			<var name="debarchitecture" value="i386"/>
 	    			<var name="jrearchitecture" value="i386"/>
-	    			<var name="tararchitecture" value="i386"/>
+	    			<var name="archivearchitecture" value="i386"/>
 	    		</then>
 	    		<else>
 	    			<if>
@@ -731,7 +766,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    			    	<var name="rpmarchitecture" value="X86_64"/>
 	    			    	<var name="debarchitecture" value="amd64"/>
 	    			    	<var name="jrearchitecture" value="amd64"/>
-	    			    	<var name="tararchitecture" value="amd64"/>
+	    			    	<var name="archivearchitecture" value="amd64"/>
 	    			    </then>
 	    			    <else>
 	    			        <fail message="unknown bitness '@{bitness}'" />
@@ -852,20 +887,48 @@ Multi-Arch: @{multiarch}]]></echo>
 			    <fileset dir="@{outdir}" includes="*.changes"/>
 			</delete>
 			<delete dir="@{outdir}/controldir" failonerror="false"/>
-			<!-- tar.gz -->
-			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${tararchitecture}.tar.gz"/>
-			<tar destfile="${apparchive}" compression="gzip">
-			    <zipfileset dir="${appdir}">
-			        <exclude name="@{executable}"/>
-			        <exclude name="jre/bin/*"/>
-			    	<exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			    	<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			    </zipfileset>
-			    <zipfileset filemode="755" file="${appdir}/@{executable}"/>
-			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			    <zipfileset filemode="755" prefix="jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			</tar>
+			<!-- archive -->
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${archivearchitecture}.${archiveextension}"/>
+			<if>
+			    <equals arg1="@{archivefileformat}" arg2="zip"/>
+			    <then>
+			        <zip destfile="${apparchive}">
+			        	<zipfileset prefix="${package-name}" dir="${appdir}">
+			        	    <exclude name="@{executable}"/>
+			        	    <exclude name="jre/bin/*"/>
+			        	    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+			        	    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+			        	</zipfileset>
+			        	<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+			        	<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+			        	<zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+			        	<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			        </zip>
+			    </then>
+				<else>
+					<if>
+					    <equals arg1="@{archivefileformat}" arg2="tar"/>
+					    <then>
+					        <var name="compression" value="none"/>
+					    </then>
+					    <else>
+					        <var name="compression" value="@{archivefileformat}"/>
+					    </else>
+					</if>
+					<tar destfile="${apparchive}" compression="${compression}">
+					    <zipfileset prefix="${package-name}" dir="${appdir}">
+					        <exclude name="@{executable}"/>
+					        <exclude name="jre/bin/*"/>
+					        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+					        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+					    </zipfileset>
+					    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+					    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+					    <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+					    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					</tar>
+				</else>
+			</if>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
 			<delete file="@{outdir}/${package-name}.desktop" failonerror="true" />
 			<if>
@@ -896,11 +959,13 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
+		<attribute name="archivefileformat" default="bzip2" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<sequential>
+			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
 			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.universal.zip"/>
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.universal.${archiveextension}"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
 			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
@@ -936,22 +1001,52 @@ Multi-Arch: @{multiarch}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- Makes a ZIP archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
-			<zip destfile="${apparchive}">
-			    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-			    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-			    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-			    	<exclude name="@{executable}"/>
-			        <exclude name="jre/bin/*"/>
-			        <exclude name="jre/lib/*.dylib"/>
-			    	<exclude name="jre/lib/**/*.dylib"/>
-			    </zipfileset>
-				<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-			    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-				<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
-				<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			</zip>
-			<!-- Deletes the directories, only keeps the ZIP archive -->
+			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
+			<if>
+				<equals arg1="@{archivefileformat}" arg2="zip"/>
+				<then>
+			        <zip destfile="${apparchive}">
+			            <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+			            <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+			            <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+			    	        <exclude name="@{executable}"/>
+			                <exclude name="jre/bin/*"/>
+			                <exclude name="jre/lib/*.dylib"/>
+			    	        <exclude name="jre/lib/**/*.dylib"/>
+			            </zipfileset>
+				        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+			            <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+				        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+				        <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			        </zip>
+			    </then>
+				<else>
+					<if>
+					    <equals arg1="@{archivefileformat}" arg2="tar"/>
+					    <then>
+					        <var name="compression" value="none"/>
+					    </then>
+					    <else>
+					        <var name="compression" value="@{archivefileformat}"/>
+					    </else>
+					</if>
+					<tar destfile="${apparchive}" compression="${compression}">
+						<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+						<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+						<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+						    <exclude name="@{executable}"/>
+						    <exclude name="jre/bin/*"/>
+						    <exclude name="jre/lib/*.dylib"/>
+						    <exclude name="jre/lib/**/*.dylib"/>
+						</zipfileset>
+						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+						<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					</tar>
+				</else>
+			</if>
+			<!-- Deletes the directories, only keeps the archive -->
 			<if>
 			    <equals arg1="${useemptydocdir}" arg2="true"/>
 			    <then>
@@ -981,18 +1076,20 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
+		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<sequential>
+			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<if>
 			    <equals arg1="@{bitness}" arg2="32" />
 			    <then>
-			        <var name="ziparchitecture" value="i386"/>
+			        <var name="archivearchitecture" value="i386"/>
 			    </then>
 			    <else>
 			        <if>
 			            <equals arg1="@{bitness}" arg2="64" />
 			            <then>
-			            	<var name="ziparchitecture" value="amd64"/>
+			            	<var name="archivearchitecture" value="amd64"/>
 			            </then>
 			            <else>
 			                <fail message="unknown bitness '@{bitness}'" />
@@ -1001,7 +1098,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    </else>
 			</if>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.${ziparchitecture}.zip"/>
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.${archivearchitecture}.${archiveextension}"/>
 			<create-app-dir platform="windows" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
                 outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
@@ -1048,20 +1145,48 @@ Multi-Arch: @{multiarch}]]></echo>
 					<var name="tmpdocdir" value="@{docdir}"/>
 				</else>
 			</if>
-			<!-- Creates the zip archive -->
-			<zip destfile="${apparchive}">
-			    <zipfileset dir="${appdir}">
-			        <exclude name="@{executable}${exeextension}"/>
-			        <exclude name="jre/bin/*.dll"/>
-			    	<exclude name="jre/bin/**/*.dll"/>
-			        <exclude name="jre/bin/*.exe"/>
-			    </zipfileset>
-			    <zipfileset filemode="755" file="${appdir}/@{executable}${exeextension}"/>
-			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
-			    <zipfileset filemode="755" prefix="jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
-				<zipfileset dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			</zip>
-			<!-- Deletes the directories, only keeps the ZIP archive -->
+			<!-- Creates the archive -->
+			<if>
+				<equals arg1="@{archivefileformat}" arg2="zip"/>
+				<then>
+			        <zip destfile="${apparchive}">
+			            <zipfileset prefix="${package-name}" dir="${appdir}">
+			                <exclude name="@{executable}${exeextension}"/>
+			                <exclude name="jre/bin/*.dll"/>
+			    	        <exclude name="jre/bin/**/*.dll"/>
+			                <exclude name="jre/bin/*.exe"/>
+			            </zipfileset>
+			            <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+			            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+			            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+				        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			        </zip>
+			    </then>
+				<else>
+					<if>
+					    <equals arg1="@{archivefileformat}" arg2="tar"/>
+					    <then>
+					    	<var name="compression" value="none"/>
+					    </then>
+						<else>
+							<var name="compression" value="@{archivefileformat}"/>
+						</else>
+					</if>
+					<tar destfile="${apparchive}" compression="${compression}">
+						<zipfileset prefix="${package-name}" dir="${appdir}">
+						    <exclude name="@{executable}${exeextension}"/>
+						    <exclude name="jre/bin/*.dll"/>
+						    <exclude name="jre/bin/**/*.dll"/>
+						    <exclude name="jre/bin/*.exe"/>
+						</zipfileset>
+						<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+						<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+						<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+						<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					</tar>
+				</else>
+			</if>
+			<!-- Deletes the directories, only keeps the archive -->
 			<if>
 				<equals arg1="${useemptydocdir}" arg2="true"/>
 			    <then>
