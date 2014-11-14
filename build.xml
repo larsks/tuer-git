@@ -187,11 +187,11 @@
 		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
-		<!-- Creates the GNU Linux packages -->
+		<!-- Creates the GNU Linux archives and packages -->
 		<antcall target="create-linux-pkgs" />
-		<!-- Creates the zipped Mac OS X application bundle -->
+		<!-- Creates the archived Mac OS X application bundle -->
 		<antcall target="create-os-x-app" />
-		<!-- Creates the Microsoft Windows packages -->
+		<!-- Creates the Microsoft Windows archives -->
 		<antcall target="create-windows-pkgs" />
 		<!-- Signs the JARs -->
 		<antcall target="sign-jars" />
