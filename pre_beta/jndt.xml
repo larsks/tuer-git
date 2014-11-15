@@ -124,8 +124,9 @@
 		</sequential>
 	</macrodef>
     <macrodef name="create-app-dir" description="Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...)">
-        <attribute name="platform" description="one of windows, linux32, linux64, mac"/>
-        <attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+    	<attribute name="os" description="one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)"/>
+    	<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
+    	<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
         <attribute name="appjar" description="file location of the JAR to package"/>
         <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
@@ -141,7 +142,7 @@
         <sequential>
             <!-- Mac has a distinct directory layout -->
             <if>
-                <equals arg1="@{platform}" arg2="mac" />
+                <equals arg1="@{os}" arg2="Mac OS X" />
                 <then>
                     <var name="contentstarget" value="@{outdir}/Contents/MacOS" />
                     <var name="resourcestarget" value="@{outdir}/Contents/Resources" />
@@ -155,19 +156,77 @@
             <if>
                 <equals arg1="@{antreimplementationenabled}" arg2="true" />
                 <then>
-                    <fail message="Invalid platform, must be linux32, linux64, mac or windows">
+                	<fail message="Invalid operating system '@{os}', must be Linux, Mac OS X or Windows">
+                		<condition>
+                		    <not>
+                		        <or>
+                		            <equals arg1="@{os}" arg2="Linux" />
+                		            <equals arg1="@{os}" arg2="Mac OS X" />
+                		            <equals arg1="@{os}" arg2="Windows" />
+                		        </or>
+                		    </not>
+                		</condition>
+                	</fail>
+                    <fail message="Invalid architecture '@{arch}', must be i386, amd64, universal or arm">
                         <condition>
                             <not>
                                 <or>
-                                    <equals arg1="@{platform}" arg2="linux32" />
-                                    <equals arg1="@{platform}" arg2="linux64" />
-                                    <equals arg1="@{platform}" arg2="mac" />
-                                    <equals arg1="@{platform}" arg2="windows" />
+                                    <equals arg1="@{arch}" arg2="i386" />
+                                    <equals arg1="@{arch}" arg2="amd64" />
+                                    <equals arg1="@{arch}" arg2="universal" />
+                                    <equals arg1="@{arch}" arg2="arm" />
+                                	<equals arg1="@{arch}" arg2="none" />
                                 </or>
                             </not>
                         </condition>
                     </fail>
-                    <!-- performs lots of checks -->
+                	<fail message="Invalid combination of os '@{os}' and architecture '@{arch}'">
+                		<condition>
+                		    <and>
+                		    	<equals arg1="@{arch}" arg2="universal" />
+                		    	<not>
+                		    		<equals arg1="@{os}" arg2="Mac OS X" />
+                		    	</not>
+                		    </and>
+                		</condition>
+                	</fail>
+                	<fail message="'jdk' must be empty if 'arch' is set to 'none'">
+                		<condition>
+                		    <and>
+                		    	<not>
+                		    		<equals arg1="@{jdk}" arg2="" />
+                		    	</not>
+                		    	<equals arg1="@{arch}" arg2="none" />
+                		    </and>
+                		</condition>
+                	</fail>
+                	<if>
+                	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+                		<then>
+                			<fail message="Combination of os '@{os}' and architecture '@{arch}' unsupported by the native launcher">
+                			     <condition>
+                			         <not>
+                			         	<or>
+                			         		<and>
+                			         			<or>
+                			         		        <equals arg1="@{os}" arg2="Linux" />
+                			         				<equals arg1="@{os}" arg2="Windows" />
+                			         			</or>
+                			         			<or>
+                			         		        <equals arg1="@{arch}" arg2="i386" />
+                			         			    <equals arg1="@{arch}" arg2="amd64" />
+                			         			</or>
+                			         		</and>
+                			         		<and>
+                			         			<equals arg1="@{os}" arg2="Mac OS X" />
+                			         			<equals arg1="@{arch}" arg2="universal" />
+                			         		</and>
+                			         	</or>
+                			         </not>
+                			    </condition>
+                			</fail>
+                		</then>
+                    </if>
                     <if>
                         <and>
                             <equals arg1="@{nativelauncherenabled}" arg2="true" />
@@ -212,7 +271,7 @@
                     <!-- creates the application directory -->
                     <mkdir dir="@{outdir}" />
                 	<if>
-                	    <equals arg1="@{platform}" arg2="mac" />
+                	    <equals arg1="@{os}" arg2="Mac OS X" />
                 	    <then>
                 	        <mkdir dir="@{outdir}/Contents/Resources" />
                 	        <mkdir dir="@{outdir}/Contents/MacOS" />
@@ -228,7 +287,7 @@
                 		</and>
                 	    <then>
                 	        <if>
-                	            <equals arg1="@{platform}" arg2="windows" />
+                	            <equals arg1="@{os}" arg2="Windows" />
                 	            <then>
                 	    	        <local name="iconsfilebasename" />
                 	    	        <basename property="iconsfilebasename" file="@{iconsfile}" />
@@ -257,10 +316,7 @@
                 	            </then>
                 	        	<else>
                 	        	    <if>
-                	        	    	<or>
-                	        	    	    <equals arg1="@{platform}" arg2="linux32" />
-                	        	    		<equals arg1="@{platform}" arg2="linux64" />
-                	        	    	</or>
+                	        	    	<equals arg1="@{os}" arg2="Linux" />
                 	        	    	<then>
                 	        	    		<local name="iconsfilebasename" />
                 	        	    		<basename property="iconsfilebasename" file="@{iconsfile}" />
@@ -289,7 +345,7 @@
                 	        	    	</then>
                 	        	    	<else>
                 	        	    		<if>
-                	        	    		    <equals arg1="@{platform}" arg2="mac" />
+                	        	    		    <equals arg1="@{os}" arg2="Mac OS X" />
                 	        	    		    <then>
                 	        	    		    	<local name="iconsfilebasename" />
                 	        	    		    	<basename property="iconsfilebasename" file="@{iconsfile}" />
@@ -330,7 +386,7 @@
                 	</if>
                     <!-- creates Mac specific files if needed -->
                     <if>
-                        <equals arg1="@{platform}" arg2="mac" />
+                        <equals arg1="@{os}" arg2="Mac OS X" />
                         <then>
                             <echo file="@{outdir}/Contents/Info.plist">
                                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -437,66 +493,76 @@ ${vmargsstring}
                         </else>
                     </if>
                     <!-- handles the native launcher or the script -->
-                    <if>
-                        <equals arg1="@{platform}" arg2="linux32" />
-                        <then>
-                            <if>
-                                <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                                <then>
+                	<if>
+                	    <equals arg1="@{os}" arg2="Windows" />
+                	    <then>
+                	    	<if>
+                	    	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+                	    	    <then>
+                	    	        <var name="exedstfilename" value="@{executable}.exe" />
+                	    	    </then>
+                	    	    <else>
+                	    	        <var name="exedstfilename" value="@{executable}.bat" />
+                	    	    </else>
+                	    	</if>
+                	    </then>
+                		<else>
+                			<var name="exedstfilename" value="@{executable}" />
+                		</else>
+                	</if>
+                	<if>
+                	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+                	    <then>
+                	        <if>
+                    	        <and>
+                                    <equals arg1="@{os}" arg2="Linux" />
+                    		        <equals arg1="@{arch}" arg2="i386" />
+                                </and>
+                    	        <then>
                                     <var name="exesrcfilename" value="packr-linux" />
-                                </then>
-                            </if>
-                            <var name="exedstfilename" value="@{executable}" />
-                        </then>
-                        <else>
-                            <if>
-                                <equals arg1="@{platform}" arg2="linux64" />
-                                <then>
-                                    <if>
-                                        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                                        <then>
-                                             <var name="exesrcfilename" value="packr-linux-x64" />
-                                        </then>
-                                    </if>
-                                    <var name="exedstfilename" value="@{executable}" />
                                 </then>
                                 <else>
                                     <if>
-                                        <equals arg1="@{platform}" arg2="mac" />
+                            	        <and>
+                            	            <equals arg1="@{os}" arg2="Linux" />
+                            	            <equals arg1="@{arch}" arg2="amd64" />
+                            	        </and>
                                         <then>
-                                            <if>
-                                                <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                                                <then>
-                                                    <var name="exesrcfilename" value="packr-mac" />
-                                                </then>
-                                            </if>
-                                            <var name="exedstfilename" value="@{executable}" />
+                                            <var name="exesrcfilename" value="packr-linux-x64" />
                                         </then>
                                         <else>
                                             <if>
-                                                <equals arg1="@{platform}" arg2="windows" />
+                                            	<and>
+                                                    <equals arg1="@{os}" arg2="Mac OS X" />
+                                            		<equals arg1="@{arch}" arg2="universal" />
+                                            	</and>
                                                 <then>
-                                                    <if>
-                                                        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                                                        <then>
-                                                            <var name="exesrcfilename" value="packr-windows.exe" />
-                                                            <var name="exedstfilename" value="@{executable}.exe" />
-                                                        </then>
-                                                        <else>
-                                                            <var name="exedstfilename" value="@{executable}.bat" />
-                                                        </else>
-                                                    </if>
+                                                    <var name="exesrcfilename" value="packr-mac" />
                                                 </then>
                                                 <else>
-                                                    <fail message="Unsupported platform @{platform}" />
+                                                    <if>
+                                                	    <and>
+                                                            <equals arg1="@{os}" arg2="Windows" />
+                                                    	    <or>
+                                                    	    	<equals arg1="@{arch}" arg2="i386" />
+                                                    	    	<equals arg1="@{arch}" arg2="amd64" />
+                                                    	    </or>
+                                                	    </and>
+                                                        <then>
+                                                            <var name="exesrcfilename" value="packr-windows.exe" />
+                                                        </then>
+                                                        <else>
+                                                            <fail message="Combination of operating system '@{os}' and architecture '@{arch}' unsupported by PackR" />
+                                                        </else>
+                                                    </if>
                                                 </else>
                                             </if>
                                         </else>
                                     </if>
                                 </else>
                             </if>
-                        </else>
-                    </if>
+                        </then>
+                	</if>
                     <if>
                         <equals arg1="@{nativelauncherenabled}" arg2="true" />
                         <then>
@@ -511,7 +577,7 @@ ${vmargsstring}
                         <else>
                             <!-- creates the platform dependent script -->
                             <if>
-                                <equals arg1="@{platform}" arg2="windows" />
+                                <equals arg1="@{os}" arg2="Windows" />
                                 <!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
                                 <!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
                                 <then>
@@ -638,6 +704,66 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 		    <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=false"/>
                 		</then>
                 	</if>
+                	<if>
+                		<equals arg1="@{os}" arg2="Linux" />
+                		<then>
+                		    <if>
+                		    	<equals arg1="@{arch}" arg2="i386" />
+                		    	<then>
+                		    	    <var name="platform" value="linux32"/>
+                		    	</then>
+                		    	<else>
+                		    		<if>
+                		    			<equals arg1="@{arch}" arg2="amd64" />
+                		    			<then>
+                		    				<var name="platform" value="linux64"/>
+                		    			</then>
+                		    			<else>
+                		    				<var name="platform" value=""/>
+                		    			</else>
+                		    	    </if>
+                		    	</else>
+                		    </if>
+                		</then>
+                		<else>
+                		    <if>
+                		    	<equals arg1="@{os}" arg2="Mac OS X" />
+                		    	<then>
+                		    		<if>
+                		    		    <equals arg1="@{arch}" arg2="universal" />
+                		    			<then>
+                		    			    <var name="platform" value="mac"/>
+                		    			</then>
+                		    			<else>
+                		    				<var name="platform" value=""/>
+                		    			</else>
+                		    		</if>
+                		    	</then>
+                		    	<else>
+                		    	    <if>
+                		    	    	<and>
+                		    	    	    <equals arg1="@{os}" arg2="Windows" />
+                		    	    		<or>
+                		    	    		    <equals arg1="@{arch}" arg2="i386" />
+                		    	    		    <equals arg1="@{arch}" arg2="amd64" />
+                		    	    		</or>
+                		    	    	</and>
+                		    	    	<then>
+                		    	    		<var name="platform" value="windows"/>
+                		    	    	</then>
+                		    	    	<else>
+                		    	    		<var name="platform" value=""/>
+                		    	    	</else>
+                		    	    </if>
+                		    	</else>
+                		    </if>
+                		</else>
+                	</if>
+                	<fail message="Combination of os '@{os}' and architecture '@{arch}' unsupported by PackR">
+                	    <condition>
+                	    	<equals arg1="${platform}" arg2="" />
+                	    </condition>
+                	</fail>
                     <if>
                         <equals arg1="@{useserverjre}" arg2="false" />
                         <then>
@@ -657,7 +783,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                         <then>
                             <java jar="${packrlibpath}" fork="true" failonerror="true">
                                 <arg value="-platform" />
-                                <arg value="@{platform}" />
+                                <arg value="${platform}" />
                                 <arg value="-executable" />
                                 <arg value="@{executable}" />
                                 <arg value="-appjar" />
@@ -677,7 +803,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                         <else>
                             <java jar="${packrlibpath}" fork="true" failonerror="true">
                                 <arg value="-platform" />
-                                <arg value="@{platform}" />
+                                <arg value="${platform}" />
                                 <arg value="-executable" />
                                 <arg value="@{executable}" />
                                 <arg value="-appjar" />
@@ -699,7 +825,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                     </if>
                     <!-- TODO test this option -->
                     <!--<if>
-                        <equals arg1="@{platform}" arg2="mac" />
+                        <equals arg1="${os}" arg2="Mac OS X" />
                         <then>
                             <replace file="@{outdir}/Contents/Info.plist" token="@{bundleIdentifier}" value="@{bundleIdentifier}"/>
                         </then>
@@ -723,7 +849,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-	    <attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
+		<attribute name="arch" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
 		<attribute name="categories" default="" description="list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
 		<attribute name="comment" default="" description="comment of the shortcut"/>
 		<attribute name="vendor" default="" description="organization that distributes the software"/>
@@ -749,10 +875,10 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="archivefileformat" default="gzip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<element name="depends" optional="true" implicit="false" description="dependencies of the Redhat package, with a 'name' and 'version' attribute"/>
 		<sequential>
+			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
 	    	<if>
-	    	    <equals arg1="@{bitness}" arg2="32" />
+	    	    <equals arg1="@{arch}" arg2="i386" />
 	    		<then>
-	    		    <var name="platform" value="linux32"/>
 	    			<var name="rpmarchitecture" value="I386"/>
 	    			<var name="debarchitecture" value="i386"/>
 	    			<var name="jrearchitecture" value="i386"/>
@@ -760,23 +886,44 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    		</then>
 	    		<else>
 	    			<if>
-	    			    <equals arg1="@{bitness}" arg2="64" />
+	    			    <equals arg1="@{arch}" arg2="amd64" />
 	    			    <then>
-	    			    	<var name="platform" value="linux64"/>
 	    			    	<var name="rpmarchitecture" value="X86_64"/>
 	    			    	<var name="debarchitecture" value="amd64"/>
 	    			    	<var name="jrearchitecture" value="amd64"/>
 	    			    	<var name="archivearchitecture" value="amd64"/>
 	    			    </then>
 	    			    <else>
-	    			        <fail message="unknown bitness '@{bitness}'" />
+	    			    	<if>
+	    			    		<equals arg1="@{arch}" arg2="arm" />
+	    			    		<then>
+	    			    			<var name="rpmarchitecture" value="ARM"/>
+	    			    			<var name="debarchitecture" value="arm"/>
+	    			    			<var name="jrearchitecture" value="arm"/>
+	    			    			<var name="archivearchitecture" value="arm"/>
+	    			    		</then>
+	    			    		<else>
+	    			    			<if>
+	    			    			    <equals arg1="@{arch}" arg2="none" />
+	    			    			    <then>
+	    			    			    	<var name="rpmarchitecture" value="NOARCH"/>
+	    			    			    	<var name="debarchitecture" value="all"/>
+	    			    			    	<var name="jrearchitecture" value=""/>
+	    			    			    	<var name="archivearchitecture" value="all"/>
+	    			    			    </then>
+	    			    				<else>
+	    			    					<fail message="unsupported architecture '@{arch}'" />
+	    			    				</else>
+	    			    			</if>
+	    			    		</else>
+	    			    	</if>
 	    			    </else>
 	    		    </if>
 	    		</else>
 	    	</if>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<create-app-dir platform="${platform}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
+			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<!-- Removes the extension from the icon name. FIXME: remove any extension -->
@@ -821,7 +968,7 @@ Categories=@{categories}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- RPM --><!-- FIXME handle the dependencies: see "depends" -->
+			<!-- RPM --><!-- FIXME handle the case jdk = '' -->
 			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
 			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
@@ -840,7 +987,7 @@ Categories=@{categories}]]></echo>
 			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 				<depends/>
 			</pure-java-rpm>
-			<!-- DEB --><!-- FIXME handle the dependencies: see "depends" -->
+			<!-- DEB --><!-- FIXME handle the case jdk = '' -->
 			<mkdir dir="@{outdir}/controldir"/>
 			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
 Version: @{version}.@{release}
@@ -887,7 +1034,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    <fileset dir="@{outdir}" includes="*.changes"/>
 			</delete>
 			<delete dir="@{outdir}/controldir" failonerror="false"/>
-			<!-- archive -->
+			<!-- archive --><!-- FIXME handle the case jdk = '' -->
 			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${archivearchitecture}.${archiveextension}"/>
 			<if>
 			    <equals arg1="@{archivefileformat}" arg2="zip"/>
@@ -941,6 +1088,7 @@ Multi-Arch: @{multiarch}]]></echo>
 	    </sequential>
 	</macrodef>
 	<macrodef name="create-os-x-app-bundle" description="creates a zipped APP file for Mac OS X">
+		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
@@ -965,9 +1113,9 @@ Multi-Arch: @{multiarch}]]></echo>
 			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.universal.${archiveextension}"/>
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.@{arch}.${archiveextension}"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
-			<create-app-dir platform="mac" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
+			<create-app-dir os="Mac OS X" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<!-- Handles the documentation -->
@@ -1001,7 +1149,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
+			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) --><!-- FIXME handle the case jdk = '' -->
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
@@ -1073,33 +1221,16 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
-		<attribute name="bitness" description="bitness of the target architecture, 32 or 64"/>
+		<attribute name="arch" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
 		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<sequential>
 			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
 			<to-package-name property="package-name" input="@{appname}"/>
-			<if>
-			    <equals arg1="@{bitness}" arg2="32" />
-			    <then>
-			        <var name="archivearchitecture" value="i386"/>
-			    </then>
-			    <else>
-			        <if>
-			            <equals arg1="@{bitness}" arg2="64" />
-			            <then>
-			            	<var name="archivearchitecture" value="amd64"/>
-			            </then>
-			            <else>
-			                <fail message="unknown bitness '@{bitness}'" />
-			            </else>
-			        </if>
-			    </else>
-			</if>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.${archivearchitecture}.${archiveextension}"/>
-			<create-app-dir platform="windows" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
+			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.@{arch}.${archiveextension}"/>
+			<create-app-dir os="Windows" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
                 outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
 			<if>
@@ -1145,7 +1276,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					<var name="tmpdocdir" value="@{docdir}"/>
 				</else>
 			</if>
-			<!-- Creates the archive -->
+			<!-- Creates the archive --><!-- FIXME handle the case jdk = '' -->
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
