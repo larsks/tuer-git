@@ -968,26 +968,46 @@ Categories=@{categories}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- RPM --><!-- FIXME handle the case jdk = '' -->
-			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
-			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			        <exclude name="@{executable}"/>
-			        <exclude name="jre/bin/*"/>
-			        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			    	<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			    </zipfileset>
-			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-				<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
-				<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-				<depends/>
-			</pure-java-rpm>
-			<!-- DEB --><!-- FIXME handle the case jdk = '' -->
+			<!-- RPM -->
+			<if>
+			    <equals arg1="@{jdk}" arg2=""/>
+			    <then>
+			    	<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			    	        <exclude name="@{executable}"/>
+			    	    </zipfileset>
+			    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+			    	    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    	    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
+			    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			    	    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	    <depends/>
+			    	</pure-java-rpm>
+			    </then>
+			    <else>
+			        <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			                <exclude name="@{executable}"/>
+			                <exclude name="jre/bin/*"/>
+			                <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+			    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+			            </zipfileset>
+			            <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+				        <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+			            <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+			            <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
+				        <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			            <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+				        <depends/>
+			        </pure-java-rpm>
+			    </else>
+			</if>
+			<!-- DEB -->
 			<mkdir dir="@{outdir}/controldir"/>
 			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
 Version: @{version}.@{release}
@@ -1002,55 +1022,98 @@ Distribution: @{distribution}
 Urgency: @{urgency}
 Essential: @{essential}
 Multi-Arch: @{multiarch}]]></echo>
-			<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    <data src="${appdir}" type="directory" 
-			        excludes="jre/bin/*,@{executable},jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
-			        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    </data>
-			    <data src="@{appjar}" type="file">
-			        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    </data>
-			    <data src="${appdir}/@{executable}" type="file">
-			        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
-			    </data>
-			    <data src="${appdir}/jre/bin" type="directory" includes="*">
-			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
-			    </data>
-			    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-			        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
-			    </data>
-			    <data src="@{outdir}/${package-name}.desktop" type="file">
-			        <mapper type="perm" prefix="/usr/share/applications"/>
-			    </data>
-			    <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
-			        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			    </data>
-				<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-				    <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-				</data>
-			    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-			</pure-java-deb>
+			<if>
+			    <equals arg1="@{jdk}" arg2=""/>
+			    <then>
+			    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			    	    <data src="${appdir}" type="directory" 
+			    	        excludes="@{executable}">
+			    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	    </data>
+			    	    <data src="@{appjar}" type="file">
+			    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	    </data>
+			    	    <data src="${appdir}/@{executable}" type="file">
+			    	        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			    	    </data>
+			    	    <data src="@{outdir}/${package-name}.desktop" type="file">
+			    	        <mapper type="perm" prefix="/usr/share/applications"/>
+			    	    </data>
+			    	    <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
+			    	        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+			    	    </data>
+			    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+			    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    	    </data>
+			    	    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	</pure-java-deb>
+			    </then>
+				<else>
+			        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			            <data src="${appdir}" type="directory" 
+			                excludes="jre/bin/*,@{executable},jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+			                <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			            </data>
+			            <data src="@{appjar}" type="file">
+			                <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			            </data>
+			            <data src="${appdir}/@{executable}" type="file">
+			                <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			            </data>
+			            <data src="${appdir}/jre/bin" type="directory" includes="*">
+			                <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+			            </data>
+			            <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
+			                <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+			            </data>
+			            <data src="@{outdir}/${package-name}.desktop" type="file">
+			                <mapper type="perm" prefix="/usr/share/applications"/>
+			            </data>
+			            <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
+			                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+			            </data>
+				        <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+				            <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+				        </data>
+			            <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			        </pure-java-deb>
+				</else>
+			</if>
 			<delete failonerror="false">
 			    <fileset dir="@{outdir}" includes="*.changes"/>
 			</delete>
 			<delete dir="@{outdir}/controldir" failonerror="false"/>
-			<!-- archive --><!-- FIXME handle the case jdk = '' -->
+			<!-- archive -->
 			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${archivearchitecture}.${archiveextension}"/>
 			<if>
 			    <equals arg1="@{archivefileformat}" arg2="zip"/>
 			    <then>
-			        <zip destfile="${apparchive}">
-			        	<zipfileset prefix="${package-name}" dir="${appdir}">
-			        	    <exclude name="@{executable}"/>
-			        	    <exclude name="jre/bin/*"/>
-			        	    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			        	    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			        	</zipfileset>
-			        	<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-			        	<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			        	<zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			        	<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			        </zip>
+			    	<if>
+			    	    <equals arg1="@{jdk}" arg2=""/>
+			    	    <then>
+			    	    	<zip destfile="${apparchive}">
+			    	    	    <zipfileset prefix="${package-name}" dir="${appdir}">
+			    	    	        <exclude name="@{executable}"/>
+			    	    	    </zipfileset>
+			    	    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+			    	    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			    	    	</zip>
+			    	    </then>
+			    	    <else>
+			                <zip destfile="${apparchive}">
+			        	        <zipfileset prefix="${package-name}" dir="${appdir}">
+			        	            <exclude name="@{executable}"/>
+			        	            <exclude name="jre/bin/*"/>
+			        	            <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+			        	            <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+			        	        </zipfileset>
+			        	        <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+			        	        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+			        	        <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+			        	        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			                </zip>
+			    	    </else>
+			        </if>
 			    </then>
 				<else>
 					<if>
@@ -1062,18 +1125,32 @@ Multi-Arch: @{multiarch}]]></echo>
 					        <var name="compression" value="@{archivefileformat}"/>
 					    </else>
 					</if>
-					<tar destfile="${apparchive}" compression="${compression}">
-					    <zipfileset prefix="${package-name}" dir="${appdir}">
-					        <exclude name="@{executable}"/>
-					        <exclude name="jre/bin/*"/>
-					        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-					        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-					    </zipfileset>
-					    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-					    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-					    <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-					    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					</tar>
+					<if>
+					    <equals arg1="@{jdk}" arg2=""/>
+					    <then>
+					    	<tar destfile="${apparchive}" compression="${compression}">
+					    	    <zipfileset prefix="${package-name}" dir="${appdir}">
+					    	        <exclude name="@{executable}"/>
+					    	    </zipfileset>
+					    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+					    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					    	</tar>
+					    </then>
+						<else>
+						    <tar destfile="${apparchive}" compression="${compression}">
+					            <zipfileset prefix="${package-name}" dir="${appdir}">
+					                <exclude name="@{executable}"/>
+					                <exclude name="jre/bin/*"/>
+					                <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+					                <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+					            </zipfileset>
+					            <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+					            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+					            <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+					            <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					        </tar>
+						</else>
+					</if>
 				</else>
 			</if>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
@@ -1153,20 +1230,36 @@ Multi-Arch: @{multiarch}]]></echo>
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
-			        <zip destfile="${apparchive}">
-			            <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-			            <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-			            <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-			    	        <exclude name="@{executable}"/>
-			                <exclude name="jre/bin/*"/>
-			                <exclude name="jre/lib/*.dylib"/>
-			    	        <exclude name="jre/lib/**/*.dylib"/>
-			            </zipfileset>
-				        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-			            <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-				        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
-				        <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			        </zip>
+					<if>
+					    <equals arg1="@{jdk}" arg2=""/>
+					    <then>
+					    	<zip destfile="${apparchive}">
+					    	    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+					    	        <exclude name="@{executable}"/>
+					    	    </zipfileset>
+					    	    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					    	</zip>
+					    </then>
+						<else>
+			                <zip destfile="${apparchive}">
+			                    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+			                    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+			                    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+			    	                <exclude name="@{executable}"/>
+			                        <exclude name="jre/bin/*"/>
+			                        <exclude name="jre/lib/*.dylib"/>
+			    	                <exclude name="jre/lib/**/*.dylib"/>
+			                    </zipfileset>
+				                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+			                    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+				                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+				                <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			                </zip>
+						</else>
+					</if>
 			    </then>
 				<else>
 					<if>
@@ -1178,20 +1271,36 @@ Multi-Arch: @{multiarch}]]></echo>
 					        <var name="compression" value="@{archivefileformat}"/>
 					    </else>
 					</if>
-					<tar destfile="${apparchive}" compression="${compression}">
-						<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-						<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-						<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-						    <exclude name="@{executable}"/>
-						    <exclude name="jre/bin/*"/>
-						    <exclude name="jre/lib/*.dylib"/>
-						    <exclude name="jre/lib/**/*.dylib"/>
-						</zipfileset>
-						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-						<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
-						<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					</tar>
+					<if>
+					    <equals arg1="@{jdk}" arg2=""/>
+					    <then>
+					    	<tar destfile="${apparchive}" compression="${compression}">
+					    	    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+					    	        <exclude name="@{executable}"/>
+					    	    </zipfileset>
+					    	    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					    	</tar>
+					    </then>
+					    <else>
+					        <tar destfile="${apparchive}" compression="${compression}">
+						        <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+						        <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+						        <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+						            <exclude name="@{executable}"/>
+						            <exclude name="jre/bin/*"/>
+						            <exclude name="jre/lib/*.dylib"/>
+						            <exclude name="jre/lib/**/*.dylib"/>
+						        </zipfileset>
+						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+						        <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					        </tar>
+					    </else>
+					</if>
 				</else>
 			</if>
 			<!-- Deletes the directories, only keeps the archive -->
@@ -1276,22 +1385,36 @@ Multi-Arch: @{multiarch}]]></echo>
 					<var name="tmpdocdir" value="@{docdir}"/>
 				</else>
 			</if>
-			<!-- Creates the archive --><!-- FIXME handle the case jdk = '' -->
+			<!-- Creates the archive -->
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
-			        <zip destfile="${apparchive}">
-			            <zipfileset prefix="${package-name}" dir="${appdir}">
-			                <exclude name="@{executable}${exeextension}"/>
-			                <exclude name="jre/bin/*.dll"/>
-			    	        <exclude name="jre/bin/**/*.dll"/>
-			                <exclude name="jre/bin/*.exe"/>
-			            </zipfileset>
-			            <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-			            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
-			            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
-				        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			        </zip>
+					<if>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<zip destfile="${apparchive}">
+							    <zipfileset prefix="${package-name}" dir="${appdir}">
+							        <exclude name="@{executable}${exeextension}"/>
+							    </zipfileset>
+							    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+							    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
+						</then>
+						<else>
+						    <zip destfile="${apparchive}">
+			                    <zipfileset prefix="${package-name}" dir="${appdir}">
+			                        <exclude name="@{executable}${exeextension}"/>
+			                        <exclude name="jre/bin/*.dll"/>
+			    	                <exclude name="jre/bin/**/*.dll"/>
+			                        <exclude name="jre/bin/*.exe"/>
+			                    </zipfileset>
+			                    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+			                    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+			                    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+				                <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			                </zip>
+					    </else>
+					</if>
 			    </then>
 				<else>
 					<if>
@@ -1303,18 +1426,32 @@ Multi-Arch: @{multiarch}]]></echo>
 							<var name="compression" value="@{archivefileformat}"/>
 						</else>
 					</if>
-					<tar destfile="${apparchive}" compression="${compression}">
-						<zipfileset prefix="${package-name}" dir="${appdir}">
-						    <exclude name="@{executable}${exeextension}"/>
-						    <exclude name="jre/bin/*.dll"/>
-						    <exclude name="jre/bin/**/*.dll"/>
-						    <exclude name="jre/bin/*.exe"/>
-						</zipfileset>
-						<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-						<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
-						<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
-						<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					</tar>
+					<if>
+					    <equals arg1="@{jdk}" arg2=""/>
+					    <then>
+					    	<tar destfile="${apparchive}" compression="${compression}">
+					    	    <zipfileset prefix="${package-name}" dir="${appdir}">
+					    	        <exclude name="@{executable}${exeextension}"/>
+					    	    </zipfileset>
+					    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+					    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					    	</tar>
+					    </then>
+					    <else>
+					        <tar destfile="${apparchive}" compression="${compression}">
+						        <zipfileset prefix="${package-name}" dir="${appdir}">
+						            <exclude name="@{executable}${exeextension}"/>
+						            <exclude name="jre/bin/*.dll"/>
+						            <exclude name="jre/bin/**/*.dll"/>
+						            <exclude name="jre/bin/*.exe"/>
+						        </zipfileset>
+						        <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
+						        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+					 	        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+						        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+					        </tar>
+					    </else>
+					</if>
 				</else>
 			</if>
 			<!-- Deletes the directories, only keeps the archive -->
