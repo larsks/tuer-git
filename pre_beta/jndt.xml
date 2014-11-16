@@ -52,6 +52,30 @@
 	<!-- task of image format conversion -->
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="${jndtlibdir}/commons-imaging-1.0-SNAPSHOT.jar"/>
  	
+	<macrodef name="to-basename-without-extension">
+		<attribute name="property" description="The name of the property to set that will contain the basename without the very last extension (output)" />
+		<attribute name="input" description="The input string to be used as a basename without extension if possible" />
+		<sequential>
+			<local name="basename"/>
+			<basename file="@{input}" property="basename"/>
+			<propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\1" override="true" />
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="to-extension">
+	    <attribute name="property" description="The name of the property to set that will contain the very last extension (output)" />
+	    <attribute name="input" description="The input string to be used as an extension if possible" />
+	    <sequential>
+	        <basename file="@{input}" property="basename"/>
+	        <propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\2" override="true" />
+	    </sequential>
+	</macrodef>
+	
+	<target name="test">
+	    <to-basename-without-extension input="urghrgtrh.pnj" property="prop" />
+		<echo message="${prop}" />
+	</target>
+	
 	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
 	<macrodef name="to-package-name">
 	    <attribute name="property" description="The name of the property to set that will contain the package name (output)" />
@@ -289,17 +313,14 @@
                 	        <if>
                 	            <equals arg1="@{os}" arg2="Windows" />
                 	            <then>
-                	    	        <local name="iconsfilebasename" />
-                	    	        <basename property="iconsfilebasename" file="@{iconsfile}" />
-                	    	        <local name="iconsfilebasenamewithoutsupportedextension" />
-                	    	        <basename property="iconsfilebasenamewithoutsupportedextension" file="@{iconsfile}" suffix=".ico"/>
+                	            	<to-extension input="@{iconsfile}" property="iconsfileextension" />
                 	    	        <if>
-                	    	            <equals arg1="${iconsfilebasename}" arg2="${iconsfilebasenamewithoutsupportedextension}" />
+                	    	        	<not>
+                	    	                <equals arg1="${iconsfileextension}" arg2="ico" />
+                	    	        	</not>
                 	    	            <then>
-                	    	            	<!-- tries to remove unsupported extensions -->
-                	    	            	<!-- FIXME remove all extensions -->
-                	    	            	<local name="iconsfilebasenamewithoutextension" />
-                	    	            	<basename property="iconsfilebasenamewithoutextension" file="${iconsfilebasenamewithoutsupportedextension}" suffix=".png"/>
+                	    	            	<!-- tries to remove all extensions -->
+                	    	            	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
                 	    	    	        <!-- converts the icon file into the proper format for Windows icons -->
                 	    	            	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.ico" />
                 	    	            	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
@@ -307,6 +328,8 @@
                 	    	    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	    	            </then>
                 	    	        	<else>
+                	    	        		<local name="iconsfilebasename" />
+                	    	        		<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	    	        		<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
                 	    	        		<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
                 	    	        		<echo message="icons file '@{iconsfile}' exists, copying" />
@@ -318,24 +341,23 @@
                 	        	    <if>
                 	        	    	<equals arg1="@{os}" arg2="Linux" />
                 	        	    	<then>
-                	        	    		<local name="iconsfilebasename" />
-                	        	    		<basename property="iconsfilebasename" file="@{iconsfile}" />
-                	        	    		<local name="iconsfilebasenamewithoutsupportedextension" />
-                	        	    		<basename property="iconsfilebasenamewithoutsupportedextension" file="@{iconsfile}" suffix=".png"/>
+                	        	    		<to-extension input="@{iconsfile}" property="iconsfileextension" />
                 	        	    		<if>
-                	        	    		    <equals arg1="${iconsfilebasename}" arg2="${iconsfilebasenamewithoutsupportedextension}" />
+                	        	    			<not>
+                	        	    			    <equals arg1="${iconsfileextension}" arg2="png" />
+                	        	    			</not>
                 	        	    		    <then>
-                	        	    		    	<!-- tries to remove unsupported extensions -->
-                	        	    		    	<!-- FIXME remove all extensions -->
-                	        	    		    	<local name="iconsfilebasenamewithoutextension" />
-                	        	    		    	<basename property="iconsfilebasenamewithoutextension" file="${iconsfilebasenamewithoutsupportedextension}" suffix=".ico"/>
-                	        	    		        <!-- converts the icon file into the proper format for GNU Linux icons -->
+                	        	    		    	<!-- tries to remove all extensions -->
+                	        	    		    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
+                	        	    		        <!-- converts the icon file into the proper format for GNU Linux icons, see http://standards.freedesktop.org/icon-theme-spec/latest/ar01s02.html -->
                 	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.png" />
                 	        	    		    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
                 	        	    		        <echo message="icons file '@{iconsfile}' exists, converting into png" />
                 	        	    		        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	        	    		    </then>
                 	        	    		    <else>
+                	        	    		    	<local name="iconsfilebasename" />
+                	        	    		    	<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
                 	        	    		    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
                 	        	    		    	<echo message="icons file '@{iconsfile}' exists, copying" />
@@ -347,17 +369,14 @@
                 	        	    		<if>
                 	        	    		    <equals arg1="@{os}" arg2="Mac OS X" />
                 	        	    		    <then>
-                	        	    		    	<local name="iconsfilebasename" />
-                	        	    		    	<basename property="iconsfilebasename" file="@{iconsfile}" />
-                	        	    		    	<local name="iconsfilebasenamewithoutsupportedextension" />
-                	        	    		    	<basename property="iconsfilebasenamewithoutsupportedextension" file="@{iconsfile}" suffix=".icns"/>
+                	        	    		    	<to-extension input="@{iconsfile}" property="iconsfileextension" />
                 	        	    		    	<if>
-                	        	    		    	    <equals arg1="${iconsfilebasename}" arg2="${iconsfilebasenamewithoutsupportedextension}" />
+                	        	    		    		<not>
+                	        	    		    		    <equals arg1="${iconsfileextension}" arg2="icns" />
+                	        	    		    		</not>
                 	        	    		    	    <then>
-                	        	    		    	        <!-- tries to remove unsupported extensions -->
-                	        	    		    	    	<!-- FIXME remove all extensions -->
-                	        	    		    	    	<local name="iconsfilebasenamewithoutextension" />
-                	        	    		    	    	<basename property="iconsfilebasenamewithoutextension" file="${iconsfilebasenamewithoutsupportedextension}" suffix=".png"/>
+                	        	    		    	    	<!-- tries to remove all extensions -->
+                	        	    		    	    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
                 	        	    		    	        <!-- converts the icon file into the proper format for Mac OS X icons -->
                 	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.icns" />
                 	        	    		    	    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
@@ -365,6 +384,8 @@
                 	        	    		    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	        	    		    	    </then>
                 	        	    		    	    <else>
+                	        	    		    	    	<local name="iconsfilebasename" />
+                	        	    		    	    	<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
                 	        	    		    	    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
                 	        	    		    	    	<echo message="icons file '@{iconsfile}' exists, copying" />
@@ -926,8 +947,8 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
-			<!-- Removes the extension from the icon name. FIXME: remove any extension -->
-			<basename file="@{iconsfile}" property="icon-name" suffix=".png"/>
+			<!-- Removes the extension from the icon name -->
+			<to-basename-without-extension input="@{iconsfile}" property="icon-name" />
 			<!-- Creates the .desktop file for the shortcut -->
 			<echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
 Name=@{appname}
@@ -968,7 +989,7 @@ Categories=@{categories}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- RPM -->
+			<!-- RPM --><!-- FIXME treat the case ${appdir}/${icon-name}.png not available -->
 			<if>
 			    <equals arg1="@{jdk}" arg2=""/>
 			    <then>
@@ -977,10 +998,11 @@ Categories=@{categories}]]></echo>
 			    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    	        <exclude name="@{executable}"/>
+			    	    	<exclude name="${icon-name}.png"/>
 			    	    </zipfileset>
 			    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
 			    	    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    	    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
+			    	    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
 			    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    	    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			    	    <depends/>
@@ -992,6 +1014,7 @@ Categories=@{categories}]]></echo>
 			            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			                <exclude name="@{executable}"/>
+			            	<exclude name="${icon-name}.png"/>
 			                <exclude name="jre/bin/*"/>
 			                <exclude name="jre/lib/${jrearchitecture}/*.so"/>
 			    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
@@ -1000,14 +1023,14 @@ Categories=@{categories}]]></echo>
 				        <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			            <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 			            <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="@{iconsfile}"/><!-- FIXME treat the case in which the icon file has been converted -->
+			            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
 				        <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			            <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 				        <depends/>
 			        </pure-java-rpm>
 			    </else>
 			</if>
-			<!-- DEB -->
+			<!-- DEB --><!-- FIXME treat the case ${appdir}/${icon-name}.png not available -->
 			<mkdir dir="@{outdir}/controldir"/>
 			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
 Version: @{version}.@{release}
@@ -1027,7 +1050,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    <then>
 			    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
 			    	    <data src="${appdir}" type="directory" 
-			    	        excludes="@{executable}">
+			    	        excludes="@{executable},${icon-name}.png">
 			    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	    </data>
 			    	    <data src="@{appjar}" type="file">
@@ -1039,7 +1062,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    <data src="@{outdir}/${package-name}.desktop" type="file">
 			    	        <mapper type="perm" prefix="/usr/share/applications"/>
 			    	    </data>
-			    	    <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
+			    	    <data src="${appdir}/${icon-name}.png" type="file">
 			    	        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
 			    	    </data>
 			    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
@@ -1051,7 +1074,7 @@ Multi-Arch: @{multiarch}]]></echo>
 				<else>
 			        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
 			            <data src="${appdir}" type="directory" 
-			                excludes="jre/bin/*,@{executable},jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+			                excludes="@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
 			                <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			            </data>
 			            <data src="@{appjar}" type="file">
@@ -1069,7 +1092,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			            <data src="@{outdir}/${package-name}.desktop" type="file">
 			                <mapper type="perm" prefix="/usr/share/applications"/>
 			            </data>
-			            <data src="@{iconsfile}" type="file"><!-- FIXME treat the case in which the icon file has been converted -->
+			            <data src="${appdir}/${icon-name}.png" type="file">
 			                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
 			            </data>
 				        <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
@@ -1226,7 +1249,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) --><!-- FIXME handle the case jdk = '' -->
+			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
