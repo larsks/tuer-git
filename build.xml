@@ -273,7 +273,31 @@
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${destdir}/${game-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+		<!-- extracts the manifest of the main JOGL JAR -->
+		<unzip src="lib/jogl/jogl-all.jar" dest="${destdir}">
+		    <patternset>
+		        <include name="META-INF/MANIFEST.MF"/>
+		    </patternset>
+		</unzip>
+		<!-- keeps only the attributes of the implementation -->
+		<copy file="${destdir}/META-INF/MANIFEST.MF" tofile="${destdir}/META-INF/MANIFEST.MF.tmp">
+		    <filterchain>
+		        <linecontains>
+		            <contains value="Implementation-"/>
+		        </linecontains>
+		    </filterchain>
+		</copy>
+		<copy file="${destdir}/META-INF/MANIFEST.MF.tmp" tofile="${destdir}/META-INF/MANIFEST.MF"/>
+		<!-- fills the manifest with other necessary attributes -->
+		<manifest file="${destdir}/META-INF/MANIFEST.MF" mode="update">
+			<attribute name="Application-Name" value="${game-long-name}"/>
+			<attribute name="Main-Class" value="${game-main-class}"/>
+			<attribute name="Trusted-Only" value="true"/>
+			<attribute name="Trusted-Library" value="false"/>
+			<attribute name="Permissions" value="all-permissions"/>
+			<attribute name="Codebase" value="${codebase-url}"/>
+		</manifest>
+		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" includes="**/*.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- Gluegen, JOAL and JOGL -->
 			<zipfileset src="lib/gluegen-rt/gluegen-rt.jar" includes="**/*.class"/>
@@ -344,6 +368,7 @@
 				<attribute name="Codebase" value="${codebase-url}"/>
 			</manifest>
 		</jar>
+		<delete dir="${destdir}/META-INF" failonerror="true"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Sign JARs                                                         -->
