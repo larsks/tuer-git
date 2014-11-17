@@ -71,11 +71,6 @@
 	    </sequential>
 	</macrodef>
 	
-	<target name="test">
-	    <to-basename-without-extension input="urghrgtrh.pnj" property="prop" />
-		<echo message="${prop}" />
-	</target>
-	
 	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
 	<macrodef name="to-package-name">
 	    <attribute name="property" description="The name of the property to set that will contain the package name (output)" />
@@ -950,7 +945,10 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 			<!-- Removes the extension from the icon name -->
 			<to-basename-without-extension input="@{iconsfile}" property="icon-name" />
 			<!-- Creates the .desktop file for the shortcut -->
-			<echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
+			<if>
+			    <available file="${appdir}/${icon-name}.png"/>
+			    <then>
+			        <echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
 Name=@{appname}
 Comment=@{comment}
 Exec=@{executable}
@@ -958,6 +956,17 @@ Icon=${icon-name}
 Terminal=false
 Type=Application
 Categories=@{categories}]]></echo>
+			    </then>
+			    <else>
+			    	<echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
+Name=@{appname}
+Comment=@{comment}
+Exec=@{executable}
+Terminal=false
+Type=Application
+Categories=@{categories}]]></echo>
+			    </else>
+			</if>
 			<!-- Handles the documentation -->
 			<if>
 			    <not>
@@ -989,48 +998,91 @@ Categories=@{categories}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
-			<!-- RPM --><!-- FIXME treat the case ${appdir}/${icon-name}.png not available -->
+			<!-- RPM -->
 			<if>
 			    <equals arg1="@{jdk}" arg2=""/>
 			    <then>
-			    	<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
-			    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			    	        <exclude name="@{executable}"/>
-			    	    	<exclude name="${icon-name}.png"/>
-			    	    </zipfileset>
-			    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-			    	    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    	    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
-			    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    	    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-			    	    <depends/>
-			    	</pure-java-rpm>
+			    	<if>
+			    		<available file="${appdir}/${icon-name}.png"/>
+			    		<then>
+			    	        <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			    	            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    	            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			    	            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			    	                <exclude name="@{executable}"/>
+			    	    	        <exclude name="${icon-name}.png"/>
+			    	            </zipfileset>
+			    	            <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+			    	            <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    	            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
+			    	            <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			    	            <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	            <depends/>
+			    	        </pure-java-rpm>
+			    	    </then>
+			    		<else>
+			    			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			    			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			    			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			    			        <exclude name="@{executable}"/>
+			    			    </zipfileset>
+			    			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+			    			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    			    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			    			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    			    <depends/>
+			    			</pure-java-rpm>
+			    		</else>
+			    	</if>
 			    </then>
 			    <else>
-			        <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
-			            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			                <exclude name="@{executable}"/>
-			            	<exclude name="${icon-name}.png"/>
-			                <exclude name="jre/bin/*"/>
-			                <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			            </zipfileset>
-			            <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-				        <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			            <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			            <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
-				        <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			            <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-				        <depends/>
-			        </pure-java-rpm>
+			    	<if>
+			    	    <available file="${appdir}/${icon-name}.png"/>
+			    	    <then>
+			                <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			                    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			                    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			                    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			                        <exclude name="@{executable}"/>
+			            	        <exclude name="${icon-name}.png"/>
+			                        <exclude name="jre/bin/*"/>
+			                        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+			    	                <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+			                    </zipfileset>
+			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+				                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+			                    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			                    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
+				                <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			                    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+				                <depends/>
+			                </pure-java-rpm>
+			    	    </then>
+			    	    <else>                    	
+			    	    	<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+			    	    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    	    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
+			    	    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+			    	    	        <exclude name="@{executable}"/>
+			    	    	        <exclude name="jre/bin/*"/>
+			    	    	        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
+			    	    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+			    	    	    </zipfileset>
+			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
+			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+			    	    	    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    	    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+			    	    	    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	    	    <depends/>
+			    	    	</pure-java-rpm>
+			    		</else>
+			        </if>
 			    </else>
 			</if>
-			<!-- DEB --><!-- FIXME treat the case ${appdir}/${icon-name}.png not available -->
+			<!-- DEB -->
 			<mkdir dir="@{outdir}/controldir"/>
 			<echo file="@{outdir}/controldir/control"><![CDATA[Package: ${package-name}
 Version: @{version}.@{release}
@@ -1048,58 +1100,112 @@ Multi-Arch: @{multiarch}]]></echo>
 			<if>
 			    <equals arg1="@{jdk}" arg2=""/>
 			    <then>
-			    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    	    <data src="${appdir}" type="directory" 
-			    	        excludes="@{executable},${icon-name}.png">
-			    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	    </data>
-			    	    <data src="@{appjar}" type="file">
-			    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	    </data>
-			    	    <data src="${appdir}/@{executable}" type="file">
-			    	        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
-			    	    </data>
-			    	    <data src="@{outdir}/${package-name}.desktop" type="file">
-			    	        <mapper type="perm" prefix="/usr/share/applications"/>
-			    	    </data>
-			    	    <data src="${appdir}/${icon-name}.png" type="file">
-			    	        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			    	    </data>
-			    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-			    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-			    	    </data>
-			    	    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-			    	</pure-java-deb>
+			    	<if>
+			    	    <available file="${appdir}/${icon-name}.png"/>
+			    	    <then>
+			    	        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			    	            <data src="${appdir}" type="directory" excludes="@{executable},${icon-name}.png">
+			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	            </data>
+			    	            <data src="@{appjar}" type="file">
+			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	            </data>
+			    	            <data src="${appdir}/@{executable}" type="file">
+			    	                <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			    	            </data>
+			    	            <data src="@{outdir}/${package-name}.desktop" type="file">
+			    	                <mapper type="perm" prefix="/usr/share/applications"/>
+			    	            </data>
+			    	            <data src="${appdir}/${icon-name}.png" type="file">
+			    	                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+			    	            </data>
+			    	            <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+			    	                <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    	            </data>
+			    	            <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	        </pure-java-deb>
+			    	    </then>
+			    	    <else>
+			    	    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			    	    	    <data src="${appdir}" type="directory" excludes="@{executable}">
+			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	    	    </data>
+			    	    	    <data src="@{appjar}" type="file">
+			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			    	    	    </data>
+			    	    	    <data src="${appdir}/@{executable}" type="file">
+			    	    	        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			    	    	    </data>
+			    	    	    <data src="@{outdir}/${package-name}.desktop" type="file">
+			    	    	        <mapper type="perm" prefix="/usr/share/applications"/>
+			    	    	    </data>
+			    	    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+			    	    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+			    	    	    </data>
+			    	    	    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			    	    	</pure-java-deb>
+			    	    </else>
+			    	</if>
 			    </then>
 				<else>
-			        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			            <data src="${appdir}" type="directory" 
-			                excludes="@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
-			                <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			            </data>
-			            <data src="@{appjar}" type="file">
-			                <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			            </data>
-			            <data src="${appdir}/@{executable}" type="file">
-			                <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
-			            </data>
-			            <data src="${appdir}/jre/bin" type="directory" includes="*">
-			                <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
-			            </data>
-			            <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-			                <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
-			            </data>
-			            <data src="@{outdir}/${package-name}.desktop" type="file">
-			                <mapper type="perm" prefix="/usr/share/applications"/>
-			            </data>
-			            <data src="${appdir}/${icon-name}.png" type="file">
-			                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			            </data>
-				        <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-				            <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-				        </data>
-			            <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
-			        </pure-java-deb>
+					<if>
+					    <available file="${appdir}/${icon-name}.png"/>
+					    <then>
+			                <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+			                    <data src="${appdir}" type="directory" excludes="@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			                    </data>
+			                    <data src="@{appjar}" type="file">
+			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+			                    </data>
+			                    <data src="${appdir}/@{executable}" type="file">
+			                        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+			                    </data>
+			                    <data src="${appdir}/jre/bin" type="directory" includes="*">
+			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+			                    </data>
+			                    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
+			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+			                    </data>
+			                    <data src="@{outdir}/${package-name}.desktop" type="file">
+			                        <mapper type="perm" prefix="/usr/share/applications"/>
+			                    </data>
+			                    <data src="${appdir}/${icon-name}.png" type="file">
+			                        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+			                    </data>
+				                <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+				                    <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+				                </data>
+			                    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+			                </pure-java-deb>
+					    </then>
+					    <else>
+					    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+					    	    <data src="${appdir}" type="directory" excludes="@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+					    	    </data>
+					    	    <data src="@{appjar}" type="file">
+					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
+					    	    </data>
+					    	    <data src="${appdir}/@{executable}" type="file">
+					    	        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
+					    	    </data>
+					    	    <data src="${appdir}/jre/bin" type="directory" includes="*">
+					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+					    	    </data>
+					    	    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
+					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+					    	    </data>
+					    	    <data src="@{outdir}/${package-name}.desktop" type="file">
+					    	        <mapper type="perm" prefix="/usr/share/applications"/>
+					    	    </data>
+					    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+					    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+					    	    </data>
+					    	    <link symbolic="true" name="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
+					    	</pure-java-deb>
+					    </else>
+					</if>
 				</else>
 			</if>
 			<delete failonerror="false">
