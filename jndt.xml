@@ -1006,7 +1006,7 @@ Categories=@{categories}]]></echo>
 			    		<available file="${appdir}/${icon-name}.png"/>
 			    		<then>
 			    	        <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			    	            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    	            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    	            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    	            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    	                <exclude name="@{executable}"/>
@@ -1022,7 +1022,7 @@ Categories=@{categories}]]></echo>
 			    	    </then>
 			    		<else>
 			    			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			    			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    			        <exclude name="@{executable}"/>
@@ -1041,7 +1041,7 @@ Categories=@{categories}]]></echo>
 			    	    <available file="${appdir}/${icon-name}.png"/>
 			    	    <then>
 			                <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			                    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			                    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			                    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			                    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			                        <exclude name="@{executable}"/>
@@ -1062,7 +1062,7 @@ Categories=@{categories}]]></echo>
 			    	    </then>
 			    	    <else>                    	
 			    	    	<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
-			    	    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}"
+			    	    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    	    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    	    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    	    	        <exclude name="@{executable}"/>
