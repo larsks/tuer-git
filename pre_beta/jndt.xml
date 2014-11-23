@@ -149,9 +149,9 @@
         <attribute name="appjar" description="file location of the JAR to package"/>
         <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
-        <attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
+        <attribute name="vmargs" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
         <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
-        <attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
+        <attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
         <attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
         <attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
         <attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac). No conversion is done if antreimplementationenabled is set to false"/>
@@ -164,11 +164,11 @@
                 <equals arg1="@{os}" arg2="Mac OS X" />
                 <then>
                     <var name="contentstarget" value="@{outdir}/Contents/MacOS" />
-                    <var name="resourcestarget" value="@{outdir}/Contents/Resources" />
+                    <var name="iconstarget" value="@{outdir}/Contents/Resources" />
                 </then>
                 <else>
                     <var name="contentstarget" value="@{outdir}" />
-                    <var name="resourcestarget" value="@{outdir}" />
+                    <var name="iconstarget" value="@{outdir}" />
                 </else>
             </if>
             <!-- checks which implementation to use -->
@@ -318,7 +318,7 @@
                 	    	            	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
                 	    	    	        <!-- converts the icon file into the proper format for Windows icons -->
                 	    	            	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.ico" />
-                	    	            	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	    	            	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	    	            	<echo message="icons file '@{iconsfile}' exists, converting into ico" />
                 	    	    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	    	            </then>
@@ -326,7 +326,7 @@
                 	    	        		<local name="iconsfilebasename" />
                 	    	        		<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	    	        		<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	    	        		<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	    	        		<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	    	        		<echo message="icons file '@{iconsfile}' exists, copying" />
                 	    	        		<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
                 	    	        	</else>
@@ -346,7 +346,7 @@
                 	        	    		    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
                 	        	    		        <!-- converts the icon file into the proper format for GNU Linux icons, see http://standards.freedesktop.org/icon-theme-spec/latest/ar01s02.html -->
                 	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.png" />
-                	        	    		    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	        	    		    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	        	    		        <echo message="icons file '@{iconsfile}' exists, converting into png" />
                 	        	    		        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	        	    		    </then>
@@ -354,7 +354,7 @@
                 	        	    		    	<local name="iconsfilebasename" />
                 	        	    		    	<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	        	    		    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	        	    		    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	        	    		    	<echo message="icons file '@{iconsfile}' exists, copying" />
                 	        	    		    	<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
                 	        	    		   </else>
@@ -374,7 +374,7 @@
                 	        	    		    	    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
                 	        	    		    	        <!-- converts the icon file into the proper format for Mac OS X icons -->
                 	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.icns" />
-                	        	    		    	    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	        	    		    	    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	        	    		    	    	<echo message="icons file '@{iconsfile}' exists, converting into icns" />
                 	        	    		    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
                 	        	    		    	    </then>
@@ -382,7 +382,7 @@
                 	        	    		    	    	<local name="iconsfilebasename" />
                 	        	    		    	    	<basename property="iconsfilebasename" file="@{iconsfile}" />
                 	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	        	    		    	    	<var name="dsticonsfile" value="${resourcestarget}/${dsticonsfilebasename}" />
+                	        	    		    	    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
                 	        	    		    	    	<echo message="icons file '@{iconsfile}' exists, copying" />
                 	        	    		    	    	<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
                 	        	    		    	    </else>
