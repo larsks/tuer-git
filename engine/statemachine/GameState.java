@@ -204,6 +204,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private static String gameoverSoundSampleIdentifier=null;
     
+    private static final String victorySoundSamplePath="/sounds/applause.ogg";
+    
+    private static String victorySoundSampleIdentifier=null;
+    
     private static final String pain1soundSamplePath="/sounds/pain1.ogg";
     
     private static final String pain2soundSamplePath="/sounds/pain2.ogg";
@@ -889,6 +893,27 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     {fpsc.setKeyRotateSpeed(customMouseAndKeyboardSettings.getKeyRotateSpeed());
                	     fpsc.setMouseRotateSpeed(customMouseAndKeyboardSettings.getMouseRotateSpeed());
                	     fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
+               	     //FIXME it's dirty, use a box, add it into another place, create a class that contains this box and the index of the next level
+               	     switch(levelIndex)
+               	     {case 0:
+               	    	  if(94.0<=correctX&&correctX<=97.0&&129.0<=correctZ&&correctZ<=130.0)
+         	    	          {gameStats.setMissionStatus(MissionStatus.COMPLETED);
+             	               ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+         	                   ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=levelIndex+1;
+         		               toGameOverTriggerAction.perform(null,null,-1);
+         		               getSoundManager().play(false,false,victorySoundSampleIdentifier);
+         	    	          }
+               	    	 break;
+               	      case 1:
+               	    	  if((116.0<=correctX&&correctX<=118.0&&213.0<=correctZ&&correctZ<=214.0)||(120.0<=correctX&&correctX<=121.0&&214.0<=correctZ&&correctZ<=215.0))
+               	    	      {gameStats.setMissionStatus(MissionStatus.COMPLETED);
+                   	           ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+               	               ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=levelIndex+1;
+               		           toGameOverTriggerAction.perform(null,null,-1);
+               		           getSoundManager().play(false,false,victorySoundSampleIdentifier);
+               	    	      }
+               	    	  break;
+               	     }
                     }
                 else
                     {if(latestPlayerDeath==null)
@@ -1470,6 +1495,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	 if(gameoverSoundSampleUrl!=null)
         		 gameoverSoundSampleIdentifier=getSoundManager().loadSound(gameoverSoundSampleUrl);
             }
+        if(victorySoundSamplePath!=null&&victorySoundSampleIdentifier==null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victorySoundSamplePath);
+       	     if(victorySoundSampleUrl!=null)
+       	    	 victorySoundSampleIdentifier=getSoundManager().loadSound(victorySoundSampleUrl);
+            }
     }
     
     /**
@@ -1576,6 +1606,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	 if(gameoverSoundSampleUrl!=null)
         		 getSoundManager().unloadSound(gameoverSoundSampleUrl);
         	 gameoverSoundSampleIdentifier=null;
+            }
+        if(victorySoundSamplePath!=null&&victorySoundSampleIdentifier!=null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victorySoundSamplePath);
+       	     if(victorySoundSampleUrl!=null)
+    		     getSoundManager().unloadSound(victorySoundSampleUrl);
+       	     victorySoundSampleIdentifier=null;
             }
     }
     
