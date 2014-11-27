@@ -92,6 +92,7 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.data.EnemyData;
 import engine.data.PlayerData;
+import engine.data.ProfileData;
 import engine.data.ProjectileController;
 import engine.data.ProjectileData;
 import engine.data.common.Medikit;
@@ -248,6 +249,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
      * 3D objects
      * FIXME detect whether the weapon is close to another 3D object and update its position
+     * TODO transfer the game statistics into the player's statistics when exiting the game
      * 
      * @author Julien Gouesse
      *
@@ -278,13 +280,33 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         }
     }
     
+    /**
+     * Constructor
+     * 
+     * @param canvas
+     * @param physicalLayer
+     * @param toPauseMenuTriggerAction
+     * @param toPauseMenuTriggerActionForExitConfirm
+     * @param toGameOverTriggerAction
+     * @param toggleScreenModeAction
+     * @param soundManager
+     * @param taskManager
+     * @param mouseManager
+     * @param defaultActionMap
+     * @param customActionMap
+     * @param defaultMouseAndKeyboardSettings
+     * @param customMouseAndKeyboardSettings
+     * @param profileData data of the profile
+     */
     public GameState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerAction,
     		         final TransitionTriggerAction<ScenegraphState,String> toPauseMenuTriggerActionForExitConfirm,
     		         final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction,
     		         final TriggerAction toggleScreenModeAction,final SoundManager soundManager,final TaskManager taskManager,
     		         final MouseManager mouseManager,final ActionMap defaultActionMap,final ActionMap customActionMap,
-    		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
+    		         final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
+    		         final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
+    		         final ProfileData profileData){
         super(soundManager,new LogicalLayer(),new Node(),canvas.getCanvasRenderer().getCamera());
         this.mouseManager=mouseManager;
         this.physicalLayer=physicalLayer;
@@ -407,7 +429,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         fpsTextLabel=initializeFpsTextLabel();
         healthTextLabel=initializeHealthTextLabel();
         headUpDisplayLabel=initializeHeadUpDisplayLabel();
-        initializeCollisionSystem(cam);
+        initializeCollisionSystem(cam,profileData);
         wireframeState=new WireframeState();
         wireframeState.setEnabled(false);
         getRoot().setRenderState(wireframeState);
@@ -486,7 +508,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    }
     }
     
-    private final void initializeCollisionSystem(final Camera cam){
+    private final void initializeCollisionSystem(final Camera cam,final ProfileData profileData){
     	//configures the collision system
         CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
         //adds a mesh with an invisible mesh data
@@ -677,7 +699,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		            {//otherwise leaves the level
                       		    		 //TODO check the objectives; if they aren't all completed, the mission status will be equal to "FAILED" and the next level index will be set to -1
                       		    	     //TODO pass the destination to the trigger action
+                      		    		 //updates the status of the current mission
                       		    		 gameStats.setMissionStatus(MissionStatus.COMPLETED);
+                      		    		 //unlocks the next level
+                      		    		 profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
+                      		    		 //indicates the next level suggested to the player
                   	                     ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
               	                         ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=teleporterDestinationLevelIndex;
               		                     toGameOverTriggerAction.perform(null,null,-1);
