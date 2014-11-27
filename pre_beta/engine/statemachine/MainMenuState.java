@@ -41,9 +41,11 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 
+import engine.data.ProfileData;
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
 import engine.input.ActionMap;
@@ -120,6 +122,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param customActionMap custom action map, which can be modified
      * @param defaultMouseAndKeyboardSettings default mouse and keyboard settings, which should not be modified, used to reset the custom ones to their default values
      * @param customMouseAndKeyboardSettings custom mouse and keyboard settings, which can be modified
+     * @param profileData data of the profile
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
@@ -128,7 +131,8 @@ public final class MainMenuState extends ScenegraphState{
                   final Runnable uninstallRunnable,final String gameFullName,final String readmeContent,
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
       			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
-      			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
+      			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
+      			  final ProfileData profileData){
         super(soundManager);
         matchTypeFactory=new MatchTypeFactory();
         matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
@@ -157,7 +161,7 @@ public final class MainMenuState extends ScenegraphState{
         optionsMenuPanel=createOptionsMenuPanel();
         confirmExitMenuPanel=createConfirmExitMenuPanel();
         this.toLoadingDisplayAction=toLoadingDisplayAction;
-        startMenuPanel=createStartMenuPanel();
+        startMenuPanel=createStartMenuPanel(profileData);
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
         arenaModePanel=createArenaModePanel();
         //creates the main frame
@@ -181,28 +185,29 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createStoryModePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
         final UIPanel storyModePanel=new UIPanel(new RowLayout(false));
-        final UIButton level0Button=new UIButton("Level 0");
+        //FIXME stop hardcoding the level indices, use getClass().getResource("/abin/LID"+levelIndex+".abin")?
+        final LevelUIButton level0Button=new LevelUIButton("Tutorial",0);
         level0Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onLevelButtonActionPerformed(ae,0);
             }
         });
-        final UIButton perfTestLevelButton=new UIButton("Level 1");
-        perfTestLevelButton.addActionListener(new ActionListener(){
+        final LevelUIButton level1Button=new LevelUIButton("Museum",1);
+        level1Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onLevelButtonActionPerformed(ae,1);
             }
         });
-        final UIButton level2Button=new UIButton("Level 2");
+        final LevelUIButton level2Button=new LevelUIButton("Outdoor",2);
         level2Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onLevelButtonActionPerformed(ae,2);
             }
         });
-        final UIButton level3Button=new UIButton("Level 3");
+        final LevelUIButton level3Button=new LevelUIButton("Bagnolet",3);
         level3Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -217,11 +222,30 @@ public final class MainMenuState extends ScenegraphState{
             }
         });
         storyModePanel.add(level0Button);
-        storyModePanel.add(perfTestLevelButton);
+        storyModePanel.add(level1Button);
         storyModePanel.add(level2Button);
         storyModePanel.add(level3Button);
         storyModePanel.add(backButton);
         return(storyModePanel);
+    }
+    
+    private static final class LevelUIButton extends UIButton{
+    	
+    	private final int levelIndex;
+    	
+    	private LevelUIButton(final String text,final int levelIndex){
+    		super(text);
+    		this.levelIndex=levelIndex;
+    	}
+    }
+    
+    private void updateStoryModePanel(final ProfileData profileData){
+    	for(Spatial child:this.storyModePanel.getChildren())
+    		if(child instanceof LevelUIButton)
+    	        {final LevelUIButton levelButton=(LevelUIButton)child;
+    	         final boolean enabled=profileData.containsUnlockedLevelIndex(levelButton.levelIndex);
+    	         levelButton.setEnabled(enabled);
+    	        }
     }
     
     private void onLevelButtonActionPerformed(final ActionEvent ae,final int levelIndex){
@@ -703,12 +727,13 @@ public final class MainMenuState extends ScenegraphState{
     	return(desktopShortcutsMenuPanel);
     }
     
-    private final UIPanel createStartMenuPanel(){
+    private final UIPanel createStartMenuPanel(final ProfileData profileData){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
         final UIButton storyModeButton=new UIButton("Story mode");
         storyModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
+            	updateStoryModePanel(profileData);
                 showPanelInMainFrame(storyModePanel);
             }
         });
