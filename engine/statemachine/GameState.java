@@ -488,7 +488,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void initializeCollisionSystem(final Camera cam){
     	//configures the collision system
-        CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);       
+        CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
         //adds a mesh with an invisible mesh data
         final Mesh playerMesh=new Mesh("player");
         final MeshData playerMeshData=new MeshData();
@@ -895,7 +895,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                	     fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
                	     //FIXME it's dirty, use a box, add it into another place, create a class that contains this box and the index of the next level
                	     switch(levelIndex)
-               	     {case 0:
+               	     {case 1:
                	    	  if(94.0<=correctX&&correctX<=97.0&&129.0<=correctZ&&correctZ<=130.0)
          	    	          {gameStats.setMissionStatus(MissionStatus.COMPLETED);
              	               ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
@@ -904,7 +904,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
          		               getSoundManager().play(false,false,victorySoundSampleIdentifier);
          	    	          }
                	    	 break;
-               	      case 1:
+               	      case 0:
                	    	  if((116.0<=correctX&&correctX<=118.0&&213.0<=correctZ&&correctZ<=214.0)||(120.0<=correctX&&correctX<=121.0&&214.0<=correctZ&&correctZ<=215.0))
                	    	      {gameStats.setMissionStatus(MissionStatus.COMPLETED);
                    	           ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;

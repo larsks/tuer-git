@@ -188,7 +188,7 @@ public final class MainMenuState extends ScenegraphState{
             	onLevelButtonActionPerformed(ae,0);
             }
         });
-        final UIButton perfTestLevelButton=new UIButton("Performance Test");
+        final UIButton perfTestLevelButton=new UIButton("Level 1");
         perfTestLevelButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
