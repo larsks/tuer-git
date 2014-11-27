@@ -637,10 +637,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 	 collisionResults.clear();
                     }
                 //checks if any teleporter is used
-                Node teleporterNode;
                 boolean hasCollision=false;
                 for(int i=teleportersList.size()-1;i>=0&&!hasCollision;i--)
-                    {teleporterNode=teleportersList.get(i);
+                    {final Node teleporterNode=teleportersList.get(i);
                      PickingUtil.findCollisions(teleporterNode,playerNode,collisionResults);
                      hasCollision=collisionResults.getNumber()>0;
                      collisionResults.clear();
@@ -659,16 +658,31 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                {//the player enters a teleporter                        	    
                       		    wasBeingTeleported=true;
                       		    TeleporterUserData teleporterUserData=(TeleporterUserData)teleporterNode.getUserData();
-                      		    Vector3 teleporterDestination=teleporterUserData.getDestination();
-                      		    //then moves him
-                      		    playerNode.setTranslation(teleporterDestination);
-                      		    //updates the previous location to avoid any problem when detecting the collisions
-                                previousPosition.set(teleporterDestination);
-                                //synchronizes the camera with the camera node
-                                cam.setLocation(teleporterDestination);
-                                //play a sound if available
-                 	            if(teleporterUserData.getPickingUpSoundSampleIdentifier()!=null)
-                                    getSoundManager().play(false,false,teleporterUserData.getPickingUpSoundSampleIdentifier());
+                      		    final Vector3 teleporterDestination=teleporterUserData.getDestination();
+                      		    final int teleporterDestinationLevelIndex=teleporterUserData.getDestinationLevelIndex();
+                      		    //if the teleporter is in the current level
+                      		    if(levelIndex==teleporterDestinationLevelIndex)
+                      		        {//then moves the player
+                      		    	 playerNode.setTranslation(teleporterDestination);
+                      		         //updates the previous location to avoid any problem when detecting the collisions
+                                     previousPosition.set(teleporterDestination);
+                                     //synchronizes the camera with the camera node
+                                     cam.setLocation(teleporterDestination);
+                                     //play a sound if available
+                 	                 if(teleporterUserData.getPickingUpSoundSampleIdentifier()!=null)
+                                         getSoundManager().play(false,false,teleporterUserData.getPickingUpSoundSampleIdentifier());
+                      		        }
+                      		    else
+                      		    	if(playerData.isAlive())
+                      		            {//otherwise leaves the level
+                      		    		 //TODO check the objectives; if they aren't all completed, the mission status will be equal to "FAILED" and the next level index will be set to -1
+                      		    	     //TODO pass the destination to the trigger action
+                      		    		 gameStats.setMissionStatus(MissionStatus.COMPLETED);
+                  	                     ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+              	                         ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=teleporterDestinationLevelIndex;
+              		                     toGameOverTriggerAction.perform(null,null,-1);
+              		                     getSoundManager().play(false,false,victorySoundSampleIdentifier);
+                      		            }
                 	           }
                 	      }                          
                     }
@@ -893,27 +907,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     {fpsc.setKeyRotateSpeed(customMouseAndKeyboardSettings.getKeyRotateSpeed());
                	     fpsc.setMouseRotateSpeed(customMouseAndKeyboardSettings.getMouseRotateSpeed());
                	     fpsc.setMoveSpeed(customMouseAndKeyboardSettings.getMoveSpeed());
-               	     //FIXME it's dirty, use a box, add it into another place, create a class that contains this box and the index of the next level
-               	     switch(levelIndex)
-               	     {case 1:
-               	    	  if(94.0<=correctX&&correctX<=97.0&&129.0<=correctZ&&correctZ<=130.0)
-         	    	          {gameStats.setMissionStatus(MissionStatus.COMPLETED);
-             	               ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
-         	                   ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=levelIndex+1;
-         		               toGameOverTriggerAction.perform(null,null,-1);
-         		               getSoundManager().play(false,false,victorySoundSampleIdentifier);
-         	    	          }
-               	    	 break;
-               	      case 0:
-               	    	  if((116.0<=correctX&&correctX<=118.0&&213.0<=correctZ&&correctZ<=214.0)||(120.0<=correctX&&correctX<=121.0&&214.0<=correctZ&&correctZ<=215.0))
-               	    	      {gameStats.setMissionStatus(MissionStatus.COMPLETED);
-                   	           ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
-               	               ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=levelIndex+1;
-               		           toGameOverTriggerAction.perform(null,null,-1);
-               		           getSoundManager().play(false,false,victorySoundSampleIdentifier);
-               	    	      }
-               	    	  break;
-               	     }
                     }
                 else
                     {if(latestPlayerDeath==null)
@@ -1932,24 +1925,40 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadTeleporters(){
-    	/*if(levelIndex==0)
-    	    {final Node teleporterNode=new Node("a teleporter");
-             final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-             teleporterBox.setRandomColors();
-             teleporterNode.setTranslation(112.5,0,221.5);
-             teleporterNode.attachChild(teleporterBox);
-             teleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(-132,0.5,-102)));
-             teleportersList.add(teleporterNode);
-             getRoot().attachChild(teleporterNode);            
-             final Node secondTeleporterNode=new Node("another teleporter");
-             final Box secondTeleporterBox=new Box("another teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-             secondTeleporterBox.setRandomColors();
-             secondTeleporterNode.setTranslation(-132,0,-102);
-             secondTeleporterNode.attachChild(secondTeleporterBox);
-             secondTeleporterNode.setUserData(new TeleporterUserData(teleporter,new Vector3(112.5,0.5,221.5)));
-             teleportersList.add(secondTeleporterNode);
-             getRoot().attachChild(secondTeleporterNode);
-    	    }*/
+    	switch(levelIndex)
+    	{
+    	    case 0:
+    	        {final Node teleporterNode0=new Node("a teleporter");
+    	    	 final Box teleporterBox0=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+    	    	 teleporterBox0.setRandomColors();
+    	    	 teleporterNode0.setTranslation(116.5,0,213.5);
+    	    	 teleporterNode0.attachChild(teleporterBox0);
+    	    	 teleporterNode0.setUserData(new TeleporterUserData(teleporter,null,1));
+    	    	 teleportersList.add(teleporterNode0);
+                 getRoot().attachChild(teleporterNode0);
+                 final Node teleporterNode1=new Node("a teleporter");
+    	    	 final Box teleporterBox1=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+    	    	 teleporterBox1.setRandomColors();
+    	    	 teleporterNode1.setTranslation(120.5,0,214.5);
+    	    	 teleporterNode1.attachChild(teleporterBox1);
+    	    	 teleporterNode1.setUserData(new TeleporterUserData(teleporter,null,1));
+    	    	 teleportersList.add(teleporterNode1);
+                 getRoot().attachChild(teleporterNode1);
+    	    	 break;
+    	        }
+    	    case 1:
+    	    	{final Node teleporterNode=new Node("a teleporter");
+    	    	 final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
+    	    	 teleporterBox.setRandomColors();
+    	    	 teleporterNode.setTranslation(94.5,0,129.5);
+    	    	 teleporterNode.attachChild(teleporterBox);
+    	    	 //TODO set the destination
+    	    	 teleporterNode.setUserData(new TeleporterUserData(teleporter,null,2));
+    	    	 teleportersList.add(teleporterNode);
+                 getRoot().attachChild(teleporterNode);
+    	    	 break;
+    	    	}
+    	}
     }
     
     private final void loadMedikits(){
