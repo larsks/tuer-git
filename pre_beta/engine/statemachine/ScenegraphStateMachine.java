@@ -239,7 +239,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         addState(gameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(pauseMenuState,new PauseMenuStateEntryAction(),new ScenegraphStateExitAction());
         //gets the figures from the argument of the transition in the entry action and pass it to the game over state
-        addState(gameOverState,new GameOverStateEntryAction(),new ScenegraphStateExitAction());
+        addState(gameOverState,new GameOverStateEntryAction(),new GameOverStateExitAction());
         addState(unloadingDisplayState,new UnloadingDisplayStateEntryAction(scheduler,noPendingTaskCondition,unloadingDisplayToExitGameTriggerAction,unloadingDisplayToMainMenuTriggerAction,unloadingDisplayToLoadingDisplayTriggerAction),new ScenegraphStateExitAction());
         addState(exitGameState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         //adds all transitions between states to the transition model
