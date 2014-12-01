@@ -245,11 +245,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private Vector3 previousPosition=new Vector3();
     
+    /**data of the profile*/
+    private final ProfileData profileData;
+    
     /**
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
      * 3D objects
      * FIXME detect whether the weapon is close to another 3D object and update its position
-     * TODO transfer the game statistics into the player's statistics when exiting the game
      * 
      * @author Julien Gouesse
      *
@@ -318,6 +320,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         this.customActionMap=customActionMap;
         this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
         this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
+        this.profileData=profileData;
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<>();
@@ -429,7 +432,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         fpsTextLabel=initializeFpsTextLabel();
         healthTextLabel=initializeHealthTextLabel();
         headUpDisplayLabel=initializeHeadUpDisplayLabel();
-        initializeCollisionSystem(cam,profileData);
+        initializeCollisionSystem(cam);
         wireframeState=new WireframeState();
         wireframeState.setEnabled(false);
         getRoot().setRenderState(wireframeState);
@@ -508,7 +511,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    }
     }
     
-    private final void initializeCollisionSystem(final Camera cam,final ProfileData profileData){
+    private final void initializeCollisionSystem(final Camera cam){
     	//configures the collision system
         CollisionTreeManager.getInstance().setTreeType(CollisionTree.Type.AABB);
         //adds a mesh with an invisible mesh data
@@ -1746,6 +1749,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(healthTextLabel);
         //detaches the HUD node
         getRoot().detachChild(headUpDisplayLabel);
+        //transfers the game statistics into the player's statistics
+        profileData.updateGamesStatistics(gameStats);
+        //unsets player's stats
+        gameStats=null;
+        //unsets the statistics of each action
+		((GameStatistics[])toPauseMenuTriggerAction.arguments.getArgument(2))[0]=null;
+		((GameStatistics[])toPauseMenuTriggerActionForExitConfirm.arguments.getArgument(2))[0]=null;
+		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=null;
     	//resets the timer at the beginning of all long operations performed while unloading
         timer.reset();
         //detaches some nodes from the root to prevent Java from using them while releasing their resources

@@ -20,6 +20,8 @@ package engine.data;
 import java.util.HashSet;
 import java.util.Set;
 
+import engine.statemachine.GameStatistics;
+
 /**
  * Data of the profile, manages the unlocked levels. It will be used to store the other achievements too. It should contain the player's 
  * statistics (the latest GameStatistics instance should transfer its data into it when ending a mission).
@@ -63,5 +65,14 @@ public class ProfileData {
 	 */
 	public boolean containsUnlockedLevelIndex(final int levelIndex){
 		return(unlockedLevelsIndices.contains(Integer.valueOf(levelIndex)));
+	}
+	
+	/**
+	 * Updates the games statistics of the player with the statistics of a game
+	 * 
+	 * @param gameStats statistics of a game
+	 */
+	public void updateGamesStatistics(final GameStatistics gameStats){
+		//TODO
 	}
 }
