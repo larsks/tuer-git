@@ -64,20 +64,23 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
          * adds a (one shot) scheduled task that exits this state when there is no pending task. The arguments are used to determine the destination. 
          * The pending tasks are used to cleanup the game state
          */
-        if(args!=null&&args.getFirst()!=null&&args.getFirst() instanceof String)
-            {final String destinationTag=(String)args.getFirst();
-        	 if(destinationTag.equals(EXIT_TAG))
-        		 scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
-        	 else
-        		 if(destinationTag.equals(MAIN_MENU_TAG))
-        			 scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
-        		 else
-        			 if(destinationTag.equals(LEVEL_TAG))
-        			     {final int levelIndex=((int[])args.getArgument(1))[0];
-        			      //uses an argument to pass the level index
-        			      ((int[])toLoadingDisplayTriggerAction.arguments.getFirst())[0]=levelIndex;
-        			      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
-        			     }
+        if(args!=null&&args instanceof ScenegraphTransitionTriggerActionArguments)
+            {final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
+        	 final String destinationTag=sttaArgs.getTag();
+        	 if(destinationTag!=null)
+        	     {if(destinationTag.equals(EXIT_TAG))
+        		      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
+        	      else
+        		      if(destinationTag.equals(MAIN_MENU_TAG))
+        			      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
+        		      else
+        			      if(destinationTag.equals(LEVEL_TAG))
+        			          {final int levelIndex=sttaArgs.getNextLevelIndex();
+        			           //uses an argument to pass the level index
+        			           toLoadingDisplayTriggerAction.arguments.setNextLevelIndex(levelIndex);
+        			           scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
+        			          }
+                 }
             }
     }
 }

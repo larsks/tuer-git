@@ -707,8 +707,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    		 //unlocks the next level
                       		    		 profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
                       		    		 //indicates the next level suggested to the player
-                  	                     ((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
-              	                         ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=teleporterDestinationLevelIndex;
+                      		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
+                      		    		 toGameOverTriggerAction.arguments.setNextLevelIndex(teleporterDestinationLevelIndex);
               		                     toGameOverTriggerAction.perform(null,null,-1);
               		                     getSoundManager().play(false,false,victorySoundSampleIdentifier);
                       		            }
@@ -956,9 +956,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	   * It would help to know why he enters this state and which level(s) should be available
                     	   */
                     	  if(latestDeathDuration>500000000)
-                    	      {((int[])toGameOverTriggerAction.arguments.getFirst())[0]=levelIndex;
+                    	      {toGameOverTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
                     	       //the player can't go to the next level when he dies
-                    	       ((int[])toGameOverTriggerAction.arguments.getFirst())[1]=-1;
+                    	       toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
                     		   toGameOverTriggerAction.perform(null,null,-1);
                     	      }
                          }
@@ -1693,14 +1693,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //resets player's stats
         gameStats=new GameStatistics();
         //sets the statistics of each action
-		((GameStatistics[])toPauseMenuTriggerAction.arguments.getArgument(2))[0]=gameStats;
-		((GameStatistics[])toPauseMenuTriggerActionForExitConfirm.arguments.getArgument(2))[0]=gameStats;
-		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=gameStats;
-		((int[])toPauseMenuTriggerAction.arguments.getFirst())[0]=levelIndex;
-		((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[0]=levelIndex;
+		toPauseMenuTriggerAction.arguments.setGameStatistics(gameStats);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setGameStatistics(gameStats);
+		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
+		toPauseMenuTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setPreviousLevelIndex(levelIndex);
 		//the player cannot go to the next level when leaving or aborting
-		((int[])toPauseMenuTriggerAction.arguments.getFirst())[1]=-1;
-		((int[])toPauseMenuTriggerActionForExitConfirm.arguments.getFirst())[1]=-1;
+		toPauseMenuTriggerAction.arguments.setNextLevelIndex(-1);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setNextLevelIndex(-1);
         //resurrects the player
         playerData.respawn();
         //TODO resets the parameters to the latest saved values
@@ -1754,9 +1754,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //unsets player's stats
         gameStats=null;
         //unsets the statistics of each action
-		((GameStatistics[])toPauseMenuTriggerAction.arguments.getArgument(2))[0]=null;
-		((GameStatistics[])toPauseMenuTriggerActionForExitConfirm.arguments.getArgument(2))[0]=null;
-		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=null;
+        toPauseMenuTriggerAction.arguments.setGameStatistics(null);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setGameStatistics(null);
+		toGameOverTriggerAction.arguments.setGameStatistics(null);
     	//resets the timer at the beginning of all long operations performed while unloading
         timer.reset();
         //detaches some nodes from the root to prevent Java from using them while releasing their resources
