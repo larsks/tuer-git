@@ -193,9 +193,9 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
 		gameStats.setMissionStatus(MissionStatus.ABORTED);
-		((int[])toGameOverTriggerAction.arguments.getFirst())[0]=latestPlayedLevelIndex;
-		((int[])toGameOverTriggerAction.arguments.getFirst())[1]=latestNextPlayableLevelIndex;
-		((GameStatistics[])toGameOverTriggerAction.arguments.getArgument(1))[0]=gameStats;
+		toGameOverTriggerAction.arguments.setPreviousLevelIndex(latestPlayedLevelIndex);
+		toGameOverTriggerAction.arguments.setNextLevelIndex(latestNextPlayableLevelIndex);
+		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
 		toGameOverTriggerAction.perform(null,null,-1);
 	}
 	

@@ -43,7 +43,7 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
     protected final E event;
     
     /**arguments used when the event is fired*/
-    protected final Arguments arguments;
+    protected final ScenegraphTransitionTriggerActionArguments arguments;
     
     /**render context if the event must be fired on the update queue, otherwise null*/
     protected final RenderContext renderContext;
@@ -67,7 +67,7 @@ public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Ac
      * @param arguments arguments used when the event is fired (can be null)
      * @param renderContext render context if the event must be fired on the update queue, otherwise null
      */
-    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,Arguments arguments,RenderContext renderContext){
+    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,ScenegraphTransitionTriggerActionArguments arguments,RenderContext renderContext){
         this.stateMachine=stateMachine;
         this.event=event;
         this.arguments=arguments;

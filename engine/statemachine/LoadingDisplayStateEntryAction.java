@@ -37,7 +37,8 @@ public class LoadingDisplayStateEntryAction extends ScenegraphStateEntryAction{
 	
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		final int levelIndex=((int[])args.getFirst())[0];
+		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
+		final int levelIndex=sttaArgs.getNextLevelIndex();
 		gameState.setLevelIndex(levelIndex);
 		super.onTransition(from,to,cause,args,stateMachine);
 	}

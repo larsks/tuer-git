@@ -249,7 +249,7 @@ public final class MainMenuState extends ScenegraphState{
     }
     
     private void onLevelButtonActionPerformed(final ActionEvent ae,final int levelIndex){
-    	((int[])toLoadingDisplayAction.arguments.getArgument(0))[0]=levelIndex;
+    	toLoadingDisplayAction.arguments.setNextLevelIndex(levelIndex);
     	toLoadingDisplayAction.perform(null,null,-1);
     }
     

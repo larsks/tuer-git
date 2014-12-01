@@ -34,13 +34,14 @@ public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction{
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final PauseMenuState pauseMenuState=(PauseMenuState)to;
-		final int latestPlayedLevelIndex=((int[])args.getFirst())[0];
-		final int latestNextPlayableLevelIndex=((int[])args.getFirst())[1];
+		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
+		final int latestPlayedLevelIndex=sttaArgs.getPreviousLevelIndex();
+		final int latestNextPlayableLevelIndex=sttaArgs.getNextLevelIndex();
 		pauseMenuState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
 		pauseMenuState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
-		final boolean openedForExitConfirm=(((String)args.getArgument(1)).equals(EXIT_CONFIRM_TAG));
+		final boolean openedForExitConfirm=EXIT_CONFIRM_TAG.equals(sttaArgs.getTag());
 		pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
-		final GameStatistics gameStats=((GameStatistics[])args.getArgument(2))[0];
+		final GameStatistics gameStats=sttaArgs.getGameStatistics();
 		pauseMenuState.setGameStatistics(gameStats);
 		super.onTransition(from,to,cause,args,stateMachine);
     }

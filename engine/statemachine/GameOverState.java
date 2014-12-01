@@ -139,12 +139,12 @@ public class GameOverState extends ScenegraphState{
 	}
 	
 	private void onNextButtonActionPerformed(final ActionEvent ae){
-		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestNextPlayableLevelIndex;
+		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIndex(latestNextPlayableLevelIndex);
 		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
 	private void onRetryButtonActionPerformed(final ActionEvent ae){
-		((int[])toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.getArgument(1))[0]=latestPlayedLevelIndex;
+		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIndex(latestPlayedLevelIndex);
 		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
