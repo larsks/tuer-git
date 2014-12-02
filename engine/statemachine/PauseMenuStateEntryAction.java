@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.List;
+import engine.data.Objective;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
@@ -42,7 +44,9 @@ public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction{
 		final boolean openedForExitConfirm=EXIT_CONFIRM_TAG.equals(sttaArgs.getTag());
 		pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
 		final GameStatistics gameStats=sttaArgs.getGameStatistics();
+		final List<Objective> objectives=sttaArgs.getObjectives();
 		pauseMenuState.setGameStatistics(gameStats);
+		pauseMenuState.setObjectives(objectives);
 		super.onTransition(from,to,cause,args,stateMachine);
     }
 }

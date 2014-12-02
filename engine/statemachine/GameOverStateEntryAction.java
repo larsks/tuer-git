@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.List;
+import engine.data.Objective;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
@@ -38,10 +40,12 @@ public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
 		final int latestPlayedLevelIndex=sttaArgs.getPreviousLevelIndex();
 		final int latestNextPlayableLevelIndex=sttaArgs.getNextLevelIndex();
 		final GameStatistics gameStats=sttaArgs.getGameStatistics();
+		final List<Objective> objectives=sttaArgs.getObjectives();
 		final GameOverState gameOverState=(GameOverState)to;
 		gameOverState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
 		gameOverState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
 		gameOverState.setGameStatistics(gameStats);
+		gameOverState.setObjectives(objectives);
 		super.onTransition(from,to,cause,args,stateMachine);
 	}
 }

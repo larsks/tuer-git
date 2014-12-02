@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.List;
+
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
@@ -34,6 +36,8 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 
+import engine.data.Objective;
+import engine.data.ObjectiveStatus;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
@@ -68,6 +72,8 @@ public class GameOverState extends ScenegraphState{
     private int latestNextPlayableLevelIndex;
     
     private GameStatistics gameStats;
+    
+    private List<Objective> objectives;
     
     private final BMText textNode;
 
@@ -221,6 +227,10 @@ public class GameOverState extends ScenegraphState{
     	this.gameStats=gameStats;
     }
 	
+	public void setObjectives(final List<Objective> objectives){
+		this.objectives=objectives;
+	}
+	
 	@Override
     public void setEnabled(final boolean enabled){
         final boolean wasEnabled=isEnabled();
@@ -229,29 +239,58 @@ public class GameOverState extends ScenegraphState{
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   //enables the "next" button if the latest next playable level index seems valid
+                  //FIXME use the profile data to check if this level is unlocked
                   ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
                   //updates the main message
-                  switch(gameStats.getMissionStatus())
-                  {
-                      case COMPLETED:
-                    	  textNode.setText("You win\nMission status: completed");
-                    	  break;
-                      case ABORTED:
-                    	  textNode.setText("Game over\nMission status: aborted");
-                    	  break;
-                      case DECEASED:
-                    	  textNode.setText("Game over\nMission status: deceased");
-                    	  break;
-                      case FAILED:
-                    	  textNode.setText("Game over\nMission status: failed");
-                    	  break;
-                  }
+                  final String text=computeText();
+                  textNode.setText(text);
                   showPanelInMainFrame(initialMenuPanel);
                  }
              else
                  mouseManager.setGrabbed(GrabbedState.GRABBED);
             }
     }
+	
+	private String computeText(){
+		final StringBuilder builder=new StringBuilder();
+		switch(gameStats.getMissionStatus())
+        {
+            case COMPLETED:
+            	{builder.append("You win\nMission status: completed");
+                 break;
+            	}
+            case ABORTED:
+                {builder.append("Game over\nMission status: aborted");
+                 break;
+                }
+            case DECEASED:
+                {builder.append("Game over\nMission status: deceased");
+                 break;
+                }
+            case FAILED:
+                {builder.append("Game over\nMission status: failed");
+                 break;
+                }
+        }
+		if(objectives!=null&&!objectives.isEmpty()){
+			if(objectives.size()==1)
+			    builder.append("\nObjective:");
+			else
+				builder.append("\nObjectives:");
+			for(Objective objective:objectives)
+			    {builder.append("\n");
+			     builder.append(objective.getDescription());
+			     builder.append(": ");
+			     if(objective.getStatus(gameStats)==ObjectiveStatus.COMPLETED)
+			         builder.append("COMPLETED");
+			     else
+			    	 {//the uncompleted objectives are treated as failed as it is too late to complete them
+			    	  builder.append("FAILED");
+			    	 }
+			    }
+		}
+		return(builder.toString());
+	}
 	
 	final void showPanelInMainFrame(final UIPanel panel){
         mainFrame.setContentPanel(panel);
