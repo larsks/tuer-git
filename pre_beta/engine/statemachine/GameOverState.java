@@ -230,7 +230,7 @@ public class GameOverState extends ScenegraphState{
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   //enables the "next" button if the latest next playable level index seems valid
                   ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
-                  //TODO update the main message
+                  //updates the main message
                   switch(gameStats.getMissionStatus())
                   {
                       case COMPLETED:

@@ -91,6 +91,8 @@ import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.data.EnemyData;
+import engine.data.Objective;
+import engine.data.ObjectiveStatus;
 import engine.data.PlayerData;
 import engine.data.ProfileData;
 import engine.data.ProjectileController;
@@ -248,6 +250,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     /**data of the profile*/
     private final ProfileData profileData;
     
+    private final List<Objective> objectives;
+    
     /**
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
      * 3D objects
@@ -321,6 +325,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
         this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
         this.profileData=profileData;
+        this.objectives=new ArrayList<>();
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<>();
@@ -700,17 +705,29 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    else
                       		    	if(playerData.isAlive())
                       		            {//otherwise leaves the level
-                      		    		 //TODO check the objectives; if they aren't all completed, the mission status will be equal to "FAILED" and the next level index will be set to -1
-                      		    	     //TODO pass the destination to the trigger action
+                      		    		 MissionStatus missionStatus=MissionStatus.COMPLETED;
+                      		    		 //checks the objectives, the mission is completed only if all objectives are completed
+                      		    		 for(Objective objective:objectives)
+                      		    			 if(objective.getStatus(gameStats)!=ObjectiveStatus.COMPLETED)
+                      		    		         {missionStatus=MissionStatus.FAILED;
+                      		    				  break;
+                      		    		         }
                       		    		 //updates the status of the current mission
-                      		    		 gameStats.setMissionStatus(MissionStatus.COMPLETED);
-                      		    		 //unlocks the next level
-                      		    		 profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
-                      		    		 //indicates the next level suggested to the player
+                      		    		 gameStats.setMissionStatus(missionStatus);
                       		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
-                      		    		 toGameOverTriggerAction.arguments.setNextLevelIndex(teleporterDestinationLevelIndex);
+                      		    		 //TODO pass the previous location and the next location to the trigger action
               		                     toGameOverTriggerAction.perform(null,null,-1);
-              		                     getSoundManager().play(false,false,victorySoundSampleIdentifier);
+              		                     if(missionStatus==MissionStatus.COMPLETED)
+              		                         {//unlocks the next level
+                      		    		      profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
+                      		    		      //indicates the next level suggested to the player
+                      		    		      toGameOverTriggerAction.arguments.setNextLevelIndex(teleporterDestinationLevelIndex);
+              		                    	  getSoundManager().play(false,false,victorySoundSampleIdentifier);
+              		                         }
+              		                     else
+              		                    	 {toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
+              		                    	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
+              		                    	 }
                       		            }
                 	           }
                 	      }                          
@@ -765,7 +782,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                          if(soldierData.isAlive())
                                              localFrameIndex=3+random.nextInt(3);
                              	         else
-                             	             localFrameIndex=random.nextInt(3);
+                             	             {localFrameIndex=random.nextInt(3);
+                             	              gameStats.setKilledEnemiesCount(gameStats.getKilledEnemiesCount()+1);
+                             	             }
                                          final MD2FrameSet frameSet;
                                          switch(localFrameIndex)
                                          {
@@ -1726,6 +1745,21 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachAllChildren();
     }
     
+    private static final class KillAllEnemiesObjective extends Objective{
+    	
+    	private KillAllEnemiesObjective(){
+    		super("Kill all enemies");
+    	}
+    	
+    	@Override
+		public ObjectiveStatus getStatus(final GameStatistics gameStats) {
+		    if(gameStats.getEnemiesCount()==gameStats.getKilledEnemiesCount())
+		        return(ObjectiveStatus.COMPLETED);
+		    else
+	            return(ObjectiveStatus.UNCOMPLETED);
+		}
+    }
+    
     private final void performTerminalBasicSetup(){
     	//adds a bounding box to each collectible object
         for(Node collectible:collectibleObjectsList)
@@ -1736,6 +1770,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         timer.reset();
         if(skyboxNode!=null)
         	skyboxNode.setTranslation(currentCamLocation);
+        gameStats.setEnemiesCount(enemiesDataMap.size());
+        switch(levelIndex)
+        {
+            case 0:
+            case 1:
+                {objectives.add(new KillAllEnemiesObjective());
+                 break;
+                }
+        }
     }
     
     private final void performInitialBasicCleanup(){
@@ -1751,6 +1794,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(headUpDisplayLabel);
         //transfers the game statistics into the player's statistics
         profileData.updateGamesStatistics(gameStats);
+        //removes all objectives
+        objectives.clear();
         //unsets player's stats
         gameStats=null;
         //unsets the statistics of each action
@@ -2138,7 +2183,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                  pit._newShape.updateModelBound();
                  pit._newShape.updateWorldBound(true);
 	    	    }
-	        final Vector3[] soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
+	        final Vector3[] soldiersPos;
+	        if(levelIndex==0)
+	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219)};
+	        else
+	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
 	        for(Vector3 soldierPos:soldiersPos)
 	            {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate,true);
 	        	 soldierNode.setName("enemy@"+soldierNode.hashCode());
