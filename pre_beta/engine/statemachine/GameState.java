@@ -250,7 +250,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     /**data of the profile*/
     private final ProfileData profileData;
     
-    private final List<Objective> objectives;
+    private List<Objective> objectives;
     
     /**
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
@@ -1743,6 +1743,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	enemiesLatestDetection.clear();
         //removes all previously attached children
         getRoot().detachAllChildren();
+        //cleans the objectives
+        objectives=null;
+        toPauseMenuTriggerAction.arguments.setObjectives(null);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(null);
+		toGameOverTriggerAction.arguments.setObjectives(null);
     }
     
     private static final class KillAllEnemiesObjective extends Objective{
@@ -1771,6 +1776,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         if(skyboxNode!=null)
         	skyboxNode.setTranslation(currentCamLocation);
         gameStats.setEnemiesCount(enemiesDataMap.size());
+        objectives=new ArrayList<>();
+        toPauseMenuTriggerAction.arguments.setObjectives(objectives);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(objectives);
+		toGameOverTriggerAction.arguments.setObjectives(objectives);
         switch(levelIndex)
         {
             case 0:
@@ -1798,7 +1807,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         objectives.clear();
         //unsets player's stats
         gameStats=null;
-        //unsets the statistics of each action
+        //unsets the statistics and the objectives of each action
         toPauseMenuTriggerAction.arguments.setGameStatistics(null);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setGameStatistics(null);
 		toGameOverTriggerAction.arguments.setGameStatistics(null);

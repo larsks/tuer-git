@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.List;
+
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
@@ -34,6 +36,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
 
+import engine.data.Objective;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
@@ -72,6 +75,8 @@ public class PauseMenuState extends ScenegraphState{
     private int latestNextPlayableLevelIndex;
     
     private GameStatistics gameStats;
+    
+    private List<Objective> objectives;
 	
 	public PauseMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
@@ -192,10 +197,12 @@ public class PauseMenuState extends ScenegraphState{
     }
 	
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
+		//passes the objectives but the mission is aborted anyway
 		gameStats.setMissionStatus(MissionStatus.ABORTED);
 		toGameOverTriggerAction.arguments.setPreviousLevelIndex(latestPlayedLevelIndex);
 		toGameOverTriggerAction.arguments.setNextLevelIndex(latestNextPlayableLevelIndex);
 		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
+		toGameOverTriggerAction.arguments.setObjectives(objectives);
 		toGameOverTriggerAction.perform(null,null,-1);
 	}
 	
@@ -247,6 +254,10 @@ public class PauseMenuState extends ScenegraphState{
     
     public void setGameStatistics(final GameStatistics gameStats){
     	this.gameStats=gameStats;
+    }
+    
+    public void setObjectives(final List<Objective> objectives){
+    	this.objectives=objectives;
     }
     
     @Override

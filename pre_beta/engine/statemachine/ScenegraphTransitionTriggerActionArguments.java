@@ -17,8 +17,11 @@
  */
 package engine.statemachine;
 
+import java.util.List;
+
 import com.ardor3d.math.Vector3;
 
+import engine.data.Objective;
 import se.hiflyer.fettle.Arguments;
 
 /**
@@ -40,7 +43,7 @@ public class ScenegraphTransitionTriggerActionArguments extends Arguments {
 	 */
 	@SuppressWarnings("cast")
 	public ScenegraphTransitionTriggerActionArguments(final String tag) {
-		super(new int[]{-1,-1},tag,(Object)new GameStatistics[1],(Object)new Vector3[2]);
+		super(new int[]{-1,-1},tag,(Object)new GameStatistics[1],(Object)new List[1],(Object)new Vector3[2]);
 	}
 
 	public int getPreviousLevelIndex(){
@@ -71,19 +74,28 @@ public class ScenegraphTransitionTriggerActionArguments extends Arguments {
 		((GameStatistics[])getArgument(2))[0]=gameStats;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public List<Objective> getObjectives(){
+		return((((List[])getArgument(3))[0]));
+	}
+	
+	public void setObjectives(final List<Objective> objectives){
+		((List[])getArgument(3))[0]=objectives;
+	}
+	
 	public Vector3 getPreviousLocation(){
-		return(((Vector3[])getArgument(3))[0]);
+		return(((Vector3[])getArgument(4))[0]);
 	}
 	
 	public void setPreviousLocation(final Vector3 previousLocation){
-		((Vector3[])getArgument(3))[0]=previousLocation;
+		((Vector3[])getArgument(4))[0]=previousLocation;
 	}
 	
 	public Vector3 getNextLocation(){
-		return(((Vector3[])getArgument(3))[1]);
+		return(((Vector3[])getArgument(4))[1]);
 	}
 	
 	public void setNextLocation(final Vector3 nextLocation){
-		((Vector3[])getArgument(3))[1]=nextLocation;
+		((Vector3[])getArgument(4))[1]=nextLocation;
 	}
 }

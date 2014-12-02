@@ -33,5 +33,6 @@ public class GameOverStateExitAction extends ScenegraphStateExitAction{
 		super.onTransition(from,to,cause,args,stateMachine);
 		final GameOverState gameOverState=(GameOverState)from;
 		gameOverState.setGameStatistics(null);
+		gameOverState.setObjectives(null);
 	}
 }
