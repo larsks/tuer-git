@@ -155,6 +155,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText healthTextLabel;
     /**text label of the head-up display*/
     private final BasicText headUpDisplayLabel;
+    /**text label of the objectives display*/
+    private final BasicText objectivesDisplayLabel;
     /**@deprecated this collision map is a temporary solution, the real collision system will have to use the 3D mesh instead of a flat 2D array*/
     @Deprecated
     private boolean[][] collisionMap;
@@ -437,6 +439,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         fpsTextLabel=initializeFpsTextLabel();
         healthTextLabel=initializeHealthTextLabel();
         headUpDisplayLabel=initializeHeadUpDisplayLabel();
+        objectivesDisplayLabel=initializeObjectivesDisplayLabel();
         initializeCollisionSystem(cam);
         wireframeState=new WireframeState();
         wireframeState.setEnabled(false);
@@ -1339,39 +1342,61 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         return(healthTextLabel);
     }
     
+    /**
+     * Controller of a basic text to display some temporary messages
+     * 
+     * @author Julien Gouesse
+     *
+     */
+    private static final class TemporaryMessagesBasicTextController implements SpatialController<BasicText>{
+    	
+    	private String latestText="";
+    	
+    	private double duration=0;
+    	
+    	private final double maxDuration;
+    	
+    	private TemporaryMessagesBasicTextController(final double maxDuration){
+    		super();
+    		this.maxDuration=maxDuration;
+    	}
+    	
+        @Override
+        public final void update(double time,BasicText caller){
+        	//if the label contains anything
+        	if(!caller.getText().isEmpty())
+        	    {//if it contains the same text
+        		 if(latestText.equals(caller.getText()))
+            		 {//increases the display time
+        			  duration+=time;
+        			  //if it has been displayed for a too long time
+            	      if(duration>maxDuration)
+            	          {//remove it
+            	    	   caller.setText("");
+            	           duration=0;
+            	          }
+            		 }
+        	     else
+        	    	 {//otherwise updates the latest text
+        	    	  latestText=caller.getText();
+        	    	  duration=0;
+        	    	 }
+        	    }
+        }
+    }
+    
     private final BasicText initializeHeadUpDisplayLabel(){    	       
     	final BasicText headUpDisplayLabel=BasicText.createDefaultTextLabel("Head-up display","");           
         headUpDisplayLabel.setTranslation(new Vector3(0,40,0));
-        headUpDisplayLabel.addController(new SpatialController<Spatial>(){
-        	
-        	private String latestText="";
-        	
-        	private double duration=0;
-        	
-            @Override
-            public final void update(double time,Spatial caller){
-            	//if the HUD label contains anything
-            	if(!headUpDisplayLabel.getText().isEmpty())
-            	    {//if it contains the same text
-            		 if(latestText.equals(headUpDisplayLabel.getText()))
-                		 {//increase the display time
-            			  duration+=time;
-            			  //if it has been displayed for a too long time
-                	      if(duration>3)
-                	          {//remove it
-                	    	   headUpDisplayLabel.setText("");
-                	           duration=0;
-                	          }
-                		 }
-            	     else
-            	    	 {//otherwise update the latest text
-            	    	  latestText=headUpDisplayLabel.getText();
-            	    	  duration=0;
-            	    	 }
-            	    }
-            }           
-        });
+        headUpDisplayLabel.addController(new TemporaryMessagesBasicTextController(3));
         return(headUpDisplayLabel);
+    }
+    
+    private final BasicText initializeObjectivesDisplayLabel(){    	       
+    	final BasicText objectivesDisplayLabel=BasicText.createDefaultTextLabel("Objectives display","");           
+    	objectivesDisplayLabel.setTranslation(new Vector3(0,200,0));
+        objectivesDisplayLabel.addController(new TemporaryMessagesBasicTextController(10));
+        return(objectivesDisplayLabel);
     }
     
     private final Teleporter initializeTeleporter(){
@@ -1707,6 +1732,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().attachChild(healthTextLabel);
         //attaches the HUD node
         getRoot().attachChild(headUpDisplayLabel);
+        //attaches the objectives node
+        getRoot().attachChild(objectivesDisplayLabel);
         //resets the latest player's death
         latestPlayerDeath=null;
         //resets player's stats
@@ -1776,6 +1803,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         if(skyboxNode!=null)
         	skyboxNode.setTranslation(currentCamLocation);
         gameStats.setEnemiesCount(enemiesDataMap.size());
+        //resets the objectives
         objectives=new ArrayList<>();
         toPauseMenuTriggerAction.arguments.setObjectives(objectives);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(objectives);
@@ -1788,6 +1816,20 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                  break;
                 }
         }
+        //shows the initial objective(s) at the beginning
+        if(!objectives.isEmpty())
+            {final StringBuilder builder=new StringBuilder();
+             if(objectives.size()==1)
+			     builder.append("Objective:");
+			 else
+			     builder.append("Objectives:");
+             for(Objective objective:objectives)
+			    {builder.append("\n");
+			     builder.append(objective.getDescription());
+			    }
+             final String text=builder.toString();
+             objectivesDisplayLabel.setText(text);
+            }
     }
     
     private final void performInitialBasicCleanup(){
@@ -1801,6 +1843,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(healthTextLabel);
         //detaches the HUD node
         getRoot().detachChild(headUpDisplayLabel);
+        //detaches the objectives node
+        getRoot().detachChild(objectivesDisplayLabel);
         //transfers the game statistics into the player's statistics
         profileData.updateGamesStatistics(gameStats);
         //removes all objectives
