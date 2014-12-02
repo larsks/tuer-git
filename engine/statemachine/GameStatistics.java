@@ -27,6 +27,10 @@ public class GameStatistics{
 
 	private MissionStatus missionStatus;
 	
+	private int enemiesCount;
+	
+	private int killedEnemiesCount;
+	
 	/**
 	 * Constructor
 	 */
@@ -60,6 +64,26 @@ public class GameStatistics{
 	 */
 	public double getAccuracy(){
 		return(1.0d);
+	}
+	
+	public int getEnemiesCount(){
+		return(enemiesCount);
+	}
+	
+	public void setEnemiesCount(final int enemiesCount){
+		if(enemiesCount<0)
+		    throw new IllegalArgumentException("The enemies count cannot be negative");
+		this.enemiesCount=enemiesCount;
+	}
+	
+	public int getKilledEnemiesCount(){
+		return(killedEnemiesCount);
+	}
+	
+	public void setKilledEnemiesCount(final int killedEnemiesCount){
+		if(killedEnemiesCount<0)
+		    throw new IllegalArgumentException("The killed enemies count cannot be negative");
+		this.killedEnemiesCount=killedEnemiesCount;
 	}
 	
 	//TODO weapon of choice, shot total, kill total, head hits, body hits, limb hits, other hits
