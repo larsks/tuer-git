@@ -18,7 +18,6 @@
 package engine.statemachine;
 
 import java.util.List;
-
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
@@ -35,7 +34,6 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
-
 import engine.data.Objective;
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
@@ -63,6 +61,12 @@ public class PauseMenuState extends ScenegraphState{
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
+    
+    private final UIPanel objectivesMenuPanel;
+    
+    private final UIButton objectivesButton;
+    
+    private final UIButton objectivesBackButton;
     
     private final UIPanel confirmAbortMenuPanel;
     
@@ -92,7 +96,10 @@ public class PauseMenuState extends ScenegraphState{
 		this.toUnloadingDisplayTriggerAction=toUnloadingDisplayTriggerAction;
 		this.latestPlayedLevelIndex=-1;
 		this.latestNextPlayableLevelIndex=-1;
+		objectivesMenuPanel=createObjectivesMenuPanel();
 		initialMenuPanel=createInitialMenuPanel();
+		objectivesButton=(UIButton)initialMenuPanel.getChild(0);
+		objectivesBackButton=(UIButton)objectivesMenuPanel.getChild(0);
 		confirmAbortMenuPanel=createConfirmAbortMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -109,8 +116,28 @@ public class PauseMenuState extends ScenegraphState{
         getRoot().attachChild(textNode);
 	}
 	
+	private final UIPanel createObjectivesMenuPanel(){
+		final UIPanel objectivesMenuPanel=new UIPanel(new RowLayout(false));
+		final UIButton backButton=new UIButton("Back");
+		backButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	showPanelInMainFrame(initialMenuPanel);
+            }
+        });
+		objectivesMenuPanel.add(backButton);
+		return(objectivesMenuPanel);
+	}
+	
 	private final UIPanel createInitialMenuPanel(){
 		final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
+		final UIButton objectivesButton=new UIButton("Objectives");
+		objectivesButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onObjectivesButtonActionPerformed(ae);
+            }
+        });
 		final UIButton resumeButton=new UIButton("Resume");
 		resumeButton.addActionListener(new ActionListener(){
             @Override
@@ -132,6 +159,7 @@ public class PauseMenuState extends ScenegraphState{
             	onExitButtonActionPerformed(ae);
             }
         });
+		initialMenuPanel.add(objectivesButton);
 		initialMenuPanel.add(resumeButton);
 		initialMenuPanel.add(abortButton);
 		initialMenuPanel.add(exitButton);
@@ -182,6 +210,10 @@ public class PauseMenuState extends ScenegraphState{
 		confirmExitMenuPanel.add(yesButton);
 		confirmExitMenuPanel.add(noButton);
 		return(confirmExitMenuPanel);
+	}
+	
+	private void onObjectivesButtonActionPerformed(final ActionEvent ae){
+		showPanelInMainFrame(objectivesMenuPanel);
 	}
 	
 	private void onResumeButtonActionPerformed(final ActionEvent ae){
@@ -267,6 +299,20 @@ public class PauseMenuState extends ScenegraphState{
             {super.setEnabled(enabled);
              if(enabled)
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
+                  //removes all components from the objectives panel
+                  objectivesMenuPanel.removeAllComponents();
+                  if(objectives==null||objectives.isEmpty())
+                      {//disables this button as there is no objective to show
+                	   objectivesButton.setEnabled(false);
+                      }
+                  else
+                      {objectivesButton.setEnabled(true);
+                       //updates the objectives
+                       final String objectivesText=computeObjectivesText();
+                       objectivesMenuPanel.add(new UILabel(objectivesText));
+                      }
+                  //adds the back button into the objectives button after the objective(s)
+                  objectivesMenuPanel.add(objectivesBackButton);
                   //if the end user arrives here after pressing ESC, it shows the exit confirm panel
                   if(openedForExitConfirm)
                       {showPanelInMainFrame(confirmExitMenuPanel);
@@ -279,6 +325,23 @@ public class PauseMenuState extends ScenegraphState{
                  mouseManager.setGrabbed(GrabbedState.GRABBED);
             }
     }
+    
+    private String computeObjectivesText(){
+		final StringBuilder builder=new StringBuilder();
+		if(objectives!=null&&!objectives.isEmpty()){
+			if(objectives.size()==1)
+			    builder.append("Objective:");
+			else
+				builder.append("Objectives:");
+			for(Objective objective:objectives)
+			    {builder.append("\n");
+			     builder.append(objective.getDescription());
+			     builder.append(": ");
+			     builder.append(objective.getStatus(gameStats).toString());
+			    }
+		}
+		return(builder.toString());
+	}
     
     final void showPanelInMainFrame(final UIPanel panel){
         mainFrame.setContentPanel(panel);
