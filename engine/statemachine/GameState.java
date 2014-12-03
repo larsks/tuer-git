@@ -254,6 +254,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private List<Objective> objectives;
     
+    private HashMap<Objective,ObjectiveStatus> previousObjectivesStatusesMap;
+    
     /**
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
      * 3D objects
@@ -327,7 +329,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         this.defaultMouseAndKeyboardSettings=defaultMouseAndKeyboardSettings;
         this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
         this.profileData=profileData;
-        this.objectives=new ArrayList<>();
         random=new Random();
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<>();
@@ -985,6 +986,21 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	      }
                          }
                     }
+                //looks for any changes in the objectives statuses
+                if(objectives!=null)
+                    {for(Objective objective:objectives)
+                         {//retrieves the previous and current objective statuses
+                    	  final ObjectiveStatus previousObjectiveStatus=previousObjectivesStatusesMap.get(objective);
+                    	  final ObjectiveStatus currentObjectiveStatus=objective.getStatus(gameStats);
+                    	  //if the objective status has just changed
+                    	  if(previousObjectiveStatus!=currentObjectiveStatus)
+                    	      {//updates the panel
+                    		   objectivesDisplayLabel.setText(objective.getDescription()+": "+currentObjectiveStatus.toString());
+                    		   //updates the map
+                    		   previousObjectivesStatusesMap.put(objective,currentObjectiveStatus);
+                    	      }
+                         }
+                    }
                 //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
             }
@@ -1395,7 +1411,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText initializeObjectivesDisplayLabel(){    	       
     	final BasicText objectivesDisplayLabel=BasicText.createDefaultTextLabel("Objectives display","");           
     	objectivesDisplayLabel.setTranslation(new Vector3(0,200,0));
-        objectivesDisplayLabel.addController(new TemporaryMessagesBasicTextController(10));
+        objectivesDisplayLabel.addController(new TemporaryMessagesBasicTextController(3));
         return(objectivesDisplayLabel);
     }
     
@@ -1772,6 +1788,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachAllChildren();
         //cleans the objectives
         objectives=null;
+        previousObjectivesStatusesMap=null;
         toPauseMenuTriggerAction.arguments.setObjectives(null);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(null);
 		toGameOverTriggerAction.arguments.setObjectives(null);
@@ -1805,6 +1822,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         gameStats.setEnemiesCount(enemiesDataMap.size());
         //resets the objectives
         objectives=new ArrayList<>();
+        previousObjectivesStatusesMap=new HashMap<>();
         toPauseMenuTriggerAction.arguments.setObjectives(objectives);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(objectives);
 		toGameOverTriggerAction.arguments.setObjectives(objectives);
@@ -1824,7 +1842,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 			 else
 			     builder.append("Objectives:");
              for(Objective objective:objectives)
-			    {builder.append("\n");
+			    {previousObjectivesStatusesMap.put(objective,objective.getStatus(gameStats));
+            	 builder.append("\n");
 			     builder.append(objective.getDescription());
 			    }
              final String text=builder.toString();

@@ -242,7 +242,7 @@ public class GameOverState extends ScenegraphState{
                   //FIXME use the profile data to check if this level is unlocked
                   ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
                   //updates the main message
-                  final String text=computeText();
+                  final String text=computeMissionAndObjectivesText();
                   textNode.setText(text);
                   showPanelInMainFrame(initialMenuPanel);
                  }
@@ -251,7 +251,12 @@ public class GameOverState extends ScenegraphState{
             }
     }
 	
-	private String computeText(){
+	/**
+	 * Returns the text containing the status of the mission and the status of each objective
+	 * 
+	 * @return text containing the status of the mission and the status of each objective
+	 */
+	private String computeMissionAndObjectivesText(){
 		final StringBuilder builder=new StringBuilder();
 		switch(gameStats.getMissionStatus())
         {
