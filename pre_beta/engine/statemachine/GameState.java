@@ -988,18 +988,35 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     }
                 //looks for any changes in the objectives statuses
                 if(objectives!=null)
-                    {for(Objective objective:objectives)
+                    {final List<Objective> updatedObjectives=new ArrayList<>();
+                	 for(Objective objective:objectives)
                          {//retrieves the previous and current objective statuses
                     	  final ObjectiveStatus previousObjectiveStatus=previousObjectivesStatusesMap.get(objective);
                     	  final ObjectiveStatus currentObjectiveStatus=objective.getStatus(gameStats);
                     	  //if the objective status has just changed
                     	  if(previousObjectiveStatus!=currentObjectiveStatus)
-                    	      {//updates the panel
-                    		   objectivesDisplayLabel.setText(objective.getDescription()+": "+currentObjectiveStatus.toString());
+                    	      {updatedObjectives.add(objective);
                     		   //updates the map
                     		   previousObjectivesStatusesMap.put(objective,currentObjectiveStatus);
                     	      }
                          }
+                	 if(!updatedObjectives.isEmpty())
+                	     {final StringBuilder builder=new StringBuilder();
+                	      if(updatedObjectives.size()==1)
+            			      builder.append("Updated objective:");
+            			  else
+            			      builder.append("Updated objectives:");
+                	      for(Objective objective:updatedObjectives)
+                		      {builder.append("\n");
+             			       builder.append(objective.getDescription());
+             			       builder.append(": ");
+             			       final ObjectiveStatus status=previousObjectivesStatusesMap.get(objective);
+             			       builder.append(status.toString());
+                		      }
+                	      //updates the panel
+                          objectivesDisplayLabel.setText(builder.toString());
+                          //TODO play a sound depending on the current status
+                	     }
                     }
                 //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
@@ -1711,6 +1728,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void performInitialBasicSetup(){
         //FIXME it should not be hard-coded
+    	//TODO get the location from the argument of the transition
     	switch(levelIndex)
     	{case 0:
     	 case 1:
