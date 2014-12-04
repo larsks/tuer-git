@@ -29,7 +29,7 @@ import engine.statemachine.GameStatistics;
  * @author Julien Gouesse
  *
  */
-public class ProfileData {
+public class ProfileData{
 	
 	/**
 	 * list of the levels indices that the player unlocks (to which he can go)
@@ -38,13 +38,10 @@ public class ProfileData {
 	
 	/**
 	 * Constructor
-	 * 
-	 * @param firstUnlockedLevelIndex level index of the unlocked level when the player runs the game for the very first time
 	 */
-	public ProfileData(final int firstUnlockedLevelIndex){
+	public ProfileData(){
 		super();
 		this.unlockedLevelsIndices=new HashSet<>();
-		this.unlockedLevelsIndices.add(Integer.valueOf(firstUnlockedLevelIndex));
 	}
 
 	/**
@@ -74,5 +71,16 @@ public class ProfileData {
 	 */
 	public void updateGamesStatistics(final GameStatistics gameStats){
 		//TODO
+	}
+	
+	public void save(){
+		//TODO
+	}
+	
+	public void load(){
+		//unlocks at least the first level
+		//FIXME the index of the first level shouldn't be hardcoded
+		unlockedLevelsIndices.add(Integer.valueOf(0));
+		//TODO if the file exists, use it to get the unlocked levels
 	}
 }

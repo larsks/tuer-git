@@ -42,12 +42,6 @@ import engine.taskmanagement.TaskManager;
  * 
  * @author Julien Gouesse
  *
- * TODO: add several states: GAME_OVER (display when the player loses), 
- *                           PAUSE_MENU,
- *                           LEVEL_END_DISPLAY (display at the end of a level with figures, etc...)
- *                           GAME_END_DISPLAY (final scene)
- *       
- *       add an accepting state to this machine to handle the cleanup 
  */
 public class ScenegraphStateMachine extends StateMachineWithScheduler<ScenegraphState,String>{
 	
@@ -73,7 +67,6 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     
     /**
      * data of the profile
-     * TODO use a container
      */
     private final ProfileData profileData;
     
@@ -100,7 +93,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
             final Runnable uninstallRunnable,final String gameShortName,final String gameFullName,final String readmeContent,
             final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final int firstUnlockedLevelIndex){
         super(ScenegraphState.class,String.class,new ScenegraphState());
-        profileData=new ProfileData(firstUnlockedLevelIndex);
+        profileData=new ProfileData();
+        profileData.load();
         fontStore=new FontStore();
         taskManager=new TaskManager();
         soundManager=new SoundManager();
@@ -228,7 +222,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
 			}
         };
         final UnloadingDisplayState unloadingDisplayState=new UnloadingDisplayState(canvas,taskManager,soundManager,gameStateCleanupRunnable,fontStore);
-        final ExitGameState exitGameState=new ExitGameState(canvas,soundManager);
+        final ExitGameState exitGameState=new ExitGameState(canvas,soundManager,profileData);
         //adds the states and their actions to the state machine
         addState(contentRatingSystemState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
         addState(initializationState,new ScenegraphStateEntryAction(),new ScenegraphStateExitAction());
