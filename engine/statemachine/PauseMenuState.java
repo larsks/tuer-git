@@ -61,7 +61,7 @@ public class PauseMenuState extends ScenegraphState{
     private final UIFrame mainFrame;
     
     private final UIPanel initialMenuPanel;
-    
+    //TODO move this panel into a separate internal class
     private final UIPanel objectivesMenuPanel;
     
     private final UIButton objectivesButton;
