@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -41,9 +40,7 @@ import com.ardor3d.framework.Canvas;
 import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
-import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
-import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
@@ -55,7 +52,6 @@ import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
-import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
@@ -89,8 +85,8 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.EnemyData;
+import engine.data.Level;
 import engine.data.Objective;
 import engine.data.ObjectiveStatus;
 import engine.data.PlayerData;
@@ -109,7 +105,6 @@ import engine.input.ActionMap;
 import engine.input.ExtendedFirstPersonControl;
 import engine.input.MouseAndKeyboardSettings;
 import engine.misc.ApplicativeTimer;
-import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
 import engine.sound.SoundManager;
@@ -127,8 +122,6 @@ import engine.weaponry.WeaponFactory;
  */
 public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
-    /**index of the level*/
-    private int levelIndex;
     /**Our native window, not the OpenGL surface itself*/
     private final NativeCanvas canvas;
     /**node of the player*/
@@ -157,9 +150,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText headUpDisplayLabel;
     /**text label of the objectives display*/
     private final BasicText objectivesDisplayLabel;
-    /**@deprecated this collision map is a temporary solution, the real collision system will have to use the 3D mesh instead of a flat 2D array*/
-    @Deprecated
-    private boolean[][] collisionMap;
     /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
     /**instance that creates all weapons*/
@@ -252,9 +242,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     /**data of the profile*/
     private final ProfileData profileData;
     
-    private List<Objective> objectives;
-    
     private HashMap<Objective,ObjectiveStatus> previousObjectivesStatusesMap;
+    
+    private Level level;
     
     /**
      * Camera node that draws its content at last just after clearing the depth buffer in order to prevent the weapons from being clipped into 
@@ -344,7 +334,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //initializes the factories, the build-in ammo and the build-in weapons       
         ammunitionFactory=initializeAmmunitionFactory();
         weaponFactory=initializeWeaponFactory();
-        readCollisionMap();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         //creates a node that follows the camera
@@ -574,7 +563,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 double correctX=playerStartX,correctZ=playerStartZ;
                 int tmpX,tmpZ;
                 //temporary hack to disable collisions in some levels
-                final boolean useCollisionMap=levelIndex==0||levelIndex==1;
+                final boolean[][] collisionMap=level.getCollisionMap();
                 for(int i=1;i<=stepCount&&!collisionFound;i++)
                     {playerX=playerStartX+(stepX*i);
                 	 playerZ=playerStartZ+(stepZ*i);
@@ -582,7 +571,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
              	    	for(int x=0;x<2&&!collisionFound;x++)
              	    	    {tmpX=(int)(playerX-0.2+(x*0.4));
              	    	     tmpZ=(int)(playerZ-0.2+(z*0.4));
-             	    	     if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+             	    	     if(collisionMap!=null&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
              	    		     collisionFound=collisionMap[tmpX][tmpZ];
              	    	     else
              	    	    	 collisionFound=false;
@@ -599,7 +588,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                        	    	  for(int x=0;x<2&&!collisionFound;x++)
                        	    	      {tmpX=(int)(playerX-0.2+(x*0.4));
                        	    	       tmpZ=(int)(playerZ-0.2+(z*0.4));
-                       	    	       if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                       	    	       if(collisionMap!=null&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                        	    		       collisionFound=collisionMap[tmpX][tmpZ];
                        	    	       else
                        	    	    	   collisionFound=false;
@@ -616,7 +605,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                            	    	   for(int x=0;x<2&&!collisionFound;x++)
                            	    	       {tmpX=(int)(playerX-0.2+(x*0.4));
                            	    	        tmpZ=(int)(playerZ-0.2+(z*0.4));
-                           	    	        if(useCollisionMap&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
+                           	    	        if(collisionMap!=null&&0<=tmpX&&tmpX<collisionMap.length&&0<=tmpZ&&tmpZ<collisionMap[tmpX].length)
                            	    		        collisionFound=collisionMap[tmpX][tmpZ];
                            	    	        else
                            	    	    	    collisionFound=false;
@@ -695,7 +684,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    final Vector3 teleporterDestination=teleporterUserData.getDestination();
                       		    final int teleporterDestinationLevelIndex=teleporterUserData.getDestinationLevelIndex();
                       		    //if the teleporter is in the current level
-                      		    if(levelIndex==teleporterDestinationLevelIndex)
+                      		    if(level.getIdentifier()==teleporterDestinationLevelIndex)
                       		        {//then moves the player
                       		    	 playerNode.setTranslation(teleporterDestination);
                       		         //updates the previous location to avoid any problem when detecting the collisions
@@ -711,14 +700,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		            {//otherwise leaves the level
                       		    		 MissionStatus missionStatus=MissionStatus.COMPLETED;
                       		    		 //checks the objectives, the mission is completed only if all objectives are completed
-                      		    		 for(Objective objective:objectives)
+                      		    		 for(Objective objective:level.getObjectives())
                       		    			 if(objective.getStatus(gameStats)!=ObjectiveStatus.COMPLETED)
                       		    		         {missionStatus=MissionStatus.FAILED;
                       		    				  break;
                       		    		         }
                       		    		 //updates the status of the current mission
                       		    		 gameStats.setMissionStatus(missionStatus);
-                      		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
+                      		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
                       		    		 //TODO pass the previous location and the next location to the trigger action
               		                     toGameOverTriggerAction.perform(null,null,-1);
               		                     if(missionStatus==MissionStatus.COMPLETED)
@@ -979,7 +968,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	   * It would help to know why he enters this state and which level(s) should be available
                     	   */
                     	  if(latestDeathDuration>500000000)
-                    	      {toGameOverTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
+                    	      {toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
                     	       //the player can't go to the next level when he dies
                     	       toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
                     		   toGameOverTriggerAction.perform(null,null,-1);
@@ -987,37 +976,35 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                          }
                     }
                 //looks for any changes in the objectives statuses
-                if(objectives!=null)
-                    {final List<Objective> updatedObjectives=new ArrayList<>();
-                	 for(Objective objective:objectives)
-                         {//retrieves the previous and current objective statuses
-                    	  final ObjectiveStatus previousObjectiveStatus=previousObjectivesStatusesMap.get(objective);
-                    	  final ObjectiveStatus currentObjectiveStatus=objective.getStatus(gameStats);
-                    	  //if the objective status has just changed
-                    	  if(previousObjectiveStatus!=currentObjectiveStatus)
-                    	      {updatedObjectives.add(objective);
-                    		   //updates the map
-                    		   previousObjectivesStatusesMap.put(objective,currentObjectiveStatus);
-                    	      }
-                         }
-                	 if(!updatedObjectives.isEmpty())
-                	     {final StringBuilder builder=new StringBuilder();
-                	      if(updatedObjectives.size()==1)
-            			      builder.append("Updated objective:");
-            			  else
-            			      builder.append("Updated objectives:");
-                	      for(Objective objective:updatedObjectives)
-                		      {builder.append("\n");
-             			       builder.append(objective.getDescription());
-             			       builder.append(": ");
-             			       final ObjectiveStatus status=previousObjectivesStatusesMap.get(objective);
-             			       builder.append(status.toString());
-                		      }
-                	      //updates the panel
-                          objectivesDisplayLabel.setText(builder.toString());
-                          //TODO play a sound depending on the current status
-                	     }
+                final List<Objective> updatedObjectives=new ArrayList<>();
+                for(Objective objective:level.getObjectives())
+                    {//retrieves the previous and current objective statuses
+                     final ObjectiveStatus previousObjectiveStatus=previousObjectivesStatusesMap.get(objective);
+                     final ObjectiveStatus currentObjectiveStatus=objective.getStatus(gameStats);
+                     //if the objective status has just changed
+                     if(previousObjectiveStatus!=currentObjectiveStatus)
+                         {updatedObjectives.add(objective);
+                          //updates the map
+                          previousObjectivesStatusesMap.put(objective,currentObjectiveStatus);
+                    	 }
                     }
+                if(!updatedObjectives.isEmpty())
+                    {final StringBuilder builder=new StringBuilder();
+                	 if(updatedObjectives.size()==1)
+            	         builder.append("Updated objective:");
+            	     else
+            	         builder.append("Updated objectives:");
+                	 for(Objective objective:updatedObjectives)
+                         {builder.append("\n");
+             			  builder.append(objective.getDescription());
+             			  builder.append(": ");
+             			  final ObjectiveStatus status=previousObjectivesStatusesMap.get(objective);
+             			  builder.append(status.toString());
+                		 }
+                	 //updates the panel
+                     objectivesDisplayLabel.setText(builder.toString());
+                     //TODO play a sound depending on the current status
+                	}
                 //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
             }
@@ -1475,26 +1462,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         return(weaponFactory);
     }
     
-    @Deprecated
-    private final void readCollisionMap(){
-    	final URL mapUrl=GameState.class.getResource("/images/containermap.png");
-    	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
-    	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
-    	collisionMap=new boolean[map.getWidth()][map.getHeight()];
-    	final ImageHelper imgHelper=new ImageHelper();
-    	for(int y=0;y<map.getHeight();y++)
-	    	for(int x=0;x<map.getWidth();x++)
-	    		{final int argb=imgHelper.getARGB(map,x,y);
-	    		 collisionMap[x][y]=(argb==ColorRGBA.BLUE.asIntARGB());
-	    		}
-    }
-    
     protected void setLevelIndex(final int levelIndex){
-        this.levelIndex=levelIndex;
+    	if(levelIndex==0||levelIndex==1)
+    	    level=new Level(levelIndex,"LEVEL NAME",new KillAllEnemiesObjective());
+    	else
+    		level=new Level(levelIndex,"LEVEL NAME");
     }
     
     public int getLevelIndex(){
-    	return(levelIndex);
+    	return(level.getIdentifier());
     }
     
     /**
@@ -1715,7 +1691,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadLevelModel(){
-    	try{levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+levelIndex+".abin"));
+    	try{levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+level.getIdentifier()+".abin"));
             getRoot().attachChild(levelNode);
     	   }
     	catch(IOException ioe)
@@ -1727,9 +1703,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void performInitialBasicSetup(){
+    	if(level.getIdentifier()==0||level.getIdentifier()==1)
+    	    {// the two first levels use a collision map
+    		 level.readCollisionMap();
+    	    }
         //FIXME it should not be hard-coded
     	//TODO get the location from the argument of the transition
-    	switch(levelIndex)
+    	switch(level.getIdentifier())
     	{case 0:
     	 case 1:
     	     {currentCamLeft.set(-1,0,0);
@@ -1776,8 +1756,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 		toPauseMenuTriggerAction.arguments.setGameStatistics(gameStats);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setGameStatistics(gameStats);
 		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
-		toPauseMenuTriggerAction.arguments.setPreviousLevelIndex(levelIndex);
-		toPauseMenuTriggerActionForExitConfirm.arguments.setPreviousLevelIndex(levelIndex);
+		toPauseMenuTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
+		toPauseMenuTriggerActionForExitConfirm.arguments.setPreviousLevelIndex(level.getIdentifier());
 		//the player cannot go to the next level when leaving or aborting
 		toPauseMenuTriggerAction.arguments.setNextLevelIndex(-1);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setNextLevelIndex(-1);
@@ -1804,12 +1784,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	enemiesLatestDetection.clear();
         //removes all previously attached children
         getRoot().detachAllChildren();
-        //cleans the objectives
-        objectives=null;
         previousObjectivesStatusesMap=null;
         toPauseMenuTriggerAction.arguments.setObjectives(null);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(null);
 		toGameOverTriggerAction.arguments.setObjectives(null);
+		level=null;
     }
     
     private static final class KillAllEnemiesObjective extends Objective{
@@ -1838,32 +1817,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         if(skyboxNode!=null)
         	skyboxNode.setTranslation(currentCamLocation);
         gameStats.setEnemiesCount(enemiesDataMap.size());
-        //resets the objectives
-        objectives=new ArrayList<>();
         previousObjectivesStatusesMap=new HashMap<>();
-        toPauseMenuTriggerAction.arguments.setObjectives(objectives);
-		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(objectives);
-		toGameOverTriggerAction.arguments.setObjectives(objectives);
-        switch(levelIndex)
-        {
-            case 0:
-            case 1:
-                {objectives.add(new KillAllEnemiesObjective());
-                 break;
-                }
-        }
+        toPauseMenuTriggerAction.arguments.setObjectives(level.getObjectives());
+		toPauseMenuTriggerActionForExitConfirm.arguments.setObjectives(level.getObjectives());
+		toGameOverTriggerAction.arguments.setObjectives(level.getObjectives());
         //shows the initial objective(s) at the beginning
-        if(!objectives.isEmpty())
+        if(!level.getObjectives().isEmpty())
             {final StringBuilder builder=new StringBuilder();
-             if(objectives.size()==1)
+             if(level.getObjectives().size()==1)
 			     builder.append("Objective:");
 			 else
 			     builder.append("Objectives:");
-             for(Objective objective:objectives)
-			    {previousObjectivesStatusesMap.put(objective,objective.getStatus(gameStats));
-            	 builder.append("\n");
-			     builder.append(objective.getDescription());
-			    }
+             for(Objective objective:level.getObjectives())
+			     {previousObjectivesStatusesMap.put(objective,objective.getStatus(gameStats));
+            	  builder.append("\n");
+			      builder.append(objective.getDescription());
+			     }
              final String text=builder.toString();
              objectivesDisplayLabel.setText(text);
             }
@@ -1884,8 +1853,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         getRoot().detachChild(objectivesDisplayLabel);
         //transfers the game statistics into the player's statistics
         profileData.updateGamesStatistics(gameStats);
-        //removes all objectives
-        objectives.clear();
         //unsets player's stats
         gameStats=null;
         //unsets the statistics and the objectives of each action
@@ -2078,7 +2045,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-    	if(levelIndex==2||levelIndex==3)
+    	if(level.getIdentifier()==2||level.getIdentifier()==3)
     	    {skyboxNode=new Skybox("skybox",64,64,64);
     	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
     	     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -2097,7 +2064,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadTeleporters(){
-    	switch(levelIndex)
+    	switch(level.getIdentifier())
     	{
     	    case 0:
     	        {final Node teleporterNode0=new Node("a teleporter");
@@ -2134,7 +2101,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	if(levelIndex==0||levelIndex==1)
+    	if(level.getIdentifier()==0||level.getIdentifier()==1)
     	    {final Node medikitNode=new Node("a medikit");
              final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
@@ -2149,7 +2116,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
-    	if(levelIndex==0||levelIndex==1)
+    	if(level.getIdentifier()==0||level.getIdentifier()==1)
     	//N.B: only show working weapons
 	    try{/*final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
             uziNode.setName("an uzi");
@@ -2227,7 +2194,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	if(levelIndex==0||levelIndex==1)
+    	if(level.getIdentifier()==0||level.getIdentifier()==1)
 	        {final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
              final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
@@ -2243,7 +2210,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     @SuppressWarnings("unchecked")
 	private final void loadEnemies(){
-    	if(levelIndex==0||levelIndex==1)
+    	if(level.getIdentifier()==0||level.getIdentifier()==1)
 	    try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
 	        weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
 	        weaponNodeTemplate.setScale(0.015);
@@ -2274,7 +2241,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                  pit._newShape.updateWorldBound(true);
 	    	    }
 	        final Vector3[] soldiersPos;
-	        if(levelIndex==0)
+	        if(level.getIdentifier()==0)
 	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219)};
 	        else
 	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
