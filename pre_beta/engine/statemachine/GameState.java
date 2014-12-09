@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -56,6 +57,7 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.ContextManager;
 import com.ardor3d.renderer.RenderContext;
@@ -85,6 +87,7 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.EnemyData;
 import engine.data.Level;
 import engine.data.Objective;
@@ -1463,10 +1466,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     protected void setLevelIndex(final int levelIndex){
-    	if(levelIndex==0||levelIndex==1)
-    	    level=new Level(levelIndex,"LEVEL NAME",new KillAllEnemiesObjective());
-    	else
-    		level=new Level(levelIndex,"LEVEL NAME");
+    	switch(levelIndex)
+    	{
+    	    case 0:
+    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new KillAllEnemiesObjective());
+    	         break;
+    	        }
+    	    case 1:
+    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new KillAllEnemiesObjective());
+    	         break;
+    	        }
+    	    default:
+    	    	level=new Level(levelIndex,"LEVEL NAME",null);
+    	}
     }
     
     public int getLevelIndex(){
@@ -2210,73 +2222,69 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     @SuppressWarnings("unchecked")
 	private final void loadEnemies(){
-    	if(level.getIdentifier()==0||level.getIdentifier()==1)
-	    try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
-	        weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	        weaponNodeTemplate.setScale(0.015);
-            //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
-            NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
-            weaponNodeTemplate.updateModelBound();
-            weaponNodeTemplate.updateWorldBound(true);
-            final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
-            for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
-                {pit._newShape.setScale(0.015);
-                 pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                 NodeHelper.applyTransformToMeshData(pit._newShape);
-                 pit._newShape.updateModelBound();
-                 pit._newShape.updateWorldBound(true);
-                }
-	    	final Mesh soldierNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/soldier.abin"));
-	    	soldierNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	    	soldierNodeTemplate.setScale(0.015);
-	    	NodeHelper.applyTransformToMeshData(soldierNodeTemplate);
-	    	soldierNodeTemplate.updateModelBound();
-	    	soldierNodeTemplate.updateWorldBound(true);
-	    	final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)soldierNodeTemplate.getController(0);
-	    	for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
-	    	    {pit._newShape.setScale(0.015);
-                 pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                 NodeHelper.applyTransformToMeshData(pit._newShape);
-                 pit._newShape.updateModelBound();
-                 pit._newShape.updateWorldBound(true);
-	    	    }
-	        final Vector3[] soldiersPos;
-	        if(level.getIdentifier()==0)
-	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219)};
-	        else
-	        	soldiersPos=new Vector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
-	        for(Vector3 soldierPos:soldiersPos)
-	            {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate,true);
-	        	 soldierNode.setName("enemy@"+soldierNode.hashCode());
-                 soldierNode.setTranslation(soldierPos);
-                 final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
-                 soldierKeyframeController.setUpdateBounding(true);
-                 //loops on all frames of the set in the supplied time frame
-                 soldierKeyframeController.setRepeatType(RepeatType.WRAP);
-                 //uses the "stand" animation
-                 soldierKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                 soldierKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                 soldierKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                 soldierKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                 getRoot().attachChild(soldierNode);
-                 final EnemyData soldierData=new EnemyData();
-                 enemiesDataMap.put(soldierNode,soldierData);
-                 final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
-                 weaponNode.setName("weapon of "+soldierNode.getName());
-                 weaponNode.setTranslation(soldierPos);
-                 final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
-                 //loops on all frames of the set in the supplied time frame
-                 weaponKeyframeController.setRepeatType(RepeatType.WRAP);
-                 //uses the "stand" animation
-                 weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                 weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                 weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                 weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                 getRoot().attachChild(weaponNode);
-	            }
-	       }
-	    catch(IOException ioe)
-	    {throw new RuntimeException("enemies loading failed",ioe);}
+    	final ReadOnlyVector3[] soldiersPos=level.getEnemiesPositions();
+    	if(soldiersPos!=null&&soldiersPos.length!=0)
+	        try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
+	            weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	            weaponNodeTemplate.setScale(0.015);
+                //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
+                NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
+                weaponNodeTemplate.updateModelBound();
+                weaponNodeTemplate.updateWorldBound(true);
+                final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
+                for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
+                    {pit._newShape.setScale(0.015);
+                     pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                     NodeHelper.applyTransformToMeshData(pit._newShape);
+                     pit._newShape.updateModelBound();
+                     pit._newShape.updateWorldBound(true);
+                    }
+	    	    final Mesh soldierNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/soldier.abin"));
+	    	    soldierNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	    	    soldierNodeTemplate.setScale(0.015);
+	    	    NodeHelper.applyTransformToMeshData(soldierNodeTemplate);
+	    	    soldierNodeTemplate.updateModelBound();
+	    	    soldierNodeTemplate.updateWorldBound(true);
+	    	    final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)soldierNodeTemplate.getController(0);
+	    	    for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
+	    	        {pit._newShape.setScale(0.015);
+                     pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                     NodeHelper.applyTransformToMeshData(pit._newShape);
+                     pit._newShape.updateModelBound();
+                     pit._newShape.updateWorldBound(true);
+	    	        }
+	            for(ReadOnlyVector3 soldierPos:soldiersPos)
+	                {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate,true);
+	        	     soldierNode.setName("enemy@"+soldierNode.hashCode());
+                     soldierNode.setTranslation(soldierPos);
+                     final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
+                     soldierKeyframeController.setUpdateBounding(true);
+                     //loops on all frames of the set in the supplied time frame
+                     soldierKeyframeController.setRepeatType(RepeatType.WRAP);
+                     //uses the "stand" animation
+                     soldierKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                     soldierKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                     soldierKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                     soldierKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                     getRoot().attachChild(soldierNode);
+                     final EnemyData soldierData=new EnemyData();
+                     enemiesDataMap.put(soldierNode,soldierData);
+                     final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
+                     weaponNode.setName("weapon of "+soldierNode.getName());
+                     weaponNode.setTranslation(soldierPos);
+                     final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
+                     //loops on all frames of the set in the supplied time frame
+                     weaponKeyframeController.setRepeatType(RepeatType.WRAP);
+                     //uses the "stand" animation
+                     weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                     weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                     weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                     weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                     getRoot().attachChild(weaponNode);
+	                }
+	           }
+	        catch(IOException ioe)
+	        {throw new RuntimeException("enemies loading failed",ioe);}
     }
     
     private final void preloadTextures(){

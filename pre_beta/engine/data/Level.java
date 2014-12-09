@@ -25,7 +25,9 @@ import java.util.List;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.math.ColorRGBA;
+import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.misc.ImageHelper;
 
 /**
@@ -45,12 +47,13 @@ public class Level{
     //TODO ammo, health
     /**objectives of the mission*/
     private final List<Objective> objectives;
-    //TODO enemies
+    /**positions of the enemies*/
+    private final ReadOnlyVector3[] enemiesPositions;
     /**root node whose hierarchy contains the geometry*/
     //private Node node;
     //TODO weapons, skybox, teleporters
     
-    public Level(final int identifier,final String name,Objective... objectives){
+    public Level(final int identifier,final String name,final ReadOnlyVector3[] enemiesPositions,Objective... objectives){
     	super();
     	this.identifier=identifier;
     	this.name=name;
@@ -58,6 +61,7 @@ public class Level{
     	if(objectives!=null&&objectives.length>0)
     	    localObjectives.addAll(Arrays.asList(objectives));
     	this.objectives=Collections.unmodifiableList(localObjectives);
+    	this.enemiesPositions=enemiesPositions;
     }
     
     @Deprecated
@@ -89,5 +93,9 @@ public class Level{
     
     public List<Objective> getObjectives(){
     	return(objectives);
+    }
+    
+    public ReadOnlyVector3[] getEnemiesPositions(){
+    	return(enemiesPositions);
     }
 }
