@@ -49,11 +49,13 @@ public class Level{
     private final List<Objective> objectives;
     /**positions of the enemies*/
     private final ReadOnlyVector3[] enemiesPositions;
+    /**positions of the medikits*///TODO handle different kinds of medikit
+    private final ReadOnlyVector3[] medikitsPositions;
     /**root node whose hierarchy contains the geometry*/
     //private Node node;
     //TODO weapons, skybox, teleporters
     
-    public Level(final int identifier,final String name,final ReadOnlyVector3[] enemiesPositions,Objective... objectives){
+    public Level(final int identifier,final String name,final ReadOnlyVector3[] enemiesPositions,final ReadOnlyVector3[] medikitsPositions,Objective... objectives){
     	super();
     	this.identifier=identifier;
     	this.name=name;
@@ -62,6 +64,7 @@ public class Level{
     	    localObjectives.addAll(Arrays.asList(objectives));
     	this.objectives=Collections.unmodifiableList(localObjectives);
     	this.enemiesPositions=enemiesPositions;
+    	this.medikitsPositions=medikitsPositions;
     }
     
     @Deprecated
@@ -97,5 +100,9 @@ public class Level{
     
     public ReadOnlyVector3[] getEnemiesPositions(){
     	return(enemiesPositions);
+    }
+    
+    public ReadOnlyVector3[] getMedikitsPositions(){
+    	return(medikitsPositions);
     }
 }
