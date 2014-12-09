@@ -633,10 +633,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 if(skyboxNode!=null)
                     skyboxNode.setTranslation(playerNode.getTranslation());
                 //checks if any object is collected
-                Node collectibleNode;
-                String subElementName;
                 for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
-                    {collectibleNode=collectibleObjectsList.get(i);
+                    {final Node collectibleNode=collectibleObjectsList.get(i);
                 	 PickingUtil.findCollisions(collectibleNode,playerNode,collisionResults);
                 	 if(collisionResults.getNumber()>0)
                 	     {//tries to collect the object (update the player model (MVC))
@@ -648,9 +646,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 			   if(collectibleNode.getParent()!=null)
                 				   //detach this object from its parent so that it is no more visible
                 				   collectibleNode.getParent().detachChild(collectibleNode);
-                			   CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectibleNode.getUserData();
+                			   final CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectibleNode.getUserData();
                 			   //displays a message when the player picked up something
-                			   subElementName=collectibleUserData.getSubElementName();
+                			   final String subElementName=collectibleUserData.getSubElementName();
                 			   if(subElementName!=null && !subElementName.equals(""))
                 				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
                 			   else
@@ -710,8 +708,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    		         }
                       		    		 //updates the status of the current mission
                       		    		 gameStats.setMissionStatus(missionStatus);
+                      		    		 //passes the previous location and the next location to the trigger action
                       		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
-                      		    		 //TODO pass the previous location and the next location to the trigger action
               		                     toGameOverTriggerAction.perform(null,null,-1);
               		                     if(missionStatus==MissionStatus.COMPLETED)
               		                         {//unlocks the next level
@@ -967,8 +965,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	  playerNode.setTranslation(playerNode.getTranslation().getX(),y,playerNode.getTranslation().getZ());
                     	  playerNode.getCamera().setLocation(playerNode.getTranslation());
                     	  /**
-                    	   * TODO add a mechanism into the entry action of this state to handle the figures of the player.
-                    	   * It would help to know why he enters this state and which level(s) should be available
+                    	   * TODO add a mechanism into the entry action of this state to handle the figures of the player
                     	   */
                     	  if(latestDeathDuration>500000000)
                     	      {toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
@@ -1469,15 +1466,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	switch(levelIndex)
     	{
     	    case 0:
-    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new KillAllEnemiesObjective());
+    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case 1:
-    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new KillAllEnemiesObjective());
+    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},new KillAllEnemiesObjective());
     	         break;
     	        }
     	    default:
-    	    	level=new Level(levelIndex,"LEVEL NAME",null);
+    	    	level=new Level(levelIndex,"LEVEL NAME",null,null);
     	}
     }
     
@@ -2113,17 +2110,20 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	if(level.getIdentifier()==0||level.getIdentifier()==1)
-    	    {final Node medikitNode=new Node("a medikit");
-             final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
+    	final ReadOnlyVector3[] medikitsPositions=level.getMedikitsPositions();
+    	if(medikitsPositions!=null&&medikitsPositions.length!=0)
+    	    {final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
              ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
              medikitBox.setRenderState(ts);
-             medikitNode.setTranslation(112.5,0.1,220.5);
-             medikitNode.attachChild(medikitBox);
-             medikitNode.setUserData(new MedikitUserData(medikit));
-             collectibleObjectsList.add(medikitNode);
-             getRoot().attachChild(medikitNode);
+             for(final ReadOnlyVector3 medikitPos:medikitsPositions)
+                 {final Node medikitNode=new Node("a medikit");
+            	  medikitNode.setTranslation(medikitPos);
+                  medikitNode.attachChild(medikitBox);
+                  medikitNode.setUserData(new MedikitUserData(medikit));
+                  collectibleObjectsList.add(medikitNode);
+                  getRoot().attachChild(medikitNode);
+                 }
     	    }
     }
     
