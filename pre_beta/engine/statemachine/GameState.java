@@ -240,10 +240,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private WireframeState wireframeState;
     
-    private Skybox skyboxNode;
-    
-    private Node levelNode;
-    
     private Vector3 previousPosition=new Vector3();
     
     /**data of the profile*/
@@ -634,8 +630,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 previousPosition.set(playerNode.getTranslation());
                 //synchronizes the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
-                if(skyboxNode!=null)
-                    skyboxNode.setTranslation(playerNode.getTranslation());
+                if(level.getSkybox()!=null)
+                	level.getSkybox().setTranslation(playerNode.getTranslation());
                 //checks if any object is collected
                 for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
                     {final Node collectibleNode=collectibleObjectsList.get(i);
@@ -1476,15 +1472,21 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	switch(levelIndex)
     	{
     	    case 0:
-    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},new KillAllEnemiesObjective());
+    	        {final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+    	         weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+    	         level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case 1:
-    	        {level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},new KillAllEnemiesObjective());
+    	        {final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+   	             weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+    	         level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    default:
-    	    	level=new Level(levelIndex,"LEVEL NAME",null,null);
+    	    	level=new Level(levelIndex,"LEVEL NAME",null,null,null);
     	}
     }
     
@@ -1721,11 +1723,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadLevelModel(){
-    	try{levelNode=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+level.getIdentifier()+".abin"));
-            getRoot().attachChild(levelNode);
-    	   }
-    	catch(IOException ioe)
-    	{throw new RuntimeException("level loading failed",ioe);}
+    	final Node levelMainModel=level.loadMainModel();
+        getRoot().attachChild(levelMainModel);
     }
     
     private final void loadOutdoor(){
@@ -1797,14 +1796,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void performTerminalBasicCleanup(){
-    	if(levelNode!=null)
-    	    {levelNode.detachAllChildren();
-    		 levelNode=null;
-    	    }
-    	if(skyboxNode!=null)
-    	    {skyboxNode.detachAllChildren();
-    		 skyboxNode=null;
-    	    }
+    	if(level.getMainModel()!=null)
+    	    level.getMainModel().detachAllChildren();
+    	if(level.getSkybox()!=null)
+    	    level.getSkybox().detachAllChildren();
     	//clears the list of objects that can be picked up
     	collectibleObjectsList.clear();
     	//clears the list of teleporters
@@ -1844,8 +1839,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
        	    NodeHelper.setModelBound(currentTeleporter,BoundingBox.class);
         //resets the timer at the end of all long operations performed while loading
         timer.reset();
-        if(skyboxNode!=null)
-        	skyboxNode.setTranslation(currentCamLocation);
+        if(level.getSkybox()!=null)
+        	level.getSkybox().setTranslation(currentCamLocation);
         gameStats.setEnemiesCount(enemiesDataMap.size());
         previousObjectivesStatusesMap=new HashMap<>();
         toPauseMenuTriggerAction.arguments.setObjectives(level.getObjectives());
@@ -1892,10 +1887,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//resets the timer at the beginning of all long operations performed while unloading
         timer.reset();
         //detaches some nodes from the root to prevent Java from using them while releasing their resources
-        if(levelNode!=null)
-        	getRoot().detachChild(levelNode);
-        if(skyboxNode!=null)
-            getRoot().detachChild(skyboxNode);
+        if(level.getMainModel()!=null)
+        	getRoot().detachChild(level.getMainModel());
+        if(level.getSkybox()!=null)
+            getRoot().detachChild(level.getSkybox());
     }
     
     private static final class VBODeleterVisitor implements Visitor{
@@ -1993,10 +1988,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
     	//TODO destroy the morph meshes and the template meshes of enemies
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
-    	if(levelNode!=null)
-	        disposableSpatials.add(levelNode);
-    	if(skyboxNode!=null)
-    	    disposableSpatials.add(skyboxNode);
+    	if(level.getMainModel()!=null)
+	        disposableSpatials.add(level.getMainModel());
+    	if(level.getSkybox()!=null)
+    	    disposableSpatials.add(level.getSkybox());
     	//performs the destruction with a single callable
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
@@ -2054,10 +2049,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	final HashSet<Spatial> disposableSpatials=new HashSet<>();
     	//gets the renderer
     	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
-    	if(levelNode!=null)
-    		disposableSpatials.add(levelNode);
-    	if(skyboxNode!=null)
-	        disposableSpatials.add(skyboxNode);
+    	if(level.getMainModel()!=null)
+    		disposableSpatials.add(level.getMainModel());
+    	if(level.getSkybox()!=null)
+	        disposableSpatials.add(level.getSkybox());
     	//performs the destruction with a single callable
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
@@ -2076,20 +2071,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadSkybox(){
     	if(level.getIdentifier()==2||level.getIdentifier()==3)
-    	    {skyboxNode=new Skybox("skybox",64,64,64);
-    	     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-    	     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-    	     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-    	     final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-    	     final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-    	     final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);            
-    	     skyboxNode.setTexture(Skybox.Face.North,north);
-    	     skyboxNode.setTexture(Skybox.Face.West,west);
-    	     skyboxNode.setTexture(Skybox.Face.South,south);
-    	     skyboxNode.setTexture(Skybox.Face.East,east);
-    	     skyboxNode.setTexture(Skybox.Face.Up,up);
-    	     skyboxNode.setTexture(Skybox.Face.Down,down);
-    	     getRoot().attachChild(skyboxNode);
+    	    {final Skybox skybox=level.loadSkybox();
+    	     getRoot().attachChild(skybox);
     	    }
     }
     
@@ -2149,78 +2132,114 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
-    	if(level.getIdentifier()==0||level.getIdentifier()==1)
     	//N.B: only show working weapons
-	    try{/*final Node uziNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
-            uziNode.setName("an uzi");
-            uziNode.setTranslation(111.5,0.15,219);
-            uziNode.setScale(0.2);
-            uziNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("UZI"),new Matrix3(uziNode.getRotation()),PlayerData.NO_UID,false,true));
-            //adds some bounding boxes for all objects that can be picked up
-            collectibleObjectsList.add(uziNode);
-            getRoot().attachChild(uziNode);
-            final Node smachNode=(Node)binaryImporter.load(getClass().getResource("/abin/smach.abin"));
-            smachNode.setName("a smach");
+	    try{/*uziNode.setTranslation(111.5,0.15,219);
             smachNode.setTranslation(112.5,0.15,219);
-            smachNode.setScale(0.2);
-            smachNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("SMACH"),new Matrix3(smachNode.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(smachNode);
-            getRoot().attachChild(smachNode);
-            final Node pistolNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
-            pistolNode.setName("a pistol (10mm)");
             pistolNode.setTranslation(113.5,0.1,219);
-            pistolNode.setScale(0.001);
-            pistolNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-            pistolNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(pistolNode);
-            getRoot().attachChild(pistolNode);            
-            final Node duplicatePistolNode=pistolNode.makeCopy(false);
-            duplicatePistolNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("PISTOL_10MM"),new Matrix3(pistolNode.getRotation()),PlayerData.NO_UID,false,false));
             duplicatePistolNode.setTranslation(113.5,0.1,217);
-            collectibleObjectsList.add(duplicatePistolNode);
-            getRoot().attachChild(duplicatePistolNode);*/
-            final Node pistol2Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
-            pistol2Node.setName("a pistol (9mm)");
-            //removes the bullet as it is not necessary now
-            ((Node)pistol2Node.getChild(0)).detachChildAt(2);
-            pistol2Node.setTranslation(114.5,0.1,219);
-            pistol2Node.setScale(0.02);
-            pistol2Node.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-            pistol2Node.setUserData(new WeaponUserData(weaponFactory.get("PISTOL_9MM"),new Matrix3(pistol2Node.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(pistol2Node);
-            getRoot().attachChild(pistol2Node);
-            final Node pistol3Node=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
-            pistol3Node.setName("a Mag 60");
-            pistol3Node.setTranslation(115.5,0.1,219);
-            pistol3Node.setScale(0.02);
-            pistol3Node.setUserData(new WeaponUserData(weaponFactory.get("MAG_60"),new Matrix3(pistol3Node.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(pistol3Node);
-            getRoot().attachChild(pistol3Node);
-            /*final Node laserNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
-            laserNode.setName("a laser");
             laserNode.setTranslation(116.5,0.1,219);
-            laserNode.setScale(0.02);
-            laserNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("LASER"),new Matrix3(laserNode.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(laserNode);
-            getRoot().attachChild(laserNode);
-            final Node shotgunNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
-            shotgunNode.setName("a shotgun");
             shotgunNode.setTranslation(117.5,0.1,219);
-            shotgunNode.setScale(0.1);
-            shotgunNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("SHOTGUN"),new Matrix3(shotgunNode.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(shotgunNode);
-            getRoot().attachChild(shotgunNode);	  
-            
-            final Node rocketLauncherNode=(Node)binaryImporter.load(getClass().getResource("/abin/rocketlauncher.abin"));
-            //removes the scope
-            rocketLauncherNode.detachChildAt(0);
-            rocketLauncherNode.setName("a rocket launcher");
-            rocketLauncherNode.setTranslation(117.5,0.1,222);
-            rocketLauncherNode.setScale(0.08);
-            rocketLauncherNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
-            rocketLauncherNode.setUserData(new WeaponUserData(weaponFactory.getWeapon("ROCKET_LAUNCHER"),new Matrix3(rocketLauncherNode.getRotation()),PlayerData.NO_UID,false,true));
-            collectibleObjectsList.add(rocketLauncherNode);
-            getRoot().attachChild(rocketLauncherNode);*/
+            rocketLauncherNode.setTranslation(117.5,0.1,222);*/
+	    	//TODO move the resource name and the name into the Weapon class
+	    	//TODO move the loading of the template nodes into the Level class
+	    	final int weaponCount=weaponFactory.getSize();
+            for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
+                {final Weapon weapon=weaponFactory.get(weaponIndex);
+            	 final String weaponIdentifier=weapon.getIdentifier();
+            	 final ReadOnlyVector3[] weaponsPos=level.getWeaponsPositions(weaponIdentifier);
+            	 if(weaponsPos!=null&&weaponsPos.length!=0)
+            	     {final Node weaponTemplateNode;
+            	      final boolean digitalWatermarkEnabled,primary;
+            		  switch(weaponIdentifier)
+            		  {
+            		      case "PISTOL_9MM":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
+            	               weaponTemplateNode.setName("a pistol (9mm)");
+                               //removes the bullet as it is not necessary now
+                               ((Node)weaponTemplateNode.getChild(0)).detachChildAt(2);
+                               weaponTemplateNode.setScale(0.02);
+                               weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+                               digitalWatermarkEnabled=false;
+                               primary=true;
+           		               break;
+           		              }
+            		      case "MAG_60":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
+           	                   weaponTemplateNode.setName("a Mag 60");
+           	                   weaponTemplateNode.setScale(0.02);
+           	                   digitalWatermarkEnabled=false;
+           	                   primary=true;
+          		               break;
+          		              }
+            		      case "UZI":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
+            		           weaponTemplateNode.setName("an uzi");
+            		           weaponTemplateNode.setScale(0.2);
+            		           digitalWatermarkEnabled=false;
+           	                   primary=true;
+          		               break;
+          		              }
+            		      case "SMACH":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/smach.abin"));
+            		           weaponTemplateNode.setName("a smach");
+            		           weaponTemplateNode.setScale(0.2);
+            		           digitalWatermarkEnabled=false;
+              	               primary=true;
+          		               break;
+          		              }
+            		      case "PISTOL_10MM":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
+            		           weaponTemplateNode.setName("a pistol (10mm)");
+            		           weaponTemplateNode.setScale(0.001);
+            		           weaponTemplateNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+            		           digitalWatermarkEnabled=false;
+              	               primary=true;
+          		               break;
+          		              }
+            		      case "ROCKET_LAUNCHER":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/rocketlauncher.abin"));
+            		           //removes the scope
+            		           weaponTemplateNode.detachChildAt(0);
+            		           weaponTemplateNode.setName("a rocket launcher");
+            		           weaponTemplateNode.setScale(0.08);
+            		           weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
+                               digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      case "SHOTGUN":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
+            		           weaponTemplateNode.setName("a shotgun");
+            		           weaponTemplateNode.setScale(0.1);
+            		           digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      case "LASER":
+            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
+            		           weaponTemplateNode.setName("a laser");
+            		           weaponTemplateNode.setScale(0.02);
+            		           digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      default:
+            		          {weaponTemplateNode=null;
+            		           digitalWatermarkEnabled=false;
+                               primary=true;
+            		          }
+            		  }
+            		  if(weaponTemplateNode!=null)
+            		      {for(final ReadOnlyVector3 weaponPos:weaponsPos)
+            		           {final Node weaponNode=weaponTemplateNode.makeCopy(false);
+            		    	    weaponNode.setTranslation(weaponPos);
+            		            weaponNode.setUserData(new WeaponUserData(weaponFactory.get(weaponIdentifier),new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
+                                collectibleObjectsList.add(weaponNode);
+                                getRoot().attachChild(weaponNode);
+            		           }
+            		      }
+            	     }
+                }
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("weapons loading failed",ioe);}
