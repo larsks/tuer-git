@@ -47,9 +47,9 @@ public class Level{
     //TODO ammo, health
     /**objectives of the mission*/
     private final List<Objective> objectives;
-    /**positions of the enemies*/
+    /**positions of the enemies*///TODO handle several kinds of enemy
     private final ReadOnlyVector3[] enemiesPositions;
-    /**positions of the medikits*///TODO handle different kinds of medikit
+    /**positions of the medikits*///TODO handle several kinds of medikit
     private final ReadOnlyVector3[] medikitsPositions;
     /**root node whose hierarchy contains the geometry*/
     //private Node node;
