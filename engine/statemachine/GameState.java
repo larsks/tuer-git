@@ -202,9 +202,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private static String gameoverSoundSampleIdentifier=null;
     
-    private static final String victorySoundSamplePath="/sounds/applause.ogg";
+    private static final String victory0SoundSamplePath="/sounds/mus3beyond.ogg";
     
-    private static String victorySoundSampleIdentifier=null;
+    private static String victory0SoundSampleIdentifier=null;
+    
+    private static final String victory1SoundSamplePath="/sounds/applause.ogg";
+    
+    private static String victory1SoundSampleIdentifier=null;
     
     private static final String pain1soundSamplePath="/sounds/pain1.ogg";
     
@@ -716,7 +720,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    		      profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
                       		    		      //indicates the next level suggested to the player
                       		    		      toGameOverTriggerAction.arguments.setNextLevelIndex(teleporterDestinationLevelIndex);
-              		                    	  getSoundManager().play(false,false,victorySoundSampleIdentifier);
+              		                    	  getSoundManager().play(false,false,victory1SoundSampleIdentifier);
               		                         }
               		                     else
               		                    	 {toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
@@ -994,16 +998,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
             	         builder.append("Updated objective:");
             	     else
             	         builder.append("Updated objectives:");
+                	 boolean allObjectivesAreCompleted=true;
                 	 for(Objective objective:updatedObjectives)
                          {builder.append("\n");
              			  builder.append(objective.getDescription());
              			  builder.append(": ");
              			  final ObjectiveStatus status=previousObjectivesStatusesMap.get(objective);
              			  builder.append(status.toString());
+             			  if(status!=ObjectiveStatus.COMPLETED&&allObjectivesAreCompleted)
+             			      allObjectivesAreCompleted=false;
                 		 }
                 	 //updates the panel
                      objectivesDisplayLabel.setText(builder.toString());
-                     //TODO play a sound depending on the current status
+                     if(allObjectivesAreCompleted)
+                    	 {//plays a sound as all updated objectives are completed
+                    	  getSoundManager().play(false,false,victory0SoundSampleIdentifier);
+                    	 }
                 	}
                 //updates the state machine of the player
                 playerWithStateMachine.updateLogicalLayer(timer);
@@ -1579,10 +1589,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         	 if(gameoverSoundSampleUrl!=null)
         		 gameoverSoundSampleIdentifier=getSoundManager().loadSound(gameoverSoundSampleUrl);
             }
-        if(victorySoundSamplePath!=null&&victorySoundSampleIdentifier==null)
-            {final URL victorySoundSampleUrl=GameState.class.getResource(victorySoundSamplePath);
+        if(victory0SoundSamplePath!=null&&victory0SoundSampleIdentifier==null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victory0SoundSamplePath);
        	     if(victorySoundSampleUrl!=null)
-       	    	 victorySoundSampleIdentifier=getSoundManager().loadSound(victorySoundSampleUrl);
+       	    	 victory0SoundSampleIdentifier=getSoundManager().loadSound(victorySoundSampleUrl);
+            }
+        if(victory1SoundSamplePath!=null&&victory1SoundSampleIdentifier==null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victory1SoundSamplePath);
+   	         if(victorySoundSampleUrl!=null)
+   	    	     victory1SoundSampleIdentifier=getSoundManager().loadSound(victorySoundSampleUrl);
             }
     }
     
@@ -1691,11 +1706,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         		 getSoundManager().unloadSound(gameoverSoundSampleUrl);
         	 gameoverSoundSampleIdentifier=null;
             }
-        if(victorySoundSamplePath!=null&&victorySoundSampleIdentifier!=null)
-            {final URL victorySoundSampleUrl=GameState.class.getResource(victorySoundSamplePath);
+        if(victory0SoundSamplePath!=null&&victory0SoundSampleIdentifier!=null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victory0SoundSamplePath);
        	     if(victorySoundSampleUrl!=null)
     		     getSoundManager().unloadSound(victorySoundSampleUrl);
-       	     victorySoundSampleIdentifier=null;
+       	     victory0SoundSampleIdentifier=null;
+            }
+        if(victory1SoundSamplePath!=null&&victory1SoundSampleIdentifier!=null)
+            {final URL victorySoundSampleUrl=GameState.class.getResource(victory1SoundSamplePath);
+   	         if(victorySoundSampleUrl!=null)
+		         getSoundManager().unloadSound(victorySoundSampleUrl);
+   	         victory1SoundSampleIdentifier=null;
             }
     }
     
