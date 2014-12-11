@@ -210,29 +210,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private static String victory1SoundSampleIdentifier=null;
     
-    private static final String pain1soundSamplePath="/sounds/pain1.ogg";
+    private static final String[] painSoundSamplePaths=new String[]{"/sounds/pain1.ogg","/sounds/pain2.ogg","/sounds/pain3.ogg","/sounds/pain4.ogg","/sounds/pain5.ogg","/sounds/pain6.ogg"};
     
-    private static final String pain2soundSamplePath="/sounds/pain2.ogg";
-    
-    private static final String pain3soundSamplePath="/sounds/pain3.ogg";
-    
-    private static final String pain4soundSamplePath="/sounds/pain4.ogg";
-    
-    private static final String pain5soundSamplePath="/sounds/pain5.ogg";
-    
-    private static final String pain6soundSamplePath="/sounds/pain6.ogg";
-    
-    private static String pain1soundSampleIdentifier=null;
-    
-    private static String pain2soundSampleIdentifier=null;
-    
-    private static String pain3soundSampleIdentifier=null;
-    
-    private static String pain4soundSampleIdentifier=null;
-    
-    private static String pain5soundSampleIdentifier=null;
-    
-    private static String pain6soundSampleIdentifier=null;
+    private static final String[] painSoundSampleIdentifiers=new String[painSoundSamplePaths.length];
     
     private static final String enemyShotgunShotSamplePath="/sounds/shotgun_shot.ogg";
     
@@ -822,22 +802,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                             	  }
                                              }
                                          //plays a sound if the enemy is not dead
-                                         if(soldierData.getHealth()<=17)
-                                             getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                         else
-                                      	     if(soldierData.getHealth()<=33)
-                                                 getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                      	     else
-                                       		     if(soldierData.getHealth()<=50)
-                                                     getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                       		     else
-                                       			     if(soldierData.getHealth()<=67)
-                                                         getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                   	                 else
-                                   	            	     if(soldierData.getHealth()<=83)
-                                                             getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                         else
-                                                       	     getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                         final double healthFactor=Math.max(0.0d,Math.min((double)soldierData.getHealth(),100.0d))/100.0d;
+                                         final int painSoundSampleIndex=painSoundSampleIdentifiers.length-1-Math.max(0,Math.min((int)Math.rint(Math.floor(healthFactor*(double)painSoundSampleIdentifiers.length)),painSoundSampleIdentifiers.length-1));
+                                         getSoundManager().play(false,false,painSoundSampleIdentifiers[painSoundSampleIndex]);
                                         }
                             	    //FIXME only remove the projectile if it doesn't pass through the enemy
                                     projectilesToRemove.add(projectileNode);
@@ -854,22 +821,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                     if(hasCollision)
                                         {if(playerData.isAlive())
                                              {playerData.decreaseHealth(10);
-                                              if(playerData.getHealth()<=17)
-                                                  getSoundManager().play(false,false,pain6soundSampleIdentifier);
-                                              else
-                                                  if(playerData.getHealth()<=33)
-                                                      getSoundManager().play(false,false,pain5soundSampleIdentifier);
-                                      	          else
-                                      		          if(playerData.getHealth()<=50)
-                                                          getSoundManager().play(false,false,pain4soundSampleIdentifier);
-                                      		          else
-                                      			          if(playerData.getHealth()<=67)
-                                                              getSoundManager().play(false,false,pain3soundSampleIdentifier);
-                                  	                      else
-                                  	                          if(playerData.getHealth()<=83)
-                                                                  getSoundManager().play(false,false,pain2soundSampleIdentifier);
-                                                              else
-                                                      	          getSoundManager().play(false,false,pain1soundSampleIdentifier);
+                                              final double healthFactor=Math.max(0.0d,Math.min((double)playerData.getHealth(),100.0d))/100.0d;
+                                              final int painSoundSampleIndex=painSoundSampleIdentifiers.length-1-Math.max(0,Math.min((int)Math.rint(Math.floor(healthFactor*(double)painSoundSampleIdentifiers.length)),painSoundSampleIdentifiers.length-1));
+                                              getSoundManager().play(false,false,painSoundSampleIdentifiers[painSoundSampleIndex]);
                                              }
                                          //FIXME only remove the projectile if it doesn't pass through the player
                                          projectilesToRemove.add(projectileNode);
@@ -1551,35 +1505,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         		      }
         	     }
             }
-        if(pain1soundSamplePath!=null&&pain1soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain1soundSamplePath);
-        	 if(pain1SoundSampleUrl!=null)
-        	     pain1soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
-            }
-        if(pain2soundSamplePath!=null&&pain2soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain2soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         pain2soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
-            }
-        if(pain3soundSamplePath!=null&&pain3soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain3soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         pain3soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
-            }
-        if(pain4soundSamplePath!=null&&pain4soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain4soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         pain4soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
-            }
-        if(pain5soundSamplePath!=null&&pain5soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain5soundSamplePath);
-	         if(pain1SoundSampleUrl!=null)
-	             pain5soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
-            }
-        if(pain6soundSamplePath!=null&&pain6soundSampleIdentifier==null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain6soundSamplePath);
-	         if(pain1SoundSampleUrl!=null)
-	             pain6soundSampleIdentifier=getSoundManager().loadSound(pain1SoundSampleUrl);
+        for(int painSoundIndex=0;painSoundIndex<painSoundSamplePaths.length;painSoundIndex++)
+            {if(painSoundSamplePaths[painSoundIndex]!=null&&painSoundSampleIdentifiers[painSoundIndex]==null)
+                 {final URL painSoundSampleUrl=GameState.class.getResource(painSoundSamplePaths[painSoundIndex]);
+    	          if(painSoundSampleUrl!=null)
+    	        	  painSoundSampleIdentifiers[painSoundIndex]=getSoundManager().loadSound(painSoundSampleUrl);
+                 }
             }
         if(enemyShotgunShotSamplePath!=null&&enemyShotgunShotSampleIdentifier==null)
             {final URL enemyShotgunShotSampleUrl=GameState.class.getResource(enemyShotgunShotSamplePath);
@@ -1660,42 +1591,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         		      }
         	     }
             }
-        if(pain1soundSamplePath!=null&&pain1soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain1soundSamplePath);
-        	 if(pain1SoundSampleUrl!=null)
-        	     getSoundManager().unloadSound(pain1SoundSampleUrl);
-        	 pain1soundSampleIdentifier=null;
-            }
-        if(pain2soundSamplePath!=null&&pain2soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain2soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
-    	     pain2soundSampleIdentifier=null;
-            }
-        if(pain3soundSamplePath!=null&&pain3soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain3soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
-    	     pain3soundSampleIdentifier=null;
-            }
-        if(pain4soundSamplePath!=null&&pain4soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain4soundSamplePath);
-    	     if(pain1SoundSampleUrl!=null)
-    	         getSoundManager().unloadSound(pain1SoundSampleUrl);
-    	     pain4soundSampleIdentifier=null;
-            }
-        if(pain5soundSamplePath!=null&&pain5soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain5soundSamplePath);
-	         if(pain1SoundSampleUrl!=null)
-	             getSoundManager().unloadSound(pain1SoundSampleUrl);
-	         pain5soundSampleIdentifier=null;
-            }
-        if(pain6soundSamplePath!=null&&pain6soundSampleIdentifier!=null)
-            {final URL pain1SoundSampleUrl=GameState.class.getResource(pain6soundSamplePath);
-	         if(pain1SoundSampleUrl!=null)
-	             getSoundManager().unloadSound(pain1SoundSampleUrl);
-	         pain6soundSampleIdentifier=null;
-            }
+        for(int painSoundIndex=0;painSoundIndex<painSoundSamplePaths.length;painSoundIndex++)
+            {if(painSoundSamplePaths[painSoundIndex]!=null&&painSoundSampleIdentifiers[painSoundIndex]!=null)
+                 {final URL painSoundSampleUrl=GameState.class.getResource(painSoundSamplePaths[painSoundIndex]);
+	              if(painSoundSampleUrl!=null)
+	        	      getSoundManager().unloadSound(painSoundSampleUrl);
+	              painSoundSampleIdentifiers[painSoundIndex]=null;
+             }
+        }
         if(enemyShotgunShotSamplePath!=null&&enemyShotgunShotSampleIdentifier!=null)
             {final URL enemyShotgunShotSampleUrl=GameState.class.getResource(enemyShotgunShotSamplePath);
         	 if(enemyShotgunShotSampleUrl!=null)
