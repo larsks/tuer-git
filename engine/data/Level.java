@@ -24,10 +24,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.math.ColorRGBA;
+import com.ardor3d.math.Matrix3;
+import com.ardor3d.math.Quaternion;
+import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.Skybox;
@@ -35,7 +39,10 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
 
+import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
+import engine.weaponry.Weapon;
+import engine.weaponry.WeaponFactory;
 
 /**
  * Data model of the level
@@ -61,7 +68,7 @@ public class Level{
     private Node mainModel;
     /**sky box*/
     private Skybox skybox;
-    /**map of the weapons' positions sorted by type*/
+    /**map of the weapons positions sorted by type*/
     private final Map<String,ReadOnlyVector3[]> weaponsPositionsMap;
     //TODO teleporters, ammo
     private final BinaryImporter binaryImporter;
@@ -93,6 +100,105 @@ public class Level{
 	    		{final int argb=imgHelper.getARGB(map,x,y);
 	    		 collisionMap[x][y]=(argb==ColorRGBA.BLUE.asIntARGB());
 	    		}
+    }
+    
+    public List<Node> loadWeaponsModels(final WeaponFactory weaponFactory){
+    	final List<Node> weaponsNodes=new ArrayList<>();
+    	//N.B: only show working weapons
+	    try{/*uziNode.setTranslation(111.5,0.15,219);
+            smachNode.setTranslation(112.5,0.15,219);
+            pistolNode.setTranslation(113.5,0.1,219);
+            duplicatePistolNode.setTranslation(113.5,0.1,217);
+            laserNode.setTranslation(116.5,0.1,219);
+            shotgunNode.setTranslation(117.5,0.1,219);
+            rocketLauncherNode.setTranslation(117.5,0.1,222);*/
+	    	//TODO store the template nodes in order to use them during the cleanup
+	    	//TODO move the transforms into the binary files and convert them into Wavefront OBJ
+	    	final int weaponCount=weaponFactory.getSize();
+            for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
+                {final Weapon weapon=weaponFactory.get(weaponIndex);
+            	 final String weaponIdentifier=weapon.getIdentifier();
+            	 final String weaponResourceName=weapon.getResourceName();
+            	 final String weaponLabel=weapon.getLabel();
+            	 final ReadOnlyVector3[] weaponsPos=weaponsPositionsMap.get(weaponIdentifier);
+            	 if(weaponsPos!=null&&weaponsPos.length!=0)
+            	     {final Node weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource(weaponResourceName));
+            	      weaponTemplateNode.setName(weaponLabel);
+            	      final boolean digitalWatermarkEnabled,primary;
+            		  switch(weaponIdentifier)
+            		  {
+            		      case "PISTOL_9MM":
+            		          {//removes the bullet as it is not necessary now
+                               ((Node)weaponTemplateNode.getChild(0)).detachChildAt(2);
+                               weaponTemplateNode.setScale(0.02);
+                               weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+                               digitalWatermarkEnabled=false;
+                               primary=true;
+           		               break;
+           		              }
+            		      case "MAG_60":
+            		          {weaponTemplateNode.setScale(0.02);
+           	                   digitalWatermarkEnabled=false;
+           	                   primary=true;
+          		               break;
+          		              }
+            		      case "UZI":
+            		          {weaponTemplateNode.setScale(0.2);
+            		           digitalWatermarkEnabled=false;
+           	                   primary=true;
+          		               break;
+          		              }
+            		      case "SMACH":
+            		          {weaponTemplateNode.setScale(0.2);
+            		           digitalWatermarkEnabled=false;
+              	               primary=true;
+          		               break;
+          		              }
+            		      case "PISTOL_10MM":
+            		          {weaponTemplateNode.setScale(0.001);
+            		           weaponTemplateNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+            		           digitalWatermarkEnabled=false;
+              	               primary=true;
+          		               break;
+          		              }
+            		      case "ROCKET_LAUNCHER":
+            		          {//removes the scope
+            		           weaponTemplateNode.detachChildAt(0);
+            		           weaponTemplateNode.setScale(0.08);
+            		           weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
+                               digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      case "SHOTGUN":
+            		          {weaponTemplateNode.setScale(0.1);
+            		           digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      case "LASER":
+            		          {weaponTemplateNode.setScale(0.02);
+            		           digitalWatermarkEnabled=false;
+                               primary=true;
+            		           break;
+            		          }
+            		      default:
+            		          {digitalWatermarkEnabled=false;
+                               primary=true;
+            		          }
+            		  }
+            		  for(final ReadOnlyVector3 weaponPos:weaponsPos)
+            		      {final Node weaponNode=weaponTemplateNode.makeCopy(false);
+            		       weaponNode.setTranslation(weaponPos);
+            		       weaponNode.setUserData(new WeaponUserData(weapon,new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
+            		       weaponsNodes.add(weaponNode);
+            		      }
+            	     }
+                }
+	       }
+	    catch(IOException ioe)
+	    {throw new RuntimeException("weapons loading failed",ioe);}
+	    return(weaponsNodes);
     }
     
     public Node loadMainModel(){
@@ -155,9 +261,5 @@ public class Level{
     
     public ReadOnlyVector3[] getMedikitsPositions(){
     	return(medikitsPositions);
-    }
-    
-    public ReadOnlyVector3[] getWeaponsPositions(final String weaponIdentifier) {
-    	return(weaponsPositionsMap.get(weaponIdentifier));
     }
 }

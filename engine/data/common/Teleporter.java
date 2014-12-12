@@ -20,6 +20,6 @@ package engine.data.common;
 public class Teleporter extends Collectible{
 
 	public Teleporter(final String pickingUpSoundSamplePath){
-		super(pickingUpSoundSamplePath);
+		super(null,pickingUpSoundSamplePath);
 	}
 }

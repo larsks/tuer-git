@@ -19,19 +19,28 @@ package engine.data.common;
 
 public abstract class Collectible{
 	
+	/**name (can contain space)*/
+    private final String label;
+    /**path of the sound played when picking up this kind of object*/
 	protected String pickingUpSoundSamplePath;
 	/**source name of the sound played when picking up this kind of object*/
 	protected String pickingUpSoundSampleIdentifier;
 	
-	public Collectible(String pickingUpSoundSamplePath){
+	public Collectible(final String label,final String pickingUpSoundSamplePath){
+		super();
+		this.label=label;
 		this.pickingUpSoundSamplePath=pickingUpSoundSamplePath;
+	}
+	
+	public String getLabel(){
+		return(label);
 	}
 	
 	public String getPickingUpSoundSamplePath(){
 		return(pickingUpSoundSamplePath);
 	}
 
-	public void setPickingUpSoundSamplePath(String pickingUpSoundSamplePath){
+	public void setPickingUpSoundSamplePath(final String pickingUpSoundSamplePath){
 		this.pickingUpSoundSamplePath=pickingUpSoundSamplePath;
 	}
 	
@@ -39,7 +48,7 @@ public abstract class Collectible{
 		return(pickingUpSoundSampleIdentifier);
 	}
 	
-	public void setPickingUpSoundSampleIdentifier(String pickingUpSoundSampleIdentifier){
+	public void setPickingUpSoundSampleIdentifier(final String pickingUpSoundSampleIdentifier){
 		this.pickingUpSoundSampleIdentifier=pickingUpSoundSampleIdentifier;
 	}	
 }

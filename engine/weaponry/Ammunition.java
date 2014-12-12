@@ -23,13 +23,10 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	
 	/**unique name (cannot contain any space)*/
     private final String identifier;
-    /**name (can contain space)*/
-    private final String label;
 	
-    Ammunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
-    	super(pickingUpSoundSamplePath);
+    Ammunition(final String label,final String identifier,final String pickingUpSoundSamplePath){
+    	super(label,pickingUpSoundSamplePath);
     	this.identifier=identifier;
-    	this.label=label;
     }
     
     @Override
@@ -59,9 +56,5 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	
 	public final String getIdentifier(){
 		return(identifier);
-	}
-	
-	public final String getLabel(){
-		return(label);
 	}
 }

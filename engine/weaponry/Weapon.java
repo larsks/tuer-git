@@ -21,6 +21,8 @@ import engine.data.common.Collectible;
 
 public final class Weapon extends Collectible implements Comparable<Weapon>{
 	
+	/**name of the resource, i.e the binary file containing the 3D model*/
+	private final String resourceName;
     /**path of the sound sample played during a shot or a blow*/
     private final String blowOrShotSoundSamplePath;
     /**source name of the sound sample played during a shot or a blow*/
@@ -48,13 +50,12 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 	 * */
 	private final boolean fullyAutomatic;
 	//TODO store the duration necessary to reload
-	//TODO: URL to the binary file
 	//TODO: template node for cloning without I/O interruption, lazily instantiated
 	    
-	public Weapon(final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,final int magazineSize,
+	public Weapon(final String label,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
-		super(pickingUpSoundSamplePath);
+		super(label,pickingUpSoundSamplePath);
 		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
 		this.reloadSoundSamplePath=reloadSoundSamplePath;
 		this.identifier=identifier;
@@ -64,6 +65,7 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 		this.ammunitionPerShot=ammunitionPerShot;
 		this.blowOrShotDurationInMillis=blowOrShotDurationInMillis;
 		this.fullyAutomatic=fullyAutomatic;
+		this.resourceName=resourceName;
 	}
 	
 	/**
@@ -157,5 +159,9 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 	
 	public final int getBlowOrShotDurationInMillis(){
 		return(blowOrShotDurationInMillis);
+	}
+	
+	public final String getResourceName(){
+		return(resourceName);
 	}
 }

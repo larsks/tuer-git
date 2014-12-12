@@ -22,7 +22,7 @@ import engine.data.common.Medikit;
 public final class MedikitUserData extends CollectibleUserData<Medikit>{
 	
 	public MedikitUserData(final Medikit medikit){
-		super(medikit,"points of health");
+		super(medikit,"health point");
 	}
 	
 	public int getHealth(){
