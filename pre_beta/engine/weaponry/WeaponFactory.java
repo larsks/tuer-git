@@ -24,13 +24,13 @@ public final class WeaponFactory extends AbstractFactory<Weapon>{
 	public WeaponFactory(){
 	}	
 	
-	public final boolean addNewWeapon(final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,
+	public final boolean addNewWeapon(final String label,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,
 			final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,
 			final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(pickingUpSoundSamplePath,blowOrShotSoundSamplePath,reloadSoundSamplePath,identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
+			{final Weapon weapon=new Weapon(label,resourceName,pickingUpSoundSamplePath,blowOrShotSoundSamplePath,reloadSoundSamplePath,identifier,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
 			 success=add(identifier,weapon);
 			}
 		return(success);

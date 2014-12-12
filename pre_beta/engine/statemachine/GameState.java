@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -53,7 +52,6 @@ import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
-import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
@@ -87,7 +85,6 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.EnemyData;
 import engine.data.Level;
 import engine.data.Objective;
@@ -102,7 +99,6 @@ import engine.data.common.userdata.AmmunitionUserData;
 import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
-import engine.data.common.userdata.WeaponUserData;
 import engine.input.Action;
 import engine.input.ActionMap;
 import engine.input.ExtendedFirstPersonControl;
@@ -629,10 +625,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 			   final CollectibleUserData<?> collectibleUserData=(CollectibleUserData<?>)collectibleNode.getUserData();
                 			   //displays a message when the player picked up something
                 			   final String subElementName=collectibleUserData.getSubElementName();
-                			   if(subElementName!=null && !subElementName.equals(""))
+                			   if(subElementName!=null&&!subElementName.isEmpty())
                 				   headUpDisplayLabel.setText("picked up "+collectedSubElementsCount+" "+subElementName+(collectedSubElementsCount>1?"s":""));
                 			   else
-                			       headUpDisplayLabel.setText("picked up "+collectibleNode.getName());               	           
+                			       {final String label=collectibleUserData.getLabel();
+                				    headUpDisplayLabel.setText("picked up "+label);
+                			       }
                 	           //plays a sound if available
                 	           if(collectibleUserData.getPickingUpSoundSampleIdentifier()!=null)
                                    getSoundManager().play(false,false,collectibleUserData.getPickingUpSoundSampleIdentifier());
@@ -1393,50 +1391,55 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final AmmunitionFactory initializeAmmunitionFactory(){
     	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","BULLET_5_56MM","5.56mm bullet");
+        ammunitionFactory.addNewAmmunition("5.56mm bullet","BULLET_5_56MM","/sounds/pickup_weapon.ogg");
     	/**Russian assault rifle*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","BULLET_7_62MM","7.62mm bullet");
+        ammunitionFactory.addNewAmmunition("7.62mm bullet","BULLET_7_62MM","/sounds/pickup_weapon.ogg");
     	/**American pistols and sub-machine guns*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","BULLET_9MM","9mm bullet");
+        ammunitionFactory.addNewAmmunition("9mm bullet","BULLET_9MM","/sounds/pickup_weapon.ogg");
     	/**Russian pistols*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","BULLET_10MM","10mm bullet");
+        ammunitionFactory.addNewAmmunition("10mm bullet","BULLET_10MM","/sounds/pickup_weapon.ogg");
     	/**cartridge*/
         ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","CARTRIDGE","cartridge");
     	/**power*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","ENERGY_CELL","energy cell");
+        ammunitionFactory.addNewAmmunition("energy cell","ENERGY_CELL","/sounds/pickup_weapon.ogg");
     	/**Russian middle range anti-tank rocket launchers*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","ANTI_TANK_ROCKET_105MM","105mm anti tank rocket");
+        ammunitionFactory.addNewAmmunition("105mm anti tank rocket","ANTI_TANK_ROCKET_105MM","/sounds/pickup_weapon.ogg");
         return(ammunitionFactory);
     }
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/pistol9mm_shot.ogg","/sounds/pistol9mm_reload.ogg","PISTOL_9MM",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"PISTOL_10MM",true,10,ammunitionFactory.get("BULLET_10MM"),1,500,true);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg","MAG_60",true,30,ammunitionFactory.get("BULLET_9MM"),1,100,true);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"UZI",true,20,ammunitionFactory.get("BULLET_9MM"),1,100,true);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"SMACH",true,35,ammunitionFactory.get("BULLET_5_56MM"),1,100,true);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"LASER",true,15,ammunitionFactory.get("ENERGY_CELL"),1,1000,false);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"SHOTGUN",false,3,ammunitionFactory.get("CARTRIDGE"),1,1500,false);
-        weaponFactory.addNewWeapon("/sounds/pickup_weapon.ogg",null,null,"ROCKET_LAUNCHER",false,1,ammunitionFactory.get("ANTI_TANK_ROCKET_105MM"),1,2000,false);
+        weaponFactory.addNewWeapon("a pistol (9mm)","/abin/pistol2.abin","/sounds/pickup_weapon.ogg","/sounds/pistol9mm_shot.ogg","/sounds/pistol9mm_reload.ogg","PISTOL_9MM",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
+        weaponFactory.addNewWeapon("a pistol (10mm)","/abin/pistol.abin","/sounds/pickup_weapon.ogg",null,null,"PISTOL_10MM",true,10,ammunitionFactory.get("BULLET_10MM"),1,500,true);
+        weaponFactory.addNewWeapon("a Mag 60","/abin/pistol3.abin","/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg","MAG_60",true,30,ammunitionFactory.get("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("an uzi","/abin/uzi.abin","/sounds/pickup_weapon.ogg",null,null,"UZI",true,20,ammunitionFactory.get("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("a smach","/abin/smach.abin","/sounds/pickup_weapon.ogg",null,null,"SMACH",true,35,ammunitionFactory.get("BULLET_5_56MM"),1,100,true);
+        weaponFactory.addNewWeapon("a laser","/abin/laser.abin","/sounds/pickup_weapon.ogg",null,null,"LASER",true,15,ammunitionFactory.get("ENERGY_CELL"),1,1000,false);
+        weaponFactory.addNewWeapon("a shotgun","/abin/shotgun.abin","/sounds/pickup_weapon.ogg",null,null,"SHOTGUN",false,3,ammunitionFactory.get("CARTRIDGE"),1,1500,false);
+        weaponFactory.addNewWeapon("a rocket launcher","/abin/rocketlauncher.abin","/sounds/pickup_weapon.ogg",null,null,"ROCKET_LAUNCHER",false,1,ammunitionFactory.get("ANTI_TANK_ROCKET_105MM"),1,2000,false);
         return(weaponFactory);
     }
     
     protected void setLevelIndex(final int levelIndex){
+    	//TODO use a factory for the enemies
     	switch(levelIndex)
     	{
     	    case 0:
-    	        {final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)};
+    	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
     	         weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level(levelIndex,"LEVEL NAME",enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case 1:
-    	        {final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
+    	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
    	             weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level(levelIndex,"LEVEL NAME",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)},new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)},weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level(levelIndex,"LEVEL NAME",enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    default:
@@ -2035,117 +2038,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
-    	//N.B: only show working weapons
-	    try{/*uziNode.setTranslation(111.5,0.15,219);
-            smachNode.setTranslation(112.5,0.15,219);
-            pistolNode.setTranslation(113.5,0.1,219);
-            duplicatePistolNode.setTranslation(113.5,0.1,217);
-            laserNode.setTranslation(116.5,0.1,219);
-            shotgunNode.setTranslation(117.5,0.1,219);
-            rocketLauncherNode.setTranslation(117.5,0.1,222);*/
-	    	//TODO move the resource name and the name into the Weapon class
-	    	//TODO move the loading of the template nodes into the Level class
-	    	final int weaponCount=weaponFactory.getSize();
-            for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
-                {final Weapon weapon=weaponFactory.get(weaponIndex);
-            	 final String weaponIdentifier=weapon.getIdentifier();
-            	 final ReadOnlyVector3[] weaponsPos=level.getWeaponsPositions(weaponIdentifier);
-            	 if(weaponsPos!=null&&weaponsPos.length!=0)
-            	     {final Node weaponTemplateNode;
-            	      final boolean digitalWatermarkEnabled,primary;
-            		  switch(weaponIdentifier)
-            		  {
-            		      case "PISTOL_9MM":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol2.abin"));
-            	               weaponTemplateNode.setName("a pistol (9mm)");
-                               //removes the bullet as it is not necessary now
-                               ((Node)weaponTemplateNode.getChild(0)).detachChildAt(2);
-                               weaponTemplateNode.setScale(0.02);
-                               weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-                               digitalWatermarkEnabled=false;
-                               primary=true;
-           		               break;
-           		              }
-            		      case "MAG_60":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol3.abin"));
-           	                   weaponTemplateNode.setName("a Mag 60");
-           	                   weaponTemplateNode.setScale(0.02);
-           	                   digitalWatermarkEnabled=false;
-           	                   primary=true;
-          		               break;
-          		              }
-            		      case "UZI":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/uzi.abin"));
-            		           weaponTemplateNode.setName("an uzi");
-            		           weaponTemplateNode.setScale(0.2);
-            		           digitalWatermarkEnabled=false;
-           	                   primary=true;
-          		               break;
-          		              }
-            		      case "SMACH":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/smach.abin"));
-            		           weaponTemplateNode.setName("a smach");
-            		           weaponTemplateNode.setScale(0.2);
-            		           digitalWatermarkEnabled=false;
-              	               primary=true;
-          		               break;
-          		              }
-            		      case "PISTOL_10MM":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/pistol.abin"));
-            		           weaponTemplateNode.setName("a pistol (10mm)");
-            		           weaponTemplateNode.setScale(0.001);
-            		           weaponTemplateNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-            		           digitalWatermarkEnabled=false;
-              	               primary=true;
-          		               break;
-          		              }
-            		      case "ROCKET_LAUNCHER":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/rocketlauncher.abin"));
-            		           //removes the scope
-            		           weaponTemplateNode.detachChildAt(0);
-            		           weaponTemplateNode.setName("a rocket launcher");
-            		           weaponTemplateNode.setScale(0.08);
-            		           weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
-                               digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      case "SHOTGUN":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/shotgun.abin"));
-            		           weaponTemplateNode.setName("a shotgun");
-            		           weaponTemplateNode.setScale(0.1);
-            		           digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      case "LASER":
-            		          {weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource("/abin/laser.abin"));
-            		           weaponTemplateNode.setName("a laser");
-            		           weaponTemplateNode.setScale(0.02);
-            		           digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      default:
-            		          {weaponTemplateNode=null;
-            		           digitalWatermarkEnabled=false;
-                               primary=true;
-            		          }
-            		  }
-            		  if(weaponTemplateNode!=null)
-            		      {for(final ReadOnlyVector3 weaponPos:weaponsPos)
-            		           {final Node weaponNode=weaponTemplateNode.makeCopy(false);
-            		    	    weaponNode.setTranslation(weaponPos);
-            		            weaponNode.setUserData(new WeaponUserData(weaponFactory.get(weaponIdentifier),new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
-                                collectibleObjectsList.add(weaponNode);
-                                getRoot().attachChild(weaponNode);
-            		           }
-            		      }
-            	     }
-                }
-	       }
-	    catch(IOException ioe)
-	    {throw new RuntimeException("weapons loading failed",ioe);}
+    	final List<Node> weaponsNodes=level.loadWeaponsModels(weaponFactory);
+	    collectibleObjectsList.addAll(weaponsNodes);
+	    for(final Node weaponNode:weaponsNodes)
+	    	getRoot().attachChild(weaponNode);
     }
     
     private final void loadAmmunitions(){

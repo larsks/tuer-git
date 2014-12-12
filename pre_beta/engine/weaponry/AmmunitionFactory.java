@@ -24,10 +24,10 @@ public final class AmmunitionFactory extends AbstractFactory<Ammunition>{
 	public AmmunitionFactory(){
 	}	
 	
-	public final boolean addNewAmmunition(final String pickingUpSoundSamplePath,final String identifier,final String label){
+	public final boolean addNewAmmunition(final String label,final String identifier,final String pickingUpSoundSamplePath){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final Ammunition ammunition=new Ammunition(pickingUpSoundSamplePath,identifier,label);
+			{final Ammunition ammunition=new Ammunition(label,identifier,pickingUpSoundSamplePath);
 			 success=add(identifier,ammunition);
 			}
 		return(success);

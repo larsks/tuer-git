@@ -22,7 +22,7 @@ public class Medikit extends Collectible{
 	private final int health;
 	
 	public Medikit(final String pickingUpSoundSamplePath,final int health){
-		super(pickingUpSoundSamplePath);
+		super(null,pickingUpSoundSamplePath);
 		this.health=health;
 	}
 	

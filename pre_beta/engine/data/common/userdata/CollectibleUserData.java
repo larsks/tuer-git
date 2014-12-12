@@ -27,12 +27,17 @@ public abstract class CollectibleUserData<T extends Collectible>{
 	private final String subElementName;
 	
 	public CollectibleUserData(final T collectible,final String subElementName){
+		super();
 		this.collectible=collectible;
 		this.subElementName=subElementName;
 	}
 	
 	public String getPickingUpSoundSampleIdentifier(){
 		return(collectible.getPickingUpSoundSampleIdentifier());
+	}
+	
+	public String getLabel(){
+		return(collectible.getLabel());
 	}
 	
 	public String getSubElementName(){
