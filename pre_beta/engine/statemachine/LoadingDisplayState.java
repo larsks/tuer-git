@@ -91,7 +91,7 @@ public final class LoadingDisplayState extends ScenegraphState{
             	//performs the long task only at the second update to display the task node correctly
             	if(!oneSkipDone)
             		{oneSkipDone=true;
-            		 levelTextLabel.setText("Level "+gameStateInitializationRunnable.state.getLevelIndex());
+            		 levelTextLabel.setText("Level "+gameStateInitializationRunnable.state.getLevelLabel());
             		}
             	else
             	    {if(taskManager.getTaskCount()>0)

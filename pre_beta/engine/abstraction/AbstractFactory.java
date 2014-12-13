@@ -45,7 +45,8 @@ public abstract class AbstractFactory<T>{
 		boolean success=stringId!=null&&component!=null&&!componentMap.containsKey(stringId)&&
 				        !componentMap.containsValue(component)&&!componentIdentifierMap.containsValue(component);
 		if(success)
-		    {final Integer generatedIdObj=Integer.valueOf(autoIncrementalIndex.getAndIncrement());
+		    {final int generatedId=autoIncrementalIndex.getAndIncrement();
+			 final Integer generatedIdObj=Integer.valueOf(generatedId);
 			 componentMap.put(stringId,component);
 		     componentIdentifierMap.put(generatedIdObj,component);
 		    }

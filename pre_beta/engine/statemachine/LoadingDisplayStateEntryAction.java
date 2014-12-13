@@ -38,8 +38,8 @@ public class LoadingDisplayStateEntryAction extends ScenegraphStateEntryAction{
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-		final int levelIndex=sttaArgs.getNextLevelIndex();
-		gameState.setLevelIndex(levelIndex);
+		final String levelIdentifier=sttaArgs.getNextLevelIdentifier();
+		gameState.setLevelIdentifier(levelIdentifier);
 		super.onTransition(from,to,cause,args,stateMachine);
 	}
 }

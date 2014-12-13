@@ -75,9 +75,9 @@ public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction
         			      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
         		      else
         			      if(destinationTag.equals(LEVEL_TAG))
-        			          {final int levelIndex=sttaArgs.getNextLevelIndex();
+        			          {final String levelIdentifier=sttaArgs.getNextLevelIdentifier();
         			           //uses an argument to pass the level index
-        			           toLoadingDisplayTriggerAction.arguments.setNextLevelIndex(levelIndex);
+        			           toLoadingDisplayTriggerAction.arguments.setNextLevelIdentifier(levelIdentifier);
         			           scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
         			          }
                  }

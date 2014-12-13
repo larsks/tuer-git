@@ -24,20 +24,20 @@ public final class TeleporterUserData extends CollectibleUserData<Teleporter>{
 	
 	private final Vector3 destination;
 	
-	private final int destinationLevelIndex;
+	private final String destinationLevelIdentifier;
 	
-	public TeleporterUserData(final Teleporter teleporter,final Vector3 destination,final int destinationLevelIndex){
+	public TeleporterUserData(final Teleporter teleporter,final Vector3 destination,final String destinationLevelIdentifier){
 		super(teleporter,null);
 		this.destination=destination;
-		this.destinationLevelIndex=destinationLevelIndex;
+		this.destinationLevelIdentifier=destinationLevelIdentifier;
 	}
 	
 	public final Vector3 getDestination(){
 		return(destination);
 	}
 	
-	public final int getDestinationLevelIndex(){
-		return(destinationLevelIndex);
+	public final String getDestinationLevelIdentifier(){
+		return(destinationLevelIdentifier);
 	}
 	
 	@Override

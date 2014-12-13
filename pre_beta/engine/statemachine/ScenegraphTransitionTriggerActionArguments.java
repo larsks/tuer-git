@@ -32,6 +32,9 @@ import se.hiflyer.fettle.Arguments;
  */
 public class ScenegraphTransitionTriggerActionArguments extends Arguments {
 	
+	/**
+	 * Constructor with no tag
+	 */
 	public ScenegraphTransitionTriggerActionArguments() {
 		this(null);
 	}
@@ -43,58 +46,110 @@ public class ScenegraphTransitionTriggerActionArguments extends Arguments {
 	 */
 	@SuppressWarnings("cast")
 	public ScenegraphTransitionTriggerActionArguments(final String tag) {
-		super(new int[]{-1,-1},tag,(Object)new GameStatistics[1],(Object)new List[1],(Object)new Vector3[2]);
+		super(new String[]{null,null},tag,(Object)new GameStatistics[1],(Object)new List[1],(Object)new Vector3[2]);
 	}
 
-	public int getPreviousLevelIndex(){
-		return(((int[])getFirst())[0]);
+	/**
+	 * 
+	 * @return
+	 */
+	public String getPreviousLevelIdentifier(){
+		return(((String[])getFirst())[0]);
 	}
 	
-	public void setPreviousLevelIndex(final int previousLevelIndex){
-		((int[])getFirst())[0]=previousLevelIndex;
+	/**
+	 * 
+	 * @param previousLevelIdentifier
+	 */
+	public void setPreviousLevelIdentifier(final String previousLevelIdentifier){
+		((String[])getFirst())[0]=previousLevelIdentifier;
 	}
 	
-	public int getNextLevelIndex(){
-		return(((int[])getFirst())[1]);
+	/**
+	 * 
+	 * @return
+	 */
+	public String getNextLevelIdentifier(){
+		return(((String[])getFirst())[1]);
 	}
 	
-	public void setNextLevelIndex(final int nextLevelIndex){
-		((int[])getFirst())[1]=nextLevelIndex;
+	/**
+	 * 
+	 * @param nextLevelIdentifier
+	 */
+	public void setNextLevelIdentifier(final String nextLevelIdentifier){
+		((String[])getFirst())[1]=nextLevelIdentifier;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public String getTag(){
 		return((String)getArgument(1));
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public GameStatistics getGameStatistics(){
 		return(((GameStatistics[])getArgument(2))[0]);
 	}
 	
+	/**
+	 * 
+	 * @param gameStats
+	 */
 	public void setGameStatistics(final GameStatistics gameStats){
 		((GameStatistics[])getArgument(2))[0]=gameStats;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public List<Objective> getObjectives(){
 		return((((List[])getArgument(3))[0]));
 	}
 	
+	/**
+	 * 
+	 * @param objectives
+	 */
 	public void setObjectives(final List<Objective> objectives){
 		((List[])getArgument(3))[0]=objectives;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public Vector3 getPreviousLocation(){
 		return(((Vector3[])getArgument(4))[0]);
 	}
 	
+	/**
+	 * 
+	 * @param previousLocation
+	 */
 	public void setPreviousLocation(final Vector3 previousLocation){
 		((Vector3[])getArgument(4))[0]=previousLocation;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public Vector3 getNextLocation(){
 		return(((Vector3[])getArgument(4))[1]);
 	}
 	
+	/**
+	 * 
+	 * @param nextLocation
+	 */
 	public void setNextLocation(final Vector3 nextLocation){
 		((Vector3[])getArgument(4))[1]=nextLocation;
 	}

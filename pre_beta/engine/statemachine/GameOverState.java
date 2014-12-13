@@ -67,9 +67,9 @@ public class GameOverState extends ScenegraphState{
     
     private final UIPanel confirmExitMenuPanel;
     
-    private int latestPlayedLevelIndex;
+    private String latestPlayedLevelIdentifier;
     
-    private int latestNextPlayableLevelIndex;
+    private String latestNextPlayableLevelIdentifier;
     
     private GameStatistics gameStats;
     
@@ -89,8 +89,8 @@ public class GameOverState extends ScenegraphState{
 		this.toUnloadingDisplayTriggerActionForExit=toUnloadingDisplayTriggerActionForExit;
 		this.toUnloadingDisplayTriggerActionForMainMenu=toUnloadingDisplayTriggerActionForMainMenu;
 		this.toUnloadingDisplayTriggerActionForLoadingDisplay=toUnloadingDisplayTriggerActionForLoadingDisplay;
-		this.latestPlayedLevelIndex=-1;
-		this.latestNextPlayableLevelIndex=-1;
+		this.latestPlayedLevelIdentifier=null;
+		this.latestNextPlayableLevelIdentifier=null;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -145,12 +145,12 @@ public class GameOverState extends ScenegraphState{
 	}
 	
 	private void onNextButtonActionPerformed(final ActionEvent ae){
-		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIndex(latestNextPlayableLevelIndex);
+		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIdentifier(latestNextPlayableLevelIdentifier);
 		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
 	private void onRetryButtonActionPerformed(final ActionEvent ae){
-		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIndex(latestPlayedLevelIndex);
+		toUnloadingDisplayTriggerActionForLoadingDisplay.arguments.setNextLevelIdentifier(latestPlayedLevelIdentifier);
 		toUnloadingDisplayTriggerActionForLoadingDisplay.perform(null,null,-1);
     }
 	
@@ -215,12 +215,12 @@ public class GameOverState extends ScenegraphState{
         return(hud);
     }
 	
-	public void setLatestPlayedLevelIndex(final int latestPlayedLevelIndex){
-		this.latestPlayedLevelIndex=latestPlayedLevelIndex;
+	public void setLatestPlayedLevelIdentifier(final String latestPlayedLevelIdentifier){
+		this.latestPlayedLevelIdentifier=latestPlayedLevelIdentifier;
 	}
 	
-	public void setLatestNextPlayableLevelIndex(final int latestNextPlayableLevelIndex){
-		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
+	public void setLatestNextPlayableLevelIdentifier(final String latestNextPlayableLevelIdentifier){
+		this.latestNextPlayableLevelIdentifier=latestNextPlayableLevelIdentifier;
 	}
 	
 	public void setGameStatistics(final GameStatistics gameStats){
@@ -240,7 +240,7 @@ public class GameOverState extends ScenegraphState{
                  {mouseManager.setGrabbed(GrabbedState.NOT_GRABBED);
                   //enables the "next" button if the latest next playable level index seems valid
                   //FIXME use the profile data to check if this level is unlocked
-                  ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIndex>=0);
+                  ((UIButton)initialMenuPanel.getChild(0)).setEnabled(latestNextPlayableLevelIdentifier!=null);
                   //updates the main message
                   final String text=computeMissionAndObjectivesText();
                   textNode.setText(text);
