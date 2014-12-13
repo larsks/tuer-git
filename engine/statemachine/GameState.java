@@ -661,9 +661,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    wasBeingTeleported=true;
                       		    TeleporterUserData teleporterUserData=(TeleporterUserData)teleporterNode.getUserData();
                       		    final Vector3 teleporterDestination=teleporterUserData.getDestination();
-                      		    final int teleporterDestinationLevelIndex=teleporterUserData.getDestinationLevelIndex();
+                      		    final String teleporterDestinationLevelIdentifier=teleporterUserData.getDestinationLevelIdentifier();
                       		    //if the teleporter is in the current level
-                      		    if(level.getIdentifier()==teleporterDestinationLevelIndex)
+                      		    if(level.getIdentifier().equals(teleporterDestinationLevelIdentifier))
                       		        {//then moves the player
                       		    	 playerNode.setTranslation(teleporterDestination);
                       		         //updates the previous location to avoid any problem when detecting the collisions
@@ -687,17 +687,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    		 //updates the status of the current mission
                       		    		 gameStats.setMissionStatus(missionStatus);
                       		    		 //passes the previous location and the next location to the trigger action
-                      		    		 toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
+                      		    		  //FIXME the identifier might not be an integer
+                      		    		 toGameOverTriggerAction.arguments.setPreviousLevelIdentifier(level.getIdentifier());
               		                     toGameOverTriggerAction.perform(null,null,-1);
               		                     if(missionStatus==MissionStatus.COMPLETED)
               		                         {//unlocks the next level
-                      		    		      profileData.addUnlockedLevelIndex(teleporterDestinationLevelIndex);
+                      		    		      profileData.addUnlockedLevelIdentifier(teleporterDestinationLevelIdentifier);
                       		    		      //indicates the next level suggested to the player
-                      		    		      toGameOverTriggerAction.arguments.setNextLevelIndex(teleporterDestinationLevelIndex);
+                      		    		      toGameOverTriggerAction.arguments.setNextLevelIdentifier(teleporterDestinationLevelIdentifier);
               		                    	  getSoundManager().play(false,false,victory1SoundSampleIdentifier);
               		                         }
               		                     else
-              		                    	 {toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
+              		                    	 {toGameOverTriggerAction.arguments.setNextLevelIdentifier(null);
               		                    	  getSoundManager().play(false,false,gameoverSoundSampleIdentifier);
               		                    	 }
                       		            }
@@ -916,13 +917,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                     	  final double y=0.4d-((((double)Math.max(0,Math.min(latestDeathDuration,500000000)))/500000000.0d)*0.4d)+0.1d;
                     	  playerNode.setTranslation(playerNode.getTranslation().getX(),y,playerNode.getTranslation().getZ());
                     	  playerNode.getCamera().setLocation(playerNode.getTranslation());
-                    	  /**
-                    	   * TODO add a mechanism into the entry action of this state to handle the figures of the player
-                    	   */
                     	  if(latestDeathDuration>500000000)
-                    	      {toGameOverTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
+                    	      {toGameOverTriggerAction.arguments.setPreviousLevelIdentifier(level.getIdentifier());
                     	       //the player can't go to the next level when he dies
-                    	       toGameOverTriggerAction.arguments.setNextLevelIndex(-1);
+                    	       toGameOverTriggerAction.arguments.setNextLevelIdentifier(null);
                     		   toGameOverTriggerAction.perform(null,null,-1);
                     	      }
                          }
@@ -1420,35 +1418,41 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         return(weaponFactory);
     }
     
-    protected void setLevelIndex(final int levelIndex){
-    	//TODO use a factory for the enemies
-    	switch(levelIndex)
+    protected void setLevelIdentifier(final String levelIdentifier){
+    	//TODO use a factory for the enemies and the levels
+    	switch(levelIdentifier)
     	{
-    	    case 0:
+    	    case "0":
     	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)};
     	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
     	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
     	         weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level(levelIndex,"LEVEL NAME",enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
-    	    case 1:
+    	    case "1":
     	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
     	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
     	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
    	             weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level(levelIndex,"LEVEL NAME",enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
-    	    default:
-    	    	level=new Level(levelIndex,"LEVEL NAME",null,null,null);
+    	    case "2":
+    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null);
+    	         break;
+    	        }
+    	    case "3":
+    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null);
+	             break;
+	            }
     	}
     }
     
-    public int getLevelIndex(){
-    	return(level.getIdentifier());
+    public String getLevelLabel(){
+    	return(level.getLabel());
     }
     
     /**
@@ -1638,29 +1642,29 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void performInitialBasicSetup(){
-    	if(level.getIdentifier()==0||level.getIdentifier()==1)
+    	if("0".equals(level.getIdentifier())||"1".equals(level.getIdentifier()))
     	    {// the two first levels use a collision map
     		 level.readCollisionMap();
     	    }
         //FIXME it should not be hard-coded
     	//TODO get the location from the argument of the transition
     	switch(level.getIdentifier())
-    	{case 0:
-    	 case 1:
+    	{case "0":
+    	 case "1":
     	     {currentCamLeft.set(-1,0,0);
     		  currentCamUp.set(0,1,0);
     		  currentCamDirection.set(0,0,-1);
     	      currentCamLocation.set(115,0.5,223);
     	      break;
     	     }
-    	 case 2:
+    	 case "2":
     	     {currentCamLeft.set(1,0,0);
    		      currentCamUp.set(0,1,0);
    		      currentCamDirection.set(0,0,1);
     	      currentCamLocation.set(0,0,0);
     	      break;
     	     }
-    	 case 3:
+    	 case "3":
     	     {currentCamLeft.set(1,0,0);
   		      currentCamUp.set(0,1,0);
   		      currentCamDirection.set(0,0,1);
@@ -1691,11 +1695,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 		toPauseMenuTriggerAction.arguments.setGameStatistics(gameStats);
 		toPauseMenuTriggerActionForExitConfirm.arguments.setGameStatistics(gameStats);
 		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
-		toPauseMenuTriggerAction.arguments.setPreviousLevelIndex(level.getIdentifier());
-		toPauseMenuTriggerActionForExitConfirm.arguments.setPreviousLevelIndex(level.getIdentifier());
+		toPauseMenuTriggerAction.arguments.setPreviousLevelIdentifier(level.getIdentifier());
+		toPauseMenuTriggerActionForExitConfirm.arguments.setPreviousLevelIdentifier(level.getIdentifier());
 		//the player cannot go to the next level when leaving or aborting
-		toPauseMenuTriggerAction.arguments.setNextLevelIndex(-1);
-		toPauseMenuTriggerActionForExitConfirm.arguments.setNextLevelIndex(-1);
+		toPauseMenuTriggerAction.arguments.setNextLevelIdentifier(null);
+		toPauseMenuTriggerActionForExitConfirm.arguments.setNextLevelIdentifier(null);
         //resurrects the player
         playerData.respawn();
         //TODO resets the parameters to the latest saved values
@@ -1976,7 +1980,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-    	if(level.getIdentifier()==2||level.getIdentifier()==3)
+    	if("2".equals(level.getIdentifier())||"3".equals(level.getIdentifier()))
     	    {final Skybox skybox=level.loadSkybox();
     	     getRoot().attachChild(skybox);
     	    }
@@ -1985,13 +1989,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final void loadTeleporters(){
     	switch(level.getIdentifier())
     	{
-    	    case 0:
+    	    case "0":
     	        {final Node teleporterNode0=new Node("a teleporter");
     	    	 final Box teleporterBox0=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
     	    	 teleporterBox0.setRandomColors();
     	    	 teleporterNode0.setTranslation(116.5,0,213.5);
     	    	 teleporterNode0.attachChild(teleporterBox0);
-    	    	 teleporterNode0.setUserData(new TeleporterUserData(teleporter,null,1));
+    	    	 teleporterNode0.setUserData(new TeleporterUserData(teleporter,null,"1"));
     	    	 teleportersList.add(teleporterNode0);
                  getRoot().attachChild(teleporterNode0);
                  final Node teleporterNode1=new Node("a teleporter");
@@ -1999,19 +2003,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    	 teleporterBox1.setRandomColors();
     	    	 teleporterNode1.setTranslation(120.5,0,214.5);
     	    	 teleporterNode1.attachChild(teleporterBox1);
-    	    	 teleporterNode1.setUserData(new TeleporterUserData(teleporter,null,1));
+    	    	 teleporterNode1.setUserData(new TeleporterUserData(teleporter,null,"1"));
     	    	 teleportersList.add(teleporterNode1);
                  getRoot().attachChild(teleporterNode1);
     	    	 break;
     	        }
-    	    case 1:
+    	    case "1":
     	    	{final Node teleporterNode=new Node("a teleporter");
     	    	 final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
     	    	 teleporterBox.setRandomColors();
     	    	 teleporterNode.setTranslation(94.5,0,129.5);
     	    	 teleporterNode.attachChild(teleporterBox);
     	    	 //TODO set the destination
-    	    	 teleporterNode.setUserData(new TeleporterUserData(teleporter,null,2));
+    	    	 teleporterNode.setUserData(new TeleporterUserData(teleporter,null,"2"));
     	    	 teleportersList.add(teleporterNode);
                  getRoot().attachChild(teleporterNode);
     	    	 break;
@@ -2045,7 +2049,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	if(level.getIdentifier()==0||level.getIdentifier()==1)
+    	if("0".equals(level.getIdentifier())||"1".equals(level.getIdentifier()))
 	        {final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
              final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();

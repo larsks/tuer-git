@@ -74,9 +74,9 @@ public class PauseMenuState extends ScenegraphState{
     
     private boolean openedForExitConfirm=false;
     
-    private int latestPlayedLevelIndex;
+    private String latestPlayedLevelIdentifier;
     
-    private int latestNextPlayableLevelIndex;
+    private String latestNextPlayableLevelIdentifier;
     
     private GameStatistics gameStats;
     
@@ -94,8 +94,8 @@ public class PauseMenuState extends ScenegraphState{
 		this.toGameTriggerAction=toGameTriggerAction;
 		this.toGameOverTriggerAction=toGameOverTriggerAction;
 		this.toUnloadingDisplayTriggerAction=toUnloadingDisplayTriggerAction;
-		this.latestPlayedLevelIndex=-1;
-		this.latestNextPlayableLevelIndex=-1;
+		this.latestPlayedLevelIdentifier=null;
+		this.latestNextPlayableLevelIdentifier=null;
 		objectivesMenuPanel=createObjectivesMenuPanel();
 		initialMenuPanel=createInitialMenuPanel();
 		objectivesButton=(UIButton)initialMenuPanel.getChild(0);
@@ -231,8 +231,8 @@ public class PauseMenuState extends ScenegraphState{
 	private void onYesAbortButtonActionPerformed(final ActionEvent ae){
 		//passes the objectives but the mission is aborted anyway
 		gameStats.setMissionStatus(MissionStatus.ABORTED);
-		toGameOverTriggerAction.arguments.setPreviousLevelIndex(latestPlayedLevelIndex);
-		toGameOverTriggerAction.arguments.setNextLevelIndex(latestNextPlayableLevelIndex);
+		toGameOverTriggerAction.arguments.setPreviousLevelIdentifier(latestPlayedLevelIdentifier);
+		toGameOverTriggerAction.arguments.setNextLevelIdentifier(latestNextPlayableLevelIdentifier);
 		toGameOverTriggerAction.arguments.setGameStatistics(gameStats);
 		toGameOverTriggerAction.arguments.setObjectives(objectives);
 		toGameOverTriggerAction.perform(null,null,-1);
@@ -276,12 +276,12 @@ public class PauseMenuState extends ScenegraphState{
     	this.openedForExitConfirm=openedForExitConfirm;
     }
     
-    public void setLatestPlayedLevelIndex(final int latestPlayedLevelIndex){
-		this.latestPlayedLevelIndex=latestPlayedLevelIndex;
+    public void setLatestPlayedLevelIdentifier(final String latestPlayedLevelIdentifier){
+		this.latestPlayedLevelIdentifier=latestPlayedLevelIdentifier;
 	}
     
-    public void setLatestNextPlayableLevelIndex(final int latestNextPlayableLevelIndex){
-		this.latestNextPlayableLevelIndex=latestNextPlayableLevelIndex;
+    public void setLatestNextPlayableLevelIdentifier(final String latestNextPlayableLevelIdentifier){
+		this.latestNextPlayableLevelIdentifier=latestNextPlayableLevelIdentifier;
 	}
     
     public void setGameStatistics(final GameStatistics gameStats){

@@ -51,10 +51,12 @@ import engine.weaponry.WeaponFactory;
  *
  */
 public class Level{
-	/**unique identifier, must be greater than or equal to zero*/
-	private final int identifier;
 	/**human readable name*/
-	private final String name;
+	private final String label;
+	/**name of the resource, i.e the binary file containing the 3D model*/
+	private final String resourceName;
+	/**unique identifier, must be greater than or equal to zero*/
+	private final String identifier;
 	/**@deprecated this collision map is a temporary solution, the real collision system will have to use the 3D mesh instead of a flat 2D array*/
     @Deprecated
     private boolean[][] collisionMap;
@@ -73,12 +75,13 @@ public class Level{
     //TODO teleporters, ammo
     private final BinaryImporter binaryImporter;
     
-    public Level(final int identifier,final String name,final ReadOnlyVector3[] enemiesPositions,final ReadOnlyVector3[] medikitsPositions,
+    public Level(final String label,final String resourceName,final String identifier,final ReadOnlyVector3[] enemiesPositions,final ReadOnlyVector3[] medikitsPositions,
     		     final Map<String,ReadOnlyVector3[]> weaponsPositionsMap,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
+    	this.label=label;
+    	this.resourceName=resourceName;
     	this.identifier=identifier;
-    	this.name=name;
     	final List<Objective> localObjectives=new ArrayList<>();
     	if(objectives!=null&&objectives.length>0)
     	    localObjectives.addAll(Arrays.asList(objectives));
@@ -204,7 +207,7 @@ public class Level{
     public Node loadMainModel(){
     	if(mainModel==null)
     	    {//TODO support a custom resource name
-    		 try{mainModel=(Node)binaryImporter.load(getClass().getResource("/abin/LID"+identifier+".abin"));}
+    		 try{mainModel=(Node)binaryImporter.load(getClass().getResource(resourceName));}
 	         catch(IOException ioe)
 	         {throw new RuntimeException("level loading failed",ioe);}
     	    }
@@ -238,12 +241,12 @@ public class Level{
     	return(skybox);
     }
     
-    public int getIdentifier(){
+    public String getIdentifier(){
     	return(identifier);
     }
     
-    public String getName(){
-    	return(name);
+    public String getLabel(){
+    	return(label);
     }
     
     @Deprecated
@@ -262,4 +265,8 @@ public class Level{
     public ReadOnlyVector3[] getMedikitsPositions(){
     	return(medikitsPositions);
     }
+    
+    public final String getResourceName(){
+		return(resourceName);
+	}
 }

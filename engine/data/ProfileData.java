@@ -32,36 +32,36 @@ import engine.statemachine.GameStatistics;
 public class ProfileData{
 	
 	/**
-	 * list of the levels indices that the player unlocks (to which he can go)
+	 * list of the level identifiers that the player unlocks (to which he can go)
 	 * */
-	final Set<Integer> unlockedLevelsIndices;
+	final Set<String> unlockedLevelIdentifiers;
 	
 	/**
 	 * Constructor
 	 */
 	public ProfileData(){
 		super();
-		this.unlockedLevelsIndices=new HashSet<>();
+		this.unlockedLevelIdentifiers=new HashSet<>();
 	}
 
 	/**
 	 * Unlocks a level
 	 * 
-	 * @param levelIndex index of the level to add
-	 * @return <code>true</code> if the index points to a level that wasn't already unlocked before this call, otherwise <code>false</code>
+	 * @param levelIdentifier identifier of the level to add
+	 * @return <code>true</code> if the identifier points to a level that wasn't already unlocked before this call, otherwise <code>false</code>
 	 */
-	public boolean addUnlockedLevelIndex(final int levelIndex){
-		return(unlockedLevelsIndices.add(Integer.valueOf(levelIndex)));
+	public boolean addUnlockedLevelIdentifier(final String levelIdentifier){
+		return(unlockedLevelIdentifiers.add(levelIdentifier));
 	}
 	
 	/**
 	 * Tells whether a level is unlocked
 	 * 
-	 * @param levelIndex index of the level
-	 * @return <code>true</code> if the index points to an unlocked level, otherwise <code>false</code>
+	 * @param levelIdentifier identifier of the level
+	 * @return <code>true</code> if the identifier points to an unlocked level, otherwise <code>false</code>
 	 */
-	public boolean containsUnlockedLevelIndex(final int levelIndex){
-		return(unlockedLevelsIndices.contains(Integer.valueOf(levelIndex)));
+	public boolean containsUnlockedLevelIdentifier(final String levelIdentifier){
+		return(unlockedLevelIdentifiers.contains(levelIdentifier));
 	}
 	
 	/**
@@ -79,8 +79,8 @@ public class ProfileData{
 	
 	public void load(){
 		//unlocks at least the first level
-		//FIXME the index of the first level shouldn't be hardcoded
-		unlockedLevelsIndices.add(Integer.valueOf(0));
+		//FIXME the identifier of the first level shouldn't be hardcoded
+		unlockedLevelIdentifiers.add("0");
 		//TODO if the file exists, use it to get the unlocked levels
 	}
 }

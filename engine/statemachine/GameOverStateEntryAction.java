@@ -37,13 +37,13 @@ public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
 	@Override
     public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
 		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-		final int latestPlayedLevelIndex=sttaArgs.getPreviousLevelIndex();
-		final int latestNextPlayableLevelIndex=sttaArgs.getNextLevelIndex();
+		final String latestPlayedLevelIdentifier=sttaArgs.getPreviousLevelIdentifier();
+		final String latestNextPlayableLevelIdentifier=sttaArgs.getNextLevelIdentifier();
 		final GameStatistics gameStats=sttaArgs.getGameStatistics();
 		final List<Objective> objectives=sttaArgs.getObjectives();
 		final GameOverState gameOverState=(GameOverState)to;
-		gameOverState.setLatestPlayedLevelIndex(latestPlayedLevelIndex);
-		gameOverState.setLatestNextPlayableLevelIndex(latestNextPlayableLevelIndex);
+		gameOverState.setLatestPlayedLevelIdentifier(latestPlayedLevelIdentifier);
+		gameOverState.setLatestNextPlayableLevelIdentifier(latestNextPlayableLevelIdentifier);
 		gameOverState.setGameStatistics(gameStats);
 		gameOverState.setObjectives(objectives);
 		super.onTransition(from,to,cause,args,stateMachine);

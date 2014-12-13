@@ -185,33 +185,33 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createStoryModePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
         final UIPanel storyModePanel=new UIPanel(new RowLayout(false));
-        //FIXME stop hardcoding the level indices, use getClass().getResource("/abin/LID"+levelIndex+".abin")?
-        final LevelUIButton level0Button=new LevelUIButton("Tutorial",0);
+        //FIXME stop hardcoding the level identifiers, use the level factory
+        final LevelUIButton level0Button=new LevelUIButton("Tutorial","0");
         level0Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onLevelButtonActionPerformed(ae,0);
+            	onLevelButtonActionPerformed(ae,"0");
             }
         });
-        final LevelUIButton level1Button=new LevelUIButton("Museum",1);
+        final LevelUIButton level1Button=new LevelUIButton("Museum","1");
         level1Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onLevelButtonActionPerformed(ae,1);
+            	onLevelButtonActionPerformed(ae,"1");
             }
         });
-        final LevelUIButton level2Button=new LevelUIButton("Outdoor",2);
+        final LevelUIButton level2Button=new LevelUIButton("Outdoor","2");
         level2Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onLevelButtonActionPerformed(ae,2);
+            	onLevelButtonActionPerformed(ae,"2");
             }
         });
-        final LevelUIButton level3Button=new LevelUIButton("Bagnolet",3);
+        final LevelUIButton level3Button=new LevelUIButton("Bagnolet","3");
         level3Button.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
-            	onLevelButtonActionPerformed(ae,3);
+            	onLevelButtonActionPerformed(ae,"3");
             }
         });
         final UIButton backButton=new UIButton("Back");
@@ -231,11 +231,11 @@ public final class MainMenuState extends ScenegraphState{
     
     private static final class LevelUIButton extends UIButton{
     	
-    	private final int levelIndex;
+    	private final String levelIdentifier;
     	
-    	private LevelUIButton(final String text,final int levelIndex){
+    	private LevelUIButton(final String text,final String levelIdentifier){
     		super(text);
-    		this.levelIndex=levelIndex;
+    		this.levelIdentifier=levelIdentifier;
     	}
     }
     
@@ -243,13 +243,13 @@ public final class MainMenuState extends ScenegraphState{
     	for(Spatial child:this.storyModePanel.getChildren())
     		if(child instanceof LevelUIButton)
     	        {final LevelUIButton levelButton=(LevelUIButton)child;
-    	         final boolean enabled=profileData.containsUnlockedLevelIndex(levelButton.levelIndex);
+    	         final boolean enabled=profileData.containsUnlockedLevelIdentifier(levelButton.levelIdentifier);
     	         levelButton.setEnabled(enabled);
     	        }
     }
     
-    private void onLevelButtonActionPerformed(final ActionEvent ae,final int levelIndex){
-    	toLoadingDisplayAction.arguments.setNextLevelIndex(levelIndex);
+    private void onLevelButtonActionPerformed(final ActionEvent ae,final String levelIdentifier){
+    	toLoadingDisplayAction.arguments.setNextLevelIdentifier(levelIdentifier);
     	toLoadingDisplayAction.perform(null,null,-1);
     }
     
