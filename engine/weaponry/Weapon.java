@@ -19,8 +19,10 @@ package engine.weaponry;
 
 import engine.data.common.Collectible;
 
-public final class Weapon extends Collectible implements Comparable<Weapon>{
+public class Weapon extends Collectible implements Comparable<Weapon>{
 	
+	/**unique name*/
+    private final String identifier;
 	/**name of the resource, i.e the binary file containing the 3D model*/
 	private final String resourceName;
     /**path of the sound sample played during a shot or a blow*/
@@ -31,8 +33,6 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
     private final String reloadSoundSamplePath;
     /**source name of the sound sample played during a reload*/
     private String reloadSoundSampleIdentifier;
-    /**unique name*/
-    private final String identifier;
     /**flag indicating whether a weapon can be used in both hands*/
     private final boolean twoHanded;
 	/**size of the magazine, -1 for melee weapons*/
@@ -50,22 +50,22 @@ public final class Weapon extends Collectible implements Comparable<Weapon>{
 	 * */
 	private final boolean fullyAutomatic;
 	//TODO store the duration necessary to reload
-	//TODO: template node for cloning without I/O interruption, lazily instantiated
+	//TODO: store the template node for cloning without I/O interruption, lazily instantiated, but into another class
 	    
-	public Weapon(final String label,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final String identifier,final boolean twoHanded,final int magazineSize,
+	public Weapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		super(label,pickingUpSoundSamplePath);
+		this.identifier=identifier;
+		this.resourceName=resourceName;
 		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
 		this.reloadSoundSamplePath=reloadSoundSamplePath;
-		this.identifier=identifier;
 		this.twoHanded=twoHanded;
 		this.magazineSize=magazineSize;
 		this.ammunition=ammunition;
 		this.ammunitionPerShot=ammunitionPerShot;
 		this.blowOrShotDurationInMillis=blowOrShotDurationInMillis;
 		this.fullyAutomatic=fullyAutomatic;
-		this.resourceName=resourceName;
 	}
 	
 	/**
