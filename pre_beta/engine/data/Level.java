@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.ardor3d.extension.model.util.KeyframeController;
+import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
@@ -33,7 +35,9 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
+import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
@@ -41,6 +45,8 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
+import engine.misc.MD2FrameSet;
+import engine.misc.NodeHelper;
 import engine.weaponry.Weapon;
 import engine.weaponry.WeaponFactory;
 
@@ -62,21 +68,21 @@ public class Level{
     private boolean[][] collisionMap;
     /**objectives of the mission*/
     private final List<Objective> objectives;
-    /**positions of the enemies*///TODO handle several kinds of enemy, use a map, load the template nodes
-    private final ReadOnlyVector3[] enemiesPositions;
+    /**positions of the enemies*///TODO load the template nodes
+    private final Map<String,ReadOnlyVector3[]> enemyPositionsMap;
     /**positions of the medikits*///TODO handle several kinds of medikit
-    private final ReadOnlyVector3[] medikitsPositions;
+    private final ReadOnlyVector3[] medikitPositions;
     /**root node whose hierarchy contains the geometry of the main model*/
     private Node mainModel;
     /**sky box*/
     private Skybox skybox;
-    /**map of the weapons positions sorted by type*/
-    private final Map<String,ReadOnlyVector3[]> weaponsPositionsMap;
+    /**map of the weapon positions sorted by type*/
+    private final Map<String,ReadOnlyVector3[]> weaponPositionsMap;
     //TODO teleporters, ammo
     private final BinaryImporter binaryImporter;
     
-    public Level(final String label,final String resourceName,final String identifier,final ReadOnlyVector3[] enemiesPositions,final ReadOnlyVector3[] medikitsPositions,
-    		     final Map<String,ReadOnlyVector3[]> weaponsPositionsMap,final Objective... objectives){
+    public Level(final String label,final String resourceName,final String identifier,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
+    		     final ReadOnlyVector3[] medikitPositions,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
     	this.label=label;
@@ -86,9 +92,9 @@ public class Level{
     	if(objectives!=null&&objectives.length>0)
     	    localObjectives.addAll(Arrays.asList(objectives));
     	this.objectives=Collections.unmodifiableList(localObjectives);
-    	this.enemiesPositions=enemiesPositions;
-    	this.medikitsPositions=medikitsPositions;
-    	this.weaponsPositionsMap=weaponsPositionsMap==null?null:Collections.unmodifiableMap(weaponsPositionsMap);
+    	this.enemyPositionsMap=enemyPositionsMap;
+    	this.medikitPositions=medikitPositions;
+    	this.weaponPositionsMap=weaponPositionsMap;
     }
     
     @Deprecated
@@ -105,8 +111,81 @@ public class Level{
 	    		}
     }
     
-    public List<Node> loadWeaponsModels(final WeaponFactory weaponFactory){
-    	final List<Node> weaponsNodes=new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public List<Mesh> loadEnemyModels(final EnemyFactory enemyFactory){
+    	final List<Mesh> enemyMeshes=new ArrayList<>();
+    	final int enemyCount=enemyFactory.getSize();
+        for(int enemyIndex=0;enemyIndex<enemyCount;enemyIndex++)
+            {final Enemy enemy=enemyFactory.get(enemyIndex);
+             final String enemyIdentifier=enemy.getIdentifier();
+             final String enemyResourceName=enemy.getResourceName();
+             final ReadOnlyVector3[] enemiesPos=enemyPositionsMap.get(enemyIdentifier);
+             if(enemiesPos!=null&&enemiesPos.length!=0)
+	             try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
+	                 weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	                 weaponNodeTemplate.setScale(0.015);
+                     //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
+                     NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
+                     weaponNodeTemplate.updateModelBound();
+                     weaponNodeTemplate.updateWorldBound(true);
+                     final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
+                     for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
+                         {pit._newShape.setScale(0.015);
+                          pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                          NodeHelper.applyTransformToMeshData(pit._newShape);
+                          pit._newShape.updateModelBound();
+                          pit._newShape.updateWorldBound(true);
+                         }
+	    	         final Mesh enemyNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource(enemyResourceName));
+	    	         enemyNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	    	         enemyNodeTemplate.setScale(0.015);
+	    	         NodeHelper.applyTransformToMeshData(enemyNodeTemplate);
+	    	         enemyNodeTemplate.updateModelBound();
+	    	         enemyNodeTemplate.updateWorldBound(true);
+	    	         final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)enemyNodeTemplate.getController(0);
+	    	         for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
+	    	             {pit._newShape.setScale(0.015);
+                          pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                          NodeHelper.applyTransformToMeshData(pit._newShape);
+                          pit._newShape.updateModelBound();
+                          pit._newShape.updateWorldBound(true);
+	    	             }
+	                 for(ReadOnlyVector3 enemyPos:enemiesPos)
+	                     {final Mesh enemyNode=NodeHelper.makeCopy(enemyNodeTemplate,true);
+	        	          enemyNode.setName("enemy@"+enemyNode.hashCode());
+                          enemyNode.setTranslation(enemyPos);
+                          final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyNode.getController(0);
+                          enemyKeyframeController.setUpdateBounding(true);
+                          //loops on all frames of the set in the supplied time frame
+                          enemyKeyframeController.setRepeatType(RepeatType.WRAP);
+                          //uses the "stand" animation
+                          enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                          enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                          enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                          enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                          final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
+                          weaponNode.setName("weapon of "+enemyNode.getName());
+                          weaponNode.setTranslation(enemyPos);
+                          final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
+                          //loops on all frames of the set in the supplied time frame
+                          weaponKeyframeController.setRepeatType(RepeatType.WRAP);
+                          //uses the "stand" animation
+                          weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                          weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                          weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                          weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                          enemyMeshes.add(enemyNode);
+                          enemyMeshes.add(weaponNode);
+	                     }
+	                }
+	             catch(IOException ioe)
+	             {throw new RuntimeException("enemies loading failed",ioe);}
+            }
+        return(enemyMeshes);
+    }
+    
+    public List<Node> loadWeaponModels(final WeaponFactory weaponFactory){
+    	final List<Node> weaponNodes=new ArrayList<>();
     	//N.B: only show working weapons
 	    try{/*uziNode.setTranslation(111.5,0.15,219);
             smachNode.setTranslation(112.5,0.15,219);
@@ -123,7 +202,7 @@ public class Level{
             	 final String weaponIdentifier=weapon.getIdentifier();
             	 final String weaponResourceName=weapon.getResourceName();
             	 final String weaponLabel=weapon.getLabel();
-            	 final ReadOnlyVector3[] weaponsPos=weaponsPositionsMap.get(weaponIdentifier);
+            	 final ReadOnlyVector3[] weaponsPos=weaponPositionsMap.get(weaponIdentifier);
             	 if(weaponsPos!=null&&weaponsPos.length!=0)
             	     {final Node weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource(weaponResourceName));
             	      weaponTemplateNode.setName(weaponLabel);
@@ -194,20 +273,19 @@ public class Level{
             		      {final Node weaponNode=weaponTemplateNode.makeCopy(false);
             		       weaponNode.setTranslation(weaponPos);
             		       weaponNode.setUserData(new WeaponUserData(weapon,new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
-            		       weaponsNodes.add(weaponNode);
+            		       weaponNodes.add(weaponNode);
             		      }
             	     }
                 }
 	       }
 	    catch(IOException ioe)
 	    {throw new RuntimeException("weapons loading failed",ioe);}
-	    return(weaponsNodes);
+	    return(weaponNodes);
     }
     
     public Node loadMainModel(){
     	if(mainModel==null)
-    	    {//TODO support a custom resource name
-    		 try{mainModel=(Node)binaryImporter.load(getClass().getResource(resourceName));}
+    	    {try{mainModel=(Node)binaryImporter.load(getClass().getResource(resourceName));}
 	         catch(IOException ioe)
 	         {throw new RuntimeException("level loading failed",ioe);}
     	    }
@@ -258,12 +336,12 @@ public class Level{
     	return(objectives);
     }
     
-    public ReadOnlyVector3[] getEnemiesPositions(){
-    	return(enemiesPositions);
+    public Map<String,ReadOnlyVector3[]> getEnemyPositionsMap(){
+    	return(enemyPositionsMap);
     }
     
-    public ReadOnlyVector3[] getMedikitsPositions(){
-    	return(medikitsPositions);
+    public ReadOnlyVector3[] getMedikitPositions(){
+    	return(medikitPositions);
     }
     
     public final String getResourceName(){

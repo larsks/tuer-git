@@ -15,25 +15,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package engine.weaponry;
+package engine.data;
 
 import engine.abstraction.AbstractFactory;
 
-public final class WeaponFactory extends AbstractFactory<Weapon>{
-	
-	public WeaponFactory(){
+public class EnemyFactory extends AbstractFactory<Enemy>{
+
+	public EnemyFactory(){
 		super();
-	}	
+	}
 	
-	public final boolean addNewWeapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,
-			final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,
-			final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int blowOrShotDurationInMillis,
-			final boolean fullyAutomatic){
+	public final boolean addNewEnemy(final String label,final String identifier,final String resourceName,final String[] painSoundSamplePaths){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final Weapon weapon=new Weapon(label,identifier,resourceName,pickingUpSoundSamplePath,blowOrShotSoundSamplePath,reloadSoundSamplePath,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
-			 success=add(identifier,weapon);
-			}
+		    {final Enemy enemy=new Enemy(label,identifier,resourceName,painSoundSamplePaths);
+			 success=add(identifier,enemy);
+		    }
 		return(success);
 	}
 }

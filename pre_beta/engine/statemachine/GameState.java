@@ -17,7 +17,6 @@
  */
 package engine.statemachine;
 
-import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
-import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
@@ -82,10 +80,11 @@ import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
-import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+import engine.data.Enemy;
 import engine.data.EnemyData;
+import engine.data.EnemyFactory;
 import engine.data.Level;
 import engine.data.Objective;
 import engine.data.ObjectiveStatus;
@@ -151,14 +150,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText objectivesDisplayLabel;
     /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
+    /**instance that creates all enemies*/
+    private final EnemyFactory enemyFactory;
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
     /**timer that can be paused and used to measure the elapsed time*/
     private final ApplicativeTimer timer;
     
     private final TaskManager taskManager;
-    
-    private final BinaryImporter binaryImporter;
     
     private final Map<Node,ProjectileData> projectilesMap;
     
@@ -212,7 +211,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private static final String enemyShotgunShotSamplePath="/sounds/shotgun_shot.ogg";
     
-    private static String enemyShotgunShotSampleIdentifier = null;
+    private static String enemyShotgunShotSampleIdentifier=null;
     
     private WireframeState wireframeState;
     
@@ -302,7 +301,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         projectileDataOpponentsComparator=new ProjectileDataOpponentsComparator();
         enemiesDataMap=new HashMap<>();
         enemiesLatestDetection=new HashMap<>();
-        this.binaryImporter=new BinaryImporter();
         this.taskManager=taskManager;
         timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<>();
@@ -310,8 +308,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         teleportersList=new ArrayList<>();        
         teleporter=initializeTeleporter();
         medikit=initializeMedikit();
-        //initializes the factories, the build-in ammo and the build-in weapons       
+        //initializes the factories, the build-in ammo and the build-in weapons
+        initializeLevelFactory();
         ammunitionFactory=initializeAmmunitionFactory();
+        enemyFactory=initializeEnemyFactory();
         weaponFactory=initializeWeaponFactory();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
@@ -802,8 +802,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                                              }
                                          //plays a sound if the enemy is not dead
                                          final double healthFactor=Math.max(0.0d,Math.min((double)soldierData.getHealth(),100.0d))/100.0d;
-                                         final int painSoundSampleIndex=painSoundSampleIdentifiers.length-1-Math.max(0,Math.min((int)Math.rint(Math.floor(healthFactor*(double)painSoundSampleIdentifiers.length)),painSoundSampleIdentifiers.length-1));
-                                         getSoundManager().play(false,false,painSoundSampleIdentifiers[painSoundSampleIndex]);
+                                         //FIXME store the identifier into another data structure within this state
+                                         final Enemy enemy=enemyFactory.get("SOLDIER");
+                                         final int painSoundSampleCount=enemy.getPainSoundSampleCount();
+                                         final int painSoundSampleIndex=painSoundSampleCount-1-Math.max(0,Math.min((int)Math.rint(Math.floor(healthFactor*(double)painSoundSampleCount)),painSoundSampleCount-1));
+                                         final String painSoundSampleIdentifier=enemy.getPainSoundSampleIdentifier(painSoundSampleIndex);
+                                         getSoundManager().play(false,false,painSoundSampleIdentifier);
                                         }
                             	    //FIXME only remove the projectile if it doesn't pass through the enemy
                                     projectilesToRemove.add(projectileNode);
@@ -1386,6 +1390,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	return(medikit);
     }
     
+    private final EnemyFactory initializeEnemyFactory(){
+    	final EnemyFactory enemyFactory=new EnemyFactory();
+    	enemyFactory.addNewEnemy("soldier","SOLDIER","/abin/soldier.abin",new String[]{"/sounds/pain1.ogg","/sounds/pain2.ogg","/sounds/pain3.ogg","/sounds/pain4.ogg","/sounds/pain5.ogg","/sounds/pain6.ogg"});
+    	return(enemyFactory);
+    }
+    
+    private final void initializeLevelFactory(){
+    	//TODO split the Level class into 2 classes so that the builder manages the models
+    }
+    
     private final AmmunitionFactory initializeAmmunitionFactory(){
     	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
@@ -1407,37 +1421,39 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final WeaponFactory initializeWeaponFactory(){
     	final WeaponFactory weaponFactory=new WeaponFactory();                       
-        weaponFactory.addNewWeapon("a pistol (9mm)","/abin/pistol2.abin","/sounds/pickup_weapon.ogg","/sounds/pistol9mm_shot.ogg","/sounds/pistol9mm_reload.ogg","PISTOL_9MM",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
-        weaponFactory.addNewWeapon("a pistol (10mm)","/abin/pistol.abin","/sounds/pickup_weapon.ogg",null,null,"PISTOL_10MM",true,10,ammunitionFactory.get("BULLET_10MM"),1,500,true);
-        weaponFactory.addNewWeapon("a Mag 60","/abin/pistol3.abin","/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg","MAG_60",true,30,ammunitionFactory.get("BULLET_9MM"),1,100,true);
-        weaponFactory.addNewWeapon("an uzi","/abin/uzi.abin","/sounds/pickup_weapon.ogg",null,null,"UZI",true,20,ammunitionFactory.get("BULLET_9MM"),1,100,true);
-        weaponFactory.addNewWeapon("a smach","/abin/smach.abin","/sounds/pickup_weapon.ogg",null,null,"SMACH",true,35,ammunitionFactory.get("BULLET_5_56MM"),1,100,true);
-        weaponFactory.addNewWeapon("a laser","/abin/laser.abin","/sounds/pickup_weapon.ogg",null,null,"LASER",true,15,ammunitionFactory.get("ENERGY_CELL"),1,1000,false);
-        weaponFactory.addNewWeapon("a shotgun","/abin/shotgun.abin","/sounds/pickup_weapon.ogg",null,null,"SHOTGUN",false,3,ammunitionFactory.get("CARTRIDGE"),1,1500,false);
-        weaponFactory.addNewWeapon("a rocket launcher","/abin/rocketlauncher.abin","/sounds/pickup_weapon.ogg",null,null,"ROCKET_LAUNCHER",false,1,ammunitionFactory.get("ANTI_TANK_ROCKET_105MM"),1,2000,false);
+        weaponFactory.addNewWeapon("a pistol (9mm)","PISTOL_9MM","/abin/pistol2.abin","/sounds/pickup_weapon.ogg","/sounds/pistol9mm_shot.ogg","/sounds/pistol9mm_reload.ogg",true,8,ammunitionFactory.get("BULLET_9MM"),1,500,true);
+        weaponFactory.addNewWeapon("a pistol (10mm)","PISTOL_10MM","/abin/pistol.abin","/sounds/pickup_weapon.ogg",null,null,true,10,ammunitionFactory.get("BULLET_10MM"),1,500,true);
+        weaponFactory.addNewWeapon("a Mag 60","MAG_60","/abin/pistol3.abin","/sounds/pickup_weapon.ogg","/sounds/mag60_shot.ogg","/sounds/mag60_reload.ogg",true,30,ammunitionFactory.get("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("an uzi","UZI","/abin/uzi.abin","/sounds/pickup_weapon.ogg",null,null,true,20,ammunitionFactory.get("BULLET_9MM"),1,100,true);
+        weaponFactory.addNewWeapon("a smach","SMACH","/abin/smach.abin","/sounds/pickup_weapon.ogg",null,null,true,35,ammunitionFactory.get("BULLET_5_56MM"),1,100,true);
+        weaponFactory.addNewWeapon("a laser","LASER","/abin/laser.abin","/sounds/pickup_weapon.ogg",null,null,true,15,ammunitionFactory.get("ENERGY_CELL"),1,1000,false);
+        weaponFactory.addNewWeapon("a shotgun","SHOTGUN","/abin/shotgun.abin","/sounds/pickup_weapon.ogg",null,null,false,3,ammunitionFactory.get("CARTRIDGE"),1,1500,false);
+        weaponFactory.addNewWeapon("a rocket launcher","ROCKET_LAUNCHER","/abin/rocketlauncher.abin","/sounds/pickup_weapon.ogg",null,null,false,1,ammunitionFactory.get("ANTI_TANK_ROCKET_105MM"),1,2000,false);
         return(weaponFactory);
     }
     
     protected void setLevelIdentifier(final String levelIdentifier){
-    	//TODO use a factory for the enemies and the levels
+    	//TODO use a factory for the levels
     	switch(levelIdentifier)
     	{
     	    case "0":
-    	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)};
-    	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
-    	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
+    	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)});
+    	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final Map<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
     	         weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
-    	        {final ReadOnlyVector3[] enemiesPositions=new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)};
-    	         final ReadOnlyVector3[] medikitsPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
-    	         final HashMap<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
+    	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
+    	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)});
+    	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final Map<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
     	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
    	             weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemiesPositions,medikitsPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
@@ -1480,6 +1496,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
        				       ammo.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
        		          }
        	         }
+            }
+        final int enemyCount=enemyFactory.getSize();
+        for(int enemyIndex=0;enemyIndex<enemyCount;enemyIndex++)
+            {final Enemy enemy=enemyFactory.get(enemyIndex);
+        	 final int painSoundSampleCount=enemy.getPainSoundSampleCount();
+        	 for(int painSoundSampleIndex=0;painSoundSampleIndex<painSoundSampleCount;painSoundSampleIndex++)
+        	     {final String painSoundSamplePath=enemy.getPainSoundSamplePath(painSoundSampleIndex);
+        		  if(painSoundSamplePath!=null)
+        		      {final URL painSoundSampleUrl=GameState.class.getResource(painSoundSamplePath);
+        			   if(painSoundSampleUrl!=null)
+        			       {final String painSoundSampleIdentifier=getSoundManager().loadSound(painSoundSampleUrl);
+        				    if(painSoundSampleIdentifier!=null)
+        				        enemy.setPainSoundSampleIdentifier(painSoundSampleIndex,painSoundSampleIdentifier);
+        			       }
+        		      }
+        	     }
             }
         final int weaponCount=weaponFactory.getSize();
         for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
@@ -1566,6 +1598,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
        				       ammo.setPickingUpSoundSampleIdentifier(null);
        		          }
        	         }
+            }
+        final int enemyCount=enemyFactory.getSize();
+        for(int enemyIndex=0;enemyIndex<enemyCount;enemyIndex++)
+            {final Enemy enemy=enemyFactory.get(enemyIndex);
+        	 final int painSoundSampleCount=enemy.getPainSoundSampleCount();
+        	 for(int painSoundSampleIndex=0;painSoundSampleIndex<painSoundSampleCount;painSoundSampleIndex++)
+        	     {final String painSoundSamplePath=enemy.getPainSoundSamplePath(painSoundSampleIndex);
+        		  if(painSoundSamplePath!=null)
+        		      {final URL painSoundSampleUrl=GameState.class.getResource(painSoundSamplePath);
+        			   if(painSoundSampleUrl!=null)
+        			       {getSoundManager().unloadSound(painSoundSampleUrl);
+        				    if(enemy.getPainSoundSampleIdentifier(painSoundSampleIndex)!=null)
+        				        enemy.setPainSoundSampleIdentifier(painSoundSampleIndex,null);
+        			       }
+        		      }
+        	     }
             }
         final int weaponCount=weaponFactory.getSize();
         for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
@@ -2024,13 +2072,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	final ReadOnlyVector3[] medikitsPositions=level.getMedikitsPositions();
-    	if(medikitsPositions!=null&&medikitsPositions.length!=0)
+    	final ReadOnlyVector3[] medikitPositions=level.getMedikitPositions();
+    	if(medikitPositions!=null&&medikitPositions.length!=0)
     	    {final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
              final TextureState ts = new TextureState();
              ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
              medikitBox.setRenderState(ts);
-             for(final ReadOnlyVector3 medikitPos:medikitsPositions)
+             for(final ReadOnlyVector3 medikitPos:medikitPositions)
                  {final Node medikitNode=new Node("a medikit");
             	  medikitNode.setTranslation(medikitPos);
                   medikitNode.attachChild(medikitBox);
@@ -2042,9 +2090,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadWeapons(){
-    	final List<Node> weaponsNodes=level.loadWeaponsModels(weaponFactory);
-	    collectibleObjectsList.addAll(weaponsNodes);
-	    for(final Node weaponNode:weaponsNodes)
+    	final List<Node> weaponNodes=level.loadWeaponModels(weaponFactory);
+	    collectibleObjectsList.addAll(weaponNodes);
+	    for(final Node weaponNode:weaponNodes)
 	    	getRoot().attachChild(weaponNode);
     }
     
@@ -2063,71 +2111,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 	        }
     }
     
-    @SuppressWarnings("unchecked")
-	private final void loadEnemies(){
-    	final ReadOnlyVector3[] soldiersPos=level.getEnemiesPositions();
-    	if(soldiersPos!=null&&soldiersPos.length!=0)
-	        try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
-	            weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	            weaponNodeTemplate.setScale(0.015);
-                //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
-                NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
-                weaponNodeTemplate.updateModelBound();
-                weaponNodeTemplate.updateWorldBound(true);
-                final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
-                for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
-                    {pit._newShape.setScale(0.015);
-                     pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                     NodeHelper.applyTransformToMeshData(pit._newShape);
-                     pit._newShape.updateModelBound();
-                     pit._newShape.updateWorldBound(true);
-                    }
-	    	    final Mesh soldierNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/soldier.abin"));
-	    	    soldierNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	    	    soldierNodeTemplate.setScale(0.015);
-	    	    NodeHelper.applyTransformToMeshData(soldierNodeTemplate);
-	    	    soldierNodeTemplate.updateModelBound();
-	    	    soldierNodeTemplate.updateWorldBound(true);
-	    	    final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)soldierNodeTemplate.getController(0);
-	    	    for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
-	    	        {pit._newShape.setScale(0.015);
-                     pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                     NodeHelper.applyTransformToMeshData(pit._newShape);
-                     pit._newShape.updateModelBound();
-                     pit._newShape.updateWorldBound(true);
-	    	        }
-	            for(ReadOnlyVector3 soldierPos:soldiersPos)
-	                {final Mesh soldierNode=NodeHelper.makeCopy(soldierNodeTemplate,true);
-	        	     soldierNode.setName("enemy@"+soldierNode.hashCode());
-                     soldierNode.setTranslation(soldierPos);
-                     final KeyframeController<Mesh> soldierKeyframeController=(KeyframeController<Mesh>)soldierNode.getController(0);
-                     soldierKeyframeController.setUpdateBounding(true);
-                     //loops on all frames of the set in the supplied time frame
-                     soldierKeyframeController.setRepeatType(RepeatType.WRAP);
-                     //uses the "stand" animation
-                     soldierKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                     soldierKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                     soldierKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                     soldierKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                     getRoot().attachChild(soldierNode);
-                     final EnemyData soldierData=new EnemyData();
-                     enemiesDataMap.put(soldierNode,soldierData);
-                     final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
-                     weaponNode.setName("weapon of "+soldierNode.getName());
-                     weaponNode.setTranslation(soldierPos);
-                     final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
-                     //loops on all frames of the set in the supplied time frame
-                     weaponKeyframeController.setRepeatType(RepeatType.WRAP);
-                     //uses the "stand" animation
-                     weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                     weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                     weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                     weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                     getRoot().attachChild(weaponNode);
-	                }
-	           }
-	        catch(IOException ioe)
-	        {throw new RuntimeException("enemies loading failed",ioe);}
+    private final void loadEnemies(){
+    	final List<Mesh> enemyMeshes=level.loadEnemyModels(enemyFactory);
+    	//TODO separate the body and the weapon(s)
+    	boolean isEnemyWeaponMesh=false;
+        for(final Mesh enemyMesh:enemyMeshes)
+            {getRoot().attachChild(enemyMesh);
+             if(!isEnemyWeaponMesh)
+                 {final EnemyData enemyData=new EnemyData();
+                  enemiesDataMap.put(enemyMesh,enemyData);
+                 }
+             isEnemyWeaponMesh=!isEnemyWeaponMesh;
+            }
     }
     
     private final void preloadTextures(){

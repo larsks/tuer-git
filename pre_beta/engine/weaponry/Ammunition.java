@@ -24,7 +24,7 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	/**unique name (cannot contain any space)*/
     private final String identifier;
 	
-    Ammunition(final String label,final String identifier,final String pickingUpSoundSamplePath){
+    public Ammunition(final String label,final String identifier,final String pickingUpSoundSamplePath){
     	super(label,pickingUpSoundSamplePath);
     	this.identifier=identifier;
     }
