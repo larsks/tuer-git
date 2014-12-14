@@ -122,88 +122,94 @@ public class Level{
     
     @SuppressWarnings("unchecked")
     public List<Mesh> loadEnemyModels(final EnemyFactory enemyFactory){
-    	final List<Mesh> enemyMeshes=new ArrayList<>();
-    	final int enemyCount=enemyFactory.getSize();
-        for(int enemyIndex=0;enemyIndex<enemyCount;enemyIndex++)
-            {final Enemy enemy=enemyFactory.get(enemyIndex);
-             final String enemyIdentifier=enemy.getIdentifier();
-             final String enemyResourceName=enemy.getResourceName();
-             final ReadOnlyVector3[] enemiesPos=enemyPositionsMap.get(enemyIdentifier);
-             if(enemiesPos!=null&&enemiesPos.length!=0)
-	             try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
-	                 weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	                 weaponNodeTemplate.setScale(0.015);
-                     //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
-                     NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
-                     weaponNodeTemplate.updateModelBound();
-                     weaponNodeTemplate.updateWorldBound(true);
-                     final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
-                     for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
-                         {pit._newShape.setScale(0.015);
-                          pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                          NodeHelper.applyTransformToMeshData(pit._newShape);
-                          pit._newShape.updateModelBound();
-                          pit._newShape.updateWorldBound(true);
-                         }
-	    	         final Mesh enemyNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource(enemyResourceName));
-	    	         enemyNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-	    	         enemyNodeTemplate.setScale(0.015);
-	    	         NodeHelper.applyTransformToMeshData(enemyNodeTemplate);
-	    	         enemyNodeTemplate.updateModelBound();
-	    	         enemyNodeTemplate.updateWorldBound(true);
-	    	         final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)enemyNodeTemplate.getController(0);
-	    	         for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
-	    	             {pit._newShape.setScale(0.015);
-                          pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
-                          NodeHelper.applyTransformToMeshData(pit._newShape);
-                          pit._newShape.updateModelBound();
-                          pit._newShape.updateWorldBound(true);
-	    	             }
-	                 for(ReadOnlyVector3 enemyPos:enemiesPos)
-	                     {final Mesh enemyNode=NodeHelper.makeCopy(enemyNodeTemplate,true);
-	        	          enemyNode.setName("enemy@"+enemyNode.hashCode());
-                          enemyNode.setTranslation(enemyPos);
-                          final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyNode.getController(0);
-                          enemyKeyframeController.setUpdateBounding(true);
-                          //loops on all frames of the set in the supplied time frame
-                          enemyKeyframeController.setRepeatType(RepeatType.WRAP);
-                          //uses the "stand" animation
-                          enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                          enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                          enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                          enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                          final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
-                          weaponNode.setName("weapon of "+enemyNode.getName());
-                          weaponNode.setTranslation(enemyPos);
-                          final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
-                          //loops on all frames of the set in the supplied time frame
-                          weaponKeyframeController.setRepeatType(RepeatType.WRAP);
-                          //uses the "stand" animation
-                          weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
-                          weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                          weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
-                          weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
-                          enemyMeshes.add(enemyNode);
-                          enemyMeshes.add(weaponNode);
-	                     }
-	                }
-	             catch(IOException ioe)
-	             {throw new RuntimeException("enemies loading failed",ioe);}
-            }
+    	List<Mesh> enemyMeshes=null;
+    	if(enemyPositionsMap!=null&&!enemyPositionsMap.isEmpty())
+    	    {final int enemyCount=enemyFactory.getSize();
+             for(int enemyIndex=0;enemyIndex<enemyCount;enemyIndex++)
+                 {final Enemy enemy=enemyFactory.get(enemyIndex);
+                  final String enemyIdentifier=enemy.getIdentifier();
+                  final String enemyResourceName=enemy.getResourceName();
+                  final ReadOnlyVector3[] enemiesPos=enemyPositionsMap.get(enemyIdentifier);
+                  if(enemiesPos!=null&&enemiesPos.length!=0)
+	                  {if(enemyMeshes==null)
+            	           enemyMeshes=new ArrayList<>();
+            	       try{final Mesh weaponNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource("/abin/weapon.abin"));
+	                       weaponNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	                       weaponNodeTemplate.setScale(0.015);
+                           //the transform of the mesh mustn't be polluted by the initial rotation and scale as it is used to know the orientation of the weapon
+                           NodeHelper.applyTransformToMeshData(weaponNodeTemplate);
+                           weaponNodeTemplate.updateModelBound();
+                           weaponNodeTemplate.updateWorldBound(true);
+                           final KeyframeController<Mesh> weaponKeyframeControllerTemplate=(KeyframeController<Mesh>)weaponNodeTemplate.getController(0);
+                           for(PointInTime pit:weaponKeyframeControllerTemplate._keyframes)
+                               {pit._newShape.setScale(0.015);
+                                pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                                NodeHelper.applyTransformToMeshData(pit._newShape);
+                                pit._newShape.updateModelBound();
+                                pit._newShape.updateWorldBound(true);
+                               }
+	    	               final Mesh enemyNodeTemplate=(Mesh)binaryImporter.load(getClass().getResource(enemyResourceName));
+	    	               enemyNodeTemplate.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+	    	               enemyNodeTemplate.setScale(0.015);
+	    	               NodeHelper.applyTransformToMeshData(enemyNodeTemplate);
+	    	               enemyNodeTemplate.updateModelBound();
+	    	               enemyNodeTemplate.updateWorldBound(true);
+	    	               final KeyframeController<Mesh> soldierKeyframeControllerTemplate=(KeyframeController<Mesh>)enemyNodeTemplate.getController(0);
+	    	               for(PointInTime pit:soldierKeyframeControllerTemplate._keyframes)
+	    	                   {pit._newShape.setScale(0.015);
+                                pit._newShape.setRotation(new Quaternion().fromEulerAngles(-Math.PI/2,0,-Math.PI/2));
+                                NodeHelper.applyTransformToMeshData(pit._newShape);
+                                pit._newShape.updateModelBound();
+                                pit._newShape.updateWorldBound(true);
+	    	                   }
+	                       for(ReadOnlyVector3 enemyPos:enemiesPos)
+	                           {final Mesh enemyNode=NodeHelper.makeCopy(enemyNodeTemplate,true);
+	        	                enemyNode.setName("enemy@"+enemyNode.hashCode());
+                                enemyNode.setTranslation(enemyPos);
+                                final KeyframeController<Mesh> enemyKeyframeController=(KeyframeController<Mesh>)enemyNode.getController(0);
+                                enemyKeyframeController.setUpdateBounding(true);
+                                //loops on all frames of the set in the supplied time frame
+                                enemyKeyframeController.setRepeatType(RepeatType.WRAP);
+                                //uses the "stand" animation
+                                enemyKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                                enemyKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                                enemyKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                                enemyKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                                final Mesh weaponNode=NodeHelper.makeCopy(weaponNodeTemplate,true);
+                                weaponNode.setName("weapon of "+enemyNode.getName());
+                                weaponNode.setTranslation(enemyPos);
+                                final KeyframeController<Mesh> weaponKeyframeController=(KeyframeController<Mesh>)weaponNode.getController(0);
+                                //loops on all frames of the set in the supplied time frame
+                                weaponKeyframeController.setRepeatType(RepeatType.WRAP);
+                                //uses the "stand" animation
+                                weaponKeyframeController.setSpeed(MD2FrameSet.STAND.getFramesPerSecond());
+                                weaponKeyframeController.setCurTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                                weaponKeyframeController.setMinTime(MD2FrameSet.STAND.getFirstFrameIndex());
+                                weaponKeyframeController.setMaxTime(MD2FrameSet.STAND.getLastFrameIndex());
+                                enemyMeshes.add(enemyNode);
+                                enemyMeshes.add(weaponNode);
+	                           }
+	                      }
+	                   catch(IOException ioe)
+	                   {throw new RuntimeException("enemies loading failed",ioe);}
+	                  }
+                 }
+    	    }
         return(enemyMeshes);
     }
     
     public List<Node> loadAmmoModels(final AmmunitionFactory ammunitionFactory){
-    	final List<Node> ammoNodes;
+    	List<Node> ammoNodes=null;
     	if(ammoPositionsMap!=null&&!ammoPositionsMap.isEmpty())
-    	    {ammoNodes=new ArrayList<>();
-    	     final int ammoCount=ammunitionFactory.getSize();
+    	    {final int ammoCount=ammunitionFactory.getSize();
     	     for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
     	         {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
     	          final String ammoIdentifier=ammo.getIdentifier();
     		      final ReadOnlyVector3[] ammosPos=ammoPositionsMap.get(ammoIdentifier);
     		      if(ammosPos!=null&&ammosPos.length!=0)
-    			      {final String ammoLabel=ammo.getLabel();
+    			      {if(ammoNodes==null)
+    			    	   ammoNodes=new ArrayList<>();
+    		    	   final String ammoLabel=ammo.getLabel();
    			           final String ammoTextureResourceName=ammo.getTextureResourceName();
    			           //TODO create a template node and copy it
     			       for(final ReadOnlyVector3 ammoPos:ammosPos)
@@ -221,107 +227,109 @@ public class Level{
     			      }
     	         }
     	    }
-    	else
-    		ammoNodes=null;
     	return(ammoNodes);
     }
     
     public List<Node> loadWeaponModels(final WeaponFactory weaponFactory){
-    	final List<Node> weaponNodes=new ArrayList<>();
-    	//N.B: only show working weapons
-	    try{/*uziNode.setTranslation(111.5,0.15,219);
-            smachNode.setTranslation(112.5,0.15,219);
-            pistolNode.setTranslation(113.5,0.1,219);
-            duplicatePistolNode.setTranslation(113.5,0.1,217);
-            laserNode.setTranslation(116.5,0.1,219);
-            shotgunNode.setTranslation(117.5,0.1,219);
-            rocketLauncherNode.setTranslation(117.5,0.1,222);*/
-	    	//TODO store the template nodes in order to use them during the cleanup
-	    	//TODO move the transforms into the binary files and convert them into Wavefront OBJ
-	    	final int weaponCount=weaponFactory.getSize();
-            for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
-                {final Weapon weapon=weaponFactory.get(weaponIndex);
-            	 final String weaponIdentifier=weapon.getIdentifier();
-            	 final String weaponResourceName=weapon.getResourceName();
-            	 final String weaponLabel=weapon.getLabel();
-            	 final ReadOnlyVector3[] weaponsPos=weaponPositionsMap.get(weaponIdentifier);
-            	 if(weaponsPos!=null&&weaponsPos.length!=0)
-            	     {final Node weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource(weaponResourceName));
-            	      weaponTemplateNode.setName(weaponLabel);
-            	      final boolean digitalWatermarkEnabled,primary;
-            		  switch(weaponIdentifier)
-            		  {
-            		      case "PISTOL_9MM":
-            		          {//removes the bullet as it is not necessary now
-                               ((Node)weaponTemplateNode.getChild(0)).detachChildAt(2);
-                               weaponTemplateNode.setScale(0.02);
-                               weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
-                               digitalWatermarkEnabled=false;
-                               primary=true;
-           		               break;
-           		              }
-            		      case "MAG_60":
-            		          {weaponTemplateNode.setScale(0.02);
-           	                   digitalWatermarkEnabled=false;
-           	                   primary=true;
-          		               break;
-          		              }
-            		      case "UZI":
-            		          {weaponTemplateNode.setScale(0.2);
-            		           digitalWatermarkEnabled=false;
-           	                   primary=true;
-          		               break;
-          		              }
-            		      case "SMACH":
-            		          {weaponTemplateNode.setScale(0.2);
-            		           digitalWatermarkEnabled=false;
-              	               primary=true;
-          		               break;
-          		              }
-            		      case "PISTOL_10MM":
-            		          {weaponTemplateNode.setScale(0.001);
-            		           weaponTemplateNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
-            		           digitalWatermarkEnabled=false;
-              	               primary=true;
-          		               break;
-          		              }
-            		      case "ROCKET_LAUNCHER":
-            		          {//removes the scope
-            		           weaponTemplateNode.detachChildAt(0);
-            		           weaponTemplateNode.setScale(0.08);
-            		           weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
-                               digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      case "SHOTGUN":
-            		          {weaponTemplateNode.setScale(0.1);
-            		           digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      case "LASER":
-            		          {weaponTemplateNode.setScale(0.02);
-            		           digitalWatermarkEnabled=false;
-                               primary=true;
-            		           break;
-            		          }
-            		      default:
-            		          {digitalWatermarkEnabled=false;
-                               primary=true;
-            		          }
-            		  }
-            		  for(final ReadOnlyVector3 weaponPos:weaponsPos)
-            		      {final Node weaponNode=weaponTemplateNode.makeCopy(false);
-            		       weaponNode.setTranslation(weaponPos);
-            		       weaponNode.setUserData(new WeaponUserData(weapon,new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
-            		       weaponNodes.add(weaponNode);
-            		      }
-            	     }
-                }
-	       }
-	    catch(IOException ioe)
-	    {throw new RuntimeException("weapons loading failed",ioe);}
+    	List<Node> weaponNodes=null;
+    	if(weaponPositionsMap!=null&&weaponPositionsMap.size()!=0)
+    	    {//N.B: only show working weapons
+	         try{/*uziNode.setTranslation(111.5,0.15,219);
+                 smachNode.setTranslation(112.5,0.15,219);
+                 pistolNode.setTranslation(113.5,0.1,219);
+                 duplicatePistolNode.setTranslation(113.5,0.1,217);
+                 laserNode.setTranslation(116.5,0.1,219);
+                 shotgunNode.setTranslation(117.5,0.1,219);
+                 rocketLauncherNode.setTranslation(117.5,0.1,222);*/
+	    	     //TODO store the template nodes in order to use them during the cleanup
+	    	     //TODO move the transforms into the binary files and convert them into Wavefront OBJ
+	    	     final int weaponCount=weaponFactory.getSize();
+                 for(int weaponIndex=0;weaponIndex<weaponCount;weaponIndex++)
+                     {final Weapon weapon=weaponFactory.get(weaponIndex);
+            	      final String weaponIdentifier=weapon.getIdentifier();
+            	      final String weaponResourceName=weapon.getResourceName();
+            	      final String weaponLabel=weapon.getLabel();
+            	      final ReadOnlyVector3[] weaponsPos=weaponPositionsMap.get(weaponIdentifier);
+            	      if(weaponsPos!=null&&weaponsPos.length!=0)
+            	          {if(weaponNodes==null)
+            	        	   weaponNodes=new ArrayList<>();
+            	    	   final Node weaponTemplateNode=(Node)binaryImporter.load(getClass().getResource(weaponResourceName));
+            	           weaponTemplateNode.setName(weaponLabel);
+            	           final boolean digitalWatermarkEnabled,primary;
+            		       switch(weaponIdentifier)
+            		       {
+            		           case "PISTOL_9MM":
+            		               {//removes the bullet as it is not necessary now
+                                    ((Node)weaponTemplateNode.getChild(0)).detachChildAt(2);
+                                    weaponTemplateNode.setScale(0.02);
+                                    weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI/2,new Vector3(1,0,0)));
+                                    digitalWatermarkEnabled=false;
+                                    primary=true;
+           		                    break;
+           		                   }
+            		           case "MAG_60":
+            		               {weaponTemplateNode.setScale(0.02);
+           	                        digitalWatermarkEnabled=false;
+           	                        primary=true;
+          		                    break;
+          		                   }
+            		           case "UZI":
+            		               {weaponTemplateNode.setScale(0.2);
+            		                digitalWatermarkEnabled=false;
+           	                        primary=true;
+          		                    break;
+          		                   }
+            		           case "SMACH":
+            		               {weaponTemplateNode.setScale(0.2);
+            		                digitalWatermarkEnabled=false;
+              	                    primary=true;
+          		                    break;
+          		                   }
+            		           case "PISTOL_10MM":
+            		               {weaponTemplateNode.setScale(0.001);
+            		                weaponTemplateNode.setRotation(new Quaternion().fromEulerAngles(Math.PI/2,-Math.PI/4,Math.PI/2));
+            		                digitalWatermarkEnabled=false;
+              	                    primary=true;
+          		                    break;
+          		                   }
+            		           case "ROCKET_LAUNCHER":
+            		               {//removes the scope
+            		                weaponTemplateNode.detachChildAt(0);
+            		                weaponTemplateNode.setScale(0.08);
+            		                weaponTemplateNode.setRotation(new Quaternion().fromAngleAxis(-Math.PI,new Vector3(0,1,0)));
+                                    digitalWatermarkEnabled=false;
+                                    primary=true;
+            		                break;
+            		               }
+            		           case "SHOTGUN":
+            		               {weaponTemplateNode.setScale(0.1);
+            		                digitalWatermarkEnabled=false;
+                                    primary=true;
+            		                break;
+            		               }
+            		           case "LASER":
+            		               {weaponTemplateNode.setScale(0.02);
+            		                digitalWatermarkEnabled=false;
+                                    primary=true;
+            		                break;
+            		               }
+            		           default:
+            		               {digitalWatermarkEnabled=false;
+                                    primary=true;
+            		               }
+            		       }
+            		       for(final ReadOnlyVector3 weaponPos:weaponsPos)
+            		           {final Node weaponNode=weaponTemplateNode.makeCopy(false);
+            		            weaponNode.setTranslation(weaponPos);
+            		            weaponNode.setUserData(new WeaponUserData(weapon,new Matrix3(weaponTemplateNode.getRotation()),PlayerData.NO_UID,digitalWatermarkEnabled,primary));
+            		            weaponNodes.add(weaponNode);
+            		           }
+            	          }
+                     }
+	            }
+	         catch(IOException ioe)
+	         {throw new RuntimeException("weapons loading failed",ioe);}
+    	    }
 	    return(weaponNodes);
     }
     
