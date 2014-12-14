@@ -2095,14 +2095,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadWeapons(){
     	final List<Node> weaponNodes=level.loadWeaponModels(weaponFactory);
-	    collectibleObjectsList.addAll(weaponNodes);
-	    for(final Node weaponNode:weaponNodes)
-	    	getRoot().attachChild(weaponNode);
+    	if(weaponNodes!=null&&weaponNodes.size()!=0)
+    	    {collectibleObjectsList.addAll(weaponNodes);
+	         for(final Node weaponNode:weaponNodes)
+	    	     getRoot().attachChild(weaponNode);
+    	    }
     }
     
     private final void loadAmmunitions(){
     	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory);
-    	if(ammoNodes!=null)
+    	if(ammoNodes!=null&&ammoNodes.size()!=0)
     	    {collectibleObjectsList.addAll(ammoNodes);
     	     for(final Node ammoNode:ammoNodes)
 	    	     getRoot().attachChild(ammoNode);
@@ -2111,16 +2113,18 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadEnemies(){
     	final List<Mesh> enemyMeshes=level.loadEnemyModels(enemyFactory);
-    	//TODO separate the body and the weapon(s)
-    	boolean isEnemyWeaponMesh=false;
-        for(final Mesh enemyMesh:enemyMeshes)
-            {getRoot().attachChild(enemyMesh);
-             if(!isEnemyWeaponMesh)
-                 {final EnemyData enemyData=new EnemyData();
-                  enemiesDataMap.put(enemyMesh,enemyData);
+    	if(enemyMeshes!=null&&enemyMeshes.size()!=0)
+    	    {//TODO separate the body and the weapon(s)
+    	     boolean isEnemyWeaponMesh=false;
+             for(final Mesh enemyMesh:enemyMeshes)
+                 {getRoot().attachChild(enemyMesh);
+                  if(!isEnemyWeaponMesh)
+                      {final EnemyData enemyData=new EnemyData();
+                       enemiesDataMap.put(enemyMesh,enemyData);
+                      }
+                  isEnemyWeaponMesh=!isEnemyWeaponMesh;
                  }
-             isEnemyWeaponMesh=!isEnemyWeaponMesh;
-            }
+    	    }
     }
     
     private final void preloadTextures(){
