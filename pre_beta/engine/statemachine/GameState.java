@@ -1403,19 +1403,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final AmmunitionFactory initializeAmmunitionFactory(){
     	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
-        ammunitionFactory.addNewAmmunition("5.56mm bullet","BULLET_5_56MM","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("5.56mm bullet","BULLET_5_56MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**Russian assault rifle*/
-        ammunitionFactory.addNewAmmunition("7.62mm bullet","BULLET_7_62MM","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("7.62mm bullet","BULLET_7_62MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**American pistols and sub-machine guns*/
-        ammunitionFactory.addNewAmmunition("9mm bullet","BULLET_9MM","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("9mm bullet","BULLET_9MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**Russian pistols*/
-        ammunitionFactory.addNewAmmunition("10mm bullet","BULLET_10MM","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("10mm bullet","BULLET_10MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**cartridge*/
-        ammunitionFactory.addNewAmmunition("/sounds/pickup_weapon.ogg","CARTRIDGE","cartridge");
+        ammunitionFactory.addNewAmmunition("cartridge","CARTRIDGE","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**power*/
-        ammunitionFactory.addNewAmmunition("energy cell","ENERGY_CELL","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("energy cell","ENERGY_CELL","/images/ammo.png","/sounds/pickup_weapon.ogg");
     	/**Russian middle range anti-tank rocket launchers*/
-        ammunitionFactory.addNewAmmunition("105mm anti tank rocket","ANTI_TANK_ROCKET_105MM","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("105mm anti tank rocket","ANTI_TANK_ROCKET_105MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
         return(ammunitionFactory);
     }
     
@@ -1440,28 +1440,32 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
     	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)});
     	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
-    	         final Map<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
-    	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
-    	         weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
+    	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+    	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+    	         final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
+    	         ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
     	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
     	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)});
     	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
-    	         final Map<String,ReadOnlyVector3[]> weaponsPositionsMap=new HashMap<>();
-    	         weaponsPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
-   	             weaponsPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponsPositionsMap,new KillAllEnemiesObjective());
+    	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
+    	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+   	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+   	             final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
+   	             ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
-    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null);
+    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null);
     	         break;
     	        }
     	    case "3":
-    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null);
+    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null);
 	             break;
 	            }
     	}
@@ -2097,18 +2101,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	if("0".equals(level.getIdentifier())||"1".equals(level.getIdentifier()))
-	        {final Node bullet9mmAmmoNode=new Node("some 9mm bullets");
-             final Box bullet9mmAmmoBox=new Box("some 9mm bullets",new Vector3(0,0,0),0.1,0.1,0.1);
-             final TextureState ts = new TextureState();
-             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/ammo.png")),Texture.MinificationFilter.Trilinear,true));
-             bullet9mmAmmoBox.setRenderState(ts);
-             bullet9mmAmmoNode.setTranslation(112.5,0.1,222.5);
-             bullet9mmAmmoNode.attachChild(bullet9mmAmmoBox);
-             bullet9mmAmmoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get("BULLET_9MM"),30));
-             collectibleObjectsList.add(bullet9mmAmmoNode);
-             getRoot().attachChild(bullet9mmAmmoNode);
-	        }
+    	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory);
+    	if(ammoNodes!=null)
+    	    {collectibleObjectsList.addAll(ammoNodes);
+    	     for(final Node ammoNode:ammoNodes)
+	    	     getRoot().attachChild(ammoNode);
+    	    }
     }
     
     private final void loadEnemies(){
