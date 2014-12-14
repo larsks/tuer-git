@@ -23,10 +23,13 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	
 	/**unique name (cannot contain any space)*/
     private final String identifier;
+    /**resource name of the texture used by the box of ammunition*/
+    private final String textureResourceName;
 	
-    public Ammunition(final String label,final String identifier,final String pickingUpSoundSamplePath){
+    public Ammunition(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath){
     	super(label,pickingUpSoundSamplePath);
     	this.identifier=identifier;
+    	this.textureResourceName=textureResourceName;
     }
     
     @Override
@@ -45,16 +48,20 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	}
 	
 	@Override
-	public final int compareTo(final Ammunition ammunition){
+	public int compareTo(final Ammunition ammunition){
 		return(hashCode()-ammunition.hashCode());
 	}
 	
 	@Override
-	public final String toString(){
+	public String toString(){
 		return(identifier);
 	}
 	
-	public final String getIdentifier(){
+	public String getIdentifier(){
 		return(identifier);
+	}
+	
+	public String getTextureResourceName(){
+		return(textureResourceName);
 	}
 }

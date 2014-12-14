@@ -35,18 +35,23 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
+import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.extension.Skybox;
+import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
 
+import engine.data.common.userdata.AmmunitionUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
+import engine.weaponry.Ammunition;
+import engine.weaponry.AmmunitionFactory;
 import engine.weaponry.Weapon;
 import engine.weaponry.WeaponFactory;
 
@@ -78,11 +83,14 @@ public class Level{
     private Skybox skybox;
     /**map of the weapon positions sorted by type*/
     private final Map<String,ReadOnlyVector3[]> weaponPositionsMap;
-    //TODO teleporters, ammo
+    /**map of the ammunition positions sorted by type*/
+    private final Map<String,ReadOnlyVector3[]> ammoPositionsMap;
+    //TODO teleporters
     private final BinaryImporter binaryImporter;
     
     public Level(final String label,final String resourceName,final String identifier,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
-    		     final ReadOnlyVector3[] medikitPositions,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,final Objective... objectives){
+    		     final ReadOnlyVector3[] medikitPositions,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
+    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
     	this.label=label;
@@ -95,6 +103,7 @@ public class Level{
     	this.enemyPositionsMap=enemyPositionsMap;
     	this.medikitPositions=medikitPositions;
     	this.weaponPositionsMap=weaponPositionsMap;
+    	this.ammoPositionsMap=ammoPositionsMap;
     }
     
     @Deprecated
@@ -182,6 +191,39 @@ public class Level{
 	             {throw new RuntimeException("enemies loading failed",ioe);}
             }
         return(enemyMeshes);
+    }
+    
+    public List<Node> loadAmmoModels(final AmmunitionFactory ammunitionFactory){
+    	final List<Node> ammoNodes;
+    	if(ammoPositionsMap!=null&&!ammoPositionsMap.isEmpty())
+    	    {ammoNodes=new ArrayList<>();
+    	     final int ammoCount=ammunitionFactory.getSize();
+    	     for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
+    	         {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
+    	          final String ammoIdentifier=ammo.getIdentifier();
+    		      final ReadOnlyVector3[] ammosPos=ammoPositionsMap.get(ammoIdentifier);
+    		      if(ammosPos!=null&&ammosPos.length!=0)
+    			      {final String ammoLabel=ammo.getLabel();
+   			           final String ammoTextureResourceName=ammo.getTextureResourceName();
+   			           //TODO create a template node and copy it
+    			       for(final ReadOnlyVector3 ammoPos:ammosPos)
+    		               {final Node ammoNode=new Node(ammoLabel);
+    	                    final Box ammoBox=new Box(ammoLabel,new Vector3(0,0,0),0.1,0.1,0.1);
+    	                    final TextureState ts = new TextureState();
+    	                    ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(ammoTextureResourceName)),Texture.MinificationFilter.Trilinear,true));
+    	                    ammoBox.setRenderState(ts);
+    	                    ammoNode.setTranslation(ammoPos);
+    	                    ammoNode.attachChild(ammoBox);
+    	                    //TODO move the ammunition count into another location
+    	                    ammoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get(ammoIdentifier),30));
+    	                    ammoNodes.add(ammoNode);
+    		               }
+    			      }
+    	         }
+    	    }
+    	else
+    		ammoNodes=null;
+    	return(ammoNodes);
     }
     
     public List<Node> loadWeaponModels(final WeaponFactory weaponFactory){
