@@ -94,7 +94,6 @@ import engine.data.ProjectileController;
 import engine.data.ProjectileData;
 import engine.data.common.Medikit;
 import engine.data.common.Teleporter;
-import engine.data.common.userdata.AmmunitionUserData;
 import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
@@ -1386,7 +1385,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 
     private final Medikit initializeMedikit(){
     	//TODO set the path of the sound sample
-    	final Medikit medikit=new Medikit(null,20);
+    	final Medikit medikit=new Medikit("/sounds/powerup.ogg",20);
     	return(medikit);
     }
     
@@ -1488,6 +1487,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
   			     	  teleporter.setPickingUpSoundSampleIdentifier(teleporterSoundSampleIdentifier);
   		         }
   	        }
+  	    final String medikitSoundSamplePath=medikit.getPickingUpSoundSamplePath();
+	    if(medikitSoundSamplePath!=null)
+	        {final URL medikitSoundSampleUrl=GameState.class.getResource(medikitSoundSamplePath);
+		     if(medikitSoundSampleUrl!=null)
+		         {final String medikitSoundSampleIdentifier=getSoundManager().loadSound(medikitSoundSampleUrl);
+		          if(medikitSoundSampleIdentifier!=null)
+		        	  medikit.setPickingUpSoundSampleIdentifier(medikitSoundSampleIdentifier);
+		         }
+	        }
         final int ammoCount=ammunitionFactory.getSize();
         for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
             {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
@@ -1590,6 +1598,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
   			     	  teleporter.setPickingUpSoundSampleIdentifier(null);
   		         }
   	        }
+  	    final String medikitSoundSamplePath=medikit.getPickingUpSoundSamplePath();
+	    if(medikitSoundSamplePath!=null)
+	        {final URL medikitSoundSampleUrl=GameState.class.getResource(medikitSoundSamplePath);
+		     if(medikitSoundSampleUrl!=null)
+		         {getSoundManager().unloadSound(medikitSoundSampleUrl);
+		          if(medikit.getPickingUpSoundSampleIdentifier()!=null)
+		        	  medikit.setPickingUpSoundSampleIdentifier(null);
+		         }
+	        }
         final int ammoCount=ammunitionFactory.getSize();
         for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
             {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
@@ -2039,6 +2056,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadTeleporters(){
+    	//TODO move most of the code into the Level class
     	switch(level.getIdentifier())
     	{
     	    case "0":
@@ -2076,6 +2094,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
+    	//TODO move most of the code into the Level class
     	final ReadOnlyVector3[] medikitPositions=level.getMedikitPositions();
     	if(medikitPositions!=null&&medikitPositions.length!=0)
     	    {final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
