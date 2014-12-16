@@ -81,7 +81,6 @@ import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
-import com.ardor3d.util.resource.URLResourceSource;
 import engine.data.Enemy;
 import engine.data.EnemyData;
 import engine.data.EnemyFactory;
@@ -95,7 +94,6 @@ import engine.data.ProjectileData;
 import engine.data.common.Medikit;
 import engine.data.common.Teleporter;
 import engine.data.common.userdata.CollectibleUserData;
-import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.input.Action;
 import engine.input.ActionMap;
@@ -1384,8 +1382,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
 
     private final Medikit initializeMedikit(){
-    	//TODO set the path of the sound sample
-    	final Medikit medikit=new Medikit("/sounds/powerup.ogg",20);
+    	//TODO add the first aid kit (10) and the large medikit (100)
+    	final Medikit medikit=new Medikit("small medikit","SMALL_MEDIKIT","/images/medikit.png","/sounds/powerup.ogg",25);
     	return(medikit);
     }
     
@@ -2094,27 +2092,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	//TODO move most of the code into the Level class
-    	final ReadOnlyVector3[] medikitPositions=level.getMedikitPositions();
-    	if(medikitPositions!=null&&medikitPositions.length!=0)
-    	    {final Box medikitBox=new Box("a medikit",new Vector3(0,0,0),0.1,0.1,0.1);
-             final TextureState ts = new TextureState();
-             ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource("/images/medikit.png")),Texture.MinificationFilter.Trilinear,true));
-             medikitBox.setRenderState(ts);
-             for(final ReadOnlyVector3 medikitPos:medikitPositions)
-                 {final Node medikitNode=new Node("a medikit");
-            	  medikitNode.setTranslation(medikitPos);
-                  medikitNode.attachChild(medikitBox);
-                  medikitNode.setUserData(new MedikitUserData(medikit));
-                  collectibleObjectsList.add(medikitNode);
-                  getRoot().attachChild(medikitNode);
-                 }
+    	final List<Node> medikitNodes=level.loadMedikitModels(medikit);
+    	if(medikitNodes!=null&&!medikitNodes.isEmpty())
+    	    {collectibleObjectsList.addAll(medikitNodes);
+    	     for(final Node medikitNode:medikitNodes)
+	    	     getRoot().attachChild(medikitNode);
     	    }
     }
     
     private final void loadWeapons(){
     	final List<Node> weaponNodes=level.loadWeaponModels(weaponFactory);
-    	if(weaponNodes!=null&&weaponNodes.size()!=0)
+    	if(weaponNodes!=null&&!weaponNodes.isEmpty())
     	    {collectibleObjectsList.addAll(weaponNodes);
 	         for(final Node weaponNode:weaponNodes)
 	    	     getRoot().attachChild(weaponNode);
@@ -2123,7 +2111,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadAmmunitions(){
     	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory);
-    	if(ammoNodes!=null&&ammoNodes.size()!=0)
+    	if(ammoNodes!=null&&!ammoNodes.isEmpty())
     	    {collectibleObjectsList.addAll(ammoNodes);
     	     for(final Node ammoNode:ammoNodes)
 	    	     getRoot().attachChild(ammoNode);
@@ -2132,7 +2120,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadEnemies(){
     	final List<Mesh> enemyMeshes=level.loadEnemyModels(enemyFactory);
-    	if(enemyMeshes!=null&&enemyMeshes.size()!=0)
+    	if(enemyMeshes!=null&&!enemyMeshes.isEmpty())
     	    {//TODO separate the body and the weapon(s)
     	     boolean isEnemyWeaponMesh=false;
              for(final Mesh enemyMesh:enemyMeshes)

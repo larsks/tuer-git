@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
@@ -44,8 +43,9 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
-
+import engine.data.common.Medikit;
 import engine.data.common.userdata.AmmunitionUserData;
+import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
@@ -196,6 +196,30 @@ public class Level{
                  }
     	    }
         return(enemyMeshes);
+    }
+    
+    public List<Node> loadMedikitModels(final Medikit medikit){
+    	List<Node> medikitNodes=null;
+    	if(medikit!=null)
+    	    {if(medikitPositions!=null&&medikitPositions.length!=0)
+        	     {//if(medikitNodes==null)
+        		  /**/medikitNodes=new ArrayList<>();
+        		  final String medikitLabel=medikit.getLabel();
+                  final String textureResourceName=medikit.getTextureResourceName();
+         		  final Box medikitBox=new Box(medikitLabel,new Vector3(0,0,0),0.1,0.1,0.1);
+                  final TextureState ts = new TextureState();
+                  ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(textureResourceName)),Texture.MinificationFilter.Trilinear,true));
+                  medikitBox.setRenderState(ts);
+                  for(final ReadOnlyVector3 medikitPos:medikitPositions)
+                      {final Node medikitNode=new Node(medikitLabel);
+                 	   medikitNode.setTranslation(medikitPos);
+                       medikitNode.attachChild(medikitBox);
+                       medikitNode.setUserData(new MedikitUserData(medikit));
+                       medikitNodes.add(medikitNode);
+                      }
+        	     }
+    	    }
+    	return(medikitNodes);
     }
     
     public List<Node> loadAmmoModels(final AmmunitionFactory ammunitionFactory){
