@@ -17,16 +17,56 @@
  */
 package engine.data.common;
 
-public class Medikit extends Collectible{
+public class Medikit extends Collectible implements Comparable<Medikit>{
 
+	/**unique name (cannot contain any space)*/
+    private final String identifier;
+    /**resource name of the texture used by the box of ammunition*/
+    private final String textureResourceName;
+	
 	private final int health;
 	
-	public Medikit(final String pickingUpSoundSamplePath,final int health){
-		super(null,pickingUpSoundSamplePath);
+	public Medikit(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath,final int health){
+		super(label,pickingUpSoundSamplePath);
+		this.identifier=identifier;
+    	this.textureResourceName=textureResourceName;
 		this.health=health;
+	}
+	
+	@Override
+	public int hashCode(){
+		return(identifier.hashCode());
+	}
+	
+	@Override
+	public String toString(){
+		return(identifier);
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result;
+		if(o==null||!(o instanceof Medikit))
+		    result=false;
+		else
+			result=hashCode()==((Medikit)o).hashCode();
+		return(result);
+	}
+	
+	@Override
+	public int compareTo(final Medikit medikit){
+		return(hashCode()-medikit.hashCode());
 	}
 	
 	public int getHealth(){
 		return(health);
+	}
+	
+	public String getIdentifier(){
+		return(identifier);
+	}
+	
+	public String getTextureResourceName(){
+		return(textureResourceName);
 	}
 }
