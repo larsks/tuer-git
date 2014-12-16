@@ -72,7 +72,6 @@ import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
-import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.ui.text.BasicText;
@@ -91,6 +90,7 @@ import engine.data.PlayerData;
 import engine.data.ProfileData;
 import engine.data.ProjectileController;
 import engine.data.ProjectileData;
+import engine.data.Skybox;
 import engine.data.common.Medikit;
 import engine.data.common.Teleporter;
 import engine.data.common.userdata.CollectibleUserData;
@@ -603,8 +603,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 previousPosition.set(playerNode.getTranslation());
                 //synchronizes the camera with the camera node
                 cam.setLocation(playerNode.getTranslation());
-                if(level.getSkybox()!=null)
-                	level.getSkybox().setTranslation(playerNode.getTranslation());
+                if(level.getSkyboxModel()!=null)
+                	level.getSkyboxModel().setTranslation(playerNode.getTranslation());
                 //checks if any object is collected
                 for(int i=collectibleObjectsList.size()-1,collectedSubElementsCount;i>=0;i--)
                     {final Node collectibleNode=collectibleObjectsList.get(i);
@@ -1775,8 +1775,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final void performTerminalBasicCleanup(){
     	if(level.getMainModel()!=null)
     	    level.getMainModel().detachAllChildren();
-    	if(level.getSkybox()!=null)
-    	    level.getSkybox().detachAllChildren();
+    	if(level.getSkyboxModel()!=null)
+    	    level.getSkyboxModel().detachAllChildren();
     	//clears the list of objects that can be picked up
     	collectibleObjectsList.clear();
     	//clears the list of teleporters
@@ -1816,8 +1816,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
        	    NodeHelper.setModelBound(currentTeleporter,BoundingBox.class);
         //resets the timer at the end of all long operations performed while loading
         timer.reset();
-        if(level.getSkybox()!=null)
-        	level.getSkybox().setTranslation(currentCamLocation);
+        if(level.getSkyboxModel()!=null)
+        	level.getSkyboxModel().setTranslation(currentCamLocation);
         gameStats.setEnemiesCount(enemiesDataMap.size());
         previousObjectivesStatusesMap=new HashMap<>();
         toPauseMenuTriggerAction.arguments.setObjectives(level.getObjectives());
@@ -1866,8 +1866,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //detaches some nodes from the root to prevent Java from using them while releasing their resources
         if(level.getMainModel()!=null)
         	getRoot().detachChild(level.getMainModel());
-        if(level.getSkybox()!=null)
-            getRoot().detachChild(level.getSkybox());
+        if(level.getSkyboxModel()!=null)
+            getRoot().detachChild(level.getSkyboxModel());
     }
     
     private static final class VBODeleterVisitor implements Visitor{
@@ -1967,8 +1967,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
     	if(level.getMainModel()!=null)
 	        disposableSpatials.add(level.getMainModel());
-    	if(level.getSkybox()!=null)
-    	    disposableSpatials.add(level.getSkybox());
+    	if(level.getSkyboxModel()!=null)
+    	    disposableSpatials.add(level.getSkyboxModel());
     	//performs the destruction with a single callable
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
@@ -2028,8 +2028,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	final Renderer renderer=canvas.getCanvasRenderer().getRenderer();
     	if(level.getMainModel()!=null)
     		disposableSpatials.add(level.getMainModel());
-    	if(level.getSkybox()!=null)
-	        disposableSpatials.add(level.getSkybox());
+    	if(level.getSkyboxModel()!=null)
+	        disposableSpatials.add(level.getSkyboxModel());
     	//performs the destruction with a single callable
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
@@ -2048,8 +2048,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     
     private final void loadSkybox(){
     	if("2".equals(level.getIdentifier())||"3".equals(level.getIdentifier()))
-    	    {final Skybox skybox=level.loadSkybox();
-    	     getRoot().attachChild(skybox);
+    	    {//TODO pass a single sky box identifier (or null) to the Level class, pass a factory to level.loadSkyboxModel()
+    		 final Skybox skybox=new Skybox("blue sky","BLUE_SKY",new String[]{"/images/1.jpg","/images/2.jpg","/images/3.jpg","/images/4.jpg","/images/5.jpg","/images/6.jpg"});
+    		 final com.ardor3d.scenegraph.extension.Skybox skyboxModel=level.loadSkyboxModel(skybox);
+    	     if(skyboxModel!=null)
+    	         getRoot().attachChild(skyboxModel);
     	    }
     }
     
