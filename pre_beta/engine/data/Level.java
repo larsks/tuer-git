@@ -38,7 +38,6 @@ import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
-import com.ardor3d.scenegraph.extension.Skybox;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
@@ -80,7 +79,7 @@ public class Level{
     /**root node whose hierarchy contains the geometry of the main model*/
     private Node mainModel;
     /**sky box*/
-    private Skybox skybox;
+    private com.ardor3d.scenegraph.extension.Skybox skyboxModel;
     /**map of the weapon positions sorted by type*/
     private final Map<String,ReadOnlyVector3[]> weaponPositionsMap;
     /**map of the ammunition positions sorted by type*/
@@ -370,27 +369,28 @@ public class Level{
     	return(mainModel);
     }
     
-    public Skybox loadSkybox(){
-		if(skybox==null)
-		    {skybox=new Skybox("skybox",64,64,64);
-		     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource("/images/1.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource("/images/3.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource("/images/2.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource("/images/4.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource("/images/6.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource("/images/5.jpg")),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     skybox.setTexture(Skybox.Face.North,north);
-		     skybox.setTexture(Skybox.Face.West,west);
-		     skybox.setTexture(Skybox.Face.South,south);
-		     skybox.setTexture(Skybox.Face.East,east);
-		     skybox.setTexture(Skybox.Face.Up,up);
-		     skybox.setTexture(Skybox.Face.Down,down);
+    public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(Skybox skybox){
+		if(skyboxModel==null&&skybox!=null)
+		    {final String skyboxLabel=skybox.getLabel();
+			 skyboxModel=new com.ardor3d.scenegraph.extension.Skybox(skyboxLabel,64,64,64);
+		     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(0))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(2))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(1))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(3))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(5))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(4))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.North,north);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.West,west);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.South,south);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.East,east);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Up,up);
+		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Down,down);
             }
-		return(skybox);
+		return(skyboxModel);
     }
     
-    public Skybox getSkybox(){
-    	return(skybox);
+    public com.ardor3d.scenegraph.extension.Skybox getSkyboxModel(){
+    	return(skyboxModel);
     }
     
     public String getIdentifier(){
