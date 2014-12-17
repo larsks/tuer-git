@@ -1442,7 +1442,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
     	         final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
     	         ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
@@ -1454,15 +1454,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
    	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
    	             final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
    	             ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
-    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null);
+    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null,"BLUE_SKY");
     	         break;
     	        }
     	    case "3":
-    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null);
+    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null,"BLUE_SKY");
 	             break;
 	            }
     	}
@@ -2047,13 +2047,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-    	if("2".equals(level.getIdentifier())||"3".equals(level.getIdentifier()))
-    	    {//TODO pass a single sky box identifier (or null) to the Level class, pass a factory to level.loadSkyboxModel()
-    		 final Skybox skybox=new Skybox("blue sky","BLUE_SKY",new String[]{"/images/1.jpg","/images/2.jpg","/images/3.jpg","/images/4.jpg","/images/5.jpg","/images/6.jpg"});
-    		 final com.ardor3d.scenegraph.extension.Skybox skyboxModel=level.loadSkyboxModel(skybox);
-    	     if(skyboxModel!=null)
-    	         getRoot().attachChild(skyboxModel);
-    	    }
+        final Skybox skybox=new Skybox("blue sky","BLUE_SKY",new String[]{"/images/1.jpg","/images/2.jpg","/images/3.jpg","/images/4.jpg","/images/5.jpg","/images/6.jpg"});
+        //TODO pass a factory to level.loadSkyboxModel()
+        final com.ardor3d.scenegraph.extension.Skybox skyboxModel=level.loadSkyboxModel(skybox);
+    	if(skyboxModel!=null)
+    	    getRoot().attachChild(skyboxModel);
     }
     
     private final void loadTeleporters(){

@@ -84,12 +84,14 @@ public class Level{
     private final Map<String,ReadOnlyVector3[]> weaponPositionsMap;
     /**map of the ammunition positions sorted by type*/
     private final Map<String,ReadOnlyVector3[]> ammoPositionsMap;
+    
+    private final String skyboxIdentifier;
     //TODO teleporters
     private final BinaryImporter binaryImporter;
     
     public Level(final String label,final String resourceName,final String identifier,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
     		     final ReadOnlyVector3[] medikitPositions,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
-    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final Objective... objectives){
+    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final String skyboxIdentifier,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
     	this.label=label;
@@ -103,6 +105,7 @@ public class Level{
     	this.medikitPositions=medikitPositions;
     	this.weaponPositionsMap=weaponPositionsMap;
     	this.ammoPositionsMap=ammoPositionsMap;
+    	this.skyboxIdentifier=skyboxIdentifier;
     }
     
     @Deprecated
@@ -370,7 +373,7 @@ public class Level{
     }
     
     public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(Skybox skybox){
-		if(skyboxModel==null&&skybox!=null)
+		if(skyboxModel==null&&skybox!=null&&skyboxIdentifier!=null)
 		    {final String skyboxLabel=skybox.getLabel();
 			 skyboxModel=new com.ardor3d.scenegraph.extension.Skybox(skyboxLabel,64,64,64);
 		     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(0))),Texture.MinificationFilter.BilinearNearestMipMap,true);
@@ -418,7 +421,7 @@ public class Level{
     	return(medikitPositions);
     }
     
-    public final String getResourceName(){
+    public String getResourceName(){
 		return(resourceName);
 	}
 }
