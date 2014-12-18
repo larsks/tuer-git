@@ -90,7 +90,7 @@ import engine.data.PlayerData;
 import engine.data.ProfileData;
 import engine.data.ProjectileController;
 import engine.data.ProjectileData;
-import engine.data.Skybox;
+import engine.data.SkyboxFactory;
 import engine.data.common.Medikit;
 import engine.data.common.Teleporter;
 import engine.data.common.userdata.CollectibleUserData;
@@ -147,6 +147,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText objectivesDisplayLabel;
     /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
+    /**instance that creates all sky boxes*/
+    private final SkyboxFactory skyboxFactory;
     /**instance that creates all enemies*/
     private final EnemyFactory enemyFactory;
     /**instance that creates all weapons*/
@@ -307,6 +309,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         medikit=initializeMedikit();
         //initializes the factories, the build-in ammo and the build-in weapons
         initializeLevelFactory();
+        skyboxFactory=initializeSkyboxFactory();
         ammunitionFactory=initializeAmmunitionFactory();
         enemyFactory=initializeEnemyFactory();
         weaponFactory=initializeWeaponFactory();
@@ -1397,6 +1400,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//TODO split the Level class into 2 classes so that the builder manages the models
     }
     
+    private final SkyboxFactory initializeSkyboxFactory(){
+    	final SkyboxFactory skyboxFactory=new SkyboxFactory();
+    	skyboxFactory.addNewSkybox("blue sky","BLUE_SKY",new String[]{"/images/1.jpg","/images/2.jpg","/images/3.jpg","/images/4.jpg","/images/5.jpg","/images/6.jpg"});
+    	return(skyboxFactory);
+    }
+    
     private final AmmunitionFactory initializeAmmunitionFactory(){
     	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
@@ -2047,9 +2056,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadSkybox(){
-        final Skybox skybox=new Skybox("blue sky","BLUE_SKY",new String[]{"/images/1.jpg","/images/2.jpg","/images/3.jpg","/images/4.jpg","/images/5.jpg","/images/6.jpg"});
-        //TODO pass a factory to level.loadSkyboxModel()
-        final com.ardor3d.scenegraph.extension.Skybox skyboxModel=level.loadSkyboxModel(skybox);
+        final com.ardor3d.scenegraph.extension.Skybox skyboxModel=level.loadSkyboxModel(skyboxFactory);
     	if(skyboxModel!=null)
     	    getRoot().attachChild(skyboxModel);
     }
