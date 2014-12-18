@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
@@ -42,7 +43,9 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.common.Medikit;
+import engine.data.common.MedikitFactory;
 import engine.data.common.userdata.AmmunitionUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.WeaponUserData;
@@ -74,8 +77,8 @@ public class Level{
     private final List<Objective> objectives;
     /**positions of the enemies*///TODO load the template nodes
     private final Map<String,ReadOnlyVector3[]> enemyPositionsMap;
-    /**positions of the medikits*///TODO handle several kinds of medikit
-    private final ReadOnlyVector3[] medikitPositions;
+    /**positions of the medikits*/
+    private final Map<String,ReadOnlyVector3[]> medikitPositionsMap;
     /**root node whose hierarchy contains the geometry of the main model*/
     private Node mainModel;
     /**sky box*/
@@ -90,7 +93,7 @@ public class Level{
     private final BinaryImporter binaryImporter;
     
     public Level(final String label,final String resourceName,final String identifier,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
-    		     final ReadOnlyVector3[] medikitPositions,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
+    		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final String skyboxIdentifier,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
@@ -102,7 +105,7 @@ public class Level{
     	    localObjectives.addAll(Arrays.asList(objectives));
     	this.objectives=Collections.unmodifiableList(localObjectives);
     	this.enemyPositionsMap=enemyPositionsMap;
-    	this.medikitPositions=medikitPositions;
+    	this.medikitPositionsMap=medikitPositionsMap;
     	this.weaponPositionsMap=weaponPositionsMap;
     	this.ammoPositionsMap=ammoPositionsMap;
     	this.skyboxIdentifier=skyboxIdentifier;
@@ -200,27 +203,34 @@ public class Level{
         return(enemyMeshes);
     }
     
-    public List<Node> loadMedikitModels(final Medikit medikit){
+    public List<Node> loadMedikitModels(final MedikitFactory medikitFactory){
     	List<Node> medikitNodes=null;
-    	if(medikit!=null)
-    	    {if(medikitPositions!=null&&medikitPositions.length!=0)
-        	     {//if(medikitNodes==null)
-        		  /**/medikitNodes=new ArrayList<>();
-        		  final String medikitLabel=medikit.getLabel();
-                  final String textureResourceName=medikit.getTextureResourceName();
-         		  final Box medikitBox=new Box(medikitLabel,new Vector3(0,0,0),0.1,0.1,0.1);
-                  final TextureState ts = new TextureState();
-                  ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(textureResourceName)),Texture.MinificationFilter.Trilinear,true));
-                  medikitBox.setRenderState(ts);
-                  for(final ReadOnlyVector3 medikitPos:medikitPositions)
-                      {final Node medikitNode=new Node(medikitLabel);
-                 	   medikitNode.setTranslation(medikitPos);
-                       medikitNode.attachChild(medikitBox);
-                       medikitNode.setUserData(new MedikitUserData(medikit));
-                       medikitNodes.add(medikitNode);
-                      }
-        	     }
+    	if(medikitPositionsMap!=null&&!medikitPositionsMap.isEmpty())
+    	    {final int medikitCount=medikitFactory.getSize();
+    	     for(int medikitIndex=0;medikitIndex<medikitCount;medikitIndex++)
+    	         {final Medikit medikit=medikitFactory.get(medikitIndex);
+    	          final String medikitIdentifier=medikit.getIdentifier();
+   		          final ReadOnlyVector3[] medikitsPos=medikitPositionsMap.get(medikitIdentifier);
+   		          if(medikitsPos!=null&&medikitsPos.length!=0)
+        	          {if(medikitNodes==null)
+        		           medikitNodes=new ArrayList<>();
+        		       final String medikitLabel=medikit.getLabel();
+                       final String textureResourceName=medikit.getTextureResourceName();
+         		       final Box medikitBox=new Box(medikitLabel,new Vector3(0,0,0),0.1,0.1,0.1);
+                       final TextureState ts = new TextureState();
+                       ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(textureResourceName)),Texture.MinificationFilter.Trilinear,true));
+                       medikitBox.setRenderState(ts);
+                       for(final ReadOnlyVector3 medikitPos:medikitsPos)
+                           {final Node medikitNode=new Node(medikitLabel);
+                 	        medikitNode.setTranslation(medikitPos);
+                            medikitNode.attachChild(medikitBox);
+                            medikitNode.setUserData(new MedikitUserData(medikit));
+                            medikitNodes.add(medikitNode);
+                           }
+        	          }
+    	         }
     	    }
+    	
     	return(medikitNodes);
     }
     
@@ -418,10 +428,6 @@ public class Level{
     
     public Map<String,ReadOnlyVector3[]> getEnemyPositionsMap(){
     	return(enemyPositionsMap);
-    }
-    
-    public ReadOnlyVector3[] getMedikitPositions(){
-    	return(medikitPositions);
     }
     
     public String getResourceName(){
