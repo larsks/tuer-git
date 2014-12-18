@@ -92,6 +92,7 @@ import engine.data.ProjectileController;
 import engine.data.ProjectileData;
 import engine.data.SkyboxFactory;
 import engine.data.common.Medikit;
+import engine.data.common.MedikitFactory;
 import engine.data.common.Teleporter;
 import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.TeleporterUserData;
@@ -133,8 +134,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final ArrayList<Node> teleportersList;
     /**typical teleporter*/
     private final Teleporter teleporter;
-    /**typical medical kit*/
-    private final Medikit medikit;
     /**text label showing the ammunition*/
     private final BasicText ammoTextLabel;
     /**text label showing the frame rate*/
@@ -149,6 +148,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final AmmunitionFactory ammunitionFactory;
     /**instance that creates all sky boxes*/
     private final SkyboxFactory skyboxFactory;
+    /**instance that creates all typical medical kits*/
+    private final MedikitFactory medikitFactory;
     /**instance that creates all enemies*/
     private final EnemyFactory enemyFactory;
     /**instance that creates all weapons*/
@@ -306,9 +307,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         projectilesMap=new HashMap<>();
         teleportersList=new ArrayList<>();        
         teleporter=initializeTeleporter();
-        medikit=initializeMedikit();
         //initializes the factories, the build-in ammo and the build-in weapons
         initializeLevelFactory();
+        medikitFactory=initializeMedikitFactory();
         skyboxFactory=initializeSkyboxFactory();
         ammunitionFactory=initializeAmmunitionFactory();
         enemyFactory=initializeEnemyFactory();
@@ -1384,10 +1385,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	return(teleporter);
     }
 
-    private final Medikit initializeMedikit(){
-    	//TODO add the first aid kit (10) and the large medikit (100)
-    	final Medikit medikit=new Medikit("small medikit","SMALL_MEDIKIT","/images/medikit.png","/sounds/powerup.ogg",25);
-    	return(medikit);
+    private final MedikitFactory initializeMedikitFactory(){
+    	final MedikitFactory medikitFactory=new MedikitFactory();
+    	medikitFactory.addNewMedikit("first aid kit","FIRST_AID_KIT","/images/medikit.png","/sounds/powerup.ogg",10);
+    	medikitFactory.addNewMedikit("small medikit","SMALL_MEDIKIT","/images/medikit.png","/sounds/powerup.ogg",25);
+    	medikitFactory.addNewMedikit("large medikit","LARGE_MEDIKIT","/images/medikit.png","/sounds/powerup.ogg",100);
+    	return(medikitFactory);
     }
     
     private final EnemyFactory initializeEnemyFactory(){
@@ -1445,7 +1448,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    case "0":
     	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
     	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)});
-    	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
+    	         medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
     	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
     	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
     	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
@@ -1457,7 +1461,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    case "1":
     	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
     	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)});
-    	         final ReadOnlyVector3[] medikitPositions=new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)};
+    	         final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
+    	         medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
     	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
     	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
    	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
@@ -1494,15 +1499,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
   			     	  teleporter.setPickingUpSoundSampleIdentifier(teleporterSoundSampleIdentifier);
   		         }
   	        }
-  	    final String medikitSoundSamplePath=medikit.getPickingUpSoundSamplePath();
-	    if(medikitSoundSamplePath!=null)
-	        {final URL medikitSoundSampleUrl=GameState.class.getResource(medikitSoundSamplePath);
-		     if(medikitSoundSampleUrl!=null)
-		         {final String medikitSoundSampleIdentifier=getSoundManager().loadSound(medikitSoundSampleUrl);
-		          if(medikitSoundSampleIdentifier!=null)
-		        	  medikit.setPickingUpSoundSampleIdentifier(medikitSoundSampleIdentifier);
-		         }
-	        }
+	    final int medikitCount=medikitFactory.getSize();
+	    for(int medikitIndex=0;medikitIndex<medikitCount;medikitIndex++)
+            {final Medikit medikit=medikitFactory.get(medikitIndex);
+             final String pickingUpSoundSamplePath=medikit.getPickingUpSoundSamplePath();
+   	         if(pickingUpSoundSamplePath!=null)
+   	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+   		              if(pickingUpSoundSampleUrl!=null)
+   		                  {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
+   			               if(pickingUpSoundSampleIdentifier!=null)
+   			            	   medikit.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
+   		                  }
+   	             }
+            }
         final int ammoCount=ammunitionFactory.getSize();
         for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
             {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
@@ -1605,15 +1614,19 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
   			     	  teleporter.setPickingUpSoundSampleIdentifier(null);
   		         }
   	        }
-  	    final String medikitSoundSamplePath=medikit.getPickingUpSoundSamplePath();
-	    if(medikitSoundSamplePath!=null)
-	        {final URL medikitSoundSampleUrl=GameState.class.getResource(medikitSoundSamplePath);
-		     if(medikitSoundSampleUrl!=null)
-		         {getSoundManager().unloadSound(medikitSoundSampleUrl);
-		          if(medikit.getPickingUpSoundSampleIdentifier()!=null)
-		        	  medikit.setPickingUpSoundSampleIdentifier(null);
-		         }
-	        }
+  	    final int medikitCount=medikitFactory.getSize();
+	    for(int medikitIndex=0;medikitIndex<medikitCount;medikitIndex++)
+            {final Medikit medikit=medikitFactory.get(medikitIndex);
+             final String pickingUpSoundSamplePath=medikit.getPickingUpSoundSamplePath();
+   	         if(pickingUpSoundSamplePath!=null)
+   	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+   		              if(pickingUpSoundSampleUrl!=null)
+   		                  {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
+   			               if(medikit.getPickingUpSoundSampleIdentifier()!=null)
+   			            	   medikit.setPickingUpSoundSampleIdentifier(null);
+   		                  }
+   	             }
+            }
         final int ammoCount=ammunitionFactory.getSize();
         for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
             {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
@@ -2100,7 +2113,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadMedikits(){
-    	final List<Node> medikitNodes=level.loadMedikitModels(medikit);
+    	final List<Node> medikitNodes=level.loadMedikitModels(medikitFactory);
     	if(medikitNodes!=null&&!medikitNodes.isEmpty())
     	    {collectibleObjectsList.addAll(medikitNodes);
     	     for(final Node medikitNode:medikitNodes)
