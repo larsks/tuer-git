@@ -372,22 +372,25 @@ public class Level{
     	return(mainModel);
     }
     
-    public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(Skybox skybox){
-		if(skyboxModel==null&&skybox!=null&&skyboxIdentifier!=null)
-		    {final String skyboxLabel=skybox.getLabel();
-			 skyboxModel=new com.ardor3d.scenegraph.extension.Skybox(skyboxLabel,64,64,64);
-		     final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(0))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(2))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(1))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(3))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(5))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(4))),Texture.MinificationFilter.BilinearNearestMipMap,true);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.North,north);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.West,west);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.South,south);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.East,east);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Up,up);
-		     skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Down,down);
+    public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(SkyboxFactory skyboxFactory){
+		if(skyboxModel==null&&skyboxIdentifier!=null)
+		    {final Skybox skybox=skyboxFactory.get(skyboxIdentifier);
+             if(skybox!=null)
+                 {final String skyboxLabel=skybox.getLabel();
+			      skyboxModel=new com.ardor3d.scenegraph.extension.Skybox(skyboxLabel,64,64,64);
+		          final Texture north=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(0))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          final Texture south=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(2))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          final Texture east=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(1))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          final Texture west=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(3))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          final Texture up=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(5))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          final Texture down=TextureManager.load(new URLResourceSource(getClass().getResource(skybox.getTextureResourceName(4))),Texture.MinificationFilter.BilinearNearestMipMap,true);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.North,north);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.West,west);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.South,south);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.East,east);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Up,up);
+		          skyboxModel.setTexture(com.ardor3d.scenegraph.extension.Skybox.Face.Down,down);
+                 }
             }
 		return(skyboxModel);
     }
