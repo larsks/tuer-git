@@ -18,6 +18,7 @@
 package engine.abstraction;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,8 +43,10 @@ public abstract class AbstractFactory<T>{
 	}
 
 	protected boolean add(final String stringId,final T component){
-		boolean success=stringId!=null&&component!=null&&!componentMap.containsKey(stringId)&&
-				        !componentMap.containsValue(component)&&!componentIdentifierMap.containsValue(component);
+		Objects.requireNonNull(stringId,"the string identifier must not be null");
+		Objects.requireNonNull(component,"the component must not be null");
+		boolean success=!componentMap.containsKey(stringId)&&!componentMap.containsValue(component)&&
+				        !componentIdentifierMap.containsValue(component);
 		if(success)
 		    {final int generatedId=autoIncrementalIndex.getAndIncrement();
 			 final Integer generatedIdObj=Integer.valueOf(generatedId);
@@ -59,6 +62,15 @@ public abstract class AbstractFactory<T>{
 		    for(Entry<Integer,T> entry:componentIdentifierMap.entrySet())
 			    if(entry.getValue().equals(component))
 				    id=entry.getKey().intValue();
+		return(id);
+	}
+	
+	public String getStringIdentifier(final T component){
+		String id=null;
+		if(component!=null)
+		    for(Entry<String,T> entry:componentMap.entrySet())
+			    if(entry.getValue().equals(component))
+				    id=entry.getKey();
 		return(id);
 	}
 	
