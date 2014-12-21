@@ -17,14 +17,9 @@
  */
 package engine.weaponry;
 
-import java.util.Objects;
-
 import engine.data.common.Collectible;
 
-public class Weapon extends Collectible implements Comparable<Weapon>{
-	
-	/**unique name*/
-    private final String identifier;
+public class Weapon extends Collectible{
 	/**name of the resource, i.e the binary file containing the 3D model*/
 	private final String resourceName;
     /**path of the sound sample played during a shot or a blow*/
@@ -54,11 +49,10 @@ public class Weapon extends Collectible implements Comparable<Weapon>{
 	//TODO store the duration necessary to reload
 	//TODO: store the template node for cloning without I/O interruption, lazily instantiated, but into another class
 	    
-	public Weapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,final int magazineSize,
+	public Weapon(final String label,final String resourceName,final String pickingUpSoundSamplePath,final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,final int magazineSize,
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		super(label,pickingUpSoundSamplePath);
-		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
 		this.resourceName=resourceName;
 		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
 		this.reloadSoundSamplePath=reloadSoundSamplePath;
@@ -128,31 +122,6 @@ public class Weapon extends Collectible implements Comparable<Weapon>{
 	
 	public final int getAmmunitionPerShot(){
 		return(ammunitionPerShot);
-	}
-	
-	@Override
-	public int hashCode(){
-		return(identifier.hashCode());
-	}
-	
-	@Override
-	public boolean equals(final Object o){
-		final boolean result=o!=null&&o instanceof Weapon&&identifier.equals(((Weapon)o).identifier);
-		return(result);
-	}
-	
-	@Override
-	public int compareTo(final Weapon weapon){
-		return(identifier.compareTo(weapon.identifier));
-	}
-	
-	@Override
-	public final String toString(){
-		return(identifier);
-	}
-	
-	public final String getIdentifier(){
-		return(identifier);
 	}
 	
 	public final int getBlowOrShotDurationInMillis(){

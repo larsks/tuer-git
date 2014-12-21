@@ -28,7 +28,7 @@ public class EnemyFactory extends AbstractFactory<Enemy>{
 	public final boolean addNewEnemy(final String label,final String identifier,final String resourceName,final String[] painSoundSamplePaths){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-		    {final Enemy enemy=new Enemy(label,identifier,resourceName,painSoundSamplePaths);
+		    {final Enemy enemy=new Enemy(label,resourceName,painSoundSamplePaths);
 			 success=add(identifier,enemy);
 		    }
 		return(success);

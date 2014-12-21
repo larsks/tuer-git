@@ -17,7 +17,9 @@
  */
 package engine.data.common;
 
-public abstract class Collectible{
+import java.util.Objects;
+
+public abstract class Collectible implements Comparable<Collectible>{
 	
 	/**name (can contain space)*/
     private final String label;
@@ -28,12 +30,39 @@ public abstract class Collectible{
 	
 	public Collectible(final String label,final String pickingUpSoundSamplePath){
 		super();
-		this.label=label;
+		this.label=Objects.requireNonNull(label,"the label must not be null");
 		this.pickingUpSoundSamplePath=pickingUpSoundSamplePath;
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result;
+		if(o==null||!(o instanceof Collectible))
+		    result=false;
+		else
+		    {final Collectible collectible=(Collectible)o;
+			 result=getLabel().equals(collectible.getLabel());
+		    }
+		return(result);
+	}
+	
+	@Override
+	public int hashCode(){
+		return(label.hashCode());
 	}
 	
 	public String getLabel(){
 		return(label);
+	}
+	
+	@Override
+	public String toString(){
+		return(label);
+	}
+	
+	@Override
+	public int compareTo(final Collectible collectible){
+		return(label.compareTo(collectible.label));
 	}
 	
 	public String getPickingUpSoundSamplePath(){

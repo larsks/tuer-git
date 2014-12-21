@@ -17,47 +17,16 @@
  */
 package engine.weaponry;
 
-import java.util.Objects;
-
 import engine.data.common.Collectible;
 
-public class Ammunition extends Collectible implements Comparable<Ammunition>{
-	
-	/**unique name (cannot contain any space)*/
-    private final String identifier;
+public class Ammunition extends Collectible{
     /**resource name of the texture used by the box of ammunition*/
     private final String textureResourceName;
 	
-    public Ammunition(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath){
+    public Ammunition(final String label,final String textureResourceName,final String pickingUpSoundSamplePath){
     	super(label,pickingUpSoundSamplePath);
-    	this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
     	this.textureResourceName=textureResourceName;
     }
-    
-    @Override
-	public int hashCode(){
-		return(identifier.hashCode());
-	}
-	
-	@Override
-	public boolean equals(final Object o){
-		final boolean result=o!=null&&o instanceof Ammunition&&identifier.equals(((Ammunition)o).identifier);
-		return(result);
-	}
-	
-	@Override
-	public int compareTo(final Ammunition ammunition){
-		return(identifier.compareTo(ammunition.identifier));
-	}
-	
-	@Override
-	public String toString(){
-		return(identifier);
-	}
-	
-	public String getIdentifier(){
-		return(identifier);
-	}
 	
 	public String getTextureResourceName(){
 		return(textureResourceName);
