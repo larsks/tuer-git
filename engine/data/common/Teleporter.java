@@ -17,9 +17,40 @@
  */
 package engine.data.common;
 
-public class Teleporter extends Collectible{
+import java.util.Objects;
 
-	public Teleporter(final String pickingUpSoundSamplePath){
-		super(null,pickingUpSoundSamplePath);
+public class Teleporter extends Collectible implements Comparable<Teleporter>{
+
+	/**unique name (cannot contain any space)*/
+    private final String identifier;
+	
+	public Teleporter(final String label,final String identifier,final String pickingUpSoundSamplePath){
+		super(label,pickingUpSoundSamplePath);
+		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
+	}
+	
+	@Override
+	public int hashCode(){
+		return(identifier.hashCode());
+	}
+	
+	@Override
+	public String toString(){
+		return(identifier);
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result=o!=null&&o instanceof Teleporter&&identifier.equals(((Teleporter)o).identifier);
+		return(result);
+	}
+	
+	@Override
+	public int compareTo(final Teleporter teleporter){
+		return(identifier.compareTo(teleporter.identifier));
+	}
+	
+	public String getIdentifier(){
+		return(identifier);
 	}
 }

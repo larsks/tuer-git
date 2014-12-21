@@ -37,7 +37,7 @@ public final class WeaponContainer{
     public final boolean add(final Node weaponNode,final Weapon weapon){
     	final boolean success;
     	if(weaponNode!=null)
-    	    {final int index=weaponFactory.getId(weapon);
+    	    {final int index=weaponFactory.getIntIdentifier(weapon);
     	     if(weaponsNodes[index]==null)
     	         {weaponsNodes[index]=weaponNode;
     	    	  success=true;
@@ -51,12 +51,12 @@ public final class WeaponContainer{
     }
     
     public final boolean isAvailable(final Weapon weapon){
-    	final int weaponId=weaponFactory.getId(weapon);
+    	final int weaponId=weaponFactory.getIntIdentifier(weapon);
     	return(weaponsNodes[weaponId]!=null);
     }
     
     public final Node getNode(final Weapon weapon){
-    	final int weaponId=weaponFactory.getId(weapon);
+    	final int weaponId=weaponFactory.getIntIdentifier(weapon);
     	return(weaponsNodes[weaponId]);
     }
     

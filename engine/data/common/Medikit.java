@@ -17,6 +17,8 @@
  */
 package engine.data.common;
 
+import java.util.Objects;
+
 public class Medikit extends Collectible implements Comparable<Medikit>{
 
 	/**unique name (cannot contain any space)*/
@@ -28,7 +30,7 @@ public class Medikit extends Collectible implements Comparable<Medikit>{
 	
 	public Medikit(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath,final int health){
 		super(label,pickingUpSoundSamplePath);
-		this.identifier=identifier;
+		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
     	this.textureResourceName=textureResourceName;
 		this.health=health;
 	}
@@ -45,17 +47,13 @@ public class Medikit extends Collectible implements Comparable<Medikit>{
 	
 	@Override
 	public boolean equals(final Object o){
-		final boolean result;
-		if(o==null||!(o instanceof Medikit))
-		    result=false;
-		else
-			result=hashCode()==((Medikit)o).hashCode();
+		final boolean result=o!=null&&o instanceof Medikit&&identifier.equals(((Medikit)o).identifier);
 		return(result);
 	}
 	
 	@Override
 	public int compareTo(final Medikit medikit){
-		return(hashCode()-medikit.hashCode());
+		return(identifier.compareTo(medikit.identifier));
 	}
 	
 	public int getHealth(){

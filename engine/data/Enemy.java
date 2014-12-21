@@ -17,12 +17,14 @@
  */
 package engine.data;
 
+import java.util.Objects;
+
 /**
  * 
  * @author Julien Gouesse
  *
  */
-public class Enemy{
+public class Enemy implements Comparable<Enemy>{
 
 	/**name (can contain space)*/
     private final String label;
@@ -38,7 +40,7 @@ public class Enemy{
 	public Enemy(final String label,final String identifier,final String resourceName,final String[] painSoundSamplePaths){
 		super();
 		this.label=label;
-		this.identifier=identifier;
+		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
 		this.resourceName=resourceName;
 		this.painSoundSamplePaths=painSoundSamplePaths;
 		this.painSoundSampleIdentifiers=painSoundSamplePaths==null?null:new String[painSoundSamplePaths.length];
@@ -50,6 +52,22 @@ public class Enemy{
 	
 	public String getIdentifier(){
 		return(identifier);
+	}
+	
+	@Override
+	public int hashCode(){
+		return(identifier.hashCode());
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result=o!=null&&o instanceof Enemy&&identifier.equals(((Enemy)o).identifier);
+		return(result);
+	}
+	
+	@Override
+	public int compareTo(final Enemy enemy){
+		return(identifier.compareTo(enemy.identifier));
 	}
 	
 	public String getResourceName(){

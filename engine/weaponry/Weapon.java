@@ -17,6 +17,8 @@
  */
 package engine.weaponry;
 
+import java.util.Objects;
+
 import engine.data.common.Collectible;
 
 public class Weapon extends Collectible implements Comparable<Weapon>{
@@ -56,7 +58,7 @@ public class Weapon extends Collectible implements Comparable<Weapon>{
 	        final Ammunition ammunition,final int ammunitionPerShot,
 	        final int blowOrShotDurationInMillis,final boolean fullyAutomatic){
 		super(label,pickingUpSoundSamplePath);
-		this.identifier=identifier;
+		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
 		this.resourceName=resourceName;
 		this.blowOrShotSoundSamplePath=blowOrShotSoundSamplePath;
 		this.reloadSoundSamplePath=reloadSoundSamplePath;
@@ -135,17 +137,13 @@ public class Weapon extends Collectible implements Comparable<Weapon>{
 	
 	@Override
 	public boolean equals(final Object o){
-		final boolean result;
-		if(o==null||!(o instanceof Weapon))
-		    result=false;
-		else
-			result=hashCode()==((Weapon)o).hashCode();
+		final boolean result=o!=null&&o instanceof Weapon&&identifier.equals(((Weapon)o).identifier);
 		return(result);
 	}
 	
 	@Override
-	public final int compareTo(final Weapon weapon){
-		return(hashCode()-weapon.hashCode());
+	public int compareTo(final Weapon weapon){
+		return(identifier.compareTo(weapon.identifier));
 	}
 	
 	@Override

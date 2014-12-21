@@ -19,6 +19,7 @@ package engine.statemachine;
 
 import java.net.URL;
 import java.nio.FloatBuffer;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,7 +73,6 @@ import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
-import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueue;
@@ -94,6 +94,7 @@ import engine.data.SkyboxFactory;
 import engine.data.common.Medikit;
 import engine.data.common.MedikitFactory;
 import engine.data.common.Teleporter;
+import engine.data.common.TeleporterFactory;
 import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.input.Action;
@@ -132,8 +133,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final ArrayList<Node> collectibleObjectsList;
     /**list of teleporters*/
     private final ArrayList<Node> teleportersList;
-    /**typical teleporter*/
-    private final Teleporter teleporter;
     /**text label showing the ammunition*/
     private final BasicText ammoTextLabel;
     /**text label showing the frame rate*/
@@ -144,6 +143,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final BasicText headUpDisplayLabel;
     /**text label of the objectives display*/
     private final BasicText objectivesDisplayLabel;
+    /**instance that creates all teleporters*/
+    private final TeleporterFactory teleporterFactory;
     /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
     /**instance that creates all sky boxes*/
@@ -305,10 +306,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         timer=new ApplicativeTimer();
         collectibleObjectsList=new ArrayList<>();
         projectilesMap=new HashMap<>();
-        teleportersList=new ArrayList<>();        
-        teleporter=initializeTeleporter();
+        teleportersList=new ArrayList<>();
         //initializes the factories, the build-in ammo and the build-in weapons
         initializeLevelFactory();
+        teleporterFactory=initializeTeleporterFactory();
         medikitFactory=initializeMedikitFactory();
         skyboxFactory=initializeSkyboxFactory();
         ammunitionFactory=initializeAmmunitionFactory();
@@ -1380,9 +1381,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         return(objectivesDisplayLabel);
     }
     
-    private final Teleporter initializeTeleporter(){
-    	final Teleporter teleporter=new Teleporter("/sounds/teleporter_use.ogg");
-    	return(teleporter);
+    private final TeleporterFactory initializeTeleporterFactory(){
+    	final TeleporterFactory teleporterFactory=new TeleporterFactory();
+    	teleporterFactory.addNewTeleporter("","","/sounds/teleporter_use.ogg");
+    	return(teleporterFactory);
     }
 
     private final MedikitFactory initializeMedikitFactory(){
@@ -1455,7 +1457,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
     	         final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
     	         ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,new KillAllEnemiesObjective());
+    	         final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
+    	         teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
+    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
@@ -1468,15 +1472,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
    	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
    	             final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
    	             ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,new KillAllEnemiesObjective());
+   	             final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
+   	             teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
+    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
-    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null,"BLUE_SKY");
+    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null,"BLUE_SKY",null);
     	         break;
     	        }
     	    case "3":
-    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null,"BLUE_SKY");
+    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null,"BLUE_SKY",null);
 	             break;
 	            }
     	}
@@ -1490,26 +1496,30 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
      * loads the sound samples
      */
     private final void loadSounds(){
-        final String teleporterSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
-  	    if(teleporterSoundSamplePath!=null)
-  	        {final URL teleporterSoundSampleUrl=GameState.class.getResource(teleporterSoundSamplePath);
-  		     if(teleporterSoundSampleUrl!=null)
-  		         {final String teleporterSoundSampleIdentifier=getSoundManager().loadSound(teleporterSoundSampleUrl);
-  		          if(teleporterSoundSampleIdentifier!=null)
-  			     	  teleporter.setPickingUpSoundSampleIdentifier(teleporterSoundSampleIdentifier);
-  		         }
-  	        }
+  	    final int teleporterCount=teleporterFactory.getSize();
+	    for(int teleporterIndex=0;teleporterIndex<teleporterCount;teleporterIndex++)
+            {final Teleporter teleporter=teleporterFactory.get(teleporterIndex);
+             final String pickingUpSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
+ 	         if(pickingUpSoundSamplePath!=null)
+ 	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+ 		          if(pickingUpSoundSampleUrl!=null)
+ 		              {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
+ 		               if(pickingUpSoundSampleIdentifier!=null)
+ 			               teleporter.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
+ 		              }
+ 	             }
+            }
 	    final int medikitCount=medikitFactory.getSize();
 	    for(int medikitIndex=0;medikitIndex<medikitCount;medikitIndex++)
             {final Medikit medikit=medikitFactory.get(medikitIndex);
              final String pickingUpSoundSamplePath=medikit.getPickingUpSoundSamplePath();
    	         if(pickingUpSoundSamplePath!=null)
    	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
-   		              if(pickingUpSoundSampleUrl!=null)
-   		                  {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
-   			               if(pickingUpSoundSampleIdentifier!=null)
-   			            	   medikit.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
-   		                  }
+   		          if(pickingUpSoundSampleUrl!=null)
+   		              {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
+   			           if(pickingUpSoundSampleIdentifier!=null)
+   			          	   medikit.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
+   		              }
    	             }
             }
         final int ammoCount=ammunitionFactory.getSize();
@@ -1605,26 +1615,30 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
      * unloads the sound samples
      */
     private final void unloadSounds(){
-        final String teleporterSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
-  	    if(teleporterSoundSamplePath!=null)
-  	        {final URL teleporterSoundSampleUrl=GameState.class.getResource(teleporterSoundSamplePath);
-  		     if(teleporterSoundSampleUrl!=null)
-  		         {getSoundManager().unloadSound(teleporterSoundSampleUrl);
-  		          if(teleporter.getPickingUpSoundSampleIdentifier()!=null)
-  			     	  teleporter.setPickingUpSoundSampleIdentifier(null);
-  		         }
-  	        }
+  	    final int teleporterCount=teleporterFactory.getSize();
+	    for(int teleporterIndex=0;teleporterIndex<teleporterCount;teleporterIndex++)
+            {final Teleporter teleporter=teleporterFactory.get(teleporterIndex);
+             final String pickingUpSoundSamplePath=teleporter.getPickingUpSoundSamplePath();
+ 	         if(pickingUpSoundSamplePath!=null)
+ 	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
+ 		          if(pickingUpSoundSampleUrl!=null)
+ 		              {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
+ 			           if(teleporter.getPickingUpSoundSampleIdentifier()!=null)
+ 			               teleporter.setPickingUpSoundSampleIdentifier(null);
+ 		              }
+ 	             }
+            }
   	    final int medikitCount=medikitFactory.getSize();
 	    for(int medikitIndex=0;medikitIndex<medikitCount;medikitIndex++)
             {final Medikit medikit=medikitFactory.get(medikitIndex);
              final String pickingUpSoundSamplePath=medikit.getPickingUpSoundSamplePath();
    	         if(pickingUpSoundSamplePath!=null)
    	             {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
-   		              if(pickingUpSoundSampleUrl!=null)
-   		                  {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
-   			               if(medikit.getPickingUpSoundSampleIdentifier()!=null)
-   			            	   medikit.setPickingUpSoundSampleIdentifier(null);
-   		                  }
+   		          if(pickingUpSoundSampleUrl!=null)
+   		              {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
+   			           if(medikit.getPickingUpSoundSampleIdentifier()!=null)
+   			               medikit.setPickingUpSoundSampleIdentifier(null);
+   		              }
    	             }
             }
         final int ammoCount=ammunitionFactory.getSize();
@@ -2075,41 +2089,12 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadTeleporters(){
-    	//TODO move most of the code into the Level class
-    	switch(level.getIdentifier())
-    	{
-    	    case "0":
-    	        {final Node teleporterNode0=new Node("a teleporter");
-    	    	 final Box teleporterBox0=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-    	    	 teleporterBox0.setRandomColors();
-    	    	 teleporterNode0.setTranslation(116.5,0,213.5);
-    	    	 teleporterNode0.attachChild(teleporterBox0);
-    	    	 teleporterNode0.setUserData(new TeleporterUserData(teleporter,null,"1"));
-    	    	 teleportersList.add(teleporterNode0);
-                 getRoot().attachChild(teleporterNode0);
-                 final Node teleporterNode1=new Node("a teleporter");
-    	    	 final Box teleporterBox1=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-    	    	 teleporterBox1.setRandomColors();
-    	    	 teleporterNode1.setTranslation(120.5,0,214.5);
-    	    	 teleporterNode1.attachChild(teleporterBox1);
-    	    	 teleporterNode1.setUserData(new TeleporterUserData(teleporter,null,"1"));
-    	    	 teleportersList.add(teleporterNode1);
-                 getRoot().attachChild(teleporterNode1);
-    	    	 break;
-    	        }
-    	    case "1":
-    	    	{final Node teleporterNode=new Node("a teleporter");
-    	    	 final Box teleporterBox=new Box("a teleporter",new Vector3(0,0,0),0.5,0.05,0.5);
-    	    	 teleporterBox.setRandomColors();
-    	    	 teleporterNode.setTranslation(94.5,0,129.5);
-    	    	 teleporterNode.attachChild(teleporterBox);
-    	    	 //TODO set the destination
-    	    	 teleporterNode.setUserData(new TeleporterUserData(teleporter,null,"2"));
-    	    	 teleportersList.add(teleporterNode);
-                 getRoot().attachChild(teleporterNode);
-    	    	 break;
-    	    	}
-    	}
+    	final List<Node> teleporterNodes=level.loadTeleporterModels(teleporterFactory);
+    	if(teleporterNodes!=null&&!teleporterNodes.isEmpty())
+    	    {teleportersList.addAll(teleporterNodes);
+    	     for(final Node teleporterNode:teleporterNodes)
+	    	     getRoot().attachChild(teleporterNode);
+    	    }
     }
     
     private final void loadMedikits(){

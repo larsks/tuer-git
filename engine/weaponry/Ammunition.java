@@ -17,6 +17,8 @@
  */
 package engine.weaponry;
 
+import java.util.Objects;
+
 import engine.data.common.Collectible;
 
 public class Ammunition extends Collectible implements Comparable<Ammunition>{
@@ -28,7 +30,7 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	
     public Ammunition(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath){
     	super(label,pickingUpSoundSamplePath);
-    	this.identifier=identifier;
+    	this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
     	this.textureResourceName=textureResourceName;
     }
     
@@ -39,17 +41,13 @@ public class Ammunition extends Collectible implements Comparable<Ammunition>{
 	
 	@Override
 	public boolean equals(final Object o){
-		final boolean result;
-		if(o==null||!(o instanceof Ammunition))
-		    result=false;
-		else
-			result=hashCode()==((Ammunition)o).hashCode();
+		final boolean result=o!=null&&o instanceof Ammunition&&identifier.equals(((Ammunition)o).identifier);
 		return(result);
 	}
 	
 	@Override
 	public int compareTo(final Ammunition ammunition){
-		return(hashCode()-ammunition.hashCode());
+		return(identifier.compareTo(ammunition.identifier));
 	}
 	
 	@Override

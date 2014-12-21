@@ -25,7 +25,7 @@ public abstract class AbstractFactory<T>{
 	
 	protected final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
 	/**
-	 * map containing human readable identifiers
+	 * map containing string identifiers
 	 * for its components
 	 */
 	protected final HashMap<String,T> componentMap;
@@ -53,7 +53,7 @@ public abstract class AbstractFactory<T>{
 		return(success);
 	}
 	
-	public int getId(final T component){
+	public int getIntIdentifier(final T component){
 		int id=-1;
 		if(component!=null)
 		    for(Entry<Integer,T> entry:componentIdentifierMap.entrySet())
