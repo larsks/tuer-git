@@ -66,7 +66,7 @@ import engine.weaponry.WeaponFactory;
  * @author Julien Gouesse
  *
  */
-public class Level{
+public class Level implements Comparable<Level>{
 	/**human readable name*/
 	private final String label;
 	/**unique identifier, must be greater than or equal to zero*/
@@ -102,7 +102,7 @@ public class Level{
     		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
     	super();
-    	this.label=label;
+    	this.label=Objects.requireNonNull(label,"the label must not be null");
     	this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
     	this.resourceName=resourceName;
     	this.enemyPositionsMap=enemyPositionsMap;
@@ -452,9 +452,36 @@ public class Level{
     	return(identifier);
     }
     
-    public String getLabel(){
-    	return(label);
-    }
+    @Override
+	public boolean equals(final Object o){
+		final boolean result;
+		if(o==null||!(o instanceof Level))
+		    result=false;
+		else
+		    {final Level level=(Level)o;
+			 result=getLabel().equals(level.getLabel());
+		    }
+		return(result);
+	}
+	
+	@Override
+	public int hashCode(){
+		return(label.hashCode());
+	}
+	
+	public String getLabel(){
+		return(label);
+	}
+	
+	@Override
+	public String toString(){
+		return(label);
+	}
+	
+	@Override
+	public int compareTo(final Level level){
+		return(label.compareTo(level.label));
+	}
     
     @Deprecated
     public boolean[][] getCollisionMap(){

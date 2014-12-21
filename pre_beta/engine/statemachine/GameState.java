@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -80,10 +81,12 @@ import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
+
 import engine.data.Enemy;
 import engine.data.EnemyData;
 import engine.data.EnemyFactory;
 import engine.data.Level;
+import engine.data.LevelFactory;
 import engine.data.Objective;
 import engine.data.ObjectiveStatus;
 import engine.data.PlayerData;
@@ -159,6 +162,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final EnemyFactory enemyFactory;
     /**instance that creates all weapons*/
     private final WeaponFactory weaponFactory;
+    /**instance that creates all levels*/
+    private final LevelFactory levelFactory;
     /**timer that can be paused and used to measure the elapsed time*/
     private final ApplicativeTimer timer;
     
@@ -312,7 +317,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         projectilesMap=new HashMap<>();
         teleportersList=new ArrayList<>();
         //initializes the factories, the build-in ammo and the build-in weapons
-        initializeLevelFactory();
         teleporterFactory=initializeTeleporterFactory();
         medikitFactory=initializeMedikitFactory();
         skyboxFactory=initializeSkyboxFactory();
@@ -320,6 +324,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         ammunitionBoxFactory=initializeAmmunitionBoxFactory();
         enemyFactory=initializeEnemyFactory();
         weaponFactory=initializeWeaponFactory();
+        levelFactory=initializeLevelFactory();
         this.canvas=canvas;
         final Camera cam=canvas.getCanvasRenderer().getCamera();
         //creates a node that follows the camera
@@ -1414,8 +1419,40 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	return(enemyFactory);
     }
     
-    private final void initializeLevelFactory(){
+    private final LevelFactory initializeLevelFactory(){
     	//TODO split the Level class into 2 classes so that the builder manages the models
+    	final LevelFactory levelFactory=new LevelFactory();
+    	{
+    	    final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
+            enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)});
+            final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
+            medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
+            final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
+            weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+            weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+            final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
+            ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+            final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
+            teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
+            levelFactory.addNewLevel("Tutorial","0","/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+        }
+    	{
+    		final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
+	        enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)});
+	        final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
+	        medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
+	        final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
+	        weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
+	        weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
+	        final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
+	        ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+	        final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
+	        teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
+	        levelFactory.addNewLevel("Museum","1","/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+    	}
+    	levelFactory.addNewLevel("Outdoor","2","/abin/LID2.abin",null,null,null,null,"BLUE_SKY",null);
+    	levelFactory.addNewLevel("Bagnolet","3","/abin/LID3.abin",null,null,null,null,"BLUE_SKY",null);
+    	return(levelFactory);
     }
     
     private final SkyboxFactory initializeSkyboxFactory(){
@@ -1463,48 +1500,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     protected void setLevelIdentifier(final String levelIdentifier){
-    	//TODO use a factory for the levels
-    	switch(levelIdentifier)
-    	{
-    	    case "0":
-    	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
-    	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219)});
-    	         final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
-    	         medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
-    	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
-    	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
-    	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
-    	         ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-    	         final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
-    	         teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
-    	         level=new Level("Tutorial",levelIdentifier,"/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
-    	         break;
-    	        }
-    	    case "1":
-    	        {final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
-    	         enemyPositionsMap.put("SOLDIER",new ReadOnlyVector3[]{new Vector3(118.5,0.4,219),new Vector3(117.5,0.4,219)});
-    	         final Map<String,ReadOnlyVector3[]> medikitPositions=new HashMap<>();
-    	         medikitPositions.put("SMALL_MEDIKIT",new ReadOnlyVector3[]{new Vector3(112.5,0.1,220.5)});
-    	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
-    	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
-   	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-   	             final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
-   	             ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
-   	             final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
-   	             teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
-    	         level=new Level("Museum",levelIdentifier,"/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
-    	         break;
-    	        }
-    	    case "2":
-    	        {level=new Level("Outdoor",levelIdentifier,"/abin/LID2.abin",null,null,null,null,"BLUE_SKY",null);
-    	         break;
-    	        }
-    	    case "3":
-    	        {level=new Level("Bagnolet",levelIdentifier,"/abin/LID3.abin",null,null,null,null,"BLUE_SKY",null);
-	             break;
-	            }
-    	}
+    	final Level level=levelFactory.get(levelIdentifier);
+    	this.level=level;
     }
     
     public String getLevelLabel(){
