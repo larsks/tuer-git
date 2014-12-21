@@ -28,8 +28,6 @@ public class Enemy implements Comparable<Enemy>{
 
 	/**name (can contain space)*/
     private final String label;
-	/**unique name*/
-    private final String identifier;
 	/**name of the resource, i.e the binary file containing the 3D model*/
 	private final String resourceName;
 	/**paths of the sounds played when the enemy is hurt*/
@@ -37,10 +35,9 @@ public class Enemy implements Comparable<Enemy>{
 	/**source names of the sounds played when the enemy is hurt*/
 	private final String[] painSoundSampleIdentifiers;
 	
-	public Enemy(final String label,final String identifier,final String resourceName,final String[] painSoundSamplePaths){
+	public Enemy(final String label,final String resourceName,final String[] painSoundSamplePaths){
 		super();
-		this.label=label;
-		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
+		this.label=Objects.requireNonNull(label,"the label must not be null");
 		this.resourceName=resourceName;
 		this.painSoundSamplePaths=painSoundSamplePaths;
 		this.painSoundSampleIdentifiers=painSoundSamplePaths==null?null:new String[painSoundSamplePaths.length];
@@ -50,24 +47,20 @@ public class Enemy implements Comparable<Enemy>{
 		return(label);
 	}
 	
-	public String getIdentifier(){
-		return(identifier);
-	}
-	
 	@Override
 	public int hashCode(){
-		return(identifier.hashCode());
+		return(label.hashCode());
 	}
 	
 	@Override
 	public boolean equals(final Object o){
-		final boolean result=o!=null&&o instanceof Enemy&&identifier.equals(((Enemy)o).identifier);
+		final boolean result=o!=null&&o instanceof Enemy&&label.equals(((Enemy)o).label);
 		return(result);
 	}
 	
 	@Override
 	public int compareTo(final Enemy enemy){
-		return(identifier.compareTo(enemy.identifier));
+		return(label.compareTo(enemy.label));
 	}
 	
 	public String getResourceName(){

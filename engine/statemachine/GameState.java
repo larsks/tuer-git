@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -80,6 +81,7 @@ import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
+
 import engine.data.Enemy;
 import engine.data.EnemyData;
 import engine.data.EnemyFactory;
@@ -323,8 +325,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         //attaches a node for the crosshair to the player node
         final Node crosshairNode=createCrosshairNode();
         playerNode.attachChild(crosshairNode);
+        //sets the limits of the ammunition containers used by the player
+        final Map<Ammunition,Integer> ammunitionMaxCountMap=new HashMap<>();
+        final int ammoCount=ammunitionFactory.getSize();
+	    for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
+	        {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
+	         //FIXME put more reasonable values into this map, a player shouldn't be able to have 1000 rockets
+	         ammunitionMaxCountMap.put(ammo,Integer.valueOf(1000));
+	        }
         //builds the player data
-        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,true){
+        playerData=new PlayerData(playerNode,ammunitionFactory,weaponFactory,ammunitionMaxCountMap,true){
         	
         	private final FloatBuffer projectileVertexBuffer;
         	
@@ -1459,7 +1469,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	         ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
     	         final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
     	         teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
-    	         level=new Level("Tutorial","/abin/LID0.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Tutorial",levelIdentifier,"/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
@@ -1474,15 +1484,15 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
    	             ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
    	             final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
    	             teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
-    	         level=new Level("Museum","/abin/LID1.abin",levelIdentifier,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Museum",levelIdentifier,"/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
-    	        {level=new Level("Outdoor","/abin/LID2.abin",levelIdentifier,null,null,null,null,"BLUE_SKY",null);
+    	        {level=new Level("Outdoor",levelIdentifier,"/abin/LID2.abin",null,null,null,null,"BLUE_SKY",null);
     	         break;
     	        }
     	    case "3":
-    	        {level=new Level("Bagnolet","/abin/LID3.abin",levelIdentifier,null,null,null,null,"BLUE_SKY",null);
+    	        {level=new Level("Bagnolet",levelIdentifier,"/abin/LID3.abin",null,null,null,null,"BLUE_SKY",null);
 	             break;
 	            }
     	}
@@ -2116,7 +2126,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory);
+    	//FIXME find a more flexible mean of managing ammunition boxes
+    	final Map<String,Integer> ammunitionCountMap=new HashMap<>();
+    	final int ammoCount=ammunitionFactory.getSize();
+	    for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
+	        {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
+	         final String identifier=ammunitionFactory.getStringIdentifier(ammo);
+	         //FIXME put more reasonable values into this map
+	         ammunitionCountMap.put(identifier,Integer.valueOf(30));
+	        }
+    	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory,ammunitionCountMap);
     	if(ammoNodes!=null&&!ammoNodes.isEmpty())
     	    {collectibleObjectsList.addAll(ammoNodes);
     	     for(final Node ammoNode:ammoNodes)

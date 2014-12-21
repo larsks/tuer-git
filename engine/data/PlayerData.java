@@ -21,6 +21,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
@@ -85,7 +86,7 @@ public class PlayerData {
 	
 	private static final double ATTACK_WEAPON_MAXIMUM_ORDINATE=0;
 	
-	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final boolean rightHanded){
+	public PlayerData(final CameraNode cameraNode,final AmmunitionFactory ammunitionFactory,final WeaponFactory weaponFactory,final Map<Ammunition,Integer> ammunitionMaxCountMap,final boolean rightHanded){
 		this.uid=autoIncrementalIndex.getAndIncrement();
 		this.cameraNode=cameraNode;
 		this.weaponFactory=weaponFactory;
@@ -95,7 +96,7 @@ public class PlayerData {
 		dualWeaponUseEnabled=false;
 		primaryHandWeaponContainer=new WeaponContainer(weaponFactory);
 		secondaryHandWeaponContainer=new WeaponContainer(weaponFactory);
-		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory);
+		ammoContainerContainer=new AmmunitionContainerContainer(ammunitionFactory,ammunitionMaxCountMap);
 		this.rightHanded=rightHanded;
 	}
 	

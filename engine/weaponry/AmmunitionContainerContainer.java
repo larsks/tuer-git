@@ -17,18 +17,31 @@
  */
 package engine.weaponry;
 
+import java.util.Map;
+
+/**
+ * Container of ammunition containers, one ammunition container per ammunition type
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class AmmunitionContainerContainer{
 	
     private final AmmunitionContainer[] ammunitionContainers;
     
     private final AmmunitionFactory ammunitionFactory;
 	
-	public AmmunitionContainerContainer(final AmmunitionFactory ammunitionFactory){
+	public AmmunitionContainerContainer(final AmmunitionFactory ammunitionFactory,final Map<Ammunition,Integer> ammunitionMaxCountMap){
 		this.ammunitionFactory=ammunitionFactory;
 		ammunitionContainers=new AmmunitionContainer[ammunitionFactory.getSize()];
-		for(int i=0;i<ammunitionContainers.length;i++)
-			//FIXME use the ammunition to set the maximum count of ammo
-			ammunitionContainers[i]=new AmmunitionContainer(1000);
+		for(int ammoIndex=0;ammoIndex<ammunitionContainers.length;ammoIndex++)
+		    {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
+		     final Integer ammunitionMaxCountObj=ammunitionMaxCountMap.get(ammo);
+		     if(ammunitionMaxCountObj!=null)
+		         {final int ammunitionMaxCount=ammunitionMaxCountObj.intValue();
+		    	  ammunitionContainers[ammoIndex]=new AmmunitionContainer(ammunitionMaxCount);
+		         }
+		    }
 	}
 	
 	public final void empty(){

@@ -17,6 +17,12 @@
  */
 package engine.weaponry;
 
+/**
+ * Container of ammunition (of a single type)
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class AmmunitionContainer{
 
 	private int ammunitionCount;
