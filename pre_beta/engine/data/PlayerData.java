@@ -26,7 +26,7 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.extension.CameraNode;
 
-import engine.data.common.userdata.AmmunitionUserData;
+import engine.data.common.userdata.AmmunitionBoxUserData;
 import engine.data.common.userdata.CollectibleUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.WeaponUserData;
@@ -117,8 +117,8 @@ public class PlayerData {
 		    	 if(userData instanceof MedikitUserData)
 		    		 result=collectMedikit(collectible,(MedikitUserData)userData);
 		    	 else
-		    		 if(userData instanceof AmmunitionUserData)
-		    			 result=collectAmmunition(collectible,(AmmunitionUserData)userData);
+		    		 if(userData instanceof AmmunitionBoxUserData)
+		    			 result=collectAmmunitionBox(collectible,(AmmunitionBoxUserData)userData);
 		    	         //handles here the other kinds of collectible objects
 		    	     else
 		    		     result=0;
@@ -148,7 +148,7 @@ public class PlayerData {
 		return(result?1:0);
 	}
 	
-	protected int collectAmmunition(final Node collectible,final AmmunitionUserData ammoUserData){
+	protected int collectAmmunitionBox(final Node collectible,final AmmunitionBoxUserData ammoUserData){
 		final int result;
 		result=ammoContainerContainer.add(ammoUserData.getAmmunition(),ammoUserData.getAmmunitionCount());
 		return(result);
