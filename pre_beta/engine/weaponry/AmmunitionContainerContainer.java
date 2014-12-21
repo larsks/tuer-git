@@ -37,22 +37,22 @@ public class AmmunitionContainerContainer{
 	}
 	
 	public final int getMax(final Ammunition ammunition){
-		final int ammunitionId=ammunitionFactory.getId(ammunition);
+		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
 		return(ammunitionContainers[ammunitionId].getAmmunitionMaxCount());
 	}
 	
 	public final int get(final Ammunition ammunition){
-		final int ammunitionId=ammunitionFactory.getId(ammunition);
+		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
 		return(ammunitionContainers[ammunitionId].getAmmunitionCount());
 	}
 	
 	public final int add(final Ammunition ammunition,final int ammunitionCountToAdd){
-		final int ammunitionId=ammunitionFactory.getId(ammunition);
+		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
 		return(ammunitionContainers[ammunitionId].add(ammunitionCountToAdd));
 	}
 	
 	public final int remove(final Ammunition ammunition,final int ammunitionCountToRemove){
-		final int ammunitionId=ammunitionFactory.getId(ammunition);
+		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
 		return(ammunitionContainers[ammunitionId].remove(ammunitionCountToRemove));
 	}
 }

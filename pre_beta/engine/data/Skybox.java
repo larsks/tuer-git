@@ -17,13 +17,15 @@
  */
 package engine.data;
 
+import java.util.Objects;
+
 /**
  * 
  * 
  * @author Julien Gouesse
  *
  */
-public class Skybox{
+public class Skybox implements Comparable<Skybox>{
 
 	/**name (can contain space)*/
     private final String label;
@@ -36,7 +38,7 @@ public class Skybox{
 	public Skybox(final String label,final String identifier,final String[] textureResourceNames){
 		super();
 		this.label=label;
-		this.identifier=identifier;
+		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
 		this.textureResourceNames=textureResourceNames;
 	}
 	
@@ -51,6 +53,22 @@ public class Skybox{
 	
 	public String getIdentifier(){
 		return(identifier);
+	}
+	
+	@Override
+	public int hashCode(){
+		return(identifier.hashCode());
+	}
+	
+	@Override
+	public boolean equals(final Object o){
+		final boolean result=o!=null&&o instanceof Skybox&&identifier.equals(((Skybox)o).identifier);
+		return(result);
+	}
+	
+	@Override
+	public int compareTo(final Skybox skybox){
+		return(identifier.compareTo(skybox.identifier));
 	}
 	
 	public int getTextureResourceNameCount(){

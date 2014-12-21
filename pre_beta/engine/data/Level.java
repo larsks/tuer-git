@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
@@ -46,8 +47,11 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 import engine.data.common.Medikit;
 import engine.data.common.MedikitFactory;
+import engine.data.common.Teleporter;
+import engine.data.common.TeleporterFactory;
 import engine.data.common.userdata.AmmunitionUserData;
 import engine.data.common.userdata.MedikitUserData;
+import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
@@ -89,12 +93,14 @@ public class Level{
     private final Map<String,ReadOnlyVector3[]> ammoPositionsMap;
     
     private final String skyboxIdentifier;
-    //TODO teleporters
+    /**map of the teleporter positions sorted by type*/
+    private final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap;
+    
     private final BinaryImporter binaryImporter;
     
     public Level(final String label,final String resourceName,final String identifier,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
-    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final String skyboxIdentifier,final Objective... objectives){
+    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
     	super();
     	this.binaryImporter=new BinaryImporter();
     	this.label=label;
@@ -109,6 +115,7 @@ public class Level{
     	this.weaponPositionsMap=weaponPositionsMap;
     	this.ammoPositionsMap=ammoPositionsMap;
     	this.skyboxIdentifier=skyboxIdentifier;
+    	this.teleporterPositionsMap=teleporterPositionsMap;
     }
     
     @Deprecated
@@ -203,6 +210,38 @@ public class Level{
         return(enemyMeshes);
     }
     
+    public List<Node> loadTeleporterModels(final TeleporterFactory teleporterFactory){
+    	List<Node> teleporterNodes=null;
+    	if(teleporterPositionsMap!=null&&!teleporterPositionsMap.isEmpty())
+    	    {final int teleporterCount=teleporterFactory.getSize();
+    	     for(int teleporterIndex=0;teleporterIndex<teleporterCount;teleporterIndex++)
+    	         {final Teleporter teleporter=teleporterFactory.get(teleporterIndex);
+    	    	  final String teleporterIdentifier=teleporter.getIdentifier();
+    	    	  final Entry<String,ReadOnlyVector3[]> entry=teleporterPositionsMap.get(teleporterIdentifier);
+    	    	  if(entry!=null)
+    	    	      {final ReadOnlyVector3[] teleportersPos=entry.getValue();
+    	    	       if(teleportersPos!=null&&teleportersPos.length!=0)
+    	    	           {if(teleporterNodes==null)
+    	    		        	teleporterNodes=new ArrayList<>();
+    	    	            final String teleportersDestinationLevelIdentifier=entry.getKey();
+    	    	            final String teleporterLabel=teleporter.getLabel();
+    	    	            for(final ReadOnlyVector3 teleporterPos:teleportersPos)
+    	    	                {final Node teleporterNode=new Node(teleporterLabel);
+    	    	                 final Box teleporterBox=new Box(teleporterLabel,new Vector3(0,0,0),0.5,0.05,0.5);
+    	    	                 teleporterBox.setRandomColors();
+    	    	                 teleporterNode.setTranslation(teleporterPos);
+    	    	                 teleporterNode.attachChild(teleporterBox);
+    	    	                 //TODO set the destination
+    	    	    	    	 teleporterNode.setUserData(new TeleporterUserData(teleporter,null,teleportersDestinationLevelIdentifier));
+    	    	    	    	 teleporterNodes.add(teleporterNode);
+    	    	                }
+    	    	           }
+    	    	      }
+    	         }
+    	    }
+    	return(teleporterNodes);
+    }
+    
     public List<Node> loadMedikitModels(final MedikitFactory medikitFactory){
     	List<Node> medikitNodes=null;
     	if(medikitPositionsMap!=null&&!medikitPositionsMap.isEmpty())
@@ -251,7 +290,7 @@ public class Level{
     			       for(final ReadOnlyVector3 ammoPos:ammosPos)
     		               {final Node ammoNode=new Node(ammoLabel);
     	                    final Box ammoBox=new Box(ammoLabel,new Vector3(0,0,0),0.1,0.1,0.1);
-    	                    final TextureState ts = new TextureState();
+    	                    final TextureState ts=new TextureState();
     	                    ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(ammoTextureResourceName)),Texture.MinificationFilter.Trilinear,true));
     	                    ammoBox.setRenderState(ts);
     	                    ammoNode.setTranslation(ammoPos);

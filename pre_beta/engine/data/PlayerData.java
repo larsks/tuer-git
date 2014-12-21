@@ -832,7 +832,7 @@ public class PlayerData {
     	          else
     	        	  //tries to use the same weapon, only changes the number of weapons in use
     	    	      firstInitialFactor=0;
-    	          final int weaponInUseId=weaponFactory.getId(weaponInUse);
+    	          final int weaponInUseId=weaponFactory.getIntIdentifier(weaponInUse);
     	    	  firstWeaponIndex=((weaponInUseId+weaponCount)+(weaponIndexMultiplier*firstInitialFactor))%weaponCount;
     	    	 }
     	     else
