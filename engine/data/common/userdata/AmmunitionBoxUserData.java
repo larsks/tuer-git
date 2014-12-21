@@ -15,46 +15,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package engine.weaponry;
+package engine.data.common.userdata;
 
-public class Ammunition implements Comparable<Ammunition>{
-    
-	/**name (can contain space)*/
-    private final String label;
+import engine.data.common.AmmunitionBox;
+import engine.weaponry.Ammunition;
+
+/**
+ * user date of an ammunition box
+ * 
+ * @author Julien Gouesse
+ *
+ */
+public final class AmmunitionBoxUserData extends CollectibleUserData<AmmunitionBox>{
 	
-    public Ammunition(final String label){
-    	super();
-    	this.label=label;
-    }
-    
-    @Override
-	public int hashCode(){
-		return(label.hashCode());
-	}
-	
-	public String getLabel(){
-		return(label);
+	public AmmunitionBoxUserData(final AmmunitionBox ammunitionBox){
+		super(ammunitionBox,ammunitionBox.getAmmunition().getLabel());
 	}
 	
 	@Override
-	public String toString(){
-		return(label);
+	public String getPickingUpSoundSampleIdentifier(){
+		return(collectible.getPickingUpSoundSampleIdentifier());
 	}
 	
-	@Override
-	public int compareTo(final Ammunition ammunition){
-		return(label.compareTo(ammunition.label));
+	public final AmmunitionBox getAmmunitionBox(){
+		return(collectible);
 	}
 	
-	@Override
-	public boolean equals(final Object o){
-		final boolean result;
-		if(o==null||!(o instanceof Ammunition))
-		    result=false;
-		else
-		    {final Ammunition ammunition=(Ammunition)o;
-			 result=getLabel().equals(ammunition.getLabel());
-		    }
-		return(result);
+	public final int getAmmunitionCount(){
+		return(collectible.getAmmunitionCount());
+	}
+	
+	public Ammunition getAmmunition(){
+		return(collectible.getAmmunition());
 	}
 }

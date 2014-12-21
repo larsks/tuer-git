@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
-
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
@@ -45,20 +44,19 @@ import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
-
+import engine.data.common.AmmunitionBox;
+import engine.data.common.AmmunitionBoxFactory;
 import engine.data.common.Medikit;
 import engine.data.common.MedikitFactory;
 import engine.data.common.Teleporter;
 import engine.data.common.TeleporterFactory;
-import engine.data.common.userdata.AmmunitionUserData;
+import engine.data.common.userdata.AmmunitionBoxUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
 import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
-import engine.weaponry.Ammunition;
-import engine.weaponry.AmmunitionFactory;
 import engine.weaponry.Weapon;
 import engine.weaponry.WeaponFactory;
 
@@ -81,8 +79,8 @@ public class Level{
     private final Map<String,ReadOnlyVector3[]> medikitPositionsMap;
     /**map of the weapon positions sorted by type*/
     private final Map<String,ReadOnlyVector3[]> weaponPositionsMap;
-    /**map of the ammunition positions sorted by type*/
-    private final Map<String,ReadOnlyVector3[]> ammoPositionsMap;
+    /**map of the ammunition box positions sorted by type*/
+    private final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap;
     /**sky box identifier, can be null if there is no sky box*/
     private final String skyboxIdentifier;
     /**map of the teleporter positions sorted by type*/
@@ -102,7 +100,7 @@ public class Level{
     
     public Level(final String label,final String identifier,final String resourceName,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
-    		     final Map<String,ReadOnlyVector3[]> ammoPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
+    		     final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
     	super();
     	this.label=label;
     	this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
@@ -110,7 +108,7 @@ public class Level{
     	this.enemyPositionsMap=enemyPositionsMap;
     	this.medikitPositionsMap=medikitPositionsMap;
     	this.weaponPositionsMap=weaponPositionsMap;
-    	this.ammoPositionsMap=ammoPositionsMap;
+    	this.ammoBoxPositionsMap=ammoBoxPositionsMap;
     	this.skyboxIdentifier=skyboxIdentifier;
     	this.teleporterPositionsMap=teleporterPositionsMap;
     	final List<Objective> localObjectives=new ArrayList<>();
@@ -276,39 +274,35 @@ public class Level{
     	return(medikitNodes);
     }
     
-    public List<Node> loadAmmoModels(final AmmunitionFactory ammunitionFactory,final Map<String,Integer> ammunitionCountMap){
-    	List<Node> ammoNodes=null;
-    	if(ammoPositionsMap!=null&&!ammoPositionsMap.isEmpty())
-    	    {final int ammoCount=ammunitionFactory.getSize();
-    	     for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
-    	         {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
-    	          final String ammoIdentifier=ammunitionFactory.getStringIdentifier(ammo);
-    		      final ReadOnlyVector3[] ammosPos=ammoPositionsMap.get(ammoIdentifier);
-    		      if(ammosPos!=null&&ammosPos.length!=0)
-    			      {if(ammoNodes==null)
-    			    	   ammoNodes=new ArrayList<>();
-    		    	   final String ammoLabel=ammo.getLabel();
-   			           final String ammoTextureResourceName=ammo.getTextureResourceName();
-   			           final Integer ammunitionCountObj=ammunitionCountMap.get(ammoIdentifier);
-   			           if(ammunitionCountObj!=null)
-   			               {final int ammunitionCount=ammunitionCountObj.intValue();
-   			                //TODO create a template node and copy it
-    			            for(final ReadOnlyVector3 ammoPos:ammosPos)
-    		                    {final Node ammoNode=new Node(ammoLabel);
-    	                         final Box ammoBox=new Box(ammoLabel,new Vector3(0,0,0),0.1,0.1,0.1);
-    	                         final TextureState ts=new TextureState();
-    	                         ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(ammoTextureResourceName)),Texture.MinificationFilter.Trilinear,true));
-    	                         ammoBox.setRenderState(ts);
-    	                         ammoNode.setTranslation(ammoPos);
-    	                         ammoNode.attachChild(ammoBox);
-    	                         ammoNode.setUserData(new AmmunitionUserData(ammunitionFactory.get(ammoIdentifier),ammunitionCount));
-    	                         ammoNodes.add(ammoNode);
-    		                    }
-   			               }
-    			      }
-    	         }
-    	    }
-    	return(ammoNodes);
+    public List<Node> loadAmmoBoxModels(final AmmunitionBoxFactory ammunitionBoxFactory){
+    	List<Node> ammoBoxNodes=null;
+    	if(ammoBoxPositionsMap!=null&&!ammoBoxPositionsMap.isEmpty())
+	        {final int ammoBoxCount=ammunitionBoxFactory.getSize();
+	         for(int ammoBoxIndex=0;ammoBoxIndex<ammoBoxCount;ammoBoxIndex++)
+	         {final AmmunitionBox ammoBox=ammunitionBoxFactory.get(ammoBoxIndex);
+	          final String ammoBoxIdentifier=ammunitionBoxFactory.getStringIdentifier(ammoBox);
+		      final ReadOnlyVector3[] ammoBoxesPos=ammoBoxPositionsMap.get(ammoBoxIdentifier);
+		      if(ammoBoxesPos!=null&&ammoBoxesPos.length!=0)
+			      {if(ammoBoxNodes==null)
+			    	   ammoBoxNodes=new ArrayList<>();
+		    	   final String ammoLabel=ammoBox.getLabel();
+			       final String ammoTextureResourceName=ammoBox.getTextureResourceName();
+			       //TODO create a template node and copy it
+			       for(final ReadOnlyVector3 ammoBoxPos:ammoBoxesPos)
+		               {final Node ammoBoxNode=new Node(ammoLabel);
+	                    final Box ammoBoxBox=new Box(ammoLabel,new Vector3(0,0,0),0.1,0.1,0.1);
+	                    final TextureState ts=new TextureState();
+	                    ts.setTexture(TextureManager.load(new URLResourceSource(getClass().getResource(ammoTextureResourceName)),Texture.MinificationFilter.Trilinear,true));
+	                    ammoBoxBox.setRenderState(ts);
+	                    ammoBoxNode.setTranslation(ammoBoxPos);
+	                    ammoBoxNode.attachChild(ammoBoxBox);
+	                    ammoBoxNode.setUserData(new AmmunitionBoxUserData(ammunitionBoxFactory.get(ammoBoxIdentifier)));
+	                    ammoBoxNodes.add(ammoBoxNode);
+		               }
+			      }
+	         }
+	    }
+    	return(ammoBoxNodes);
     }
     
     public List<Node> loadWeaponModels(final WeaponFactory weaponFactory){

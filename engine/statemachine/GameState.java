@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.bounding.CollisionTree;
 import com.ardor3d.bounding.CollisionTreeManager;
@@ -81,7 +80,6 @@ import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
-
 import engine.data.Enemy;
 import engine.data.EnemyData;
 import engine.data.EnemyFactory;
@@ -93,6 +91,8 @@ import engine.data.ProfileData;
 import engine.data.ProjectileController;
 import engine.data.ProjectileData;
 import engine.data.SkyboxFactory;
+import engine.data.common.AmmunitionBox;
+import engine.data.common.AmmunitionBoxFactory;
 import engine.data.common.Medikit;
 import engine.data.common.MedikitFactory;
 import engine.data.common.Teleporter;
@@ -149,6 +149,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final TeleporterFactory teleporterFactory;
     /**instance that creates all ammunitions*/
     private final AmmunitionFactory ammunitionFactory;
+    /**instance that creates all ammunition boxes*/
+    private final AmmunitionBoxFactory ammunitionBoxFactory;
     /**instance that creates all sky boxes*/
     private final SkyboxFactory skyboxFactory;
     /**instance that creates all typical medical kits*/
@@ -315,6 +317,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
         medikitFactory=initializeMedikitFactory();
         skyboxFactory=initializeSkyboxFactory();
         ammunitionFactory=initializeAmmunitionFactory();
+        ammunitionBoxFactory=initializeAmmunitionBoxFactory();
         enemyFactory=initializeEnemyFactory();
         weaponFactory=initializeWeaponFactory();
         this.canvas=canvas;
@@ -1424,20 +1427,26 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     private final AmmunitionFactory initializeAmmunitionFactory(){
     	final AmmunitionFactory ammunitionFactory=new AmmunitionFactory();
         /**American assault rifle*/
-        ammunitionFactory.addNewAmmunition("5.56mm bullet","BULLET_5_56MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("5.56mm bullet","BULLET_5_56MM");
     	/**Russian assault rifle*/
-        ammunitionFactory.addNewAmmunition("7.62mm bullet","BULLET_7_62MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("7.62mm bullet","BULLET_7_62MM");
     	/**American pistols and sub-machine guns*/
-        ammunitionFactory.addNewAmmunition("9mm bullet","BULLET_9MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("9mm bullet","BULLET_9MM");
     	/**Russian pistols*/
-        ammunitionFactory.addNewAmmunition("10mm bullet","BULLET_10MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("10mm bullet","BULLET_10MM");
     	/**cartridge*/
-        ammunitionFactory.addNewAmmunition("cartridge","CARTRIDGE","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("cartridge","CARTRIDGE");
     	/**power*/
-        ammunitionFactory.addNewAmmunition("energy cell","ENERGY_CELL","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("energy cell","ENERGY_CELL");
     	/**Russian middle range anti-tank rocket launchers*/
-        ammunitionFactory.addNewAmmunition("105mm anti tank rocket","ANTI_TANK_ROCKET_105MM","/images/ammo.png","/sounds/pickup_weapon.ogg");
+        ammunitionFactory.addNewAmmunition("105mm anti tank rocket","ANTI_TANK_ROCKET_105MM");
         return(ammunitionFactory);
+    }
+    
+    private final AmmunitionBoxFactory initializeAmmunitionBoxFactory(){
+    	final AmmunitionBoxFactory ammunitionBoxFactory=new AmmunitionBoxFactory();
+    	ammunitionBoxFactory.addNewAmmunitionBox("small box of 9mm bullets","SMALL_BOX_OF_9MM_BULLETS","/sounds/pickup_weapon.ogg",ammunitionFactory.get("BULLET_9MM"),"/images/ammo.png",30);
+    	return(ammunitionBoxFactory);
     }
     
     private final WeaponFactory initializeWeaponFactory(){
@@ -1465,11 +1474,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
     	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
     	         weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-    	         final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
-    	         ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+    	         final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
+    	         ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
     	         final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
     	         teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
-    	         level=new Level("Tutorial",levelIdentifier,"/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Tutorial",levelIdentifier,"/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "1":
@@ -1480,11 +1489,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	         final Map<String,ReadOnlyVector3[]> weaponPositionsMap=new HashMap<>();
     	         weaponPositionsMap.put("PISTOL_9MM",new ReadOnlyVector3[]{new Vector3(114.5,0.1,219.0)});
    	             weaponPositionsMap.put("MAG_60",new ReadOnlyVector3[]{new Vector3(115.5,0.1,219.0)});
-   	             final Map<String,ReadOnlyVector3[]> ammoPositionsMap=new HashMap<>();
-   	             ammoPositionsMap.put("BULLET_9MM",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
+   	             final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap=new HashMap<>();
+   	             ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
    	             final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
    	             teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
-    	         level=new Level("Museum",levelIdentifier,"/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+    	         level=new Level("Museum",levelIdentifier,"/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	         break;
     	        }
     	    case "2":
@@ -1532,16 +1541,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
    		              }
    	             }
             }
-        final int ammoCount=ammunitionFactory.getSize();
-        for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
-            {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
-             final String pickingUpSoundSamplePath=ammo.getPickingUpSoundSamplePath();
+        final int ammoBoxCount=ammunitionBoxFactory.getSize();
+        for(int ammoBoxIndex=0;ammoBoxIndex<ammoBoxCount;ammoBoxIndex++)
+            {final AmmunitionBox ammoBox=ammunitionBoxFactory.get(ammoBoxIndex);
+             final String pickingUpSoundSamplePath=ammoBox.getPickingUpSoundSamplePath();
        	     if(pickingUpSoundSamplePath!=null)
        	         {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
        		      if(pickingUpSoundSampleUrl!=null)
        		          {final String pickingUpSoundSampleIdentifier=getSoundManager().loadSound(pickingUpSoundSampleUrl);
        			       if(pickingUpSoundSampleIdentifier!=null)
-       				       ammo.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
+       				       ammoBox.setPickingUpSoundSampleIdentifier(pickingUpSoundSampleIdentifier);
        		          }
        	         }
             }
@@ -1651,16 +1660,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
    		              }
    	             }
             }
-        final int ammoCount=ammunitionFactory.getSize();
-        for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
-            {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
-             final String pickingUpSoundSamplePath=ammo.getPickingUpSoundSamplePath();
+        final int ammoBoxCount=ammunitionBoxFactory.getSize();
+        for(int ammoBoxIndex=0;ammoBoxIndex<ammoBoxCount;ammoBoxIndex++)
+            {final AmmunitionBox ammoBox=ammunitionBoxFactory.get(ammoBoxIndex);
+             final String pickingUpSoundSamplePath=ammoBox.getPickingUpSoundSamplePath();
        	     if(pickingUpSoundSamplePath!=null)
        	         {final URL pickingUpSoundSampleUrl=GameState.class.getResource(pickingUpSoundSamplePath);
        		      if(pickingUpSoundSampleUrl!=null)
        		          {getSoundManager().unloadSound(pickingUpSoundSampleUrl);
-       			       if(ammo.getPickingUpSoundSampleIdentifier()!=null)
-       				       ammo.setPickingUpSoundSampleIdentifier(null);
+       			       if(ammoBox.getPickingUpSoundSampleIdentifier()!=null)
+       				       ammoBox.setPickingUpSoundSampleIdentifier(null);
        		          }
        	         }
             }
@@ -2126,20 +2135,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     }
     
     private final void loadAmmunitions(){
-    	//FIXME find a more flexible mean of managing ammunition boxes
-    	final Map<String,Integer> ammunitionCountMap=new HashMap<>();
-    	final int ammoCount=ammunitionFactory.getSize();
-	    for(int ammoIndex=0;ammoIndex<ammoCount;ammoIndex++)
-	        {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
-	         final String identifier=ammunitionFactory.getStringIdentifier(ammo);
-	         //FIXME put more reasonable values into this map
-	         ammunitionCountMap.put(identifier,Integer.valueOf(30));
-	        }
-    	final List<Node> ammoNodes=level.loadAmmoModels(ammunitionFactory,ammunitionCountMap);
-    	if(ammoNodes!=null&&!ammoNodes.isEmpty())
-    	    {collectibleObjectsList.addAll(ammoNodes);
-    	     for(final Node ammoNode:ammoNodes)
-	    	     getRoot().attachChild(ammoNode);
+    	final List<Node> ammoBoxNodes=level.loadAmmoBoxModels(ammunitionBoxFactory);
+    	if(ammoBoxNodes!=null&&!ammoBoxNodes.isEmpty())
+    	    {collectibleObjectsList.addAll(ammoBoxNodes);
+    	     for(final Node ammoBoxNode:ammoBoxNodes)
+	    	     getRoot().attachChild(ammoBoxNode);
     	    }
     }
     

@@ -15,29 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package engine.data.common.userdata;
+package engine.data.common;
 
+import engine.abstraction.AbstractFactory;
 import engine.weaponry.Ammunition;
 
-public final class AmmunitionUserData extends CollectibleUserData<Ammunition>{
-	
-	private final int ammunitionCount;
-	
-	public AmmunitionUserData(final Ammunition ammunition,final int ammunitionCount){
-		super(ammunition,ammunition.getLabel());
-		this.ammunitionCount=ammunitionCount;
+public class AmmunitionBoxFactory extends AbstractFactory<AmmunitionBox>{
+
+	public AmmunitionBoxFactory(){
+		super();
 	}
 	
-	@Override
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
-	
-	public final Ammunition getAmmunition(){
-		return(collectible);
-	}
-	
-	public final int getAmmunitionCount(){
-		return(ammunitionCount);
+	public boolean addNewAmmunitionBox(final String label,final String identifier,final String pickingUpSoundSamplePath,final Ammunition ammunition,final String textureResourceName,final int ammunitionCount){
+		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
+		if(success)
+			{final AmmunitionBox ammunitionBox=new AmmunitionBox(label,pickingUpSoundSamplePath,ammunition,textureResourceName,ammunitionCount);
+			 success=add(identifier,ammunitionBox);
+			}
+		return(success);
 	}
 }
