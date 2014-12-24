@@ -19,13 +19,13 @@ package engine.weaponry;
 
 import engine.abstraction.AbstractFactory;
 
-public final class WeaponFactory extends AbstractFactory<Weapon>{
+public class WeaponFactory extends AbstractFactory<Weapon>{
 	
 	public WeaponFactory(){
 		super();
-	}	
+	}
 	
-	public final boolean addNewWeapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,
+	public boolean addNewWeapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,
 			final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,
 			final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int blowOrShotDurationInMillis,
 			final boolean fullyAutomatic){
