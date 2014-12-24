@@ -19,15 +19,16 @@ package engine.weaponry;
 
 import engine.abstraction.AbstractFactory;
 
-public final class AmmunitionFactory extends AbstractFactory<Ammunition>{
+public class AmmunitionFactory extends AbstractFactory<Ammunition>{
 	
 	public AmmunitionFactory(){
+		super();
 	}	
 	
-	public final boolean addNewAmmunition(final String label,final String identifier/*,final String textureResourceName,final String pickingUpSoundSamplePath*/){
+	public boolean addNewAmmunition(final String label,final String identifier){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final Ammunition ammunition=new Ammunition(label/*,textureResourceName,pickingUpSoundSamplePath*/);
+			{final Ammunition ammunition=new Ammunition(label);
 			 success=add(identifier,ammunition);
 			}
 		return(success);
