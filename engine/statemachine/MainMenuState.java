@@ -134,10 +134,8 @@ public final class MainMenuState extends ScenegraphState{
       			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
       			  final ProfileData profileData){
         super(soundManager);
-        matchTypeFactory=new MatchTypeFactory();
-        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
-        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag");
-        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag");
+        //TODO move this factory into another location
+        this.matchTypeFactory=initMatchTypeFactory();
         this.launchRunnable=launchRunnable;
         this.uninstallRunnable=uninstallRunnable;
         this.toExitGameTriggerAction=toExitGameTriggerAction;
@@ -182,6 +180,14 @@ public final class MainMenuState extends ScenegraphState{
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
         for(InputTrigger trigger:triggers)
             getLogicalLayer().registerTrigger(trigger);
+    }
+    
+    private MatchTypeFactory initMatchTypeFactory(){
+    	final MatchTypeFactory matchTypeFactory=new MatchTypeFactory();
+        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
+        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag");
+        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag");
+        return(matchTypeFactory);
     }
     
     private final UIPanel createStoryModePanel(final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayAction){
