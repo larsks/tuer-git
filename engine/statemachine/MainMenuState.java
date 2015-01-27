@@ -184,9 +184,9 @@ public final class MainMenuState extends ScenegraphState{
     
     private MatchTypeFactory initMatchTypeFactory(){
     	final MatchTypeFactory matchTypeFactory=new MatchTypeFactory();
-        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch");
-        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag");
-        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag");
+        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch","  Get best score  ");
+        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag","Capture most flags");
+        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag"," Hold it the most ");
         return(matchTypeFactory);
     }
     
@@ -402,7 +402,7 @@ public final class MainMenuState extends ScenegraphState{
     	         {final String value=(String)victoryModel.getValueAt(elementIndex);
     	          final String view;
     	          if(elementIndex==0)
-    	    	      view="  Get best score  ";
+    	    	      view=matchType.getNoLimitObjectiveDescriptionLabel();
     	          else
     	    	      view="   Reach score "+value+"  ";
     	          victoryModel.setViewAt(elementIndex,view);
@@ -414,7 +414,7 @@ public final class MainMenuState extends ScenegraphState{
    	    	         {final String value=(String)victoryModel.getValueAt(elementIndex);
 	    	          final String view;
 	    	          if(elementIndex==0)
-	    		          view="Capture most flags";
+	    	        	  view=matchType.getNoLimitObjectiveDescriptionLabel();
 	    	          else
 	    		          view="Capture "+value+" flag"+((elementIndex==1)?"":"s"+"    ");
 	    	          victoryModel.setViewAt(elementIndex,view);
@@ -426,7 +426,7 @@ public final class MainMenuState extends ScenegraphState{
   	    	             {final String value=(String)victoryModel.getValueAt(elementIndex);
 	    	              final String view;
 	    	              if(elementIndex==0)
-	    		              view=" Hold it the most ";
+	    	            	  view=matchType.getNoLimitObjectiveDescriptionLabel();
 	    	              else
 	    		              view=" Hold it "+value+" minute"+((elementIndex==1)?"":"s"+" ");
 	    	              victoryModel.setViewAt(elementIndex,view);

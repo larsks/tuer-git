@@ -20,9 +20,12 @@ package engine.data.common;
 public class MatchType{
 	
 	private final String label;
+	
+	private final String noLimitObjectiveDescriptionLabel;
 
-	public MatchType(final String label){
+	public MatchType(final String label,final String noLimitObjectiveDescriptionLabel){
 		this.label=label;
+		this.noLimitObjectiveDescriptionLabel=noLimitObjectiveDescriptionLabel;
 	}
 	
 	@Override
@@ -32,5 +35,9 @@ public class MatchType{
 	
 	public String getLabel(){
 		return(label);
+	}
+	
+	public String getNoLimitObjectiveDescriptionLabel(){
+		return(noLimitObjectiveDescriptionLabel);
 	}
 }
