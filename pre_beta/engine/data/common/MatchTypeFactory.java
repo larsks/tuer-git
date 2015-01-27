@@ -24,10 +24,10 @@ public class MatchTypeFactory extends AbstractFactory<MatchType>{
 	public MatchTypeFactory(){
 	}
 
-	public boolean addNewMatchType(final String identifier,final String label){
+	public boolean addNewMatchType(final String identifier,final String label,final String noLimitObjectiveDescriptionLabel){
 		boolean success=identifier!=null&&label!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final MatchType matchType=new MatchType(label);
+			{final MatchType matchType=new MatchType(label,noLimitObjectiveDescriptionLabel);
 			 success=add(identifier,matchType);
 			}
 		return(success);
