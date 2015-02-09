@@ -17,7 +17,7 @@
  */
 package engine.statemachine;
 
-import javax.media.nativewindow.util.Point;
+import com.jogamp.nativewindow.util.Point;
 
 import java.net.URL;
 import java.util.HashMap;

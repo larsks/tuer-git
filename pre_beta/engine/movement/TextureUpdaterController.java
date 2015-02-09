@@ -17,7 +17,7 @@
  */
 package engine.movement;
 
-import javax.media.nativewindow.util.Point;
+import com.jogamp.nativewindow.util.Point;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
