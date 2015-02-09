@@ -56,6 +56,11 @@
 	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
 	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
 	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
+	<!--<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
+	<property name="openjdk-linux-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
+	<property name="openjdk-linux-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
+	<property name="openjdk-windows-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
+	<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>-->
 	<property name="game-version" value="0.0.0" />
 	<property name="game-release" value="0" />
 	<property name="game-group" value="Applications/Games" />
@@ -76,8 +81,8 @@
 	<property name="editor-jar-filename" value="jfpsm.jar" />
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_813-joal_557-jogl_1322-jocl_995/jar -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/jar/orig -->
-	<!-- example of value for a released version: http://jogamp.org/deployment/v2.2.1/jar -->
-	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/v2.2.4/jar" />
+	<!-- example of value for a released version: http://jogamp.org/deployment/v2.2.4/jar -->
+	<property name="jogamp-unsigned-jars-url" value="http://jogamp.org/deployment/archive/master/gluegen_844-joal_575-jogl_1371-jocl_1032/jar/" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->

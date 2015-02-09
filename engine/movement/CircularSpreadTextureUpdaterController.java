@@ -17,7 +17,7 @@
  */
 package engine.movement;
 
-import javax.media.nativewindow.util.Point;
+import com.jogamp.nativewindow.util.Point;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
