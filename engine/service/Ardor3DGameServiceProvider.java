@@ -87,6 +87,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	/**full name of the game*/
 	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
 	
+	/**subtitle displayed in the introduction of the game*/
+	private static final String GAME_INTRODUCTION_SUBTITLE=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-introduction-subtitle");
+	
 	/**recommended URL to download the game*/
 	private static final String GAME_RECOMMENDED_DOWNLOAD_URL=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-recommended-download-url");
 	
@@ -345,7 +348,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final String readmeContent=getTextFileContent("/README.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,
-        uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0);
+        uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {

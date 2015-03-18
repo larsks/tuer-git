@@ -72,7 +72,8 @@ public final class IntroductionState extends ScenegraphState{
      */
     public IntroductionState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
     		final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,
-    		final TriggerAction toMainMenuAction,final SoundManager soundManager,final FontStore fontStore,final String gameShortName){
+    		final TriggerAction toMainMenuAction,final SoundManager soundManager,final FontStore fontStore,
+    		final String gameShortName,final String gameIntroductionSubtitle){
         super(soundManager);
         box=new Box("Introduction Box",Vector3.ZERO,12,9,5);
         box.setModelBound(new BoundingBox());
@@ -102,12 +103,14 @@ public final class IntroductionState extends ScenegraphState{
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(8));
         textNode.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
         getRoot().attachChild(textNode);
-        //shows the subtitle
-        final BMText subtitleNode=new BMText("subtitleNode","The Internationale will be the human race",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
-        subtitleNode.setFontScale(6);
-        subtitleNode.setTextColor(ColorRGBA.ORANGE);
-        subtitleNode.setTranslation(0,-5,-5);
-        getRoot().attachChild(subtitleNode);
+        //shows the subtitle if any
+        if(gameIntroductionSubtitle!=null&&!gameIntroductionSubtitle.isEmpty())
+            {final BMText subtitleNode=new BMText("subtitleNode",gameIntroductionSubtitle,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+             subtitleNode.setFontScale(6);
+             subtitleNode.setTextColor(ColorRGBA.ORANGE);
+             subtitleNode.setTranslation(0,-5,-5);
+             getRoot().attachChild(subtitleNode);
+            }
         //adds the triggers
         final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
