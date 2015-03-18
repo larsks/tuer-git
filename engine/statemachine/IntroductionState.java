@@ -102,6 +102,12 @@ public final class IntroductionState extends ScenegraphState{
         timeWindowsTable.put(Double.valueOf(0),Double.valueOf(8));
         textNode.addController(new UniformlyVariableRectilinearTranslationController(0,10,-75,new Vector3(0,0,1),timeWindowsTable));
         getRoot().attachChild(textNode);
+        //shows the subtitle
+        final BMText subtitleNode=new BMText("subtitleNode","The Internationale will be the human race",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        subtitleNode.setFontScale(6);
+        subtitleNode.setTextColor(ColorRGBA.ORANGE);
+        subtitleNode.setTranslation(0,-5,-5);
+        getRoot().attachChild(subtitleNode);
         //adds the triggers
         final InputTrigger toMainMenuTrigger=new InputTrigger(new KeyPressedCondition(Key.RETURN),toMainMenuAction);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
