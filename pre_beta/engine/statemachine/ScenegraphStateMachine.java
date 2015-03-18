@@ -28,6 +28,7 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
+
 import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.BasicConditions;
 import engine.data.ProfileData;
@@ -82,6 +83,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
      * @param uninstallRunnable
      * @param gameShortName
      * @param gameLongName
+     * @param gameIntroductionSubtitle
      * @param gameRecommendedDownloadUrl recommended URL to download the game
      * @param readmeContent
      * @param defaultActionMap
@@ -91,7 +93,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     public ScenegraphStateMachine(final Node parent,final NativeCanvas canvas,
             final PhysicalLayer physicalLayer,final MouseManager mouseManager,
             final TriggerAction toggleScreenModeAction,final Runnable launchRunnable,
-            final Runnable uninstallRunnable,final String gameShortName,final String gameLongName,final String gameRecommendedDownloadUrl,final String readmeContent,
+            final Runnable uninstallRunnable,final String gameShortName,final String gameLongName,final String gameIntroductionSubtitle,final String gameRecommendedDownloadUrl,final String readmeContent,
             final ActionMap defaultActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final int firstUnlockedLevelIndex){
         super(ScenegraphState.class,String.class,new ScenegraphState());
         profileData=new ProfileData();
@@ -210,7 +212,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final ScenegraphState initialState=internalStateMachine.getCurrentState();
         final ContentRatingSystemState contentRatingSystemState=new ContentRatingSystemState(canvas,physicalLayer,mouseManager,soundManager,fontStore);
         final InitializationState initializationState=new InitializationState(canvas,physicalLayer,initializationToExitGameTriggerAction,initializationToIntroductionTriggerAction,soundManager,taskManager);
-        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,introductionToExitGameTriggerAction,introductionToMainMenuTriggerAction,soundManager,fontStore,gameShortName);
+        final IntroductionState introductionState=new IntroductionState(canvas,physicalLayer,introductionToExitGameTriggerAction,introductionToMainMenuTriggerAction,soundManager,fontStore,gameShortName,gameIntroductionSubtitle);
         final MainMenuState mainMenuState=new MainMenuState(canvas,physicalLayer,mouseManager,mainMenuToExitGameTriggerAction,mainMenuToLoadingDisplayTriggerAction,soundManager,launchRunnable,uninstallRunnable,gameLongName,gameRecommendedDownloadUrl,readmeContent,fontStore,toggleScreenModeAction,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings,this.profileData);
         final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,gameToGameOverTriggerAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings,profileData);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,loadingDisplayToGameTriggerAction,loadingDisplayToUnloadingDisplayTriggerAction,soundManager,taskManager,new StateInitializationRunnable<>(gameState),fontStore);
