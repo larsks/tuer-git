@@ -707,7 +707,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                       		    		 //updates the status of the current mission
                       		    		 gameStats.setMissionStatus(missionStatus);
                       		    		 //passes the previous location and the next location to the trigger action
-                      		    		  //FIXME the identifier might not be an integer
                       		    		 toGameOverTriggerAction.arguments.setPreviousLevelIdentifier(level.getIdentifier());
               		                     toGameOverTriggerAction.perform(null,null,-1);
               		                     if(missionStatus==MissionStatus.COMPLETED)
