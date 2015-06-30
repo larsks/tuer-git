@@ -23,13 +23,23 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-public interface I3DServiceProvider{
-    public boolean writeSavableInstanceIntoFile(final Object savable,final File file);
-    public boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file);
-    public void attachChildToNode(final Object parent,final Object child);
-    public Object createNode(final String name);
-    public Object createMeshFromBuffers(final String name,
+/**
+ * Interface of services provided by a 3D scenegraph. It's designed with JMonkeyEngine and Ardor3D in mind
+ * 
+ * @author gouessej
+ *
+ * @param <S> class of encodable or serializable objects
+ * @param <T> class of scenegraph nodes
+ * @param <U> class of scenegraph objects
+ * @param <V> class of leaf nodes managing the geometry
+ */
+public interface I3DServiceProvider<S,T,U,V>{
+    public boolean writeSavableInstanceIntoFile(final S savable,final File file);
+    public boolean writeSavableInstancesListIntoFile(final ArrayList<S> savablesList,final File file);
+    public void attachChildToNode(final T parent,final U child);
+    public T createNode(final String name);
+    public V createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
-    public void attachTextureToSpatial(final Object spatial,final URL url);
+    public void attachTextureToSpatial(final U spatial,final URL url);
 }

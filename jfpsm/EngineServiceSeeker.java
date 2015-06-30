@@ -23,16 +23,21 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-public final class EngineServiceSeeker implements I3DServiceSeeker{
+import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.util.export.Savable;
+
+public final class EngineServiceSeeker implements I3DServiceSeeker<Savable,Node,Spatial,Mesh>{
 
     
     private static final EngineServiceSeeker instance=new EngineServiceSeeker();
     
-    private I3DServiceSeeker delegate;
+    private I3DServiceSeeker<Savable,Node,Spatial,Mesh> delegate;
     
     
     @Override
-    public void bind3DServiceSeeker(I3DServiceSeeker seeker){
+    public void bind3DServiceSeeker(I3DServiceSeeker<Savable,Node,Spatial,Mesh> seeker){
         delegate=seeker;
     }
 
@@ -41,34 +46,34 @@ public final class EngineServiceSeeker implements I3DServiceSeeker{
     }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
+    public final boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override
-    public final void attachChildToNode(final Object parent,final Object child){
+    public final void attachChildToNode(final Node parent,final Spatial child){
     	delegate.attachChildToNode(parent,child);
     }
     
     @Override
-    public final Object createNode(final String name){
+    public final Node createNode(final String name){
     	return(delegate.createNode(name));
     }
     
     @Override
-    public final Object createMeshFromBuffers(final String name,
+    public final Mesh createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,final URL url){
+    public final void attachTextureToSpatial(final Spatial spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
 }
