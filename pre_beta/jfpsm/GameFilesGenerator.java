@@ -28,12 +28,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
 import javax.imageio.ImageIO;
 
+/**
+ * Game files generator, communicates with the 3D engine.
+ * 
+ * @author gouessej
+ *
+ */
+@SuppressWarnings({"unchecked","rawtypes"})//FIXME ensure type safety instead of suppressing these warnings, capture several types
 final class GameFilesGenerator{
 
     
     private static final GameFilesGenerator instance=new GameFilesGenerator();
+    
+    private static final I3DServiceSeeker seekerInstance=EngineServiceSeeker.getInstance();
     
     
     static final GameFilesGenerator getInstance(){
@@ -371,22 +381,22 @@ final class GameFilesGenerator{
                                {ImageIO.write(tile.getTexture(),"png",tileFile);
                                 break;
                                }
-                       EngineServiceSeeker.getInstance().attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
+                       seekerInstance.attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
                        //this file is now useless, delete it
                        tileFile.delete();
                        //attaches the newly created mesh to its floor
-                       EngineServiceSeeker.getInstance().attachChildToNode(floorNode,volumeElementMesh);
+                       seekerInstance.attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }
                   //attaches the floor to its level
-                  EngineServiceSeeker.getInstance().attachChildToNode(levelNode,floorNode);
+                  seekerInstance.attachChildToNode(levelNode,floorNode);
                   //looks at the next floor
                   j++;
                  }
              System.out.println("[INFO] level node successfully created");
              System.out.println("[INFO] JFPSM attempts to write the level into the file "+destFile.getName());
              //writes the level into a file
-             success=EngineServiceSeeker.getInstance().writeSavableInstanceIntoFile(levelNode,destFile);
+             success=seekerInstance.writeSavableInstanceIntoFile(levelNode,destFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destFile.getName()+" successful");
                   //System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");
@@ -395,7 +405,7 @@ final class GameFilesGenerator{
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
              System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
              //writes the bounding boxes of the level into a file
-             success=EngineServiceSeeker.getInstance().writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
+             success=seekerInstance.writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
                   System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");

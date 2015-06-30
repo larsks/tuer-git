@@ -42,10 +42,11 @@ import com.ardor3d.util.resource.URLResourceSource;
 /**
  * service provider of the engine, this part is dependent on the underneath 3D engine. It should be quite
  * easy to modify this class to support any other engine
+ * 
  * @author Julien Gouesse
  *
  */
-public final class EngineServiceProvider implements I3DServiceProvider{
+public final class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh>{
     
     private static final class DirectBinaryExporter extends BinaryExporter{
         @Override
@@ -70,23 +71,22 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Object savable,final File file){
-    	boolean success=savable instanceof Savable;
-    	if(success)
-    	    try{binaryExporter.save((Savable)savable,file);}
-            catch(IOException ioe)
-            {success=false;
-             ioe.printStackTrace();
-            }
+    public final boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
+    	boolean success=true;
+    	try{binaryExporter.save(savable,file);}
+        catch(IOException ioe)
+        {success=false;
+         ioe.printStackTrace();
+        }
         return(success);
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file){
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
         boolean success=true;
         try(FileOutputStream fos=new FileOutputStream(file)){
-        	for(Object savable:savablesList)
-                {try{binaryExporter.save((Savable)savable,fos);}
+        	for(Savable savable:savablesList)
+                {try{binaryExporter.save(savable,fos);}
                  catch(Throwable t)
                  {success=false;}
             	  if(!success)
@@ -101,17 +101,17 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     }
     
     @Override
-    public final void attachChildToNode(final Object parent,final Object child){
-    	((Node)parent).attachChild((Spatial)child);
+    public final void attachChildToNode(final Node parent,final Spatial child){
+    	parent.attachChild(child);
     }
     
     @Override
-    public final Object createNode(final String name){
+    public final Node createNode(final String name){
     	return(new Node(name));
     }
     
     @Override
-    public final Object createMeshFromBuffers(final String name,
+    public final Mesh createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){  	
     	MeshData meshData=new MeshData();
@@ -125,10 +125,10 @@ public final class EngineServiceProvider implements I3DServiceProvider{
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,final URL url){
+    public final void attachTextureToSpatial(final Spatial spatial,final URL url){
         TextureState ts=new TextureState();
         ts.setEnabled(true);
         ts.setTexture(TextureManager.load(new URLResourceSource(url),Texture.MinificationFilter.Trilinear,true));
-        ((Spatial)spatial).setRenderState(ts);
+        spatial.setRenderState(ts);
     }
 }

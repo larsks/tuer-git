@@ -35,48 +35,49 @@ import jfpsm.MainWindow;
  * @author Julien Gouesse
  *
  */
-public final class JFPSMServiceProvider implements I3DServiceSeeker{
+public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B,C,D>{
     
     /**delegate that executes the services of the engine*/
-    private final engine.service.I3DServiceProvider delegate;
+    private final engine.service.I3DServiceProvider<A,B,C,D> delegate;
     
     
-    private JFPSMServiceProvider(final engine.service.I3DServiceProvider 
-    		factory,final I3DServiceSeeker seeker){
+    private JFPSMServiceProvider(final engine.service.I3DServiceProvider<A,B,C,D> 
+    		factory,final I3DServiceSeeker<A,B,C,D> seeker){
+    	super();
         delegate=factory;
         bind3DServiceSeeker(seeker);
     }
     
     
     @Override
-    public final void bind3DServiceSeeker(I3DServiceSeeker seeker){
+    public final void bind3DServiceSeeker(I3DServiceSeeker<A,B,C,D> seeker){
         seeker.bind3DServiceSeeker(this);
     }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Object savable,
+    public final boolean writeSavableInstanceIntoFile(final A savable,
     		final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
     }
     
     @Override
     public final boolean writeSavableInstancesListIntoFile(
-    		final ArrayList<?> savablesList,final File file){
+    		final ArrayList<A> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override
-    public final void attachChildToNode(final Object parent,final Object child){
+    public final void attachChildToNode(final B parent,final C child){
     	delegate.attachChildToNode(parent,child);
     }
     
     @Override
-    public final Object createNode(final String name){
+    public final B createNode(final String name){
     	return(delegate.createNode(name));
     }
     
     @Override
-    public final Object createMeshFromBuffers(final String name,
+    public final D createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,
@@ -84,7 +85,7 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
     }
     
     @Override
-    public final void attachTextureToSpatial(final Object spatial,
+    public final void attachTextureToSpatial(final C spatial,
     		final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
@@ -93,8 +94,8 @@ public final class JFPSMServiceProvider implements I3DServiceSeeker{
         //Disables DirectDraw under Windows in order to avoid conflicts with
     	//OpenGL
         System.setProperty("sun.java2d.noddraw","true");
-        new JFPSMServiceProvider(EngineServiceProvider.getInstance(),
-                                 EngineServiceSeeker.getInstance());
+        new JFPSMServiceProvider<>(EngineServiceProvider.getInstance(),
+                                   EngineServiceSeeker.getInstance());
         MainWindow.runInstance(args);
     }
 }

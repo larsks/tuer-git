@@ -17,20 +17,18 @@
  */
 package jfpsm;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
+import engine.service.I3DServiceProvider;
 
-public interface I3DServiceSeeker{
-    public void bind3DServiceSeeker(I3DServiceSeeker seeker);
-    public boolean writeSavableInstanceIntoFile(final Object savable,final File file);
-    public boolean writeSavableInstancesListIntoFile(final ArrayList<?> savablesList,final File file);
-    public void attachChildToNode(final Object parent,final Object child);
-    public Object createNode(final String name);
-    public Object createMeshFromBuffers(final String name,
-    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
-    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
-    public void attachTextureToSpatial(final Object spatial,final URL url);
+/**
+ * Interface of services seeker
+ * 
+ * @author gouessej
+ *
+ * @param <S> class of encodable or serializable objects
+ * @param <T> class of scenegraph nodes
+ * @param <U> class of scenegraph objects
+ * @param <V> class of leaf nodes managing the geometry
+ */
+public interface I3DServiceSeeker<S,T,U,V> extends I3DServiceProvider<S,T,U,V>{
+    public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V> seeker);
 }
