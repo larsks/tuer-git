@@ -23,57 +23,67 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-import com.ardor3d.scenegraph.Mesh;
-import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.Spatial;
-import com.ardor3d.util.export.Savable;
-
-public final class EngineServiceSeeker implements I3DServiceSeeker<Savable,Node,Spatial,Mesh>{
+/**
+ * Concrete engine service seeker
+ * 
+ * @author Julien Gouesse
+ *
+ * @param <S>
+ * @param <T>
+ * @param <U>
+ * @param <V>
+ */
+public final class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
 
     
     private static final EngineServiceSeeker instance=new EngineServiceSeeker();
     
-    private I3DServiceSeeker<Savable,Node,Spatial,Mesh> delegate;
+    private I3DServiceSeeker<S,T,U,V> delegate;
     
     
     @Override
-    public void bind3DServiceSeeker(I3DServiceSeeker<Savable,Node,Spatial,Mesh> seeker){
+    public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V> seeker){
         delegate=seeker;
     }
 
-    public static final EngineServiceSeeker getInstance(){
+    /**
+     * @deprecated Abusing of singletons isn't a good idea and this object isn't heavy
+     * @return
+     */
+    @Deprecated
+    public static final I3DServiceSeeker getInstance(){
         return(instance);
     }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
+    public final boolean writeSavableInstanceIntoFile(final S savable,final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
+    public final boolean writeSavableInstancesListIntoFile(final ArrayList<S> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override
-    public final void attachChildToNode(final Node parent,final Spatial child){
+    public final void attachChildToNode(final T parent,final U child){
     	delegate.attachChildToNode(parent,child);
     }
     
     @Override
-    public final Node createNode(final String name){
+    public final T createNode(final String name){
     	return(delegate.createNode(name));
     }
     
     @Override
-    public final Mesh createMeshFromBuffers(final String name,
+    public final V createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
     
     @Override
-    public final void attachTextureToSpatial(final Spatial spatial,final URL url){
+    public final void attachTextureToSpatial(final U spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
 }

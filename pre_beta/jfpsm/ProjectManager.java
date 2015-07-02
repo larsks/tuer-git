@@ -72,6 +72,8 @@ public final class ProjectManager extends EntityManager{
 	private static final long serialVersionUID=1L;
 	
 	private static final Logger logger = Logger.getLogger(ProjectManager.class.getName());
+	
+	private final GameFilesGenerator gameFilesGenerator;
 
 	
 	/**
@@ -80,7 +82,8 @@ public final class ProjectManager extends EntityManager{
 	 */
 	public ProjectManager(final MainWindow mainWindow){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
-        //fills the popup menu
+        this.gameFilesGenerator=new GameFilesGenerator();
+		//fills the popup menu
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        
         final JMenuItem exportMenuItem=new JMenuItem("Export");
@@ -1004,7 +1007,7 @@ public final class ProjectManager extends EntityManager{
     		for(FloorSet level:levelsList)
     		    {levelFile=new File(projectManager.createRawDataPath(level.getName()+".abin"));
     		     levelCollisionFile=new File(projectManager.createRawDataPath(level.getName()+".collision.abin"));
-                 try{GameFilesGenerator.getInstance().writeLevel(level,levelIndex,project,levelFile,levelCollisionFile);}
+                 try{projectManager.gameFilesGenerator.writeLevel(level,levelIndex,project,levelFile,levelCollisionFile);}
                  catch(Throwable throwable)
                  {projectManager.displayErrorMessage(throwable,false);}
                  filenamesList.add(level.getName());

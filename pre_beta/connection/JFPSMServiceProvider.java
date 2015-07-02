@@ -22,8 +22,8 @@ import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-
 import engine.service.EngineServiceProvider;
+import engine.service.I3DServiceProvider;
 import jfpsm.EngineServiceSeeker;
 import jfpsm.I3DServiceSeeker;
 import jfpsm.MainWindow;
@@ -38,11 +38,11 @@ import jfpsm.MainWindow;
 public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B,C,D>{
     
     /**delegate that executes the services of the engine*/
-    private final engine.service.I3DServiceProvider<A,B,C,D> delegate;
+    private final I3DServiceProvider<A,B,C,D> delegate;
     
     
-    private JFPSMServiceProvider(final engine.service.I3DServiceProvider<A,B,C,D> 
-    		factory,final I3DServiceSeeker<A,B,C,D> seeker){
+    private JFPSMServiceProvider(final I3DServiceProvider<A,B,C,D> factory,
+    		                     final I3DServiceSeeker<A,B,C,D> seeker){
     	super();
         delegate=factory;
         bind3DServiceSeeker(seeker);
@@ -85,8 +85,7 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
     }
     
     @Override
-    public final void attachTextureToSpatial(final C spatial,
-    		final URL url){
+    public final void attachTextureToSpatial(final C spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
     
@@ -94,8 +93,9 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
         //Disables DirectDraw under Windows in order to avoid conflicts with
     	//OpenGL
         System.setProperty("sun.java2d.noddraw","true");
-        new JFPSMServiceProvider<>(EngineServiceProvider.getInstance(),
-                                   EngineServiceSeeker.getInstance());
+        new JFPSMServiceProvider<>(new EngineServiceProvider(),
+        		                   EngineServiceSeeker.getInstance());
+        //TODO create a I3DServiceSeeker and pass it to the game files generator
         MainWindow.runInstance(args);
     }
 }

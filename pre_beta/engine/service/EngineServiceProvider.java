@@ -46,7 +46,7 @@ import com.ardor3d.util.resource.URLResourceSource;
  * @author Julien Gouesse
  *
  */
-public final class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh>{
+public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh>{
     
     private static final class DirectBinaryExporter extends BinaryExporter{
         @Override
@@ -56,22 +56,16 @@ public final class EngineServiceProvider implements I3DServiceProvider<Savable,N
         }
     }
     
-    /**unique instance of the engine service provider (design pattern "singleton")*/
-    private static final EngineServiceProvider instance=new EngineServiceProvider();
+    private final BinaryExporter binaryExporter;
     
-    private BinaryExporter binaryExporter=new DirectBinaryExporter();
-    
-    private EngineServiceProvider(){
+    public EngineServiceProvider(){
+    	super();
+    	this.binaryExporter=new DirectBinaryExporter();
         JoglImageLoader.registerLoader();
     }
     
-    
-    public static final EngineServiceProvider getInstance(){
-        return(instance);
-    }
-    
     @Override
-    public final boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
+    public boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
     	boolean success=true;
     	try{binaryExporter.save(savable,file);}
         catch(IOException ioe)
@@ -82,7 +76,7 @@ public final class EngineServiceProvider implements I3DServiceProvider<Savable,N
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
+    public boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
         boolean success=true;
         try(FileOutputStream fos=new FileOutputStream(file)){
         	for(Savable savable:savablesList)
@@ -101,17 +95,17 @@ public final class EngineServiceProvider implements I3DServiceProvider<Savable,N
     }
     
     @Override
-    public final void attachChildToNode(final Node parent,final Spatial child){
+    public void attachChildToNode(final Node parent,final Spatial child){
     	parent.attachChild(child);
     }
     
     @Override
-    public final Node createNode(final String name){
+    public Node createNode(final String name){
     	return(new Node(name));
     }
     
     @Override
-    public final Mesh createMeshFromBuffers(final String name,
+    public Mesh createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){  	
     	MeshData meshData=new MeshData();
@@ -125,7 +119,7 @@ public final class EngineServiceProvider implements I3DServiceProvider<Savable,N
     }
     
     @Override
-    public final void attachTextureToSpatial(final Spatial spatial,final URL url){
+    public void attachTextureToSpatial(final Spatial spatial,final URL url){
         TextureState ts=new TextureState();
         ts.setEnabled(true);
         ts.setTexture(TextureManager.load(new URLResourceSource(url),Texture.MinificationFilter.Trilinear,true));

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 /**
  * Interface of services provided by a 3D scenegraph. It's designed with JMonkeyEngine and Ardor3D in mind
  * 
- * @author gouessej
+ * @author Julien Gouesse
  *
  * @param <S> class of encodable or serializable objects
  * @param <T> class of scenegraph nodes

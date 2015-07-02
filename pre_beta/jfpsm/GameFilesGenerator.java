@@ -32,22 +32,19 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 
 /**
- * Game files generator, communicates with the 3D engine.
+ * Game files generator, communicates with the 3D engine. 
  * 
- * @author gouessej
+ * @author Julien Gouesse
  *
  */
-@SuppressWarnings({"unchecked","rawtypes"})//FIXME ensure type safety instead of suppressing these warnings, capture several types
-final class GameFilesGenerator{
-
+@SuppressWarnings({"unchecked","rawtypes"})//FIXME ensure type safety instead of suppressing these warnings, capture several parameterized types
+public class GameFilesGenerator{
     
-    private static final GameFilesGenerator instance=new GameFilesGenerator();
+    private final I3DServiceSeeker seekerInstance;
     
-    private static final I3DServiceSeeker seekerInstance=EngineServiceSeeker.getInstance();
-    
-    
-    static final GameFilesGenerator getInstance(){
-        return(instance);
+    public GameFilesGenerator(){
+    	super();
+    	this.seekerInstance=EngineServiceSeeker.getInstance();
     }
     
     private final Entry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid> createVolumeParametersAndGridFromLevel(final FloorSet level,final Project project){        
@@ -130,7 +127,7 @@ final class GameFilesGenerator{
              System.out.println("[INFO] JFPSM attempts to create a level node...");
              final String levelNodeName="LID"+levelIndex;
              //create one node per level
-             final Object levelNode=EngineServiceSeeker.getInstance().createNode(levelNodeName);
+             final Object levelNode=seekerInstance.createNode(levelNodeName);
              String floorNodeName,meshName,tilePath;
              File tileFile;
              Object volumeElementMesh,floorNode;
@@ -207,7 +204,7 @@ final class GameFilesGenerator{
                               }
                   //create one node per floor (array)
                   floorNodeName=levelNodeName+"NID"+j;
-                  floorNode=EngineServiceSeeker.getInstance().createNode(floorNodeName);                
+                  floorNode=seekerInstance.createNode(floorNodeName);                
                   meshIndex=0;
                   //use the geometries passed as arguments to build the mesh data
                   for(Entry<Integer,ArrayList<float[]>> entry:volumeParamLocationTable.entrySet())
@@ -366,7 +363,7 @@ final class GameFilesGenerator{
                         * */
                        //creates a mesh for this floor and for the volume parameter currently in use
                        meshName=floorNodeName+"CID"+meshIndex;
-                       volumeElementMesh=EngineServiceSeeker.getInstance().createMeshFromBuffers(meshName,
+                       volumeElementMesh=seekerInstance.createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
                        tilePath=destFile.getParent()+System.getProperty("file.separator")+tileNameTable.get(key)+".png";
                        //creates a file containing the texture of the tile because it 
