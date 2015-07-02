@@ -245,8 +245,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         Display display=NewtFactory.createDisplay(null);
         Screen screen=NewtFactory.createScreen(display,0);
         screen.addReference();
-        //FIXME is it really the main monitor?
-        final SurfaceSize surfaceSize=screen.getMonitorDevices().get(0).queryCurrentMode().getSurfaceSize();
+        //uses the primary monitor
+        final SurfaceSize surfaceSize=screen.getPrimaryMonitor().queryCurrentMode().getSurfaceSize();
         final int mainMonitorWidth=surfaceSize.getResolution().getWidth();
         final int mainMonitorHeight=surfaceSize.getResolution().getHeight();
         final int bitDepth=surfaceSize.getBitsPerPixel();
