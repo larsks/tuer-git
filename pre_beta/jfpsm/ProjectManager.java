@@ -79,10 +79,11 @@ public final class ProjectManager extends EntityManager{
 	/**
 	 * builds a project manager
 	 * @param mainWindow window that contains this manager
+	 * @param seeker 3D service seeker used during the creation of the game files
 	 */
-	public ProjectManager(final MainWindow mainWindow){
+	public ProjectManager(final MainWindow mainWindow,final I3DServiceSeeker seeker){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
-        this.gameFilesGenerator=new GameFilesGenerator();
+        this.gameFilesGenerator=new GameFilesGenerator(seeker);
 		//fills the popup menu
         final JMenuItem renameMenuItem=new JMenuItem("Rename");
         final JMenuItem importMenuItem=new JMenuItem("Import");        

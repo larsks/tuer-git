@@ -132,10 +132,10 @@ public final class MainWindow{
     /**
      * builds the weakest part of the application (some exceptions may be thrown) 
      */
-    public final void run(){
+    public final void run(final I3DServiceSeeker seeker){
     	toolManager=new ToolManager(this);
     	//builds the projects manager
-    	projectManager=new ProjectManager(this);
+    	projectManager=new ProjectManager(this,seeker);
     	//builds the viewer
         entityViewer=new EntityViewer(projectManager,toolManager);
         JSplitPane leftSplitPane=new JSplitPane(JSplitPane.VERTICAL_SPLIT,true,toolManager,projectManager);
@@ -182,6 +182,8 @@ public final class MainWindow{
     }
 
     final void displayErrorMessage(Throwable throwable,boolean fatal){
+    	//TODO use a StringBuilder
+    	//TODO use a more efficient method to get the full stack trace
     	String errorMessage="";
     	final String lineSep=System.getProperty("line.separator");
     	Throwable currentThrowable=throwable;
@@ -201,11 +203,11 @@ public final class MainWindow{
     	JOptionPane.showMessageDialog(applicativeFrame,errorMessage,errorTitle,JOptionPane.ERROR_MESSAGE);
     }
     
-    public static final void runInstance(String[] args){
+    public static final void runInstance(final String[] args,final I3DServiceSeeker seeker){
         //launches a minimal GUI to be able to display a popup if something goes wrong later        
         MainWindow mainWindow=new MainWindow(new JFrame());
         //runs the application
-        try{mainWindow.run();}
+        try{mainWindow.run(seeker);}
         catch(Throwable throwable)
         {//displays a popup to tell the user something goes wrong
          mainWindow.displayErrorMessage(throwable,true);
