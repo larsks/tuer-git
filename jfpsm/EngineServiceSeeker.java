@@ -33,10 +33,7 @@ import java.util.ArrayList;
  * @param <U>
  * @param <V>
  */
-public final class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
-
-    
-    private static final EngineServiceSeeker instance=new EngineServiceSeeker();
+public class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
     
     private I3DServiceSeeker<S,T,U,V> delegate;
     
@@ -45,45 +42,36 @@ public final class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,
     public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V> seeker){
         delegate=seeker;
     }
-
-    /**
-     * @deprecated Abusing of singletons isn't a good idea and this object isn't heavy
-     * @return
-     */
-    @Deprecated
-    public static final I3DServiceSeeker getInstance(){
-        return(instance);
-    }
     
     @Override
-    public final boolean writeSavableInstanceIntoFile(final S savable,final File file){
+    public boolean writeSavableInstanceIntoFile(final S savable,final File file){
     	return(delegate.writeSavableInstanceIntoFile(savable,file));
     }
     
     @Override
-    public final boolean writeSavableInstancesListIntoFile(final ArrayList<S> savablesList,final File file){
+    public boolean writeSavableInstancesListIntoFile(final ArrayList<S> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
     @Override
-    public final void attachChildToNode(final T parent,final U child){
+    public void attachChildToNode(final T parent,final U child){
     	delegate.attachChildToNode(parent,child);
     }
     
     @Override
-    public final T createNode(final String name){
+    public T createNode(final String name){
     	return(delegate.createNode(name));
     }
     
     @Override
-    public final V createMeshFromBuffers(final String name,
+    public V createMeshFromBuffers(final String name,
     		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){
     	return(delegate.createMeshFromBuffers(name,vertexBuffer,indexBuffer,normalBuffer,texCoordBuffer));
     }
     
     @Override
-    public final void attachTextureToSpatial(final U spatial,final URL url){
+    public void attachTextureToSpatial(final U spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
 }

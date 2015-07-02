@@ -40,11 +40,15 @@ import javax.imageio.ImageIO;
 @SuppressWarnings({"unchecked","rawtypes"})//FIXME ensure type safety instead of suppressing these warnings, capture several parameterized types
 public class GameFilesGenerator{
     
-    private final I3DServiceSeeker seekerInstance;
+    private final I3DServiceSeeker seeker;
     
-    public GameFilesGenerator(){
+    /**
+     * 
+     * @param seeker
+     */
+    public GameFilesGenerator(final I3DServiceSeeker seeker){
     	super();
-    	this.seekerInstance=EngineServiceSeeker.getInstance();
+    	this.seeker=seeker;
     }
     
     private final Entry<ArrayList<AbsoluteVolumeParameters[][]>,RegularGrid> createVolumeParametersAndGridFromLevel(final FloorSet level,final Project project){        
@@ -127,7 +131,7 @@ public class GameFilesGenerator{
              System.out.println("[INFO] JFPSM attempts to create a level node...");
              final String levelNodeName="LID"+levelIndex;
              //create one node per level
-             final Object levelNode=seekerInstance.createNode(levelNodeName);
+             final Object levelNode=seeker.createNode(levelNodeName);
              String floorNodeName,meshName,tilePath;
              File tileFile;
              Object volumeElementMesh,floorNode;
@@ -204,7 +208,7 @@ public class GameFilesGenerator{
                               }
                   //create one node per floor (array)
                   floorNodeName=levelNodeName+"NID"+j;
-                  floorNode=seekerInstance.createNode(floorNodeName);                
+                  floorNode=seeker.createNode(floorNodeName);                
                   meshIndex=0;
                   //use the geometries passed as arguments to build the mesh data
                   for(Entry<Integer,ArrayList<float[]>> entry:volumeParamLocationTable.entrySet())
@@ -363,7 +367,7 @@ public class GameFilesGenerator{
                         * */
                        //creates a mesh for this floor and for the volume parameter currently in use
                        meshName=floorNodeName+"CID"+meshIndex;
-                       volumeElementMesh=seekerInstance.createMeshFromBuffers(meshName,
+                       volumeElementMesh=seeker.createMeshFromBuffers(meshName,
                                totalVertexBuffer,totalIndexBuffer,totalNormalBuffer,totalTexCoordBuffer);
                        tilePath=destFile.getParent()+System.getProperty("file.separator")+tileNameTable.get(key)+".png";
                        //creates a file containing the texture of the tile because it 
@@ -378,22 +382,22 @@ public class GameFilesGenerator{
                                {ImageIO.write(tile.getTexture(),"png",tileFile);
                                 break;
                                }
-                       seekerInstance.attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
+                       seeker.attachTextureToSpatial(volumeElementMesh,tileFile.toURI().toURL());
                        //this file is now useless, delete it
                        tileFile.delete();
                        //attaches the newly created mesh to its floor
-                       seekerInstance.attachChildToNode(floorNode,volumeElementMesh);
+                       seeker.attachChildToNode(floorNode,volumeElementMesh);
                        meshIndex++;
                       }
                   //attaches the floor to its level
-                  seekerInstance.attachChildToNode(levelNode,floorNode);
+                  seeker.attachChildToNode(levelNode,floorNode);
                   //looks at the next floor
                   j++;
                  }
              System.out.println("[INFO] level node successfully created");
              System.out.println("[INFO] JFPSM attempts to write the level into the file "+destFile.getName());
              //writes the level into a file
-             success=seekerInstance.writeSavableInstanceIntoFile(levelNode,destFile);
+             success=seeker.writeSavableInstanceIntoFile(levelNode,destFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destFile.getName()+" successful");
                   //System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");
@@ -402,7 +406,7 @@ public class GameFilesGenerator{
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
              System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
              //writes the bounding boxes of the level into a file
-             success=seekerInstance.writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
+             success=seeker.writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
                   System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");

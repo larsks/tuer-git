@@ -93,9 +93,9 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
         //Disables DirectDraw under Windows in order to avoid conflicts with
     	//OpenGL
         System.setProperty("sun.java2d.noddraw","true");
-        new JFPSMServiceProvider<>(new EngineServiceProvider(),
-        		                   EngineServiceSeeker.getInstance());
+        final I3DServiceSeeker seeker=new EngineServiceSeeker();
+        new JFPSMServiceProvider<>(new EngineServiceProvider(),seeker);
         //TODO create a I3DServiceSeeker and pass it to the game files generator
-        MainWindow.runInstance(args);
+        MainWindow.runInstance(args,seeker);
     }
 }
