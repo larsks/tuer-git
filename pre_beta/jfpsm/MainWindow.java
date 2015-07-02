@@ -26,6 +26,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -182,25 +184,25 @@ public final class MainWindow{
     }
 
     final void displayErrorMessage(Throwable throwable,boolean fatal){
-    	//TODO use a StringBuilder
-    	//TODO use a more efficient method to get the full stack trace
-    	String errorMessage="";
-    	final String lineSep=System.getProperty("line.separator");
-    	Throwable currentThrowable=throwable;
-    	while(currentThrowable!=null)
-    		{errorMessage+=currentThrowable.getClass().getName();
-    		 if(currentThrowable.getMessage()!=null)
-    		     errorMessage+=": "+currentThrowable.getMessage()+lineSep;
-    		 else
-    		     errorMessage+=lineSep;
-    		 for(StackTraceElement element:currentThrowable.getStackTrace())
-    		     errorMessage+=element.toString()+lineSep;    		     
-    		 currentThrowable=currentThrowable.getCause();
-    		}
+    	final StringBuilder builder=new StringBuilder();
+    	final String stackTrace=getStackTrace(throwable);
+    	builder.append(stackTrace);
     	if(fatal)
-    	    errorMessage+=System.getProperty("line.separator")+"The application will exit.";
-    	String errorTitle=(fatal)?"Fatal error":"Application error";
+    		builder.append('\n').append("The application will exit.");
+    	final String errorTitle=(fatal)?"Fatal error":"Application error";
+    	final String errorMessage=builder.toString();
     	JOptionPane.showMessageDialog(applicativeFrame,errorMessage,errorTitle,JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public String getStackTrace(final Throwable throwable){
+    	try(final StringWriter stringWriter=new StringWriter();PrintWriter printWriter=new PrintWriter(stringWriter))
+    	    {throwable.printStackTrace(printWriter);
+    	     return(stringWriter.toString());
+    	    }
+    	catch(final IOException ioe)
+    	{//it will never happen as StringWriter doesn't throw any IOException
+    	 return("");
+    	}
     }
     
     public static final void runInstance(final String[] args,final I3DServiceSeeker seeker){
@@ -222,10 +224,10 @@ public final class MainWindow{
     	    throw new IllegalArgumentException("Cannot find a property whose key is null");
     	if(BRANDING_PROPERTIES==null)
     	    {BRANDING_PROPERTIES=new Properties();
-    	     try(InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
+    	     try(final InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
     	    	 BRANDING_PROPERTIES.load(stream);
     	     }
-    	     catch(IOException ioe)
+    	     catch(final IOException ioe)
     	     {throw new RuntimeException("Failed in loading the property file "+path,ioe);}
     	    }
     	final String propertyValue=BRANDING_PROPERTIES.getProperty(propertyKey);
