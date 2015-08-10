@@ -5,11 +5,8 @@
 	<classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJavaSound.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gluegen-rt/gluegen-rt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/joal/joal.jar"/>
 	<classpathentry kind="lib" path="lib/pss/LibraryJOAL.jar"/>
 	<classpathentry kind="lib" path="lib/fettle/fettle-0.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jogl/jogl-all.jar"/>
 	<classpathentry kind="lib" path="lib/google-collect/guava-18.0.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-collada-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-core-1.0-SNAPSHOT.jar"/>
@@ -18,5 +15,6 @@
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-math-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/jogamp/jogamp-fat.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
