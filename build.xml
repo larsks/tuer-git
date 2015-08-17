@@ -219,7 +219,7 @@
 			</manifest>
 		</jar>
 		<!-- extracts the manifest of the main JOGL JAR -->
-		<unzip src="lib/jogl/jogl-all.jar" dest="${destdir}">
+		<unzip src="lib/jogl/lib/jogamp/jogamp-fat.jar.jar" dest="${destdir}">
 		    <patternset>
 		        <include name="META-INF/MANIFEST.MF"/>
 		    </patternset>
