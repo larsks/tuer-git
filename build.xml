@@ -105,7 +105,6 @@
 		<pathelement location="lib/google-collect/guava-18.0.jar"/>
 		<pathelement location="lib/jogamp/jogamp-fat.jar"/>
 		<pathelement location="lib/pss/CodecJOrbis.jar"/>
-		<pathelement location="lib/pss/LibraryJavaSound.jar"/>
 		<pathelement location="lib/pss/LibraryJOAL.jar"/>
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
@@ -195,7 +194,6 @@
 			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/google-collect/guava-18.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
-			<zipfileset src="lib/pss/LibraryJavaSound.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
 			<!-- the rest of the files (not within JARs) -->
@@ -257,7 +255,6 @@
 			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/google-collect/guava-18.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
-			<zipfileset src="lib/pss/LibraryJavaSound.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
 			<!-- the rest of the files (not within JARs) -->
