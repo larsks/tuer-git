@@ -17,7 +17,6 @@
  */
 package jfpsm;
 
-import misc.SerializationHelper;
 
 /**
  * A floor is a subsection in a level (downstairs, upstairs, ...). 

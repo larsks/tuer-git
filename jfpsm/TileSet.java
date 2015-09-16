@@ -18,7 +18,6 @@
 package jfpsm;
 
 import java.util.ArrayList;
-import misc.SerializationHelper;
 
 /**
  * Container of tiles
