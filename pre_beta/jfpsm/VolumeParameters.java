@@ -22,8 +22,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Map.Entry;
 
-import misc.SerializationHelper;
-
 public abstract class VolumeParameters implements Serializable,Dirtyable {
 
     

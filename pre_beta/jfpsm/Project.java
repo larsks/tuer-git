@@ -23,8 +23,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import misc.SerializationHelper;
-
 /**
  * Instance of a game, it contains a container of floors and a container of tiles.
  * It is saved as a ZIP archive that contains an XML file for most of the data and the image files.
