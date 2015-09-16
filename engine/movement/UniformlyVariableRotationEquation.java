@@ -17,8 +17,6 @@
  */
 package engine.movement;
 
-import misc.SerializationHelper;
-
 /**
  * equation of a uniformly variable rotation in degrees
  * @author Julien Gouesse
@@ -26,8 +24,6 @@ import misc.SerializationHelper;
  */
 public final class UniformlyVariableRotationEquation extends UniformlyVariableMovementEquation{
 
-    
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableRotationEquation.class);}
     
     private static final long serialVersionUID=1L;
 

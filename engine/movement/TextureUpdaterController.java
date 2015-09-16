@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import misc.SerializationHelper;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
@@ -47,8 +46,6 @@ import engine.misc.ImageHelper;
 public abstract class TextureUpdaterController implements Serializable,SpatialController<Spatial>{
 
 	
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(TextureUpdaterController.class);}
-    
 	private static final long serialVersionUID=1L;
     
 	/**resource name of the image to load it with the resource locator*/

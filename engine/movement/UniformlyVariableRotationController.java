@@ -18,9 +18,6 @@
 package engine.movement;
 
 import java.util.LinkedHashMap;
-
-import misc.SerializationHelper;
-
 import com.ardor3d.math.MathUtils;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Vector3;
@@ -29,8 +26,6 @@ import com.ardor3d.scenegraph.Spatial;
 
 public final class UniformlyVariableRotationController extends MovementEquationController{
 
-    
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableRotationController.class);}
     
     private static final long serialVersionUID=1L;
     

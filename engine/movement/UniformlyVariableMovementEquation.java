@@ -17,12 +17,8 @@
  */
 package engine.movement;
 
-import misc.SerializationHelper;
-
 public class UniformlyVariableMovementEquation implements MovementEquation{
 
-    
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableMovementEquation.class);}
     
     private static final long serialVersionUID=1L;
     

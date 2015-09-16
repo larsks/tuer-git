@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import misc.SerializationHelper;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
@@ -29,8 +28,6 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 
 public abstract class MovementEquationController implements Serializable,SpatialController<Spatial>{
     
-    
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(MovementEquationController.class);}
     
     private static final long serialVersionUID=1L;
     

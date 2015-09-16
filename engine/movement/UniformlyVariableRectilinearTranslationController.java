@@ -18,16 +18,12 @@
 package engine.movement;
 
 import java.util.LinkedHashMap;
-
-import misc.SerializationHelper;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
 
 public final class UniformlyVariableRectilinearTranslationController extends MovementEquationController{
 
-    
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(UniformlyVariableRectilinearTranslationController.class);}
     
     private static final long serialVersionUID=1L;
 
