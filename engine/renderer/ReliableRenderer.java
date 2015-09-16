@@ -120,12 +120,8 @@ public class ReliableRenderer extends JoglRenderer{
 	        {//this buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
 		     if(directByteBufferCleanerCleanCallable)
 	             {//the mechanism is working, tries to use it
-			      Object directByteBuffer=null;
-	              if(realNioBuffer instanceof ByteBuffer&&directByteBufferClass.isAssignableFrom(realNioBuffer.getClass()))
-	        	      {//this buffer is a direct byte buffer
-	        	       directByteBuffer=realNioBuffer;
-	        	      }
-	              else
+			      Object directByteBuffer=getCleanableDirectByteBufferFromDirectByteBuffer(realNioBuffer);
+	              if(directByteBuffer==null)
 	                  {//this buffer is a view on a direct byte buffer, gets this viewed buffer
 	            	   //first attempt (inspired of com.jme3.util.BufferUtils.destroyByteBuffer(Buffer) from JMonkeyEngine 3: http://www.jmonkeyengine.org)
 	            	   if(viewedBufferMethod!=null)
@@ -140,9 +136,10 @@ public class ReliableRenderer extends JoglRenderer{
 	        		             if(!wasAccessible)
 	                	             field.setAccessible(true);
 						         try{final Object fieldValue=field.get(realNioBuffer);
-							         if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect()&&directByteBufferClass.isAssignableFrom(fieldValue.getClass()))
-	            	    	             {directByteBuffer=fieldValue;
-	            	    	              break;
+							         if(fieldValue!=null&&fieldValue instanceof Buffer)
+	            	    	             {directByteBuffer=getCleanableDirectByteBufferFromDirectByteBuffer((Buffer)fieldValue);
+	            	    	              if(directByteBuffer!=null)
+	            	    	                  break;
 	            	    	             }
 						            }
 						         catch(Throwable t)
@@ -165,5 +162,23 @@ public class ReliableRenderer extends JoglRenderer{
 	                  }
 	             }
 	        }
+	}
+	
+	private ByteBuffer getCleanableDirectByteBufferFromDirectByteBuffer(final Buffer buffer){
+		ByteBuffer cleanableByteBuffer=null;
+		if(buffer!=null&&buffer.isDirect()&&buffer instanceof ByteBuffer&&directByteBufferClass.isAssignableFrom(buffer.getClass()))
+		    {//this buffer is a direct byte buffer
+ 	         if(buffer.isReadOnly())
+                 {//this buffer is in read only mode, the real direct buffer that contains the data is the viewed buffer
+    	          if(viewedBufferMethod!=null)
+		              {try{cleanableByteBuffer=(ByteBuffer)viewedBufferMethod.invoke(buffer);}
+		               catch(Throwable t)
+		               {logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"deleteBuffer","Failed to get the viewed buffer",t);}
+		              }
+                 }
+             else
+    	         cleanableByteBuffer=(ByteBuffer)buffer;
+ 	        }
+	    return(cleanableByteBuffer);
 	}
 }
