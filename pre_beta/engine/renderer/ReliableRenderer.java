@@ -39,6 +39,8 @@ public class ReliableRenderer extends JoglRenderer{
 	
 	private static final Logger logger = Logger.getLogger(ReliableRenderer.class.getName());
 	
+	private static final Class<?> directByteBufferClass;
+	
 	private static final boolean directByteBufferCleanerCleanCallable;
 	
 	private static final Method directByteBufferCleanerMethod;
@@ -52,8 +54,9 @@ public class ReliableRenderer extends JoglRenderer{
 		Method tmpDirectByteBufferCleanerMethod;
 		Method tmpCleanerCleanMethod;
 		Method tmpViewedBufferMethod=null;
-		try{final Class<?> directByteBufferClass=Class.forName("java.nio.DirectByteBuffer");
-		    tmpDirectByteBufferCleanerMethod=directByteBufferClass.getDeclaredMethod("cleaner");
+		Class<?> tmpDirectByteBufferClass=null;
+		try{tmpDirectByteBufferClass=Class.forName("java.nio.DirectByteBuffer");
+		    tmpDirectByteBufferCleanerMethod=tmpDirectByteBufferClass.getDeclaredMethod("cleaner");
 		    tmpDirectByteBufferCleanerMethod.setAccessible(true);
 		    final Class<?> cleanerClass=Class.forName("sun.misc.Cleaner");
 		    tmpCleanerCleanMethod=cleanerClass.getDeclaredMethod("clean");
@@ -76,12 +79,14 @@ public class ReliableRenderer extends JoglRenderer{
 		   } 
 		catch(Throwable t){
 			tmpDirectByteBufferCleanerCleanCallable=false;
+			tmpDirectByteBufferClass=null;
 			tmpDirectByteBufferCleanerMethod=null;
 			tmpCleanerCleanMethod=null;
 			tmpViewedBufferMethod=null;
 			logger.logp(Level.WARNING,ReliableRenderer.class.getName(),"<static initializer>","Impossible to retrieve the required methods to release the native resources of direct NIO buffers",t);
 		}
 		directByteBufferCleanerCleanCallable=tmpDirectByteBufferCleanerCleanCallable;
+		directByteBufferClass=tmpDirectByteBufferClass;
 		directByteBufferCleanerMethod=tmpDirectByteBufferCleanerMethod;
 		cleanerCleanMethod=tmpCleanerCleanMethod;
 		viewedBufferMethod=tmpViewedBufferMethod;
@@ -111,12 +116,12 @@ public class ReliableRenderer extends JoglRenderer{
 	}
 	
 	public void deleteBuffer(final Buffer realNioBuffer){
-		if(realNioBuffer.isDirect())
+		if(realNioBuffer!=null&&realNioBuffer.isDirect())
 	        {//this buffer is direct. Then, it uses some native memory. Therefore, it's up to the programmer to release it.
 		     if(directByteBufferCleanerCleanCallable)
 	             {//the mechanism is working, tries to use it
 			      Object directByteBuffer=null;
-	              if(realNioBuffer instanceof ByteBuffer)
+	              if(realNioBuffer instanceof ByteBuffer&&directByteBufferClass.isAssignableFrom(realNioBuffer.getClass()))
 	        	      {//this buffer is a direct byte buffer
 	        	       directByteBuffer=realNioBuffer;
 	        	      }
@@ -135,7 +140,7 @@ public class ReliableRenderer extends JoglRenderer{
 	        		             if(!wasAccessible)
 	                	             field.setAccessible(true);
 						         try{final Object fieldValue=field.get(realNioBuffer);
-							         if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect())
+							         if(fieldValue!=null&&fieldValue instanceof ByteBuffer&&((ByteBuffer)fieldValue).isDirect()&&directByteBufferClass.isAssignableFrom(fieldValue.getClass()))
 	            	    	             {directByteBuffer=fieldValue;
 	            	    	              break;
 	            	    	             }
