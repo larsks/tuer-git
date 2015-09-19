@@ -23,9 +23,11 @@ import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.math.ColorRGBA;
 
-public class ImageHelper {
+public class ImageHelper{
 
-	public ImageHelper(){}
+	public ImageHelper(){
+		super();
+	}
 	
 	public ColorRGBA getRGBA(final Image img,final int x,final int y,final ColorRGBA store){
 		final ColorRGBA result=store==null?new ColorRGBA():store;
