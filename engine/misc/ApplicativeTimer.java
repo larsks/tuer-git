@@ -53,6 +53,7 @@ public class ApplicativeTimer implements ReadOnlyTimer{
      * Default constructor, starts this timer immediately
      */
     public ApplicativeTimer(){
+    	super();
     	startTime=getSystemNanoTime();
     	pauseEnabled=false;
     	pausePreviouslyEnabled=false;
