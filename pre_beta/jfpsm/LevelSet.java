@@ -27,8 +27,6 @@ import java.util.ArrayList;
 public final class LevelSet extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(LevelSet.class);}
-	
     private static final long serialVersionUID = 1L;
     
     private ArrayList<FloorSet> floorSetsList;

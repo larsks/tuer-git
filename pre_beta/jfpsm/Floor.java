@@ -17,6 +17,8 @@
  */
 package jfpsm;
 
+import java.beans.Transient;
+
 
 /**
  * A floor is a subsection in a level (downstairs, upstairs, ...). 
@@ -28,8 +30,6 @@ package jfpsm;
 public final class Floor extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Floor.class);}
-	
     private static final long serialVersionUID=1L;
     
     /**
@@ -61,6 +61,7 @@ public final class Floor extends JFPSMProjectUserObject{
     	return(maps[type.ordinal()]);
     }
     
+    @Transient
     @Override
     public final boolean isDirty(){
         boolean dirty=this.dirty;

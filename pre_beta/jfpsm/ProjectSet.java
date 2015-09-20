@@ -18,6 +18,7 @@
 package jfpsm;
 
 import java.awt.image.BufferedImage;
+import java.beans.Transient;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,8 +40,6 @@ import javax.imageio.ImageIO;
 public final class ProjectSet extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(ProjectSet.class);}
-	
     private static final ProjectFileFilter projectFileFilter=new ProjectFileFilter();
 	
 	private static final long serialVersionUID=1L;
@@ -208,6 +207,7 @@ public final class ProjectSet extends JFPSMProjectUserObject{
     		throw new IllegalArgumentException("The project "+project.getName()+" is not handled by this project set!");
     }
 
+    @Transient
     @Override
     public final boolean isDirty(){
         boolean dirty=this.dirty;

@@ -19,6 +19,7 @@ package jfpsm;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.beans.Transient;
 
 /**
  * A tile associates a color with a textured pattern. This pattern
@@ -29,8 +30,6 @@ import java.awt.image.BufferedImage;
 public final class Tile extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Tile.class);}
-	
     private static final long serialVersionUID=1L;
 
     /**
@@ -58,11 +57,12 @@ public final class Tile extends JFPSMProjectUserObject{
         textureContainer=new BufferedImageContainer();
     }
     
-    
+    @Transient
     public final BufferedImage getTexture(){
         return(getTexture(0));
     }
     
+    @Transient
     public final BufferedImage getTexture(final int index){
         return(textureContainer!=null?textureContainer.get(index):null);
     }
@@ -72,10 +72,12 @@ public final class Tile extends JFPSMProjectUserObject{
     	return(textureContainer.size());
     }
     
+    @Transient
     public final void setTexture(final BufferedImage texture){   	
     	setTexture(0,texture);
     }
     
+    @Transient
     public final void setTexture(final int index,final BufferedImage texture){
     	if(textureContainer==null)
     		textureContainer=new BufferedImageContainer();
@@ -92,6 +94,7 @@ public final class Tile extends JFPSMProjectUserObject{
         markDirty();
     }
     
+    @Transient
     @Override
     public final boolean isDirty(){
         return(dirty||(volumeParameters!=null&&volumeParameters.isDirty()));
