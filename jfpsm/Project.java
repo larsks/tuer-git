@@ -32,11 +32,9 @@ import java.util.zip.ZipFile;
 public final class Project extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Project.class);}
-	
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
     
-    private static final String fileExtension = ".jfpsm.zip";
+    private static final String fileExtension=".jfpsm.zip";
     
     private LevelSet levelSet;
 

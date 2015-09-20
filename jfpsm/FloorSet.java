@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+import java.beans.Transient;
 import java.util.ArrayList;
 
 /**
@@ -27,9 +28,7 @@ import java.util.ArrayList;
 public final class FloorSet extends JFPSMProjectUserObject{
     
     
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(FloorSet.class);}
-	
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID=1L;
     
     private ArrayList<Floor> floorsList;
     
@@ -46,6 +45,7 @@ public final class FloorSet extends JFPSMProjectUserObject{
         markDirty();
     }
     
+    @Transient
     @Override
     public final boolean isDirty(){
         boolean dirty=this.dirty;

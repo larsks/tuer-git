@@ -20,11 +20,10 @@ package jfpsm;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.beans.Transient;
 
 public final class Map extends JFPSMProjectUserObject{
 
-	
-	static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(Map.class);}
 	
 	private static final long serialVersionUID=1L;
 	
@@ -45,7 +44,7 @@ public final class Map extends JFPSMProjectUserObject{
 		markDirty();
 	}
 	
-	
+	@Transient
 	@Override
 	public final boolean isDirty(){
 		return(dirty);
@@ -61,11 +60,13 @@ public final class Map extends JFPSMProjectUserObject{
 		dirty=false;
 	}
 	
-	final BufferedImage getImage(){
+	@Transient
+	public final BufferedImage getImage(){
 		return(image);
 	}
 	
-	final void setImage(BufferedImage image){
+	@Transient
+	public final void setImage(BufferedImage image){
 		this.image=image;
 		markDirty();
 	}

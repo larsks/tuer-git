@@ -25,8 +25,6 @@ import java.util.Map.Entry;
 public abstract class VolumeParameters implements Serializable,Dirtyable {
 
     
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(VolumeParameters.class);}
-    
     private static final long serialVersionUID=1L;
     
     private boolean removalOfIdenticalFacesEnabled;

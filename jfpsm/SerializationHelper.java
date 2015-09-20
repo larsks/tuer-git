@@ -17,10 +17,6 @@
  */
 package jfpsm;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -28,8 +24,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.io.InputStream;
 
 
 /**
@@ -38,60 +33,27 @@ import java.lang.reflect.Modifier;
  *
  */
 public final class SerializationHelper{
-
-	/**
-	 * force the XML encoder/decoder to ignore transient members like the binary serialization
-	 * FIXME: it does not work properly on collections
-	 * @param myClass
-	 */
-    public static final void forceHandlingOfTransientModifiersForXMLSerialization(Class<?> myClass){
-        BeanInfo beanInfo = null;
-        try{beanInfo=Introspector.getBeanInfo(myClass);} 
-        catch(IntrospectionException ie)
-        {ie.printStackTrace();}
-        if(beanInfo!=null)
-            {PropertyDescriptor[] propertyDescriptors=beanInfo.getPropertyDescriptors();
-             String fieldName;
-             //for each non inherited declared field
-             for(Field field:myClass.getDeclaredFields())
-                 //if this field is transient for binary serialization
-                 if(Modifier.isTransient(field.getModifiers()))
-                     {fieldName=field.getName();
-                      for(PropertyDescriptor propertyDesc:propertyDescriptors)
-                          if(propertyDesc.getName().equals(fieldName))
-                              {//set this field to transient for the XML serialization too
-                               propertyDesc.setValue("transient",Boolean.TRUE);
-                               break;
-                              }
-                     }
-            }
-    }
     
     public static final Object decodeObjectInXMLFile(String path){
     	Object resultingObject=null;
-    	try(final BufferedInputStream bis=new BufferedInputStream(SerializationHelper.class.getResourceAsStream(path))){
-            try(final XMLDecoder decoder=new XMLDecoder(bis)){
-                resultingObject=decoder.readObject();
-            }
-        }
+    	try(final InputStream inputStream=SerializationHelper.class.getResourceAsStream(path);final BufferedInputStream bis=new BufferedInputStream(inputStream);final XMLDecoder decoder=new XMLDecoder(bis))
+    	    {resultingObject=decoder.readObject();}
         catch(IOException ioe)
-        {throw new RuntimeException("Unable to close the file "+path,ioe);}
+            {throw new RuntimeException("Unable to close the file "+path,ioe);}
         return(resultingObject);
     }
 
     public static final void encodeObjectInFile(Object o,String filename){
         File file=new File(filename);   
-        try{if(!file.exists())
-                if(!file.createNewFile())
-                    throw new IOException("Unable to create the file "+filename);
-            try(final BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file))){
-                try(final XMLEncoder encoder=new XMLEncoder(bos)){
-                    encoder.writeObject(o);
-                }
+        try
+            {if(!file.exists())
+                 if(!file.createNewFile())
+                     throw new IOException("Unable to create the file "+filename);
+             try(final FileOutputStream fos=new FileOutputStream(file);final BufferedOutputStream bos=new BufferedOutputStream(fos);final XMLEncoder encoder=new XMLEncoder(bos))
+                 {encoder.writeObject(o);}
             }
-           }
         catch(IOException ioe)
-        {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
+            {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
         
     }
 }

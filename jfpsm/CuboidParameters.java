@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+import java.beans.Transient;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.AbstractMap;
@@ -28,9 +29,7 @@ import java.util.Map.Entry;
 public final class CuboidParameters extends VolumeParameters{
 
     
-    private static final long serialVersionUID = 1L;
-
-    static{SerializationHelper.forceHandlingOfTransientModifiersForXMLSerialization(CuboidParameters.class);}
+    private static final long serialVersionUID=1L;
     
     private transient boolean dirty;
     
@@ -86,6 +85,7 @@ public final class CuboidParameters extends VolumeParameters{
         return(VolumeType.CUBOID);
     }
 
+    @Transient
     @Override
     public final boolean isDirty(){
         return(dirty);
@@ -346,12 +346,14 @@ public final class CuboidParameters extends VolumeParameters{
             }
     }
     
+    @Transient
     @Override
     public final int[][][] getVerticesIndicesOfPotentiallyIdenticalFaces(){
         recomputeBuffersIfNeeded();
         return(verticesIndicesOfPotentiallyIdenticalFaces);
     }
     
+    @Transient
     @Override
     public final int[][][] getVerticesIndicesOfAdjacentMergeableFaces(){
         recomputeBuffersIfNeeded();
@@ -498,30 +500,35 @@ public final class CuboidParameters extends VolumeParameters{
         markDirty();
     }
 
+    @Transient
     @Override
     public final IntBuffer getIndexBuffer(){
         recomputeBuffersIfNeeded();
         return(indexBuffer);
     }   
 
+    @Transient
     @Override
     public final IntBuffer getMergeableIndexBuffer(){
         recomputeBuffersIfNeeded();
         return(mergeableIndexBuffer);
     }
     
+    @Transient
     @Override
     public final FloatBuffer getNormalBuffer(){
         recomputeBuffersIfNeeded();
         return(normalBuffer);
     }
 
+    @Transient
     @Override
     public final FloatBuffer getVertexBuffer(){
         recomputeBuffersIfNeeded();
         return(vertexBuffer);
     }
     
+    @Transient
     @Override
     public final FloatBuffer getTexCoordBuffer(){
         recomputeBuffersIfNeeded();
