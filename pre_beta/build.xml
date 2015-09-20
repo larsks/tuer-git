@@ -245,7 +245,7 @@
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" excludes="**/*awt/**/*.class,**/AWT*.class,**/JavaSound*.class" />
 			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
-			<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
+			<!--<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />-->
 			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
