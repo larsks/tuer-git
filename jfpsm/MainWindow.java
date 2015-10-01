@@ -40,8 +40,6 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-import engine.service.Ardor3DGameServiceProvider;
-
 /**
  * main class of the application, it handles several components: the project manager and the viewer.
  * It contains the entry point of the program. 
@@ -224,7 +222,7 @@ public final class MainWindow{
     	    throw new IllegalArgumentException("Cannot find a property whose key is null");
     	if(BRANDING_PROPERTIES==null)
     	    {BRANDING_PROPERTIES=new Properties();
-    	     try(final InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
+    	     try(final InputStream stream=MainWindow.class.getResourceAsStream(path)){
     	    	 BRANDING_PROPERTIES.load(stream);
     	     }
     	     catch(final IOException ioe)
