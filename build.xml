@@ -40,27 +40,27 @@
 		</else>
 	</if>
 	<!-- Properties -->
-	<property name="bindir" value="."/>
+	<property name="bindir" value="target/classes"/>
 	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
-	<property name="srcdir" value="."/>
+	<property name="srcdir" value="src/main/java"/>
 	<property name="homepage-url" value="http://${project-unix-name}.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="email" value="gouessej@orange.fr" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
+	<!--<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
 	<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
 	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
 	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
-	<!--<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
+	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>-->
+	<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
 	<property name="openjdk-linux-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
 	<property name="openjdk-linux-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
 	<property name="openjdk-windows-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-	<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>-->
+	<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
 	<property name="game-version" value="0.0.0" />
 	<property name="game-release" value="0" />
 	<property name="game-group" value="Applications/Games" />
@@ -139,6 +139,21 @@
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
 	<target name="compile" description="Compiles the source code">
+		<!-- Creates the directory containing the class files -->
+		<if>
+		    <not>
+			    <available file="${bindir}"/>
+		    </not>
+		    <then>
+		        <mkdir dir="${bindir}"/>
+		    </then>
+		</if>
+		<!-- Copies the resources into the same directory than the class files -->
+		<copy todir="${bindir}">
+			<fileset dir="." includes="*.txt,*.properties"/>
+		    <fileset dir="src/main/resources"/>
+		</copy>
+		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
 	           debug="on" source="1.7" target="1.7">
@@ -157,7 +172,7 @@
 		<!-- Creates the destination directory -->
 		<mkdir dir="${destdir}"/>
 		<!-- Copies the logo into it -->
-		<copy file="images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
+		<copy file="src/main/resources/images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
 		<!-- Creates the GNU Linux archives and packages -->
@@ -179,7 +194,7 @@
 	<!-- Create JARs                                                       -->
 	<!-- ================================================================= -->
 	<target name="create-jars">
-		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="**/*.class" compress="false">
+		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,connection/*.class,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" />
@@ -201,11 +216,6 @@
 			<include name="**/NOTICE.txt" />
 			<include name="**/README.txt" />
 			<include name="**/branding.properties" />
-			<!-- the collada models are not yet used -->
-			<exclude name="**/dae/*" />
-			<!-- ANT file -->
-			<exclude name="**/build.xml" />
-			<exclude name="**/*.py" />
 			<manifest>
 				<attribute name="Application-Name" value="${editor-long-name}" />
 				<attribute name="Main-Class" value="${editor-main-class}" />
@@ -240,12 +250,12 @@
 			<attribute name="Permissions" value="all-permissions"/>
 			<attribute name="Codebase" value="${codebase-url}"/>
 		</manifest>
-		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" includes="**/*.class" compress="false">
+		<!-- FIXME include all files in ${bindir}, keep only the exclusion filters -->
+		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" excludes="**/*awt/**/*.class,**/AWT*.class,**/JavaSound*.class" />
-			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
-			<!--<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />-->
+			<!-- JogAmp's Ardor3D Continuation, Paul Lamb Sound Library, Fettle and Guava -->
 			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
@@ -257,35 +267,17 @@
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
-			<!-- the rest of the files (not within JARs) -->
-			<include name="**/*.bmp" />
-			<include name="**/*.png" />
-			<include name="**/*.jpg" />
-			<include name="**/*.fnt" />
-			<include name="**/sounds/*.ogg" />
+			<!-- the game only uses the models in Ardor3D binary format -->
+			<exclude name="**/dae/*" />
+			<exclude name="**/md2/*" />
+			<exclude name="**/obj/*" />
+			<exclude name="**/osm/*" />
 			<!-- the game does not need the classes of the editor -->
 			<exclude name="**/jfpsm/*.class" />
-			<exclude name="**/connection/*.class" />
-			<!-- the collada models -->
-			<!--<include name="**/dae/*.dae" />-->
-			<include name="**/abin/*.abin" />
-			<include name="**/LICENSE.txt" />
-			<include name="**/NOTICE.txt" />
-			<include name="**/README.txt" />
-			<include name="**/branding.properties" />
-			<!-- ANT file -->
-			<exclude name="**/build.xml" />
-			<exclude name="**/*.py" />
-			<!-- miscellaneous libraries -->
-			<exclude name="**/lib/**" />
-			<manifest>
-				<attribute name="Application-Name" value="${game-long-name}"/>
-				<attribute name="Main-Class" value="${game-main-class}"/>
-				<attribute name="Trusted-Only" value="true"/>
-				<attribute name="Trusted-Library" value="false"/>
-				<attribute name="Permissions" value="all-permissions"/>
-				<attribute name="Codebase" value="${codebase-url}"/>
-			</manifest>
+			<exclude name="**/jfpsm/**/*.class" />
+			<exclude name="**/connection/*" />
+			<exclude name="**/engine/service/EngineServiceProvider*.class" />
+			<exclude name="**/engine/service/I3DServiceProvider.class" />
 		</jar>
 		<delete dir="${destdir}/META-INF" failonerror="true"/>
 	</target>
@@ -396,7 +388,8 @@
 		<delete file="${destdir}/${game-src-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
 		<zip destfile="${destdir}/${game-src-zip-filename}">
-			<fileset dir="." excludes="**/*.class,**/target/*,${keystore},**/*.py"/>
+			<fileset dir="${srcdir}"/>
+			<fileset dir="src/main/resources"/>
 		</zip>
 	</target>
 	<!-- ================================================================= -->
@@ -406,14 +399,14 @@
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" arch="i386" version="${game-version}" release="${game-release}"
 			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
 			summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}" 
 			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" arch="amd64" version="${game-version}" release="${game-release}"
 		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
 		    summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}"
@@ -426,11 +419,11 @@
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" arch="i386" version="${game-version}" release="${game-release}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="images/${game-logo-filename}" 
+		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    antreimplementationenabled="true" nativelauncherenabled="false" arch="amd64" version="${game-version}" release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
@@ -441,7 +434,7 @@
 		<create-os-x-app-bundle arch="universal" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
 		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
 			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
-			iconsfile="images/${game-logo-filename}" antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" 
+			iconsfile="src/main/resources/images/${game-logo-filename}" antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" 
 			release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
