@@ -407,8 +407,7 @@
 		<delete file="${destdir}/${game-src-zip-filename}" failonerror="false" />
 		<!-- Creates the archive -->
 		<zip destfile="${destdir}/${game-src-zip-filename}">
-			<fileset dir="${srcdir}"/>
-			<fileset dir="src/main/resources"/>
+			<fileset dir="." excludes="${destdir}/"/>
 		</zip>
 	</target>
 	<!-- ================================================================= -->
