@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="fr"><head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>TUER : Truly Unusual Experience of Revolution® (Expérience de révolution vraiment inhabituelle)</title>
+</head><body>
+<center><strong><font color="red" size="20"><b><big>TUER</big></b></font></strong></center>
+<center>TUER : Truly Unusual Experience of Revolution® (Expérience de révolution vraiment inhabituelle)</center>
+<br>
+<center>Jeu de tir en vue subjective gratuit et libre (à des fins non commerciales) écrit en Java par Julien Gouesse</center>
+<br>
+<br>
+<br>
+<a style="float:right;margin-left:10px;margin-right:10px;" href="../../en/project/"><img src="../../en.png" alt="English"></a><a style="float:right;margin-left:10px;margin-right:10px;" href="./"><img src="../../fr.png" alt="Français"></a>
+<br>
+<hr>
+<a href="../">Accueil</a>&nbsp;&nbsp;&nbsp;
+<a href="http://gouessej.wordpress.com/tag/tuer/">Blog</a>&nbsp;&nbsp;&nbsp;
+<a href="../telecharger/">Télécharger</a>&nbsp;&nbsp;&nbsp;
+<a href="../jouer/">Jouer</a>&nbsp;&nbsp;&nbsp;
+<a href="../images/">Images</a>&nbsp;&nbsp;&nbsp;
+<a href="../videos/">Vidéos</a>&nbsp;&nbsp;&nbsp;
+<a href="./">Projet</a>&nbsp;&nbsp;&nbsp;
+<a href="../foutoir/">Foutoir</a>&nbsp;&nbsp;&nbsp;
+<a href="./">Contact</a>&nbsp;&nbsp;&nbsp;
+<a href="../../rss.xml" type="application/rss+xml"><img src="../../rss.png" alt="flux RSS de TUER" height="15" width="15"></a>
+<hr>
+<br>
+<b>Sommaire</b>
+<ul>
+<li><a href="#licences">Licences</a>
+    <ul>
+        <li><a href="#trademarkPolicy">Ensemble de règles sur la marque de commerce</a></li>
+        <li><a href="#videoPolicy">Ensemble de règles sur les vidéos</a></li>
+    </ul>
+</li>
+<li><a href="#requirements">Configuration minimale</a></li>
+<li><a href="#configuration">Configuration du clavier et de la souris</a></li>
+<li><a href="#test">Systèmes d'exploitation testés</a></li>
+<li><a href="#story">Histoire</a></li>
+<li><a href="#guidelines">Lignes directives</a></li>
+<li><a href="#presentation">Présentation du projet</a>
+    <ul>
+        <li><a href="#versionalpha">Version alpha</a></li>
+        <li><a href="#versionprebetaabandonnee">Version pré-bêta abandonnée</a></li>
+        <li><a href="#versionprebetacourante">Version pré-bêta courante</a></li>
+    </ul>
+</li>
+<li><a href="#bugsAndRequests">Bogues connus et demandes d'amélioration</a></li>
+<li><a href="#roadmap">Feuille de route</a></li>
+</ul>
+<h1 id="licences"><a href="#licences">Licences</a></h1>
+<ul>
+<li>Truly Unusual Experience of Revolution® dont le code source est sous GPL V2 et les créations artistiques sous Creative Commons BY-NC-SA 3.0</li>
+<li><a href="http://openjdk.java.net">OpenJDK</a> 1.7 sous GPL V2 avec Exception Classpath</li>
+<li><a href="http://jogamp.org/jogl/www/">JOGL</a> 2 sous licence BSD</li>
+<li><a href="http://jogamp.org/joal/www/">JOAL</a> 1.1.3 sous licence BSD</li>
+<li><a href="http://www.jcraft.com/jorbis/">JOGG</a> sous LGPL</li>
+<li><a href="http://www.jcraft.com/jorbis/">JORBIS</a> sous LGPL</li>
+<li><a href="http://github.com/gouessej/Ardor3D/">JogAmp's Ardor3D Continuation</a> 1.0 sous licence libpng/zlib</li>
+<li><a href="http://www.paulscode.com/forum/index.php?topic=4.0">Paul Lamb's 3D sound system</a> sous une licence open source personnalisée</li>
+<li><a href="http://github.com/thehiflyer/Fettle">Fettle</a> 0.7 sous licence MIT</li>
+<li><a href="http://osm2world.org">OSM2World</a> sous LGPL</li>
+<li><a href="http://github.com/google/guava">Google Guava</a> sous licence Apache</li>
+<li><a href="http://ant.apache.org">Ant</a> sous licence Apache</li>
+<li><a href="http://ant-contrib.sourceforge.net">Ant-Contrib</a> sous licence Apache</li>
+<li><a href="http://enitsys.sourceforge.net/ant-classloadertask/usage.html">Ant classloader task</a> sous licence Apache</li>
+<li><a href="http://github.com/tcurdt/jdeb">jDeb</a> sous licence Apache</li>
+<li><a href="http://redline-rpm.org">Redline RPM</a> sous licence MIT</li>
+<li><a href="http://github.com/libgdx/packr">PackR</a> sous licence Apache</li>
+<li><a href="http://commons.apache.org/compress/">Apache Commons Compress</a> sous licence Apache</li>
+<li><a href="http://commons.apache.org/imaging/">Apache Commons Imaging</a> sous licence Apache</li>
+<li><a href="http://commons.apache.org/io/">Apache Commons IO</a> sous licence Apache</li>
+<li><a href="http://www.slf4j.org">slf4j</a> sous licence MIT</li>
+<li><a href="http://tukaani.org/xz/">XZ for Java</a> dans le domaine public</li>
+<li><a href="http://bouncycastle.org/java.html">Bountycastle Java</a> sous licence MIT</li>
+</ul>
+<h2 id="trademarkPolicy"><a href="#trademarkPolicy">Ensemble de règles sur la marque de commerce</a></h2>
+<p>Truly Unusual Experience of Revolution® est une marque de commerce enregistrée par Julien Gouesse auprès de l'institut national de la propriété industrielle en classe 9 (logiciels de jeux) dont le numéro national est 14 4 079 878. 
+Son utilisation sans l'autorisation préalable du détenteur pour désigner tout produit de cette classe en France et à l'étranger est strictement interdite. Néanmoins, utiliser le nom Unix du jeu ("tuer") pour le désigner est possible et vivement recommandé.</p>
+<h2 id="videoPolicy"><a href="#videoPolicy">Ensemble de règles sur les vidéos</a></h2>
+<p>Les joueurs sont encouragés à faire des vidéos utilisant les contenus du jeu, telles que des vidéos d'exploration ou d'instruction. La publication de ces vidéos sur quelconques sites web ou services de partage de vidéos convient à l'auteur tant qu'ils respectent la règle sur la marque de commerce et qu'ils ne prétendent pas que leurs vidéos sont officielles. Distribuer les éléments du jeu séparément requiert de respecter leurs licences.
+
+L'utilisation des contenus du jeu doit être strictement non commerciale. Par là l'auteur entend qu'ils ne peuvent faire payer les utilisateurs pour voir ou accéder à leurs vidéos. Ils ne peuvent pas non plus vendre ou céder leurs vidéos à d'autres contre un paiement de n'importe quel type. Ils ne peuvent pas les monétiser via un programme de partenariat sur un site de partage de vidéos. Ils ne peuvent pas les embarquer dans une page web contenant des publicités ou des liens sponsorisés. Les contenus du jeu ne peuvent pas être mélangés avec des publicités dans leurs vidéos.
+
+Ils seront légalement responsables des commentaires postés près de leurs vidéos et ils seront poursuivis s'ils refusent sciemment de retirer des commentaires injurieux ou diffamatoires contre ce jeu ou son auteur.
+
+Cette ensemble de règles s'applique uniquement aux contenus de ce jeu. S'ils incluent des contenus d'autres personnes dans leurs vidéos, ils devront obtenir la permission des détenteurs respectifs.</p>
+<h1 id="requirements"><a href="#requirements">Configuration minimale</a></h1>
+<ul>
+<li>Environnement d'exécution Java 1.7</li>
+<li>OpenGL 1.3</li>
+<li>128 Mo de RAM</li>
+<li>16 Mo de VRAM</li>
+</ul>
+<h1 id="configuration"><a href="#configuration">Configuration du clavier et de la souris</a></h1>
+<ul>
+<li>ESC pour quitter le jeu</li>
+<li>SHIFT pour courrir</li>
+<li>flèche gauche pour tourner à gauche</li>
+<li>flèche droite pour tourner à droite</li>
+<li>flèche haute ou Z ou W pour avancer</li>
+<li>flèche basse ou S pour reculer</li>
+<li>F1 pour faire une capture d'écran</li>
+<li>la souris pour regarder</li>
+<li>clic gauche ou espace pour tirer</li>
+<li>Q ou A pour faire un pas de côté à gauche</li>
+<li>D pour faire un pas de côté à droite</li>
+<li>P pour mettre le jeu en pause</li>
+</ul>
+<h1 id="test"><a href="#test">Testé sur les systèmes d'exploitation suivants : </a></h1>
+<ul>
+<li>Linux (Fedora, Red Hat, Arch, Mandriva, Debian, SUSE, Mageia, CentOS, Ubuntu, Gentoo, Mint)</li>
+<li>Solaris et OpenIndiana</li>
+<li>Macintosh (Mac OS X 10.6.8 et supérieur)</li>
+<li>Windows (NT 2000, XP, Vista, 7, 8)</li>
+</ul>
+<h1 id="story"><a href="#story">Histoire</a></h1>
+<p>
+Le capitalisme menait notre monde à sa perte. La précarité et le chômage augmentaient,
+la nature mourrait, les droits sociaux disparaissaient rapidement, les services publics aussi. La pauvreté 
+a forcé beaucoup de gens à vivre sans domicile et à voler de la nourriture. La corruption de nos gouvernements transforma 
+nos démocraties en dictatures. Tous les aspects de nos vies étaient infectés par la manière de penser mercantile
+laquelle menait à des discriminations, un partage des richesses injuste, une baisse de la qualité de vie, 
+plus d'accidents dans les trains, des jeux vidéo moins bons, de la nourriture moins bonne, des soins de santé moins bons, des conditions de travail moins bonnes, 
+une éducation moins bonne, des voitures moins sûres, plus de dettes, plus de liberté d'expression, plus du tout de liberté. Toutes les manifestations 
+étaient réprimées très violemment bien que la police évitait de tuer des gens la plupart du temps.
+</p>
+<p>
+Cependant, cette répression est allé plus loin une fois, les policiers ont abattu plusieurs étudiants pendant un blocage à l'université de 
+la Sorbonne à Paris. La même chose s'est produit en Grèce à Athènes. Les étudiants vivants témoins de ces 
+événements sont devenus extrêmement violents et ont mis le feu à toutes les commissariats de police. Les ouvriers d'usine et les employés 
+d'entreprises privées investis dans des grèves et des mobilisations sont venus les aider. Les policiers 
+ont décidé d'utiliser des armes mortelles pour mettre fin à cette insurrection mais ils ont échoué, le reste de la population 
+éprouvaient une certaine sympathie pour les grévistes et certains les ont rejoints. Quelques gouvernements révolutionnaires de transition 
+supportés par les gens ont remplacé les gouvernements capitalistes corrompus. La situation est devenue plus 
+paisible. Le sang a cessé de couler. Néanmoins, quelques policiers, quelques soldats et beaucoup de membres de 
+milices para-militaires d'extrême-droite veulent arrêter la révolution par tous les moyens, ils sont financés par des entreprises privées, les 
+précédents gouvernements corrompus et l'Organisation Mondiale du Commerce. Votre missions consiste à les arrêter 
+et à éviter les pertes civiles. S'ils refusent de se rendre, tirez à vue, vous avez le permis de tuer.
+</p>
+<h1 id="guidelines"><a href="#guidelines">Lignes directives</a></h1>
+<p>
+Le but de ce projet est de créer un nouveau jeu de tir en vue subjective utilisant le langage de programmation Java, 
+inspiré de Goldeneye 007, Doom, Quake et Turok, et rivalisant avec des jeux comme Cube, Open Arena et 
+Alien Arena 2006. J'ai (Julien Gouesse, développeur) commencé à travailler dessus en octobre 2006 et 
+cela continuera au moins jusqu'en 2020, en impliquant plusieurs autres personnes dans les éléments graphiques. L'utlisation de 
+JMonkeyEngine 2 aurait dû me faire gagner beaucoup de temps comme c'est un excellent moteur 3D mais il y avait trop 
+de bogues. C'est pourquoi j'utilise Ardor3D depuis septembre 2009.<br><br>Pour le moment, la priorité 
+est donnée à la programmation des efforts progressifs seront faits pour améliorer les graphismes qui sont assez 
+moches (sauf le pistolet).<br><br> Je ne prévois pas de créer la prochaine application qui va bouleverser le "marché" comme ce n'est pas réaliste.
+</p>
+<h1 id=presentation><a href="#presentation">Présentation du projet</a></h1>
+<h2 id="versionalpha"><a href="#versionalpha">Version alpha</a></h2>
+<p>
+Cette version reposait sur d3caster en octobre 2006 puis sur mon propre moteur de 2007 jusqu'à septembre 2008.
+</p>
+<p>
+Java Web Start était très facile à utiliser. Il premettait aux utilisateurs finaux d'installer le jeu très facilement. 
+Vous aviez juste besoin d'un clic (ou quelques uns) pour pouvoir jouer.
+L'image ci-dessous montre ce qui arrive quand vous lancez le jeu :
+</p>
+<img src="../../screenshots/javaws.png" width="400" height="300" title="Java Web Start screenshot" alt="Java Web Start screenshot">
+<br><br>
+<p>
+Si ça marche bien, à la fin du téléchargement, vous verrez ceci : 
+</p>
+<img src="../../screenshots/starting_screen.png" width="512" height="512" title="starting screen screenshot" alt="starting screen screenshot">
+<br><br>
+<p>
+Le chargement peut durer au plus 20 secondes, cela dépend de la vitesse de votre ordinateur. 
+Après le chargement, vous verrez ceci : 
+</p>
+<img src="../../screenshots/snapshot_0.gif" width="400" height="300" alt="start screenshot">
+<br><br>
+<p>
+Maintenant, il y a quelques ennemis qui essaient de vous abattre. Remarquez qu'il y a un système d'éclairage dynamique. Quand le projectiles se déplace, il y a une lumière autour de lui, vous pouvez la voir au 
+plafond et au sol : 
+</p>
+<img src="../../screenshots/snapshot_1.gif" width="400" height="300" alt="action screenshot">
+<br><br>
+<p>
+Comme vous pouvez le voir, il y a quelques jolies images qui apparaissent quand vous battez tous les ennemis dans une salle. Ces images ont été créées par Vincent Stahl : 
+</p>
+<img src="../../screenshots/snapshot_2.gif" width="400" height="300" alt="art screenshot">
+<br><br>
+<p>
+Vous pourriez être déçu par la fréquence d'affichage faible de mon jeu. Les performances dépendent largement de la vitesse du microprocesseur, la vitesse de la mémoire vive, 
+la vitesse de votre bus graphique et la puissance de votre carte graphique. Par exemple, j'utilise un processeur céléron 
+700 Mhz avec 256 Mo de RAM à 133 Mhz et une ATI Radeon 9250 Pro. J'ai seulement au plus 8 images à la seconde.
+Sur un ordinateur récent, vous pouvez avoir environ 500 images à la seconde.
+</p>
+<p>
+Par le passé, beaucoup de gens se demandaient pourquoi c'est si lent alors que ça utilise OpenGL. Le problème venait du raycasting. Le mode "lent" du jeu utilisait une bonne dose de rendu logiciel avec un 
+algorithme très lent appelé raycasting. Plus l'écran était grand, plus le jeu était lent. Le jeu qui a inspiré TUER utilise uniquement du rendu logiciel et est entre 8 et 64 
+fois plus lent que le mien quand vous le mettez en mode plein écran. Mon jeu a utilisé les pipelines OpenGL après avoir renoncé au raycasting pour augmenter la vitesse d'affichage.
+Comme ce n'était pas suffisant, j'ai complètement retiré le mode lent et je n'utilise plus du tout le raycasting.
+Regardez le premier affichage que j'ai obtenu quand j'ai commencé à modifier le moteur :
+</p>
+<img src="../../screenshots/bug.png" width="400" height="300" alt="bug screenshot">
+<p>
+Au début de la modification du système de rendu, l'image était inversée verticalement, il y avait une autre inversion dans l'ordre des composantes de couleur et je pouvais 
+voir seulement un quart de l'image attendue. Si vous êtes curieux, regardez le code source!
+</p>
+<br><br>
+<p>
+Le mode expérimental du jeu est devenu très <b>rapide</b> comme vous pouvez le voir ci-dessous (testé sous Mandriva 2007, 2 Go DDRAM, ATI X1950 Pro 256 MB AGP 8X).
+</p>
+<img src="../../screenshots/snapshot_3.png" width="400" height="300" alt="art screenshot">
+<h2 id="versionprebetaabandonnee"><a href="#versionprebetaabandonnee">Version pré-bêta abandonnée</a></h2>
+<p>
+La maquette utilisant JMonkeyEngine 2.0 était prometteuse, j'ai travaillé dessus de septembre 2008 à octobre 2009. Psionic et Maxime ont modélisé quelques bonnes armes.
+Malheureusement, ce moteur contenait trop de bogues, je passais la majeure partie de mon temps à les corriger.
+</p>
+<h2 id="versionprebetacourante"><a href="#versionprebetacourante">Version pré-bêta courante</a></h2>
+<p>
+La maquette utilisant Ardor3D est vraiment prometteuse! J'ai commencé à travailler dessus en octobre 2009. L'interface graphique a été coplètement 
+réécrite, elle est moins moche et plus dynamique. TUER revient à son arrière-plan politique habituel.
+</p>
+<img src="../../screenshots/ardor3d_snapshot_0.png" width="400" height="300" alt="Ardor3D screenshot">
+<h1 id="bugsAndRequests"><a href="#bugsAndRequests">Bogues connus et demandes d'amélioration</a></h1>
+<p>La liste des bogues (dont les demandes d'amélioration) est <a href="http://sourceforge.net/p/tuer/tickets/" >ici</a>.</p>
+<h1 id="roadmap"><a href="#roadmap">Feuille de route</a></h1>
+<p>TUER a utilisé 4 moteurs différents et sa feuille de route a été mise à jour plusieurs fois sur <a href="http://gouessej.wordpress.com/tag/tuer/">mon blog</a>.</p>
+<br>
+<p>
+   <a href="http://validator.w3.org/check?uri=referer">
+      <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
+   </a>
+</p>
+</body>
+</html>

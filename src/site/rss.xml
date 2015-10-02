@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<rss version="2.0">
+  <channel>
+    <title>TUER RSS Feed</title>
+    <link>http://tuer.sourceforge.net</link>
+    <pubDate>Wed, 17 Sep 2008 10:25:00 GMT</pubDate>
+    <language>en-us</language>
+    <webMaster>gouessej@yahoo.fr</webMaster>
+    <description>The Free Gaming Foundation promotes the free access to 
+    gaming for all.</description>
+    <item>
+       <title>TUER now uses JOGL 2.0 and JOAL</title>
+       <link>http://tuer.sourceforge.net</link>
+       <pubDate>Thu, 8 Dec 2011 12:02:00 GMT</pubDate>
+       <description>TUER now uses JOGL 2.0 and JOAL in order to provide a better support of the full screen mode under GNU/Linux and a better sound support with OpenJDK.</description>
+       <title>The mouse cursor is correctly hidden under Mac OS X 10.6 in the pre-beta version</title>
+       <link>http://tuer.sourceforge.net</link>
+       <pubDate>Wed, 18 Jan 2012 1:48:00 GMT</pubDate>
+       <description>A bug of NEWT (JOGL 2.0) reproducible only on Mac OS X prevented the mouse cursor from being hidden. It has been fixed and the pre-beta version of TUER has been updated.</description>
+       <title>The pre-beta version of TUER has just been updated</title>
+       <link>http://tuer.sourceforge.net</link>
+       <pubDate>Fri, 03 Oct 2015 0:00:00 GMT</pubDate>
+       <description>This updated version should no longer crash under Windows 10. The directory layout of the source code has been updated to allow the developers to find more easily the source code and the resources of the project.</description>
+    </item>
+  </channel>
+</rss>

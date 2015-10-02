@@ -1,0 +1,11 @@
+AddType application/x-java-jnlp-file .jnlp
+AddType application/x-java-archive .jar
+AddType application/x-rpm .rpm
+AddType application/x-deb .deb
+AddType application/zip .zip
+AddType video/ogg .ogv
+AddType video/webm .webm
+AddEncoding gzip .gz
+AddEncoding pack200-gzip .pack.gz
+Redirect permanent /tuer.jnlp /alpha/tuer.jnlp
+Redirect permanent /tuer.php /alpha/tuer.jnlp
