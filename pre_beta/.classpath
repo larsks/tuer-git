@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path=""/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
+	<classpathentry excluding="src/main/java/|src/main/resources/" including="*.properties|*.txt" kind="src" output="target/classes" path=""/>
+	<classpathentry kind="src" output="target/classes" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
@@ -15,5 +17,5 @@
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-savable-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d/ardor3d-ui-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/jogamp/jogamp-fat.jar"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
