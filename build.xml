@@ -473,9 +473,9 @@
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
 		    <fileset file="${destdir}/${game-src-zip-filename}" />
 		</scp>
-		<!-- Uploads the other files just by Java Webstart onto the SFTP server in the Project Web Space -->
+		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-			<fileset dir="${destdir}" includes="*" excludes="${project-unix-name}-${game-version}-${game-release}.*" />
+			<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
 		</scp>
 	</target>
 	<!-- ================================================================= -->
