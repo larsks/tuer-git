@@ -5,9 +5,8 @@
     <link>http://tuer.sourceforge.net</link>
     <pubDate>Wed, 17 Sep 2008 10:25:00 GMT</pubDate>
     <language>en-us</language>
-    <webMaster>gouessej@yahoo.fr</webMaster>
-    <description>The Free Gaming Foundation promotes the free access to 
-    gaming for all.</description>
+    <webMaster>gouessej@orange.fr</webMaster>
+    <description>TUER: Truly Unusual Experience of Revolution, pre-beta version, single player first person shooter created by Julien Gouesse</description>
     <item>
        <title>TUER now uses JOGL 2.0 and JOAL</title>
        <link>http://tuer.sourceforge.net</link>
@@ -19,7 +18,7 @@
        <description>A bug of NEWT (JOGL 2.0) reproducible only on Mac OS X prevented the mouse cursor from being hidden. It has been fixed and the pre-beta version of TUER has been updated.</description>
        <title>The pre-beta version of TUER has just been updated</title>
        <link>http://tuer.sourceforge.net</link>
-       <pubDate>Fri, 03 Oct 2015 0:00:00 GMT</pubDate>
+       <pubDate>Sat, 03 Oct 2015 0:00:00 GMT</pubDate>
        <description>This updated version should no longer crash under Windows 10. The directory layout of the source code has been updated to allow the developers to find more easily the source code and the resources of the project.</description>
     </item>
   </channel>
