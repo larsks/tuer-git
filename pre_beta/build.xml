@@ -90,6 +90,7 @@
 	<!-- Sourceforge Project Web space -->
 	<property name="sftp-server" value="web.sourceforge.net" />
 	<property name="sftp-remotedir" value="/home/project-web/${project-unix-name}/htdocs/very_experimental" />
+	<property name="sftp-website-remotedir" value="/home/project-web/${project-unix-name}/htdocs" />
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
 	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/${project-unix-name}-${game-version}"/><!-- N.B: no release number in the directory name -->
@@ -464,6 +465,21 @@
 		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
 			<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
+		</scp>
+	</target>
+	<!-- ================================================================= -->
+	<!-- Upload site                                                       -->
+	<!-- ================================================================= -->
+	<target name="upload-site">
+		<!-- Loads jsch-0.1.50.jar (which is required to use the optional scp task) into the system classloader
+		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
+		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
+		<!-- Gets the SFTP account's password from the end user's input -->
+		<input message="Please enter the password:" addproperty="sftp-password"/>
+		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
+		<!-- Uploads the files of the website onto the SFTP server in the Project Web Space -->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}">
+		    <fileset dir="src/site"/>
 		</scp>
 	</target>
 	<!-- ================================================================= -->
