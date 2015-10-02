@@ -269,8 +269,8 @@
 			<attribute name="Permissions" value="all-permissions"/>
 			<attribute name="Codebase" value="${codebase-url}"/>
 		</manifest>
-		<!-- FIXME include all files in ${bindir}, keep only the exclusion filters -->
-		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" compress="false">
+		<!-- the game only uses the models in Ardor3D binary format and it does not need the classes of the editor -->
+		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" excludes="connection/,dae/,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class,jfpsm/,md2/,obj/,osm/" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" excludes="**/*awt/**/*.class,**/AWT*.class,**/JavaSound*.class" />
@@ -286,17 +286,6 @@
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
-			<!-- the game only uses the models in Ardor3D binary format -->
-			<exclude name="**/dae/*" />
-			<exclude name="**/md2/*" />
-			<exclude name="**/obj/*" />
-			<exclude name="**/osm/*" />
-			<!-- the game does not need the classes of the editor -->
-			<exclude name="**/jfpsm/*.class" />
-			<exclude name="**/jfpsm/**/*.class" />
-			<exclude name="**/connection/*" />
-			<exclude name="**/engine/service/EngineServiceProvider*.class" />
-			<exclude name="**/engine/service/I3DServiceProvider.class" />
 		</jar>
 		<delete dir="${destdir}/META-INF" failonerror="true"/>
 	</target>
