@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta http-equiv="Content-Language" content="fr">
+<title>TUER : Truly Unusual Experience of Revolution® (Expérience de révolution vraiment inhabituelle)</title>
+</head><body>
+<center><strong><font color="red" size="20"><b><big>TUER</big></b></font></strong></center>
+<center>TUER : Truly Unusual Experience of Revolution® (Expérience de révolution vraiment inhabituelle)</center>
+<br>
+<center>Jeu de tir en vue subjective gratuit et libre (à des fins non commerciales) écrit en Java par Julien Gouesse</center>
+<br>
+<br>
+<br>
+<a style="float:right;margin-left:10px;margin-right:10px;" href="../../en/contact/"><img src="../../en.png" alt="English"></a><a style="float:right;margin-left:10px;margin-right:10px;" href="./"><img src="../../fr.png" alt="Français"></a>
+<br>
+<hr>
+<a href="../">Accueil</a>&nbsp;&nbsp;&nbsp;
+<a href="http://gouessej.wordpress.com/tag/tuer/">Blog</a>&nbsp;&nbsp;&nbsp;
+<a href="../telecharger/">Télécharger</a>&nbsp;&nbsp;&nbsp;
+<a href="../jouer/">Jouer</a>&nbsp;&nbsp;&nbsp;
+<a href="../images/">Images</a>&nbsp;&nbsp;&nbsp;
+<a href="../videos/">Vidéos</a>&nbsp;&nbsp;&nbsp;
+<a href="../projet/">Projet</a>&nbsp;&nbsp;&nbsp;
+<a href="../foutoir/">Foutoir</a>&nbsp;&nbsp;&nbsp;
+<a href="./">Contact</a>&nbsp;&nbsp;&nbsp;
+<a href="../../rss.xml" type="application/rss+xml"><img src="../../rss.png" alt="flux RSS de TUER" height="15" width="15"></a>
+<hr>
+<p>Vous avez besoin de ces programmes pour utiliser mon jeu à des fins de développement : </p>
+<ul>
+<li>Kit de développement Java 1.7 ou supérieur : <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
+<li>Eclipse 4.3.2 ou supérieur (optionel mais recommandé): <a href="http://www.eclipse.org/downloads/">ici</a></li>
+<li>Subversion (SVN)</li>
+<ul>
+<li>utilisateurs en ligne de commande: <a href="http://subversion.tigris.org/">ici</a></li>
+<li>utilisateurs d'Eclipse: <a href="http://subclipse.tigris.org/">ici</a></li>
+</ul>
+<li>ANT: <a href="http://ant.apache.org/">ici</a> (déjà supporté et livré avec les EDI majeurs tel qu'Eclipse et Netbeans)</li>
+</ul>
+Ce sont les URLs des dépôts SVN pour toutes les versions :
+<ul>
+    <li>accès en lecture seule
+        <ul>
+            <li><a href="http://svn.code.sf.net/p/tuer/code/alpha/">http://svn.code.sf.net/p/tuer/code/alpha/</a> (version alpha abandonnée qui utilise mon propre moteur)</li>
+            <li><a href="http://svn.code.sf.net/p/tuer/code/tuer/">http://svn.code.sf.net/p/tuer/code/tuer/</a> (version pré-bêta abandonnée qui utilise JMonkeyEngine 2.0)</li>
+            <li><a href="http://svn.code.sf.net/p/tuer/code/pre_beta/">http://svn.code.sf.net/p/tuer/code/pre_beta/</a> (version pré-bêta courante qui utilise Ardor3D)</li>
+        </ul>
+    </li>
+    <li>accès en lecture/écriture (réservé aux contributeurs du projet)
+        <ul>
+            <li><a href="https://svn.code.sf.net/p/tuer/code/alpha/">https://svn.code.sf.net/p/tuer/code/alpha/</a> (version alpha abandonnée qui utilise mon propre moteur)</li>
+            <li><a href="https://svn.code.sf.net/p/tuer/code/tuer/">https://svn.code.sf.net/p/tuer/code/tuer/</a> (version pré-bêta abandonnée qui utilise JMonkeyEngine 2.0)</li>
+            <li><a href="https://svn.code.sf.net/p/tuer/code/pre_beta/">https://svn.code.sf.net/p/tuer/code/pre_beta/</a> (version pré-bêta courante qui utilise Ardor3D)</li>
+        </ul>
+    </li>
+</ul>
+Veuillez suivre une de ces méthodes :
+<ul>
+<li>En <b>ligne de commande</b>, suivez ces étapes :</li>
+<ul>
+<li>tapez ceci pour obtenir le code source : svn checkout URL_du_dépôt_SVN</li>
+<li>tapez ceci pour construire le projet : ant build</li>
+<li>tapez ceci pour lancer le jeu : ant run-game (ou "ant run-tuer")</li>
+</ul>
+<li>Dans <b>Eclipse</b> (version 4.3.2 ou supérieure), avec Subclipse (version 1.6.0 ou supérieure), suivez ces étapes :</li>
+<ul>
+<li>Faites un clic droit dans la zone de paquetage</li>
+<li>Sélectionnez "New" -> "Other..."</li>
+<li>Ouvrez le répertoire "SVN"</li>
+<li>Sélectionnez "Checkout Projects from SVN"</li>
+<li>Cliquez sur "Next"</li>
+<li>Sélectionnez "Create a new repository location"</li>
+<li>Cliquez sur "Next"</li>
+<li>Entrez l'URL du dépôt SVN dans le champ de texte "URL"</li>
+<li>Cliquez sur "Next"</li>
+<li>Sélectionnez le répertoire le plus haut</li>
+<li>Cliquez sur "Finish"</li>
+<li>Suivez ces étapes pour construire le projet avec Ant dans Eclipse : </li>
+<ul>
+<li>Allez dans le menu "Window" -> "Show view" -> "Ant"</li>
+<li>Glissez et déposez le fichier build.xml dans la vue ANT</li>
+<li>Faites un doucle clic sur la cible "build" dans cette vue pour construire le projet</li>
+<li>Faites un doucle clic sur la cible "run-game" (ou "run-tuer") dans cette vue pour lancer le jeu</li>
+</ul>
+</ul>
+<li>Dans <b>Netbeans</b> (version 6.9.1 ou supérieure), suivez ces étapes : </li>
+<ul>
+<li>Allez dans le menu "Team" -> "Subversion" -> "Checkout..."</li>
+<li>Entrez l'URL du dépôt SVN en tant que "Repository URL"</li>
+<li>Cliquez sur "Next"</li>
+<li>Cliquez sur "Finish"</li>
+<li>Attendez un moment</li>
+<li>A popup entitled "Checkout Completed" appears, click on "Create Project..."</li>
+<li>Select "Java Project with Existing Sources"</li>
+<li>Click on "Next"</li>
+<li>Enter a project name and click on "Next"</li>
+<li>In the "Source Package Folders" section, click on "Add Folder..." and select the only directory</li>
+<li>Cliquez sur "Next"</li>
+<li>Cliquez sur "Finish"</li>
+<li>Dans l'onglet "project", sélectionnez le noeud "Libraries" -> "Add JAR/Folder" et sélectionnez tous les JARs de tous les sous-répertoires du répertoire "lib"</li>
+<li>Allez dans l'onglet "project" -> "Source packages" -> "default package" -> build.xml -> build -> "Run Target" pour construire le projet</li>
+<li>Allez dans l'onglet "project" -> "Source packages" -> "default package" -> build.xml -> run-game (ou run-tuer) -> "Run Target" pour lancer le jeu</li>
+</ul>
+<li>Dans <b>les autres EDIs</b>, débrouillez-vous, je n'ai pas de temps à perdre avec les EDIs propriétaires et ceux avec une audience confidentielle</li>
+</ul>
+Vous pouvez obtenir le code source de toutes les dépendences ici :
+<ul>
+<li><a href="http://hg.openjdk.java.net">OpenJDK</a></li>
+<li><a href="http://github.com/sgothel/jogl/archive/master.zip">JOGL</a></li>
+<li><a href="http://github.com/sgothel/joal/archive/master.zip">JOAL</a></li>
+<li><a href="http://github.com/sgothel/gluegen/archive/master.zip">GlueGen</a></li>
+<li><a href="http://www.jcraft.com/jorbis/jorbis-0.0.17.zip">JOGG</a></li>
+<li><a href="http://www.jcraft.com/jorbis/jorbis-0.0.17.zip">JORBIS</a></li>
+<li><a href="http://github.com/gouessej/Ardor3D/archive/master.zip">JogAmp's Ardor3D Continuation</a></li>
+<li><a href="http://www.paulscode.com/source/SoundSystem/07JAN2012/SoundSystem.zip">Paul Lamb's 3D sound system</a></li>
+<li><a href="http://github.com/thehiflyer/Fettle/archive/master.zip">Fettle</a></li>
+<li><a href="http://github.com/tordanik/OSM2World/archive/master.zip">OSM2World</a></li>
+<li><a href="http://github.com/google/guava/archive/master.zip">Google Guava</a></li>
+<li><a href="http://ant.apache.org/srcdownload.cgi">Ant</a></li>
+<li><a href="http://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-src.zip/download">Ant-Contrib</a></li>
+<li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
+<li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
+<li><a href="https://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
+<li><a href="http://github.com/libgdx/packr/archive/master.zip">PackR</a></li>
+<li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
+<li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
+<li><a href="http://commons.apache.org/proper/commons-io/source-repository.html">Apache Commons IO</a></li>
+<li><a href="http://slf4j.org/dist/slf4j-1.7.7.zip">slf4j</a></li>
+<li><a href="http://tukaani.org/xz/xz-java-1.5.zip">XZ for Java</a></li>
+<li><a href="http://www.bouncycastle.org/download/bcpg-jdk15on-151.zip">Bountycastle Java</a></li>
+</ul>
+<p>TUER requiert moins de 32 Mo (la dernière version peut requérir plus de 64 Mo) mais <b>quelques programmes utilisés pour précalculer ses données requièrent 1 Go voire même 2 Go</b>. N'essayez pas de construire le jeu 
+à partir du code source si votre ordinateur n'a pas assez de RAM. Utilisez l'argument de la machine virtuelle "-Xmx" si une carte particulière a besoin de plus de mémoire.
+</p>
+<br>
+<p>
+   <a href="http://validator.w3.org/check?uri=referer">
+      <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
+   </a>
+</p>
+</body>
+</html>
