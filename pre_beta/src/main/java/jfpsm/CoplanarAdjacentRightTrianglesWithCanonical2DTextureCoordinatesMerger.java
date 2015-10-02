@@ -17,8 +17,6 @@
  */
 package jfpsm;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.FloatBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
@@ -36,12 +33,8 @@ import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
-import com.ardor3d.scenegraph.Node;
-import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.geom.GeometryTool.MatchCondition;
-import com.ardor3d.util.resource.ResourceLocatorTool;
-import com.ardor3d.util.resource.SimpleResourceLocator;
 
 
 /**
@@ -53,7 +46,7 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
  */
 public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger{
 
-	private static final class RightTriangleInfo{
+	static final class RightTriangleInfo{
 		
 		private final int primitiveIndex;
 		
@@ -62,7 +55,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		private final int sideIndexOfHypotenuse;
 		
 		
-		private RightTriangleInfo(int primitiveIndex,int sectionIndex,int sideIndexOfHypotenuse){
+		RightTriangleInfo(int primitiveIndex,int sectionIndex,int sideIndexOfHypotenuse){
 			this.primitiveIndex=primitiveIndex;
 			this.sectionIndex=sectionIndex;
 			this.sideIndexOfHypotenuse=sideIndexOfHypotenuse;
@@ -91,7 +84,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		}
 	}
 	
-	private static final class NextQuadInfo{
+	static final class NextQuadInfo{
 		
 		private final Vector3[] vertices;
 		
@@ -99,7 +92,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		
 		private final int[] indices;
 		
-		private NextQuadInfo(final Vector3[] vertices,final Vector2[] textureCoords,final int[] indices){
+		NextQuadInfo(final Vector3[] vertices,final Vector2[] textureCoords,final int[] indices){
 			this.vertices=vertices;
 			this.textureCoords=textureCoords;
 			this.indices=indices;
@@ -824,7 +817,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @param meshData mesh data
 	 * @return
 	 */
-	private static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
+	static RightTriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(
 			final ArrayList<RightTriangleInfo> trisList,
 			final HashMap<RightTriangleInfo,ArrayList<Entry<RightTriangleInfo[],int[]>>> commonSidesInfosMap){
 		/**
@@ -1029,62 +1022,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		return result;
 	}
 	
-	@SuppressWarnings("unused")
-	private static void testComputeAdjacentMergeableTrisArraysList(){
-		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
-		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
-				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null},
-				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},null,null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,null,null,null,null,null,null}};
-		System.out.println("Input:");
-		//for each row
-		for(int i=0;i<adjacentTrisArray.length;i++)
-			{//for each column
-			 for(int j=0;j<adjacentTrisArray[i].length;j++)
-				 if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
-		             System.out.print("[X]");
-				 else
-					 System.out.print("[ ]");
-			 System.out.println("");
-			}
-		System.out.println("");
-		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
-		System.out.println("Output:");
-		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
-			{for(int i=0;i<resultingAdjacentTrisArray.length;i++)
-			     {for(int j=0;j<resultingAdjacentTrisArray[i].length;j++)
-				      if(resultingAdjacentTrisArray[i][j]!=null&&resultingAdjacentTrisArray[i][j][0]!=null&&resultingAdjacentTrisArray[i][j][1]!=null)
-		                  System.out.print("[X]");
-				      else
-					      System.out.print("[ ]");
-			      System.out.println("");
-			     }
-			 System.out.println("");
-			}
-	}
-	
-	public static final void main(String[] args){
-		//testComputeAdjacentMergeableTrisArraysList();
-		JoglImageLoader.registerLoader();
-		try{SimpleResourceLocator srl=new SimpleResourceLocator(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/images"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-           } 
-        catch(final URISyntaxException urise)
-        {urise.printStackTrace();}
-		try{final Node levelNode=(Node)new BinaryImporter().load(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
-		    final Mesh mesh=(Mesh)((Node)levelNode.getChild(0)).getChild(1);
-		    System.out.println("Input: "+mesh.getMeshData().getVertexCount());
-		    optimize(mesh);
-		    System.out.println("Output: "+mesh.getMeshData().getVertexCount());
-	       }
-	    catch(IOException ioe)
-	    {throw new RuntimeException("level loading failed",ioe);}
-	}
-	
 	/**
 	 * Computes a list of arrays of adjacent triangles which could be merged to 
 	 * make bigger rectangles
@@ -1092,7 +1029,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
 	 * @return list of 2D arrays of adjacent mergeable triangles
 	 */
-	private static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
+	static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
 		return(new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray));
 	}
 }
