@@ -45,6 +45,8 @@
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="src/main/java"/>
+	<property name="testsrcdir" value="src/test/java"/>
+	<property name="testbindir" value="target/test-classes"/>
 	<property name="homepage-url" value="http://${project-unix-name}.sourceforge.net" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
@@ -139,13 +141,21 @@
 	<!-- Compile                                                           -->
 	<!-- ================================================================= -->
 	<target name="compile" description="Compiles the source code">
-		<!-- Creates the directory containing the class files -->
+		<!-- Creates the directories containing the class files -->
 		<if>
 		    <not>
 			    <available file="${bindir}"/>
 		    </not>
 		    <then>
 		        <mkdir dir="${bindir}"/>
+		    </then>
+		</if>
+		<if>
+		    <not>
+		        <available file="${testbindir}"/>
+		    </not>
+		    <then>
+		        <mkdir dir="${testbindir}"/>
 		    </then>
 		</if>
 		<!-- Copies the resources into the same directory than the class files -->
@@ -159,6 +169,15 @@
 	           debug="on" source="1.7" target="1.7">
 			<classpath refid="project.class.path"/>
 			<include name="**/*.java"/>
+		</javac>
+		<javac includeantruntime="false" srcdir="${testsrcdir}"              
+		       destdir="${testbindir}"
+		       debug="on" source="1.7" target="1.7">
+		    <classpath>
+		        <path refid="project.class.path"/>
+		    	<fileset dir="${bindir}"/>
+		    </classpath>
+		    <include name="**/*.java"/>
 		</javac>
 	</target>
 	<!-- =================================================================== -->
