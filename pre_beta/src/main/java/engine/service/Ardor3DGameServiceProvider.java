@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Properties;
+import java.util.ResourceBundle;
+
 import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
@@ -74,6 +76,8 @@ import engine.statemachine.ScenegraphStateMachine;
  * 
  */
 public final class Ardor3DGameServiceProvider implements Scene{
+	
+	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
 
 	/**path of the branding property file*/
 	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
@@ -88,7 +92,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
 	
 	/**subtitle displayed in the introduction of the game*/
-	private static final String GAME_INTRODUCTION_SUBTITLE=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-introduction-subtitle");
+	private static final String GAME_INTRODUCTION_SUBTITLE=I18N_MESSAGES_BUNDLE.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
 	
 	/**recommended URL to download the game*/
 	private static final String GAME_RECOMMENDED_DOWNLOAD_URL=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-recommended-download-url");

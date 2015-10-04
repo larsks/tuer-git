@@ -17,6 +17,8 @@
  */
 package engine.taskmanagement;
 
+import java.util.ResourceBundle;
+
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
 import com.ardor3d.extension.ui.UILabel;
@@ -32,7 +34,9 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 public final class TaskManagementProgressionNode extends Node{
 
     
-    private final UIProgressBar bar;
+	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+	
+	private final UIProgressBar bar;
     
     private int maxTaskCount;
     
@@ -52,7 +56,8 @@ public final class TaskManagementProgressionNode extends Node{
         bar.setPercentFilled(0);
         //bar.setComponentWidth(250);
         final UIPanel panel=new UIPanel(new RowLayout(false));
-        panel.add(new UILabel("Loading... Please wait"));
+        final String text=I18N_MESSAGES_BUNDLE.getString("LOADING_PLEASE_WAIT");
+        panel.add(new UILabel(text));
         panel.add(bar);
         frame=new UIFrame("");
         frame.setDecorated(false);
