@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.ResourceBundle;
+
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
@@ -55,13 +57,15 @@ import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
 	
+	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+	
 	private final MatchTypeFactory matchTypeFactory;
     
-    private static final String NO_LIMIT="No limit";
+    private static final String NO_LIMIT=I18N_MESSAGES_BUNDLE.getString("NO_LIMIT");
     
-    private static final String DEFAULT="Default";
+    private static final String DEFAULT=I18N_MESSAGES_BUNDLE.getString("DEFAULT");
     
-    private static final String CUSTOM="Custom";
+    private static final String CUSTOM=I18N_MESSAGES_BUNDLE.getString("CUSTOM");
     
     final NativeCanvas canvas;
     
@@ -169,7 +173,7 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final String text=gameLongName+"\n"+"Recommended download URL: "+gameRecommendedDownloadUrl;
+        final String text=gameLongName+"\n"+I18N_MESSAGES_BUNDLE.getString("RECOMMENDED_DOWNLOAD_URL")+": "+gameRecommendedDownloadUrl;
         final BMText textNode=new BMText("gameTitleNode",text,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
@@ -184,9 +188,10 @@ public final class MainMenuState extends ScenegraphState{
     
     private MatchTypeFactory initMatchTypeFactory(){
     	final MatchTypeFactory matchTypeFactory=new MatchTypeFactory();
-        matchTypeFactory.addNewMatchType("DEATHMATCH","Deathmatch","  Get best score  ");
-        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG","Capture the flag","Capture most flags");
-        matchTypeFactory.addNewMatchType("HOLD_THE_BAG","Hold the bag"," Hold it the most ");
+    	//FIXME compute the number of spaces required to center the text
+        matchTypeFactory.addNewMatchType("DEATHMATCH",I18N_MESSAGES_BUNDLE.getString("DEATHMATCH"),"  "+I18N_MESSAGES_BUNDLE.getString("GET_BEST_SCORE")+"  ");
+        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG",I18N_MESSAGES_BUNDLE.getString("CAPTURE_THE_FLAG"),I18N_MESSAGES_BUNDLE.getString("CAPTURE_MOST_FLAGS"));
+        matchTypeFactory.addNewMatchType("HOLD_THE_BAG",I18N_MESSAGES_BUNDLE.getString("HOLD_THE_BAG")," "+I18N_MESSAGES_BUNDLE.getString("HOLD_IT_THE_MOST")+" ");
         return(matchTypeFactory);
     }
     
@@ -221,7 +226,7 @@ public final class MainMenuState extends ScenegraphState{
             	onLevelButtonActionPerformed(ae,"3");
             }
         });
-        final UIButton backButton=new UIButton("Back");
+        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -459,7 +464,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createProfilePanel(){
     	final UIPanel profilePanel=new UIPanel(new RowLayout(false));
-    	final UIButton backButton=new UIButton("Back");
+    	final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -495,21 +500,21 @@ public final class MainMenuState extends ScenegraphState{
     private final UIPanel createInitialMenuPanel(final TriggerAction exitAction){
         final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
         initialMenuPanel.setForegroundColor(ColorRGBA.DARK_GRAY);
-        final UIButton startButton=new UIButton("Start");
+        final UIButton startButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("START"));
         startButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        final UIButton optionsButton=new UIButton("Options");
+        final UIButton optionsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("OPTIONS"));
         optionsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(optionsMenuPanel);
             }
         });
-        final UIButton exitButton=new UIButton("Exit");
+        final UIButton exitButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("EXIT"));
         exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -526,7 +531,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UIPanel optionsMenuPanel=new UIPanel(new RowLayout(false));
     	final UIButton desktopShortcutsButton;
     	if(desktopShortcutsMenuPanel!=null)
-    	    {desktopShortcutsButton=new UIButton("Shortcuts");
+    	    {desktopShortcutsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SHORTCUTS"));
     	     desktopShortcutsButton.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent event) {
@@ -538,7 +543,7 @@ public final class MainMenuState extends ScenegraphState{
     		desktopShortcutsButton=null;
     	final UIButton displaySettingsButton;
     	if(displaySettingsMenuPanel!=null)
-    	    {displaySettingsButton=new UIButton("Display");
+    	    {displaySettingsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("DISPLAY"));
     	     displaySettingsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -550,7 +555,7 @@ public final class MainMenuState extends ScenegraphState{
     		displaySettingsButton=null;
     	final UIButton soundSettingsButton;
     	if(soundSettingsMenuPanel!=null)
-	        {soundSettingsButton=new UIButton("Sound");
+	        {soundSettingsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SOUND"));
 	         soundSettingsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -562,7 +567,7 @@ public final class MainMenuState extends ScenegraphState{
 	    	soundSettingsButton=null;
     	final UIButton controlsButton;
         if(controlsPanel!=null)
-            {controlsButton=new UIButton("Controls");
+            {controlsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("CONTROLS"));
              controlsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -574,7 +579,7 @@ public final class MainMenuState extends ScenegraphState{
         	controlsButton=null;
         final UIButton profileButton;
         if(profilePanel!=null)
-            {profileButton=new UIButton("Profile");
+            {profileButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("PROFILE"));
              profileButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -586,7 +591,7 @@ public final class MainMenuState extends ScenegraphState{
         	profileButton=null;
         final UIButton readmeButton;
         if(readmePanel!=null)
-            {readmeButton=new UIButton("Read me");
+            {readmeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("READ_ME"));
              readmeButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -596,7 +601,7 @@ public final class MainMenuState extends ScenegraphState{
             }
         else
         	readmeButton=null;
-        final UIButton backButton=new UIButton("Back");
+        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -621,15 +626,15 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createConfirmExitMenuPanel(){
 		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
-		final UILabel confirmLabel=new UILabel("Confirm exit?");
-		final UIButton yesButton=new UIButton("Yes");
+		final UILabel confirmLabel=new UILabel(I18N_MESSAGES_BUNDLE.getString("CONFIRM_EXIT"));
+		final UIButton yesButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("YES"));
 		yesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onYesExitButtonActionPerformed(ae);
             }
         });
-		final UIButton noButton=new UIButton("No");
+		final UIButton noButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("NO"));
 		noButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -674,14 +679,14 @@ public final class MainMenuState extends ScenegraphState{
     	if(soundManager!=null)
     	    {final TriggerAction toggleSoundManagerAction=new ToggleSoundManagerAction(soundManager);
     		 soundSettingsMenuPanel=new UIPanel(new RowLayout(false));
-    	     final UIButton toggleSoundButton=new UIButton("Switch sound on/off");
+    	     final UIButton toggleSoundButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SWITCH_SOUND_ON_OFF"));
     	     toggleSoundButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
                 	 toggleSoundManagerAction.perform(canvas,null,Double.NaN);
                  }
              });
-    	     final UIButton backButton=new UIButton("Back");
+    	     final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
              backButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -701,7 +706,7 @@ public final class MainMenuState extends ScenegraphState{
     	if(launchRunnable!=null||uninstallRunnable!=null)
     	    {desktopShortcutsMenuPanel=new UIPanel(new RowLayout(false));
     	     if(launchRunnable!=null)
-                 {final UIButton addDesktopShortcutButton=new UIButton("Add a desktop shortcut to launch the game");
+                 {final UIButton addDesktopShortcutButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ADD_A_DESKTOP_SHORTCUT_TO_LAUNCH_THE_GAME"));
                   addDesktopShortcutButton.addActionListener(new ActionListener(){
                       @Override
                       public void actionPerformed(ActionEvent event){
@@ -711,7 +716,7 @@ public final class MainMenuState extends ScenegraphState{
                   desktopShortcutsMenuPanel.add(addDesktopShortcutButton);
                  }
              if(uninstallRunnable!=null)
-                 {final UIButton addUninstallDesktopShortcutButton=new UIButton("Add a desktop shortcut to uninstall the game");
+                 {final UIButton addUninstallDesktopShortcutButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ADD_A_DESKTOP_SHORTCUT_TO_UNINSTALL_THE_GAME"));
                   addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){
                       @Override
                       public void actionPerformed(ActionEvent event){
@@ -720,7 +725,7 @@ public final class MainMenuState extends ScenegraphState{
                   });
                   desktopShortcutsMenuPanel.add(addUninstallDesktopShortcutButton);
                  }
-             final UIButton backButton=new UIButton("Back");
+             final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
              backButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -736,7 +741,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createStartMenuPanel(final ProfileData profileData){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
-        final UIButton storyModeButton=new UIButton("Story mode");
+        final UIButton storyModeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("STORY_MODE"));
         storyModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -744,7 +749,7 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(storyModePanel);
             }
         });
-        final UIButton arenaModeButton=new UIButton("Arena mode");
+        final UIButton arenaModeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ARENA_MODE"));
         arenaModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -753,7 +758,7 @@ public final class MainMenuState extends ScenegraphState{
         });
         //FIXME enable this button when the arena mode is ready
         arenaModeButton.setEnabled(false);
-        final UIButton backButton=new UIButton("Back");
+        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -777,7 +782,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UILabel label=new UILabel(textualContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
-        final UIButton backButton=new UIButton("Back");
+        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
         backButton.addActionListener(backButtonActionListener);
         textualPanel.add(backButton);
         return(textualPanel);
