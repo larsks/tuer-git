@@ -17,18 +17,23 @@
  */
 package engine.statemachine;
 
+import java.util.ResourceBundle;
+
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.ui.text.BMText;
+
 import engine.misc.FontStore;
 import engine.sound.SoundManager;
 
 public final class ContentRatingSystemState extends ScenegraphState{
 	
 	
-	private final String text="Adults Only (+18)\n\nViolence\n\nBad Language\n\nFear\n\nSex\n\nDrugs\n\nDiscrimination";
+	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+	
+	private final String text=I18N_MESSAGES_BUNDLE.getString("CONTENT_RATING_WARNING");
 
 	private MouseManager mouseManager;
 	
