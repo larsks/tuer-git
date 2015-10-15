@@ -74,8 +74,7 @@ import engine.statemachine.ScenegraphStateMachine;
  * 
  */
 public final class Ardor3DGameServiceProvider implements Scene{
-	
-	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider();
+
 
 	/**path of the branding property file*/
 	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
@@ -85,6 +84,9 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	
 	/**short name of the game*/
 	private static final String GAME_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-short-name");
+	
+	/**provider of localized messages*/
+	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider("."+GAME_SHORT_NAME);
 	
 	/**full name of the game*/
 	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
