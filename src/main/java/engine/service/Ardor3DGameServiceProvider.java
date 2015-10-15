@@ -84,7 +84,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	/**short name of the game*/
 	private static final String GAME_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-short-name");
 
-	private static final SettingsProvider settingsProvider=new SettingsProvider("."+GAME_SHORT_NAME);
+	private static final SettingsProvider settingsProvider=new SettingsProvider(GAME_SHORT_NAME);
 	
 	/**provider of localized messages*/
 	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider(settingsProvider.getLocale());
@@ -358,7 +358,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,
         uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0,
-        localizedMessageProvider);
+        localizedMessageProvider,settingsProvider);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {

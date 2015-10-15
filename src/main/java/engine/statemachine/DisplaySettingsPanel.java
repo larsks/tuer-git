@@ -49,6 +49,7 @@ import com.jogamp.newt.util.MonitorModeUtil;
 import com.jogamp.opengl.JoglVersion;
 
 import engine.misc.LocalizedMessageProvider;
+import engine.misc.SettingsProvider;
 
 /**
  * panel of the display settings (vertical synchronization, refresh rate, screen resolution, ...)
@@ -62,6 +63,8 @@ public class DisplaySettingsPanel extends UIPanel{
 	
 	private final TriggerAction toggleScreenModeAction;
 	
+	private final SettingsProvider settingsProvider;
+	
 	private final DefaultComboBoxModel displayModesModel;
 	
 	private final UIComboBox displayModesCombo;
@@ -69,10 +72,11 @@ public class DisplaySettingsPanel extends UIPanel{
 	private final HashMap<Integer,List<MonitorMode>> screenModesByRotation;
 	
 	public DisplaySettingsPanel(final MainMenuState mainMenuState,final TriggerAction toggleScreenModeAction,
-			final LocalizedMessageProvider localizedMessageProvider){
+			final LocalizedMessageProvider localizedMessageProvider,final SettingsProvider settingsProvider){
 		super();
 		this.mainMenuState=mainMenuState;
 		this.toggleScreenModeAction=toggleScreenModeAction;
+		this.settingsProvider=settingsProvider;
 		setLayout(new RowLayout(false));
     	final UILabel screenModesLabel=new UILabel(localizedMessageProvider.getString("DISPLAY_MODE"));
     	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
@@ -228,15 +232,22 @@ public class DisplaySettingsPanel extends UIPanel{
 	}
 	
 	private void onWindowingModeButtonActionPerformed(final ActionEvent event){
+		final boolean fullscreenEnabled=!((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().isFullscreen();
 		toggleScreenModeAction.perform(mainMenuState.canvas,null,Double.NaN);
+		settingsProvider.setFullscreenEnabled(fullscreenEnabled);
 	}
 	
     private void onEnableVSyncButtonActionPerformed(final ActionEvent event){
-    	mainMenuState.canvas.setVSyncEnabled(true);
+    	onVSyncChanged(true);
 	}
 	
 	private void onDisableVSyncButtonActionPerformed(final ActionEvent event){
-		mainMenuState.canvas.setVSyncEnabled(false);
+		onVSyncChanged(false);
+	}
+	
+	private void onVSyncChanged(final boolean vsyncEnabled){
+		mainMenuState.canvas.setVSyncEnabled(vsyncEnabled);
+    	settingsProvider.setVerticalSynchronizationEnabled(vsyncEnabled);
 	}
 	
 	private void onBackButtonActionPerformed(final ActionEvent event){

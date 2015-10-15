@@ -18,9 +18,12 @@
 package engine.misc;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -40,8 +43,14 @@ public class SettingsProvider{
 	
 	private static final String[] falseStrings={Boolean.FALSE.toString(),"off","0","disabled","deactivated"};
 	
+	/**program short name used to name the sub-directory, in the user's home directory*/
+	private final String programShortName;
+	
 	/**locale*/
 	private Locale locale;
+	
+	/**configuration file*/
+	private final File configFile;
 	
 	private boolean verticalSynchronizationEnabled;
 	
@@ -50,16 +59,17 @@ public class SettingsProvider{
 	/**
 	 * Default constructor
 	 * 
-	 * @param gameFilesSubDir sub-directory of the game, in the user's home directory
+	 * @param programShortName program short name used to name the sub-directory, in the user's home directory
 	 */
-	public SettingsProvider(final String gameFilesSubDir){
+	public SettingsProvider(final String programShortName){
 		super();
+		this.programShortName=programShortName;
 		//default values
 		locale=Locale.getDefault();//locale of the system
 		verticalSynchronizationEnabled=false;
 		fullscreenEnabled=true;
 		//looks at the file that contains the settings
-		final File configFile=new File(System.getProperty("user.home")+"/"+gameFilesSubDir,"config");
+		configFile=new File(System.getProperty("user.home")+"/."+programShortName,"config");
 		if(configFile.exists())
 	        {final Properties properties=new Properties();
 	         try(final FileReader fileReader=new FileReader(configFile);final BufferedReader bufferedReader=new BufferedReader(fileReader))
@@ -128,8 +138,16 @@ public class SettingsProvider{
 		return(verticalSynchronizationEnabled);
 	}
 	
+	public void setVerticalSynchronizationEnabled(final boolean verticalSynchronizationEnabled){
+		this.verticalSynchronizationEnabled=verticalSynchronizationEnabled;
+	}
+	
 	public boolean isFullscreenEnabled(){
 		return(fullscreenEnabled);
+	}
+	
+	public void setFullscreenEnabled(final boolean fullscreenEnabled){
+		this.fullscreenEnabled=fullscreenEnabled;
 	}
 	
 	/**
@@ -139,5 +157,33 @@ public class SettingsProvider{
 	 */
 	public Locale getLocale(){
 		return(locale);
+	}
+	
+	
+	public void setLocale(final Locale locale){
+		if(locale==null)
+		    throw new IllegalArgumentException("The locale cannot be set to null");
+		this.locale=locale;
+	}
+	
+	public void save(){
+		final Properties properties=new Properties();
+		properties.put("LANGUAGE",locale.getLanguage());
+		properties.put("VSYNC",Boolean.toString(verticalSynchronizationEnabled));
+		properties.put("FULLSCREEN",Boolean.toString(fullscreenEnabled));
+		try
+		    {final File parentDir=configFile.getParentFile();
+			 if(!parentDir.exists())
+				 parentDir.mkdirs();
+			 if(!configFile.exists())
+				 configFile.createNewFile();
+			 try(final FileWriter fileWriter=new FileWriter(configFile);final BufferedWriter bufferedWriter=new BufferedWriter(fileWriter))
+			     {final String comments=programShortName+" configuration file";
+				  properties.store(bufferedWriter, comments);
+				 }
+			 logger.log(Level.INFO,"Settings saved into the configuration file "+configFile.getAbsolutePath());
+		    }
+		catch(Throwable t)
+		{logger.log(Level.WARNING,"Something wrong has happened while trying to save the settings into the configuration file "+configFile.getAbsolutePath(),t);}
 	}
 }
