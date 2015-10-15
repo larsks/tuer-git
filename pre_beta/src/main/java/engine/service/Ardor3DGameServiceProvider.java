@@ -17,13 +17,10 @@
  */
 package engine.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Properties;
-
 import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
@@ -62,7 +59,6 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.LocalizedMessageProvider;
@@ -358,7 +354,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
             {launchRunnable=null;
         	 uninstallRunnable=null;
             }
-        final String readmeContent=getTextFileContent("/README.txt");
+        final String readmeContent=localizedMessageProvider.getString("README_FULL_TEXT");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,
         uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0,
@@ -406,24 +402,5 @@ public final class Ardor3DGameServiceProvider implements Scene{
     	if(propertyValue==null)
     		throw new RuntimeException("Property "+propertyKey+" not found");
     	return(propertyValue);
-    }
-    
-    //TODO move this method into a separate class in order to avoid mixing scene services and file services
-    private final String getTextFileContent(final String path){
-    	String result=null;
-    	try(final InputStream stream=getClass().getResourceAsStream(path);BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(stream)))
-    	    {final StringBuilder textContent=new StringBuilder();
-        	 try
-        	     {String line;
-        		  while((line=bufferedReader.readLine())!=null)
-                      textContent.append(line+"\n");
-                 }
-             catch(IOException ioe)
-                 {ioe.printStackTrace();}
-        	 result=textContent.toString();
-    	    } 
-    	catch(IOException ioe)
-    	    {throw new RuntimeException("Failed in reading the file "+path,ioe);}
-        return(result);
     }
 }

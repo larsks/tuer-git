@@ -40,11 +40,13 @@ import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+
 import engine.input.Action;
 import engine.input.ActionMap;
 import engine.input.MouseAndKeyboardSettings;
 import engine.input.MouseWheelMovedDownCondition;
 import engine.input.MouseWheelMovedUpCondition;
+import engine.misc.LocalizedMessageProvider;
 
 /**
  * Panel used to modify the controls
@@ -71,7 +73,8 @@ public final class ControlsPanel extends UIPanel{
 	private final HashMap<Action,UILabel> actionsLabelsMap;
 	
 	public ControlsPanel(final MainMenuState mainMenuState,final ActionMap defaultActionMap,final ActionMap customActionMap,
-			             final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings){
+			             final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
+			             final LocalizedMessageProvider localizedMessageProvider){
 		super();
 		setLayout(new RowLayout(false));
 		previousTriggers=new HashSet<>();
@@ -82,7 +85,7 @@ public final class ControlsPanel extends UIPanel{
 		this.customMouseAndKeyboardSettings=customMouseAndKeyboardSettings;
 		latestEditedAction=null;
 		actionsLabelsMap=new HashMap<>();
-		add(new UILabel("Controls"));
+		add(new UILabel(localizedMessageProvider.getString("CONTROLS")));
 		final UIPanel actionPanel=new UIPanel(new RowLayout(true));
 		final UIPanel actionsButtonsPanel=new UIPanel(new RowLayout(false));
 		final UIPanel actionsLabelsPanel=new UIPanel(new RowLayout(false));
@@ -114,7 +117,7 @@ public final class ControlsPanel extends UIPanel{
             	onMouseRotateSpeedSliderActionPerformed(ae);
             }
 		});
-		final UILabel mouseRotateSpeedLabel=new UILabel("Mouse Rotation Speed");
+		final UILabel mouseRotateSpeedLabel=new UILabel(localizedMessageProvider.getString("MOUSE_ROTATION_SPEED"));
 		mouseRotateSpeedPanel.add(mouseRotateSpeedSlider);
 		mouseRotateSpeedPanel.add(mouseRotateSpeedLabel);
 		add(mouseRotateSpeedPanel);
@@ -128,12 +131,12 @@ public final class ControlsPanel extends UIPanel{
             	onKeyRotateSpeedSliderActionPerformed(ae);
             }
 		});
-		final UILabel keyRotateSpeedLabel=new UILabel("Key Rotation Speed");
+		final UILabel keyRotateSpeedLabel=new UILabel(localizedMessageProvider.getString("KEY_ROTATION_SPEED"));
 		keyRotateSpeedPanel.add(keyRotateSpeedSlider);
 		keyRotateSpeedPanel.add(keyRotateSpeedLabel);
 		add(keyRotateSpeedPanel);
 		
-		final UICheckBox lookUpDownReversedCheckBox=new UICheckBox("Reverse look up/down");
+		final UICheckBox lookUpDownReversedCheckBox=new UICheckBox(localizedMessageProvider.getString("REVERSE_LOOK_UP_DOWN"));
 		lookUpDownReversedCheckBox.setSelected(customMouseAndKeyboardSettings.isLookUpDownReversed());
 		lookUpDownReversedCheckBox.addActionListener(new ActionListener(){           
             @Override
@@ -142,7 +145,7 @@ public final class ControlsPanel extends UIPanel{
             }
 		});
 		add(lookUpDownReversedCheckBox);
-		final UICheckBox mousePointerNeverHiddenCheckBox=new UICheckBox("Never hide the mouse pointer (for debug purpose only)");
+		final UICheckBox mousePointerNeverHiddenCheckBox=new UICheckBox(localizedMessageProvider.getString("NEVER_HIDE_THE_MOUSE_POINTER_FOR_DEBUG_PURPOSE_ONLY"));
 		mousePointerNeverHiddenCheckBox.setSelected(customMouseAndKeyboardSettings.isMousePointerNeverHidden());
 		mousePointerNeverHiddenCheckBox.addActionListener(new ActionListener(){           
             @Override
@@ -152,7 +155,7 @@ public final class ControlsPanel extends UIPanel{
 		});
 		add(mousePointerNeverHiddenCheckBox);
 		update();
-        final UIButton resetToDefaultsButton=new UIButton("Reset to defaults");
+        final UIButton resetToDefaultsButton=new UIButton(localizedMessageProvider.getString("RESET_TO_DEFAULTS"));
         resetToDefaultsButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -160,7 +163,7 @@ public final class ControlsPanel extends UIPanel{
             	update();
             }
         });
-        final UIButton backButton=new UIButton("Back");
+        final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent ae){

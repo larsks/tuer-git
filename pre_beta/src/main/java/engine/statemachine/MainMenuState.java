@@ -152,7 +152,7 @@ public final class MainMenuState extends ScenegraphState{
         this.mouseManager=mouseManager;
         //creates the panels
         if(customActionMap!=null)
-            controlsPanel=new ControlsPanel(this,defaultActionMap,customActionMap,defaultMouseAndKeyboardSettings,customMouseAndKeyboardSettings);
+            controlsPanel=new ControlsPanel(this,defaultActionMap,customActionMap,defaultMouseAndKeyboardSettings,customMouseAndKeyboardSettings,localizedMessageProvider);
         else
         	controlsPanel=null;
         profilePanel=createProfilePanel();
@@ -160,7 +160,7 @@ public final class MainMenuState extends ScenegraphState{
             readmePanel=createReadmePanel(readmeContent);
         else
         	readmePanel=null;
-        displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction);
+        displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction,localizedMessageProvider);
         soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
@@ -273,7 +273,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UIPanel arenaModePanel=new UIPanel(new RowLayout(false));
     	
     	final UIPanel matchTypePanel=new UIPanel(new RowLayout(true));
-    	matchTypePanel.add(new UILabel("Match type"));
+    	matchTypePanel.add(new UILabel(localizedMessageProvider.getString("MATCH_TYPE")));
     	final Object[] subModes=getUnlockedMatchTypes();
     	final DefaultComboBoxModel subModesModel=new DefaultComboBoxModel(subModes);
     	updateMatchTypeModel(subModesModel);
@@ -282,7 +282,7 @@ public final class MainMenuState extends ScenegraphState{
     	matchTypePanel.add(subModeCombo);
     	
     	final UIPanel playersPanel=new UIPanel(new RowLayout(true));
-    	playersPanel.add(new UILabel("Players"));
+    	playersPanel.add(new UILabel(localizedMessageProvider.getString("PLAYERS")));
     	final Object[] playersSettingsSuggestions=getAvailablePlayersSettingsFromUnlockedPlayers();
     	final DefaultComboBoxModel playersSettingsModel=new DefaultComboBoxModel(playersSettingsSuggestions);
     	final UIComboBox playersCombo=new UIComboBox(playersSettingsModel);
@@ -301,7 +301,7 @@ public final class MainMenuState extends ScenegraphState{
     	playersPanel.add(playersCombo);
     	
     	final UIPanel weaponsPanel=new UIPanel(new RowLayout(true));
-    	weaponsPanel.add(new UILabel("Weapons"));
+    	weaponsPanel.add(new UILabel(localizedMessageProvider.getString("WEAPONS")));
     	final Object[] weaponsSettingsSuggestions=getAvailableWeaponsSettingsFromUnlockedWeapons();
     	final DefaultComboBoxModel weaponsSettingsModel=new DefaultComboBoxModel(weaponsSettingsSuggestions);
     	final UIComboBox weaponsCombo=new UIComboBox(weaponsSettingsModel);
@@ -320,7 +320,7 @@ public final class MainMenuState extends ScenegraphState{
     	weaponsPanel.add(weaponsCombo);
     	
     	final UIPanel victoryPanel=new UIPanel(new RowLayout(true));
-    	victoryPanel.add(new UILabel("Victory"));
+    	victoryPanel.add(new UILabel(localizedMessageProvider.getString("VICTORY")));
     	final Object[] victorySuggestions=new Object[]{noLimitMsg,"1","2","3","4","5","10","15","20","25","30","35","40","45","50"};
     	final DefaultComboBoxModel victoryModel=new DefaultComboBoxModel(victorySuggestions);
     	updateVictoryModel(victoryModel,(MatchType)subModeCombo.getSelectedValue());
@@ -329,7 +329,7 @@ public final class MainMenuState extends ScenegraphState{
     	victoryPanel.add(victoryCombo);
     	
     	final UIPanel timePanel=new UIPanel(new RowLayout(true));
-    	timePanel.add(new UILabel("Time"));
+    	timePanel.add(new UILabel(localizedMessageProvider.getString("TIME")));
     	final Object[] timeSuggestions=new Object[]{noLimitMsg,"1","2","3","4","5","6","7","8","9","10","15","20","30"};
     	final DefaultComboBoxModel timeModel=new DefaultComboBoxModel(timeSuggestions);
     	final UIComboBox timeCombo=new UIComboBox(timeModel);
@@ -337,7 +337,7 @@ public final class MainMenuState extends ScenegraphState{
     	timePanel.add(timeCombo);
     	
     	final UIPanel arenasPanel=new UIPanel(new RowLayout(true));
-    	arenasPanel.add(new UILabel("Arena"));
+    	arenasPanel.add(new UILabel(localizedMessageProvider.getString("ARENA")));
     	final Object[] arenas=getUnlockedArenas();
     	final DefaultComboBoxModel arenasModel=new DefaultComboBoxModel(arenas);
     	final UIComboBox arenasCombo=new UIComboBox(arenasModel);
@@ -354,7 +354,7 @@ public final class MainMenuState extends ScenegraphState{
 			}
 		});
     	
-    	final UIButton beginMatchButton=new UIButton("Begin match");
+    	final UIButton beginMatchButton=new UIButton(localizedMessageProvider.getString("BEGIN_MATCH"));
     	beginMatchButton.addActionListener(new ActionListener(){           
             @Override
             @SuppressWarnings("unused")
@@ -379,7 +379,7 @@ public final class MainMenuState extends ScenegraphState{
         });
     	beginMatchButton.setEnabled(false);
     	
-    	final UIButton backButton=new UIButton("Back");
+    	final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -475,7 +475,7 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(optionsMenuPanel);
             }
         });
-        profilePanel.add(new UILabel("Feature not yet implemented!"));
+        profilePanel.add(new UILabel(localizedMessageProvider.getString("FEATURE_NOT_YET_IMPLEMENTED")));
         profilePanel.add(backButton);
     	return(profilePanel);
     }
