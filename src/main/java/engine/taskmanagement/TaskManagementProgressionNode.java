@@ -17,8 +17,6 @@
  */
 package engine.taskmanagement;
 
-import java.util.ResourceBundle;
-
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
 import com.ardor3d.extension.ui.UILabel;
@@ -31,10 +29,10 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 
-public final class TaskManagementProgressionNode extends Node{
+import engine.misc.LocalizedMessageProvider;
 
-    
-	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+public final class TaskManagementProgressionNode extends Node{
+	
 	
 	private final UIProgressBar bar;
     
@@ -47,7 +45,7 @@ public final class TaskManagementProgressionNode extends Node{
     private final Rectangle2 bounds;
     
     
-    public TaskManagementProgressionNode(final Camera cam,final TaskManager taskManager){
+    public TaskManagementProgressionNode(final Camera cam,final TaskManager taskManager,final LocalizedMessageProvider localizedMessageProvider){
         super("task progression node");
         bounds=new Rectangle2();
         this.taskManager=taskManager;
@@ -56,7 +54,7 @@ public final class TaskManagementProgressionNode extends Node{
         bar.setPercentFilled(0);
         //bar.setComponentWidth(250);
         final UIPanel panel=new UIPanel(new RowLayout(false));
-        final String text=I18N_MESSAGES_BUNDLE.getString("LOADING_PLEASE_WAIT");
+        final String text=localizedMessageProvider.getString("LOADING_PLEASE_WAIT");
         panel.add(new UILabel(text));
         panel.add(bar);
         frame=new UIFrame("");

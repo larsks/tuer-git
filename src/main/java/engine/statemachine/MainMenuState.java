@@ -17,8 +17,6 @@
  */
 package engine.statemachine;
 
-import java.util.ResourceBundle;
-
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
@@ -46,26 +44,26 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
-
 import engine.data.ProfileData;
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
 import engine.input.ActionMap;
 import engine.input.MouseAndKeyboardSettings;
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
 	
-	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+	private final LocalizedMessageProvider localizedMessageProvider;
 	
 	private final MatchTypeFactory matchTypeFactory;
     
-    private static final String NO_LIMIT=I18N_MESSAGES_BUNDLE.getString("NO_LIMIT");
+    private final String noLimitMsg;
     
-    private static final String DEFAULT=I18N_MESSAGES_BUNDLE.getString("DEFAULT");
+    private final String defaultMsg;
     
-    private static final String CUSTOM=I18N_MESSAGES_BUNDLE.getString("CUSTOM");
+    private final String customMsg;
     
     final NativeCanvas canvas;
     
@@ -119,6 +117,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param launchRunnable runnable used to create a desktop shortcut to launch the game (may be null)
      * @param uninstallRunnable runnable used to create a desktop shortcut to uninstall the game (may be null)
      * @param gameLongName full name of the game
+     * @param gameRecommendedDownloadUrl recommended URL to download the game
      * @param readmeContent "read me" content (may be null)
      * @param fontStore store that contains fonts
      * @param toggleScreenModeAction action allowing to modify the windowing mode
@@ -127,6 +126,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param defaultMouseAndKeyboardSettings default mouse and keyboard settings, which should not be modified, used to reset the custom ones to their default values
      * @param customMouseAndKeyboardSettings custom mouse and keyboard settings, which can be modified
      * @param profileData data of the profile
+     * @param localizedMessageProvider provider of localized messages
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
@@ -136,8 +136,12 @@ public final class MainMenuState extends ScenegraphState{
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
       			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
       			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
-      			  final ProfileData profileData){
+      			  final ProfileData profileData,final LocalizedMessageProvider localizedMessageProvider){
         super(soundManager);
+        this.localizedMessageProvider=localizedMessageProvider;
+        this.noLimitMsg=localizedMessageProvider.getString("NO_LIMIT");
+        this.defaultMsg=localizedMessageProvider.getString("DEFAULT");
+        this.customMsg=localizedMessageProvider.getString("CUSTOM");
         //TODO move this factory into another location
         this.matchTypeFactory=initMatchTypeFactory();
         this.launchRunnable=launchRunnable;
@@ -173,7 +177,7 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final String text=gameLongName+"\n"+I18N_MESSAGES_BUNDLE.getString("RECOMMENDED_DOWNLOAD_URL")+": "+gameRecommendedDownloadUrl;
+        final String text=gameLongName+"\n"+localizedMessageProvider.getString("RECOMMENDED_DOWNLOAD_URL")+": "+gameRecommendedDownloadUrl;
         final BMText textNode=new BMText("gameTitleNode",text,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(2);
         textNode.setTextColor(ColorRGBA.RED);
@@ -189,9 +193,9 @@ public final class MainMenuState extends ScenegraphState{
     private MatchTypeFactory initMatchTypeFactory(){
     	final MatchTypeFactory matchTypeFactory=new MatchTypeFactory();
     	//FIXME compute the number of spaces required to center the text
-        matchTypeFactory.addNewMatchType("DEATHMATCH",I18N_MESSAGES_BUNDLE.getString("DEATHMATCH"),"  "+I18N_MESSAGES_BUNDLE.getString("GET_BEST_SCORE")+"  ");
-        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG",I18N_MESSAGES_BUNDLE.getString("CAPTURE_THE_FLAG"),I18N_MESSAGES_BUNDLE.getString("CAPTURE_MOST_FLAGS"));
-        matchTypeFactory.addNewMatchType("HOLD_THE_BAG",I18N_MESSAGES_BUNDLE.getString("HOLD_THE_BAG")," "+I18N_MESSAGES_BUNDLE.getString("HOLD_IT_THE_MOST")+" ");
+        matchTypeFactory.addNewMatchType("DEATHMATCH",localizedMessageProvider.getString("DEATHMATCH"),"  "+localizedMessageProvider.getString("GET_BEST_SCORE")+"  ");
+        matchTypeFactory.addNewMatchType("CAPTURE_THE_FLAG",localizedMessageProvider.getString("CAPTURE_THE_FLAG"),localizedMessageProvider.getString("CAPTURE_MOST_FLAGS"));
+        matchTypeFactory.addNewMatchType("HOLD_THE_BAG",localizedMessageProvider.getString("HOLD_THE_BAG")," "+localizedMessageProvider.getString("HOLD_IT_THE_MOST")+" ");
         return(matchTypeFactory);
     }
     
@@ -226,7 +230,7 @@ public final class MainMenuState extends ScenegraphState{
             	onLevelButtonActionPerformed(ae,"3");
             }
         });
-        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+        final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -288,7 +292,7 @@ public final class MainMenuState extends ScenegraphState{
 			@Override
 			public void selectionChanged(final UIComboBox component,final Object newValue){
 				//TODO update the real players settings
-				if(newValue==CUSTOM)
+				if(newValue==customMsg)
 			        {//TODO open the GUI
 				     
 			        }
@@ -307,7 +311,7 @@ public final class MainMenuState extends ScenegraphState{
 			@Override
 			public void selectionChanged(final UIComboBox component,final Object newValue){
 				//TODO update the real weapons settings
-				if(newValue==CUSTOM)
+				if(newValue==customMsg)
 				    {//TODO open the GUI
 					 
 				    }
@@ -317,7 +321,7 @@ public final class MainMenuState extends ScenegraphState{
     	
     	final UIPanel victoryPanel=new UIPanel(new RowLayout(true));
     	victoryPanel.add(new UILabel("Victory"));
-    	final Object[] victorySuggestions=new Object[]{NO_LIMIT,"1","2","3","4","5","10","15","20","25","30","35","40","45","50"};
+    	final Object[] victorySuggestions=new Object[]{noLimitMsg,"1","2","3","4","5","10","15","20","25","30","35","40","45","50"};
     	final DefaultComboBoxModel victoryModel=new DefaultComboBoxModel(victorySuggestions);
     	updateVictoryModel(victoryModel,(MatchType)subModeCombo.getSelectedValue());
     	final UIComboBox victoryCombo=new UIComboBox(victoryModel);
@@ -326,7 +330,7 @@ public final class MainMenuState extends ScenegraphState{
     	
     	final UIPanel timePanel=new UIPanel(new RowLayout(true));
     	timePanel.add(new UILabel("Time"));
-    	final Object[] timeSuggestions=new Object[]{NO_LIMIT,"1","2","3","4","5","6","7","8","9","10","15","20","30"};
+    	final Object[] timeSuggestions=new Object[]{noLimitMsg,"1","2","3","4","5","6","7","8","9","10","15","20","30"};
     	final DefaultComboBoxModel timeModel=new DefaultComboBoxModel(timeSuggestions);
     	final UIComboBox timeCombo=new UIComboBox(timeModel);
     	timeCombo.setSelectedIndex(0);
@@ -358,13 +362,13 @@ public final class MainMenuState extends ScenegraphState{
             	final MatchType matchType=(MatchType)subModeCombo.getSelectedValue();
             	final int victoryLimit;
             	final String victoryValue=(String)victoryCombo.getSelectedValue();
-            	if(victoryValue.equals(NO_LIMIT))
+            	if(victoryValue.equals(noLimitMsg))
             		victoryLimit=-1;
             	else
             		victoryLimit=Integer.parseInt(victoryValue);
             	final int timeLimit;
             	final String timeValue=(String)timeCombo.getSelectedValue();
-            	if(timeValue.equals(NO_LIMIT))
+            	if(timeValue.equals(noLimitMsg))
             		timeLimit=-1;
             	else
             		timeLimit=Integer.parseInt(timeValue);
@@ -454,17 +458,17 @@ public final class MainMenuState extends ScenegraphState{
     
     private Object[] getAvailableWeaponsSettingsFromUnlockedWeapons(){
     	//FIXME return weapons settings composed of unlocked weapons
-    	return(new Object[]{DEFAULT,"Only knives",CUSTOM});
+    	return(new Object[]{defaultMsg,"Only knives",customMsg});
     }
     
     private Object[] getAvailablePlayersSettingsFromUnlockedPlayers(){
     	//FIXME return players settings composed of unlocked players
-    	return(new Object[]{DEFAULT,CUSTOM});
+    	return(new Object[]{defaultMsg,customMsg});
     }
     
     private final UIPanel createProfilePanel(){
     	final UIPanel profilePanel=new UIPanel(new RowLayout(false));
-    	final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+    	final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -500,21 +504,21 @@ public final class MainMenuState extends ScenegraphState{
     private final UIPanel createInitialMenuPanel(final TriggerAction exitAction){
         final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
         initialMenuPanel.setForegroundColor(ColorRGBA.DARK_GRAY);
-        final UIButton startButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("START"));
+        final UIButton startButton=new UIButton(localizedMessageProvider.getString("START"));
         startButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(startMenuPanel);
             }
         });
-        final UIButton optionsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("OPTIONS"));
+        final UIButton optionsButton=new UIButton(localizedMessageProvider.getString("OPTIONS"));
         optionsButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent event){
                 showPanelInMainFrame(optionsMenuPanel);
             }
         });
-        final UIButton exitButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("EXIT"));
+        final UIButton exitButton=new UIButton(localizedMessageProvider.getString("EXIT"));
         exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -531,7 +535,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UIPanel optionsMenuPanel=new UIPanel(new RowLayout(false));
     	final UIButton desktopShortcutsButton;
     	if(desktopShortcutsMenuPanel!=null)
-    	    {desktopShortcutsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SHORTCUTS"));
+    	    {desktopShortcutsButton=new UIButton(localizedMessageProvider.getString("SHORTCUTS"));
     	     desktopShortcutsButton.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent event) {
@@ -543,7 +547,7 @@ public final class MainMenuState extends ScenegraphState{
     		desktopShortcutsButton=null;
     	final UIButton displaySettingsButton;
     	if(displaySettingsMenuPanel!=null)
-    	    {displaySettingsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("DISPLAY"));
+    	    {displaySettingsButton=new UIButton(localizedMessageProvider.getString("DISPLAY"));
     	     displaySettingsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -555,7 +559,7 @@ public final class MainMenuState extends ScenegraphState{
     		displaySettingsButton=null;
     	final UIButton soundSettingsButton;
     	if(soundSettingsMenuPanel!=null)
-	        {soundSettingsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SOUND"));
+	        {soundSettingsButton=new UIButton(localizedMessageProvider.getString("SOUND"));
 	         soundSettingsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -567,7 +571,7 @@ public final class MainMenuState extends ScenegraphState{
 	    	soundSettingsButton=null;
     	final UIButton controlsButton;
         if(controlsPanel!=null)
-            {controlsButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("CONTROLS"));
+            {controlsButton=new UIButton(localizedMessageProvider.getString("CONTROLS"));
              controlsButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -579,7 +583,7 @@ public final class MainMenuState extends ScenegraphState{
         	controlsButton=null;
         final UIButton profileButton;
         if(profilePanel!=null)
-            {profileButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("PROFILE"));
+            {profileButton=new UIButton(localizedMessageProvider.getString("PROFILE"));
              profileButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -591,7 +595,7 @@ public final class MainMenuState extends ScenegraphState{
         	profileButton=null;
         final UIButton readmeButton;
         if(readmePanel!=null)
-            {readmeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("READ_ME"));
+            {readmeButton=new UIButton(localizedMessageProvider.getString("READ_ME"));
              readmeButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -601,7 +605,7 @@ public final class MainMenuState extends ScenegraphState{
             }
         else
         	readmeButton=null;
-        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+        final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -626,15 +630,15 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createConfirmExitMenuPanel(){
 		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
-		final UILabel confirmLabel=new UILabel(I18N_MESSAGES_BUNDLE.getString("CONFIRM_EXIT"));
-		final UIButton yesButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("YES"));
+		final UILabel confirmLabel=new UILabel(localizedMessageProvider.getString("CONFIRM_EXIT"));
+		final UIButton yesButton=new UIButton(localizedMessageProvider.getString("YES"));
 		yesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onYesExitButtonActionPerformed(ae);
             }
         });
-		final UIButton noButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("NO"));
+		final UIButton noButton=new UIButton(localizedMessageProvider.getString("NO"));
 		noButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -679,14 +683,14 @@ public final class MainMenuState extends ScenegraphState{
     	if(soundManager!=null)
     	    {final TriggerAction toggleSoundManagerAction=new ToggleSoundManagerAction(soundManager);
     		 soundSettingsMenuPanel=new UIPanel(new RowLayout(false));
-    	     final UIButton toggleSoundButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("SWITCH_SOUND_ON_OFF"));
+    	     final UIButton toggleSoundButton=new UIButton(localizedMessageProvider.getString("SWITCH_SOUND_ON_OFF"));
     	     toggleSoundButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
                 	 toggleSoundManagerAction.perform(canvas,null,Double.NaN);
                  }
              });
-    	     final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+    	     final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
              backButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -706,7 +710,7 @@ public final class MainMenuState extends ScenegraphState{
     	if(launchRunnable!=null||uninstallRunnable!=null)
     	    {desktopShortcutsMenuPanel=new UIPanel(new RowLayout(false));
     	     if(launchRunnable!=null)
-                 {final UIButton addDesktopShortcutButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ADD_A_DESKTOP_SHORTCUT_TO_LAUNCH_THE_GAME"));
+                 {final UIButton addDesktopShortcutButton=new UIButton(localizedMessageProvider.getString("ADD_A_DESKTOP_SHORTCUT_TO_LAUNCH_THE_GAME"));
                   addDesktopShortcutButton.addActionListener(new ActionListener(){
                       @Override
                       public void actionPerformed(ActionEvent event){
@@ -716,7 +720,7 @@ public final class MainMenuState extends ScenegraphState{
                   desktopShortcutsMenuPanel.add(addDesktopShortcutButton);
                  }
              if(uninstallRunnable!=null)
-                 {final UIButton addUninstallDesktopShortcutButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ADD_A_DESKTOP_SHORTCUT_TO_UNINSTALL_THE_GAME"));
+                 {final UIButton addUninstallDesktopShortcutButton=new UIButton(localizedMessageProvider.getString("ADD_A_DESKTOP_SHORTCUT_TO_UNINSTALL_THE_GAME"));
                   addUninstallDesktopShortcutButton.addActionListener(new ActionListener(){
                       @Override
                       public void actionPerformed(ActionEvent event){
@@ -725,7 +729,7 @@ public final class MainMenuState extends ScenegraphState{
                   });
                   desktopShortcutsMenuPanel.add(addUninstallDesktopShortcutButton);
                  }
-             final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+             final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
              backButton.addActionListener(new ActionListener(){           
                  @Override
                  public void actionPerformed(ActionEvent event){
@@ -741,7 +745,7 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel createStartMenuPanel(final ProfileData profileData){
         final UIPanel startMenuPanel=new UIPanel(new RowLayout(false));
-        final UIButton storyModeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("STORY_MODE"));
+        final UIButton storyModeButton=new UIButton(localizedMessageProvider.getString("STORY_MODE"));
         storyModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -749,7 +753,7 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(storyModePanel);
             }
         });
-        final UIButton arenaModeButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("ARENA_MODE"));
+        final UIButton arenaModeButton=new UIButton(localizedMessageProvider.getString("ARENA_MODE"));
         arenaModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -758,7 +762,7 @@ public final class MainMenuState extends ScenegraphState{
         });
         //FIXME enable this button when the arena mode is ready
         arenaModeButton.setEnabled(false);
-        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+        final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -782,7 +786,7 @@ public final class MainMenuState extends ScenegraphState{
     	final UILabel label=new UILabel(textualContent);
         final UIPanel textualPanel=new UIPanel(new RowLayout(false));
         textualPanel.add(label);
-        final UIButton backButton=new UIButton(I18N_MESSAGES_BUNDLE.getString("BACK"));
+        final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(backButtonActionListener);
         textualPanel.add(backButton);
         return(textualPanel);

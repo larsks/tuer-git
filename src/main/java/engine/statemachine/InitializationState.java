@@ -18,6 +18,7 @@
 package engine.statemachine;
 
 import java.util.LinkedHashMap;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.image.Texture;
@@ -33,6 +34,8 @@ import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
+
+import engine.misc.LocalizedMessageProvider;
 import engine.movement.UniformlyVariableRotationController;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
@@ -48,9 +51,11 @@ public final class InitializationState extends ScenegraphState{
     private final Camera cam;
     
     
-    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TriggerAction toIntroAction,final SoundManager soundManager,final TaskManager taskManager){
+    public InitializationState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
+    		final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,final TriggerAction toIntroAction,
+    		final SoundManager soundManager,final TaskManager taskManager,final LocalizedMessageProvider localizedMessageProvider){
         super(soundManager);
-        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
+        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager,localizedMessageProvider);
         cam=canvas.getCanvasRenderer().getCamera();
         box=new Box("Initialization Box",Vector3.ZERO,5,5,5);
         box.setModelBound(new BoundingBox());

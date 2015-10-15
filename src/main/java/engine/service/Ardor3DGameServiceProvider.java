@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Properties;
-import java.util.ResourceBundle;
-
 import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
@@ -63,9 +61,9 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
+import engine.misc.LocalizedMessageProvider;
 import engine.renderer.ReliableCanvasRenderer;
 import engine.statemachine.ScenegraphStateMachine;
 
@@ -77,7 +75,7 @@ import engine.statemachine.ScenegraphStateMachine;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 	
-	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
+	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider();
 
 	/**path of the branding property file*/
 	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
@@ -92,7 +90,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
 	
 	/**subtitle displayed in the introduction of the game*/
-	private static final String GAME_INTRODUCTION_SUBTITLE=I18N_MESSAGES_BUNDLE.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
+	private static final String GAME_INTRODUCTION_SUBTITLE=localizedMessageProvider.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
 	
 	/**recommended URL to download the game*/
 	private static final String GAME_RECOMMENDED_DOWNLOAD_URL=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-recommended-download-url");
@@ -352,7 +350,8 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final String readmeContent=getTextFileContent("/README.txt");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,
-        uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0);
+        uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0,
+        localizedMessageProvider);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {

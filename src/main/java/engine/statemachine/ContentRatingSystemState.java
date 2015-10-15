@@ -17,31 +17,26 @@
  */
 package engine.statemachine;
 
-import java.util.ResourceBundle;
-
 import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.ui.text.BMText;
-
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 
 public final class ContentRatingSystemState extends ScenegraphState{
 	
 	
-	private static final ResourceBundle I18N_MESSAGES_BUNDLE=ResourceBundle.getBundle("i18n.MessagesBundle");
-	
-	private final String text=I18N_MESSAGES_BUNDLE.getString("CONTENT_RATING_WARNING");
-
 	private MouseManager mouseManager;
 	
     
 	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
-			final FontStore fontStore){
+			final FontStore fontStore,final LocalizedMessageProvider localizedMessageProvider){
         super(soundManager);
         this.mouseManager=mouseManager;
+        final String text=localizedMessageProvider.getString("CONTENT_RATING_WARNING");
         final BMText textNode=new BMText("contentSystemRatingNode",text,fontStore.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
     }

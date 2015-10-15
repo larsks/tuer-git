@@ -31,6 +31,7 @@ import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
 
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
@@ -59,11 +60,12 @@ private final TaskManagementProgressionNode taskNode;
     
 
 	public UnloadingDisplayState(final NativeCanvas canvas,final TaskManager taskManager,final SoundManager soundManager,
-			                     final Runnable gameStateCleanupRunnable,final FontStore fontStore){
+			                     final Runnable gameStateCleanupRunnable,final FontStore fontStore,
+			                     final LocalizedMessageProvider localizedMessageProvider){
 		super(soundManager);
 		this.taskManager=taskManager;
 		this.gameStateCleanupRunnable=gameStateCleanupRunnable;
-		taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
+		taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager,localizedMessageProvider);
         cam=canvas.getCanvasRenderer().getCamera();
         getRoot().attachChild(taskNode);
         texturesPaths=new String[]{"communism.png","venimus_vidimus_vicimus.png"};
