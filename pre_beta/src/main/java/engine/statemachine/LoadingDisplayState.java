@@ -33,7 +33,9 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.ui.text.BMText;
 import com.ardor3d.util.TextureManager;
+
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 import engine.taskmanagement.TaskManagementProgressionNode;
 import engine.taskmanagement.TaskManager;
@@ -63,11 +65,11 @@ public final class LoadingDisplayState extends ScenegraphState{
     		final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,
     		final SoundManager soundManager,final TaskManager taskManager,
     		final StateInitializationRunnable<GameState> gameStateInitializationRunnable,
-    		final FontStore fontStore){
+    		final FontStore fontStore,final LocalizedMessageProvider localizedMessageProvider){
         super(soundManager);
         this.taskManager=taskManager;
         this.gameStateInitializationRunnable=gameStateInitializationRunnable;
-        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager);
+        taskNode=new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(),taskManager,localizedMessageProvider);
         cam=canvas.getCanvasRenderer().getCamera();
         getRoot().attachChild(taskNode);
         texturesPaths=new String[]{"communism.png","venimus_vidimus_vicimus.png"};
