@@ -28,6 +28,7 @@ import com.ardor3d.util.ContextGarbageCollector;
 import com.ardor3d.util.GameTaskQueueManager;
 
 import engine.data.ProfileData;
+import engine.misc.SettingsProvider;
 import engine.sound.SoundManager;
 
 /**
@@ -43,12 +44,15 @@ public class ExitGameState extends ScenegraphState{
 	private final SoundManager soundManager;
 	
 	private final ProfileData profileData;
+	
+	private final SettingsProvider settingsProvider;
 
-	public ExitGameState(final NativeCanvas canvas,final SoundManager soundManager,final ProfileData profileData){
+	public ExitGameState(final NativeCanvas canvas,final SoundManager soundManager,final ProfileData profileData,final SettingsProvider settingsProvider){
 		super(soundManager);
 		this.canvas=canvas;
 		this.soundManager=soundManager;
 		this.profileData=profileData;
+		this.settingsProvider=settingsProvider;
 		getRoot().addController(new SpatialController<Node>(){
 			@Override
 			public void update(final double timeSinceLastCall,final Node caller){
@@ -58,7 +62,8 @@ public class ExitGameState extends ScenegraphState{
 	}
 	
 	protected void performFinalCleanupAndExit(){
-		try{profileData.save();
+		try{settingsProvider.save();
+			profileData.save();
 			soundManager.stop();
 			soundManager.cleanup();
 		    final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();

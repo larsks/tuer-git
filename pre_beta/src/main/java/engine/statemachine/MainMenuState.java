@@ -44,6 +44,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
+
 import engine.data.ProfileData;
 import engine.data.common.MatchType;
 import engine.data.common.MatchTypeFactory;
@@ -51,6 +52,7 @@ import engine.input.ActionMap;
 import engine.input.MouseAndKeyboardSettings;
 import engine.misc.FontStore;
 import engine.misc.LocalizedMessageProvider;
+import engine.misc.SettingsProvider;
 import engine.sound.SoundManager;
 
 public final class MainMenuState extends ScenegraphState{
@@ -136,7 +138,7 @@ public final class MainMenuState extends ScenegraphState{
       			  final FontStore fontStore,final TriggerAction toggleScreenModeAction,final ActionMap defaultActionMap,
       			  final ActionMap customActionMap,final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
       			  final MouseAndKeyboardSettings customMouseAndKeyboardSettings,
-      			  final ProfileData profileData,final LocalizedMessageProvider localizedMessageProvider){
+      			  final ProfileData profileData,final LocalizedMessageProvider localizedMessageProvider,final SettingsProvider settingsProvider){
         super(soundManager);
         this.localizedMessageProvider=localizedMessageProvider;
         this.noLimitMsg=localizedMessageProvider.getString("NO_LIMIT");
@@ -160,7 +162,7 @@ public final class MainMenuState extends ScenegraphState{
             readmePanel=createReadmePanel(readmeContent);
         else
         	readmePanel=null;
-        displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction,localizedMessageProvider);
+        displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction,localizedMessageProvider,settingsProvider);
         soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
