@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Properties;
+
 import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
@@ -61,9 +62,11 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
+
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.LocalizedMessageProvider;
+import engine.misc.SettingsProvider;
 import engine.renderer.ReliableCanvasRenderer;
 import engine.statemachine.ScenegraphStateMachine;
 
@@ -75,7 +78,7 @@ import engine.statemachine.ScenegraphStateMachine;
  */
 public final class Ardor3DGameServiceProvider implements Scene{
 
-
+	
 	/**path of the branding property file*/
 	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
 	
@@ -84,9 +87,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
 	
 	/**short name of the game*/
 	private static final String GAME_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-short-name");
+
+	private static final SettingsProvider settingsProvider=new SettingsProvider("."+GAME_SHORT_NAME);
 	
 	/**provider of localized messages*/
-	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider("."+GAME_SHORT_NAME);
+	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider(settingsProvider.getLocale());
 	
 	/**full name of the game*/
 	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
@@ -262,12 +267,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
          * slow software renderer with a bad support of OpenGL
          */
         final int depthBits=24;
-        final DisplaySettings settings=new DisplaySettings(mainMonitorWidth,mainMonitorHeight,bitDepth,0,0,depthBits,0,0,true,false);
+        final boolean fullscreen=settingsProvider.isFullscreenEnabled();
+        final DisplaySettings settings=new DisplaySettings(mainMonitorWidth,mainMonitorHeight,bitDepth,0,0,depthBits,0,0,fullscreen,false);
         //setups the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new ReliableCanvasRenderer(this);
         //creates a canvas      
         canvas=new JoglNewtWindow(canvasRenderer,settings);
         canvas.init();
+        //enables or disables the vertical synchronization
+        final boolean verticalSynchronizationEnabled=settingsProvider.isVerticalSynchronizationEnabled();
+        canvas.setVSyncEnabled(verticalSynchronizationEnabled);
         mouseManager=new JoglNewtMouseManager((JoglNewtWindow)canvas);
         //removes the mouse cursor
         mouseManager.setGrabbed(GrabbedState.GRABBED);
