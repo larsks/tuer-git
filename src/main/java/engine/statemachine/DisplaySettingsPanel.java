@@ -48,6 +48,8 @@ import com.jogamp.newt.MonitorMode;
 import com.jogamp.newt.util.MonitorModeUtil;
 import com.jogamp.opengl.JoglVersion;
 
+import engine.misc.LocalizedMessageProvider;
+
 /**
  * panel of the display settings (vertical synchronization, refresh rate, screen resolution, ...)
  * 
@@ -66,12 +68,13 @@ public class DisplaySettingsPanel extends UIPanel{
 	
 	private final HashMap<Integer,List<MonitorMode>> screenModesByRotation;
 	
-	public DisplaySettingsPanel(final MainMenuState mainMenuState,final TriggerAction toggleScreenModeAction){
+	public DisplaySettingsPanel(final MainMenuState mainMenuState,final TriggerAction toggleScreenModeAction,
+			final LocalizedMessageProvider localizedMessageProvider){
 		super();
 		this.mainMenuState=mainMenuState;
 		this.toggleScreenModeAction=toggleScreenModeAction;
 		setLayout(new RowLayout(false));
-    	final UILabel screenModesLabel=new UILabel("Display Mode");
+    	final UILabel screenModesLabel=new UILabel(localizedMessageProvider.getString("DISPLAY_MODE"));
     	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
     	final MonitorMode currentScreenMode=monitor.getCurrentMode();
     	final List<MonitorMode> screenModes=monitor.getSupportedModes();
@@ -90,7 +93,7 @@ public class DisplaySettingsPanel extends UIPanel{
     	final UIRadioButton[] rotationsButtons;
     	if(availableRotations.size()>1)
     	    {rotationsPanel=new UIPanel(new RowLayout(true));
-    	     final UILabel screenRotationsLabel=new UILabel("Screen rotation");
+    	     final UILabel screenRotationsLabel=new UILabel(localizedMessageProvider.getString("SCREEN_ROTATION"));
     	     rotationsPanel.add(screenRotationsLabel);
     		 final ButtonGroup rotationsGroup=new ButtonGroup();
     		 rotationsButtons=new UIRadioButton[availableRotations.size()];
@@ -138,7 +141,7 @@ public class DisplaySettingsPanel extends UIPanel{
 		          });
 	             }
     	    }
-    	final UIButton windowingModeButton=new UIButton("Switch to windowed mode or full screen mode");
+    	final UIButton windowingModeButton=new UIButton(localizedMessageProvider.getString("SWITCH_TO_WINDOWED_MODE_OR_FULL_SCREEN_MODE"));
     	windowingModeButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -147,15 +150,15 @@ public class DisplaySettingsPanel extends UIPanel{
         });
     	final UIPanel vSyncPanel=new UIPanel(new RowLayout(true));
     	final ButtonGroup vSyncGroup=new ButtonGroup();
-    	final UILabel vSyncLabel=new UILabel("Vertical synchronization");
-    	final UIRadioButton enableVSyncButton=new UIRadioButton("On");
+    	final UILabel vSyncLabel=new UILabel(localizedMessageProvider.getString("VERTICAL_SYNCHRONIZATION"));
+    	final UIRadioButton enableVSyncButton=new UIRadioButton(localizedMessageProvider.getString("ON"));
     	enableVSyncButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
             	onEnableVSyncButtonActionPerformed(event);
             }
         });
-    	final UIRadioButton disableVSyncButton=new UIRadioButton("Off");
+    	final UIRadioButton disableVSyncButton=new UIRadioButton(localizedMessageProvider.getString("OFF"));
     	disableVSyncButton.setSelected(true);
     	disableVSyncButton.addActionListener(new ActionListener(){           
             @Override
@@ -168,7 +171,7 @@ public class DisplaySettingsPanel extends UIPanel{
     	vSyncPanel.add(vSyncLabel);
     	vSyncPanel.add(enableVSyncButton);
     	vSyncPanel.add(disableVSyncButton);
-    	final UIButton backButton=new UIButton("Back");
+    	final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
@@ -186,11 +189,11 @@ public class DisplaySettingsPanel extends UIPanel{
         	 crappyDriverWarningLabel.setForegroundColor(ColorRGBA.RED);
             }
         final UIPanel openglGraphicalCardDriverInfoPanel=new UIPanel(new RowLayout(false));
-    	final UILabel openglDriverLabel=new UILabel("OpenGL Driver");
-    	final UILabel vendorLabel=new UILabel("Vendor: "+caps.getDisplayVendor());
-    	final UILabel rendererLabel=new UILabel("Renderer: "+caps.getDisplayRenderer());
-    	final UILabel versionLabel=new UILabel("Version: "+caps.getDisplayVersion());
-    	final UILabel joglVersionLabel=new UILabel("JOGL Version: "+JoglVersion.getInstance().getImplementationVersion());
+    	final UILabel openglDriverLabel=new UILabel(localizedMessageProvider.getString("OPENGL_DRIVER"));
+    	final UILabel vendorLabel=new UILabel(localizedMessageProvider.getString("VENDOR")+": "+caps.getDisplayVendor());
+    	final UILabel rendererLabel=new UILabel(localizedMessageProvider.getString("RENDERER")+": "+caps.getDisplayRenderer());
+    	final UILabel versionLabel=new UILabel(localizedMessageProvider.getString("VERSION")+": "+caps.getDisplayVersion());
+    	final UILabel joglVersionLabel=new UILabel(localizedMessageProvider.getString("JOGL_VERSION")+": "+JoglVersion.getInstance().getImplementationVersion());
     	openglGraphicalCardDriverInfoPanel.add(firstEmptyLabel);
     	openglGraphicalCardDriverInfoPanel.add(openglDriverLabel);
     	openglGraphicalCardDriverInfoPanel.add(vendorLabel);
