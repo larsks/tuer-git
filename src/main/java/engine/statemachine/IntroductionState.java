@@ -105,7 +105,7 @@ public final class IntroductionState extends ScenegraphState{
         getRoot().attachChild(textNode);
         //shows the subtitle if any
         if(gameIntroductionSubtitle!=null&&!gameIntroductionSubtitle.isEmpty())
-            {final BMText subtitleNode=new BMText("subtitleNode",gameIntroductionSubtitle,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+            {final BMText subtitleNode=new BMText("subtitleNode",gameIntroductionSubtitle,fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
              subtitleNode.setFontScale(6);
              subtitleNode.setTextColor(ColorRGBA.ORANGE);
              subtitleNode.setTranslation(0,-5,-5);

@@ -123,7 +123,7 @@ public final class LoadingDisplayState extends ScenegraphState{
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-15));
         getRoot().attachChild(box);
-        levelTextLabel=new BMText("Level Index Text","",fontStore.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        levelTextLabel=new BMText("Level Index Text","",fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
         levelTextLabel.setTranslation(levelTextLabel.getTranslation().add(0,3.3,0,null));
         getRoot().attachChild(levelTextLabel);
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toUnloadingDisplayTriggerAction);

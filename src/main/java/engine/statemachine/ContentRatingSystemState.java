@@ -37,7 +37,7 @@ public final class ContentRatingSystemState extends ScenegraphState{
         super(soundManager);
         this.mouseManager=mouseManager;
         final String text=localizedMessageProvider.getString("CONTENT_RATING_WARNING");
-        final BMText textNode=new BMText("contentSystemRatingNode",text,fontStore.getFontsList().get(0),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("contentSystemRatingNode",text,fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
         getRoot().attachChild(textNode);
     }
     
