@@ -17,6 +17,8 @@
  */
 package engine.statemachine;
 
+import java.util.Locale;
+
 import com.ardor3d.annotation.MainThread;
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIComboBox;
@@ -59,6 +61,8 @@ public final class MainMenuState extends ScenegraphState{
 	
 	private final LocalizedMessageProvider localizedMessageProvider;
 	
+	private final SettingsProvider settingsProvider;
+	
 	private final MatchTypeFactory matchTypeFactory;
     
     private final String noLimitMsg;
@@ -83,7 +87,11 @@ public final class MainMenuState extends ScenegraphState{
     
     private final UIPanel confirmExitMenuPanel;
     
+    private final UIPanel forcedExitAfterSettingsChangeMenuPanel;
+    
     private final DisplaySettingsPanel displaySettingsMenuPanel;
+    
+    private final UIPanel languageMenuPanel;
     
     private final UIPanel soundSettingsMenuPanel;
     
@@ -129,6 +137,7 @@ public final class MainMenuState extends ScenegraphState{
      * @param customMouseAndKeyboardSettings custom mouse and keyboard settings, which can be modified
      * @param profileData data of the profile
      * @param localizedMessageProvider provider of localized messages
+     * @param settingsProvider provider of the settings
      */
     public MainMenuState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,
                   final MouseManager mouseManager,
@@ -141,6 +150,7 @@ public final class MainMenuState extends ScenegraphState{
       			  final ProfileData profileData,final LocalizedMessageProvider localizedMessageProvider,final SettingsProvider settingsProvider){
         super(soundManager);
         this.localizedMessageProvider=localizedMessageProvider;
+        this.settingsProvider=settingsProvider;
         this.noLimitMsg=localizedMessageProvider.getString("NO_LIMIT");
         this.defaultMsg=localizedMessageProvider.getString("DEFAULT");
         this.customMsg=localizedMessageProvider.getString("CUSTOM");
@@ -163,11 +173,13 @@ public final class MainMenuState extends ScenegraphState{
         else
         	readmePanel=null;
         displaySettingsMenuPanel=new DisplaySettingsPanel(this,toggleScreenModeAction,localizedMessageProvider,settingsProvider);
+        languageMenuPanel=createLanguageMenuPanel();
         soundSettingsMenuPanel=createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel=createDesktopShortcutsMenuPanel();
         initialMenuPanel=createInitialMenuPanel(toExitGameTriggerAction);
         optionsMenuPanel=createOptionsMenuPanel();
         confirmExitMenuPanel=createConfirmExitMenuPanel();
+        forcedExitAfterSettingsChangeMenuPanel=createForcedExitAfterSettingsChangeMenuPanel();
         this.toLoadingDisplayAction=toLoadingDisplayAction;
         startMenuPanel=createStartMenuPanel(profileData);
         storyModePanel=createStoryModePanel(toLoadingDisplayAction);
@@ -552,6 +564,18 @@ public final class MainMenuState extends ScenegraphState{
     	    }
     	else
     		desktopShortcutsButton=null;
+    	final UIButton languageSettingsButton;
+    	if(languageMenuPanel!=null)
+    	    {languageSettingsButton=new UIButton(localizedMessageProvider.getString("LANGUAGE"));
+    	     languageSettingsButton.addActionListener(new ActionListener(){           
+                 @Override
+                 public void actionPerformed(ActionEvent event){
+                     showPanelInMainFrame(languageMenuPanel);
+                 }
+             });
+    	    }
+    	else
+    		languageSettingsButton=null;
     	final UIButton displaySettingsButton;
     	if(displaySettingsMenuPanel!=null)
     	    {displaySettingsButton=new UIButton(localizedMessageProvider.getString("DISPLAY"));
@@ -619,6 +643,8 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(initialMenuPanel);
             }
         });
+        if(languageSettingsButton!=null)
+        	optionsMenuPanel.add(languageSettingsButton);
         if(displaySettingsButton!=null)
         	optionsMenuPanel.add(displaySettingsButton);
         if(soundSettingsButton!=null)
@@ -658,6 +684,21 @@ public final class MainMenuState extends ScenegraphState{
 		return(confirmExitMenuPanel);
 	}
     
+    private final UIPanel createForcedExitAfterSettingsChangeMenuPanel(){
+    	final UIPanel forcedExitAfterSettingsChangeMenuPanel=new UIPanel(new RowLayout(false));
+		final UILabel forcedExitAfterSettingsChangeLabel=new UILabel(localizedMessageProvider.getString("A_RESTART_IS_REQUIRED_FOR_THE_CHANGE_TO_TAKE_EFFECT"));
+		final UIButton yesButton=new UIButton(localizedMessageProvider.getString("YES"));
+		yesButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+            	onYesExitButtonActionPerformed(ae);
+            }
+        });
+		forcedExitAfterSettingsChangeMenuPanel.add(forcedExitAfterSettingsChangeLabel);
+		forcedExitAfterSettingsChangeMenuPanel.add(yesButton);
+		return(forcedExitAfterSettingsChangeMenuPanel);
+    }
+    
     private void onExitButtonActionPerformed(final ActionEvent ae){
 		showPanelInMainFrame(confirmExitMenuPanel);
     }
@@ -683,6 +724,64 @@ public final class MainMenuState extends ScenegraphState{
 		public void perform(Canvas source,TwoInputStates inputStates,double tpf){
     		soundManager.setEnabled(!soundManager.isEnabled());
     	}
+    }
+    
+    private static final class LanguageActionListener implements ActionListener{
+    	
+    	private final Locale locale;
+    	
+    	private final MainMenuState mainMenuState;
+    	
+    	private LanguageActionListener(final Locale locale,final MainMenuState mainMenuState){
+    		super();
+    		this.locale=locale;
+    		this.mainMenuState=mainMenuState;
+    	}
+    	
+    	@Override
+        public void actionPerformed(ActionEvent event){
+    		//modifies the locale in the provider of the settings
+    		this.mainMenuState.settingsProvider.setLocale(locale);
+    		//tells the player that the game must be restarted to take this change into account
+    		mainMenuState.showPanelInMainFrame(mainMenuState.forcedExitAfterSettingsChangeMenuPanel);
+    	}
+    }
+    
+    private final UIPanel createLanguageMenuPanel(){
+    	final UIPanel languageMenuPanel=new UIPanel(new RowLayout(false));
+    	final UIButton germanLanguageButton=new UIButton("Deutsch");
+    	germanLanguageButton.addActionListener(new LanguageActionListener(Locale.GERMAN,this));
+    	final UIButton englishLanguageButton=new UIButton("English");
+    	englishLanguageButton.addActionListener(new LanguageActionListener(Locale.ENGLISH,this));
+    	final UIButton spanishLanguageButton=new UIButton("Español");
+    	spanishLanguageButton.addActionListener(new LanguageActionListener(new Locale("es"),this));
+    	final UIButton frenchLanguageButton=new UIButton("Français");
+    	frenchLanguageButton.addActionListener(new LanguageActionListener(Locale.FRENCH,this));
+    	final UIButton italianLanguageButton=new UIButton("Italiano");
+    	italianLanguageButton.addActionListener(new LanguageActionListener(Locale.ITALIAN,this));
+    	final UIButton portugueseLanguageButton=new UIButton("Português");
+    	portugueseLanguageButton.addActionListener(new LanguageActionListener(new Locale("pt"),this));
+    	final UIButton dutchLanguageButton=new UIButton("Nederlandse");
+    	dutchLanguageButton.addActionListener(new LanguageActionListener(new Locale("nl"),this));
+    	final UIButton swedishLanguageButton=new UIButton("Svenska");
+    	swedishLanguageButton.addActionListener(new LanguageActionListener(new Locale("sv"),this));
+    	final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
+        backButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(optionsMenuPanel);
+            }
+        });
+        languageMenuPanel.add(germanLanguageButton);
+        languageMenuPanel.add(englishLanguageButton);
+        languageMenuPanel.add(spanishLanguageButton);
+        languageMenuPanel.add(frenchLanguageButton);
+        languageMenuPanel.add(italianLanguageButton);
+        languageMenuPanel.add(portugueseLanguageButton);
+        languageMenuPanel.add(dutchLanguageButton);
+        languageMenuPanel.add(swedishLanguageButton);
+        languageMenuPanel.add(backButton);
+    	return(languageMenuPanel);
     }
     
     private final UIPanel createSoundSettingsMenuPanel(final SoundManager soundManager){
