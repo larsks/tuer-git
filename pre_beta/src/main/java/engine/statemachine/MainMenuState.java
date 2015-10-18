@@ -179,12 +179,17 @@ public final class MainMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final String text=gameLongName+"\n"+localizedMessageProvider.getString("RECOMMENDED_DOWNLOAD_URL")+": "+gameRecommendedDownloadUrl;
-        final BMText textNode=new BMText("gameTitleNode",text,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
-        textNode.setFontScale(2);
-        textNode.setTextColor(ColorRGBA.RED);
-        textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
-        getRoot().attachChild(textNode);
+        final String recommendedUrlText=localizedMessageProvider.getString("RECOMMENDED_DOWNLOAD_URL")+": "+gameRecommendedDownloadUrl;
+        final BMText gameTitleTextNode=new BMText("gameTitleNode",gameLongName,fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        gameTitleTextNode.setFontScale(2);
+        gameTitleTextNode.setTextColor(ColorRGBA.RED);
+        gameTitleTextNode.setTranslation(gameTitleTextNode.getTranslation().add(0,3.3,0,null));
+        getRoot().attachChild(gameTitleTextNode);
+        final BMText recommendedUrlTextNode=new BMText("recommendedUrlNode",recommendedUrlText,fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
+        recommendedUrlTextNode.setFontScale(1);
+        recommendedUrlTextNode.setTextColor(ColorRGBA.GREEN);
+        recommendedUrlTextNode.setTranslation(recommendedUrlTextNode.getTranslation().add(0,3.0,0,null));
+        getRoot().attachChild(recommendedUrlTextNode);
         //setups the keyboard triggers
         final InputTrigger exitTrigger=new InputTrigger(new KeyPressedCondition(Key.ESCAPE),toExitGameTriggerAction);
         final InputTrigger[] triggers=new InputTrigger[]{exitTrigger};
