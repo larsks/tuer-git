@@ -20,7 +20,10 @@ package engine.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Properties;
+
+import com.jogamp.nativewindow.util.Dimension;
 import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
@@ -54,11 +57,15 @@ import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.jogamp.newt.Display;
+import com.jogamp.newt.MonitorDevice;
+import com.jogamp.newt.MonitorMode;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.newt.util.MonitorModeUtil;
+
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.LocalizedMessageProvider;
@@ -245,13 +252,31 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private Ardor3DGameServiceProvider(){
         timer=new Timer();
         root=new Node("root node of the game");
-        
+        //retrieves some screen parameters from the settings
+        final int screenRotation=settingsProvider.getScreenRotation();
+        final int screenWidth=settingsProvider.getScreenWidth();
+        final int screenHeight=settingsProvider.getScreenHeight();
         //retrieves some parameters of the display
-        Display display=NewtFactory.createDisplay(null);
-        Screen screen=NewtFactory.createScreen(display,0);
+        final Display display=NewtFactory.createDisplay(null);
+        final Screen screen=NewtFactory.createScreen(display,0);
         screen.addReference();
         //uses the primary monitor
-        final SurfaceSize surfaceSize=screen.getPrimaryMonitor().queryCurrentMode().getSurfaceSize();
+        final MonitorDevice primaryMonitor=screen.getPrimaryMonitor();
+        final MonitorMode previousMode=primaryMonitor.queryCurrentMode();
+        List<MonitorMode> availableModes=primaryMonitor.getSupportedModes();
+        if(screenRotation!=0)
+            availableModes=MonitorModeUtil.filterByRotation(availableModes,screenRotation);
+        if(screenWidth==SettingsProvider.UNCHANGED_SIZE||screenHeight==SettingsProvider.UNCHANGED_SIZE)
+            availableModes=MonitorModeUtil.filterByResolution(availableModes,previousMode.getSurfaceSize().getResolution());
+        else
+            availableModes=MonitorModeUtil.filterByResolution(availableModes,new Dimension(screenWidth,screenHeight));
+        availableModes=MonitorModeUtil.filterByRate(availableModes,previousMode.getRefreshRate());
+        if(!availableModes.isEmpty())
+            {//FIXME rather pass the wished resolution and rotation to JogAmp's Ardor3D Continuation
+        	 primaryMonitor.setCurrentMode(availableModes.get(0));
+            }
+        //the monitor mode might have changed
+        final SurfaceSize surfaceSize=primaryMonitor.getCurrentMode().getSurfaceSize();
         final int mainMonitorWidth=surfaceSize.getResolution().getWidth();
         final int mainMonitorHeight=surfaceSize.getResolution().getHeight();
         final int bitDepth=surfaceSize.getBitsPerPixel();
