@@ -36,11 +36,15 @@ import java.util.logging.Logger;
  */
 public class SettingsProvider{
 	
+	public static final int UNCHANGED_SIZE=-1;
+	
 	private static final Logger logger=Logger.getLogger(SettingsProvider.class.getCanonicalName());
 	
 	private static final String[] trueStrings={Boolean.TRUE.toString(),"on","1","enabled","activated"};
 	
 	private static final String[] falseStrings={Boolean.FALSE.toString(),"off","0","disabled","deactivated"};
+	
+	private static final int[] screenRotations=new int[]{0,90,180,270};
 	
 	/**program short name used to name the sub-directory, in the user's home directory*/
 	private final String programShortName;
@@ -53,7 +57,20 @@ public class SettingsProvider{
 	
 	private boolean verticalSynchronizationEnabled;
 	
+	/**fullscreen or windowed*/
 	private boolean fullscreenEnabled;
+	
+	/**screen width*/
+	private int screenWidth;
+	
+	/**screen height*/
+	private int screenHeight;
+	
+	/**screen rotation*/
+	private int screenRotation;
+	
+	/**sound enabled*/
+	private boolean soundEnabled;
 
 	/**
 	 * Default constructor
@@ -67,6 +84,10 @@ public class SettingsProvider{
 		locale=Locale.getDefault();//locale of the system
 		verticalSynchronizationEnabled=false;
 		fullscreenEnabled=true;
+		screenWidth=UNCHANGED_SIZE;
+		screenHeight=UNCHANGED_SIZE;
+		screenRotation=0;
+		soundEnabled=true;
 		//looks at the file that contains the settings
 		configFile=new File(System.getProperty("user.home")+"/."+programShortName,"config");
 		if(configFile.exists())
@@ -99,6 +120,34 @@ public class SettingsProvider{
 			    	  logger.log(Level.INFO,"Fullscreen flag \""+fullscreenString+"\" found, fullscreen "+fullscreenEnabled);
 			      else
 			    	  logger.log(Level.INFO,"Fullscreen flag not found, fullscreen "+fullscreenEnabled);
+			      //screen width
+			      final String screenWidthString=properties.getProperty("SCREEN_WIDTH");
+			      screenWidth=parseInt(screenWidthString,Integer.valueOf(screenWidth),null);
+			      if(screenWidthString!=null&&!screenWidthString.isEmpty())
+			    	  logger.log(Level.INFO,"Screen width flag \""+screenWidthString+"\" found, screen width "+screenWidth);
+			      else
+			    	  logger.log(Level.INFO,"Screen width flag not found, screen width "+screenWidth);
+			      //screen height
+			      final String screenHeightString=properties.getProperty("SCREEN_HEIGHT");
+			      screenHeight=parseInt(screenHeightString,Integer.valueOf(screenHeight),null);
+			      if(screenHeightString!=null&&!screenHeightString.isEmpty())
+			    	  logger.log(Level.INFO,"Screen height flag \""+screenHeightString+"\" found, screen height "+screenHeight);
+			      else
+			    	  logger.log(Level.INFO,"Screen height flag not found, screen height "+screenHeight);
+			      //screen rotation
+			      final String screenRotationString=properties.getProperty("SCREEN_ROTATION");
+			      screenRotation=parseInt(screenRotationString,Integer.valueOf(screenRotation),screenRotations);
+			      if(screenRotationString!=null&&!screenRotationString.isEmpty())
+			    	  logger.log(Level.INFO,"Screen rotation flag \""+screenRotationString+"\" found, screen rotation "+screenRotation);
+			      else
+			    	  logger.log(Level.INFO,"Screen rotation flag not found, screen rotation "+screenRotation);
+			      //sound enabled
+			      final String soundEnabledString=properties.getProperty("SOUND_ENABLED");
+			      soundEnabled=parseBoolean(soundEnabledString,Boolean.valueOf(soundEnabled));
+			      if(soundEnabledString!=null&&!soundEnabledString.isEmpty())
+			    	  logger.log(Level.INFO,"Sound enabled flag \""+soundEnabledString+"\" found, sound enabled "+soundEnabled);
+			      else
+			    	  logger.log(Level.INFO,"Sound enabled flag not found, sound enabled "+soundEnabled);
 		         }
 		     catch(IOException ioe)
 		         {//something wrong has just happened while reading the configuration file
@@ -124,6 +173,23 @@ public class SettingsProvider{
 			         {result=false;
 			    	  break;
 			         }
+		    }
+		return(result);
+	}
+	
+	private int parseInt(final String string,final Integer defaultValue,final int[] acceptedValues){
+		int result=defaultValue==null?0:defaultValue.intValue();
+		if(string!=null&&!string.isEmpty())
+		    {final int resultCandidate=Integer.parseInt(string);
+		     if(acceptedValues!=null&&acceptedValues.length>0)
+			     {for(final int acceptedIntValue:acceptedValues)
+		              if(resultCandidate==acceptedIntValue)
+		                  {result=resultCandidate;
+		        	       break;
+		                  }
+			     }
+		     else
+		    	 result=resultCandidate;
 		    }
 		return(result);
 	}
@@ -165,11 +231,47 @@ public class SettingsProvider{
 		this.locale=locale;
 	}
 	
+	public int getScreenRotation(){
+		return(screenRotation);
+	}
+	
+	public void setScreenRotation(final int screenRotation){
+		this.screenRotation=screenRotation;
+	}
+	
+	public boolean isSoundEnabled(){
+		return(soundEnabled);
+	}
+	
+	public void setSoundEnabled(final boolean soundEnabled){
+		this.soundEnabled=soundEnabled;
+	}
+	
+	public int getScreenWidth(){
+		return(screenWidth);
+	}
+	
+	public void setScreenWidth(final int screenWidth){
+		this.screenWidth=screenWidth;
+	}
+	
+	public int getScreenHeight(){
+		return(screenHeight);
+	}
+	
+	public void setScreenHeight(final int screenHeight){
+		this.screenHeight=screenHeight;
+	}
+	
 	public void save(){
 		final Properties properties=new Properties();
 		properties.put("LANGUAGE",locale.getLanguage());
 		properties.put("VSYNC",Boolean.toString(verticalSynchronizationEnabled));
 		properties.put("FULLSCREEN",Boolean.toString(fullscreenEnabled));
+		properties.put("SCREEN_WIDTH",Integer.toString(screenWidth));
+		properties.put("SCREEN_HEIGHT",Integer.toString(screenHeight));
+		properties.put("SCREEN_ROTATION",Integer.toString(screenRotation));
+		properties.put("SOUND_ENABLED",Boolean.toString(soundEnabled));
 		try
 		    {final File parentDir=configFile.getParentFile();
 			 if(!parentDir.exists())

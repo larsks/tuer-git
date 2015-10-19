@@ -788,6 +788,7 @@ public final class MainMenuState extends ScenegraphState{
                  @Override
                  public void actionPerformed(ActionEvent event){
                 	 toggleSoundManagerAction.perform(canvas,null,Double.NaN);
+                	 settingsProvider.setSoundEnabled(soundManager.isEnabled());
                  }
              });
     	     final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));

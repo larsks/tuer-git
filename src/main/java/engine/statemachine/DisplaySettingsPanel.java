@@ -79,7 +79,7 @@ public class DisplaySettingsPanel extends UIPanel{
 		this.settingsProvider=settingsProvider;
 		setLayout(new RowLayout(false));
     	final UILabel screenModesLabel=new UILabel(localizedMessageProvider.getString("DISPLAY_MODE"));
-    	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+    	final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen().getPrimaryMonitor();
     	final MonitorMode currentScreenMode=monitor.getCurrentMode();
     	final List<MonitorMode> screenModes=monitor.getSupportedModes();
     	screenModesByRotation=new HashMap<>();
@@ -219,16 +219,19 @@ public class DisplaySettingsPanel extends UIPanel{
 		final Integer selectedRotation=Integer.valueOf(Integer.parseInt(((UIRadioButton)ae.getSource()).getText()));
 		displayModesCombo.setSelectedIndex(-1,false);
 		displayModesModel.clear();
-		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen().getPrimaryMonitor();
 		final MonitorMode freshCurrentScreenMode=monitor.getCurrentMode();
 		for(MonitorMode rotatedScreenMode:screenModesByRotation.get(selectedRotation))
 		    {displayModesModel.addItem(rotatedScreenMode);
 			 if(rotatedScreenMode.getSurfaceSize().getResolution().getWidth()==freshCurrentScreenMode.getSurfaceSize().getResolution().getWidth()&&
 			    rotatedScreenMode.getSurfaceSize().getResolution().getHeight()==freshCurrentScreenMode.getSurfaceSize().getResolution().getHeight()&&
 				rotatedScreenMode.getRefreshRate()==monitor.getCurrentMode().getRefreshRate())
-			     setScreenMode(rotatedScreenMode);
+			     {setScreenMode(rotatedScreenMode);
+			      break;
+			     }
 			}
 		displayModesCombo.setSelectedIndex(screenModesByRotation.get(selectedRotation).indexOf(monitor.getCurrentMode()),false);
+		settingsProvider.setScreenRotation(selectedRotation.intValue());
 	}
 	
 	private void onWindowingModeButtonActionPerformed(final ActionEvent event){
@@ -255,11 +258,14 @@ public class DisplaySettingsPanel extends UIPanel{
 	}
 	
 	private void onDisplayModesComboSelectionChanged(final UIComboBox component,final Object newValue){
-		setScreenMode((MonitorMode)newValue);
+		final MonitorMode monitorMode=(MonitorMode)newValue;
+		setScreenMode(monitorMode);
+		settingsProvider.setScreenWidth(monitorMode.getSurfaceSize().getResolution().getWidth());
+		settingsProvider.setScreenHeight(monitorMode.getSurfaceSize().getResolution().getHeight());
 	}
 	
 	private void setScreenMode(final MonitorMode monitorMode){
-		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getMainMonitor();
+		final MonitorDevice monitor=((JoglNewtWindow)mainMenuState.canvas).getNewtWindow().getScreen().getPrimaryMonitor();
 		if(monitor.setCurrentMode(monitorMode))
 		    updateUiLocationOnCameraChange(monitorMode.getRotatedWidth(),monitorMode.getRotatedHeight(),5);
 	}

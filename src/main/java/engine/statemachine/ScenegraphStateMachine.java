@@ -106,6 +106,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         fontStore=new FontStore();
         taskManager=new TaskManager();
         soundManager=new SoundManager();
+        final boolean soundEnabled=settingsProvider.isSoundEnabled();
+        soundManager.setEnabled(soundEnabled);
         if(defaultMouseAndKeyboardSettings==null)
             {this.defaultMouseAndKeyboardSettings=new MouseAndKeyboardSettings();
              this.defaultMouseAndKeyboardSettings.setKeyRotateSpeed(2.2);
