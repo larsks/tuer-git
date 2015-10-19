@@ -530,6 +530,13 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(startMenuPanel);
             }
         });
+        final UIButton languageSettingsButton=new UIButton(localizedMessageProvider.getString("LANGUAGE"));
+    	languageSettingsButton.addActionListener(new ActionListener(){           
+            @Override
+            public void actionPerformed(ActionEvent event){
+                showPanelInMainFrame(languageMenuPanel);
+            }
+        });
         final UIButton optionsButton=new UIButton(localizedMessageProvider.getString("OPTIONS"));
         optionsButton.addActionListener(new ActionListener(){
             @Override
@@ -545,6 +552,7 @@ public final class MainMenuState extends ScenegraphState{
             }
         });
         initialMenuPanel.add(startButton);
+        initialMenuPanel.add(languageSettingsButton);
         initialMenuPanel.add(optionsButton);
         initialMenuPanel.add(exitButton);
         return(initialMenuPanel);
@@ -564,18 +572,6 @@ public final class MainMenuState extends ScenegraphState{
     	    }
     	else
     		desktopShortcutsButton=null;
-    	final UIButton languageSettingsButton;
-    	if(languageMenuPanel!=null)
-    	    {languageSettingsButton=new UIButton(localizedMessageProvider.getString("LANGUAGE"));
-    	     languageSettingsButton.addActionListener(new ActionListener(){           
-                 @Override
-                 public void actionPerformed(ActionEvent event){
-                     showPanelInMainFrame(languageMenuPanel);
-                 }
-             });
-    	    }
-    	else
-    		languageSettingsButton=null;
     	final UIButton displaySettingsButton;
     	if(displaySettingsMenuPanel!=null)
     	    {displaySettingsButton=new UIButton(localizedMessageProvider.getString("DISPLAY"));
@@ -643,8 +639,6 @@ public final class MainMenuState extends ScenegraphState{
                 showPanelInMainFrame(initialMenuPanel);
             }
         });
-        if(languageSettingsButton!=null)
-        	optionsMenuPanel.add(languageSettingsButton);
         if(displaySettingsButton!=null)
         	optionsMenuPanel.add(displaySettingsButton);
         if(soundSettingsButton!=null)
@@ -769,7 +763,7 @@ public final class MainMenuState extends ScenegraphState{
         backButton.addActionListener(new ActionListener(){           
             @Override
             public void actionPerformed(ActionEvent event){
-                showPanelInMainFrame(optionsMenuPanel);
+                showPanelInMainFrame(initialMenuPanel);
             }
         });
         languageMenuPanel.add(germanLanguageButton);
