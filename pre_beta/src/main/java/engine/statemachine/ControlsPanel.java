@@ -145,7 +145,7 @@ public final class ControlsPanel extends UIPanel{
             }
 		});
 		add(lookUpDownReversedCheckBox);
-		final UICheckBox mousePointerNeverHiddenCheckBox=new UICheckBox(localizedMessageProvider.getString("NEVER_HIDE_THE_MOUSE_POINTER_FOR_DEBUG_PURPOSE_ONLY"));
+		final UICheckBox mousePointerNeverHiddenCheckBox=new UICheckBox(localizedMessageProvider.getString("NEVER_HIDE_THE_MOUSE_POINTER_FOR_DEBUG_PURPOSES_ONLY"));
 		mousePointerNeverHiddenCheckBox.setSelected(customMouseAndKeyboardSettings.isMousePointerNeverHidden());
 		mousePointerNeverHiddenCheckBox.addActionListener(new ActionListener(){           
             @Override
