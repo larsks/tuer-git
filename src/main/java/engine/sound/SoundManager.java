@@ -58,16 +58,24 @@ public final class SoundManager{
     
     
     public SoundManager(){
-        try{try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
-    	    catch(SoundSystemException sseOpenAL)
-    	    {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);}
-    	    if(soundSystem!=null)
-                SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
-    	   }
+        try
+            {try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
+    	     catch(SoundSystemException sseOpenAL)
+    	         {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);}
+    	     if(soundSystem!=null)
+                 SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
+    	    }
         catch(SoundSystemException sse)
-        {System.out.println("The initialization of the sound manager failed: "+sse);}
+            {enabled=false;
+             latestMasterVolume=0;
+        	 System.out.println("The initialization of the sound manager failed: "+sse);
+        	}
         finally
-        {enabled=true;}
+            {if(soundSystem!=null)
+        	     {enabled=true;
+                  latestMasterVolume=soundSystem.getMasterVolume();
+        	     }
+            }
     }
     
     public final boolean isEnabled(){
@@ -77,13 +85,17 @@ public final class SoundManager{
     public final void setEnabled(final boolean enabled){
     	this.enabled=enabled;
     	if(enabled)
-    	    {//resets the volume to its latest non null value
-    		 soundSystem.setMasterVolume(latestMasterVolume);
+    	    {if(soundSystem!=null)
+    	         {//resets the volume to its latest non null value
+    		      soundSystem.setMasterVolume(latestMasterVolume);
+    	         }
     	    }
     	else
-    	    {//gets the current volume before muting
-    		 latestMasterVolume=soundSystem.getMasterVolume();
-    		 soundSystem.setMasterVolume(0);
+    	    {if(soundSystem!=null)
+    	         {//gets the current volume before muting
+    		      latestMasterVolume=soundSystem.getMasterVolume();
+    		      soundSystem.setMasterVolume(0);
+    	         }
     	    }
     }
     
