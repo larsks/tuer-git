@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class SettingsProvider{
 	
-	public static final int UNCHANGED_SIZE=-1;
+	public static final int UNCHANGED_SIZE=0;
 	
 	private static final Logger logger=Logger.getLogger(SettingsProvider.class.getCanonicalName());
 	
