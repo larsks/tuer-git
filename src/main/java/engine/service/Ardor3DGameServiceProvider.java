@@ -252,44 +252,16 @@ public final class Ardor3DGameServiceProvider implements Scene{
     private Ardor3DGameServiceProvider(){
         timer=new Timer();
         root=new Node("root node of the game");
-        //retrieves some screen parameters from the settings
-        final int screenRotation=settingsProvider.getScreenRotation();
-        final int screenWidth=settingsProvider.getScreenWidth();
-        final int screenHeight=settingsProvider.getScreenHeight();
-        //retrieves some parameters of the display
-        final Display display=NewtFactory.createDisplay(null);
-        final Screen screen=NewtFactory.createScreen(display,0);
-        screen.addReference();
-        //uses the primary monitor
-        final MonitorDevice primaryMonitor=screen.getPrimaryMonitor();
-        final MonitorMode previousMode=primaryMonitor.queryCurrentMode();
-        List<MonitorMode> availableModes=primaryMonitor.getSupportedModes();
-        if(screenRotation!=0)
-            availableModes=MonitorModeUtil.filterByRotation(availableModes,screenRotation);
-        if(screenWidth==SettingsProvider.UNCHANGED_SIZE||screenHeight==SettingsProvider.UNCHANGED_SIZE)
-            availableModes=MonitorModeUtil.filterByResolution(availableModes,previousMode.getSurfaceSize().getResolution());
-        else
-            availableModes=MonitorModeUtil.filterByResolution(availableModes,new Dimension(screenWidth,screenHeight));
-        availableModes=MonitorModeUtil.filterByRate(availableModes,previousMode.getRefreshRate());
-        if(!availableModes.isEmpty())
-            {//FIXME rather pass the wished resolution and rotation to JogAmp's Ardor3D Continuation
-        	 primaryMonitor.setCurrentMode(availableModes.get(0));
-            }
-        //the monitor mode might have changed
-        final SurfaceSize surfaceSize=primaryMonitor.getCurrentMode().getSurfaceSize();
-        final int mainMonitorWidth=surfaceSize.getResolution().getWidth();
-        final int mainMonitorHeight=surfaceSize.getResolution().getHeight();
-        final int bitDepth=surfaceSize.getBitsPerPixel();
-        screen.removeReference();
-        
-        //initializes the settings, the full-screen mode is enabled
+        final int primaryMonitorRequestedWidth=settingsProvider.getScreenWidth();
+        final int primaryMonitorRequestedHeight=settingsProvider.getScreenHeight();
+        final int primaryMonitorRequestedRotation=settingsProvider.getScreenRotation();
         /**
          * do not use 32 bits for the depth buffer as 24 bits are enough and forcing 32 bits might lead to pick a 
          * slow software renderer with a bad support of OpenGL
          */
         final int depthBits=24;
         final boolean fullscreen=settingsProvider.isFullscreenEnabled();
-        final DisplaySettings settings=new DisplaySettings(mainMonitorWidth,mainMonitorHeight,bitDepth,0,0,depthBits,0,0,fullscreen,false);
+        final DisplaySettings settings=new DisplaySettings(primaryMonitorRequestedWidth,primaryMonitorRequestedHeight,0,0,0,depthBits,0,0,fullscreen,false,null,primaryMonitorRequestedRotation);
         //setups the canvas renderer
         final JoglCanvasRenderer canvasRenderer=new ReliableCanvasRenderer(this);
         //creates a canvas      
