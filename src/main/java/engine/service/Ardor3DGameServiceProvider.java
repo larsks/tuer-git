@@ -20,11 +20,7 @@ package engine.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Properties;
-
-import com.jogamp.nativewindow.util.Dimension;
-import com.jogamp.nativewindow.util.SurfaceSize;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
 import com.ardor3d.annotation.MainThread;
@@ -56,16 +52,10 @@ import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.Timer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
-import com.jogamp.newt.Display;
-import com.jogamp.newt.MonitorDevice;
-import com.jogamp.newt.MonitorMode;
-import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.newt.util.MonitorModeUtil;
-
 import engine.integration.DesktopIntegration;
 import engine.integration.DesktopIntegration.OS;
 import engine.misc.LocalizedMessageProvider;
