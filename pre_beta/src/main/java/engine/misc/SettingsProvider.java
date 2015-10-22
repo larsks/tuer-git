@@ -96,58 +96,19 @@ public class SettingsProvider{
 		         {properties.load(bufferedReader);
 		          logger.log(Level.INFO,"Configuration file "+configFile.getAbsolutePath()+" found");
 		          //language property
-		          //tries to read the ISO 639 alpha-2 or alpha-3 language code
-			      final String languageCode=properties.getProperty("LANGUAGE");
-			      if(languageCode!=null&&!languageCode.isEmpty())
-			          {locale=new Locale(languageCode);
-			           logger.log(Level.INFO,"Language code \""+languageCode+"\" found, uses the language "+locale.getDisplayLanguage());
-			          }
-			      else
-			          {//language not set
-			    	   logger.log(Level.INFO,"Language code not found, uses the default language "+locale.getDisplayLanguage());
-			          }
+			      locale=readLocalePropertyValue(properties,"LANGUAGE",locale);
 			      //vertical synchronization
-			      final String vSyncString=properties.getProperty("VSYNC");
-			      verticalSynchronizationEnabled=parseBoolean(vSyncString,Boolean.valueOf(verticalSynchronizationEnabled));
-			      if(vSyncString!=null&&!vSyncString.isEmpty())
-			    	  logger.log(Level.INFO,"Vertical synchronization flag \""+vSyncString+"\" found, vertical synchronization "+verticalSynchronizationEnabled);
-			      else
-			    	  logger.log(Level.INFO,"Vertical synchronization flag not found, vertical synchronization "+verticalSynchronizationEnabled);
+			      verticalSynchronizationEnabled=readBooleanPropertyValue(properties,"VSYNC",Boolean.valueOf(verticalSynchronizationEnabled));
 			      //fullscreen
-			      final String fullscreenString=properties.getProperty("FULLSCREEN");
-			      fullscreenEnabled=parseBoolean(fullscreenString,Boolean.valueOf(fullscreenEnabled));
-			      if(fullscreenString!=null&&!fullscreenString.isEmpty())
-			    	  logger.log(Level.INFO,"Fullscreen flag \""+fullscreenString+"\" found, fullscreen "+fullscreenEnabled);
-			      else
-			    	  logger.log(Level.INFO,"Fullscreen flag not found, fullscreen "+fullscreenEnabled);
+			      fullscreenEnabled=readBooleanPropertyValue(properties,"FULLSCREEN",Boolean.valueOf(fullscreenEnabled));
 			      //screen width
-			      final String screenWidthString=properties.getProperty("SCREEN_WIDTH");
-			      screenWidth=parseInt(screenWidthString,Integer.valueOf(screenWidth),null);
-			      if(screenWidthString!=null&&!screenWidthString.isEmpty())
-			    	  logger.log(Level.INFO,"Screen width flag \""+screenWidthString+"\" found, screen width "+screenWidth);
-			      else
-			    	  logger.log(Level.INFO,"Screen width flag not found, screen width "+screenWidth);
+			      screenWidth=readIntPropertyValue(properties,"SCREEN_WIDTH",Integer.valueOf(screenWidth),null);
 			      //screen height
-			      final String screenHeightString=properties.getProperty("SCREEN_HEIGHT");
-			      screenHeight=parseInt(screenHeightString,Integer.valueOf(screenHeight),null);
-			      if(screenHeightString!=null&&!screenHeightString.isEmpty())
-			    	  logger.log(Level.INFO,"Screen height flag \""+screenHeightString+"\" found, screen height "+screenHeight);
-			      else
-			    	  logger.log(Level.INFO,"Screen height flag not found, screen height "+screenHeight);
+			      screenHeight=readIntPropertyValue(properties,"SCREEN_HEIGHT",Integer.valueOf(screenHeight),null);
 			      //screen rotation
-			      final String screenRotationString=properties.getProperty("SCREEN_ROTATION");
-			      screenRotation=parseInt(screenRotationString,Integer.valueOf(screenRotation),screenRotations);
-			      if(screenRotationString!=null&&!screenRotationString.isEmpty())
-			    	  logger.log(Level.INFO,"Screen rotation flag \""+screenRotationString+"\" found, screen rotation "+screenRotation);
-			      else
-			    	  logger.log(Level.INFO,"Screen rotation flag not found, screen rotation "+screenRotation);
+			      screenRotation=readIntPropertyValue(properties,"SCREEN_ROTATION",Integer.valueOf(screenRotation),screenRotations);
 			      //sound enabled
-			      final String soundEnabledString=properties.getProperty("SOUND_ENABLED");
-			      soundEnabled=parseBoolean(soundEnabledString,Boolean.valueOf(soundEnabled));
-			      if(soundEnabledString!=null&&!soundEnabledString.isEmpty())
-			    	  logger.log(Level.INFO,"Sound enabled flag \""+soundEnabledString+"\" found, sound enabled "+soundEnabled);
-			      else
-			    	  logger.log(Level.INFO,"Sound enabled flag not found, sound enabled "+soundEnabled);
+			      soundEnabled=readBooleanPropertyValue(properties,"SOUND",Boolean.valueOf(soundEnabled));
 		         }
 		     catch(IOException ioe)
 		         {//something wrong has just happened while reading the configuration file
@@ -160,38 +121,90 @@ public class SettingsProvider{
 			}
 	}
 	
-	private boolean parseBoolean(final String string,final Boolean defaultValue){
-		boolean result=defaultValue==null?false:defaultValue.booleanValue();
-		if(string!=null&&!string.isEmpty())
-		    {for(final String trueString:trueStrings)
-			     if(string.equalsIgnoreCase(trueString))
-			         {result=true;
-			    	  break;
-			         }
-		     for(final String falseString:falseStrings)
-			     if(string.equalsIgnoreCase(falseString))
-			         {result=false;
-			    	  break;
-			         }
-		    }
-		return(result);
+	private Locale readLocalePropertyValue(final Properties properties,final String propertyKey,final Locale defaultLocale){
+		final Locale localePropertyValue;
+		//tries to read the ISO 639 alpha-2 or alpha-3 language code
+		final String languageCode=properties.getProperty(propertyKey);
+		if(languageCode!=null&&!languageCode.isEmpty())
+            {localePropertyValue=new Locale(languageCode);
+             logger.log(Level.INFO,"Language code \""+languageCode+"\" found, uses the language "+localePropertyValue.getDisplayLanguage() + "for the property " + propertyKey);
+            }
+        else
+            {localePropertyValue=defaultLocale;
+        	 //language not set
+             if(localePropertyValue==null)
+            	 logger.log(Level.WARNING,"Language code not found, no default language, uses null for the property " + propertyKey);
+             else
+  	             logger.log(Level.INFO,"Language code not found, uses the default language "+localePropertyValue.getDisplayLanguage() + "for the property " + propertyKey);
+            }
+		return(localePropertyValue);
 	}
 	
-	private int parseInt(final String string,final Integer defaultValue,final int[] acceptedValues){
-		int result=defaultValue==null?0:defaultValue.intValue();
-		if(string!=null&&!string.isEmpty())
-		    {final int resultCandidate=Integer.parseInt(string);
-		     if(acceptedValues!=null&&acceptedValues.length>0)
-			     {for(final int acceptedIntValue:acceptedValues)
-		              if(resultCandidate==acceptedIntValue)
-		                  {result=resultCandidate;
-		        	       break;
-		                  }
+	private boolean readBooleanPropertyValue(final Properties properties,final String propertyKey,final Boolean defaultValue){
+		final String booleanStringValue=properties.getProperty(propertyKey);
+		Boolean booleanPropertyValue=null;
+		if(booleanStringValue!=null&&!booleanStringValue.isEmpty())
+	        {for(final String trueString:trueStrings)
+		         if(booleanStringValue.equalsIgnoreCase(trueString))
+		             {booleanPropertyValue=Boolean.TRUE;
+		    	      break;
+		             }
+	         if(booleanPropertyValue==null)
+	             for(final String falseString:falseStrings)
+		             if(booleanStringValue.equalsIgnoreCase(falseString))
+		                 {booleanPropertyValue=Boolean.FALSE;
+		    	          break;
+		                 }
+	        }
+		if(booleanPropertyValue==null)
+			{if(defaultValue==null)
+			     {booleanPropertyValue=Boolean.FALSE;
+			      logger.log(Level.WARNING,"Boolean property "+propertyKey+" not found, no default value, set to false");
 			     }
-		     else
-		    	 result=resultCandidate;
+			 else
+			     {booleanPropertyValue=defaultValue;
+			      logger.log(Level.INFO,"Boolean property "+propertyKey+" not found, set to the default value " + defaultValue.booleanValue());
+			     }
+			}
+		else
+			logger.log(Level.INFO,"Boolean property "+propertyKey+" found: "+booleanPropertyValue.booleanValue());
+		return(booleanPropertyValue.booleanValue());
+	}
+	
+	private int readIntPropertyValue(final Properties properties,final String propertyKey,final Integer defaultValue,final int[] acceptedValues){
+		final String intStringValue=properties.getProperty(propertyKey);
+		Integer intPropertyValue=null;
+		if(intStringValue!=null&&!intStringValue.isEmpty())
+		    {try
+		         {final int resultCandidate=Integer.parseInt(intStringValue);
+		          if(acceptedValues!=null&&acceptedValues.length>0)
+			          {for(final int acceptedIntValue:acceptedValues)
+		                   if(resultCandidate==acceptedIntValue)
+		                       {intPropertyValue=resultCandidate;
+		        	            break;
+		                       }
+			           if(intPropertyValue==null)
+			        	   logger.log(Level.WARNING,"Value "+resultCandidate+ " rejected for the property "+propertyKey);
+			          }
+		          else
+		        	  intPropertyValue=resultCandidate;
+		         }
+			 catch(NumberFormatException nfe)
+		         {logger.log(Level.WARNING,"A problem occured while reading the property "+propertyKey,nfe);}
 		    }
-		return(result);
+		if(intPropertyValue==null)
+		    {if(defaultValue==null)
+		         {intPropertyValue=Integer.MIN_VALUE;
+		          logger.log(Level.WARNING,"Integer property "+propertyKey+" not found, no default value, set to "+Integer.MIN_VALUE);
+		         }
+		     else
+		         {intPropertyValue=defaultValue;
+		          logger.log(Level.INFO,"Integer property "+propertyKey+" not found, set to the default value " + defaultValue.intValue());
+		         }
+		    }
+		else
+			logger.log(Level.INFO,"Integer property "+propertyKey+" found: "+intPropertyValue.intValue());
+		return(intPropertyValue.intValue());
 	}
 	
 	/**
@@ -271,7 +284,7 @@ public class SettingsProvider{
 		properties.put("SCREEN_WIDTH",Integer.toString(screenWidth));
 		properties.put("SCREEN_HEIGHT",Integer.toString(screenHeight));
 		properties.put("SCREEN_ROTATION",Integer.toString(screenRotation));
-		properties.put("SOUND_ENABLED",Boolean.toString(soundEnabled));
+		properties.put("SOUND",Boolean.toString(soundEnabled));
 		try
 		    {final File parentDir=configFile.getParentFile();
 			 if(!parentDir.exists())
