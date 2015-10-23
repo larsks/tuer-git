@@ -421,6 +421,12 @@ public class Level implements Comparable<Level>{
     	return(mainModel);
     }
     
+    public Node getMainModelAndSetItToNull(){
+    	final Node mainModel=this.mainModel;
+    	this.mainModel=null;
+    	return(mainModel);
+    }
+    
     public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(SkyboxFactory skyboxFactory){
 		if(skyboxModel==null&&skyboxIdentifier!=null)
 		    {final Skybox skybox=skyboxFactory.get(skyboxIdentifier);
@@ -445,6 +451,12 @@ public class Level implements Comparable<Level>{
     }
     
     public com.ardor3d.scenegraph.extension.Skybox getSkyboxModel(){
+    	return(skyboxModel);
+    }
+    
+    public com.ardor3d.scenegraph.extension.Skybox getSkyboxModelAndSetItToNull(){
+    	final com.ardor3d.scenegraph.extension.Skybox skyboxModel=this.skyboxModel;
+    	this.skyboxModel=null;
     	return(skyboxModel);
     }
     
