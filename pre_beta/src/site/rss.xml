@@ -20,6 +20,10 @@
        <link>http://tuer.sourceforge.net</link>
        <pubDate>Sat, 03 Oct 2015 0:00:00 GMT</pubDate>
        <description>This updated version should no longer crash under Windows 10. The directory layout of the source code has been updated to allow the developers to find more easily the source code and the resources of the project.</description>
+       <title>The pre-beta version of TUER has just been updated</title>
+       <link>http://tuer.sourceforge.net</link>
+       <pubDate>Sat, 24 Oct 2015 1:43:00 GMT</pubDate>
+       <description>This updated version has been translated into French and German and a minor regression preventing from retrying a mission has been fixed.</description>
     </item>
   </channel>
 </rss>
