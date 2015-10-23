@@ -104,7 +104,7 @@ public class GameOverState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        textNode=new BMText("gameOverNode",localizedMessageProvider.getString("GAME_OVER"),fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        textNode=new BMText("gameOverNode",localizedMessageProvider.getString("GAME_OVER"),fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(10);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
