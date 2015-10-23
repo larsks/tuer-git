@@ -224,7 +224,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
         final GameState gameState=new GameState(canvas,physicalLayer,gameToPauseMenuTriggerAction,gameToPauseMenuTriggerActionForExitConfirm,gameToGameOverTriggerAction,toggleScreenModeAction,soundManager,taskManager,mouseManager,this.defaultActionMap,this.customActionMap,this.defaultMouseAndKeyboardSettings,this.customMouseAndKeyboardSettings,profileData);
         final LoadingDisplayState loadingDisplayState=new LoadingDisplayState(canvas,physicalLayer,loadingDisplayToGameTriggerAction,loadingDisplayToUnloadingDisplayTriggerAction,soundManager,taskManager,new StateInitializationRunnable<>(gameState),fontStore,localizedMessageProvider);
         final PauseMenuState pauseMenuState=new PauseMenuState(canvas,physicalLayer,mouseManager,pauseMenuToGameTriggerAction,pauseMenuToGameOverTriggerAction,pauseMenuToUnloadingDisplayTriggerAction,soundManager,fontStore,localizedMessageProvider);
-        final GameOverState gameOverState=new GameOverState(canvas,physicalLayer,mouseManager,soundManager,fontStore,gameOverToUnloadingDisplayTriggerActionForExit,gameOverToUnloadingDisplayTriggerActionForMainMenu,gameOverToUnloadingDisplayTriggerActionForLoadingDisplay);
+        final GameOverState gameOverState=new GameOverState(canvas,physicalLayer,mouseManager,soundManager,fontStore,localizedMessageProvider,gameOverToUnloadingDisplayTriggerActionForExit,gameOverToUnloadingDisplayTriggerActionForMainMenu,gameOverToUnloadingDisplayTriggerActionForLoadingDisplay);
         final Runnable gameStateCleanupRunnable=new Runnable(){
 			@Override
 			public void run(){

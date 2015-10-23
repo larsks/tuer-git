@@ -39,6 +39,7 @@ import com.ardor3d.ui.text.BMText;
 import engine.data.Objective;
 import engine.data.ObjectiveStatus;
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 
 /**
@@ -71,6 +72,8 @@ public class GameOverState extends ScenegraphState{
     
     private String latestNextPlayableLevelIdentifier;
     
+    private final LocalizedMessageProvider localizedMessageProvider;
+    
     private GameStatistics gameStats;
     
     private List<Objective> objectives;
@@ -78,7 +81,7 @@ public class GameOverState extends ScenegraphState{
     private final BMText textNode;
 
 	public GameOverState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
-			final FontStore fontStore,
+			final FontStore fontStore,final LocalizedMessageProvider localizedMessageProvider,
 			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForExit,
 			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForMainMenu,
 			final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerActionForLoadingDisplay){
@@ -91,6 +94,7 @@ public class GameOverState extends ScenegraphState{
 		this.toUnloadingDisplayTriggerActionForLoadingDisplay=toUnloadingDisplayTriggerActionForLoadingDisplay;
 		this.latestPlayedLevelIdentifier=null;
 		this.latestNextPlayableLevelIdentifier=null;
+		this.localizedMessageProvider=localizedMessageProvider;
 		initialMenuPanel=createInitialMenuPanel();
 		confirmExitMenuPanel=createConfirmExitMenuPanel();
 		//creates the main frame
@@ -100,7 +104,7 @@ public class GameOverState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        textNode=new BMText("gameOverNode","Game over",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        textNode=new BMText("gameOverNode",localizedMessageProvider.getString("GAME_OVER"),fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(10);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
@@ -109,28 +113,28 @@ public class GameOverState extends ScenegraphState{
 	
 	private final UIPanel createInitialMenuPanel(){
 		final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
-		final UIButton nextButton=new UIButton("Next");
+		final UIButton nextButton=new UIButton(localizedMessageProvider.getString("NEXT"));
 		nextButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onNextButtonActionPerformed(ae);
             }
         });
-		final UIButton retryButton=new UIButton("Retry");
+		final UIButton retryButton=new UIButton(localizedMessageProvider.getString("RETRY"));
 		retryButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onRetryButtonActionPerformed(ae);
             }
         });
-		final UIButton mainMenuButton=new UIButton("Main Menu");
+		final UIButton mainMenuButton=new UIButton(localizedMessageProvider.getString("MAIN_MENU"));
 		mainMenuButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onMainMenuButtonActionPerformed(ae);
             }
         });
-		final UIButton exitButton=new UIButton("Exit");
+		final UIButton exitButton=new UIButton(localizedMessageProvider.getString("EXIT"));
 		exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -164,15 +168,15 @@ public class GameOverState extends ScenegraphState{
 	
 	private final UIPanel createConfirmExitMenuPanel(){
 		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
-		final UILabel confirmLabel=new UILabel("Confirm exit?");
-		final UIButton yesButton=new UIButton("Yes");
+		final UILabel confirmLabel=new UILabel(localizedMessageProvider.getString("CONFIRM_EXIT"));
+		final UIButton yesButton=new UIButton(localizedMessageProvider.getString("YES"));
 		yesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onYesExitButtonActionPerformed(ae);
             }
         });
-		final UIButton noButton=new UIButton("No");
+		final UIButton noButton=new UIButton(localizedMessageProvider.getString("NO"));
 		noButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
