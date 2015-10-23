@@ -2017,9 +2017,9 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	//TODO destroy the morph meshes and the template meshes of enemies
     	//TODO use templates to create weapons and do the same than above with them (get them from the list of collectible objects and from the camera node)
     	if(level.getMainModel()!=null)
-	        disposableSpatials.add(level.getMainModel());
+	        disposableSpatials.add(level.getMainModelAndSetItToNull());
     	if(level.getSkyboxModel()!=null)
-    	    disposableSpatials.add(level.getSkyboxModel());
+    	    disposableSpatials.add(level.getSkyboxModelAndSetItToNull());
     	//performs the destruction with a single callable
     	GameTaskQueueManager.getManager(canvas.getCanvasRenderer().getRenderContext()).getQueue(GameTaskQueue.RENDER).enqueue(new Callable<Void>(){
 		      @Override
