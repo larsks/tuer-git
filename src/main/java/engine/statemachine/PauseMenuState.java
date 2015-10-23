@@ -18,6 +18,7 @@
 package engine.statemachine;
 
 import java.util.List;
+
 import com.ardor3d.extension.ui.UIButton;
 import com.ardor3d.extension.ui.UIFrame;
 import com.ardor3d.extension.ui.UIHud;
@@ -34,8 +35,10 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.ui.text.BMText;
+
 import engine.data.Objective;
 import engine.misc.FontStore;
+import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 
 /**
@@ -78,6 +81,8 @@ public class PauseMenuState extends ScenegraphState{
     
     private String latestNextPlayableLevelIdentifier;
     
+    private final LocalizedMessageProvider localizedMessageProvider;
+    
     private GameStatistics gameStats;
     
     private List<Objective> objectives;
@@ -86,7 +91,7 @@ public class PauseMenuState extends ScenegraphState{
 			              final TransitionTriggerAction<ScenegraphState,String> toGameTriggerAction,
 			              final TransitionTriggerAction<ScenegraphState,String> toGameOverTriggerAction,
 			              final TransitionTriggerAction<ScenegraphState,String> toUnloadingDisplayTriggerAction,final SoundManager soundManager,
-			              final FontStore fontStore){
+			              final FontStore fontStore,final LocalizedMessageProvider localizedMessageProvider){
 		super(soundManager);
 		this.canvas=canvas;
 		this.physicalLayer=physicalLayer;
@@ -96,6 +101,7 @@ public class PauseMenuState extends ScenegraphState{
 		this.toUnloadingDisplayTriggerAction=toUnloadingDisplayTriggerAction;
 		this.latestPlayedLevelIdentifier=null;
 		this.latestNextPlayableLevelIdentifier=null;
+		this.localizedMessageProvider=localizedMessageProvider;
 		objectivesMenuPanel=createObjectivesMenuPanel();
 		initialMenuPanel=createInitialMenuPanel();
 		objectivesButton=(UIButton)initialMenuPanel.getChild(0);
@@ -109,7 +115,7 @@ public class PauseMenuState extends ScenegraphState{
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         //adds some text
-        final BMText textNode=new BMText("gamePauseNode","Game paused",fontStore.getFontsList().get(1),BMText.Align.Center,BMText.Justify.Center);
+        final BMText textNode=new BMText("gamePauseNode",localizedMessageProvider.getString("GAME_PAUSED"),fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
         textNode.setFontScale(10);
         textNode.setTextColor(ColorRGBA.RED);
         textNode.setTranslation(textNode.getTranslation().add(0,3.3,0,null));
@@ -118,7 +124,7 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private final UIPanel createObjectivesMenuPanel(){
 		final UIPanel objectivesMenuPanel=new UIPanel(new RowLayout(false));
-		final UIButton backButton=new UIButton("Back");
+		final UIButton backButton=new UIButton(localizedMessageProvider.getString("BACK"));
 		backButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -131,28 +137,28 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private final UIPanel createInitialMenuPanel(){
 		final UIPanel initialMenuPanel=new UIPanel(new RowLayout(false));
-		final UIButton objectivesButton=new UIButton("Objectives");
+		final UIButton objectivesButton=new UIButton(localizedMessageProvider.getString("OBJECTIVES"));
 		objectivesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onObjectivesButtonActionPerformed(ae);
             }
         });
-		final UIButton resumeButton=new UIButton("Resume");
+		final UIButton resumeButton=new UIButton(localizedMessageProvider.getString("RESUME"));
 		resumeButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onResumeButtonActionPerformed(ae);
             }
         });
-		final UIButton abortButton=new UIButton("Abort");
+		final UIButton abortButton=new UIButton(localizedMessageProvider.getString("ABORT"));
 		abortButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onAbortButtonActionPerformed(ae);
             }
         });
-		final UIButton exitButton=new UIButton("Exit");
+		final UIButton exitButton=new UIButton(localizedMessageProvider.getString("EXIT"));
 		exitButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -168,15 +174,15 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private final UIPanel createConfirmAbortMenuPanel(){
 		final UIPanel confirmAbortMenuPanel=new UIPanel(new RowLayout(false));
-		final UILabel confirmLabel=new UILabel("Confirm abort?");
-		final UIButton yesButton=new UIButton("Yes");
+		final UILabel confirmLabel=new UILabel(localizedMessageProvider.getString("CONFIRM_ABORT"));
+		final UIButton yesButton=new UIButton(localizedMessageProvider.getString("YES"));
 		yesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onYesAbortButtonActionPerformed(ae);
             }
         });
-		final UIButton noButton=new UIButton("No");
+		final UIButton noButton=new UIButton(localizedMessageProvider.getString("NO"));
 		noButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
@@ -191,15 +197,15 @@ public class PauseMenuState extends ScenegraphState{
 	
 	private final UIPanel createConfirmExitMenuPanel(){
 		final UIPanel confirmExitMenuPanel=new UIPanel(new RowLayout(false));
-		final UILabel confirmLabel=new UILabel("Confirm exit?");
-		final UIButton yesButton=new UIButton("Yes");
+		final UILabel confirmLabel=new UILabel(localizedMessageProvider.getString("CONFIRM_EXIT"));
+		final UIButton yesButton=new UIButton(localizedMessageProvider.getString("YES"));
 		yesButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
             	onYesExitButtonActionPerformed(ae);
             }
         });
-		final UIButton noButton=new UIButton("No");
+		final UIButton noButton=new UIButton(localizedMessageProvider.getString("NO"));
 		noButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae){
