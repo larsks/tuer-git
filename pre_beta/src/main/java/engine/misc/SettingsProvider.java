@@ -295,7 +295,7 @@ public class SettingsProvider{
 			     {final String comments=programShortName+" configuration file";
 				  properties.store(bufferedWriter, comments);
 				 }
-			 logger.log(Level.INFO,"Settings saved into the configuration file "+configFile.getAbsolutePath());
+			 logger.log(Level.INFO,"Settings saved into the configuration file "+configFile.getAbsolutePath()+"\n");
 		    }
 		catch(Throwable t)
 		{logger.log(Level.WARNING,"Something wrong has happened while trying to save the settings into the configuration file "+configFile.getAbsolutePath(),t);}
