@@ -73,30 +73,30 @@ public final class Ardor3DGameServiceProvider implements Scene{
 
 	
 	/**path of the branding property file*/
-	private static final String BRANDING_PROPERTY_FILE_PATH="/branding.properties";
+	private final String brandingPropertyFilePath;
 	
 	/**storage of branding properties*/
-	private static Properties BRANDING_PROPERTIES=null;
+	private Properties brandingProperties;
 	
 	/**short name of the game*/
-	private static final String GAME_SHORT_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-short-name");
+	private final String gameShortName;
 
-	private static final SettingsProvider settingsProvider=new SettingsProvider(GAME_SHORT_NAME);
+	private final SettingsProvider settingsProvider;
 	
 	/**provider of localized messages*/
-	private static final LocalizedMessageProvider localizedMessageProvider=new LocalizedMessageProvider(settingsProvider.getLocale());
+	private final LocalizedMessageProvider localizedMessageProvider;
 	
 	/**full name of the game*/
-	private static final String GAME_LONG_NAME=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-long-name");
+	private final String gameLongName;
 	
 	/**subtitle displayed in the introduction of the game*/
-	private static final String GAME_INTRODUCTION_SUBTITLE=localizedMessageProvider.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
+	private final String gameIntroductionSubtitle;
 	
 	/**recommended URL to download the game*/
-	private static final String GAME_RECOMMENDED_DOWNLOAD_URL=getPropertyValue(BRANDING_PROPERTY_FILE_PATH,"game-recommended-download-url");
+	private final String gameRecommendedDownloadUrl;
 	
 	/**game title, visible only in windowed mode*/
-	private static final String GAME_TITLE=GAME_SHORT_NAME+": "+GAME_LONG_NAME;
+	private final String gameTitle;
 	
     /**native window, not the GL surface itself*/
     private final NativeCanvas canvas;
@@ -116,7 +116,11 @@ public final class Ardor3DGameServiceProvider implements Scene{
     /**state machine of the scenegraph*/    
     private ScenegraphStateMachine scenegraphStateMachine;
     
-    
+    /**
+     * Main method to run the game
+     * 
+     * @param args
+     */
     public static void main(final String[] args){
     	//there is no need of hardware acceleration for Java2D as I don't use it anymore
     	System.setProperty("sun.java2d.opengl","false");
@@ -240,6 +244,23 @@ public final class Ardor3DGameServiceProvider implements Scene{
      * Constructs an instance of this class, also creating the native window and GL surface.
      */
     private Ardor3DGameServiceProvider(){
+    	super();
+    	//branding stuff, naming, settings, internationalization (i18n)
+    	brandingPropertyFilePath="/branding.properties";
+    	brandingProperties=new Properties();
+    	try(InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(brandingPropertyFilePath))
+    	    {brandingProperties.load(stream);}
+	    catch(IOException ioe)
+	        {throw new RuntimeException("Failed in loading the property file "+brandingPropertyFilePath,ioe);}
+    	gameShortName=getPropertyValue("game-short-name");
+    	settingsProvider=new SettingsProvider(gameShortName);
+    	settingsProvider.load();
+    	localizedMessageProvider=new LocalizedMessageProvider(settingsProvider.getLocale());
+    	gameLongName=getPropertyValue("game-long-name");
+    	gameIntroductionSubtitle=localizedMessageProvider.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
+    	gameRecommendedDownloadUrl=getPropertyValue("game-recommended-download-url");
+    	gameTitle=gameShortName+": "+gameLongName;
+    	//scene stuff
         timer=new Timer();
         root=new Node("root node of the game");
         final int primaryMonitorRequestedWidth=settingsProvider.getScreenWidth();
@@ -294,7 +315,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
      * Initializes our scene.
      */
     private final void init(){
-        canvas.setTitle(GAME_TITLE);
+        canvas.setTitle(gameTitle);
         //refreshes the frustum when the window is resized
         ((JoglNewtWindow)canvas).addWindowListener(new WindowAdapter(){
 			@Override
@@ -344,7 +365,7 @@ public final class Ardor3DGameServiceProvider implements Scene{
         final String readmeContent=localizedMessageProvider.getString("README_FULL_TEXT");
         final TriggerAction toggleScreenModeAction=new ToggleScreenModeAction();
         scenegraphStateMachine=new ScenegraphStateMachine(root,canvas,physicalLayer,mouseManager,toggleScreenModeAction,launchRunnable,
-        uninstallRunnable,GAME_SHORT_NAME,GAME_LONG_NAME,GAME_INTRODUCTION_SUBTITLE,GAME_RECOMMENDED_DOWNLOAD_URL,readmeContent,null,null,0,
+        uninstallRunnable,gameShortName,gameLongName,gameIntroductionSubtitle,gameRecommendedDownloadUrl,readmeContent,null,null,0,
         localizedMessageProvider,settingsProvider);
     }
 
@@ -373,19 +394,10 @@ public final class Ardor3DGameServiceProvider implements Scene{
         return(null);
     }
     
-    //TODO move this method into a separate class in order to avoid mixing scene services and file services
-    private static final String getPropertyValue(final String path,final String propertyKey){
+    private final String getPropertyValue(final String propertyKey){
     	if(propertyKey==null)
     	    throw new IllegalArgumentException("Cannot find a property whose key is null");
-    	if(BRANDING_PROPERTIES==null)
-    	    {BRANDING_PROPERTIES=new Properties();
-    	     try(InputStream stream=Ardor3DGameServiceProvider.class.getResourceAsStream(path)){
-    	    	 BRANDING_PROPERTIES.load(stream);
-    	     }
-    	     catch(IOException ioe)
-    	     {throw new RuntimeException("Failed in loading the property file "+path,ioe);}
-    	    }
-    	final String propertyValue=BRANDING_PROPERTIES.getProperty(propertyKey);
+    	final String propertyValue=brandingProperties.getProperty(propertyKey);
     	if(propertyValue==null)
     		throw new RuntimeException("Property "+propertyKey+" not found");
     	return(propertyValue);
