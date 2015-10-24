@@ -49,12 +49,13 @@ public class SettingsProvider{
 	/**program short name used to name the sub-directory, in the user's home directory*/
 	private final String programShortName;
 	
-	/**locale*/
-	private Locale locale;
-	
 	/**configuration file*/
 	private final File configFile;
 	
+	/**locale*/
+	private Locale locale;
+	
+	/**vertical synchronization enabled*/
 	private boolean verticalSynchronizationEnabled;
 	
 	/**fullscreen or windowed*/
@@ -73,42 +74,40 @@ public class SettingsProvider{
 	private boolean soundEnabled;
 
 	/**
-	 * Default constructor
+	 * Constructor, the configuration file "config" is put into a sub-directory in the user's home directory named .programShortName
 	 * 
 	 * @param programShortName program short name used to name the sub-directory, in the user's home directory
 	 */
 	public SettingsProvider(final String programShortName){
+		this(programShortName,new File(System.getProperty("user.home")+"/."+programShortName,"config"));
+	}
+	
+	/**
+	 * Default constructor
+	 * 
+	 * @param programShortName program short name
+	 * @param configFile configuration file
+	 */
+	public SettingsProvider(final String programShortName,final File configFile){
 		super();
+		if(programShortName==null||programShortName.isEmpty())
+			throw new IllegalArgumentException("programShortName cannot be null or empty");
+		if(configFile==null)
+			throw new IllegalArgumentException("configFile cannot be null");
 		this.programShortName=programShortName;
-		//default values
-		locale=Locale.getDefault();//locale of the system
-		verticalSynchronizationEnabled=false;
-		fullscreenEnabled=true;
-		screenWidth=UNCHANGED_SIZE;
-		screenHeight=UNCHANGED_SIZE;
-		screenRotation=0;
-		soundEnabled=true;
+		this.configFile=configFile;
+	}
+	
+	/**
+	 * Loads the settings from the configuration file if any, uses the default values if necessary
+	 */
+	public void load(){
+		final Properties properties=new Properties();
 		//looks at the file that contains the settings
-		configFile=new File(System.getProperty("user.home")+"/."+programShortName,"config");
 		if(configFile.exists())
-	        {final Properties properties=new Properties();
-	         try(final FileReader fileReader=new FileReader(configFile);final BufferedReader bufferedReader=new BufferedReader(fileReader))
+	        {try(final FileReader fileReader=new FileReader(configFile);final BufferedReader bufferedReader=new BufferedReader(fileReader))
 		         {properties.load(bufferedReader);
 		          logger.log(Level.INFO,"Configuration file "+configFile.getAbsolutePath()+" found");
-		          //language property
-			      locale=readLocalePropertyValue(properties,"LANGUAGE",locale);
-			      //vertical synchronization
-			      verticalSynchronizationEnabled=readBooleanPropertyValue(properties,"VSYNC",Boolean.valueOf(verticalSynchronizationEnabled));
-			      //fullscreen
-			      fullscreenEnabled=readBooleanPropertyValue(properties,"FULLSCREEN",Boolean.valueOf(fullscreenEnabled));
-			      //screen width
-			      screenWidth=readIntPropertyValue(properties,"SCREEN_WIDTH",Integer.valueOf(screenWidth),null);
-			      //screen height
-			      screenHeight=readIntPropertyValue(properties,"SCREEN_HEIGHT",Integer.valueOf(screenHeight),null);
-			      //screen rotation
-			      screenRotation=readIntPropertyValue(properties,"SCREEN_ROTATION",Integer.valueOf(screenRotation),screenRotations);
-			      //sound enabled
-			      soundEnabled=readBooleanPropertyValue(properties,"SOUND",Boolean.valueOf(soundEnabled));
 		         }
 		     catch(IOException ioe)
 		         {//something wrong has just happened while reading the configuration file
@@ -119,6 +118,20 @@ public class SettingsProvider{
 			{//the configuration file is absent
 			 logger.log(Level.WARNING,"Cannot find the configuration file "+configFile.getAbsolutePath());
 			}
+		//language property
+	    locale=readLocalePropertyValue(properties,"LANGUAGE",Locale.getDefault());
+	    //vertical synchronization
+	    verticalSynchronizationEnabled=readBooleanPropertyValue(properties,"VSYNC",Boolean.FALSE);
+	    //fullscreen
+	    fullscreenEnabled=readBooleanPropertyValue(properties,"FULLSCREEN",Boolean.TRUE);
+	    //screen width
+	    screenWidth=readIntPropertyValue(properties,"SCREEN_WIDTH",Integer.valueOf(UNCHANGED_SIZE),null);
+	    //screen height
+	    screenHeight=readIntPropertyValue(properties,"SCREEN_HEIGHT",Integer.valueOf(UNCHANGED_SIZE),null);
+	    //screen rotation
+	    screenRotation=readIntPropertyValue(properties,"SCREEN_ROTATION",Integer.valueOf(0),screenRotations);
+	    //sound enabled
+	    soundEnabled=readBooleanPropertyValue(properties,"SOUND",Boolean.TRUE);
 	}
 	
 	private Locale readLocalePropertyValue(final Properties properties,final String propertyKey,final Locale defaultLocale){
@@ -127,7 +140,7 @@ public class SettingsProvider{
 		final String languageCode=properties.getProperty(propertyKey);
 		if(languageCode!=null&&!languageCode.isEmpty())
             {localePropertyValue=new Locale(languageCode);
-             logger.log(Level.INFO,"Language code \""+languageCode+"\" found, uses the language "+localePropertyValue.getDisplayLanguage() + "for the property " + propertyKey);
+             logger.log(Level.INFO,"Language code \""+languageCode+"\" found, uses the language "+localePropertyValue.getDisplayLanguage() + " for the property " + propertyKey);
             }
         else
             {localePropertyValue=defaultLocale;
@@ -135,7 +148,7 @@ public class SettingsProvider{
              if(localePropertyValue==null)
             	 logger.log(Level.WARNING,"Language code not found, no default language, uses null for the property " + propertyKey);
              else
-  	             logger.log(Level.INFO,"Language code not found, uses the default language "+localePropertyValue.getDisplayLanguage() + "for the property " + propertyKey);
+  	             logger.log(Level.INFO,"Language code not found, uses the default language "+localePropertyValue.getDisplayLanguage() + " for the property " + propertyKey);
             }
 		return(localePropertyValue);
 	}
@@ -276,6 +289,9 @@ public class SettingsProvider{
 		this.screenHeight=screenHeight;
 	}
 	
+	/**
+	 * Saves the settings in the configuration file
+	 */
 	public void save(){
 		final Properties properties=new Properties();
 		properties.put("LANGUAGE",locale.getLanguage());
