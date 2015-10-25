@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
+
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
@@ -39,11 +40,13 @@ import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
+import com.ardor3d.scenegraph.Spatial;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import engine.data.common.AmmunitionBox;
 import engine.data.common.AmmunitionBoxFactory;
 import engine.data.common.Medikit;
@@ -421,12 +424,6 @@ public class Level implements Comparable<Level>{
     	return(mainModel);
     }
     
-    public Node getMainModelAndSetItToNull(){
-    	final Node mainModel=this.mainModel;
-    	this.mainModel=null;
-    	return(mainModel);
-    }
-    
     public com.ardor3d.scenegraph.extension.Skybox loadSkyboxModel(SkyboxFactory skyboxFactory){
 		if(skyboxModel==null&&skyboxIdentifier!=null)
 		    {final Skybox skybox=skyboxFactory.get(skyboxIdentifier);
@@ -454,10 +451,22 @@ public class Level implements Comparable<Level>{
     	return(skyboxModel);
     }
     
-    public com.ardor3d.scenegraph.extension.Skybox getSkyboxModelAndSetItToNull(){
-    	final com.ardor3d.scenegraph.extension.Skybox skyboxModel=this.skyboxModel;
-    	this.skyboxModel=null;
-    	return(skyboxModel);
+    /**
+     * Removes the disposable spatials from the level
+     * 
+     * @return the list of removed disposable spatials
+     */
+    public List<Spatial> removeDisposableSpatials(){
+    	final List<Spatial> disposableSpatials=new ArrayList<>();
+    	if(this.skyboxModel!=null)
+    		{disposableSpatials.add(this.skyboxModel);
+    		 this.skyboxModel=null;
+    		}
+    	if(this.mainModel!=null)
+    	    {disposableSpatials.add(this.mainModel);
+    		 this.mainModel=null;
+    	    }
+    	return(disposableSpatials);
     }
     
     public String getIdentifier(){
