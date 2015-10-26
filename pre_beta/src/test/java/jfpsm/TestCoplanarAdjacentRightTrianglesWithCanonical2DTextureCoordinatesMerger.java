@@ -41,6 +41,7 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
 
 	private static void testComputeAdjacentMergeableTrisArraysList(){
 		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
+		//FIXME reverse the whole array?
 		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null},
 				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null},
 				                                                                    new RightTriangleInfo[][]{null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
@@ -50,30 +51,20 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
 				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},null,null,null,null,null},
 				                                                                    new RightTriangleInfo[][]{null,null,null,null,null,null,null,null}};
 		System.out.println("Input:");
-		//for each row
-		for(int i=0;i<adjacentTrisArray.length;i++)
-			{//for each column
-			 for(int j=0;j<adjacentTrisArray[i].length;j++)
-				 if(adjacentTrisArray[i][j]!=null&&adjacentTrisArray[i][j][0]!=null&&adjacentTrisArray[i][j][1]!=null)
-		             System.out.print("[X]");
-				 else
-					 System.out.print("[ ]");
-			 System.out.println("");
+		final ArrayHelper arrayHelper=new ArrayHelper();
+		final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck=new ArrayHelper.OccupancyCheck<RightTriangleInfo[]>(){
+
+			@Override
+			public boolean isOccupied(RightTriangleInfo[] value) {
+				return(value!=null&&value[0]!=null&&value[1]!=null);
 			}
-		System.out.println("");
+			
+		};
+		System.out.println(arrayHelper.toString(adjacentTrisArray,false,trisOccupancyCheck));
 		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
 		System.out.println("Output:");
 		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
-			{for(int i=0;i<resultingAdjacentTrisArray.length;i++)
-			     {for(int j=0;j<resultingAdjacentTrisArray[i].length;j++)
-				      if(resultingAdjacentTrisArray[i][j]!=null&&resultingAdjacentTrisArray[i][j][0]!=null&&resultingAdjacentTrisArray[i][j][1]!=null)
-		                  System.out.print("[X]");
-				      else
-					      System.out.print("[ ]");
-			      System.out.println("");
-			     }
-			 System.out.println("");
-			}
+			System.out.println(arrayHelper.toString(resultingAdjacentTrisArray,false,trisOccupancyCheck));
 	}
 	
 	private static void testOptimize(){
