@@ -41,20 +41,52 @@ public class ArrayHelper{
 	 */
 	public static final class OccupancyMap{
 		
+		/**
+		 * array map that indicates which cells are occupied
+		 */
 		private final boolean[][] arrayMap;
 		
+		/**
+		 * smallest row index, i.e minimum ordinate
+		 */
 		private final int smallestRowIndex;
 		
+		/**
+		 * biggest row index, i.e maximum ordinate
+		 */
 		private final int biggestRowIndex;
 		
+		/**
+		 * smallest column index, i.e minimum abscissa
+		 */
 		private final int smallestColumnIndex;
         
+		/**
+		 * biggest column index, i.e maximum abscissa
+		 */
 		private final int biggestColumnIndex;
         
+		/**
+		 * row count
+		 */
 		private final int rowCount;
         
+		/**
+		 * column count
+		 */
 		private final int columnCount;
 		
+		/**
+		 * Constructor
+		 * 
+		 * @param arrayMap array map that indicates which cells are occupied
+		 * @param smallestRowIndex smallest row index, i.e minimum ordinate
+		 * @param biggestRowIndex biggest row index, i.e maximum ordinate
+		 * @param smallestColumnIndex smallest column index, i.e minimum abscissa
+		 * @param biggestColumnIndex biggest column index, i.e maximum abscissa
+		 * @param rowCount row count
+		 * @param columnCount column count
+		 */
 		public OccupancyMap(final boolean[][] arrayMap,final int smallestRowIndex,final int biggestRowIndex,
 				            final int smallestColumnIndex,final int biggestColumnIndex,
 				            final int rowCount,final int columnCount){
@@ -67,40 +99,93 @@ public class ArrayHelper{
 			this.columnCount=columnCount;
 		}
 
+		/**
+		 * Returns the array map that indicates which cells are occupied
+		 * 
+		 * @return
+		 */
 		public final boolean[][] getArrayMap(){
 			return(arrayMap);
 		}
 
+		/**
+		 * Returns the smallest row index, i.e minimum ordinate
+		 * 
+		 * @return smallest row index, i.e minimum ordinate
+		 */
 		public final int getSmallestRowIndex(){
 			return(smallestRowIndex);
 		}
 
+		/**
+		 * Returns the biggest row index, i.e maximum ordinate
+		 * 
+		 * @return biggest row index, i.e maximum ordinate
+		 */
 		public final int getBiggestRowIndex(){
 			return(biggestRowIndex);
 		}
 
+		/**
+		 * Returns the smallest column index, i.e minimum abscissa
+		 * 
+		 * @return smallest column index, i.e minimum abscissa
+		 */
 		public final int getSmallestColumnIndex(){
 			return(smallestColumnIndex);
 		}
 
+		/**
+		 * Returns the biggest column index, i.e maximum abscissa
+		 * 
+		 * @return biggest column index, i.e maximum abscissa
+		 */
 		public final int getBiggestColumnIndex(){
 			return(biggestColumnIndex);
 		}
 
+		/**
+		 * Returns the row count
+		 * 
+		 * @return row count
+		 */
 		public final int getRowCount(){
 			return(rowCount);
 		}
 
+		/**
+		 * Returns the column count
+		 * 
+		 * @return column count
+		 */
 		public final int getColumnCount(){
 			return(columnCount);
 		}
 		
+		/**
+		 * Tells whether the occupancy array is empty
+		 * 
+		 * @return <code>true</code> if the occupancy array is empty, otherwise <code>false</code>
+		 */
 		public final boolean isEmpty(){
 			return(rowCount==0||columnCount==0);
 		}
 	}
 
+	/**
+	 * Check of occupancy for a 2D array
+	 * 
+	 * @author gouessej
+	 *
+	 * @param <T> type of the value occupying a cell of an array
+	 */
 	public static interface OccupancyCheck<T>{
+		/**
+		 * Tells whether the value is considered as occupying a cell array
+		 * 
+		 * @param value value in the array cell
+		 * @return <code>true</code> if the value is considered as occupying a cell array, otherwise <code>false</code>
+		 */
 		public boolean isOccupied(T value);
 	}
 	
