@@ -19,6 +19,7 @@ package jfpsm;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Helpers to manipulate arrays
@@ -28,8 +29,16 @@ import java.util.ArrayList;
  */
 public class ArrayHelper{
 
-	public ArrayHelper(){}
+	public ArrayHelper(){
+		super();
+	}
 	
+	/**
+	 * Occupancy map, structure representing the occupation of an array, can be ragged
+	 * 
+	 * @author gouessej
+	 *
+	 */
 	public static final class OccupancyMap{
 		
 		private final boolean[][] arrayMap;
@@ -91,6 +100,60 @@ public class ArrayHelper{
 		}
 	}
 
+	public static interface OccupancyCheck<T>{
+		public boolean isOccupied(T value);
+	}
+	
+	/**
+	 * Returns a textual representation of a 2D array, can be ragged
+	 * 
+	 * @param array 2D array
+	 * @param useObjectToString indicates whether to use Object.toString() to build the textual representation of an object, uses 'X' and ' ' if <code>false</code>
+	 * @param occupancyCheck occupancy check, tells whether the object "occupies" the array cell, can be null. If <code>null</code>, the cell isn't occupied if it contains <code>null</code>
+	 * @return textual representation of a 2D array
+	 */
+	public <T> String toString(final T[][] array,final boolean useObjectToString,final OccupancyCheck<T> occupancyCheck){
+		final StringBuilder builder=new StringBuilder();
+		//computes the maximum number of rows in the columns (to handle the jagged arrays)
+		int maxColumnRowCount=0;
+		//for each column, i.e for each abscissa
+		for(int x=0;x<array.length;x++)
+			if(array[x]!=null)
+				maxColumnRowCount=Math.max(maxColumnRowCount,array[x].length);
+		//for each row, i.e for each ordinate
+		for(int y=0;y<maxColumnRowCount;y++)
+		    {//for each column, i.e for each abscissa
+			 for(int x=0;x<array.length;x++)
+				 if(array[x]!=null&&y<array[x].length)
+			         {final T value=array[x][y];
+			          if(useObjectToString)
+			              {if(value==null||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
+				    	       builder.append("[null]");
+				           else
+				    	       builder.append('[').append(Objects.toString(value)).append(']');
+			              }
+			          else
+				          {if(value==null||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
+				    	       builder.append("[ ]");
+				           else
+				    	       builder.append("[X]");
+				          }
+			         }
+			 //end of row
+			 builder.append('\n');
+		    }
+		return(builder.toString());
+	}
+	
+	/**
+	 * Creates the occupancy map of an array
+	 * 
+	 * @param array array whose occupancy has to be computed
+	 * @return occupancy map of an array
+	 * 
+	 * TODO support OccupancyCheck
+	 * FIXME rowCount and columnCount are wrong, rows and columns are in the wrong order even though the occupancy array is correct
+	 */
 	public <T> OccupancyMap createPackedOccupancyMap(final T[][] array){
 		//detects empty rows and empty columns in order to skip them later
 		int smallestI=Integer.MAX_VALUE;
@@ -259,9 +322,12 @@ public class ArrayHelper{
 		   	 			                          //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
 		   	 			                          for(int jj=0;jj<primarySize;jj++)
 		   	 			                	          for(int ii=0;ii<secondarySize;ii++)
-		   	 			                		          {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
-		   			                		               occupancyMap[ii+i][jj+j]=false;
-		   			                		              }
+		   	 			                	        	  try
+		   	 			                		              {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
+		   			                		                   occupancyMap[ii+i][jj+j]=false;
+		   			                		                  }
+		   	 			                                  catch(final ArrayIndexOutOfBoundsException aioobe)
+		   	 			                                      {aioobe.printStackTrace();}
 		    		    	                     }
 		    		    	                }
 		    		                   }
