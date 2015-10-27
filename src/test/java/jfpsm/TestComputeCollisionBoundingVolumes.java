@@ -36,7 +36,7 @@ public class TestComputeCollisionBoundingVolumes {
 
 	public static void main(String[] args) {
 		JoglImageLoader.registerLoader();
-		final URL mapUrl=Level.class.getResource("/images/containermap.png");
+		final URL mapUrl=Level.class.getResource("/images/containermap1.png");
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
