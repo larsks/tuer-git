@@ -237,108 +237,115 @@ public class ArrayHelper{
 	 * @return occupancy map of an array
 	 * 
 	 * TODO support OccupancyCheck
-	 * FIXME rowCount and columnCount are wrong, rows and columns are in the wrong order even though the occupancy array is correct
 	 */
 	public <T> OccupancyMap createPackedOccupancyMap(final T[][] array){
 		//detects empty rows and empty columns in order to skip them later
-		int smallestI=Integer.MAX_VALUE;
-		int biggestI=Integer.MIN_VALUE;
-		int smallestJ=Integer.MAX_VALUE;
-		int biggestJ=Integer.MIN_VALUE;
-		//checks if the array has at least one row
+		int smallestRowIndex=Integer.MAX_VALUE;
+		int biggestRowIndex=Integer.MIN_VALUE;
+		int smallestColumnIndex=Integer.MAX_VALUE;
+		int biggestColumnIndex=Integer.MIN_VALUE;
+		//checks if the array has at least one column
 		if(array.length>0)
-			{//looks for biggestI
+		    {//looks for the biggest column index
 			 boolean searchStopped=false;
-			 for(int i=array.length-1;i>=0&&!searchStopped;i--)
-			     if(array[i]!=null&&array[i].length>0)
-			 		 for(int j=array[i].length-1;j>=0&&!searchStopped;j--)
-			 			 if(array[i][j]!=null)
-			 		         {//correct value
-			 			      biggestI=i;
-			 			      //candidates
-			 		          smallestI=i;
-			 		          smallestJ=j;
-			 		          biggestJ=j;
-			 		          //uses this flag to stop the search
+			 //for each column, i.e for each abscissa
+			 for(int x=array.length-1;x>=0&&!searchStopped;x--)
+				 if(array[x]!=null&&array[x].length>0)
+					 //for each row, i.e for each ordinate
+					 for(int y=array[x].length-1;y>=0&&!searchStopped;y--)
+						 if(array[x][y]!=null)
+			                 {//correct value
+							  biggestColumnIndex=x;
+							  //candidates
+							  smallestColumnIndex=x;
+							  smallestRowIndex=y;
+							  biggestRowIndex=y;
+							  //uses this flag to stop the search
 			 		          searchStopped=true;
-			 		         }
+			                 }
 			 //checks if the array has at least one non empty row
 			 if(searchStopped)
-			     {//looks for smallestI
+			     {//looks for the smallest column index
 				  searchStopped=false;
-				  for(int i=0;i<biggestI&&!searchStopped;i++)
-				      if(array[i]!=null)
-				          for(int j=0;j<array[i].length&&!searchStopped;j++)
-				        	  if(array[i][j]!=null)
+				  //for each column, i.e for each abscissa
+				  for(int x=0;x<biggestColumnIndex&&!searchStopped;x++)
+				      if(array[x]!=null)
+				    	  //for each row, i.e for each ordinate
+				          for(int y=0;y<array[x].length&&!searchStopped;y++)
+				        	  if(array[x][y]!=null)
 				                  {//correct value
-				                   smallestI=i;
+				                   smallestColumnIndex=x;
 				                   //candidates
-				                   smallestJ=Math.min(smallestJ,j);
-				  			       biggestJ=Math.max(biggestJ,j);
+				                   smallestRowIndex=Math.min(smallestRowIndex,y);
+				  			       biggestRowIndex=Math.max(biggestRowIndex,y);
 				  			       //uses this flag to stop the search
 				  			       searchStopped=true;
 				                  }
-				  //looks for biggestJ
+				  //looks for the biggest row index
 				  searchStopped=false;
-				  if(biggestJ<Integer.MAX_VALUE)
-				      {for(int i=biggestI-1;i>=smallestI&&!searchStopped;i--)
-				           if(array[i]!=null&&array[i].length>biggestJ+1)
-				               {for(int j=array[i].length-1;j>biggestJ&&!searchStopped;j--)
-				                    if(array[i][j]!=null)
-				                        biggestJ=j;
-				                    if(biggestJ==Integer.MAX_VALUE)
+				  if(biggestRowIndex<Integer.MAX_VALUE)
+				      {//for each column, i.e for each abscissa
+					   for(int x=biggestColumnIndex-1;x>=smallestColumnIndex&&!searchStopped;x--)
+				           if(array[x]!=null&&array[x].length>biggestRowIndex+1)
+				               {//for each row, i.e for each ordinate
+				        	    for(int y=array[x].length-1;y>biggestRowIndex&&!searchStopped;y--)
+				                    if(array[x][y]!=null)
+				                    	biggestRowIndex=y;
+				                    if(biggestRowIndex==Integer.MAX_VALUE)
 				                        searchStopped=true;
                                }
 				      }
-				  //looks for smallestJ
+				  //looks for the smallest row index
 				  searchStopped=false;
-				  if(smallestJ>0)
-				      {for(int i=smallestI+1;i<=biggestI&&!searchStopped;i++)
-				           if(array[i]!=null&&array[i].length>0)
-				               {for(int j=0;j<smallestJ&&!searchStopped;j++)
-				                    if(array[i][j]!=null)
-				                        smallestJ=j;
-				                    if(smallestJ==0)
+				  if(smallestRowIndex>0)
+				      {//for each column, i.e for each abscissa
+					   for(int x=smallestColumnIndex+1;x<=biggestColumnIndex&&!searchStopped;x++)
+				           if(array[x]!=null&&array[x].length>0)
+				               {//for each row, i.e for each ordinate
+				        	    for(int y=0;y<smallestRowIndex&&!searchStopped;y++)
+				                    if(array[x][y]!=null)
+				                        smallestRowIndex=y;
+				                    if(smallestRowIndex==0)
 				                        searchStopped=true;
 				               }
 				      }
 			     }
 		    }
-		//N.B: row-major convention
-		final int rowCount=biggestI>=smallestI?biggestI-smallestI+1:0;//this is equal to the "length" of the occupancy map
-		final int columnCount=biggestJ>=smallestJ?biggestJ-smallestJ+1:0;
+		final int rowCount=biggestRowIndex>=smallestRowIndex?biggestRowIndex-smallestRowIndex+1:0;
+		final int columnCount=biggestColumnIndex>=smallestColumnIndex?biggestColumnIndex-smallestColumnIndex+1:0;
 		final boolean[][] occupancyMapArray;
 		//if the array is not empty
 		if(rowCount>0&&columnCount>0)
 		    {//creates an occupancy map of the supplied array but without empty columns and rows
-		     occupancyMapArray=new boolean[rowCount][];
-		     //for each row
-			 for(int i=0;i<occupancyMapArray.length;i++)
-				 {//computes the index in the original array by using the offset
-				  final int rawI=i+smallestI;
-				  if(array[rawI]!=null)
-				      {//starts the computation of the biggest index of the current column
-					   int localBiggestJ=Integer.MIN_VALUE;
-					   for(int j=0;j<columnCount;j++)
+			 occupancyMapArray=new boolean[columnCount][];
+			 //for each column, i.e for each abscissa
+			 for(int x=0;x<array.length;x++)
+			     {//computes the index in the original array by using the offset
+				  final int rawX=x+smallestColumnIndex;
+				  if(array[rawX]!=null)
+				      {//starts the computation of the biggest index of the current row
+					   int localBiggestRowIndex=Integer.MIN_VALUE;
+					   //for each row, i.e for each ordinate
+					   for(int y=0;y<rowCount;y++)
 					       {//computes the index in the original array by using the offset
-					    	final int rawJ=j+smallestJ;
-					        if(array[rawI][rawJ]!=null)
-					        	localBiggestJ=rawJ;
+					    	final int rawY=y+smallestRowIndex;
+					        if(array[rawX][rawY]!=null)
+					        	localBiggestRowIndex=rawY;
 					       }
-					   final int localColumnCount=localBiggestJ>=smallestJ?localBiggestJ-smallestJ+1:0;
+					   final int localRowCount=localBiggestRowIndex>=smallestRowIndex?localBiggestRowIndex-smallestRowIndex+1:0;
 					   //allocates the current column of the occupancy map as tightly as possible
-					   occupancyMapArray[i]=new boolean[localColumnCount];
+					   occupancyMapArray[x]=new boolean[localRowCount];
 					   //fills the occupancy map (true <-> not null)
-				       for(int j=0;j<occupancyMapArray[i].length;j++)
-					       {final int rawJ=j+smallestJ;
-					        occupancyMapArray[i][j]=array[rawI][rawJ]!=null;
+				       for(int y=0;y<occupancyMapArray[x].length;y++)
+					       {final int rawY=y+smallestRowIndex;
+					        occupancyMapArray[x][y]=array[rawX][rawY]!=null;
 					       }
 				      }
-                 }
-			}
+			     }
+		    }
 		else
 			occupancyMapArray=new boolean[0][0];
-		final OccupancyMap occupancyMap=new OccupancyMap(occupancyMapArray,smallestI,biggestI,smallestJ,biggestJ,rowCount,columnCount);
+		final OccupancyMap occupancyMap=new OccupancyMap(occupancyMapArray,smallestRowIndex,biggestRowIndex,smallestColumnIndex,biggestColumnIndex,rowCount,columnCount);
 		return(occupancyMap);
 	}
 	
@@ -407,12 +414,9 @@ public class ArrayHelper{
 		   	 			                          //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
 		   	 			                          for(int jj=0;jj<primarySize;jj++)
 		   	 			                	          for(int ii=0;ii<secondarySize;ii++)
-		   	 			                	        	  try
-		   	 			                		              {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
-		   			                		                   occupancyMap[ii+i][jj+j]=false;
-		   			                		                  }
-		   	 			                                  catch(final ArrayIndexOutOfBoundsException aioobe)
-		   	 			                                      {aioobe.printStackTrace();}
+		   	 			                	        	  {adjacentTrisSubArray[ii][jj]=array[ii+i+smallestI][jj+j+smallestJ];
+		   			                		               occupancyMap[ii+i][jj+j]=false;
+		   			                		              }
 		    		    	                     }
 		    		    	                }
 		    		                   }
