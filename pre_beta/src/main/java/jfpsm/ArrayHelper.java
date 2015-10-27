@@ -319,7 +319,7 @@ public class ArrayHelper{
 		    {//creates an occupancy map of the supplied array but without empty columns and rows
 			 occupancyMapArray=new boolean[columnCount][];
 			 //for each column, i.e for each abscissa
-			 for(int x=0;x<array.length;x++)
+			 for(int x=0;x<columnCount;x++)
 			     {//computes the index in the original array by using the offset
 				  final int rawX=x+smallestColumnIndex;
 				  if(array[rawX]!=null)
