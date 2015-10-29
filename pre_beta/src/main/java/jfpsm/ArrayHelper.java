@@ -392,10 +392,10 @@ public class ArrayHelper{
 		    		    	                 {@SuppressWarnings("unchecked")
 										      final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
 		    		    	                  //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
-		    		    	                  for(int ii=0;ii<primarySize;ii++)
-		    		    		                  {for(int jj=0;jj<secondarySize;jj++)
-		    		    		                       {adjacentTrisSubArray[ii][jj]=array[ii+x+smallestRowIndex][jj+y+smallestColumnIndex];
-		    		    		                        occupancyMap[ii+x][jj+y]=false;
+		    		    	                  for(int i=0;i<primarySize;i++)
+		    		    		                  {for(int j=0;j<secondarySize;j++)
+		    		    		                       {adjacentTrisSubArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		    		    		                        occupancyMap[i+x][j+y]=false;
 		    		    		                       }
 		    		    		                  }
 		    		    	                  //puts the location of the full array and the array into the map
@@ -410,10 +410,10 @@ public class ArrayHelper{
 		    		    	                      {@SuppressWarnings("unchecked")
 		    		    	            	       final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
 		   	 			                           //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
-		   	 			                           for(int jj=0;jj<primarySize;jj++)
-		   	 			                	           {for(int ii=0;ii<secondarySize;ii++)
-		   	 			                	        	    {adjacentTrisSubArray[ii][jj]=array[ii+x+smallestRowIndex][jj+y+smallestColumnIndex];
-		   			                		                 occupancyMap[ii+x][jj+y]=false;
+		   	 			                           for(int j=0;j<primarySize;j++)
+		   	 			                	           {for(int i=0;i<secondarySize;i++)
+		   	 			                	        	    {adjacentTrisSubArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		   			                		                 occupancyMap[i+x][j+y]=false;
 		   			                		                }
 		   	 			                	           }
 		   	 			                           //puts the location of the full array and the array into the map
@@ -446,20 +446,27 @@ public class ArrayHelper{
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnColumnIsolationEnabled){
 		boolean isolated;
+		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array
 	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex])
 	        {if(testOnColumnIsolationEnabled)
 	             {isolated=true;
-	              for(int ii=Math.max(0,localSmallestColumnIndex-1);ii<=localSmallestColumnIndex+primarySize&&ii<rowCount&&isolated;ii++)
-	                  for(int jj=Math.max(0,localSmallestRowIndex);jj<localSmallestRowIndex+secondarySize&&jj<columnCount&&isolated;jj++)
-	            	      if((((ii==localSmallestColumnIndex-1)||(ii==localSmallestColumnIndex+primarySize))&&(ii<array.length&&array[ii]!=null&&jj<array[ii].length&&array[ii][jj]))||((localSmallestColumnIndex-1<ii)&&(ii<localSmallestColumnIndex+primarySize)&&(ii>=array.length||array[ii]==null||jj>=array[ii].length||!array[ii][jj])))
-	            	    	  isolated=false;
+	              //for each column, i.e for each abscissa
+	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
+	                  {//for each row, i.e for each ordinate
+	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
+	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
+	            	    	   isolated=false;
+	                  }
 	             }
 	         else
 	             {isolated=true;
-	              for(int ii=Math.max(0,localSmallestColumnIndex);ii<localSmallestColumnIndex+secondarySize&&ii<rowCount&&isolated;ii++)
-	                  for(int jj=Math.max(0,localSmallestRowIndex-1);jj<=localSmallestRowIndex+primarySize&&jj<columnCount&&isolated;jj++)
-	            		  if((((jj==localSmallestRowIndex-1)||(jj==localSmallestRowIndex+primarySize))&&(ii<array.length&&array[ii]!=null&&jj<array[ii].length&&array[ii][jj]))||((localSmallestRowIndex-1<jj)&&(jj<localSmallestRowIndex+primarySize)&&(ii>=array.length||array[ii]==null||jj>=array[ii].length||!array[ii][jj])))
-	            	    	  isolated=false;
+	              //for each column, i.e for each abscissa
+	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
+	                  {//for each row, i.e for each ordinate
+	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
+	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
+	            	    	   isolated=false;
+	                  }
 	             }
 	        }
 	    else
@@ -488,17 +495,19 @@ public class ArrayHelper{
 	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex]!=null)
 	        {if(testOnColumnIsolationEnabled)
 	             {isolated=true;
-	              for(int ii=Math.max(0,localSmallestColumnIndex-1);ii<=localSmallestColumnIndex+primarySize&&ii<rowCount&&isolated;ii++)
-	                  for(int jj=Math.max(0,localSmallestRowIndex);jj<localSmallestRowIndex+secondarySize&&jj<columnCount&&isolated;jj++)
-	            	      if((((ii==localSmallestColumnIndex-1)||(ii==localSmallestColumnIndex+primarySize))&&(ii<array.length&&array[ii]!=null&&jj<array[ii].length&&array[ii][jj]!=null))||((localSmallestColumnIndex-1<ii)&&(ii<localSmallestColumnIndex+primarySize)&&(ii>=array.length||array[ii]==null||jj>=array[ii].length||array[ii][jj]==null)))
-	            	    	  isolated=false;
+	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
+	                  {for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
+	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            	    	   isolated=false;
+	                  }
 	             }
 	         else
 	             {isolated=true;
-	              for(int ii=Math.max(0,localSmallestColumnIndex);ii<localSmallestColumnIndex+secondarySize&&ii<rowCount&&isolated;ii++)
-	                  for(int jj=Math.max(0,localSmallestRowIndex-1);jj<=localSmallestRowIndex+primarySize&&jj<columnCount&&isolated;jj++)
-	            		  if((((jj==localSmallestRowIndex-1)||(jj==localSmallestRowIndex+primarySize))&&(ii<array.length&&array[ii]!=null&&jj<array[ii].length&&array[ii][jj]!=null))||((localSmallestRowIndex-1<jj)&&(jj<localSmallestRowIndex+primarySize)&&(ii>=array.length||array[ii]==null||jj>=array[ii].length||array[ii][jj]==null)))
-	            	    	  isolated=false;
+	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
+	                  {for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
+	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            	    	   isolated=false;
+	                  }
 	             }
 	        }
 	    else
