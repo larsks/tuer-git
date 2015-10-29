@@ -46,7 +46,7 @@
 	        <pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
 	        <pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
 	        <pathelement location="${jndtlibdir}/commons-io-2.4.jar"/>
-	        <pathelement location="${jndtlibdir}/jdeb-1.3.jar"/>
+	        <pathelement location="${jndtlibdir}/jdeb-1.4.jar"/>
 	    </classpath>
 	</taskdef>
 	<!-- task of image format conversion -->
