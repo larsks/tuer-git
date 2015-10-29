@@ -614,9 +614,7 @@ ${vmargsstring}
                                         <equals arg1="@{jdk}" arg2="" />
                                         <then>
                                             <!-- uses the system JRE if any -->
-                                            <echo file="${contentstarget}/${exedstfilename}">
-                                        <![CDATA[
-#!/usr/bin/bash
+                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/usr/bin/bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -631,9 +629,7 @@ java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
                                         </then>
                                         <else>
                                             <!-- uses the packaged JRE -->
-                                            <echo file="${contentstarget}/${exedstfilename}">
-                                        <![CDATA[
-#!/usr/bin/bash
+                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/usr/bin/bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
