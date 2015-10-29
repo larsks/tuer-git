@@ -61,7 +61,7 @@ public class TestComputeCollisionBoundingVolumes {
     	System.out.println("smallestColumnIndex: "+occupancyMap.getSmallestColumnIndex());
     	System.out.println("biggestColumnIndex: "+occupancyMap.getBiggestColumnIndex());
     	System.out.println("Occupancy map check: "+(Arrays.deepEquals(primitiveCollisionMap,occupancyMap.getArrayMap())?"OK":"NOK"));
-    	final ArrayList<Boolean[][]> arrayList=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
+    	final ArrayList<Boolean[][]> arrayList=new ArrayList<>(arrayHelper.computeFullArraysFromNonFullArray(collisionMap).values());
     	System.out.println("Output:");
     	for(final Boolean[][] collisionArray:arrayList)
     	    {System.out.println(arrayHelper.toString(collisionArray,false,null));

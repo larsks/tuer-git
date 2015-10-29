@@ -536,14 +536,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			              {//builds the 2D array from the list of triangles
 						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
-				           final ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
+				           final java.util.Map<int[],RightTriangleInfo[][][]> adjacentTrisArraysMap=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
 				           //puts the new list into the map
 				           ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
 				           if(adjacentTrisArraysListsList==null)
 				               {adjacentTrisArraysListsList=new ArrayList<>();
 				                mapOfListsOfListsOfArraysOfMergeableTris.put(plane,adjacentTrisArraysListsList);
 				               }
-				           adjacentTrisArraysListsList.add(adjacentTrisArraysList);
+				           adjacentTrisArraysListsList.add(new ArrayList<>(adjacentTrisArraysMap.values()));
 			              }		  
 			     }
 			 //sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
@@ -1028,9 +1028,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * make bigger rectangles
 	 * 
 	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
-	 * @return list of 2D arrays of adjacent mergeable triangles
+	 * @return map of 2D arrays of adjacent mergeable triangles
 	 */
-	static ArrayList<RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
+	static java.util.Map<int[],RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
 		return(new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray));
 	}
 }
