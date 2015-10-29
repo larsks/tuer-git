@@ -69,12 +69,12 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
 	
 	private static void testOptimize(){
 		JoglImageLoader.registerLoader();
-		try{SimpleResourceLocator srl=new SimpleResourceLocator(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/images"));
+		try{SimpleResourceLocator srl=new SimpleResourceLocator(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/images"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
-		try{final Node levelNode=(Node)new BinaryImporter().load(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
+		try{final Node levelNode=(Node)new BinaryImporter().load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
 		    final Mesh mesh=(Mesh)((Node)levelNode.getChild(0)).getChild(1);
 		    System.out.println("Input: "+mesh.getMeshData().getVertexCount());
 		    CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.optimize(mesh);
