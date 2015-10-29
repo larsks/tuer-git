@@ -1013,7 +1013,7 @@ Categories=@{categories}]]></echo>
 			    	    	        <exclude name="${icon-name}.png"/>
 			    	            </zipfileset>
 			    	            <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-			    	            <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    	            <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    	            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
 			    	            <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    	            <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
@@ -1028,7 +1028,7 @@ Categories=@{categories}]]></echo>
 			    			        <exclude name="@{executable}"/>
 			    			    </zipfileset>
 			    			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
-			    			    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    			    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    			    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    			    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			    			    <depends/>
@@ -1053,7 +1053,7 @@ Categories=@{categories}]]></echo>
 			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
 				                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			                    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			                    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			                    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
 				                <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			                    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
@@ -1073,7 +1073,7 @@ Categories=@{categories}]]></echo>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			    	    	    <zipfileset prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+			    	    	    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    	    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    	    	    <link path="/usr/bin/@{executable}" target="/usr/share/${package-name}/@{executable}"/>
 			    	    	    <depends/>
@@ -1114,7 +1114,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	                <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
 			    	            </data>
 			    	            <data src="@{outdir}/${package-name}.desktop" type="file">
-			    	                <mapper type="perm" prefix="/usr/share/applications"/>
+			    	                <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
 			    	            </data>
 			    	            <data src="${appdir}/${icon-name}.png" type="file">
 			    	                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
@@ -1137,7 +1137,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    	        <mapper type="perm" prefix="usr/share/${package-name}" filemode="755"/>
 			    	    	    </data>
 			    	    	    <data src="@{outdir}/${package-name}.desktop" type="file">
-			    	    	        <mapper type="perm" prefix="/usr/share/applications"/>
+			    	    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
 			    	    	    </data>
 			    	    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
 			    	    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
@@ -1168,7 +1168,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
 			                    </data>
 			                    <data src="@{outdir}/${package-name}.desktop" type="file">
-			                        <mapper type="perm" prefix="/usr/share/applications"/>
+			                        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
 			                    </data>
 			                    <data src="${appdir}/${icon-name}.png" type="file">
 			                        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
@@ -1197,7 +1197,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
 					    	    </data>
 					    	    <data src="@{outdir}/${package-name}.desktop" type="file">
-					    	        <mapper type="perm" prefix="/usr/share/applications"/>
+					    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
 					    	    </data>
 					    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
 					    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
