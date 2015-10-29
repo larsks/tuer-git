@@ -37,7 +37,7 @@
 	        <pathelement location="${jndtlibdir}/slf4j-api-1.7.7.jar"/>
 	        <pathelement location="${jndtlibdir}/slf4j-simple-1.7.7.jar"/>
 	        <pathelement location="${jndtlibdir}/xz-1.4.jar"/>
-	        <pathelement location="${jndtlibdir}/redline-1.1.16.jar"/>
+	        <pathelement location="${jndtlibdir}/redline-1.2.2.jar"/>
 	    </classpath>
 	</taskdef>
 	<!-- pure Java implementation of the DEB package builder -->
