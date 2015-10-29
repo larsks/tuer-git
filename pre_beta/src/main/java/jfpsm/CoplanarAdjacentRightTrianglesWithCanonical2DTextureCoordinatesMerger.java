@@ -570,6 +570,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		            	        		     if(adjacentTrisArray[rowIndex][columnIndex]==null||adjacentTrisArray[rowIndex][columnIndex].length!=2)
 		            	        	             isFull=false;
 		            	        	}
+			    			    //FIXME this test never passes
 			    			    //checks if this array is full, rectangular and if it contains more than one pair of adjacent triangles
 			    			    if(isRectangular&&isFull&&(adjacentTrisArray.length>1||adjacentTrisArray[0].length>1))
 			    			        {//as this array is rectangular, it has a consistent row count and column count
