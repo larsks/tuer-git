@@ -146,6 +146,7 @@
     	<attribute name="os" description="one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)"/>
     	<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
     	<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+    	<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true, if os is set to 'Linux' and if nativelauncherenabled is set to false"/>
         <attribute name="appjar" description="file location of the JAR to package"/>
         <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
@@ -255,6 +256,15 @@
                             <fail message="'jdk' must not be empty when nativelauncherenabled is set to true"/>
                         </then>
                     </if>
+                	<if>
+                		<and>
+                		    <equals arg1="@{nativelauncherenabled}" arg2="true" />
+                	        <equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
+                	    </and>
+                		<then>
+                	        <echo message="nativelauncherenabled is set to true, no script is used to launch the program, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
+                	    </then>
+                	</if>
                 	<if>
                 	    <and>
                 	        <equals arg1="@{nativelauncherenabled}" arg2="true" />
@@ -610,6 +620,36 @@ ${vmargsstring}
                                     </if>
                                 </then>
                                 <else>
+                                	<if>
+                                	    <equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
+                                	    <then>
+                                	    	<if>
+                                	    		<equals arg1="@{os}" arg2="Mac OS X" />
+                                	    		<then>
+                                	                <echo message="nativelauncherenabled is set to true, no script is used to launch the program, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
+                                	            </then>
+                                	    		<else>
+                                	    			<if>
+                                	    			    <equals arg1="@{jdk}" arg2="" />
+                                	    			    <then>
+                                	    			        <!-- uses the system JRE if any -->
+                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/usr/bin/sh
+java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+                                	    			     ]]>
+                                	    			        </echo>
+                                	    			    </then>
+                                	    				<else>
+                                	    					<!-- uses the packaged JRE -->
+                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/usr/bin/sh
+/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+                                                         ]]>
+                                	    					</echo>
+                                	    				</else>
+                                	    			</if>
+                                	    		</else>
+                                	    	</if>
+                                	    </then>
+                                	</if>
                                     <if>
                                         <equals arg1="@{jdk}" arg2="" />
                                         <then>
@@ -714,6 +754,12 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 	    </not>
                 		<then>
                 		    <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=false"/>
+                		</then>
+                	</if>
+                	<if>
+                		<equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
+                		<then>
+                			<echo message="PackR uses its own native launcher, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
                 		</then>
                 	</if>
                 	<if>
@@ -848,6 +894,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
     </macrodef>
 	<macrodef name="create-linux-app-bundles" description="creates a RPM package, a DEB package and a tar.gz archive for GNU Linux">
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+		<attribute name="packageshscriptenabled" default="true" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if nativelauncherenabled is set to false"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
 		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
@@ -937,7 +984,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
 			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
-			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
+			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}" linuxpackageshscriptenabled="@{packageshscriptenabled}"/>
 			<!-- Removes the extension from the icon name -->
 			<to-basename-without-extension input="@{iconsfile}" property="icon-name" />
 			<!-- Creates the .desktop file for the shortcut -->
@@ -994,6 +1041,14 @@ Categories=@{categories}]]></echo>
 			        <var name="tmpdocdir" value="@{docdir}"/>
 			    </else>
 			</if>
+			<!-- packages -->
+			<if>
+				<equals arg1="@{packageshscriptenabled}" arg2="true" />
+				<then>
+					<move file="${appdir}/@{executable}" tofile="${appdir}/nopackagesh_@{executable}" overwrite="true"/>
+					<move file="${appdir}/packagesh_@{executable}" tofile="${appdir}/@{executable}" overwrite="true"/>
+				</then>
+			</if>
 			<!-- RPM -->
 			<if>
 			    <equals arg1="@{jdk}" arg2=""/>
@@ -1006,6 +1061,7 @@ Categories=@{categories}]]></echo>
 			    	            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    	            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    	                <exclude name="@{executable}"/>
+			    	            	<exclude name="nopackagesh_@{executable}"/>
 			    	    	        <exclude name="${icon-name}.png"/>
 			    	            </zipfileset>
 			    	            <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
@@ -1022,6 +1078,7 @@ Categories=@{categories}]]></echo>
 			    			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    			        <exclude name="@{executable}"/>
+			    			    	<exclude name="nopackagesh_@{executable}"/>
 			    			    </zipfileset>
 			    			    <zipfileset filemode="755" prefix="/usr/share/${package-name}" file="${appdir}/@{executable}"/>
 			    			    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
@@ -1041,6 +1098,7 @@ Categories=@{categories}]]></echo>
 			                    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			                    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			                        <exclude name="@{executable}"/>
+			                    	<exclude name="nopackagesh_@{executable}"/>
 			            	        <exclude name="${icon-name}.png"/>
 			                        <exclude name="jre/bin/*"/>
 			                        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
@@ -1062,6 +1120,7 @@ Categories=@{categories}]]></echo>
 			    	    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
 			    	    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
 			    	    	        <exclude name="@{executable}"/>
+			    	    	    	<exclude name="nopackagesh_@{executable}"/>
 			    	    	        <exclude name="jre/bin/*"/>
 			    	    	        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
 			    	    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
@@ -1100,7 +1159,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    <available file="${appdir}/${icon-name}.png"/>
 			    	    <then>
 			    	        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    	            <data src="${appdir}" type="directory" excludes="@{executable},${icon-name}.png">
+			    	            <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png">
 			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	            </data>
 			    	            <data src="@{appjar}" type="file">
@@ -1123,7 +1182,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    </then>
 			    	    <else>
 			    	    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    	    	    <data src="${appdir}" type="directory" excludes="@{executable}">
+			    	    	    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable}">
 			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	    	    </data>
 			    	    	    <data src="@{appjar}" type="file">
@@ -1148,7 +1207,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					    <available file="${appdir}/${icon-name}.png"/>
 					    <then>
 			                <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			                    <data src="${appdir}" type="directory" excludes="@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+			                    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
 			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			                    </data>
 			                    <data src="@{appjar}" type="file">
@@ -1177,7 +1236,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					    </then>
 					    <else>
 					    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-					    	    <data src="${appdir}" type="directory" excludes="@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+					    	    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 					    	    </data>
 					    	    <data src="@{appjar}" type="file">
@@ -1203,6 +1262,12 @@ Multi-Arch: @{multiarch}]]></echo>
 					    </else>
 					</if>
 				</else>
+			</if>
+			<if>
+			    <equals arg1="@{packageshscriptenabled}" arg2="true" />
+			    <then>
+			    	<move file="${appdir}/nopackagesh_@{executable}" tofile="${appdir}/@{executable}" overwrite="true"/>
+			    </then>
 			</if>
 			<delete failonerror="false">
 			    <fileset dir="@{outdir}" includes="*.changes"/>
