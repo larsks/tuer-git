@@ -536,7 +536,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			              {//builds the 2D array from the list of triangles
 						   final RightTriangleInfo[][][] adjacentTrisArray=compute2dTrisArrayFromAdjacentTrisList(trisList,commonSidesInfosMap);
 				           //computes a list of arrays of adjacent triangles which could be merged to make bigger rectangles
-				           final java.util.Map<int[],RightTriangleInfo[][][]> adjacentTrisArraysMap=computeAdjacentMergeableTrisArraysList(adjacentTrisArray);
+				           final java.util.Map<int[],RightTriangleInfo[][][]> adjacentTrisArraysMap=computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
 				           //puts the new list into the map
 				           ArrayList<ArrayList<RightTriangleInfo[][][]>> adjacentTrisArraysListsList=mapOfListsOfListsOfArraysOfMergeableTris.get(plane);
 				           if(adjacentTrisArraysListsList==null)
@@ -1030,7 +1030,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 	 * @param adjacentTrisArray 2D arrays containing adjacent triangles
 	 * @return map of 2D arrays of adjacent mergeable triangles
 	 */
-	static java.util.Map<int[],RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysList(final RightTriangleInfo[][][] adjacentTrisArray){
+	static java.util.Map<int[],RightTriangleInfo[][][]> computeAdjacentMergeableTrisArraysMap(final RightTriangleInfo[][][] adjacentTrisArray){
 		return(new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray));
 	}
 }

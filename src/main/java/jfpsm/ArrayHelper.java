@@ -348,9 +348,20 @@ public class ArrayHelper{
 		return(occupancyMap);
 	}
 	
+	/*public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap){
+		final StringBuilder builder=new StringBuilder();
+		//TODO compute the size of the array (row count, column count)
+		//TODO compute the maximum size of the string used to represent a full array
+		//TODO build a 2D array
+		//TODO fill it by looping on the entry set
+		//TODO fill the empty cell with a string containing spaces
+		//TODO pass it to toString()
+		return(builder.toString());
+	}*/
+	
 	/**
 	 * Creates a map of full arrays from a potentially non full array. It tries to 
-	 * minimize the count of full arrays and to maximize their size.
+	 * minimize the count of full arrays and to maximize their respective sizes.
 	 * 
 	 * @param array potentially non full array
 	 * @return map of full arrays whose keys are their respective locations
