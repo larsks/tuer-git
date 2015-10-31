@@ -53,16 +53,51 @@
 	<property name="email" value="gouessej@orange.fr" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
-	<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
-	<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
-	<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-	<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
-	<!--<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
-	<property name="openjdk-linux-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
-	<property name="openjdk-linux-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
-	<property name="openjdk-windows-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-	<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>-->
+	<if>
+		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip" />
+		<then>
+			<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
+		</then>
+		<else>
+			<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
+		</else>
+	</if>
+	<if>
+		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip" />
+		<then>
+			<property name="openjdk-linux-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
+		</then>
+		<else>
+			<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
+		</else>
+	</if>
+	<if>
+		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip" />
+		<then>
+			<property name="openjdk-linux-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
+		</then>
+		<else>
+			<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
+		</else>
+	</if>
+	<if>
+		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip" />
+		<then>
+			<property name="openjdk-windows-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
+		</then>
+		<else>
+			<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
+		</else>
+	</if>
+	<if>
+		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip" />
+		<then>
+			<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
+		</then>
+		<else>
+			<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
+		</else>
+	</if>
 	<property name="game-version" value="0.0.0" />
 	<property name="game-release" value="0" />
 	<property name="game-group" value="Applications/Games" />
@@ -93,7 +128,8 @@
 	<property name="sftp-website-remotedir" value="/home/project-web/${project-unix-name}/htdocs" />
 	<!-- Sourceforge Project file releases -->
 	<property name="sftp-pfs-server" value="frs.sourceforge.net" />
-	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/${project-unix-name}-${game-version}"/><!-- N.B: no release number in the directory name -->
+	<property name="sftp-pfs-remotedir" value="/home/pfs/project/${project-unix-name}/${project-unix-name}/${project-unix-name}-${game-version}"/>
+	<!-- N.B: no release number in the directory name -->
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
@@ -113,11 +149,11 @@
 	</path>
 	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
 		<fail message="Please build using Ant 1.8.4 or higher.">
-		    <condition>
-		        <not>
-		            <antversion atleast="1.8.4"/>
-		        </not>
-		    </condition>
+			<condition>
+				<not>
+					<antversion atleast="1.8.4"/>
+				</not>
+			</condition>
 		</fail>
 		<fail message="Please use Java SDK 1.7 or higher.">
 			<condition>
@@ -144,25 +180,25 @@
 	<target name="compile" description="Compiles the source code">
 		<!-- Creates the directories containing the class files -->
 		<if>
-		    <not>
-			    <available file="${bindir}"/>
-		    </not>
-		    <then>
-		        <mkdir dir="${bindir}"/>
-		    </then>
+			<not>
+				<available file="${bindir}"/>
+			</not>
+			<then>
+				<mkdir dir="${bindir}"/>
+			</then>
 		</if>
 		<if>
-		    <not>
-		        <available file="${testbindir}"/>
-		    </not>
-		    <then>
-		        <mkdir dir="${testbindir}"/>
-		    </then>
+			<not>
+				<available file="${testbindir}"/>
+			</not>
+			<then>
+				<mkdir dir="${testbindir}"/>
+			</then>
 		</if>
 		<!-- Copies the resources into the same directory than the class files -->
 		<copy todir="${bindir}">
 			<fileset dir="." includes="*.txt,*.properties"/>
-		    <fileset dir="src/main/resources"/>
+			<fileset dir="src/main/resources"/>
 		</copy>
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
@@ -174,11 +210,11 @@
 		<javac includeantruntime="false" srcdir="${testsrcdir}"              
 		       destdir="${testbindir}"
 		       debug="on" source="1.7" target="1.7">
-		    <classpath>
-		        <path refid="project.class.path"/>
-		    	<fileset dir="${bindir}"/>
-		    </classpath>
-		    <include name="**/*.java"/>
+			<classpath>
+				<path refid="project.class.path"/>
+				<fileset dir="${bindir}"/>
+			</classpath>
+			<include name="**/*.java"/>
 		</javac>
 	</target>
 	<!-- =================================================================== -->
@@ -208,7 +244,7 @@
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
-		<antcall target="upload" />
+		<!--<antcall target="upload" />-->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create JARs                                                       -->
@@ -248,17 +284,17 @@
 		</jar>
 		<!-- extracts the manifest of the main JOGL JAR -->
 		<unzip src="lib/jogamp/jogamp-fat.jar" dest="${destdir}">
-		    <patternset>
-		        <include name="META-INF/MANIFEST.MF"/>
-		    </patternset>
+			<patternset>
+				<include name="META-INF/MANIFEST.MF"/>
+			</patternset>
 		</unzip>
 		<!-- keeps only the attributes of the implementation -->
 		<copy file="${destdir}/META-INF/MANIFEST.MF" tofile="${destdir}/META-INF/MANIFEST.MF.tmp">
-		    <filterchain>
-		        <linecontains>
-		            <contains value="Implementation-"/>
-		        </linecontains>
-		    </filterchain>
+			<filterchain>
+				<linecontains>
+					<contains value="Implementation-"/>
+				</linecontains>
+			</filterchain>
 		</copy>
 		<copy file="${destdir}/META-INF/MANIFEST.MF.tmp" tofile="${destdir}/META-INF/MANIFEST.MF"/>
 		<!-- fills the manifest with other necessary attributes -->
@@ -438,7 +474,7 @@
 	<!-- Create OS X APP                                                   -->
 	<!-- ================================================================= -->
 	<target name="create-os-x-app">
-	    <to-package-name property="game-package-name" input="${game-short-name}"/>
+		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle arch="universal" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
 		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
 			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
@@ -460,7 +496,7 @@
 			<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" excludes="${game-src-zip-filename}" />
 		</scp>
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-		    <fileset file="${destdir}/${game-src-zip-filename}" />
+			<fileset file="${destdir}/${game-src-zip-filename}" />
 		</scp>
 		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
@@ -479,7 +515,7 @@
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the files of the website onto the SFTP server in the Project Web Space -->
 		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}">
-		    <fileset dir="src/site"/>
+			<fileset dir="src/site"/>
 		</scp>
 	</target>
 	<!-- ================================================================= -->
