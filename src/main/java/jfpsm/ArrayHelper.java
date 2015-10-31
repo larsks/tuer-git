@@ -19,6 +19,7 @@ package jfpsm;
 
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 /**
@@ -348,16 +349,78 @@ public class ArrayHelper{
 		return(occupancyMap);
 	}
 	
-	/*public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap){
-		final StringBuilder builder=new StringBuilder();
-		//TODO compute the size of the array (row count, column count)
-		//TODO compute the maximum size of the string used to represent a full array
-		//TODO build a 2D array
+	public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap){
+		return(toString(fullArraysMap,-1,-1));
+	}
+	
+	/**
+	 * TODO not fully implemented yet
+	 * 
+	 * @param fullArraysMap
+	 * @param maxVisibleRowCount
+	 * @param maxVisibleColumnCount
+	 * @return
+	 */
+	public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap,final int maxVisibleRowCount,final int maxVisibleColumnCount){
+		//computes the size of the smallest non full arrays that could contain the full arrays
+		int dataMaxRowCount=0;
+		int dataMaxColumnCount=0;
+		int validValuesCount=0;
+		//for each full array of the map
+		for(final Entry<int[],T[][]> fullArrayEntry:fullArraysMap.entrySet())
+			{final int[] location=fullArrayEntry.getKey();
+			 final T[][] fullArray=fullArrayEntry.getValue();
+			 //a map can support null values and null keys
+			 if(fullArray!=null&&location!=null)
+		         {validValuesCount++;
+				  //uses the location as an offset of the abscissa
+				  dataMaxColumnCount=Math.max(dataMaxColumnCount,fullArray.length+location.length>=1?location[0]:0);
+		          //for each column
+			      for(final T[] fullArrayColumm:fullArray)
+			          {//if the column isn't null (Java supports the ragged arrays)
+				       if(fullArrayColumm!=null)
+					       {//the size of the column is used to compute the maximum row count, uses the location as an offset of the ordinate
+					        dataMaxRowCount=Math.max(dataMaxRowCount,fullArrayColumm.length+location.length>=2?location[1]:0);
+					       }
+			          }
+		         }
+			}
+		//computes the size of the visible array
+		final int realMaxVisibleRowCount;
+		if(maxVisibleRowCount<0)
+			realMaxVisibleRowCount=dataMaxRowCount;
+		else
+			realMaxVisibleRowCount=maxVisibleRowCount;
+		final int realMaxVisibleColumnCount;
+		if(maxVisibleColumnCount<0)
+			realMaxVisibleColumnCount=dataMaxColumnCount;
+		else
+			realMaxVisibleColumnCount=maxVisibleColumnCount;
+		//computes the maximum size of the string used to represent a full array
+		final int maxCharCountPerCell=validValuesCount==0?0:1+(int)Math.rint(Math.log10(validValuesCount));
+		//builds a 2D array
+		final String[][] stringNonFullArray=new String[realMaxVisibleColumnCount][realMaxVisibleRowCount];
 		//TODO fill it by looping on the entry set
-		//TODO fill the empty cell with a string containing spaces
-		//TODO pass it to toString()
-		return(builder.toString());
-	}*/
+		for(final Entry<int[],T[][]> fullArrayEntry:fullArraysMap.entrySet())
+		    {
+			 
+		    }
+		//fills the empty cell with a string containing spaces
+		final StringBuilder emptyCellContentBuilder=new StringBuilder();
+		for(int spaceIndex=0;spaceIndex<maxCharCountPerCell;spaceIndex++)
+			emptyCellContentBuilder.append(' ');
+		final String emptyCellContent=emptyCellContentBuilder.toString();
+		//for each column, i.e for each abscissa
+		for(int x=0;x<realMaxVisibleColumnCount;x++)
+			{//for each row, i.e for each ordinate
+			 for(int y=0;y<realMaxVisibleRowCount;y++)
+				 if(stringNonFullArray[x][y]==null||stringNonFullArray[x][y].isEmpty())
+		             {//
+					  stringNonFullArray[x][y]=emptyCellContent;
+		             }
+			}
+		return(toString(stringNonFullArray,true,null));
+	}
 	
 	/**
 	 * Creates a map of full arrays from a potentially non full array. It tries to 
