@@ -542,7 +542,10 @@ public class ArrayHelper{
 		    		    	                 {//checks whether the candidate full array doesn't go beyond the occupancy map
 		    		    	            	  boolean isOccupable=true;
 		    		    	            	  for(int i=0;i<primarySize&&isOccupable;i++)
-		    		    	            		  isOccupable&=occupancyMap[i+x]!=null&&secondarySize+y<=occupancyMap[i+x].length;
+		    		    	            		  {isOccupable&=occupancyMap[i+x]!=null&&secondarySize+y<=occupancyMap[i+x].length;
+		    		    	            		   for(int j=0;j<secondarySize&&isOccupable;j++)
+		    		    	            		       isOccupable&=occupancyMap[i+x][j+y];
+		    		    	            		  }
 		    		    	            	  if(isOccupable)
 		    		    	            	      {@SuppressWarnings("unchecked")
 										           final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
@@ -569,7 +572,10 @@ public class ArrayHelper{
 		    		    	                      {//checks whether the candidate full array doesn't go beyond the occupancy map
 			    		    	            	   boolean isOccupable=true;
 			    		    	            	   for(int i=0;i<secondarySize&&isOccupable;i++)
-			    		    	            		   isOccupable&=occupancyMap[i+x]!=null&&primarySize+y<=occupancyMap[i+x].length;
+			    		    	            		   {isOccupable&=occupancyMap[i+x]!=null&&primarySize+y<=occupancyMap[i+x].length;
+			    		    	            		    for(int j=0;j<primarySize&&isOccupable;j++)
+			    		    	            		    	isOccupable&=occupancyMap[i+x][j+y];
+			    		    	            		   }
 			    		    	            	   if(isOccupable)
 			    		    	            	       {@SuppressWarnings("unchecked")
 		    		    	            	            final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
@@ -577,7 +583,10 @@ public class ArrayHelper{
 		   	 			                                for(int j=0;j<primarySize;j++)
 		   	 			                	                {for(int i=0;i<secondarySize;i++)
 		   	 			                	        	         {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		   			                		                      occupancyMap[i+x][j+y]=false;
+		   	 			                	        	          if(!occupancyMap[i+x][j+y])
+		   	 			                	        	        	  logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
+		   	 			                	        	          else
+		   			                		                          occupancyMap[i+x][j+y]=false;
 		   			                		                     }
 		   	 			                	                }
 		   	 			                                //puts the location of the full array and the array into the map
