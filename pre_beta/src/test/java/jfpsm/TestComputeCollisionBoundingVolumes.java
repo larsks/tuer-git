@@ -18,7 +18,6 @@
 package jfpsm;
 
 import java.net.URL;
-import java.util.Arrays;
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
 import com.ardor3d.image.Image;
@@ -33,7 +32,7 @@ public class TestComputeCollisionBoundingVolumes {
 
 	public static void main(String[] args) {
 		JoglImageLoader.registerLoader();
-		final URL mapUrl=Level.class.getResource("/images/containermap1.png");
+		final URL mapUrl=Level.class.getResource("/images/containermap2.png");
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
@@ -57,12 +56,27 @@ public class TestComputeCollisionBoundingVolumes {
     	System.out.println("biggestRowIndex: "+occupancyMap.getBiggestRowIndex());
     	System.out.println("smallestColumnIndex: "+occupancyMap.getSmallestColumnIndex());
     	System.out.println("biggestColumnIndex: "+occupancyMap.getBiggestColumnIndex());
-    	System.out.println("Occupancy map check: "+(Arrays.deepEquals(primitiveCollisionMap,occupancyMap.getArrayMap())?"OK":"NOK"));
+    	
+    	boolean occupancyMapConsistentWithCollisionMap=true;
+    	final boolean[][] array=occupancyMap.getArrayMap();
+    	final int smallestColumnIndex=occupancyMap.getSmallestColumnIndex();
+    	final int smallestRowIndex=occupancyMap.getSmallestRowIndex();
+    	for(int y=0;y<map.getHeight()&&occupancyMapConsistentWithCollisionMap;y++)
+	    	for(int x=0;x<map.getWidth()&&occupancyMapConsistentWithCollisionMap;x++)
+    	        {final boolean cellInArray=0<=x-smallestColumnIndex&&x-smallestColumnIndex<array.length&&
+    	         array[x-smallestColumnIndex]!=null&&0<=y-smallestRowIndex&&y-smallestRowIndex<array[x-smallestColumnIndex].length;
+	    		 if(primitiveCollisionMap[x][y])
+    	        	 {//checks whether there is a cell at these coordinates and the cell is occupied
+	    			  occupancyMapConsistentWithCollisionMap&=cellInArray&&array[x-smallestColumnIndex][y-smallestRowIndex];
+    	        	 }
+    	         else
+    	             {//checks whether there is no cell at these coordinates or the cell isn't occupied
+    	        	  occupancyMapConsistentWithCollisionMap&=!cellInArray||!array[x-smallestColumnIndex][y-smallestRowIndex];
+    	             }
+    	        }
+    	System.out.println("Occupancy check: "+(occupancyMapConsistentWithCollisionMap?"OK":"NOK"));
     	final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
     	System.out.println("Output:");
-    	System.out.println(arrayHelper.toString(fullArrayMap));
-    	/*for(final Boolean[][] collisionArray:arrayList)
-    	    {System.out.println(arrayHelper.toString(collisionArray,false,null));
-    	    }*/
+    	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
 	}
 }
