@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 /**
  * Helper to manipulate arrays
@@ -29,12 +30,49 @@ import java.util.Objects;
  *
  */
 public class ArrayHelper{
+	
+	private static final Logger logger=Logger.getLogger(ArrayHelper.class.getName());
 
 	/**
 	 * Default constructor
 	 */
 	public ArrayHelper(){
 		super();
+	}
+	
+	public static final class Vector2i{
+		
+		private final int x;
+		
+		private final int y;
+		
+		public Vector2i(final int x,final int y){
+			super();
+			this.x=x;
+			this.y=y;
+		}
+		
+		public int getX(){
+			return(x);
+		}
+		
+		public int getY(){
+			return(y);
+		}
+		
+		@Override
+		public int hashCode(){
+			final int prime=31;
+			int result=1;
+			result=prime*result+x;
+			result=prime*result+y;
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object other){
+			return(this==other||(other!=null&&other.getClass()==Vector2i.class&&x==((Vector2i)other).x&&y==((Vector2i)other).y));
+		}
 	}
 	
 	/**
@@ -349,40 +387,42 @@ public class ArrayHelper{
 		return(occupancyMap);
 	}
 	
-	public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap){
+	public <T> String toString(final java.util.Map<Vector2i,T[][]> fullArraysMap){
 		return(toString(fullArraysMap,-1,-1));
 	}
 	
 	/**
-	 * TODO not fully implemented yet
+	 * 
 	 * 
 	 * @param fullArraysMap
 	 * @param maxVisibleRowCount
 	 * @param maxVisibleColumnCount
 	 * @return
 	 */
-	public <T> String toString(final java.util.Map<int[],T[][]> fullArraysMap,final int maxVisibleRowCount,final int maxVisibleColumnCount){
+	public <T> String toString(final java.util.Map<Vector2i,T[][]> fullArraysMap,final int maxVisibleRowCount,final int maxVisibleColumnCount){
 		//computes the size of the smallest non full arrays that could contain the full arrays
 		int dataMaxRowCount=0;
 		int dataMaxColumnCount=0;
 		int validValuesCount=0;
 		//for each full array of the map
-		for(final Entry<int[],T[][]> fullArrayEntry:fullArraysMap.entrySet())
-			{final int[] location=fullArrayEntry.getKey();
+		for(final Entry<Vector2i,T[][]> fullArrayEntry:fullArraysMap.entrySet())
+			{final Vector2i location=fullArrayEntry.getKey();
 			 final T[][] fullArray=fullArrayEntry.getValue();
-			 //a map can support null values and null keys
-			 if(fullArray!=null&&location!=null)
-		         {validValuesCount++;
+			 //a map can support null values
+			 if(fullArray!=null)
+		         {final int xOffset=location==null?0:location.getX();
+		          final int yOffset=location==null?0:location.getY();
 				  //uses the location as an offset of the abscissa
-				  dataMaxColumnCount=Math.max(dataMaxColumnCount,fullArray.length+location.length>=1?location[0]:0);
+				  dataMaxColumnCount=Math.max(dataMaxColumnCount,fullArray.length+xOffset);
 		          //for each column
 			      for(final T[] fullArrayColumm:fullArray)
 			          {//if the column isn't null (Java supports the ragged arrays)
 				       if(fullArrayColumm!=null)
 					       {//the size of the column is used to compute the maximum row count, uses the location as an offset of the ordinate
-					        dataMaxRowCount=Math.max(dataMaxRowCount,fullArrayColumm.length+location.length>=2?location[1]:0);
+					        dataMaxRowCount=Math.max(dataMaxRowCount,fullArrayColumm.length+yOffset);
 					       }
 			          }
+			      validValuesCount++;
 		         }
 			}
 		//computes the size of the visible array
@@ -397,13 +437,46 @@ public class ArrayHelper{
 		else
 			realMaxVisibleColumnCount=maxVisibleColumnCount;
 		//computes the maximum size of the string used to represent a full array
-		final int maxCharCountPerCell=validValuesCount==0?0:1+(int)Math.rint(Math.log10(validValuesCount));
+		final int maxCharCountPerCell=validValuesCount==0?0:Integer.toString(validValuesCount-1).length();
 		//builds a 2D array
 		final String[][] stringNonFullArray=new String[realMaxVisibleColumnCount][realMaxVisibleRowCount];
-		//TODO fill it by looping on the entry set
-		for(final Entry<int[],T[][]> fullArrayEntry:fullArraysMap.entrySet())
-		    {
-			 
+		if(validValuesCount>0)
+		    {//fills it by looping on the entry set
+		     int validFullArrayIndex=0;
+		     for(final Entry<Vector2i,T[][]> fullArrayEntry:fullArraysMap.entrySet())
+		         {final Vector2i location=fullArrayEntry.getKey();
+			      final T[][] fullArray=fullArrayEntry.getValue();
+			      //a map can support null values and null keys
+			      if(fullArray!=null)
+		              {final int xOffset=location==null?0:location.getX();
+		               final int yOffset=location==null?0:location.getY();
+		               final String validFullArrayIndexString=Integer.toString(validFullArrayIndex);
+		               final int validFullArrayIndexStringLength=validFullArrayIndexString.length();
+		               //for each column, i.e for each abscissa
+		               for(int x=0;x<fullArray.length;x++)
+		        	       if(fullArray[x]!=null)
+		                       {//for each row, i.e for each ordinate
+		        	            for(int y=0;y<fullArray[x].length;y++)
+		        	    	        if(fullArray[x][y]!=null&&0<=x+xOffset&&x+xOffset<stringNonFullArray.length&&0<=y+yOffset&&y+yOffset<stringNonFullArray[x+xOffset].length)
+		        	                    {//checks whether the cell is already occupied
+		        	    		         if(stringNonFullArray[x+xOffset][y+yOffset]!=null&&!stringNonFullArray[x+xOffset][y+yOffset].isEmpty())
+		        	    	                 logger.warning("Overlap at ["+(x+xOffset)+"]["+(y+yOffset)+"] between full array n°"+stringNonFullArray[x+xOffset][y+yOffset].trim()+" and full array n°"+validFullArrayIndex);
+		        	                     //builds the content of the cell
+		        	                     final StringBuilder cellContentBuilder=new StringBuilder();
+		        	                     final int leadingWhiteSpaceCount=(maxCharCountPerCell-validFullArrayIndexStringLength)/2;
+		        	                     final int trailingWhiteSpaceCount=maxCharCountPerCell-validFullArrayIndexStringLength-leadingWhiteSpaceCount;
+		        	                     for(int spaceIndex=0;spaceIndex<leadingWhiteSpaceCount;spaceIndex++)
+		        	                    	 cellContentBuilder.append(' ');
+		        	                     cellContentBuilder.append(validFullArrayIndexString);
+		        	                     for(int spaceIndex=0;spaceIndex<trailingWhiteSpaceCount;spaceIndex++)
+		        	                    	 cellContentBuilder.append(' ');
+		        	                     //sets the content of the cell
+		        	                     stringNonFullArray[x+xOffset][y+yOffset]=cellContentBuilder.toString();
+		        	                    }
+		                       }
+		               validFullArrayIndex++;
+		              }
+		         }
 		    }
 		//fills the empty cell with a string containing spaces
 		final StringBuilder emptyCellContentBuilder=new StringBuilder();
@@ -414,8 +487,9 @@ public class ArrayHelper{
 		for(int x=0;x<realMaxVisibleColumnCount;x++)
 			{//for each row, i.e for each ordinate
 			 for(int y=0;y<realMaxVisibleRowCount;y++)
+				 //if the cell is empty
 				 if(stringNonFullArray[x][y]==null||stringNonFullArray[x][y].isEmpty())
-		             {//
+		             {//puts a string with empty spaces into it (to preserve the alignment with the other cells)
 					  stringNonFullArray[x][y]=emptyCellContent;
 		             }
 			}
@@ -429,10 +503,10 @@ public class ArrayHelper{
 	 * @param array potentially non full array
 	 * @return map of full arrays whose keys are their respective locations
 	 */
-	public <T> java.util.Map<int[],T[][]> computeFullArraysFromNonFullArray(final T[][] array){
+	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array){
 		//creates an occupancy map that will be updated (instead of modifying the supplied array)
 		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array);
-		final java.util.Map<int[],T[][]> fullArraysMap=new LinkedHashMap<>();
+		final java.util.Map<Vector2i,T[][]> fullArraysMap=new LinkedHashMap<>();
 		//if the array isn't empty (then the occupancy map isn't empty)
 		if(!occupancyMapObj.isEmpty())
 		    {final int smallestRowIndex=occupancyMapObj.getSmallestRowIndex();
@@ -463,35 +537,40 @@ public class ArrayHelper{
 		    		    	                isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
 		    		    		           (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y-1,primarySize,1,true))&&
 		    		    		           (y+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
+		    		    	            	 //FIXME improve the condition to avoid ArrayIndexOutOfBoundsException
 		    		    	                 {@SuppressWarnings("unchecked")
-										      final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
+										      final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
 		    		    	                  //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
 		    		    	                  for(int i=0;i<primarySize;i++)
 		    		    		                  {for(int j=0;j<secondarySize;j++)
-		    		    		                       {adjacentTrisSubArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		    		    		                       {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
 		    		    		                        occupancyMap[i+x][j+y]=false;
 		    		    		                       }
 		    		    		                  }
 		    		    	                  //puts the location of the full array and the array into the map
-		    		    	                  fullArraysMap.put(new int[]{x,y},adjacentTrisSubArray);
+		    		    	                  if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
+		    		    	                	  logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
 		    		    	                 }
 		    		    	             else
 		    		    	                 {//horizontal checks (rows)
 		    		    	                  if(primarySize+y<=columnCount&&secondarySize<=rowCount&&
 		    		    	                     isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
 		    		 			 	            (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x-1,y,primarySize,1,false))&&
-		    		 			 	            (x+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
+		    		 			 	            (x+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x+secondarySize,y,primarySize,1,false))&&
+		    		 			 	             //FIXME improve the condition to avoid ArrayIndexOutOfBoundsException
+		    		 			 	             secondarySize+x+smallestColumnIndex<array.length)
 		    		    	                      {@SuppressWarnings("unchecked")
-		    		    	            	       final T[][] adjacentTrisSubArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
+		    		    	            	       final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
 		   	 			                           //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
 		   	 			                           for(int j=0;j<primarySize;j++)
 		   	 			                	           {for(int i=0;i<secondarySize;i++)
-		   	 			                	        	    {adjacentTrisSubArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		   	 			                	        	    {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
 		   			                		                 occupancyMap[i+x][j+y]=false;
 		   			                		                }
 		   	 			                	           }
 		   	 			                           //puts the location of the full array and the array into the map
-				    		    	               fullArraysMap.put(new int[]{x,y},adjacentTrisSubArray);
+		   	 			                           if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
+			    		    	                	   logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
 		    		    	                      }
 		    		    	                 }
 		    		                    }

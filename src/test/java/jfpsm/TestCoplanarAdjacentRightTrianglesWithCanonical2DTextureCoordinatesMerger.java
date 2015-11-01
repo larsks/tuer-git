@@ -19,15 +19,13 @@ package jfpsm;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
-
+import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.RightTriangleInfo;
 
 /**
@@ -61,10 +59,9 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
 			
 		};
 		System.out.println(arrayHelper.toString(adjacentTrisArray,false,trisOccupancyCheck));
-		ArrayList<RightTriangleInfo[][][]> adjacentTrisArraysList=new ArrayList<>(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.computeAdjacentMergeableTrisArraysMap(adjacentTrisArray).values());
+		java.util.Map<Vector2i,RightTriangleInfo[][][]> adjacentTrisArraysMap=CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
 		System.out.println("Output:");
-		for(RightTriangleInfo[][][] resultingAdjacentTrisArray:adjacentTrisArraysList)
-			System.out.println(arrayHelper.toString(resultingAdjacentTrisArray,false,trisOccupancyCheck));
+		System.out.println(arrayHelper.toString(adjacentTrisArraysMap));
 	}
 	
 	private static void testOptimize(){
