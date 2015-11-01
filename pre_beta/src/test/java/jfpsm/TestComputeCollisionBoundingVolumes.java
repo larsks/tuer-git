@@ -18,17 +18,14 @@
 package jfpsm;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-
 import jfpsm.ArrayHelper.OccupancyMap;
-
+import jfpsm.ArrayHelper.Vector2i;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.Level;
 import engine.misc.ImageHelper;
 
@@ -36,7 +33,7 @@ public class TestComputeCollisionBoundingVolumes {
 
 	public static void main(String[] args) {
 		JoglImageLoader.registerLoader();
-		final URL mapUrl=Level.class.getResource("/images/containermap1.png");
+		final URL mapUrl=Level.class.getResource("/images/containermap.png");
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
@@ -61,10 +58,11 @@ public class TestComputeCollisionBoundingVolumes {
     	System.out.println("smallestColumnIndex: "+occupancyMap.getSmallestColumnIndex());
     	System.out.println("biggestColumnIndex: "+occupancyMap.getBiggestColumnIndex());
     	System.out.println("Occupancy map check: "+(Arrays.deepEquals(primitiveCollisionMap,occupancyMap.getArrayMap())?"OK":"NOK"));
-    	final ArrayList<Boolean[][]> arrayList=new ArrayList<>(arrayHelper.computeFullArraysFromNonFullArray(collisionMap).values());
+    	final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
     	System.out.println("Output:");
-    	for(final Boolean[][] collisionArray:arrayList)
+    	System.out.println(arrayHelper.toString(fullArrayMap));
+    	/*for(final Boolean[][] collisionArray:arrayList)
     	    {System.out.println(arrayHelper.toString(collisionArray,false,null));
-    	    }
+    	    }*/
 	}
 }
