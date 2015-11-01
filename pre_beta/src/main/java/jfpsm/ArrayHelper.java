@@ -533,25 +533,24 @@ public class ArrayHelper{
 		    				        if(occupancyMap[x][y])
 		    		                    {//looks for an isolated element
 		    				    	     //horizontal checks (rows)
-		    		    	             if(/*primarySize+x<=rowCount&&secondarySize<=columnCount&&*/
+		    		    	             if(//avoids to go beyond the occupancy map
+		    		    		            primarySize+x<=columnCount&&secondarySize+y<=rowCount&&
+		    		    		            //avoids to go beyond the passed array
+		    		    		            primarySize+x+smallestColumnIndex<=array.length&&array[primarySize+x+smallestColumnIndex-1]!=null&&secondarySize+y+smallestRowIndex<=array[primarySize+x+smallestColumnIndex-1].length&&
 		    		    	                //checks if the current set of rows is isolated
 		    		    	                isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
 		    		    	                //checks if there is no row above the current set of rows or if this row isn't isolated
 		    		    		           (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y-1,primarySize,1,true))&&
 		    		    		            //checks if there is no row below the current set of rows or if this row isn't isolated
-		    		    		           (/*y+secondarySize>=rowCount||*/!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y+secondarySize,primarySize,1,true))&&
-		    		    		            //avoids to go beyond the occupancy map
-		    		    		            primarySize+x<=columnCount&&secondarySize+y<=rowCount&&
-		    		    		            //avoids to go beyond the passed array
-		    		    		            primarySize+x+smallestColumnIndex<=array.length&&array[primarySize+x+smallestColumnIndex-1]!=null&&secondarySize+y+smallestRowIndex<=array[primarySize+x+smallestColumnIndex-1].length)
+		    		    		           (y+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
 		    		    	                 {//checks whether the candidate full array doesn't go beyond the occupancy map
-		    		    	            	  boolean isOccupable=true;
-		    		    	            	  for(int i=0;i<primarySize&&isOccupable;i++)
-		    		    	            		  {isOccupable&=occupancyMap[i+x]!=null&&secondarySize+y<=occupancyMap[i+x].length;
-		    		    	            		   for(int j=0;j<secondarySize&&isOccupable;j++)
-		    		    	            		       isOccupable&=occupancyMap[i+x][j+y];
+		    		    	            	  boolean isSubsectionFullyOccupied=true;
+		    		    	            	  for(int i=0;i<primarySize&&isSubsectionFullyOccupied;i++)
+		    		    	            		  {isSubsectionFullyOccupied&=occupancyMap[i+x]!=null&&secondarySize+y<=occupancyMap[i+x].length;
+		    		    	            		   for(int j=0;j<secondarySize&&isSubsectionFullyOccupied;j++)
+		    		    	            		       isSubsectionFullyOccupied&=occupancyMap[i+x][j+y];
 		    		    	            		  }
-		    		    	            	  if(isOccupable)
+		    		    	            	  if(isSubsectionFullyOccupied)
 		    		    	            	      {@SuppressWarnings("unchecked")
 										           final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
 		    		    	                       //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
@@ -568,23 +567,24 @@ public class ArrayHelper{
 		    		    	                 }
 		    		    	             else
 		    		    	                 {//vertical checks (columns)
-		    		    	                  if(/*primarySize+y<=columnCount&&secondarySize<=rowCount&&*/
+		    		    	                  if(//avoids to go beyond the occupancy map
+		    		    	                	 secondarySize+x<=columnCount&&primarySize+y<=rowCount&&
+		    		    	                	 //avoids to go beyond the passed array
+		    		 			 	             secondarySize+x+smallestColumnIndex<=array.length&&array[secondarySize+x+smallestColumnIndex-1]!=null&&primarySize+y+smallestRowIndex<=array[secondarySize+x+smallestColumnIndex-1].length&&
 		    		    	                	 //checks if the current set of columns is isolated
 		    		    	                     isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
 		    		    	                     //checks if there is no column above the current set of columns or if this column isn't isolated
 		    		 			 	            (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x-1,y,primarySize,1,false))&&
 		    		 			 	             //checks if there is no column below the current set of columns or if this column isn't isolated
-		    		 			 	            (/*x+secondarySize>=rowCount||*/!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x+secondarySize,y,primarySize,1,false))&&
-		    		 			 	             secondarySize+x<=columnCount&&primarySize+y<=rowCount&&
-		    		 			 	             secondarySize+x+smallestColumnIndex<=array.length&&array[secondarySize+x+smallestColumnIndex-1]!=null&&primarySize+y+smallestRowIndex<=array[secondarySize+x+smallestColumnIndex-1].length)
+		    		 			 	            (x+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
 		    		    	                      {//checks whether the candidate full array doesn't go beyond the occupancy map
-			    		    	            	   boolean isOccupable=true;
-			    		    	            	   for(int i=0;i<secondarySize&&isOccupable;i++)
-			    		    	            		   {isOccupable&=occupancyMap[i+x]!=null&&primarySize+y<=occupancyMap[i+x].length;
-			    		    	            		    for(int j=0;j<primarySize&&isOccupable;j++)
-			    		    	            		    	isOccupable&=occupancyMap[i+x][j+y];
+			    		    	            	   boolean isSubsectionFullyOccupied=true;
+			    		    	            	   for(int i=0;i<secondarySize&&isSubsectionFullyOccupied;i++)
+			    		    	            		   {isSubsectionFullyOccupied&=occupancyMap[i+x]!=null&&primarySize+y<=occupancyMap[i+x].length;
+			    		    	            		    for(int j=0;j<primarySize&&isSubsectionFullyOccupied;j++)
+			    		    	            		    	isSubsectionFullyOccupied&=occupancyMap[i+x][j+y];
 			    		    	            		   }
-			    		    	            	   if(isOccupable)
+			    		    	            	   if(isSubsectionFullyOccupied)
 			    		    	            	       {@SuppressWarnings("unchecked")
 		    		    	            	            final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
 		   	 			                                //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
@@ -620,34 +620,39 @@ public class ArrayHelper{
 	 * @param columnCount column count (may be greater than the column count of the supplied array)
 	 * @param localSmallestColumnIndex lowest column index of the subsection 
 	 * @param localSmallestRowIndex lowest row index of the subsection
-	 * @param primarySize row count of the subsection if testOnColumnIsolationEnabled is true, otherwise column count
-	 * @param secondarySize column count of the subsection if testOnColumnIsolationEnabled is true, otherwise row count
+	 * @param primarySize column count of the subsection if testOnRowIsolationEnabled is true, otherwise row count
+	 * @param secondarySize row count of the subsection if testOnRowIsolationEnabled is true, otherwise column count
 	 * @param testOnRowIsolationEnabled true if the test checks whether the isolation of this subsection is tested as a row, otherwise it is tested as a column
-	 * @return
+	 * @return <code>true</code> if the subsection is isolated, otherwise <code>false</code>
 	 */
 	public boolean isRectangularSubSectionLocallyIsolated(final boolean[][] array,final int rowCount,final int columnCount,
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
 		boolean isolated;
-		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array
+		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array and is occupied
 	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex])
-	        {if(testOnRowIsolationEnabled)
-	             {isolated=true;
-	              //for each column, i.e for each abscissa
+	        {isolated=true;
+	    	 if(testOnRowIsolationEnabled)
+	             {//for each column, i.e for each abscissa
 	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
 	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
-	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
+	            		   //looks at the closest columns outside of the subsection on its left and on its right
+	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||
+	            	    	  //looks at the cells inside the subsection
+	            	          ((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
 	            	    	   isolated=false;
 	                  }
 	             }
 	         else
-	             {isolated=true;
-	              //for each column, i.e for each abscissa
+	             {//for each column, i.e for each abscissa
 	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
 	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
-	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
+	            		   //looks at the closest rows outside of the subsection above and below
+	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||
+	            			  //looks at the cells inside the subsection
+	            			  ((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])))
 	            	    	   isolated=false;
 	                  }
 	             }
@@ -666,28 +671,33 @@ public class ArrayHelper{
 	 * @param columnCount column count (may be greater than the column count of the supplied array)
 	 * @param localSmallestColumnIndex lowest column index of the subsection 
 	 * @param localSmallestRowIndex lowest row index of the subsection
-	 * @param primarySize row count of the subsection if testOnColumnIsolationEnabled is true, otherwise column count
-	 * @param secondarySize column count of the subsection if testOnColumnIsolationEnabled is true, otherwise row count
+	 * @param primarySize column count of the subsection if testOnRowIsolationEnabled is true, otherwise row count
+	 * @param secondarySize row count of the subsection if testOnRowIsolationEnabled is true, otherwise column count
 	 * @param testOnRowIsolationEnabled true if the test checks whether the isolation of this subsection is tested as a row, otherwise it is tested as a column
-	 * @return
+	 * @return <code>true</code> if the subsection is isolated, otherwise <code>false</code>
 	 */
 	public <T> boolean isRectangularSubSectionLocallyIsolated(final T[][] array,final int rowCount,final int columnCount,
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
 		boolean isolated;
+		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array
 	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex]!=null)
 	        {if(testOnRowIsolationEnabled)
 	             {isolated=true;
+	              //for each column, i.e for each abscissa
 	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
-	                  {for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
+	                  {//for each row, i.e for each ordinate
+	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
 	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
 	            	    	   isolated=false;
 	                  }
 	             }
 	         else
 	             {isolated=true;
+	              //for each column, i.e for each abscissa
 	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
-	                  {for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
+	                  {//for each row, i.e for each ordinate
+	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
 	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
 	            	    	   isolated=false;
 	                  }
