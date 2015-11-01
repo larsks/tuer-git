@@ -634,9 +634,9 @@ public class ArrayHelper{
 	        {isolated=true;
 	    	 if(testOnRowIsolationEnabled)
 	             {//for each column, i.e for each abscissa
-	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
+	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<columnCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
-	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
+	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<rowCount&&isolated;y++)
 	            		   //looks at the closest columns outside of the subsection on its left and on its right
 	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||
 	            	    	  //looks at the cells inside the subsection
@@ -646,9 +646,9 @@ public class ArrayHelper{
 	             }
 	         else
 	             {//for each column, i.e for each abscissa
-	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
+	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<columnCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
-	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
+	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<rowCount&&isolated;y++)
 	            		   //looks at the closest rows outside of the subsection above and below
 	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]))||
 	            			  //looks at the cells inside the subsection
@@ -680,25 +680,30 @@ public class ArrayHelper{
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
 		boolean isolated;
-		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array
+		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array and is occupied
 	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex]!=null)
-	        {if(testOnRowIsolationEnabled)
-	             {isolated=true;
-	              //for each column, i.e for each abscissa
-	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<rowCount&&isolated;x++)
+	        {isolated=true;
+	    	 if(testOnRowIsolationEnabled)
+	             {//for each column, i.e for each abscissa
+	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+primarySize&&x<columnCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
-	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<columnCount&&isolated;y++)
-	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<rowCount&&isolated;y++)
+	            		   //looks at the closest columns outside of the subsection on its left and on its right
+	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||
+	            	    	  //looks at the cells inside the subsection
+	            	          ((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
 	            	    	   isolated=false;
 	                  }
 	             }
 	         else
-	             {isolated=true;
-	              //for each column, i.e for each abscissa
-	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<rowCount&&isolated;x++)
+	             {//for each column, i.e for each abscissa
+	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+secondarySize&&x<columnCount&&isolated;x++)
 	                  {//for each row, i.e for each ordinate
-	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<columnCount&&isolated;y++)
-	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<rowCount&&isolated;y++)
+	            		   //looks at the closest rows outside of the subsection above and below
+	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||
+	            			  //looks at the cells inside the subsection
+	            			  ((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
 	            	    	   isolated=false;
 	                  }
 	             }
