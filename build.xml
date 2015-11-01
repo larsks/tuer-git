@@ -200,6 +200,9 @@
 			<fileset dir="." includes="*.txt,*.properties"/>
 			<fileset dir="src/main/resources"/>
 		</copy>
+		<copy todir="${testbindir}">
+		    <fileset dir="src/test/resources"/>
+		</copy>
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"

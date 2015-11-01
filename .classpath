@@ -2,8 +2,9 @@
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
-	<classpathentry excluding="src/main/java/|src/main/resources/|src/test/java/" including="*.properties|*.txt" kind="src" output="target/classes" path=""/>
+	<classpathentry excluding="src/main/java/|src/main/resources/|src/test/java/|src/test/resources/" including="*.properties|*.txt" kind="src" output="target/classes" path=""/>
 	<classpathentry kind="src" output="target/classes" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/pss/CodecJOrbis.jar"/>
 	<classpathentry kind="lib" path="lib/pss/SoundSystem.jar"/>
