@@ -249,13 +249,13 @@ public class ArrayHelper{
 				 {if(array[x]!=null&&y<array[x].length)
 			          {final T value=array[x][y];
 			           if(useObjectToString)
-			               {if(value==null||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
+			               {if((occupancyCheck==null&&value==null)||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
 				    	        builder.append("[null]");
 				            else
 				    	        builder.append('[').append(Objects.toString(value)).append(']');
 			               }
 			           else
-				           {if(value==null||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
+				           {if((occupancyCheck==null&&value==null)||(occupancyCheck!=null&&!occupancyCheck.isOccupied(value)))
 				    	        builder.append("[ ]");
 				            else
 				    	        builder.append("[X]");
@@ -272,11 +272,22 @@ public class ArrayHelper{
 	 * Creates the occupancy map of an array
 	 * 
 	 * @param array array whose occupancy has to be computed
-	 * @return occupancy map of an array
 	 * 
-	 * TODO support OccupancyCheck
+	 * @return occupancy map of an array
 	 */
 	public <T> OccupancyMap createPackedOccupancyMap(final T[][] array){
+		return(createPackedOccupancyMap(array,null));
+	}
+	
+	/**
+	 * Creates the occupancy map of an array
+	 * 
+	 * @param array array whose occupancy has to be computed
+	 * @param occupancyCheck occupancy check, tells whether the object "occupies" the array cell, can be null. If <code>null</code>, the cell isn't occupied if it contains <code>null</code>
+	 * 
+	 * @return occupancy map of an array
+	 */
+	public <T> OccupancyMap createPackedOccupancyMap(final T[][] array,final OccupancyCheck<T> occupancyCheck){
 		//detects empty rows and empty columns in order to skip them later
 		int smallestRowIndex=Integer.MAX_VALUE;
 		int biggestRowIndex=Integer.MIN_VALUE;
@@ -291,7 +302,7 @@ public class ArrayHelper{
 				 if(array[x]!=null&&array[x].length>0)
 					 //for each row, i.e for each ordinate
 					 for(int y=array[x].length-1;y>=0&&!searchStopped;y--)
-						 if(array[x][y]!=null)
+						 if((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))
 			                 {//correct value
 							  biggestColumnIndex=x;
 							  //candidates
@@ -310,7 +321,7 @@ public class ArrayHelper{
 				      if(array[x]!=null)
 				    	  //for each row, i.e for each ordinate
 				          for(int y=0;y<array[x].length&&!searchStopped;y++)
-				        	  if(array[x][y]!=null)
+				        	  if((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))
 				                  {//correct value
 				                   smallestColumnIndex=x;
 				                   //candidates
@@ -327,7 +338,7 @@ public class ArrayHelper{
 				           if(array[x]!=null&&array[x].length>biggestRowIndex+1)
 				               {//for each row, i.e for each ordinate
 				        	    for(int y=array[x].length-1;y>biggestRowIndex&&!searchStopped;y--)
-				                    if(array[x][y]!=null)
+				        	    	if((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))
 				                    	biggestRowIndex=y;
 				                    if(biggestRowIndex==Integer.MAX_VALUE)
 				                        searchStopped=true;
@@ -341,7 +352,7 @@ public class ArrayHelper{
 				           if(array[x]!=null&&array[x].length>0)
 				               {//for each row, i.e for each ordinate
 				        	    for(int y=0;y<smallestRowIndex&&!searchStopped;y++)
-				                    if(array[x][y]!=null)
+				        	    	if((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))
 				                        smallestRowIndex=y;
 				                    if(smallestRowIndex==0)
 				                        searchStopped=true;
@@ -367,7 +378,7 @@ public class ArrayHelper{
 					   for(int y=0;y<rowCount;y++)
 					       {//computes the index in the original array by using the offset
 					    	final int rawY=y+smallestRowIndex;
-					        if(array[rawX][rawY]!=null)
+					    	if((occupancyCheck==null&&array[rawX][rawY]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[rawX][rawY])))
 					        	localBiggestRowIndex=rawY;
 					       }
 					   final int localRowCount=localBiggestRowIndex>=smallestRowIndex?localBiggestRowIndex-smallestRowIndex+1:0;
@@ -376,7 +387,7 @@ public class ArrayHelper{
 					   //fills the occupancy map (true <-> not null)
 				       for(int y=0;y<occupancyMapArray[x].length;y++)
 					       {final int rawY=y+smallestRowIndex;
-					        occupancyMapArray[x][y]=array[rawX][rawY]!=null;
+					        occupancyMapArray[x][y]=(occupancyCheck==null&&array[rawX][rawY]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[rawX][rawY]));
 					       }
 				      }
 			     }
@@ -504,8 +515,20 @@ public class ArrayHelper{
 	 * @return map of full arrays whose keys are their respective locations
 	 */
 	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array){
+		return(computeFullArraysFromNonFullArray(array,null));
+	}
+	
+	/**
+	 * Creates a map of full arrays from a potentially non full array. It tries to 
+	 * minimize the count of full arrays and to maximize their respective sizes.
+	 * 
+	 * @param array potentially non full array
+	 * @param occupancyCheck occupancy check, tells whether the object "occupies" the array cell, can be null. If <code>null</code>, the cell isn't occupied if it contains <code>null</code>
+	 * @return map of full arrays whose keys are their respective locations
+	 */
+	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array,final OccupancyCheck<T> occupancyCheck){
 		//creates an occupancy map that will be updated (instead of modifying the supplied array)
-		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array);
+		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array,occupancyCheck);
 		final java.util.Map<Vector2i,T[][]> fullArraysMap=new LinkedHashMap<>();
 		//if the array isn't empty (then the occupancy map isn't empty)
 		if(!occupancyMapObj.isEmpty())
@@ -679,9 +702,30 @@ public class ArrayHelper{
 	public <T> boolean isRectangularSubSectionLocallyIsolated(final T[][] array,final int rowCount,final int columnCount,
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
+		return(isRectangularSubSectionLocallyIsolated(array,rowCount,columnCount,localSmallestColumnIndex,localSmallestRowIndex,primarySize,secondarySize,testOnRowIsolationEnabled));
+	}
+	
+	/**
+	 * Tells whether a rectangular subsection of the supplied array is locally isolated, i.e it is full
+	 * and its close neighboring is empty
+	 * 
+	 * @param array array containing the subsection
+	 * @param rowCount row count (may be greater than the row count of the supplied array)
+	 * @param columnCount column count (may be greater than the column count of the supplied array)
+	 * @param localSmallestColumnIndex lowest column index of the subsection 
+	 * @param localSmallestRowIndex lowest row index of the subsection
+	 * @param primarySize column count of the subsection if testOnRowIsolationEnabled is true, otherwise row count
+	 * @param secondarySize row count of the subsection if testOnRowIsolationEnabled is true, otherwise column count
+	 * @param testOnRowIsolationEnabled true if the test checks whether the isolation of this subsection is tested as a row, otherwise it is tested as a column
+	 * @param occupancyCheck occupancy check, tells whether the object "occupies" the array cell, can be null. If <code>null</code>, the cell isn't occupied if it contains <code>null</code>
+	 * @return <code>true</code> if the subsection is isolated, otherwise <code>false</code>
+	 */
+	public <T> boolean isRectangularSubSectionLocallyIsolated(final T[][] array,final int rowCount,final int columnCount,
+			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
+			final boolean testOnRowIsolationEnabled,final OccupancyCheck<T> occupancyCheck){
 		boolean isolated;
 		//checks whether the first cell of the subsection [localSmallestColumnIndex,localSmallestRowIndex] is in the array and is occupied
-	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&array[localSmallestColumnIndex][localSmallestRowIndex]!=null)
+	    if(0<=localSmallestColumnIndex&&localSmallestColumnIndex<array.length&&array[localSmallestColumnIndex]!=null&&0<=localSmallestRowIndex&&localSmallestRowIndex<array[localSmallestColumnIndex].length&&((occupancyCheck==null&&array[localSmallestColumnIndex][localSmallestRowIndex]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[localSmallestColumnIndex][localSmallestRowIndex]))))
 	        {isolated=true;
 	    	 if(testOnRowIsolationEnabled)
 	             {//for each column, i.e for each abscissa
@@ -689,9 +733,9 @@ public class ArrayHelper{
 	                  {//for each row, i.e for each ordinate
 	            	   for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+secondarySize&&y<rowCount&&isolated;y++)
 	            		   //looks at the closest columns outside of the subsection on its left and on its right
-	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||
+	            	       if((((x==localSmallestColumnIndex-1)||(x==localSmallestColumnIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))))||
 	            	    	  //looks at the cells inside the subsection
-	            	          ((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            	          ((localSmallestColumnIndex-1<x)&&(x<localSmallestColumnIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||((occupancyCheck==null&&array[x][y]==null)||(occupancyCheck!=null&&!occupancyCheck.isOccupied(array[x][y]))))))
 	            	    	   isolated=false;
 	                  }
 	             }
@@ -701,9 +745,9 @@ public class ArrayHelper{
 	                  {//for each row, i.e for each ordinate
 	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+primarySize&&y<rowCount&&isolated;y++)
 	            		   //looks at the closest rows outside of the subsection above and below
-	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y]!=null))||
+	            		   if((((y==localSmallestRowIndex-1)||(y==localSmallestRowIndex+primarySize))&&(x<array.length&&array[x]!=null&&y<array[x].length&&((occupancyCheck==null&&array[x][y]!=null)||(occupancyCheck!=null&&occupancyCheck.isOccupied(array[x][y])))))||
 	            			  //looks at the cells inside the subsection
-	            			  ((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||array[x][y]==null)))
+	            			  ((localSmallestRowIndex-1<y)&&(y<localSmallestRowIndex+primarySize)&&(x>=array.length||array[x]==null||y>=array[x].length||((occupancyCheck==null&&array[x][y]==null)||(occupancyCheck!=null&&!occupancyCheck.isOccupied(array[x][y]))))))
 	            	    	   isolated=false;
 	                  }
 	             }
