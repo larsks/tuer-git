@@ -18,6 +18,7 @@
 package engine.movement;
 
 import com.jogamp.nativewindow.util.Point;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
@@ -27,9 +28,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.Texture2D;
+import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.RenderContext;
@@ -41,7 +44,6 @@ import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.ResourceSource;
 import com.ardor3d.util.resource.URLResourceSource;
-import engine.misc.ImageHelper;
 
 public abstract class TextureUpdaterController implements Serializable,SpatialController<Spatial>{
 
@@ -118,10 +120,9 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         coloredVerticesList=new ArrayList<>();
         //fills
         ReadOnlyColorRGBA sourceColor,destinationColor;
-        final ImageHelper imgHelper=new ImageHelper();
         for(int y=0;y<originalImage.getHeight();y++)
             for(int x=0;x<originalImage.getWidth();x++)
-                {final int argb=imgHelper.getARGB(originalImage,x,y);
+                {final int argb=ImageUtils.getARGB(originalImage,x,y);
                  sourceColor=new ColorRGBA().fromIntARGB(argb);
                  destinationColor=colorSubstitutionTable.get(sourceColor);
                  if(destinationColor!=null)
@@ -158,7 +159,6 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         if(updatablePixelsCount>0)
             {//modify the buffer
              Point updatedVertex;
-             final ImageHelper imgHelper=new ImageHelper();
              int rgbVal,minX=originalImage.getWidth(),minY=originalImage.getHeight(),maxX=-1,maxY=-1;
              for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
                  {rgbVal=coloredVerticesList.get(i).getValue().asIntARGB();
@@ -167,7 +167,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
                   minY=Math.min(minY,updatedVertex.getY());
                   maxX=Math.max(maxX,updatedVertex.getX());
                   maxY=Math.max(maxY,updatedVertex.getY());
-                  imgHelper.setARGB(modifiedImage,updatedVertex.getX(),updatedVertex.getY(),rgbVal);
+                  ImageUtils.setARGB(modifiedImage,updatedVertex.getX(),updatedVertex.getY(),rgbVal);
                  }
              if(minX<originalImage.getWidth())
                  {//compute the zone that needs an update

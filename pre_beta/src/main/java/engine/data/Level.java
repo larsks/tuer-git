@@ -32,6 +32,7 @@ import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
+import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
@@ -57,7 +58,6 @@ import engine.data.common.userdata.AmmunitionBoxUserData;
 import engine.data.common.userdata.MedikitUserData;
 import engine.data.common.userdata.TeleporterUserData;
 import engine.data.common.userdata.WeaponUserData;
-import engine.misc.ImageHelper;
 import engine.misc.MD2FrameSet;
 import engine.misc.NodeHelper;
 import engine.weaponry.Weapon;
@@ -128,10 +128,9 @@ public class Level implements Comparable<Level>{
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	collisionMap=new boolean[map.getWidth()][map.getHeight()];
-    	final ImageHelper imgHelper=new ImageHelper();
     	for(int y=0;y<map.getHeight();y++)
 	    	for(int x=0;x<map.getWidth();x++)
-	    		{final int argb=imgHelper.getARGB(map,x,y);
+	    		{final int argb=ImageUtils.getARGB(map,x,y);
 	    		 collisionMap[x][y]=(argb==ColorRGBA.BLUE.asIntARGB());
 	    		}
     }
