@@ -18,8 +18,7 @@
 package jfpsm;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map.Entry;
+import java.util.List;
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
 import com.ardor3d.bounding.BoundingBox;
@@ -28,15 +27,13 @@ import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
-import com.ardor3d.math.Vector3;
 import com.ardor3d.util.resource.URLResourceSource;
-import engine.data.Level;
 
 public class TestComputeCollisionBoundingVolumes{
 
 	public static void main(String[] args){
 		JoglImageLoader.registerLoader();
-		final URL mapUrl=Level.class.getResource("/images/containermap.png");
+		final URL mapUrl=TestComputeCollisionBoundingVolumes.class.getResource("/images/containermap.png");
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
@@ -83,37 +80,7 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
     	
     	//computes the bounding boxes
-    	final ArrayList<BoundingBox> boundingBoxList=new ArrayList<>();
-    	final Vector2i zero=new Vector2i(0,0);
-    	for(final Entry<Vector2i,Boolean[][]> fullArrayMapEntry:fullArrayMap.entrySet())
-    	    {final Vector2i location=fullArrayMapEntry.getKey()==null?zero:fullArrayMapEntry.getKey();
-    		 final Boolean[][] fullArray=fullArrayMapEntry.getValue();
-    		 if(fullArray!=null)
-    		     {final int fullArrayColumnCount=fullArray.length;
-    		      //all columns have the same size
-    		      final int fullArrayRowCount=fullArrayColumnCount==0?0:fullArray[0].length;
-    			  //computes the minimum and maximum coordinates
-    		      //abscissa
-    		      final int x0=location.getX();
-    			  final int x1=x0+fullArrayColumnCount;
-    			  //ordinate
-    			  final int y0=location.getY();
-    			  final int y1=y0+fullArrayRowCount;
-    			  //applicate
-    			  final int z0=0;
-    			  final int z1=1;
-    			  //extents
-    			  final double xExtent=x1-x0;
-    			  final double yExtent=y1-y0;
-    			  final double zExtent=z1-z0;
-    			  //center
-    			  final Vector3 center=new Vector3(xExtent/2.0,yExtent/2.0,zExtent/2.0);
-    			  //bounding box
-    			  final BoundingBox boundingBox=new BoundingBox(center,xExtent,yExtent,zExtent);
-    			  //adds the bounding box into the list
-    			  boundingBoxList.add(boundingBox);
-    		     }
-    	    }
+    	List<BoundingBox> boundingBoxList=new VolumeHelper().computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,true,true);
     	System.out.println("Bounding boxes: "+boundingBoxList.size());
 	}
 }
