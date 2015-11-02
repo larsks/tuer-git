@@ -80,7 +80,7 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
     	
     	//computes the bounding boxes
-    	List<BoundingBox> boundingBoxList=new VolumeHelper().computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,true,true);
+    	List<BoundingBox> boundingBoxList=new VolumeHelper().computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
     	System.out.println("Bounding boxes: "+boundingBoxList.size());
 	}
 }
