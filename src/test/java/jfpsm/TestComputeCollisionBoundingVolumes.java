@@ -20,20 +20,17 @@ package jfpsm;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map.Entry;
-
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
-
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
+import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import engine.data.Level;
-import engine.misc.ImageHelper;
 
 public class TestComputeCollisionBoundingVolumes{
 
@@ -44,10 +41,9 @@ public class TestComputeCollisionBoundingVolumes{
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
     	final boolean[][] primitiveCollisionMap=new boolean[map.getWidth()][map.getHeight()];
-    	final ImageHelper imgHelper=new ImageHelper();
     	for(int y=0;y<map.getHeight();y++)
 	    	for(int x=0;x<map.getWidth();x++)
-	    		{final int argb=imgHelper.getARGB(map,x,y);
+	    		{final int argb=ImageUtils.getARGB(map,x,y);
 	    		 collisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB()?Boolean.TRUE:null;
 	    		 primitiveCollisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB();
 	    		}
