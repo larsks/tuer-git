@@ -35,7 +35,6 @@ public class ImageHelper{
 		return(result.fromIntRGBA(rgba));
 	}
 	
-	@SuppressWarnings("cast")
 	public int getARGB(final Image img,final int x,final int y){
 		final ByteBuffer imgData=img.getData(0);
 		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());
@@ -43,31 +42,31 @@ public class ImageHelper{
 		final int argb;
 		switch(img.getDataFormat())
 		{case Alpha:
-			 argb=((((int)imgData.get(dataIndex))&0xFF)<<24);
+			 argb=((imgData.get(dataIndex)&0xFF)<<24);
 			 break;
 		 case Red:
-			 argb=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<16);
+			 argb=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<16);
 			 break;
 		 case Green:
-			 argb=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<8);
+			 argb=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<8);
 			 break;
 		 case Blue:
-			 argb=(0xFF<<24)|(((int)imgData.get(dataIndex))&0xFF);
+			 argb=(0xFF<<24)|(imgData.get(dataIndex)&0xFF);
 			 break;
 		 case RG:
-			 argb=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<16)|((((int)imgData.get(dataIndex+1))&0xFF)<<8)|(0x00);
+			 argb=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<16)|((imgData.get(dataIndex+1)&0xFF)<<8)|(0x00);
 			 break;
 		 case RGB:
-			 argb=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<16)|((((int)imgData.get(dataIndex+1))&0xFF)<<8)|(((int)imgData.get(dataIndex+2))&0xFF);
+			 argb=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<16)|((imgData.get(dataIndex+1)&0xFF)<<8)|(imgData.get(dataIndex+2)&0xFF);
 			 break;
 		 case BGR:
-			 argb=(0xFF<<24)|((((int)imgData.get(dataIndex+2))&0xFF)<<16)|((((int)imgData.get(dataIndex+1))&0xFF)<<8)|(((int)imgData.get(dataIndex))&0xFF);
+			 argb=(0xFF<<24)|((imgData.get(dataIndex+2)&0xFF)<<16)|((imgData.get(dataIndex+1)&0xFF)<<8)|(imgData.get(dataIndex)&0xFF);
 			 break;
 		 case RGBA:
-			 argb=((((int)imgData.get(dataIndex+3))&0xFF)<<24)|((((int)imgData.get(dataIndex))&0xFF)<<16)|((((int)imgData.get(dataIndex+1))&0xFF)<<8)|(((int)imgData.get(dataIndex+2))&0xFF);
+			 argb=((imgData.get(dataIndex+3)&0xFF)<<24)|((imgData.get(dataIndex)&0xFF)<<16)|((imgData.get(dataIndex+1)&0xFF)<<8)|(imgData.get(dataIndex+2)&0xFF);
 			 break;
 		 case BGRA:
-			 argb=((((int)imgData.get(dataIndex+3))&0xFF)<<24)|((((int)imgData.get(dataIndex+2))&0xFF)<<16)|((((int)imgData.get(dataIndex+1))&0xFF)<<8)|(((int)imgData.get(dataIndex))&0xFF);
+			 argb=((imgData.get(dataIndex+3)&0xFF)<<24)|((imgData.get(dataIndex+2)&0xFF)<<16)|((imgData.get(dataIndex+1)&0xFF)<<8)|(imgData.get(dataIndex)&0xFF);
 			 break;
 		 default:
 			 throw new UnsupportedOperationException("Image data format "+img.getDataFormat()+" not supported!");
@@ -75,7 +74,6 @@ public class ImageHelper{
 		return(argb);
 	}
 	
-	@SuppressWarnings("cast")
 	public int getRGBA(final Image img,final int x,final int y){
 		final ByteBuffer imgData=img.getData(0);
 		final int bytesPerPixel=ImageUtils.getPixelByteSize(img.getDataFormat(),img.getDataType());
@@ -83,31 +81,31 @@ public class ImageHelper{
 		final int rgba;
 		switch(img.getDataFormat())
 		{case Alpha:
-			 rgba=(((int)imgData.get(dataIndex))&0xFF);
+			 rgba=(imgData.get(dataIndex)&0xFF);
 			 break;
 		 case Red:
-			 rgba=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<24);
+			 rgba=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<24);
 			 break;
 		 case Green:
-			 rgba=(0xFF<<24)|((((int)imgData.get(dataIndex))&0xFF)<<16);
+			 rgba=(0xFF<<24)|((imgData.get(dataIndex)&0xFF)<<16);
 			 break;
 		 case Blue:
-			 rgba=(0xFF<<24)|(((int)imgData.get(dataIndex))&0xFF<<8);
+			 rgba=(0xFF<<24)|(imgData.get(dataIndex)&0xFF<<8);
 			 break;
 		 case RG:
-			 rgba=((((int)imgData.get(dataIndex))&0xFF)<<24)|((((int)imgData.get(dataIndex+1))&0xFF)<<16)|(0x00<<8)|(0xFF);
+			 rgba=((imgData.get(dataIndex)&0xFF)<<24)|((imgData.get(dataIndex+1)&0xFF)<<16)|(0x00<<8)|(0xFF);
 			 break;
 		 case RGB:
-			 rgba=((((int)imgData.get(dataIndex))&0xFF)<<24)|((((int)imgData.get(dataIndex+1))&0xFF)<<16)|((((int)imgData.get(dataIndex+2))&0xFF)<<8)|(0xFF);
+			 rgba=((imgData.get(dataIndex)&0xFF)<<24)|((imgData.get(dataIndex+1)&0xFF)<<16)|((imgData.get(dataIndex+2)&0xFF)<<8)|(0xFF);
 			 break;
 		 case BGR:
-			 rgba=((((int)imgData.get(dataIndex+2))&0xFF)<<24)|((((int)imgData.get(dataIndex+1))&0xFF)<<16)|((((int)imgData.get(dataIndex))&0xFF)<<8)|(0xFF);
+			 rgba=((imgData.get(dataIndex+2)&0xFF)<<24)|((imgData.get(dataIndex+1)&0xFF)<<16)|((imgData.get(dataIndex)&0xFF)<<8)|(0xFF);
 			 break;
 		 case RGBA:
-			 rgba=((((int)imgData.get(dataIndex))&0xFF)<<24)|((((int)imgData.get(dataIndex+1))&0xFF)<<16)|((((int)imgData.get(dataIndex+2))&0xFF)<<8)|(((int)imgData.get(dataIndex+3))&0xFF);
+			 rgba=((imgData.get(dataIndex)&0xFF)<<24)|((imgData.get(dataIndex+1)&0xFF)<<16)|((imgData.get(dataIndex+2)&0xFF)<<8)|(imgData.get(dataIndex+3)&0xFF);
 			 break;
 		 case BGRA:
-			 rgba=((((int)imgData.get(dataIndex+2))&0xFF)<<24)|((((int)imgData.get(dataIndex+1))&0xFF)<<16)|((((int)imgData.get(dataIndex))&0xFF)<<8)|(((int)imgData.get(dataIndex+3))&0xFF);
+			 rgba=((imgData.get(dataIndex+2)&0xFF)<<24)|((imgData.get(dataIndex+1)&0xFF)<<16)|((imgData.get(dataIndex)&0xFF)<<8)|(imgData.get(dataIndex+3)&0xFF);
 			 break;
 		 default:
 			 throw new UnsupportedOperationException("Image data format "+img.getDataFormat()+" not supported!");
