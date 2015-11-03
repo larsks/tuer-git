@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +28,15 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
+
+import jfpsm.ArrayHelper.Vector2i;
+
+import com.ardor3d.image.util.ImageUtils;
+import com.ardor3d.math.ColorRGBA;
 
 /**
  * Game files generator, communicates with the 3D engine. 
@@ -105,11 +112,13 @@ public class GameFilesGenerator{
     
     /**
      * write the level mesh into a file and the bounding boxes used for the collisions in another one
-     * @param level
-     * @param levelIndex
-     * @param project
-     * @param destFile
-     * @param destCollisionFile
+     * 
+     * @param level level
+     * @param levelIndex index of the level
+     * @param project project
+     * @param destFile file containing the geometry of the level
+     * @param destCollisionFile file containing the bounding volumes of the level
+     * 
      * @throws Exception
      */
     final void writeLevel(final FloorSet level,final int levelIndex,final Project project,final File destFile,final File destCollisionFile)throws Exception{            
@@ -164,7 +173,6 @@ public class GameFilesGenerator{
              int[][][] newIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              //int[][][] newOtherIndexOffsetArray=new int[grid.getLogicalWidth()][grid.getLogicalHeight()][grid.getLogicalDepth()];
              ArrayList<int[]> indexArrayOffsetIndicesList=new ArrayList<>();
-             ArrayList<Object> boundingBoxesList=new ArrayList<>();
              int[] logicalGridPos;
              //start with the first floor
              int j=0;
@@ -406,7 +414,23 @@ public class GameFilesGenerator{
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
              System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
              //writes the bounding boxes of the level into a file
-             success=seeker.writeSavableInstancesListIntoFile(boundingBoxesList,destCollisionFile);
+             final List<Object> boundingBoxList=new ArrayList<>();
+             if(!level.getFloorsList().isEmpty())
+                 {for(final Floor floor:level.getFloorsList())
+                      {final Map map=floor.getMap(MapType.CONTAINER_MAP);
+                	   final BufferedImage image=map.getImage();
+                	   final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
+                   	   for(int y=0;y<map.getHeight();y++)
+               	           for(int x=0;x<map.getWidth();x++)
+               	    		   {final int rgb=image.getRGB(x,y);
+               	    		    collisionMap[x][y]=rgb==Color.BLUE.getRGB()?Boolean.TRUE:null;
+               	    		   }
+                   	   final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=new ArrayHelper().computeFullArraysFromNonFullArray(collisionMap);
+                   	   final List<?> floorBoundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
+                   	   boundingBoxList.addAll(floorBoundingBoxList);
+                      }
+                 }
+             success=seeker.writeSavableInstancesListIntoFile(boundingBoxList,destCollisionFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
                   System.out.println("[INFO] Elapsed time: "+(System.currentTimeMillis()-time)/1000.0f+" seconds");

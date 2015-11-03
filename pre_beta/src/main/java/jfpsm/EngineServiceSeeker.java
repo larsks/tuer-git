@@ -21,7 +21,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Concrete engine service seeker
@@ -33,13 +33,13 @@ import java.util.ArrayList;
  * @param <U>
  * @param <V>
  */
-public class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
+public class EngineServiceSeeker<S,T,U,V,W> implements I3DServiceSeeker<S,T,U,V,W>{
     
-    private I3DServiceSeeker<S,T,U,V> delegate;
+    private I3DServiceSeeker<S,T,U,V,W> delegate;
     
     
     @Override
-    public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V> seeker){
+    public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V,W> seeker){
         delegate=seeker;
     }
     
@@ -49,7 +49,7 @@ public class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
     }
     
     @Override
-    public boolean writeSavableInstancesListIntoFile(final ArrayList<S> savablesList,final File file){
+    public boolean writeSavableInstancesListIntoFile(final List<S> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
@@ -74,4 +74,9 @@ public class EngineServiceSeeker<S,T,U,V> implements I3DServiceSeeker<S,T,U,V>{
     public void attachTextureToSpatial(final U spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
+
+	@Override
+	public W createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent) {
+		return(delegate.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent));
+	}
 }
