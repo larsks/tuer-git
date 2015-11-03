@@ -19,8 +19,10 @@ package jfpsm;
 
 import java.net.URL;
 import java.util.List;
+
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
@@ -28,6 +30,9 @@ import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.util.resource.URLResourceSource;
+
+import connection.JFPSMServiceProvider;
+import engine.service.EngineServiceProvider;
 
 public class TestComputeCollisionBoundingVolumes{
 
@@ -37,12 +42,10 @@ public class TestComputeCollisionBoundingVolumes{
     	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
     	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
     	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
-    	final boolean[][] primitiveCollisionMap=new boolean[map.getWidth()][map.getHeight()];
     	for(int y=0;y<map.getHeight();y++)
 	    	for(int x=0;x<map.getWidth();x++)
 	    		{final int argb=ImageUtils.getARGB(map,x,y);
 	    		 collisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB()?Boolean.TRUE:null;
-	    		 primitiveCollisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB();
 	    		}
     	//System.out.println("[260,3]: "+(imgHelper.getARGB(map,260,3)==ColorRGBA.BLUE.asIntARGB()));//true
     	//System.out.println(map.getWidth()+" "+map.getHeight());//300 256
@@ -65,7 +68,7 @@ public class TestComputeCollisionBoundingVolumes{
 	    	for(int x=0;x<map.getWidth()&&occupancyMapConsistentWithCollisionMap;x++)
     	        {final boolean cellInArray=0<=x-smallestColumnIndex&&x-smallestColumnIndex<array.length&&
     	         array[x-smallestColumnIndex]!=null&&0<=y-smallestRowIndex&&y-smallestRowIndex<array[x-smallestColumnIndex].length;
-	    		 if(primitiveCollisionMap[x][y])
+	    		 if(collisionMap[x][y]!=null&&collisionMap[x][y].booleanValue())
     	        	 {//checks whether there is a cell at these coordinates and the cell is occupied
 	    			  occupancyMapConsistentWithCollisionMap&=cellInArray&&array[x-smallestColumnIndex][y-smallestRowIndex];
     	        	 }
@@ -80,7 +83,9 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
     	
     	//computes the bounding boxes
-    	List<BoundingBox> boundingBoxList=new VolumeHelper().computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
+    	final I3DServiceSeeker seeker=new EngineServiceSeeker();
+        new JFPSMServiceProvider<>(new EngineServiceProvider(),seeker);
+    	List<?> boundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
     	System.out.println("Bounding boxes: "+boundingBoxList.size());
 	}
 }

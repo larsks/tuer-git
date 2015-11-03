@@ -21,7 +21,8 @@ import java.io.File;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
+import java.util.List;
+
 import engine.service.EngineServiceProvider;
 import engine.service.I3DServiceProvider;
 import jfpsm.EngineServiceSeeker;
@@ -35,14 +36,14 @@ import jfpsm.MainWindow;
  * @author Julien Gouesse
  *
  */
-public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B,C,D>{
+public final class JFPSMServiceProvider<A,B,C,D,E> implements I3DServiceSeeker<A,B,C,D,E>{
     
     /**delegate that executes the services of the engine*/
-    private final I3DServiceProvider<A,B,C,D> delegate;
+    private final I3DServiceProvider<A,B,C,D,E> delegate;
     
     
-    private JFPSMServiceProvider(final I3DServiceProvider<A,B,C,D> factory,
-    		                     final I3DServiceSeeker<A,B,C,D> seeker){
+    public JFPSMServiceProvider(final I3DServiceProvider<A,B,C,D,E> factory,
+    		                     final I3DServiceSeeker<A,B,C,D,E> seeker){
     	super();
         delegate=factory;
         bind3DServiceSeeker(seeker);
@@ -50,7 +51,7 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
     
     
     @Override
-    public final void bind3DServiceSeeker(I3DServiceSeeker<A,B,C,D> seeker){
+    public final void bind3DServiceSeeker(I3DServiceSeeker<A,B,C,D,E> seeker){
         seeker.bind3DServiceSeeker(this);
     }
     
@@ -62,7 +63,7 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
     
     @Override
     public final boolean writeSavableInstancesListIntoFile(
-    		final ArrayList<A> savablesList,final File file){
+    		final List<A> savablesList,final File file){
         return(delegate.writeSavableInstancesListIntoFile(savablesList,file));
     }
     
@@ -88,6 +89,11 @@ public final class JFPSMServiceProvider<A,B,C,D> implements I3DServiceSeeker<A,B
     public final void attachTextureToSpatial(final C spatial,final URL url){
         delegate.attachTextureToSpatial(spatial,url);
     }
+    
+    @Override
+	public E createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent){
+		return(delegate.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent));
+	}
     
     public static final void main(String[] args){
         //Disables DirectDraw under Windows in order to avoid conflicts with

@@ -20,10 +20,6 @@ package jfpsm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import com.ardor3d.bounding.BoundingBox;
-import com.ardor3d.math.Vector3;
-
 import jfpsm.ArrayHelper.Vector2i;
 
 /**
@@ -33,9 +29,12 @@ import jfpsm.ArrayHelper.Vector2i;
  *
  */
 public class VolumeHelper{
+	
+	private final I3DServiceSeeker seeker;
 
-	public VolumeHelper(){
+	public VolumeHelper(final I3DServiceSeeker seeker){
 		super();
+		this.seeker=seeker;
 	}
 	
 	/**
@@ -48,9 +47,9 @@ public class VolumeHelper{
 	 * @param generateCeilingBoundingBox <code>true</code> if a single bounding box above the main layer has to be computed, otherwise <code>false</code>
 	 * @return list of 3D bounding boxes
 	 */
-	public <T> List<BoundingBox> computeBoundingBoxListFromFullArrayMap(final java.util.Map<Vector2i,T[][]> fullArrayMap,
+	public <T> List<Object> computeBoundingBoxListFromFullArrayMap(final java.util.Map<Vector2i,T[][]> fullArrayMap,
 			final double z0,final double z1,final boolean generateFloorBoundingBox,final boolean generateCeilingBoundingBox){
-		final List<BoundingBox> boundingBoxList=new ArrayList<>();
+		final List<Object> boundingBoxList=new ArrayList<>();
     	final Vector2i zero=new Vector2i(0,0);
     	int smallestRowIndex=Integer.MAX_VALUE;
 		int biggestRowIndex=Integer.MIN_VALUE;
@@ -83,9 +82,11 @@ public class VolumeHelper{
     			       final double xExtent=Math.abs(x1-x0)/2.0;
     			       final double yExtent=Math.abs(y1-y0)/2.0;
     			       //center
-    			       final Vector3 center=new Vector3((x0+x1)/2.0,(y0+y1)/2.0,(z0+z1)/2.0);
+    			       final double xCenter=(x0+x1)/2.0;
+    			       final double yCenter=(y0+y1)/2.0;
+    			       final double zCenter=(z0+z1)/2.0;
     			       //bounding box
-    			       final BoundingBox boundingBox=new BoundingBox(center,xExtent,yExtent,zExtent);
+    			       final Object boundingBox=seeker.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent);
     			       //adds the bounding box into the list
     			       boundingBoxList.add(boundingBox);
     		          }
@@ -101,8 +102,10 @@ public class VolumeHelper{
     	          final double z3=z2-(zExtent*2.0);
     	          final double xExtent=Math.abs(x2-x3)/2.0;
 			      final double yExtent=Math.abs(y2-y3)/2.0;
-    	          final Vector3 center=new Vector3((x2+x3)/2.0,(y2+y3)/2.0,(z2+z3)/2.0);
-    	          final BoundingBox boundingBox=new BoundingBox(center,xExtent,yExtent,zExtent);
+			      final double xCenter=(x2+x3)/2.0;
+		          final double yCenter=(y2+y3)/2.0;
+		          final double zCenter=(z2+z3)/2.0;
+    	          final Object boundingBox=seeker.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent);
     	          boundingBoxList.add(boundingBox);
     	         }
     	     if(generateCeilingBoundingBox)
@@ -110,8 +113,10 @@ public class VolumeHelper{
    	              final double z3=z2+(zExtent*2.0);
    	              final double xExtent=Math.abs(x2-x3)/2.0;
 			      final double yExtent=Math.abs(y2-y3)/2.0;
-   	              final Vector3 center=new Vector3((x2+x3)/2.0,(y2+y3)/2.0,(z2+z3)/2.0);
-   	              final BoundingBox boundingBox=new BoundingBox(center,xExtent,yExtent,zExtent);
+   	              final double xCenter=(x2+x3)/2.0;
+		          final double yCenter=(y2+y3)/2.0;
+		          final double zCenter=(z2+z3)/2.0;
+   	              final Object boundingBox=seeker.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent);
    	              boundingBoxList.add(boundingBox);
     	         }
     	    }

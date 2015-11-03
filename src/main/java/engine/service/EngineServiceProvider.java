@@ -23,9 +23,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
+import java.util.List;
+
+import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
+import com.ardor3d.math.Vector3;
 import com.ardor3d.renderer.state.TextureState;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -46,7 +49,7 @@ import com.ardor3d.util.resource.URLResourceSource;
  * @author Julien Gouesse
  *
  */
-public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh>{
+public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh,BoundingBox>{
     
     private static final class DirectBinaryExporter extends BinaryExporter{
         @Override
@@ -76,7 +79,7 @@ public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Sp
     }
     
     @Override
-    public boolean writeSavableInstancesListIntoFile(final ArrayList<Savable> savablesList,final File file){
+    public boolean writeSavableInstancesListIntoFile(final List<Savable> savablesList,final File file){
         boolean success=true;
         try(FileOutputStream fos=new FileOutputStream(file)){
         	for(Savable savable:savablesList)
@@ -125,4 +128,9 @@ public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Sp
         ts.setTexture(TextureManager.load(new URLResourceSource(url),Texture.MinificationFilter.Trilinear,true));
         spatial.setRenderState(ts);
     }
+
+	@Override
+	public BoundingBox createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent){
+		return(new BoundingBox(new Vector3(xCenter,yCenter,zCenter),xExtent,yExtent,zExtent));
+	}
 }
