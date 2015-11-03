@@ -256,7 +256,7 @@
 		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,connection/*.class,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
-			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" />
+			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/*.bin,**/*.defl" />
 			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
 			<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
