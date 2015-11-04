@@ -18,6 +18,7 @@
 package engine.data;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
 
+import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.extension.model.util.KeyframeController;
 import com.ardor3d.extension.model.util.KeyframeController.PointInTime;
 import com.ardor3d.image.Image;
@@ -76,6 +78,8 @@ public class Level implements Comparable<Level>{
 	private final String identifier;
 	/**name of the resource, i.e the binary file containing the 3D spatial*/
 	private final String resourceName;
+	/**name of the resource containing the bounding volumes used in the collision system*/
+	private final String boundingBoxListResourceName;
     /**positions of the enemies*/
     private final Map<String,ReadOnlyVector3[]> enemyPositionsMap;
     /**positions of the medikits*/
@@ -101,19 +105,23 @@ public class Level implements Comparable<Level>{
     @Deprecated
     private boolean[][] collisionMap;
     
-    public Level(final String label,final String identifier,final String resourceName,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
+    private List<BoundingBox> boundingBoxList;
+    
+    public Level(final String label,final String identifier,final String resourceName,final String boundingBoxListResourceName,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
     		     final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
     	super();
     	this.label=Objects.requireNonNull(label,"the label must not be null");
     	this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
     	this.resourceName=resourceName;
+    	this.boundingBoxListResourceName=boundingBoxListResourceName;
     	this.enemyPositionsMap=enemyPositionsMap;
     	this.medikitPositionsMap=medikitPositionsMap;
     	this.weaponPositionsMap=weaponPositionsMap;
     	this.ammoBoxPositionsMap=ammoBoxPositionsMap;
     	this.skyboxIdentifier=skyboxIdentifier;
     	this.teleporterPositionsMap=teleporterPositionsMap;
+    	this.boundingBoxList=null;
     	final List<Objective> localObjectives=new ArrayList<>();
     	if(objectives!=null&&objectives.length>0)
     	    localObjectives.addAll(Arrays.asList(objectives));
@@ -133,6 +141,34 @@ public class Level implements Comparable<Level>{
 	    		{final int argb=ImageUtils.getARGB(map,x,y);
 	    		 collisionMap[x][y]=(argb==ColorRGBA.BLUE.asIntARGB());
 	    		}
+    }
+    
+    public final void readCollisionVolumes(){
+    	if(boundingBoxList==null&&boundingBoxListResourceName!=null)
+    	    {final URL url=getClass().getResource(boundingBoxListResourceName);
+    	     //if the file can be found
+    	     if(url!=null)
+    		     {//creates the list to store the bounding boxes
+    	    	  final ArrayList<BoundingBox> localBoundingBoxList=new ArrayList<>();
+    	    	  //uses a try with resource to ensure that there is no leak
+    	    	  try(final InputStream inputStream=url.openStream())
+    	    	      {//loops on the savable instances in the stream
+    	    		   while(inputStream.available()>0)
+    		               {//loads a bounding box
+    	    	    	    final BoundingBox boundingBox=(BoundingBox)binaryImporter.load(inputStream);
+    	    	    	    //adds it into the list
+    	    	    	    localBoundingBoxList.add(boundingBox);
+    		               }
+    	    		   boundingBoxList=Collections.unmodifiableList(localBoundingBoxList);
+    	    	      }
+	              catch(IOException ioe)
+	              {throw new RuntimeException("level collision volumes loading failed",ioe);}
+    		     }
+    	    }
+    }
+    
+    public final List<BoundingBox> getCollisionVolumes(){
+    	return(boundingBoxList);
     }
     
     @SuppressWarnings("unchecked")

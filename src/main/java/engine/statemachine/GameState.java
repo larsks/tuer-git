@@ -561,6 +561,11 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 boolean collisionFound=false;
                 double correctX=playerStartX,correctZ=playerStartZ;
                 int tmpX,tmpZ;
+                final List<BoundingBox> boundingBoxList=level.getCollisionVolumes();
+                if(boundingBoxList!=null&&!boundingBoxList.isEmpty())
+                    {//TODO
+                	 
+                    }
                 //temporary hack to disable collisions in some levels
                 final boolean[][] collisionMap=level.getCollisionMap();
                 for(int i=1;i<=stepCount&&!collisionFound;i++)
@@ -1433,7 +1438,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
             ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
             final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
             teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("1",new ReadOnlyVector3[]{new Vector3(116.5,0,213.5),new Vector3(120.5,0,214.5)}));
-            levelFactory.addNewLevel("Tutorial","0","/abin/LID0.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+            levelFactory.addNewLevel("Tutorial","0","/abin/LID0.abin",null,enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
         }
     	{
     		final Map<String,ReadOnlyVector3[]> enemyPositionsMap=new HashMap<>();
@@ -1447,10 +1452,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
 	        ammoBoxPositionsMap.put("SMALL_BOX_OF_9MM_BULLETS",new ReadOnlyVector3[]{new Vector3(112.5,0.1,222.5)});
 	        final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap=new HashMap<>();
 	        teleporterPositionsMap.put("",new AbstractMap.SimpleImmutableEntry<>("2",new ReadOnlyVector3[]{new Vector3(94.5,0,129.5)}));
-	        levelFactory.addNewLevel("Museum","1","/abin/LID1.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
+	        levelFactory.addNewLevel("Museum","1","/abin/LID1.abin","/abin/LID1.collision.abin",enemyPositionsMap,medikitPositions,weaponPositionsMap,ammoBoxPositionsMap,null,teleporterPositionsMap,new KillAllEnemiesObjective());
     	}
-    	levelFactory.addNewLevel("Outdoor","2","/abin/LID2.abin",null,null,null,null,"BLUE_SKY",null);
-    	levelFactory.addNewLevel("Bagnolet","3","/abin/LID3.abin",null,null,null,null,"BLUE_SKY",null);
+    	levelFactory.addNewLevel("Outdoor","2","/abin/LID2.abin",null,null,null,null,null,"BLUE_SKY",null);
+    	levelFactory.addNewLevel("Bagnolet","3","/abin/LID3.abin",null,null,null,null,null,"BLUE_SKY",null);
     	return(levelFactory);
     }
     
@@ -1764,6 +1769,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
     	    {// the two first levels use a collision map
     		 level.readCollisionMap();
     	    }
+    	level.readCollisionVolumes();
         //FIXME it should not be hard-coded
     	//TODO get the location from the argument of the transition
     	switch(level.getIdentifier())
