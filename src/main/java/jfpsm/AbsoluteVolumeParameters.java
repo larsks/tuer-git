@@ -81,6 +81,10 @@ final class AbsoluteVolumeParameters{
     	return(volumeParam!=null?volumeParam.isMergeOfAdjacentFacesEnabled():false);
     }
 
+    final VolumeParameters getVolumeParam(){
+    	return(volumeParam);
+    }
+    
     public final void setVolumeParam(final VolumeParameters volumeParam){
         this.volumeParam=volumeParam;
     }

@@ -17,7 +17,6 @@
  */
 package jfpsm;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +31,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import jfpsm.ArrayHelper.Vector2i;
+import jfpsm.CuboidParameters.Orientation;
+import jfpsm.CuboidParameters.Side;
 
 /**
  * Game files generator, communicates with the 3D engine. 
@@ -408,23 +409,39 @@ public class GameFilesGenerator{
              else
                  System.out.println("[WARNING]Export into the file "+destFile.getName()+" not successful!");
              System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "+destCollisionFile.getName());
-             //writes the bounding boxes of the level into a file
+             //computes the bounding boxes
              final List<Object> boundingBoxList=new ArrayList<>();
-             if(!level.getFloorsList().isEmpty())
-                 {for(final Floor floor:level.getFloorsList())
-                      {final Map map=floor.getMap(MapType.CONTAINER_MAP);
-                	   final BufferedImage image=map.getImage();
-                	   final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
-                   	   for(int y=0;y<map.getHeight();y++)
-               	           for(int x=0;x<map.getWidth();x++)
-               	    		   {final int rgb=image.getRGB(x,y);
-               	    		    collisionMap[x][y]=rgb==Color.BLUE.getRGB()?Boolean.TRUE:null;
-               	    		   }
-                   	   final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=new ArrayHelper().computeFullArraysFromNonFullArray(collisionMap);
-                   	   final List<?> floorBoundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
-                   	   boundingBoxList.addAll(floorBoundingBoxList);
-                      }
-                 }
+             int validFloorIndex=0;
+             for(final AbsoluteVolumeParameters[][] floorVolumeElements:volumeElementsList)
+                 if(floorVolumeElements!=null)
+                     {final Boolean[][] collisionMap=new Boolean[grid.getLogicalWidth()][grid.getLogicalDepth()];
+                	  //for each column, i.e for each abscissa
+                      for(int x=0;x<floorVolumeElements.length;x++)
+                          if(floorVolumeElements[x]!=null)
+                              {//for each row, i.e for each ordinate
+                        	   for(int z=0;z<floorVolumeElements[x].length;z++)
+                        		   if(floorVolumeElements[x][z]!=null)
+                                       {final VolumeParameters volumParam=floorVolumeElements[x][z].getVolumeParam();
+                                        //if it is a rectangular parallelepiped
+                        			    if(volumParam!=null&&volumParam instanceof CuboidParameters)
+                        			        {final CuboidParameters cuboidParam=(CuboidParameters)volumParam;
+                        			         //if it's a unit cube with the normals of all faces visible for the player (all except the top and the bottom) going outwards
+                        			    	 if(cuboidParam.getSize()!=null&&cuboidParam.getSize().length==3&&
+                        			    	    cuboidParam.getSize()[0]==1.0f&&cuboidParam.getSize()[1]==1.0f&&cuboidParam.getSize()[2]==1.0f&&
+                        			    	    cuboidParam.getOrientation(Side.FRONT)==Orientation.OUTWARDS&&cuboidParam.getOrientation(Side.BACK)==Orientation.OUTWARDS&&
+                        			    	    cuboidParam.getOrientation(Side.LEFT)==Orientation.OUTWARDS&&cuboidParam.getOrientation(Side.RIGHT)==Orientation.OUTWARDS)
+                        			    	     {//marks this cell
+                        			    		  collisionMap[x][z]=Boolean.TRUE;
+                        			    	     }
+                        			        }
+                                       }
+                              }
+                   	  final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=new ArrayHelper().computeFullArraysFromNonFullArray(collisionMap);
+                   	  final List<?> floorBoundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,validFloorIndex,validFloorIndex+1,false,false);
+                   	  boundingBoxList.addAll(floorBoundingBoxList);
+                   	  validFloorIndex++;
+                     }
+             //writes the bounding boxes of the level into the collision file
              success=seeker.writeSavableInstancesListIntoFile(boundingBoxList,destCollisionFile);
              if(success)
                  {System.out.println("[INFO] Export into the file "+destCollisionFile.getName()+" successful");
