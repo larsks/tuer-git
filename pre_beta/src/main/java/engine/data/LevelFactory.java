@@ -28,12 +28,12 @@ public class LevelFactory extends AbstractFactory<Level>{
 		super();
 	}
 	
-	public boolean addNewLevel(final String label,final String identifier,final String resourceName,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
+	public boolean addNewLevel(final String label,final String identifier,final String resourceName,final String boundingBoxListResourceName,final Map<String,ReadOnlyVector3[]> enemyPositionsMap,
 		     final Map<String,ReadOnlyVector3[]> medikitPositionsMap,final Map<String,ReadOnlyVector3[]> weaponPositionsMap,
 		     final Map<String,ReadOnlyVector3[]> ammoBoxPositionsMap,final String skyboxIdentifier,final Map<String,Entry<String,ReadOnlyVector3[]>> teleporterPositionsMap,final Objective... objectives){
 		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
 		if(success)
-			{final Level level=new Level(label,identifier,resourceName,enemyPositionsMap,medikitPositionsMap,weaponPositionsMap,ammoBoxPositionsMap,skyboxIdentifier,teleporterPositionsMap,objectives);
+			{final Level level=new Level(label,identifier,resourceName,boundingBoxListResourceName,enemyPositionsMap,medikitPositionsMap,weaponPositionsMap,ammoBoxPositionsMap,skyboxIdentifier,teleporterPositionsMap,objectives);
 			 success=add(identifier,level);
 			}
 		return(success);
