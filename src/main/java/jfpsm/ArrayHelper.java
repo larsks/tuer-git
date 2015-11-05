@@ -76,7 +76,8 @@ public class ArrayHelper{
 	}
 	
 	/**
-	 * Occupancy map, structure representing the occupation of an array, can be ragged
+	 * Occupancy map, structure representing the occupation of an array, can be ragged. This class isn't thread safe and the passed array 
+	 * shouldn't be modified outside of this class. It's not copied in order to avoid increasing the memory footprint.
 	 */
 	public static final class OccupancyMap{
 		
@@ -86,22 +87,22 @@ public class ArrayHelper{
 		private final boolean[][] arrayMap;
 		
 		/**
-		 * smallest row index, i.e minimum ordinate
+		 * smallest row index or minimum ordinate of an occupied cell in the array used to compute the array map
 		 */
 		private final int smallestRowIndex;
 		
 		/**
-		 * biggest row index, i.e maximum ordinate
+		 * biggest row index or maximum ordinate of an occupied cell in the array used to compute the array map
 		 */
 		private final int biggestRowIndex;
 		
 		/**
-		 * smallest column index, i.e minimum abscissa
+		 * smallest column index or minimum abscissa of an occupied cell in the array used to compute the array map
 		 */
 		private final int smallestColumnIndex;
         
 		/**
-		 * biggest column index, i.e maximum abscissa
+		 * biggest column index or maximum abscissa of an occupied cell in the array used to compute the array map
 		 */
 		private final int biggestColumnIndex;
         
@@ -116,13 +117,18 @@ public class ArrayHelper{
 		private final int columnCount;
 		
 		/**
+		 * count of occupied cells, i.e count of cells set to true
+		 */
+		private int occupiedCellCount;
+		
+		/**
 		 * Constructor
 		 * 
 		 * @param arrayMap array map that indicates which cells are occupied
-		 * @param smallestRowIndex smallest row index, i.e minimum ordinate
-		 * @param biggestRowIndex biggest row index, i.e maximum ordinate
-		 * @param smallestColumnIndex smallest column index, i.e minimum abscissa
-		 * @param biggestColumnIndex biggest column index, i.e maximum abscissa
+		 * @param smallestRowIndex smallest row index or minimum ordinate of an occupied cell in the array used to compute the array map
+		 * @param biggestRowIndex biggest row index or maximum ordinate of an occupied cell in the array used to compute the array map
+		 * @param smallestColumnIndex smallest column index or minimum abscissa of an occupied cell in the array used to compute the array map
+		 * @param biggestColumnIndex biggest column index or maximum abscissa of an occupied cell in the array used to compute the array map
 		 * @param rowCount row count
 		 * @param columnCount column count, must be greater than or equal to the column count of the array map
 		 */
@@ -137,6 +143,22 @@ public class ArrayHelper{
 					logger.warning("Some columns will be ignored as the column count of the array map is greater than the column count. "+arrayMap.length+">"+columnCount);
 			if(rowCount<0)
 				throw new IllegalArgumentException("The row count must be positive or equal to zero");
+			this.occupiedCellCount=0;
+			//computes the count of occupied cells
+			//for each column, i.e for each abscissa
+			for(int x=0;x<columnCount;x++)
+			    {//if there is a column
+				 if(arrayMap[x]!=null)
+			         {//doesn't visit any cell beyond the the row count
+					  final int localRowCount=Math.min(arrayMap[x].length,rowCount);
+					  //for each row, i.e for each ordinate
+				      for(int y=0;y<localRowCount;y++)
+			              if(arrayMap[x][y])
+			                  {//the cell is occupied
+			            	   this.occupiedCellCount++;
+			                  }
+			         }
+			    }
 			this.arrayMap=arrayMap;
 			this.smallestRowIndex=smallestRowIndex;
 			this.biggestRowIndex=biggestRowIndex;
@@ -189,7 +211,7 @@ public class ArrayHelper{
 		}
 		
 		/**
-		 * Sets the value at the given position
+		 * Sets the value at the given position and updates the count of cells set to true
 		 * 
 		 * @param columnIndex column index
 		 * @param rowIndex row index
@@ -200,40 +222,54 @@ public class ArrayHelper{
 				throw new IllegalArgumentException("The column index must be less than the column count. "+columnIndex+">="+columnCount);
 			if(rowCount<=rowIndex)
 				throw new IllegalArgumentException("The row index must be less than the row count. "+rowIndex+">="+rowCount);
-			arrayMap[columnIndex][rowIndex]=value;
+			if(arrayMap[columnIndex][rowIndex]!=value)
+			    {/**
+				  * updates the count of cells, tries to avoid setting an absurd value even though a modification of the array map not performed in 
+				  * this setter isn't tracked and can drive the count of occupied cells completely wrong
+				  */
+				 if(value)
+			         {//increases the count of cells set to true, it can't be greater than the maximum cell count
+			    	  this.occupiedCellCount=Math.min(this.occupiedCellCount+1,columnCount*rowCount);
+			         }
+			     else
+			         {//decreases the count of cells set to true, it can't be negative
+			    	  this.occupiedCellCount=Math.max(this.occupiedCellCount-1,0);
+			         }
+				 arrayMap[columnIndex][rowIndex]=value;
+			    }
 		}
 
 		/**
-		 * Returns the smallest row index, i.e minimum ordinate
+		 * Returns the smallest row index or minimum ordinate of an occupied cell in the array used to compute the array map
 		 * 
-		 * @return smallest row index, i.e minimum ordinate
+		 * @return smallest row index or minimum ordinate of an occupied cell in the array used to compute the array map
 		 */
 		public final int getSmallestRowIndex(){
 			return(smallestRowIndex);
 		}
 
 		/**
-		 * Returns the biggest row index, i.e maximum ordinate
+		 * Returns the biggest row index or maximum ordinate of an occupied cell in the array used to compute the array map
 		 * 
-		 * @return biggest row index, i.e maximum ordinate
+		 * @return biggest row index, i.e or maximum ordinate of an occupied cell in the array used to compute the array map
 		 */
 		public final int getBiggestRowIndex(){
 			return(biggestRowIndex);
 		}
 
 		/**
-		 * Returns the smallest column index, i.e minimum abscissa
+		 * Returns the smallest column index or minimum abscissa of an occupied cell in the array used to compute the array map
 		 * 
-		 * @return smallest column index, i.e minimum abscissa
+		 * @return smallest column index or minimum abscissa of an occupied cell in the array used to compute the array map
 		 */
 		public final int getSmallestColumnIndex(){
 			return(smallestColumnIndex);
 		}
 
 		/**
-		 * Returns the biggest column index, i.e maximum abscissa
+		 * Returns the biggest column index or maximum abscissa of an occupied cell in the array used to compute the array map
 		 * 
-		 * @return biggest column index, i.e maximum abscissa
+		 * @return biggest column index or maximum abscissa of an occupied cell in the array used to compute the array map
 		 */
 		public final int getBiggestColumnIndex(){
 			return(biggestColumnIndex);
@@ -258,12 +294,12 @@ public class ArrayHelper{
 		}
 		
 		/**
-		 * Tells whether the occupancy array is empty
+		 * Tells whether the occupancy array is empty, i.e if it has no row, no column or no cell set to true
 		 * 
 		 * @return <code>true</code> if the occupancy array is empty, otherwise <code>false</code>
 		 */
 		public final boolean isEmpty(){
-			return(rowCount==0||columnCount==0);
+			return(rowCount==0||columnCount==0||occupiedCellCount==0);
 		}
 	}
 
