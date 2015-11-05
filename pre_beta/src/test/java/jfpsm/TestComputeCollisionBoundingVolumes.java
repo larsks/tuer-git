@@ -19,18 +19,14 @@ package jfpsm;
 
 import java.net.URL;
 import java.util.List;
-
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
-
-import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.util.resource.URLResourceSource;
-
 import connection.JFPSMServiceProvider;
 import engine.service.EngineServiceProvider;
 
@@ -61,20 +57,19 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println("biggestColumnIndex: "+occupancyMap.getBiggestColumnIndex());
     	
     	boolean occupancyMapConsistentWithCollisionMap=true;
-    	final boolean[][] array=occupancyMap.getArrayMap();
     	final int smallestColumnIndex=occupancyMap.getSmallestColumnIndex();
     	final int smallestRowIndex=occupancyMap.getSmallestRowIndex();
     	for(int y=0;y<map.getHeight()&&occupancyMapConsistentWithCollisionMap;y++)
 	    	for(int x=0;x<map.getWidth()&&occupancyMapConsistentWithCollisionMap;x++)
-    	        {final boolean cellInArray=0<=x-smallestColumnIndex&&x-smallestColumnIndex<array.length&&
-    	         array[x-smallestColumnIndex]!=null&&0<=y-smallestRowIndex&&y-smallestRowIndex<array[x-smallestColumnIndex].length;
+    	        {final boolean cellInArray=0<=x-smallestColumnIndex&&x-smallestColumnIndex<occupancyMap.getColumnCount()&&
+    	         occupancyMap.hasNonNullColumn(x-smallestColumnIndex)&&0<=y-smallestRowIndex&&y-smallestRowIndex<occupancyMap.getRowCount(x-smallestColumnIndex);
 	    		 if(collisionMap[x][y]!=null&&collisionMap[x][y].booleanValue())
     	        	 {//checks whether there is a cell at these coordinates and the cell is occupied
-	    			  occupancyMapConsistentWithCollisionMap&=cellInArray&&array[x-smallestColumnIndex][y-smallestRowIndex];
+	    			  occupancyMapConsistentWithCollisionMap&=cellInArray&&occupancyMap.getValue(x-smallestColumnIndex,y-smallestRowIndex);
     	        	 }
     	         else
     	             {//checks whether there is no cell at these coordinates or the cell isn't occupied
-    	        	  occupancyMapConsistentWithCollisionMap&=!cellInArray||!array[x-smallestColumnIndex][y-smallestRowIndex];
+    	        	  occupancyMapConsistentWithCollisionMap&=!cellInArray||!occupancyMap.getValue(x-smallestColumnIndex,y-smallestRowIndex);
     	             }
     	        }
     	System.out.println("Occupancy check: "+(occupancyMapConsistentWithCollisionMap?"OK":"NOK"));

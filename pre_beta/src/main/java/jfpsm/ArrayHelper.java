@@ -124,11 +124,19 @@ public class ArrayHelper{
 		 * @param smallestColumnIndex smallest column index, i.e minimum abscissa
 		 * @param biggestColumnIndex biggest column index, i.e maximum abscissa
 		 * @param rowCount row count
-		 * @param columnCount column count
+		 * @param columnCount column count, must be greater than or equal to the column count of the array map
 		 */
 		public OccupancyMap(final boolean[][] arrayMap,final int smallestRowIndex,final int biggestRowIndex,
 				            final int smallestColumnIndex,final int biggestColumnIndex,
 				            final int rowCount,final int columnCount){
+			super();
+			if(arrayMap.length<columnCount)
+				throw new IllegalArgumentException("The column count of the array map must be greater than or equal to the column count. "+arrayMap.length+"<"+columnCount);
+			else
+				if(arrayMap.length>columnCount)
+					logger.warning("Some columns will be ignored as the column count of the array map is greater than the column count. "+arrayMap.length+">"+columnCount);
+			if(rowCount<0)
+				throw new IllegalArgumentException("The row count must be positive or equal to zero");
 			this.arrayMap=arrayMap;
 			this.smallestRowIndex=smallestRowIndex;
 			this.biggestRowIndex=biggestRowIndex;
@@ -137,14 +145,62 @@ public class ArrayHelper{
 			this.rowCount=rowCount;
 			this.columnCount=columnCount;
 		}
-
+		
 		/**
-		 * Returns the array map that indicates which cells are occupied
+		 * Tells whether the column is non null
 		 * 
-		 * @return
+		 * @param columnIndex column index
+		 * 
+		 * @return <code>true</code> if the column is non null
 		 */
-		public final boolean[][] getArrayMap(){
-			return(arrayMap);
+		public boolean hasNonNullColumn(final int columnIndex){
+			if(columnCount<=columnIndex)
+				throw new IllegalArgumentException("The column index must be less than the column count. "+columnIndex+">="+columnCount);
+			return(arrayMap[columnIndex]!=null);
+		}
+		
+		/**
+		 * Returns the row count of the column
+		 * 
+		 * @param columnIndex column index
+		 * 
+		 * @return row count of the column
+		 */
+		public int getRowCount(final int columnIndex){
+			if(columnCount<=columnIndex)
+				throw new IllegalArgumentException("The column index must be less than the column count. "+columnIndex+">="+columnCount);
+			return(arrayMap[columnIndex].length);
+		}
+		
+		/**
+		 * Returns the value at the given position
+		 * 
+		 * @param columnIndex column index
+		 * @param rowIndex row index
+		 * 
+		 * @return value at the given position
+		 */
+		public boolean getValue(final int columnIndex,final int rowIndex){
+			if(columnCount<=columnIndex)
+				throw new IllegalArgumentException("The column index must be less than the column count. "+columnIndex+">="+columnCount);
+			if(rowCount<=rowIndex)
+				throw new IllegalArgumentException("The row index must be less than the row count. "+rowIndex+">="+rowCount);
+			return(arrayMap[columnIndex][rowIndex]);
+		}
+		
+		/**
+		 * Sets the value at the given position
+		 * 
+		 * @param columnIndex column index
+		 * @param rowIndex row index
+		 * @param value value to set
+		 */
+		public void setValue(final int columnIndex,final int rowIndex,boolean value){
+			if(columnCount<=columnIndex)
+				throw new IllegalArgumentException("The column index must be less than the column count. "+columnIndex+">="+columnCount);
+			if(rowCount<=rowIndex)
+				throw new IllegalArgumentException("The row index must be less than the row count. "+rowIndex+">="+rowCount);
+			arrayMap[columnIndex][rowIndex]=value;
 		}
 
 		/**
@@ -536,7 +592,7 @@ public class ArrayHelper{
 		     final int smallestColumnIndex=occupancyMapObj.getSmallestColumnIndex();
 		     final int rowCount=occupancyMapObj.getRowCount();
 		     final int columnCount=occupancyMapObj.getColumnCount();
-			 final boolean[][] occupancyMap=occupancyMapObj.getArrayMap();
+			 //final boolean[][] occupancyMap=occupancyMapObj.getArrayMap();
 		     /**
 		      * As Java is unable to create a generic array by directly using the generic type, 
 		      * it is necessary to retrieve it thanks to the reflection
@@ -548,12 +604,12 @@ public class ArrayHelper{
 		    	 //the primary size is the most important size of the chunk
 		    	 for(int primarySize=1;primarySize<=Math.max(rowCount,columnCount);primarySize++)
 		             {//for each column, i.e for each abscissa
-		    		  for(int x=0;x<occupancyMap.length;x++)
-		    			  if(occupancyMap[x]!=null)
+		    		  for(int x=0;x<columnCount;x++)
+		    			  if(occupancyMapObj.hasNonNullColumn(x))
 		    			      {//for each row, i.e for each ordinate
-		    			       for(int y=0;y<occupancyMap[x].length;y++)
+		    			       for(int y=0;y<occupancyMapObj.getRowCount(x);y++)
 		    		               {//if this element is occupied
-		    				        if(occupancyMap[x][y])
+		    				        if(occupancyMapObj.getValue(x,y))
 		    		                    {//looks for an isolated element
 		    				    	     //horizontal checks (rows)
 		    		    	             if(//avoids to go beyond the occupancy map
@@ -561,17 +617,17 @@ public class ArrayHelper{
 		    		    		            //avoids to go beyond the passed array
 		    		    		            primarySize+x+smallestColumnIndex<=array.length&&array[primarySize+x+smallestColumnIndex-1]!=null&&secondarySize+y+smallestRowIndex<=array[primarySize+x+smallestColumnIndex-1].length&&
 		    		    	                //checks if the current set of rows is isolated
-		    		    	                isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
+		    		    	                isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
 		    		    	                //checks if there is no row above the current set of rows or if this row isn't isolated
-		    		    		           (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y-1,primarySize,1,true))&&
+		    		    		           (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y-1,primarySize,1,true))&&
 		    		    		            //checks if there is no row below the current set of rows or if this row isn't isolated
-		    		    		           (y+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
+		    		    		           (y+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
 		    		    	                 {//checks whether the candidate full array doesn't go beyond the occupancy map
 		    		    	            	  boolean isSubsectionFullyOccupied=true;
 		    		    	            	  for(int i=0;i<primarySize&&isSubsectionFullyOccupied;i++)
-		    		    	            		  {isSubsectionFullyOccupied&=occupancyMap[i+x]!=null&&secondarySize+y<=occupancyMap[i+x].length;
+		    		    	            		  {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&secondarySize+y<=occupancyMapObj.getRowCount(i+x);
 		    		    	            		   for(int j=0;j<secondarySize&&isSubsectionFullyOccupied;j++)
-		    		    	            		       isSubsectionFullyOccupied&=occupancyMap[i+x][j+y];
+		    		    	            		       isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
 		    		    	            		  }
 		    		    	            	  if(isSubsectionFullyOccupied)
 		    		    	            	      {@SuppressWarnings("unchecked")
@@ -580,7 +636,10 @@ public class ArrayHelper{
 		    		    	                       for(int i=0;i<primarySize;i++)
 		    		    		                       {for(int j=0;j<secondarySize;j++)
 		    		    		                            {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		    		    		                             occupancyMap[i+x][j+y]=false;
+		    		    		                             if(!occupancyMapObj.getValue(i+x,j+y))
+	   	 			                	        	        	  logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
+		    		    		                             else
+		    		    		                                 occupancyMapObj.setValue(i+x,j+y,false);
 		    		    		                            }
 		    		    		                       }
 		    		    	                       //puts the location of the full array and the array into the map
@@ -595,17 +654,17 @@ public class ArrayHelper{
 		    		    	                	 //avoids to go beyond the passed array
 		    		 			 	             secondarySize+x+smallestColumnIndex<=array.length&&array[secondarySize+x+smallestColumnIndex-1]!=null&&primarySize+y+smallestRowIndex<=array[secondarySize+x+smallestColumnIndex-1].length&&
 		    		    	                	 //checks if the current set of columns is isolated
-		    		    	                     isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
+		    		    	                     isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
 		    		    	                     //checks if there is no column above the current set of columns or if this column isn't isolated
-		    		 			 	            (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x-1,y,primarySize,1,false))&&
+		    		 			 	            (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x-1,y,primarySize,1,false))&&
 		    		 			 	             //checks if there is no column below the current set of columns or if this column isn't isolated
-		    		 			 	            (x+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMap,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
+		    		 			 	            (x+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
 		    		    	                      {//checks whether the candidate full array doesn't go beyond the occupancy map
 			    		    	            	   boolean isSubsectionFullyOccupied=true;
 			    		    	            	   for(int i=0;i<secondarySize&&isSubsectionFullyOccupied;i++)
-			    		    	            		   {isSubsectionFullyOccupied&=occupancyMap[i+x]!=null&&primarySize+y<=occupancyMap[i+x].length;
+			    		    	            		   {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&primarySize+y<=occupancyMapObj.getRowCount(i+x);
 			    		    	            		    for(int j=0;j<primarySize&&isSubsectionFullyOccupied;j++)
-			    		    	            		    	isSubsectionFullyOccupied&=occupancyMap[i+x][j+y];
+			    		    	            		    	isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
 			    		    	            		   }
 			    		    	            	   if(isSubsectionFullyOccupied)
 			    		    	            	       {@SuppressWarnings("unchecked")
@@ -614,10 +673,10 @@ public class ArrayHelper{
 		   	 			                                for(int j=0;j<primarySize;j++)
 		   	 			                	                {for(int i=0;i<secondarySize;i++)
 		   	 			                	        	         {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		   	 			                	        	          if(!occupancyMap[i+x][j+y])
+		   	 			                	        	          if(!occupancyMapObj.getValue(i+x,j+y))
 		   	 			                	        	        	  logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
 		   	 			                	        	          else
-		   			                		                          occupancyMap[i+x][j+y]=false;
+		   	 			                	        	        	  occupancyMapObj.setValue(i+x,j+y,false);
 		   			                		                     }
 		   	 			                	                }
 		   	 			                                //puts the location of the full array and the array into the map
@@ -634,6 +693,12 @@ public class ArrayHelper{
 		return(fullArraysMap);
 	}
 
+	public boolean isRectangularSubSectionLocallyIsolated(final OccupancyMap occupancyMap,final int rowCount,final int columnCount,
+			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
+			final boolean testOnRowIsolationEnabled){
+		return(isRectangularSubSectionLocallyIsolated(occupancyMap.arrayMap,rowCount,columnCount,localSmallestColumnIndex,localSmallestRowIndex,primarySize,secondarySize,testOnRowIsolationEnabled));
+	}
+	
 	/**
 	 * Tells whether a rectangular subsection of the supplied array is locally isolated, i.e it is full
 	 * and its close neighboring is empty
