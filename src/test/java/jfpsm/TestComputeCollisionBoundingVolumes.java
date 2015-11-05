@@ -43,8 +43,6 @@ public class TestComputeCollisionBoundingVolumes{
 	    		{final int argb=ImageUtils.getARGB(map,x,y);
 	    		 collisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB()?Boolean.TRUE:null;
 	    		}
-    	//System.out.println("[260,3]: "+(imgHelper.getARGB(map,260,3)==ColorRGBA.BLUE.asIntARGB()));//true
-    	//System.out.println(map.getWidth()+" "+map.getHeight());//300 256
     	System.out.println("Input: ");
     	final ArrayHelper arrayHelper=new ArrayHelper();
     	System.out.println(arrayHelper.toString(collisionMap,false,null));
@@ -73,7 +71,11 @@ public class TestComputeCollisionBoundingVolumes{
     	             }
     	        }
     	System.out.println("Occupancy check: "+(occupancyMapConsistentWithCollisionMap?"OK":"NOK"));
+    	final long startTime=System.currentTimeMillis();
+    	System.out.println("Start");
     	final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
+    	final long durationInMilliseconds=System.currentTimeMillis()-startTime;
+    	System.out.println("End. Duration: "+durationInMilliseconds+" ms");
     	System.out.println("Output:");
     	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
     	
