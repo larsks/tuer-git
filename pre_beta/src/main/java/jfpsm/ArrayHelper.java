@@ -301,6 +301,10 @@ public class ArrayHelper{
 		public final boolean isEmpty(){
 			return(rowCount==0||columnCount==0||occupiedCellCount==0);
 		}
+		
+		public final int getOccupiedCellCount(){
+			return(occupiedCellCount);
+		}
 	}
 
 	/**
@@ -628,7 +632,6 @@ public class ArrayHelper{
 		     final int smallestColumnIndex=occupancyMapObj.getSmallestColumnIndex();
 		     final int rowCount=occupancyMapObj.getRowCount();
 		     final int columnCount=occupancyMapObj.getColumnCount();
-			 //final boolean[][] occupancyMap=occupancyMapObj.getArrayMap();
 		     /**
 		      * As Java is unable to create a generic array by directly using the generic type, 
 		      * it is necessary to retrieve it thanks to the reflection
@@ -636,95 +639,99 @@ public class ArrayHelper{
 		     final Class<?> arrayComponentType=array.getClass().getComponentType().getComponentType();
 		     //finds the isolated sets of adjacent triangles that could be used to create quads
 		     //the secondary size is the least important size of the chunk
-		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount);secondarySize++)
-		    	 //the primary size is the most important size of the chunk
-		    	 for(int primarySize=1;primarySize<=Math.max(rowCount,columnCount);primarySize++)
-		             {//for each column, i.e for each abscissa
-		    		  for(int x=0;x<columnCount;x++)
-		    			  if(occupancyMapObj.hasNonNullColumn(x))
-		    			      {//for each row, i.e for each ordinate
-		    			       for(int y=0;y<occupancyMapObj.getRowCount(x);y++)
-		    		               {//if this element is occupied
-		    				        if(occupancyMapObj.getValue(x,y))
-		    		                    {//looks for an isolated element
-		    				    	     //horizontal checks (rows)
-		    		    	             if(//avoids to go beyond the occupancy map
-		    		    		            primarySize+x<=columnCount&&secondarySize+y<=rowCount&&
-		    		    		            //avoids to go beyond the passed array
-		    		    		            primarySize+x+smallestColumnIndex<=array.length&&array[primarySize+x+smallestColumnIndex-1]!=null&&secondarySize+y+smallestRowIndex<=array[primarySize+x+smallestColumnIndex-1].length&&
-		    		    	                //checks if the current set of rows is isolated
-		    		    	                isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
-		    		    	                //checks if there is no row above the current set of rows or if this row isn't isolated
-		    		    		           (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y-1,primarySize,1,true))&&
-		    		    		            //checks if there is no row below the current set of rows or if this row isn't isolated
-		    		    		           (y+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
-		    		    	                 {//checks whether the candidate full array doesn't go beyond the occupancy map
-		    		    	            	  boolean isSubsectionFullyOccupied=true;
-		    		    	            	  for(int i=0;i<primarySize&&isSubsectionFullyOccupied;i++)
-		    		    	            		  {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&secondarySize+y<=occupancyMapObj.getRowCount(i+x);
-		    		    	            		   for(int j=0;j<secondarySize&&isSubsectionFullyOccupied;j++)
-		    		    	            		       isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
-		    		    	            		  }
-		    		    	            	  if(isSubsectionFullyOccupied)
-		    		    	            	      {@SuppressWarnings("unchecked")
-										           final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
-		    		    	                       //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
-		    		    	                       for(int i=0;i<primarySize;i++)
-		    		    		                       {for(int j=0;j<secondarySize;j++)
-		    		    		                            {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		    		    		                             if(!occupancyMapObj.getValue(i+x,j+y))
-	   	 			                	        	        	  logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
-		    		    		                             else
-		    		    		                                 occupancyMapObj.setValue(i+x,j+y,false);
-		    		    		                            }
-		    		    		                       }
-		    		    	                       //puts the location of the full array and the array into the map
-		    		    	                       if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
-		    		    	                	       logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
-		    		    	            	      }
-		    		    	                 }
-		    		    	             else
-		    		    	                 {//vertical checks (columns)
-		    		    	                  if(//avoids to go beyond the occupancy map
-		    		    	                	 secondarySize+x<=columnCount&&primarySize+y<=rowCount&&
-		    		    	                	 //avoids to go beyond the passed array
-		    		 			 	             secondarySize+x+smallestColumnIndex<=array.length&&array[secondarySize+x+smallestColumnIndex-1]!=null&&primarySize+y+smallestRowIndex<=array[secondarySize+x+smallestColumnIndex-1].length&&
-		    		    	                	 //checks if the current set of columns is isolated
-		    		    	                     isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
-		    		    	                     //checks if there is no column above the current set of columns or if this column isn't isolated
-		    		 			 	            (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x-1,y,primarySize,1,false))&&
-		    		 			 	             //checks if there is no column below the current set of columns or if this column isn't isolated
-		    		 			 	            (x+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
-		    		    	                      {//checks whether the candidate full array doesn't go beyond the occupancy map
-			    		    	            	   boolean isSubsectionFullyOccupied=true;
-			    		    	            	   for(int i=0;i<secondarySize&&isSubsectionFullyOccupied;i++)
-			    		    	            		   {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&primarySize+y<=occupancyMapObj.getRowCount(i+x);
-			    		    	            		    for(int j=0;j<primarySize&&isSubsectionFullyOccupied;j++)
-			    		    	            		    	isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
-			    		    	            		   }
-			    		    	            	   if(isSubsectionFullyOccupied)
-			    		    	            	       {@SuppressWarnings("unchecked")
-		    		    	            	            final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
-		   	 			                                //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
-		   	 			                                for(int j=0;j<primarySize;j++)
-		   	 			                	                {for(int i=0;i<secondarySize;i++)
-		   	 			                	        	         {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		   	 			                	        	          if(!occupancyMapObj.getValue(i+x,j+y))
-		   	 			                	        	        	  logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
-		   	 			                	        	          else
-		   	 			                	        	        	  occupancyMapObj.setValue(i+x,j+y,false);
-		   			                		                     }
-		   	 			                	                }
-		   	 			                                //puts the location of the full array and the array into the map
-		   	 			                                if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
-			    		    	                	        logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
-			    		    	            	       }
-		    		    	                      }
-		    		    	                 }
-		    		                    }
-		    		               }
-		                      }
-		             }
+		     for(int secondarySize=1;secondarySize<=Math.max(rowCount,columnCount)&&!occupancyMapObj.isEmpty();secondarySize++)
+		         {//the primary size is the most important size of the chunk
+		    	  for(int primarySize=1;primarySize<=Math.max(rowCount,columnCount)&&!occupancyMapObj.isEmpty();primarySize++)
+		    		  {//checks whether there are enough cells to occupy. This test drastically improves the performance
+		    		   if(primarySize*secondarySize<=occupancyMapObj.getOccupiedCellCount())
+		                   {//for each column, i.e for each abscissa
+		    		        for(int x=0;x<columnCount&&!occupancyMapObj.isEmpty();x++)
+		    			        if(occupancyMapObj.hasNonNullColumn(x))
+		    			            {//for each row, i.e for each ordinate
+		    			             for(int y=0;y<occupancyMapObj.getRowCount(x)&&!occupancyMapObj.isEmpty();y++)
+		    		                     {//if this element is occupied
+		    				              if(occupancyMapObj.getValue(x,y))
+		    		                          {//looks for an isolated element
+		    				    	           //horizontal checks (rows)
+		    		    	                   if(//avoids to go beyond the occupancy map
+		    		    		                  primarySize+x<=columnCount&&secondarySize+y<=rowCount&&
+		    		    		                  //avoids to go beyond the passed array
+		    		    		                  primarySize+x+smallestColumnIndex<=array.length&&array[primarySize+x+smallestColumnIndex-1]!=null&&secondarySize+y+smallestRowIndex<=array[primarySize+x+smallestColumnIndex-1].length&&
+		    		    	                      //checks if the current set of rows is isolated
+		    		    	                      isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,true)&&
+		    		    	                      //checks if there is no row above the current set of rows or if this row isn't isolated
+		    		    		                  (y-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y-1,primarySize,1,true))&&
+		    		    		                  //checks if there is no row below the current set of rows or if this row isn't isolated
+		    		    		                  (y+secondarySize>=rowCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y+secondarySize,primarySize,1,true)))
+		    		    	                       {//checks whether the candidate full array doesn't go beyond the occupancy map
+		    		    	            	        boolean isSubsectionFullyOccupied=true;
+		    		    	            	        for(int i=0;i<primarySize&&isSubsectionFullyOccupied;i++)
+		    		    	            		        {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&secondarySize+y<=occupancyMapObj.getRowCount(i+x);
+		    		    	            		         for(int j=0;j<secondarySize&&isSubsectionFullyOccupied;j++)
+		    		    	            		             isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
+		    		    	            		        }
+		    		    	            	        if(isSubsectionFullyOccupied)
+		    		    	            	            {@SuppressWarnings("unchecked")
+										                 final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,primarySize,secondarySize);
+		    		    	                             //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
+		    		    	                             for(int i=0;i<primarySize;i++)
+		    		    		                             {for(int j=0;j<secondarySize;j++)
+		    		    		                                  {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		    		    		                                   if(!occupancyMapObj.getValue(i+x,j+y))
+	   	 			                	        	         	      logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
+		    		    		                                   else
+		    		    		                                       occupancyMapObj.setValue(i+x,j+y,false);
+		    		    		                                  }
+		    		    		                             }
+		    		    	                             //puts the location of the full array and the array into the map
+		    		    	                             if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
+		    		    	                	             logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
+		    		    	            	            }
+		    		    	                       }
+		    		    	                   else
+		    		    	                       {//vertical checks (columns)
+		    		    	                        if(//avoids to go beyond the occupancy map
+		    		    	                 	       secondarySize+x<=columnCount&&primarySize+y<=rowCount&&
+		    		    	                 	       //avoids to go beyond the passed array
+		    		 			 	                   secondarySize+x+smallestColumnIndex<=array.length&&array[secondarySize+x+smallestColumnIndex-1]!=null&&primarySize+y+smallestRowIndex<=array[secondarySize+x+smallestColumnIndex-1].length&&
+		    		    	                	       //checks if the current set of columns is isolated
+		    		    	                           isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x,y,primarySize,secondarySize,false)&&
+		    		    	                           //checks if there is no column above the current set of columns or if this column isn't isolated
+		    		 			 	                   (x-1<0||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x-1,y,primarySize,1,false))&&
+		    		 			 	                   //checks if there is no column below the current set of columns or if this column isn't isolated
+		    		 			 	                   (x+secondarySize>=columnCount||!isRectangularSubSectionLocallyIsolated(occupancyMapObj,rowCount,columnCount,x+secondarySize,y,primarySize,1,false)))
+		    		    	                            {//checks whether the candidate full array doesn't go beyond the occupancy map
+			    		    	            	         boolean isSubsectionFullyOccupied=true;
+			    		    	            	         for(int i=0;i<secondarySize&&isSubsectionFullyOccupied;i++)
+			    		    	            		         {isSubsectionFullyOccupied&=occupancyMapObj.hasNonNullColumn(i+x)&&primarySize+y<=occupancyMapObj.getRowCount(i+x);
+			    		    	            		          for(int j=0;j<primarySize&&isSubsectionFullyOccupied;j++)
+			    		    	            		    	      isSubsectionFullyOccupied&=occupancyMapObj.getValue(i+x,j+y);
+			    		    	            		         }
+			    		    	            	         if(isSubsectionFullyOccupied)
+			    		    	            	             {@SuppressWarnings("unchecked")
+		    		    	            	                  final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,secondarySize,primarySize);
+		   	 			                                      //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
+		   	 			                                      for(int j=0;j<primarySize;j++)
+		   	 			                	                      {for(int i=0;i<secondarySize;i++)
+		   	 			                	        	               {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
+		   	 			                	        	                if(!occupancyMapObj.getValue(i+x,j+y))
+		   	 			                	        	         	        logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
+		   	 			                	        	                else
+		   	 			                	        	        	        occupancyMapObj.setValue(i+x,j+y,false);
+		   			                		                           }
+		   	 			                	                      }
+		   	 			                                      //puts the location of the full array and the array into the map
+		   	 			                                      if(fullArraysMap.put(new Vector2i(x+smallestColumnIndex,y+smallestRowIndex),fullArray)!=null)
+			    		    	                	              logger.warning("Overlap at ["+(x+smallestColumnIndex)+"]["+(y+smallestRowIndex)+"]");
+			    		    	            	             }
+		    		    	                            }
+		    		    	                       }
+		    		                          }
+		    		                     }
+		                            }
+		                   }
+		              }
+		         }
 		    }
 		return(fullArraysMap);
 	}
