@@ -810,7 +810,7 @@ public class ArrayHelper{
 	public <T> boolean isRectangularSubSectionLocallyIsolated(final T[][] array,final int rowCount,final int columnCount,
 			final int localSmallestColumnIndex,final int localSmallestRowIndex,final int primarySize,final int secondarySize,
 			final boolean testOnRowIsolationEnabled){
-		return(isRectangularSubSectionLocallyIsolated(array,rowCount,columnCount,localSmallestColumnIndex,localSmallestRowIndex,primarySize,secondarySize,testOnRowIsolationEnabled));
+		return(isRectangularSubSectionLocallyIsolated(array,rowCount,columnCount,localSmallestColumnIndex,localSmallestRowIndex,primarySize,secondarySize,testOnRowIsolationEnabled,null));
 	}
 	
 	/**
