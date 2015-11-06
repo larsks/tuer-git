@@ -247,7 +247,7 @@
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
-		<!--<antcall target="upload" />-->
+		<antcall target="upload" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create JARs                                                       -->
