@@ -740,9 +740,9 @@ public class ArrayHelper{
 										                  final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,subsectionColumnCount,subsectionRowCount);
 		    		    	                              //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
 		    		    	                              for(int i=0;i<subsectionColumnCount;i++)
-		    		    		                              {for(int j=0;j<subsectionRowCount;j++)
-		    		    		                                   {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		    		    		                                    if(!occupancyMapObj.getValue(i+x,j+y))
+		    		    		                              {System.arraycopy(array[i+x+smallestColumnIndex],y+smallestRowIndex,fullArray[i],0,subsectionRowCount);
+		    		    	                            	   for(int j=0;j<subsectionRowCount;j++)
+		    		    		                                   {if(!occupancyMapObj.getValue(i+x,j+y))
 	   	 			                	        	          	        logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
 		    		    		                                    else
 		    		    		                                        occupancyMapObj.setValue(i+x,j+y,false);
@@ -778,10 +778,10 @@ public class ArrayHelper{
 			    		    	            	              {@SuppressWarnings("unchecked")
 		    		    	            	                   final T[][] fullArray=(T[][])Array.newInstance(arrayComponentType,subsectionColumnCount,subsectionRowCount);
 		   	 			                                       //copies the elements of the chunk into the sub-array and marks them as removed from the occupancy map
-		   	 			                                       for(int j=0;j<subsectionRowCount;j++)
-		   	 			                	                       {for(int i=0;i<subsectionColumnCount;i++)
-		   	 			                	        	                {fullArray[i][j]=array[i+x+smallestColumnIndex][j+y+smallestRowIndex];
-		   	 			                	        	                 if(!occupancyMapObj.getValue(i+x,j+y))
+			    		    	            	               for(int i=0;i<subsectionColumnCount;i++)
+		   	 			                	                       {System.arraycopy(array[i+x+smallestColumnIndex],y+smallestRowIndex,fullArray[i],0,subsectionRowCount);
+			    		    	            	            	    for(int j=0;j<subsectionRowCount;j++)
+		   	 			                	        	                {if(!occupancyMapObj.getValue(i+x,j+y))
 		   	 			                	        	          	         logger.warning("Overlap at ["+(i+x+smallestColumnIndex)+"]["+(j+y+smallestRowIndex)+"]");
 		   	 			                	        	                 else
 		   	 			                	        	        	         occupancyMapObj.setValue(i+x,j+y,false);
