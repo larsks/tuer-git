@@ -75,9 +75,9 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println("Start");
     	final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
     	final long durationInMilliseconds=System.currentTimeMillis()-startTime;
-    	System.out.println("End. Duration: "+durationInMilliseconds+" ms");
     	System.out.println("Output:");
     	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
+    	System.out.println("End. Duration: "+durationInMilliseconds+" ms");
     	
     	//computes the bounding boxes
     	final I3DServiceSeeker seeker=new EngineServiceSeeker();
