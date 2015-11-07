@@ -633,16 +633,14 @@ ${vmargsstring}
                                 	    			    <equals arg1="@{jdk}" arg2="" />
                                 	    			    <then>
                                 	    			        <!-- uses the system JRE if any -->
-                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/usr/bin/sh
-java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
-                                	    			     ]]>
+                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+]]>
                                 	    			        </echo>
                                 	    			    </then>
                                 	    				<else>
                                 	    					<!-- uses the packaged JRE -->
-                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/usr/bin/sh
-/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
-                                                         ]]>
+                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+]]>
                                 	    					</echo>
                                 	    				</else>
                                 	    			</if>
