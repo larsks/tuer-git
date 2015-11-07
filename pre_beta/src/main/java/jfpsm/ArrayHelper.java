@@ -784,6 +784,7 @@ public class ArrayHelper{
 	              for(int x=Math.max(0,localSmallestColumnIndex-1);x<=localSmallestColumnIndex+subsectionColumnCount&&x<columnCount&&isolated;x++)
 	                  {if(x==localSmallestColumnIndex-1||x==localSmallestColumnIndex+subsectionColumnCount)
 	                       {//looks at the closest columns outside of the subsection on its left and on its right
+	                	    //for each row, i.e for each ordinate
 	                	    for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+subsectionRowCount&&y<rowCount&&isolated;y++)
 	                	        {//if the cell is in the array and if it is occupied
 	                	    	 if(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y])
@@ -792,6 +793,7 @@ public class ArrayHelper{
 	                       }
 	                   else
 	                       {//looks at the cells inside the subsection
+	                	    //for each row, i.e for each ordinate
 	                	    for(int y=Math.max(0,localSmallestRowIndex);y<localSmallestRowIndex+subsectionRowCount&&y<rowCount&&isolated;y++)
 	                	    	{//if the cell isn't in the array or if it isn't occupied
 	                	    	 if(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])
@@ -801,24 +803,28 @@ public class ArrayHelper{
 	                  }
 	             }
 	         else
-	             {//for each column, i.e for each abscissa
-	              for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+subsectionColumnCount&&x<columnCount&&isolated;x++)
-	                  {//for each row, i.e for each ordinate
-	            	   for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+subsectionRowCount&&y<rowCount&&isolated;y++)
-	            	       {if(y==localSmallestRowIndex-1||y==localSmallestRowIndex+subsectionRowCount)
-	            	            {//looks at the closest rows outside of the subsection above and below
-	            	    	     //if the cell is in the array and if it is occupied
+	             {//for each row, i.e for each ordinate
+	              for(int y=Math.max(0,localSmallestRowIndex-1);y<=localSmallestRowIndex+subsectionRowCount&&y<rowCount&&isolated;y++)
+	            	  {if(y==localSmallestRowIndex-1||y==localSmallestRowIndex+subsectionRowCount)
+	            	       {//looks at the closest rows outside of the subsection above and below
+	            	    	//for each column, i.e for each abscissa
+	         	            for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+subsectionColumnCount&&x<columnCount&&isolated;x++)
+	         	                {//if the cell is in the array and if it is occupied
 	            	    	     if(x<array.length&&array[x]!=null&&y<array[x].length&&array[x][y])
-	            	    	    	 isolated=false;
-	            	            }
-	            	        else
-	            	            {//looks at the cells inside the subsection
-	            	        	 //if the cell isn't in the array or if it isn't occupied
-	            	        	 if(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])
-	            	    	    	 isolated=false;
-	            	            }
+	            	    	         isolated=false;
+	         	                }
 	            	       }
-	                  }
+	            	   else
+	            	       {//looks at the cells inside the subsection
+	            	        //for each column, i.e for each abscissa
+	          	            for(int x=Math.max(0,localSmallestColumnIndex);x<localSmallestColumnIndex+subsectionColumnCount&&x<columnCount&&isolated;x++)
+	          	                {//if the cell isn't in the array or if it isn't occupied
+	            	        	 if(x>=array.length||array[x]==null||y>=array[x].length||!array[x][y])
+	            	    	         isolated=false;
+	          	                }
+	            	       }
+	            	  }
+	                  
 	             }
 	        }
 	    else
