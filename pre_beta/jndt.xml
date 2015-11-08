@@ -626,20 +626,22 @@ ${vmargsstring}
                                 	    	<if>
                                 	    		<equals arg1="@{os}" arg2="Mac OS X" />
                                 	    		<then>
-                                	                <echo message="nativelauncherenabled is set to true, no script is used to launch the program, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
+                                	                <echo message="'os=Mac OS X', 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
                                 	            </then>
                                 	    		<else>
                                 	    			<if>
                                 	    			    <equals arg1="@{jdk}" arg2="" />
                                 	    			    <then>
                                 	    			        <!-- uses the system JRE if any -->
-                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
+java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
 ]]>
                                 	    			        </echo>
                                 	    			    </then>
                                 	    				<else>
                                 	    					<!-- uses the packaged JRE -->
-                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
+/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
 ]]>
                                 	    					</echo>
                                 	    				</else>
@@ -652,7 +654,7 @@ ${vmargsstring}
                                         <equals arg1="@{jdk}" arg2="" />
                                         <then>
                                             <!-- uses the system JRE if any -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/usr/bin/bash
+                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/bin/env bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -662,12 +664,12 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
-                                        ]]>
+]]>
                                             </echo>
                                         </then>
                                         <else>
                                             <!-- uses the packaged JRE -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/usr/bin/bash
+                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/bin/env bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -677,7 +679,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
-                                        ]]>
+]]>
                                             </echo>
                                         </else>
                                     </if>
