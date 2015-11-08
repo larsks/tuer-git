@@ -495,16 +495,27 @@
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the packages and the archives (the binaries and the source code) onto the SFTP server in the Project file release -->
-		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-			<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" excludes="${game-src-zip-filename}" />
-		</scp>
-		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}">
-			<fileset file="${destdir}/${game-src-zip-filename}" />
-		</scp>
+		<for param="file-to-upload">
+		    <path>
+		    	<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" />
+		    </path>
+			<sequential>
+			    <echo message="Upload of the file @{file-to-upload} in progress..." />
+			    <scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}" />
+			    <echo message="Upload of the file @{file-to-upload} successful" />
+			</sequential>
+		</for>
 		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
-		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}">
-			<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
-		</scp>
+		<for param="file-to-upload-into-the-project-web-space">
+		    <path>
+		    	<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
+		    </path>
+			<sequential>
+			    <echo message="Upload of the file @{file-to-upload-into-the-project-web-space} in progress..." />
+			    <scp sftp="true" trust="true" file="@{file-to-upload-into-the-project-web-space}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}" />
+		        <echo message="Upload of the file @{file-to-upload-into-the-project-web-space} successful" />
+			</sequential>
+		</for>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Upload site                                                       -->
