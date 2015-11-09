@@ -148,6 +148,7 @@
     	<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
     	<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true, if os is set to 'Linux' and if nativelauncherenabled is set to false"/>
         <attribute name="appjar" description="file location of the JAR to package"/>
+    	<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
         <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
         <attribute name="vmargs" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
@@ -630,18 +631,27 @@ ${vmargsstring}
                                 	            </then>
                                 	    		<else>
                                 	    			<if>
+                                	    				<equals arg1="@{appname}" arg2="" />
+                                	    				<then>
+                                	    					<fail message="'appname' is empty whereas it is required to generate the package name as 'linuxpackageshscriptenabled' is set to true" />
+                                	    				</then>
+                                	    				<else>
+                                	    					<to-package-name property="package-name" input="@{appname}"/>
+                                	    				</else>
+                                	    			</if>
+                                	    			<if>
                                 	    			    <equals arg1="@{jdk}" arg2="" />
                                 	    			    <then>
                                 	    			        <!-- uses the system JRE if any -->
                                 	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
-java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+java ${vmargsstring} -jar /usr/share/${package-name}/${appjarbasename}
 ]]>
                                 	    			        </echo>
                                 	    			    </then>
                                 	    				<else>
                                 	    					<!-- uses the packaged JRE -->
                                 	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
-/usr/share/@{executable}/jre/bin/java ${vmargsstring} -jar /usr/share/@{executable}/${appjarbasename}
+/usr/share/${package-name}/jre/bin/java ${vmargsstring} -jar /usr/share/${package-name}/${appjarbasename}
 ]]>
                                 	    					</echo>
                                 	    				</else>
@@ -982,7 +992,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 	    	</if>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
+			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" appname="@{appname}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
 			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
 			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}" linuxpackageshscriptenabled="@{packageshscriptenabled}"/>
 			<!-- Removes the extension from the icon name -->
