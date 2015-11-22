@@ -28,11 +28,12 @@
 <ul>
 <li>Java Development Kit 1.7 or higher: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">here</a> or in the official repository of your GNU Linux distribution</li>
 <li>Eclipse 3.7 or higher (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
-<li>Subversion (SVN)</li>
+<li>Subversion (SVN)
 <ul>
 <li>Command line users: <a href="http://subversion.tigris.org/">here</a></li>
 <li>Eclipse users: <a href="http://subclipse.tigris.org/">here</a></li>
 </ul>
+</li>
 <li>ANT: <a href="http://ant.apache.org/">here</a> (already supported and bundled with major IDEs like Eclipse and Netbeans)</li>
 </ul>
 These are the URLs of the SVN repositories for all versions:
@@ -54,13 +55,14 @@ These are the URLs of the SVN repositories for all versions:
 </ul>
 Please follow one of these methods:
 <ul>
-<li>In <b>command line</b>, follow these steps:</li>
+<li>In <b>command line</b>, follow these steps:
 <ul>
 <li>enter this to get the source code: svn checkout URL_of_the_SVN_repository</li>
 <li>enter this to build the project: ant build</li>
 <li>enter this to run the game: ant run-game (or "ant run-tuer")</li>
 </ul>
-<li>In <b>Eclipse</b> (version 4.3.2 or higher), with Subclipse (version 1.6.0 or higher), follow these steps:</li>
+</li>
+<li>In <b>Eclipse</b> (version 4.3.2 or higher), with Subclipse (version 1.6.0 or higher), follow these steps:
 <ul>
 <li>Right click in the package area</li>
 <li>Select "New" -> "Other..."</li>
@@ -73,15 +75,17 @@ Please follow one of these methods:
 <li>Click on "Next"</li>
 <li>Select the topmost folder</li>
 <li>Click on "Finish"</li>
-<li>Follow these steps to build the project with Ant within Eclipse:</li>
+<li>Follow these steps to build the project with Ant within Eclipse:
 <ul>
 <li>Go to the menu "Window" -> "Show view" -> "Ant"</li>
 <li>Drag and drop the file build.xml into the ANT view</li>
 <li>Double-click on the "build" target in this view to build the project</li>
 <li>Double-click on the "run-game" (or "run-tuer") target in this view to run the game</li>
 </ul>
+</li>
 </ul>
-<li>In <b>Netbeans</b> (version 6.9.1 or higher), follow these steps:</li>
+</li>
+<li>In <b>Netbeans</b> (version 6.9.1 or higher), follow these steps:
 <ul>
 <li>Go to the "Team" menu -> "Subversion" -> "Checkout..."</li>
 <li>Enter the URL of the SVN repository as "Repository URL"</li>
@@ -99,6 +103,7 @@ Please follow one of these methods:
 <li>Go to the "project" tab -> "Source packages" -> "default package" -> build.xml -> build -> "Run Target" to build the project</li>
 <li>Go to the "project" tab -> "Source packages" -> "default package" -> build.xml -> run-game (or run-tuer) -> "Run Target" to run the game</li>
 </ul>
+</li>
 <li>In <b>other IDEs</b>, make your own way with them, I have no time to waste with proprietary IDEs and IDEs with a confidential audience</li>
 </ul>
 You can get the source code of the dependencies here :

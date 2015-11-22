@@ -28,11 +28,12 @@
 <ul>
 <li>Kit de développement Java 1.7 ou supérieur : <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
 <li>Eclipse 4.3.2 ou supérieur (optionel mais recommandé): <a href="http://www.eclipse.org/downloads/">ici</a></li>
-<li>Subversion (SVN)</li>
+<li>Subversion (SVN)
 <ul>
 <li>utilisateurs en ligne de commande: <a href="http://subversion.tigris.org/">ici</a></li>
 <li>utilisateurs d'Eclipse: <a href="http://subclipse.tigris.org/">ici</a></li>
 </ul>
+</li>
 <li>ANT: <a href="http://ant.apache.org/">ici</a> (déjà supporté et livré avec les EDI majeurs tel qu'Eclipse et Netbeans)</li>
 </ul>
 Ce sont les URLs des dépôts SVN pour toutes les versions :
@@ -54,13 +55,14 @@ Ce sont les URLs des dépôts SVN pour toutes les versions :
 </ul>
 Veuillez suivre une de ces méthodes :
 <ul>
-<li>En <b>ligne de commande</b>, suivez ces étapes :</li>
+<li>En <b>ligne de commande</b>, suivez ces étapes :
 <ul>
 <li>tapez ceci pour obtenir le code source : svn checkout URL_du_dépôt_SVN</li>
 <li>tapez ceci pour construire le projet : ant build</li>
 <li>tapez ceci pour lancer le jeu : ant run-game (ou "ant run-tuer")</li>
 </ul>
-<li>Dans <b>Eclipse</b> (version 4.3.2 ou supérieure), avec Subclipse (version 1.6.0 ou supérieure), suivez ces étapes :</li>
+</li>
+<li>Dans <b>Eclipse</b> (version 4.3.2 ou supérieure), avec Subclipse (version 1.6.0 ou supérieure), suivez ces étapes :
 <ul>
 <li>Faites un clic droit dans la zone de paquetage</li>
 <li>Sélectionnez "New" -> "Other..."</li>
@@ -73,15 +75,17 @@ Veuillez suivre une de ces méthodes :
 <li>Cliquez sur "Next"</li>
 <li>Sélectionnez le répertoire le plus haut</li>
 <li>Cliquez sur "Finish"</li>
-<li>Suivez ces étapes pour construire le projet avec Ant dans Eclipse : </li>
+<li>Suivez ces étapes pour construire le projet avec Ant dans Eclipse :
 <ul>
 <li>Allez dans le menu "Window" -> "Show view" -> "Ant"</li>
 <li>Glissez et déposez le fichier build.xml dans la vue ANT</li>
 <li>Faites un doucle clic sur la cible "build" dans cette vue pour construire le projet</li>
 <li>Faites un doucle clic sur la cible "run-game" (ou "run-tuer") dans cette vue pour lancer le jeu</li>
 </ul>
+</li>
 </ul>
-<li>Dans <b>Netbeans</b> (version 6.9.1 ou supérieure), suivez ces étapes : </li>
+</li>
+<li>Dans <b>Netbeans</b> (version 6.9.1 ou supérieure), suivez ces étapes :
 <ul>
 <li>Allez dans le menu "Team" -> "Subversion" -> "Checkout..."</li>
 <li>Entrez l'URL du dépôt SVN en tant que "Repository URL"</li>
@@ -99,6 +103,7 @@ Veuillez suivre une de ces méthodes :
 <li>Allez dans l'onglet "project" -> "Source packages" -> "default package" -> build.xml -> build -> "Run Target" pour construire le projet</li>
 <li>Allez dans l'onglet "project" -> "Source packages" -> "default package" -> build.xml -> run-game (ou run-tuer) -> "Run Target" pour lancer le jeu</li>
 </ul>
+</li>
 <li>Dans <b>les autres EDIs</b>, débrouillez-vous, je n'ai pas de temps à perdre avec les EDIs propriétaires et ceux avec une audience confidentielle</li>
 </ul>
 Vous pouvez obtenir le code source de toutes les dépendences ici :
