@@ -1172,7 +1172,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	            </data>
 			    	            <data src="${appdir}/@{executable}" type="file">
-			    	                <mapper type="perm" prefix="usr/bin" filemode="755"/>
+			    	                <mapper type="perm" prefix="/usr/bin" filemode="755"/>
 			    	            </data>
 			    	            <data src="@{outdir}/${package-name}.desktop" type="file">
 			    	                <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -1194,7 +1194,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	    	    </data>
 			    	    	    <data src="${appdir}/@{executable}" type="file">
-			    	    	        <mapper type="perm" prefix="usr/bin" filemode="755"/>
+			    	    	        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
 			    	    	    </data>
 			    	    	    <data src="@{outdir}/${package-name}.desktop" type="file">
 			    	    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -1218,7 +1218,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			                    </data>
 			                    <data src="${appdir}/@{executable}" type="file">
-			                        <mapper type="perm" prefix="usr/bin" filemode="755"/>
+			                        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
 			                    </data>
 			                    <data src="${appdir}/jre/bin" type="directory" includes="*">
 			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
@@ -1246,7 +1246,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 					    	    </data>
 					    	    <data src="${appdir}/@{executable}" type="file">
-					    	        <mapper type="perm" prefix="usr/bin" filemode="755"/>
+					    	        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
 					    	    </data>
 					    	    <data src="${appdir}/jre/bin" type="directory" includes="*">
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
