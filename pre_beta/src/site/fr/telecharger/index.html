@@ -123,7 +123,7 @@ Vous pouvez obtenir le code source de toutes les dépendences ici :
 <li><a href="http://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-src.zip/download">Ant-Contrib</a></li>
 <li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
-<li><a href="https://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
+<li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
 <li><a href="http://github.com/libgdx/packr/archive/master.zip">PackR</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
 <li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
@@ -135,6 +135,152 @@ Vous pouvez obtenir le code source de toutes les dépendences ici :
 <p>TUER requiert moins de 32 Mo (la dernière version peut requérir plus de 64 Mo) mais <b>quelques programmes utilisés pour précalculer ses données requièrent 1 Go voire même 2 Go</b>. N'essayez pas de construire le jeu 
 à partir du code source si votre ordinateur n'a pas assez de RAM. Utilisez l'argument de la machine virtuelle "-Xmx" si une carte particulière a besoin de plus de mémoire.
 </p>
+<hr>
+<p><a name="jndt" href="./#jndt">JNDT</a> est utilisé pour construire les paquets applicatifs natifs autonomes du projet. vous pouvez trouver la documentation de ses cibles ci-dessous :</p>
+<b>create-app-dir</b><br/>
+Crée le répertoire de l'application, c'est-à-dire le répertoire contenant les fichiers nécessaires pour lancer l'application, son JAR, ses ressources (optionnelles), son JRE (optionnel), le lanceur natif ou le script de démarrage et les fichiers pour l'intégration native dans le bureau (l'icône, ...).
+<table border="1">
+<thead>
+<tr>
+<th>Attribut</th><th>Description</th><th>Requis</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>os</td><td></td><td>Oui</td></tr>
+<tr><td>arch</td><td></td><td>Oui</td></tr>
+<tr><td>executable</td><td></td><td>Oui</td></tr>
+<tr><td>linuxpackageshscriptenabled</td><td></td><td>Non - défaut est "false"</td></tr>
+<tr><td>appjar</td><td></td><td>Oui</td></tr>
+<tr><td>appname</td><td></td><td>Non, à moins que linuxpackageshscriptenabled soit "true" - défaut est ""</td></tr>
+<tr><td>mainclass</td><td></td><td>Non, à moins que nativelauncherenabled soit "true" - défaut est ""</td></tr>
+<tr><td>outdir</td><td></td><td>Oui</td></tr>
+<tr><td>vmargs</td><td></td><td>Non - défaut est ";"</td></tr>
+<tr><td>jdk</td><td></td><td>Oui</td></tr>
+<tr><td>resources</td><td></td><td>Non - défaut est ";"</td></tr>
+<tr><td>minimizejre</td><td></td><td>Non</td></tr>
+<tr><td>bundleidentifier</td><td></td><td>Non - défaut est "com.yourcompany.identifier"</td></tr>
+<tr><td>iconsfile</td><td></td><td>Non - défaut est ""</td></tr>
+<tr><td>antreimplementationenabled</td><td></td><td>Non - défaut est "true"</td></tr>
+<tr><td>nativelauncherenabled</td><td></td><td>Non - défaut est "false"</td></tr>
+<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client. Le JRE serveur est toujours utilisé quand antreimplementationenabled est à "false"</td><td>Non - défaut est "true"</td></tr>
+</tbody>
+</table>
+<br>
+<b>create-linux-app-bundles</b><br>
+Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.
+<table border="1">
+<thead>
+<tr>
+<th>Attribut</th><th>Description</th><th>Requis</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>executable</td><td></td><td>Oui</td></tr>
+<tr><td>packageexecutabledir</td><td></td><td>Non - défaut est "/usr/bin"</td></tr>
+<tr><td>packageshscriptenabled</td><td></td><td>Non - défaut est "true"</td></tr>
+<tr><td>appjar</td><td></td><td></td></tr>
+<tr><td>appname</td><td></td><td></td></tr>
+<tr><td>mainclass</td><td></td><td></td></tr>
+<tr><td>outdir</td><td></td><td></td></tr>
+<tr><td>vmargs</td><td></td><td></td></tr>
+<tr><td>jdk</td><td></td><td></td></tr>
+<tr><td>resources</td><td></td><td></td></tr>
+<tr><td>minimizejre</td><td></td><td></td></tr>
+<tr><td>bundleidentifier</td><td></td><td></td></tr>
+<tr><td>iconsfile</td><td></td><td></td></tr>
+<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
+<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
+<tr><td>useserverjre</td><td></td><td></td></tr>
+<tr><td>arch</td><td></td><td></td></tr>
+<tr><td>categories</td><td></td><td></td></tr>
+<tr><td>comment</td><td></td><td></td></tr>
+<tr><td>vendor</td><td></td><td></td></tr>
+<tr><td>packager</td><td></td><td></td></tr>
+<tr><td>license</td><td></td><td></td></tr>
+<tr><td>summary</td><td></td><td></td></tr>
+<tr><td>description</td><td></td><td></td></tr>
+<tr><td>group</td><td></td><td></td></tr>
+<tr><td>section</td><td></td><td></td></tr>
+<tr><td>version</td><td></td><td></td></tr>
+<tr><td>release</td><td></td><td></td></tr>
+<tr><td>host</td><td></td><td></td></tr>
+<tr><td>url</td><td></td><td></td></tr>
+<tr><td>email</td><td></td><td></td></tr>
+<tr><td>distribution</td><td></td><td></td></tr>
+<tr><td>priority</td><td></td><td></td></tr>
+<tr><td>urgency</td><td></td><td></td></tr>
+<tr><td>essential</td><td></td><td></td></tr>
+<tr><td>debdepends</td><td></td><td></td></tr>
+<tr><td>multiarch</td><td></td><td></td></tr>
+<tr><td>docdir</td><td></td><td></td></tr>
+<tr><td>docdirincludes</td><td></td><td></td></tr>
+<tr><td>archivefileformat</td><td></td><td></td></tr>
+</tbody>
+</table>
+<br>
+<b>create-os-x-app-bundle</b><br>
+Crée un fichier APP zippé pour Mac OS X.
+<table border="1">
+<thead>
+<tr>
+<th>Attribut</th><th>Description</th><th>Requis</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>arch</td><td></td><td></td></tr>
+<tr><td>executable</td><td></td><td></td></tr>
+<tr><td>appjar</td><td></td><td></td></tr>
+<tr><td>appname</td><td></td><td></td></tr>
+<tr><td>mainclass</td><td></td><td></td></tr>
+<tr><td>outdir</td><td></td><td></td></tr>
+<tr><td>vmargs</td><td></td><td></td></tr>
+<tr><td>jdk</td><td></td><td></td></tr>
+<tr><td>resources</td><td></td><td></td></tr>
+<tr><td>minimizejre</td><td></td><td></td></tr>
+<tr><td>bundleidentifier</td><td></td><td></td></tr>
+<tr><td>iconsfile</td><td></td><td></td></tr>
+<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
+<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
+<tr><td>useserverjre</td><td></td><td></td></tr>
+<tr><td>version</td><td></td><td></td></tr>
+<tr><td>release</td><td></td><td></td></tr>
+<tr><td>docdir</td><td></td><td></td></tr>
+<tr><td>docdirincludes</td><td></td><td></td></tr>
+<tr><td>archivefileformat</td><td></td><td></td></tr>
+</tbody>
+</table>
+<br>
+<b>create-windows-app-bundle</b><br>
+Crée une archive d'application zippée pour Microsoft Windows.
+<table border="1">
+<thead>
+<tr>
+<th>Attribut</th><th>Description</th><th>Requis</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>executable</td><td></td><td></td></tr>
+<tr><td>appjar</td><td></td><td></td></tr>
+<tr><td>appname</td><td></td><td></td></tr>
+<tr><td>mainclass</td><td></td><td></td></tr>
+<tr><td>outdir</td><td></td><td></td></tr>
+<tr><td>vmargs</td><td></td><td></td></tr>
+<tr><td>jdk</td><td></td><td></td></tr>
+<tr><td>resources</td><td></td><td></td></tr>
+<tr><td>minimizejre</td><td></td><td></td></tr>
+<tr><td>bundleidentifier</td><td></td><td></td></tr>
+<tr><td>iconsfile</td><td></td><td></td></tr>
+<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
+<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
+<tr><td>useserverjre</td><td></td><td></td></tr>
+<tr><td>version</td><td></td><td></td></tr>
+<tr><td>release</td><td></td><td></td></tr>
+<tr><td>arch</td><td></td><td></td></tr>
+<tr><td>docdir</td><td></td><td></td></tr>
+<tr><td>docdirincludes</td><td></td><td></td></tr>
+<tr><td>archivefileformat</td><td></td><td></td></tr>
+</tbody>
+</table>
 <br>
 <p>
    <a href="http://validator.w3.org/check?uri=referer">
