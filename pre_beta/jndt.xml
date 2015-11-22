@@ -151,7 +151,7 @@
     	<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
         <attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
-        <attribute name="vmargs" default="" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
+        <attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
         <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
         <attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
         <attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
@@ -902,16 +902,16 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
             </if>
         </sequential>
     </macrodef>
-	<macrodef name="create-linux-app-bundles" description="creates a RPM package, a DEB package and a tar.gz archive for GNU Linux">
+	<macrodef name="create-linux-app-bundles" description="creates a RPM package, a DEB package and an archive for GNU Linux">
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
 		<attribute name="packageexecutabledir" default="/usr/bin" description="directory containing the executable after the install of a RPM or DEB package"/>
 		<attribute name="packageshscriptenabled" default="true" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if nativelauncherenabled is set to false"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
-		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+		<attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
-		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
-		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
+		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
+		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
 		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
@@ -919,13 +919,13 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
 		<attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-		<attribute name="arch" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
+		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
 		<attribute name="categories" default="" description="list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
 		<attribute name="comment" default="" description="comment of the shortcut"/>
 		<attribute name="vendor" default="" description="organization that distributes the software"/>
 		<attribute name="packager" default="" description="organization that actually packaged the software"/>
 		<attribute name="license" default="" description="license"/>
-		<attribute name="summary" default="" description="shirt description of the packaged software (generally on a single line)"/>
+		<attribute name="summary" default="" description="short description of the packaged software (generally on a single line)"/>
 		<attribute name="description" default="" description="detailed description of the packaged software (can take up more than one line)"/>
 		<attribute name="group" default="Applications" description="string composed of a series of words separated by slashes that defines how the packaged software should be grouped with other packages"/>
 		<attribute name="section" default="java" description="classifier of the application for the Debian package, see http://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections"/>
@@ -1358,15 +1358,15 @@ Multi-Arch: @{multiarch}]]></echo>
 	    </sequential>
 	</macrodef>
 	<macrodef name="create-os-x-app-bundle" description="creates a zipped APP file for Mac OS X">
-		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
+		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
 		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
-		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
-		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
+		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
+		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;"/>
 		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably in .icns format, otherwise it is converted into this format), must be icons.icns if antreimplementationenabled is set to false as the icon filename is hardcoded in PackR"/>
@@ -1510,10 +1510,10 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
-		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+		<attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
-		<attribute name="vmargs" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
-		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
+		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
+		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
 		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
@@ -1523,7 +1523,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
 		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
-		<attribute name="arch" description="one of i386, amd64, universal, arm (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
+		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
 		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
