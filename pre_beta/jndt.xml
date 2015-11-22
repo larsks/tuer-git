@@ -149,16 +149,16 @@
     	<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true, if os is set to 'Linux' and if nativelauncherenabled is set to false"/>
         <attribute name="appjar" description="file location of the JAR to package"/>
     	<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
-        <attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
+        <attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
         <attribute name="outdir" description="output directory"/>
-        <attribute name="vmargs" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
-        <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE"/>
+        <attribute name="vmargs" default="" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
+        <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
         <attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
         <attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
         <attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
         <attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac). No conversion is done if antreimplementationenabled is set to false"/>
-        <attribute name="antreimplementationenabled" default="false" description="enables the Ant reimplementation of PackR which uses only its native launcher"/>
-        <attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
+        <attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of PackR which uses only its native launcher"/>
+        <attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
         <attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
         <sequential>
             <!-- Mac has a distinct directory layout -->
