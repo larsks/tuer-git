@@ -904,6 +904,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
     </macrodef>
 	<macrodef name="create-linux-app-bundles" description="creates a RPM package, a DEB package and a tar.gz archive for GNU Linux">
 		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+		<attribute name="packageexecutabledir" default="/usr/bin" description="directory containing the executable after the install of a RPM or DEB package"/>
 		<attribute name="packageshscriptenabled" default="true" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if nativelauncherenabled is set to false"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
@@ -1074,7 +1075,7 @@ Categories=@{categories}]]></echo>
 			    	            	<exclude name="nopackagesh_@{executable}"/>
 			    	    	        <exclude name="${icon-name}.png"/>
 			    	            </zipfileset>
-			    	            <zipfileset filemode="755" prefix="/usr/bin" file="${appdir}/@{executable}"/>
+			    	            <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
 			    	            <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    	            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
 			    	            <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
@@ -1089,7 +1090,7 @@ Categories=@{categories}]]></echo>
 			    			        <exclude name="@{executable}"/>
 			    			    	<exclude name="nopackagesh_@{executable}"/>
 			    			    </zipfileset>
-			    			    <zipfileset filemode="755" prefix="/usr/bin" file="${appdir}/@{executable}"/>
+			    			    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
 			    			    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
 			    			    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 			    			    <depends/>
@@ -1112,7 +1113,7 @@ Categories=@{categories}]]></echo>
 			                        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
 			    	                <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
 			                    </zipfileset>
-			                    <zipfileset filemode="755" prefix="/usr/bin" file="${appdir}/@{executable}"/>
+			                    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
 				                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 			                    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
@@ -1132,7 +1133,7 @@ Categories=@{categories}]]></echo>
 			    	    	        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
 			    	    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
 			    	    	    </zipfileset>
-			    	    	    <zipfileset filemode="755" prefix="/usr/bin" file="${appdir}/@{executable}"/>
+			    	    	    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
 			    	    	    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
@@ -1172,7 +1173,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	            </data>
 			    	            <data src="${appdir}/@{executable}" type="file">
-			    	                <mapper type="perm" prefix="/usr/bin" filemode="755"/>
+			    	                <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
 			    	            </data>
 			    	            <data src="@{outdir}/${package-name}.desktop" type="file">
 			    	                <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -1194,7 +1195,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			    	    	    </data>
 			    	    	    <data src="${appdir}/@{executable}" type="file">
-			    	    	        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
+			    	    	        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
 			    	    	    </data>
 			    	    	    <data src="@{outdir}/${package-name}.desktop" type="file">
 			    	    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -1218,7 +1219,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 			                    </data>
 			                    <data src="${appdir}/@{executable}" type="file">
-			                        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
+			                        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
 			                    </data>
 			                    <data src="${appdir}/jre/bin" type="directory" includes="*">
 			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
@@ -1246,7 +1247,7 @@ Multi-Arch: @{multiarch}]]></echo>
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
 					    	    </data>
 					    	    <data src="${appdir}/@{executable}" type="file">
-					    	        <mapper type="perm" prefix="/usr/bin" filemode="755"/>
+					    	        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
 					    	    </data>
 					    	    <data src="${appdir}/jre/bin" type="directory" includes="*">
 					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
