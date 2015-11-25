@@ -42,20 +42,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
-import com.ardor3d.extension.model.md2.Md2Importer;
-import com.ardor3d.extension.model.obj.ObjExporter;
-import com.ardor3d.extension.model.obj.ObjImporter;
-import com.ardor3d.scenegraph.Mesh;
-import com.ardor3d.scenegraph.Node;
-import com.ardor3d.scenegraph.Spatial;
-import com.ardor3d.scenegraph.visitor.Visitor;
-import com.ardor3d.util.export.binary.BinaryClassObject;
-import com.ardor3d.util.export.binary.BinaryExporter;
-import com.ardor3d.util.export.binary.BinaryIdContentPair;
-import com.ardor3d.util.export.binary.BinaryImporter;
-import com.ardor3d.util.export.binary.BinaryOutputCapsule;
-import com.ardor3d.util.resource.URLResourceSource;
 
 /**
  * Graphical user interface of the model converter
@@ -289,33 +275,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 				toolManager,toolManager.progressDialog,this).execute();
 	}
 	
-	private static final class DirectBinaryExporter extends BinaryExporter{
-        @Override
-		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
-            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
-            return pair;
-        }
-    }
-	
-    private static final class MeshFinder implements Visitor{
-    	
-    	private final List<Mesh> meshList;
-		
-		private MeshFinder(){
-			super();
-			meshList=new ArrayList<>();
-		}
-		
-		@Override
-    	public void visit(final Spatial spatial){
-			if(spatial instanceof Mesh)
-			    {final Mesh mesh=(Mesh)spatial;
-			     meshList.add(mesh);
-			    }
-		}
-	}
-	
-	private static final class ModelConversionSwingWorker extends SwingWorker<Spatial,String>{
+	private static final class ModelConversionSwingWorker extends SwingWorker</*Spatial*/Object,String>{
 		
 		private final File inputModelFile;
 		
@@ -356,49 +316,12 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		}
 
 		@Override
-		protected Spatial doInBackground() throws Exception{
+		protected Object doInBackground() throws Exception{
 			try
-			    {final Spatial convertible;
-			     switch(inputModelFileFormat)
-			     {
-			         case ARDOR3D_BINARY:
-			    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
-			    	     break;
-			         case COLLADA:
-			    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryHelper()).getScene();
-			    	     break;
-			         case MD2:
-			    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
-			    	     break;
-			         case WAVEFRONT_OBJ:
-			    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryHelper()).getScene();
-			    	     break;
-			         default:
-			    	     convertible=null;
-			    	     throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
-			     }
+			    {final Object convertible=toolManager.getSeeker().load(inputModelFile,inputModelFileFormat.name());
 			     publish("Loading successful");
 			     //FIXME call dialog.setValue(50) on the EDT
-			     switch(outputModelFileFormat)
-			     {
-			         case ARDOR3D_BINARY:
-			    	     new DirectBinaryExporter().save(convertible,outputModelFile);
-			    	     break;
-			         case WAVEFRONT_OBJ:
-			    	     if(convertible instanceof Mesh)
-			    	    	 new ObjExporter().save((Mesh)convertible,outputModelFile,secondaryOutputModelFile);
-			    	     else
-			    		     if(convertible instanceof Node)
-			    		         {//creates a mesh list by visiting the spatial
-			    			      final MeshFinder meshFinder=new MeshFinder();
-			    			      meshFinder.visit(convertible);
-			    			      //exports the whole
-			    			      new ObjExporter().save(meshFinder.meshList,outputModelFile,secondaryOutputModelFile,null);
-			    		         }
-			    	     break;
-			         default:
-			    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
-			     }
+			     toolManager.getSeeker().save(outputModelFile,outputModelFileFormat.name(),secondaryOutputModelFile,convertible);
 			     publish("Conversion successful");
 			     //FIXME call dialog.setValue(100) on the EDT
 			     return(convertible);

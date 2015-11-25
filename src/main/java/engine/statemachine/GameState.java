@@ -555,17 +555,27 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters{
                 double playerEndZ=cam.getLocation().getZ();
                 double playerX,playerZ;
                 double distance=previousPosition.distance(cam.getLocation());
-                int stepCount=(int)Math.ceil(distance/0.2);
+                final int stepCount=(int)Math.ceil(distance/0.2);
                 double stepX=stepCount==0?0:(playerEndX-playerStartX)/stepCount;
                 double stepZ=stepCount==0?0:(playerEndZ-playerStartZ)/stepCount;
                 boolean collisionFound=false;
                 double correctX=playerStartX,correctZ=playerStartZ;
                 int tmpX,tmpZ;
-                final List<BoundingBox> boundingBoxList=level.getCollisionVolumes();
+                /*final List<BoundingBox> boundingBoxList=level.getCollisionVolumes();
                 if(boundingBoxList!=null&&!boundingBoxList.isEmpty())
-                    {//TODO
-                	 
+                    {final BoundingBox playerBoundingBox=(BoundingBox)playerMesh.getModelBound();
+                	 //TODO
+                	 for(final BoundingBox boundingBox:boundingBoxList)
+                		 if(playerBoundingBox.intersects(boundingBox))
+                		     {
+                			  
+                		     }
                     }
+                else
+                    {//no collision, nothing to prevent the player from moving
+                	 correctX=playerEndX;
+                     correctZ=playerEndZ;
+                    }*/
                 //temporary hack to disable collisions in some levels
                 final boolean[][] collisionMap=level.getCollisionMap();
                 for(int i=1;i<=stepCount&&!collisionFound;i++)

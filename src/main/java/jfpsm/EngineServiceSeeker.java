@@ -18,6 +18,7 @@
 package jfpsm;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -78,5 +79,15 @@ public class EngineServiceSeeker<S,T,U,V,W> implements I3DServiceSeeker<S,T,U,V,
 	@Override
 	public W createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent) {
 		return(delegate.createBoundingBox(xCenter,yCenter,zCenter,xExtent,yExtent,zExtent));
+	}
+
+	@Override
+	public U load(final File inputModelFile,final String inputModelFileFormat)throws IOException,UnsupportedOperationException{
+		return(delegate.load(inputModelFile,inputModelFileFormat));
+	}
+
+	@Override
+	public void save(final File outputModelFile,final String outputModelFileFormat,final File secondaryOutputModelFile,final U convertible)throws IOException,UnsupportedOperationException{
+		delegate.save(outputModelFile,outputModelFileFormat,secondaryOutputModelFile,convertible);
 	}
 }

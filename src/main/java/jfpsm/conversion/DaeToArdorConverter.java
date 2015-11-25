@@ -20,9 +20,6 @@ package jfpsm.conversion;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
-import jfpsm.GeometryHelper;
-
 import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Node;
@@ -47,7 +44,7 @@ public final class DaeToArdorConverter{
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
         ColladaImporter colladaImporter=new ColladaImporter();
-        final GeometryTool geomTool=new GeometryHelper();
+        final GeometryTool geomTool=new GeometryTool(true);
         for(String arg:args)
             {System.out.println("Loading "+arg+" ...");
              final ResourceSource argSrc=ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);

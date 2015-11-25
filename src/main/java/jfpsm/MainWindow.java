@@ -133,7 +133,7 @@ public final class MainWindow{
      * builds the weakest part of the application (some exceptions may be thrown) 
      */
     public final void run(final I3DServiceSeeker seeker){
-    	toolManager=new ToolManager(this);
+    	toolManager=new ToolManager(this,seeker);
     	//builds the projects manager
     	projectManager=new ProjectManager(this,seeker);
     	//builds the viewer
