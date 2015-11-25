@@ -37,6 +37,7 @@ import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.util.geom.BufferUtils;
+import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.geom.GeometryTool.MatchCondition;
 
 
@@ -117,7 +118,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 		    {//converts this geometry into non indexed geometry (if necessary) in order to ease further operations
 		     final boolean previousGeometryWasIndexed=meshData.getIndexBuffer()!=null;
 		     if(previousGeometryWasIndexed)
-		         new GeometryHelper().convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+		         new GeometryTool(true).convertIndexedGeometryIntoNonIndexedGeometry(meshData);
 			 //first step: separates right triangles with canonical 2D texture coordinates from the others
 			 final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos=new ArrayList<>();
 			 //loops on all sections of the mesh data
@@ -808,7 +809,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 			      //uses all conditions with GeometryTool
 			      final EnumSet<MatchCondition> conditions=EnumSet.of(MatchCondition.UVs,MatchCondition.Normal,MatchCondition.Color);
 			      //reduces the geometry to avoid duplication of vertices
-			      new GeometryHelper().minimizeVerts(mesh,conditions);
+			      new GeometryTool(true).minimizeVerts(mesh,conditions);
 		         }
 		    }
 	}

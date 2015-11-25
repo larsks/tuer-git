@@ -39,8 +39,8 @@ public final class ToolManager extends EntityManager{
 	
     private static final long serialVersionUID=1L;
 
-	public ToolManager(final MainWindow mainWindow){
-		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ToolSet("Tool Set"))));
+	public ToolManager(final MainWindow mainWindow,final I3DServiceSeeker seeker){
+		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ToolSet("Tool Set"))),seeker);
 		final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
 		final DefaultMutableTreeNode toolsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
 		final ToolSet toolSet=(ToolSet)toolsRoot.getUserObject();

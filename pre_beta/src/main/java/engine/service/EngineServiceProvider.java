@@ -23,9 +23,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.List;
-
 import com.ardor3d.bounding.BoundingBox;
+import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
+import com.ardor3d.extension.model.md2.Md2Importer;
+import com.ardor3d.extension.model.obj.ObjExporter;
+import com.ardor3d.extension.model.obj.ObjImporter;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.Vector3;
@@ -34,12 +38,15 @@ import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.Spatial;
+import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.Savable;
 import com.ardor3d.util.export.binary.BinaryClassObject;
 import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.export.binary.BinaryIdContentPair;
+import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
+import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.URLResourceSource;
 
 /**
@@ -58,6 +65,24 @@ public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Sp
             return pair;
         }
     }
+    
+    private static final class MeshFinder implements Visitor{
+    	
+    	private final List<Mesh> meshList;
+		
+		private MeshFinder(){
+			super();
+			meshList=new ArrayList<>();
+		}
+		
+		@Override
+    	public void visit(final Spatial spatial){
+			if(spatial instanceof Mesh)
+			    {final Mesh mesh=(Mesh)spatial;
+			     meshList.add(mesh);
+			    }
+		}
+	}
     
     private final BinaryExporter binaryExporter;
     
@@ -133,4 +158,50 @@ public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Sp
 	public BoundingBox createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent){
 		return(new BoundingBox(new Vector3(xCenter,yCenter,zCenter),xExtent,yExtent,zExtent));
 	}
+	
+	@Override
+	public Spatial load(final File inputModelFile,final String inputModelFileFormat)throws IOException,UnsupportedOperationException{
+    	final Spatial convertible;
+	    switch(inputModelFileFormat)
+	        {case "ARDOR3D_BINARY":
+	    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
+	    	     break;
+	         case "COLLADA":
+	    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
+	    	     break;
+	         case "MD2":
+	    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
+	    	     break;
+	         case "WAVEFRONT_OBJ":
+	    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
+	    	     break;
+	         default:
+	    	     convertible=null;
+	    	     throw new UnsupportedOperationException(inputModelFileFormat+" not supported as an input model file format");
+	        }
+	    return(convertible);
+    }
+    
+    @Override
+	public void save(final File outputModelFile,final String outputModelFileFormat,final File secondaryOutputModelFile,final Spatial convertible)throws IOException,UnsupportedOperationException{
+    	switch(outputModelFileFormat)
+	        {case "ARDOR3D_BINARY":
+	    	     new DirectBinaryExporter().save(convertible,outputModelFile);
+	    	     break;
+	         case "WAVEFRONT_OBJ":
+	    	     if(convertible instanceof Mesh)
+	    	    	 new ObjExporter().save((Mesh)convertible,outputModelFile,secondaryOutputModelFile);
+	    	     else
+	    		     if(convertible instanceof Node)
+	    		         {//creates a mesh list by visiting the spatial
+	    			      final MeshFinder meshFinder=new MeshFinder();
+	    			      meshFinder.visit(convertible);
+	    			      //exports the whole
+	    			      new ObjExporter().save(meshFinder.meshList,outputModelFile,secondaryOutputModelFile,null);
+	    		         }
+	    	     break;
+	         default:
+	    	     throw new UnsupportedOperationException(outputModelFileFormat+" not supported as an input model file format");
+	        }
+    }
 }

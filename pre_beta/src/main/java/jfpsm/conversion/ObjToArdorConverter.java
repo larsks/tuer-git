@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
-
-import jfpsm.GeometryHelper;
-
 import com.ardor3d.extension.model.obj.ObjGeometryStore;
 import com.ardor3d.extension.model.obj.ObjImporter;
 import com.ardor3d.image.Texture;
@@ -113,7 +110,7 @@ public class ObjToArdorConverter{
            } 
         catch(final URISyntaxException urise)
         {urise.printStackTrace();}
-        final GeometryTool geomTool=new GeometryHelper();
+        final GeometryTool geomTool=new GeometryTool(true);
         final ObjImporter objImporter=new ObjImporter();
         try{objImporter.setTextureLocator(new SimpleResourceLocator(ObjToArdorConverter.class.getResource("/images")));
            } 
@@ -164,11 +161,11 @@ public class ObjToArdorConverter{
 	
 	private static final class Deindexer implements Visitor{
 		
-		private final GeometryHelper geometryHelper;
+		private final GeometryTool geometryHelper;
 		
 		private Deindexer(){
 			super();
-			this.geometryHelper=new GeometryHelper();
+			this.geometryHelper=new GeometryTool(true);
 		}
 		
 		@Override

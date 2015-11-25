@@ -20,6 +20,7 @@ package jfpsm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.AbstractMap.SimpleEntry;
+
 import javax.swing.BoxLayout;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -50,6 +51,8 @@ public abstract class EntityManager extends JPanel{
 	
     protected final MainWindow mainWindow;
     
+    protected final I3DServiceSeeker seeker;
+    
     protected final ProgressDialog progressDialog;
     
     protected final JTree tree;
@@ -66,9 +69,10 @@ public abstract class EntityManager extends JPanel{
 	
 	protected final JMenuItem deleteMenuItem;
 
-	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel){
+	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final I3DServiceSeeker seeker){
 		super();
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+		this.seeker=seeker;
 		this.mainWindow=mainWindow;
 		this.progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
 		this.quitEnabled=true;
@@ -203,5 +207,9 @@ public abstract class EntityManager extends JPanel{
 		//prevents the user from collapsing the root
         if(event.getPath().getLastPathComponent()==tree.getModel().getRoot())
             throw new ExpandVetoException(event);
+	}
+	
+	public I3DServiceSeeker getSeeker(){
+		return(seeker);
 	}
 }
