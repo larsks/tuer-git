@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -49,6 +48,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import common.EngineServiceProviderInterface;
 
 /**
  * Panel that allows to manipulate the projects in a tree containing their
@@ -81,7 +81,7 @@ public final class ProjectManager extends EntityManager{
 	 * @param mainWindow window that contains this manager
 	 * @param seeker 3D service seeker used during the creation of the game files
 	 */
-	public ProjectManager(final MainWindow mainWindow,final I3DServiceSeeker seeker){
+	public ProjectManager(final MainWindow mainWindow,final EngineServiceProviderInterface seeker){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))),seeker);
         this.gameFilesGenerator=new GameFilesGenerator(seeker);
 		//fills the popup menu

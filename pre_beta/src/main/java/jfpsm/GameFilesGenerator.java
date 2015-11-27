@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
+import common.EngineServiceProviderInterface;
 import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CuboidParameters.Orientation;
 import jfpsm.CuboidParameters.Side;
@@ -43,13 +44,13 @@ import jfpsm.CuboidParameters.Side;
 @SuppressWarnings({"unchecked","rawtypes"})//FIXME ensure type safety instead of suppressing these warnings, capture several parameterized types
 public class GameFilesGenerator{
     
-    private final I3DServiceSeeker seeker;
+    private final EngineServiceProviderInterface seeker;
     
     /**
      * 
      * @param seeker
      */
-    public GameFilesGenerator(final I3DServiceSeeker seeker){
+    public GameFilesGenerator(final EngineServiceProviderInterface seeker){
     	super();
     	this.seeker=seeker;
     }

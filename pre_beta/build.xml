@@ -112,7 +112,7 @@
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
 	<property name="game-bundle-identifier" value="net.sourceforge.tuer" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
-	<property name="editor-main-class" value="connection.JFPSMServiceProvider"/>
+	<property name="editor-main-class" value="jfpsm.MainWindow"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
 	<property name="editor-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="editor-jar-filename" value="jfpsm.jar" />
@@ -253,7 +253,7 @@
 	<!-- Create JARs                                                       -->
 	<!-- ================================================================= -->
 	<target name="create-jars">
-		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,connection/*.class,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class" compress="false">
+		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,common/*.class,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/*.bin,**/*.defl" />
@@ -275,6 +275,7 @@
 			<include name="**/NOTICE.txt" />
 			<include name="**/README.txt" />
 			<include name="**/branding.properties" />
+			<include name="**/META-INF/services/*" />
 			<manifest>
 				<attribute name="Application-Name" value="${editor-long-name}" />
 				<attribute name="Main-Class" value="${editor-main-class}" />
@@ -310,7 +311,7 @@
 			<attribute name="Codebase" value="${codebase-url}"/>
 		</manifest>
 		<!-- the game only uses the models in Ardor3D binary format and it does not need the classes of the editor -->
-		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" excludes="connection/,dae/,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class,jfpsm/,md2/,obj/,osm/" compress="false">
+		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" excludes="common/,dae/,engine/service/EngineServiceProvider*.class,jfpsm/,md2/,obj/,osm/" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin" excludes="**/*awt/**/*.class,**/AWT*.class,**/JavaSound*.class" />

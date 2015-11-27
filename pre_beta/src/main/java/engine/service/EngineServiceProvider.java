@@ -48,6 +48,7 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.URLResourceSource;
+import common.EngineServiceProviderInterface;
 
 /**
  * service provider of the engine, this part is dependent on the underneath 3D engine. It should be quite
@@ -56,7 +57,7 @@ import com.ardor3d.util.resource.URLResourceSource;
  * @author Julien Gouesse
  *
  */
-public class EngineServiceProvider implements I3DServiceProvider<Savable,Node,Spatial,Mesh,BoundingBox>{
+public class EngineServiceProvider implements EngineServiceProviderInterface<Savable,Node,Spatial,Mesh,BoundingBox>{
     
     private static final class DirectBinaryExporter extends BinaryExporter{
         @Override
