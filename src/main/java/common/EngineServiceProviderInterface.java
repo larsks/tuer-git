@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package jfpsm;
+package common;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +35,9 @@ import java.util.List;
  * @param <V> class of leaf nodes managing the geometry
  * @param <W> class of bounding box
  */
-public interface I3DServiceSeeker<S,T,U,V,W>{
-    public void bind3DServiceSeeker(I3DServiceSeeker<S,T,U,V,W> seeker);
-    public boolean writeSavableInstanceIntoFile(final S savable,final File file);
+public interface EngineServiceProviderInterface<S,T,U,V,W>{
+
+	public boolean writeSavableInstanceIntoFile(final S savable,final File file);
     public boolean writeSavableInstancesListIntoFile(final List<S> savablesList,final File file);
     public void attachChildToNode(final T parent,final U child);
     public T createNode(final String name);

@@ -20,7 +20,6 @@ package jfpsm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.AbstractMap.SimpleEntry;
-
 import javax.swing.BoxLayout;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -34,6 +33,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import common.EngineServiceProviderInterface;
 
 /**
  * Panel that allows to manipulate the entities in a tree containing their sub-components.
@@ -51,7 +51,7 @@ public abstract class EntityManager extends JPanel{
 	
     protected final MainWindow mainWindow;
     
-    protected final I3DServiceSeeker seeker;
+    protected final EngineServiceProviderInterface seeker;
     
     protected final ProgressDialog progressDialog;
     
@@ -69,7 +69,7 @@ public abstract class EntityManager extends JPanel{
 	
 	protected final JMenuItem deleteMenuItem;
 
-	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final I3DServiceSeeker seeker){
+	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final EngineServiceProviderInterface seeker){
 		super();
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		this.seeker=seeker;
@@ -209,7 +209,7 @@ public abstract class EntityManager extends JPanel{
             throw new ExpandVetoException(event);
 	}
 	
-	public I3DServiceSeeker getSeeker(){
+	public EngineServiceProviderInterface getSeeker(){
 		return(seeker);
 	}
 }

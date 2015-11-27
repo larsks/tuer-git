@@ -30,7 +30,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Properties;
-
+import java.util.ServiceLoader;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -40,9 +40,11 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import common.EngineServiceProviderInterface;
+
 /**
  * main class of the application, it handles several components: the project manager and the viewer.
- * It contains the entry point of the program. 
+ * It contains the entry point of the editor.
  * 
  * @author Julien Gouesse
  */
@@ -132,7 +134,7 @@ public final class MainWindow{
     /**
      * builds the weakest part of the application (some exceptions may be thrown) 
      */
-    public final void run(final I3DServiceSeeker seeker){
+    public final void run(final EngineServiceProviderInterface seeker){
     	toolManager=new ToolManager(this,seeker);
     	//builds the projects manager
     	projectManager=new ProjectManager(this,seeker);
@@ -203,10 +205,15 @@ public final class MainWindow{
     	}
     }
     
-    public static final void runInstance(final String[] args,final I3DServiceSeeker seeker){
+    public static final void main(final String[] args){
+    	//Disables DirectDraw under Windows in order to avoid conflicts with
+    	//OpenGL
+        System.setProperty("sun.java2d.noddraw","true");
         //launches a minimal GUI to be able to display a popup if something goes wrong later        
         MainWindow mainWindow=new MainWindow(new JFrame());
         //runs the application
+        //TODO supports several implementations
+        final EngineServiceProviderInterface seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
         try{mainWindow.run(seeker);}
         catch(Throwable throwable)
         {//displays a popup to tell the user something goes wrong

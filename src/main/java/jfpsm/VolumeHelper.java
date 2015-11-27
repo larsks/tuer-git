@@ -20,6 +20,7 @@ package jfpsm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import common.EngineServiceProviderInterface;
 import jfpsm.ArrayHelper.Vector2i;
 
 /**
@@ -30,9 +31,9 @@ import jfpsm.ArrayHelper.Vector2i;
  */
 public class VolumeHelper{
 	
-	private final I3DServiceSeeker seeker;
+	private final EngineServiceProviderInterface seeker;
 
-	public VolumeHelper(final I3DServiceSeeker seeker){
+	public VolumeHelper(final EngineServiceProviderInterface seeker){
 		super();
 		this.seeker=seeker;
 	}

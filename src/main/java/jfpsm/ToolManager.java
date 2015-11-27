@@ -21,12 +21,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.AbstractMap.SimpleEntry;
-
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
+import common.EngineServiceProviderInterface;
 
 /**
  * Panel that allows to manipulate the tools in a tree containing their use cases
@@ -39,7 +40,7 @@ public final class ToolManager extends EntityManager{
 	
     private static final long serialVersionUID=1L;
 
-	public ToolManager(final MainWindow mainWindow,final I3DServiceSeeker seeker){
+	public ToolManager(final MainWindow mainWindow,final EngineServiceProviderInterface seeker){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ToolSet("Tool Set"))),seeker);
 		final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
 		final DefaultMutableTreeNode toolsRoot=(DefaultMutableTreeNode)treeModel.getRoot();
