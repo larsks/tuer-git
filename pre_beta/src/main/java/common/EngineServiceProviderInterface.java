@@ -46,6 +46,8 @@ public interface EngineServiceProviderInterface<S,T,U,V,W>{
     		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
     public void attachTextureToSpatial(final U spatial,final URL url);
     public W createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent);
-    public U load(final File inputModelFile,final String inputModelFileFormat)throws IOException,UnsupportedOperationException;
-    public void save(final File outputModelFile,final String outputModelFileFormat,final File secondaryOutputModelFile,final U convertible)throws IOException,UnsupportedOperationException;
+    public boolean isLoadable(final ModelFileFormat inputModelFileFormat);
+    public boolean isSavable(final ModelFileFormat outputModelFileFormat);
+    public U load(final File inputModelFile,final ModelFileFormat inputModelFileFormat)throws IOException,UnsupportedOperationException;
+    public void save(final File outputModelFile,final ModelFileFormat outputModelFileFormat,final File secondaryOutputModelFile,final U convertible)throws IOException,UnsupportedOperationException;
 }
