@@ -80,7 +80,7 @@ public class TestComputeCollisionBoundingVolumes{
     	System.out.println("End. Duration: "+durationInMilliseconds+" ms");
     	
     	//computes the bounding boxes
-    	final EngineServiceProviderInterface seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
+    	final EngineServiceProviderInterface<?,?,?,?,?> seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
     	List<?> boundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
     	System.out.println("Bounding boxes: "+boundingBoxList.size());
 	}

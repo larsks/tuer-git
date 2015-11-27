@@ -51,7 +51,7 @@ public abstract class EntityManager extends JPanel{
 	
     protected final MainWindow mainWindow;
     
-    protected final EngineServiceProviderInterface seeker;
+    protected final EngineServiceProviderInterface<?,?,?,?,?> seeker;
     
     protected final ProgressDialog progressDialog;
     
@@ -69,7 +69,7 @@ public abstract class EntityManager extends JPanel{
 	
 	protected final JMenuItem deleteMenuItem;
 
-	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final EngineServiceProviderInterface seeker){
+	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final EngineServiceProviderInterface<?,?,?,?,?> seeker){
 		super();
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		this.seeker=seeker;

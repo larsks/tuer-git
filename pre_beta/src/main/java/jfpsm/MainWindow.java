@@ -134,7 +134,7 @@ public final class MainWindow{
     /**
      * builds the weakest part of the application (some exceptions may be thrown) 
      */
-    public final void run(final EngineServiceProviderInterface seeker){
+    public final void run(final EngineServiceProviderInterface<?,?,?,?,?> seeker){
     	toolManager=new ToolManager(this,seeker);
     	//builds the projects manager
     	projectManager=new ProjectManager(this,seeker);
@@ -213,7 +213,7 @@ public final class MainWindow{
         MainWindow mainWindow=new MainWindow(new JFrame());
         //runs the application
         //TODO supports several implementations
-        final EngineServiceProviderInterface seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
+        final EngineServiceProviderInterface<?,?,?,?,?> seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
         try{mainWindow.run(seeker);}
         catch(Throwable throwable)
         {//displays a popup to tell the user something goes wrong

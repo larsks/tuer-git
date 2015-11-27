@@ -50,7 +50,7 @@ public class GameFilesGenerator{
      * 
      * @param seeker
      */
-    public GameFilesGenerator(final EngineServiceProviderInterface seeker){
+    public GameFilesGenerator(final EngineServiceProviderInterface<?,?,?,?,?> seeker){
     	super();
     	this.seeker=seeker;
     }
