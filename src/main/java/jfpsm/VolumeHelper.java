@@ -31,9 +31,9 @@ import jfpsm.ArrayHelper.Vector2i;
  */
 public class VolumeHelper{
 	
-	private final EngineServiceProviderInterface seeker;
+	private final EngineServiceProviderInterface<?,?,?,?,?> seeker;
 
-	public VolumeHelper(final EngineServiceProviderInterface seeker){
+	public VolumeHelper(final EngineServiceProviderInterface<?,?,?,?,?> seeker){
 		super();
 		this.seeker=seeker;
 	}

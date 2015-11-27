@@ -382,7 +382,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 
 		private final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
 		
-		private ConvertibleModelFileFilter(final EngineServiceProviderInterface seeker){
+		private ConvertibleModelFileFilter(final EngineServiceProviderInterface<?,?,?,?,?> seeker){
 			super();
 			for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
 				if(seeker.isLoadable(modelFileFormat))

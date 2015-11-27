@@ -81,7 +81,7 @@ public final class ProjectManager extends EntityManager{
 	 * @param mainWindow window that contains this manager
 	 * @param seeker 3D service seeker used during the creation of the game files
 	 */
-	public ProjectManager(final MainWindow mainWindow,final EngineServiceProviderInterface seeker){
+	public ProjectManager(final MainWindow mainWindow,final EngineServiceProviderInterface<?,?,?,?,?> seeker){
 		super(mainWindow,new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))),seeker);
         this.gameFilesGenerator=new GameFilesGenerator(seeker);
 		//fills the popup menu
