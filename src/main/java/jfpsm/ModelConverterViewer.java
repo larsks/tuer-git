@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -42,6 +43,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
+
+import common.EngineServiceProviderInterface;
+import common.ModelFileFormat;
 
 /**
  * Graphical user interface of the model converter
@@ -123,7 +127,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		modelConversionSetupPanel.add(convertedModelEditionPanel,new GridBagConstraints(1,2,1,1,10,1,GridBagConstraints.CENTER,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0));
 		final ArrayList<ModelFileFormat> writableModelFileFormatsList=new ArrayList<>();
 		for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
-			if(modelFileFormat.isWritable())
+			if(toolManager.getSeeker().isSavable(modelFileFormat))
 				writableModelFileFormatsList.add(modelFileFormat);
 		convertedModelFormatCombobox=new JComboBox<>(writableModelFileFormatsList.toArray(new ModelFileFormat[writableModelFileFormatsList.size()]));
 		convertedModelFormatCombobox.addActionListener(new ActionListener(){
@@ -183,7 +187,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		for(FileFilter fileFilter:Arrays.asList(fileChooser.getChoosableFileFilters()))
 			fileChooser.removeChoosableFileFilter(fileFilter);
-		fileChooser.addChoosableFileFilter(new ConvertibleModelFileFilter());
+		fileChooser.addChoosableFileFilter(new ConvertibleModelFileFilter(toolManager.getSeeker()));
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
 		    {//updates the data model first
 			 getEntity().setConvertibleModelFilePath(fileChooser.getSelectedFile().getAbsolutePath());
@@ -318,10 +322,10 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		@Override
 		protected Object doInBackground() throws Exception{
 			try
-			    {final Object convertible=toolManager.getSeeker().load(inputModelFile,inputModelFileFormat.name());
+			    {final Object convertible=toolManager.getSeeker().load(inputModelFile,inputModelFileFormat);
 			     publish("Loading successful");
 			     //FIXME call dialog.setValue(50) on the EDT
-			     toolManager.getSeeker().save(outputModelFile,outputModelFileFormat.name(),secondaryOutputModelFile,convertible);
+			     toolManager.getSeeker().save(outputModelFile,outputModelFileFormat,secondaryOutputModelFile,convertible);
 			     publish("Conversion successful");
 			     //FIXME call dialog.setValue(100) on the EDT
 			     return(convertible);
@@ -376,11 +380,12 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	
 	private static final class ConvertibleModelFileFilter extends FileFilter{
 
-		private static final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
+		private final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
 		
-		static{
+		private ConvertibleModelFileFilter(final EngineServiceProviderInterface seeker){
+			super();
 			for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
-				if(modelFileFormat.isReadable())
+				if(seeker.isLoadable(modelFileFormat))
 					convertibleFileFormatsExtensions.add(modelFileFormat.getExtension());
 		}
 		

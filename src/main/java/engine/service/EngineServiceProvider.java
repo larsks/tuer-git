@@ -25,6 +25,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.extension.model.md2.Md2Importer;
@@ -48,7 +49,9 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.URLResourceSource;
+
 import common.EngineServiceProviderInterface;
+import common.ModelFileFormat;
 
 /**
  * service provider of the engine, this part is dependent on the underneath 3D engine. It should be quite
@@ -161,35 +164,63 @@ public class EngineServiceProvider implements EngineServiceProviderInterface<Sav
 	}
 	
 	@Override
-	public Spatial load(final File inputModelFile,final String inputModelFileFormat)throws IOException,UnsupportedOperationException{
+	public boolean isLoadable(final ModelFileFormat inputModelFileFormat){
+		switch(inputModelFileFormat)
+            {case ARDOR3D_BINARY:
+        	     return(true);
+             case COLLADA:
+        	     return(true);
+             case MD2:
+        	     return(true);
+             case WAVEFRONT_OBJ:
+        	     return(true);
+             default:
+    	         return(false);
+            }
+	}
+	
+	@Override
+    public boolean isSavable(final ModelFileFormat outputModelFileFormat){
+		switch(outputModelFileFormat)
+            {case ARDOR3D_BINARY:
+    	         return(true);
+             case WAVEFRONT_OBJ:
+    	         return(true);
+             default:
+	             return(false);
+            }
+    }
+	
+	@Override
+	public Spatial load(final File inputModelFile,final ModelFileFormat inputModelFileFormat)throws IOException,UnsupportedOperationException{
     	final Spatial convertible;
 	    switch(inputModelFileFormat)
-	        {case "ARDOR3D_BINARY":
+	        {case ARDOR3D_BINARY:
 	    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
 	    	     break;
-	         case "COLLADA":
+	         case COLLADA:
 	    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
 	    	     break;
-	         case "MD2":
+	         case MD2:
 	    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
 	    	     break;
-	         case "WAVEFRONT_OBJ":
+	         case WAVEFRONT_OBJ:
 	    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
 	    	     break;
 	         default:
 	    	     convertible=null;
-	    	     throw new UnsupportedOperationException(inputModelFileFormat+" not supported as an input model file format");
+	    	     throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
 	        }
 	    return(convertible);
     }
     
     @Override
-	public void save(final File outputModelFile,final String outputModelFileFormat,final File secondaryOutputModelFile,final Spatial convertible)throws IOException,UnsupportedOperationException{
+	public void save(final File outputModelFile,final ModelFileFormat outputModelFileFormat,final File secondaryOutputModelFile,final Spatial convertible)throws IOException,UnsupportedOperationException{
     	switch(outputModelFileFormat)
-	        {case "ARDOR3D_BINARY":
+	        {case ARDOR3D_BINARY:
 	    	     new DirectBinaryExporter().save(convertible,outputModelFile);
 	    	     break;
-	         case "WAVEFRONT_OBJ":
+	         case WAVEFRONT_OBJ:
 	    	     if(convertible instanceof Mesh)
 	    	    	 new ObjExporter().save((Mesh)convertible,outputModelFile,secondaryOutputModelFile);
 	    	     else
@@ -202,7 +233,7 @@ public class EngineServiceProvider implements EngineServiceProviderInterface<Sav
 	    		         }
 	    	     break;
 	         default:
-	    	     throw new UnsupportedOperationException(outputModelFileFormat+" not supported as an input model file format");
+	    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
 	        }
     }
 }

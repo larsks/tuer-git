@@ -17,6 +17,8 @@
  */
 package jfpsm;
 
+import common.ModelFileFormat;
+
 /**
  * Data model of the 3D model converter, it contains some information
  * about the output file and the input file
