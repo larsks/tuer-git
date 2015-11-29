@@ -104,7 +104,6 @@
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
-	<property name="game-main-class-for-packr" value="engine/service/Ardor3DGameServiceProvider"/>
 	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-src-zip-filename" value="${project-unix-name}-${game-version}-${game-release}.src.zip" />
@@ -448,16 +447,14 @@
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false" packageshscriptenabled="true" packageexecutabledir="/usr/bin"
-			arch="i386" version="${game-version}" release="${game-release}"
+		    packageshscriptenabled="true" packageexecutabledir="/usr/bin" arch="i386" version="${game-version}" release="${game-release}"
 			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
 			summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}" 
 			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false" packageshscriptenabled="true" packageexecutabledir="/usr/bin"
-			arch="amd64" version="${game-version}" release="${game-release}"
+		    packageshscriptenabled="true" packageexecutabledir="/usr/bin" arch="amd64" version="${game-version}" release="${game-release}"
 		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
 		    summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}"
 			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
@@ -470,11 +467,11 @@
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false" arch="i386" version="${game-version}" release="${game-release}"/>
+		    arch="i386" version="${game-version}" release="${game-release}"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    antreimplementationenabled="true" nativelauncherenabled="false" arch="amd64" version="${game-version}" release="${game-release}"/>
+		    arch="amd64" version="${game-version}" release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create OS X APP                                                   -->
@@ -482,9 +479,9 @@
 	<target name="create-os-x-app">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle arch="universal" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
-		  	mainclass="${game-main-class-for-packr}" outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
+		  	outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
 			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
-			iconsfile="src/main/resources/images/${game-logo-filename}" antreimplementationenabled="true" nativelauncherenabled="true" version="${game-version}" 
+			iconsfile="src/main/resources/images/${game-logo-filename}" version="${game-version}" 
 			release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
