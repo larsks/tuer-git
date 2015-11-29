@@ -349,7 +349,7 @@
 			</dname>
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
-		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}" tsaurl="http://timestamping.edelweb.fr/service/tsp">
+		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}">
 			<path>
 				<pathelement location="${destdir}/${game-jar-filename}"/>
 				<pathelement location="${destdir}/${editor-jar-filename}"/>
