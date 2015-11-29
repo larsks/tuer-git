@@ -147,22 +147,18 @@ Creates the directory of the application, i.e the directory containing the neces
 </thead>
 <tbody>
 <tr><td>os</td><td>one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)</td><td>Yes</td></tr>
-<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''</td><td>Yes</td></tr>
-<tr><td>executable</td><td>name of the native executable or script (see nativelauncherenabled), without extension such as .exe</td><td>Yes</td></tr>
-<tr><td>linuxpackageshscriptenabled</td><td>creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true, if os is set to 'Linux' and if nativelauncherenabled is set to false</td><td>No - default is "false"</td></tr>
+<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
+<tr><td>executable</td><td>name of the script, without extension such as .bat and .sh</td><td>Yes</td></tr>
+<tr><td>linuxpackageshscriptenabled</td><td>creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if os is set to 'Linux'</td><td>No - default is "false"</td></tr>
 <tr><td>appjar</td><td>file location of the JAR to package</td><td>Yes</td></tr>
 <tr><td>appname</td><td>application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true</td><td>No, unless linuxpackageshscriptenabled is "true" - default is ""</td></tr>
-<tr><td>mainclass</td><td>fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used</td><td>No, unless nativelauncherenabled is "true" - default is ""</td></tr>
 <tr><td>outdir</td><td>output directory</td><td>Yes</td></tr>
 <tr><td>vmargs</td><td>list of arguments for the JVM, separated by ';', e.g. -Xmx1G</td><td>No - default is ";"</td></tr>
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
-<tr><td>resources</td><td>list of files and directories to be packaged next to the native executable, separated by ';'.</td><td>No - default is ";"</td></tr>
-<tr><td>minimizejre</td><td>minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'</td><td>No</td></tr>
+<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'.</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac). No conversion is done if antreimplementationenabled is set to false</td><td>No - default is ""</td></tr>
-<tr><td>antreimplementationenabled</td><td>enables the Ant reimplementation of PackR which uses only its native launcher</td><td>No - default is "true"</td></tr>
-<tr><td>nativelauncherenabled</td><td>uses PackR's native launcher if true, otherwise replaces it by a script</td><td>No - default is "false"</td></tr>
-<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false</td><td>No - default is "true"</td></tr>
+<tr><td>iconsfile</td><td>icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)</td><td>No - default is ""</td></tr>
+<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 </tbody>
 </table>
 <br>
@@ -175,23 +171,19 @@ Creates a RPM package, a DEB package and an archive for GNU Linux.
 </tr>
 </thead>
 <tbody>
-<tr><td>executable</td><td>name of the native executable or script (see nativelauncherenabled), without extension such as .exe</td><td>Yes</td></tr>
+<tr><td>executable</td><td>name of the script, without extension such as .sh</td><td>Yes</td></tr>
 <tr><td>packageexecutabledir</td><td>directory containing the executable after the install of a RPM or DEB package</td><td>No - default is "/usr/bin"</td></tr>
-<tr><td>packageshscriptenabled</td><td>creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if nativelauncherenabled is set to false</td><td>No - default is "true"</td></tr>
+<tr><td>packageshscriptenabled</td><td>creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true</td><td>No - default is "true"</td></tr>
 <tr><td>appjar</td><td>file location of the JAR to package</td><td>Yes</td></tr>
 <tr><td>appname</td><td>application name</td><td>Yes</td></tr>
-<tr><td>mainclass</td><td>fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used</td><td>No, unless nativelauncherenabled is "true" - default is ""</td></tr>
 <tr><td>outdir</td><td>output directory</td><td>Yes</td></tr>
 <tr><td>vmargs</td><td>list of arguments for the JVM, separated by ';', e.g. -Xmx1G</td><td>No - default is ";"</td></tr>
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
-<tr><td>resources</td><td>list of files and directories to be packaged next to the native executable, separated by ';'.</td><td>No - default is ";"</td></tr>
-<tr><td>minimizejre</td><td>minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'</td><td>No - default is ""</td></tr>
+<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'.</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
 <tr><td>iconsfile</td><td>icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)</td><td>No - default is ""</td></tr>
-<tr><td>antreimplementationenabled</td><td>enables the Ant reimplementation of Packr which uses only its native launcher</td><td>No - default is "true"</td></tr>
-<tr><td>nativelauncherenabled</td><td>uses PackR's native launcher if true, otherwise replaces it by a script</td><td>No - default is "false"</td></tr>
-<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false</td><td>No - default is "true"</td></tr>
-<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''</td><td>Yes</td></tr>
+<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
+<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
 <tr><td>categories</td><td>list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>No - default is ""</td></tr>
 <tr><td>comment</td><td>comment of the shortcut</td><td>No - default is ""</td></tr>
 <tr><td>vendor</td><td>organization that distributes the software</td><td>No - default is ""</td></tr>
@@ -227,21 +219,17 @@ Creates a zipped APP file for Mac OS X.
 </tr>
 </thead>
 <tbody>
-<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''</td><td>No - default is "universal"</td></tr>
-<tr><td>executable</td><td>name of the native executable or script (see nativelauncherenabled), without extension such as .exe</td><td>Yes</td></tr>
+<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>No - default is "universal"</td></tr>
+<tr><td>executable</td><td>name of the script, without extension such as .sh</td><td>Yes</td></tr>
 <tr><td>appjar</td><td>file location of the JAR to package</td><td>Yes</td></tr>
 <tr><td>appname</td><td>application name</td><td>Yes</td></tr>
-<tr><td>mainclass</td><td>the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used</td><td>No, unless nativelauncherenabled is "true" - default is ""</td></tr>
 <tr><td>outdir</td><td>output directory</td><td>Yes</td></tr>
 <tr><td>vmargs</td><td>list of arguments for the JVM, separated by ;, e.g. -Xmx1G</td><td>No - default is ";"</td></tr>
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
-<tr><td>resources</td><td>list of files and directories to be packaged next to the native executable, separated by ;</td><td>No - default is ";"</td></tr>
-<tr><td>minimizejre</td><td>minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'</td><td>No - default is ""</td></tr>
+<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ;</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably in .icns format, otherwise it is converted into this format), must be icons.icns if antreimplementationenabled is set to false as the icon filename is hardcoded in PackR</td><td>No - default is ""</td></tr>
-<tr><td>antreimplementationenabled</td><td>enables the Ant reimplementation of Packr which uses only its native launcher</td><td>No - default is "true"</td></tr>
-<tr><td>nativelauncherenabled</td><td>uses PackR's native launcher if true, otherwise replaces it by a script</td><td>No - default is "true"</td></tr>
-<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false</td><td>No - default is "true"</td></tr>
+<tr><td>iconsfile</td><td>icons file (preferably in .icns format, otherwise it is converted into this format)</td><td>No - default is ""</td></tr>
+<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 <tr><td>version</td><td>version</td><td>No - default is "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>No - default is "0"</td></tr>
 <tr><td>docdir</td><td>directory containing the documentation</td><td>No - default is ""</td></tr>
@@ -259,23 +247,19 @@ Creates a zipped application archive for Microsoft Windows.
 </tr>
 </thead>
 <tbody>
-<tr><td>executable</td><td>name of the native executable or script (see nativelauncherenabled), without extension such as .exe</td><td>Yes</td></tr>
+<tr><td>executable</td><td>name of the script, without extension such as .bat</td><td>Yes</td></tr>
 <tr><td>appjar</td><td>file location of the JAR to package</td><td>Yes</td></tr>
 <tr><td>appname</td><td>application name</td><td>Yes</td></tr>
-<tr><td>mainclass</td><td>the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used</td><td>No, unless nativelauncherenabled is "true" - default is ""</td></tr>
 <tr><td>outdir</td><td>output directory</td><td>Yes</td></tr>
 <tr><td>vmargs</td><td>list of arguments for the JVM, separated by ;, e.g. -Xmx1G</td><td>No - default is ";"</td></tr>
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
-<tr><td>resources</td><td>list of files and directories to be packaged next to the native executable, separated by ;</td><td>No - default is ";"</td></tr>
-<tr><td>minimizejre</td><td>minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'</td><td>No - default is ""</td></tr>
+<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ;</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably in .icns format, otherwise it is converted into this format), must be icons.icns if antreimplementationenabled is set to false as the icon filename is hardcoded in PackR</td><td>No - default is ""</td></tr>
-<tr><td>antreimplementationenabled</td><td>enables the Ant reimplementation of Packr which uses only its native launcher</td><td>No - default is "true"</td></tr>
-<tr><td>nativelauncherenabled</td><td>uses PackR's native launcher if true, otherwise replaces it by a script</td><td>No - default is "true"</td></tr>
-<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false</td><td>No - default is "true"</td></tr>
+<tr><td>iconsfile</td><td>icons file (preferably in .ico format, otherwise it is converted into this format)</td><td>No - default is ""</td></tr>
+<tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 <tr><td>version</td><td>version</td><td>No - default is "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>No - default is "0"</td></tr>
-<tr><td>arch</td><td>one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''</td><td>Yes</td></tr>
+<tr><td>arch</td><td>one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
 <tr><td>docdir</td><td>directory containing the documentation</td><td>No - default is ""</td></tr>
 <tr><td>docdirincludes</td><td>inclusion filter of the documentation directory</td><td>No - default is "*"</td></tr>
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "bzip2"</td></tr>
