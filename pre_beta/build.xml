@@ -528,7 +528,7 @@
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the files of the website onto the SFTP server in the Project Web Space -->
-		<for param="file-to-upload">
+		<!--<for param="file-to-upload">
 		    <path>
 		        <fileset dir="src/site"/>
 		    </path>
@@ -537,7 +537,10 @@
 		        <scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}"/>
 		    	<echo message="Upload of the file @{file-to-upload} successful" />
 		    </sequential>
-	    </for>
+	    </for>-->
+		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}">
+		    <fileset dir="src/site"/>
+		</scp>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
