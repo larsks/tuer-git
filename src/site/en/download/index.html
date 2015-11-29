@@ -124,7 +124,6 @@ You can get the source code of the dependencies here :
 <li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
-<li><a href="http://github.com/libgdx/packr/archive/master.zip">PackR</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
 <li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
 <li><a href="http://commons.apache.org/proper/commons-io/source-repository.html">Apache Commons IO</a></li>
@@ -155,7 +154,7 @@ Creates the directory of the application, i.e the directory containing the neces
 <tr><td>outdir</td><td>output directory</td><td>Yes</td></tr>
 <tr><td>vmargs</td><td>list of arguments for the JVM, separated by ';', e.g. -Xmx1G</td><td>No - default is ";"</td></tr>
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
-<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'.</td><td>No - default is ";"</td></tr>
+<tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
 <tr><td>iconsfile</td><td>icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
@@ -183,7 +182,7 @@ Creates a RPM package, a DEB package and an archive for GNU Linux.
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
 <tr><td>iconsfile</td><td>icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
-<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
+<tr><td>arch</td><td>one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
 <tr><td>categories</td><td>list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>No - default is ""</td></tr>
 <tr><td>comment</td><td>comment of the shortcut</td><td>No - default is ""</td></tr>
 <tr><td>vendor</td><td>organization that distributes the software</td><td>No - default is ""</td></tr>
@@ -219,7 +218,7 @@ Creates a zipped APP file for Mac OS X.
 </tr>
 </thead>
 <tbody>
-<tr><td>arch</td><td>one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>No - default is "universal"</td></tr>
+<tr><td>arch</td><td>one of universal, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>No - default is "universal"</td></tr>
 <tr><td>executable</td><td>name of the script, without extension such as .sh</td><td>Yes</td></tr>
 <tr><td>appjar</td><td>file location of the JAR to package</td><td>Yes</td></tr>
 <tr><td>appname</td><td>application name</td><td>Yes</td></tr>
