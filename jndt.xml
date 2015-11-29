@@ -591,7 +591,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
-		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
+		<attribute name="arch" description="one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
 		<attribute name="categories" default="" description="list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
 		<attribute name="comment" default="" description="comment of the shortcut"/>
 		<attribute name="vendor" default="" description="organization that distributes the software"/>
@@ -1034,7 +1034,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		</sequential>
 	</macrodef>
 	<macrodef name="create-os-x-app-bundle" description="creates a zipped APP file for Mac OS X">
-		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
+		<attribute name="arch" default="universal" description="one of universal, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
 		<attribute name="executable" description="name of the script, without extension such as .sh"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
@@ -1190,7 +1190,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
 		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
-		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
+		<attribute name="arch" description="one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
 		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
