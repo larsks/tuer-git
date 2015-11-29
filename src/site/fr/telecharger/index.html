@@ -92,11 +92,11 @@ Veuillez suivre une de ces méthodes :
 <li>Cliquez sur "Next"</li>
 <li>Cliquez sur "Finish"</li>
 <li>Attendez un moment</li>
-<li>A popup entitled "Checkout Completed" appears, click on "Create Project..."</li>
-<li>Select "Java Project with Existing Sources"</li>
-<li>Click on "Next"</li>
-<li>Enter a project name and click on "Next"</li>
-<li>In the "Source Package Folders" section, click on "Add Folder..." and select the only directory</li>
+<li>Un popu titré "Checkout Completed" apparait, cliquez sur "Create Project..."</li>
+<li>Sélectionnez "Java Project with Existing Sources"</li>
+<li>Cliquez sur "Next"</li>
+<li>Entrez un nom de projet et cliquez sur "Next"</li>
+<li>Dans la section "Source Package Folders", cliquez sur "Add Folder..." et sélectionnez le seul répertoire</li>
 <li>Cliquez sur "Next"</li>
 <li>Cliquez sur "Finish"</li>
 <li>Dans l'onglet "project", sélectionnez le noeud "Libraries" -> "Add JAR/Folder" et sélectionnez tous les JARs de tous les sous-répertoires du répertoire "lib"</li>
@@ -124,7 +124,6 @@ Vous pouvez obtenir le code source de toutes les dépendences ici :
 <li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
-<li><a href="http://github.com/libgdx/packr/archive/master.zip">PackR</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
 <li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
 <li><a href="http://commons.apache.org/proper/commons-io/source-repository.html">Apache Commons IO</a></li>
@@ -146,23 +145,19 @@ Crée le répertoire de l'application, c'est-à-dire le répertoire contenant le
 </tr>
 </thead>
 <tbody>
-<tr><td>os</td><td></td><td>Oui</td></tr>
-<tr><td>arch</td><td></td><td>Oui</td></tr>
-<tr><td>executable</td><td></td><td>Oui</td></tr>
-<tr><td>linuxpackageshscriptenabled</td><td></td><td>Non - défaut est "false"</td></tr>
-<tr><td>appjar</td><td></td><td>Oui</td></tr>
-<tr><td>appname</td><td></td><td>Non, à moins que linuxpackageshscriptenabled soit "true" - défaut est ""</td></tr>
-<tr><td>mainclass</td><td></td><td>Non, à moins que nativelauncherenabled soit "true" - défaut est ""</td></tr>
-<tr><td>outdir</td><td></td><td>Oui</td></tr>
-<tr><td>vmargs</td><td></td><td>Non - défaut est ";"</td></tr>
-<tr><td>jdk</td><td></td><td>Oui</td></tr>
-<tr><td>resources</td><td></td><td>Non - défaut est ";"</td></tr>
-<tr><td>minimizejre</td><td></td><td>Non</td></tr>
-<tr><td>bundleidentifier</td><td></td><td>Non - défaut est "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td></td><td>Non - défaut est ""</td></tr>
-<tr><td>antreimplementationenabled</td><td></td><td>Non - défaut est "true"</td></tr>
-<tr><td>nativelauncherenabled</td><td></td><td>Non - défaut est "false"</td></tr>
-<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client. Le JRE serveur est toujours utilisé quand antreimplementationenabled est à "false"</td><td>Non - défaut est "true"</td></tr>
+<tr><td>os</td><td>Un parmi Linux, Mac OS X, Windows (similaire à l'attribut 'os' de la balise 'resources' en JNLP)</td><td>Oui</td></tr>
+<tr><td>arch</td><td>Un parmi i386, amd64, universal, arm, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Oui</td></tr>
+<tr><td>executable</td><td>nom du script, sans extension telle que .bat et .sh</td><td>Oui</td></tr>
+<tr><td>linuxpackageshscriptenabled</td><td>crée un script shell simplifié portable utilisé en tant que lanceur pour n'importe quel paquetage GNU Linux si "true" et si "os" est mis à 'Linux'</td><td>Non, par défaut à "false"</td></tr>
+<tr><td>appjar</td><td>emplacement du fichier JAR à empaqueter</td><td>Oui</td></tr>
+<tr><td>appname</td><td>nom de l'application, obligatoire pour construire le nom de paquetage si "linuxpackageshscriptenabled" est mis à "true"</td><td>Non, à moins que linuxpackageshscriptenabled soit "true", par défaut à ""</td></tr>
+<tr><td>outdir</td><td>répertoire de sortie</td><td>Oui</td></tr>
+<tr><td>vmargs</td><td>liste d'arguments pour la JVM, séparatés par ';', par exemple -Xmx1G</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
+<tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparatés par ';'</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (préférablement .png pour GNU Linux, .ico pour Windows, .icns pour Mac)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 </tbody>
 </table>
 <br>
@@ -175,46 +170,42 @@ Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.
 </tr>
 </thead>
 <tbody>
-<tr><td>executable</td><td></td><td>Oui</td></tr>
-<tr><td>packageexecutabledir</td><td></td><td>Non - défaut est "/usr/bin"</td></tr>
-<tr><td>packageshscriptenabled</td><td></td><td>Non - défaut est "true"</td></tr>
-<tr><td>appjar</td><td></td><td></td></tr>
-<tr><td>appname</td><td></td><td></td></tr>
-<tr><td>mainclass</td><td></td><td></td></tr>
-<tr><td>outdir</td><td></td><td></td></tr>
-<tr><td>vmargs</td><td></td><td></td></tr>
-<tr><td>jdk</td><td></td><td></td></tr>
-<tr><td>resources</td><td></td><td></td></tr>
-<tr><td>minimizejre</td><td></td><td></td></tr>
-<tr><td>bundleidentifier</td><td></td><td></td></tr>
-<tr><td>iconsfile</td><td></td><td></td></tr>
-<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
-<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
-<tr><td>useserverjre</td><td></td><td></td></tr>
-<tr><td>arch</td><td></td><td></td></tr>
-<tr><td>categories</td><td></td><td></td></tr>
-<tr><td>comment</td><td></td><td></td></tr>
-<tr><td>vendor</td><td></td><td></td></tr>
-<tr><td>packager</td><td></td><td></td></tr>
-<tr><td>license</td><td></td><td></td></tr>
-<tr><td>summary</td><td></td><td></td></tr>
-<tr><td>description</td><td></td><td></td></tr>
-<tr><td>group</td><td></td><td></td></tr>
-<tr><td>section</td><td></td><td></td></tr>
-<tr><td>version</td><td></td><td></td></tr>
-<tr><td>release</td><td></td><td></td></tr>
-<tr><td>host</td><td></td><td></td></tr>
-<tr><td>url</td><td></td><td></td></tr>
-<tr><td>email</td><td></td><td></td></tr>
-<tr><td>distribution</td><td></td><td></td></tr>
-<tr><td>priority</td><td></td><td></td></tr>
-<tr><td>urgency</td><td></td><td></td></tr>
-<tr><td>essential</td><td></td><td></td></tr>
-<tr><td>debdepends</td><td></td><td></td></tr>
-<tr><td>multiarch</td><td></td><td></td></tr>
-<tr><td>docdir</td><td></td><td></td></tr>
-<tr><td>docdirincludes</td><td></td><td></td></tr>
-<tr><td>archivefileformat</td><td></td><td></td></tr>
+<tr><td>executable</td><td>nom du script, sans extension telle que .sh</td><td>Oui</td></tr>
+<tr><td>packageexecutabledir</td><td>directory containing the executable after the install of a RPM or DEB package</td><td>Non, par défaut à "/usr/bin"</td></tr>
+<tr><td>packageshscriptenabled</td><td>creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true</td><td>Non, par défaut à "true"</td></tr>
+<tr><td>appjar</td><td>emplacement du fichier JAR à empaqueter</td><td>Oui</td></tr>
+<tr><td>appname</td><td>nom de l'application</td><td>Oui</td></tr>
+<tr><td>outdir</td><td>répertoire de sortie</td><td>Oui</td></tr>
+<tr><td>vmargs</td><td>liste d'arguments pour la JVM, séparatés par ';', par exemple -Xmx1G</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
+<tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparatés par ';'</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (préférablement ni au format .icns ni au format .ico, sinon il est converti en PNG)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
+<tr><td>arch</td><td>Un parmi i386, amd64, arm, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Oui</td></tr>
+<tr><td>categories</td><td>list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>Non, par défaut à ""</td></tr>
+<tr><td>comment</td><td>comment of the shortcut</td><td>Non, par défaut à ""</td></tr>
+<tr><td>vendor</td><td>organization that distributes the software</td><td>Non, par défaut à ""</td></tr>
+<tr><td>packager</td><td>organization that actually packaged the software</td><td>Non, par défaut à ""</td></tr>
+<tr><td>license</td><td>license</td><td>Non, par défaut à ""</td></tr>
+<tr><td>summary</td><td>short description of the packaged software (generally on a single line)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>description</td><td>detailed description of the packaged software (can take up more than one line)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>group</td><td>string composed of a series of words separated by slashes that defines how the packaged software should be grouped with other packages</td><td>Non, par défaut à "Applications"</td></tr>
+<tr><td>section</td><td>classifier of the application for the Debian package, see http://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections</td><td>Non, par défaut à "java"</td></tr>
+<tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
+<tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>
+<tr><td>host</td><td>host (codebase)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>url</td><td>homepage url, generally pointing to the documentation of the software being packaged</td><td>Non, par défaut à ""</td></tr>
+<tr><td>email</td><td>email</td><td>Non, par défaut à ""</td></tr>
+<tr><td>distribution</td><td>target GNU Linux distribution</td><td>Non, par défaut à "unknown"</td></tr>
+<tr><td>priority</td><td>how important it is that the user have the package installed: required, important, standard, optional or extra</td><td>Non, par défaut à "optional"</td></tr>
+<tr><td>urgency</td><td>how important it is to upgrade to this version from previous ones: low, medium, high, emergency, or critical followed by an optional comment</td><td>Non, par défaut à "low"</td></tr>
+<tr><td>essential</td><td>whether the package management system will refuse to remove the package</td><td>Non, par défaut à "no"</td></tr>
+<tr><td>debdepends</td><td>dependencies of the Debian package, can end with ':any' (see 'multiarch')</td><td>Non, par défaut à ""</td></tr>
+<tr><td>multiarch</td><td>support of multiple architecture, see https://wiki.ubuntu.com/MultiarchSpec</td><td>Non, par défaut à "no"</td></tr>
+<tr><td>docdir</td><td>répertoire contenant la documentation</td><td>Non, par défaut à ""</td></tr>
+<tr><td>docdirincludes</td><td>filtre d'inclusion du répertoire de la documentation</td><td>Non, par défaut à "*"</td></tr>
+<tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "gzip"</td></tr>
 </tbody>
 </table>
 <br>
@@ -227,26 +218,22 @@ Crée un fichier APP zippé pour Mac OS X.
 </tr>
 </thead>
 <tbody>
-<tr><td>arch</td><td></td><td></td></tr>
-<tr><td>executable</td><td></td><td></td></tr>
-<tr><td>appjar</td><td></td><td></td></tr>
-<tr><td>appname</td><td></td><td></td></tr>
-<tr><td>mainclass</td><td></td><td></td></tr>
-<tr><td>outdir</td><td></td><td></td></tr>
-<tr><td>vmargs</td><td></td><td></td></tr>
-<tr><td>jdk</td><td></td><td></td></tr>
-<tr><td>resources</td><td></td><td></td></tr>
-<tr><td>minimizejre</td><td></td><td></td></tr>
-<tr><td>bundleidentifier</td><td></td><td></td></tr>
-<tr><td>iconsfile</td><td></td><td></td></tr>
-<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
-<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
-<tr><td>useserverjre</td><td></td><td></td></tr>
-<tr><td>version</td><td></td><td></td></tr>
-<tr><td>release</td><td></td><td></td></tr>
-<tr><td>docdir</td><td></td><td></td></tr>
-<tr><td>docdirincludes</td><td></td><td></td></tr>
-<tr><td>archivefileformat</td><td></td><td></td></tr>
+<tr><td>arch</td><td>Un parmi universal, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Non, par défaut à "universal"</td></tr>
+<tr><td>executable</td><td>nom du script, sans extension telle que .sh</td><td>Oui</td></tr>
+<tr><td>appjar</td><td>emplacement du fichier JAR à empaqueter</td><td>Oui</td></tr>
+<tr><td>appname</td><td>nom de l'application</td><td>Oui</td></tr>
+<tr><td>outdir</td><td>répertoire de sortie</td><td>Oui</td></tr>
+<tr><td>vmargs</td><td>liste d'arguments pour la JVM, séparatés par ';', par exemple -Xmx1G</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
+<tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparatés par ';'</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (préférablement au format .icns, sinon il est converti dans ce format)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
+<tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
+<tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>
+<tr><td>docdir</td><td>répertoire contenant la documentation</td><td>Non, par défaut à ""</td></tr>
+<tr><td>docdirincludes</td><td>filtre d'inclusion du répertoire de la documentation</td><td>Non, par défaut à "*"</td></tr>
+<tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
 </tbody>
 </table>
 <br>
@@ -259,26 +246,22 @@ Crée une archive d'application zippée pour Microsoft Windows.
 </tr>
 </thead>
 <tbody>
-<tr><td>executable</td><td></td><td></td></tr>
-<tr><td>appjar</td><td></td><td></td></tr>
-<tr><td>appname</td><td></td><td></td></tr>
-<tr><td>mainclass</td><td></td><td></td></tr>
-<tr><td>outdir</td><td></td><td></td></tr>
-<tr><td>vmargs</td><td></td><td></td></tr>
-<tr><td>jdk</td><td></td><td></td></tr>
-<tr><td>resources</td><td></td><td></td></tr>
-<tr><td>minimizejre</td><td></td><td></td></tr>
-<tr><td>bundleidentifier</td><td></td><td></td></tr>
-<tr><td>iconsfile</td><td></td><td></td></tr>
-<tr><td>antreimplementationenabled</td><td></td><td></td></tr>
-<tr><td>nativelauncherenabled</td><td></td><td></td></tr>
-<tr><td>useserverjre</td><td></td><td></td></tr>
-<tr><td>version</td><td></td><td></td></tr>
-<tr><td>release</td><td></td><td></td></tr>
-<tr><td>arch</td><td></td><td></td></tr>
-<tr><td>docdir</td><td></td><td></td></tr>
-<tr><td>docdirincludes</td><td></td><td></td></tr>
-<tr><td>archivefileformat</td><td></td><td></td></tr>
+<tr><td>executable</td><td>nom du script, sans extension telle que .bat</td><td>Oui</td></tr>
+<tr><td>appjar</td><td>emplacement du fichier JAR à empaqueter</td><td>Oui</td></tr>
+<tr><td>appname</td><td>nom de l'application</td><td>Oui</td></tr>
+<tr><td>outdir</td><td>répertoire de sortie</td><td>Oui</td></tr>
+<tr><td>vmargs</td><td>liste d'arguments pour la JVM, séparatés par ';', par exemple -Xmx1G</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
+<tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparatés par ';'</td><td>Non, par défaut à ";"</td></tr>
+<tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (préférablement au format .ico, sinon il est converti dans ce format)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
+<tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
+<tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>
+<tr><td>arch</td><td>Un parmi i386, amd64, arm, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Oui</td></tr>
+<tr><td>docdir</td><td>répertoire contenant la documentation</td><td>Non, par défaut à ""</td></tr>
+<tr><td>docdirincludes</td><td>filtre d'inclusion du répertoire de la documentation</td><td>Non, par défaut à "*"</td></tr>
+<tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
 </tbody>
 </table>
 <br>
