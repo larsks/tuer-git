@@ -24,34 +24,33 @@
 <!-- ===================================================================== -->
 
 <project name="jndt" basedir=".">
-    <description>JNDT: Java Native Deployment Toolkit</description>
+	<description>JNDT: Java Native Deployment Toolkit</description>
 	<property name="jndtlibdir" value="lib/ant" />
-	<property name="packrlibpath" value="${jndtlibdir}/packr-1.3-SNAPSHOT-jar-with-dependencies.jar" />
- 	<!-- External tasks of Ant-Contrib -->
- 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${jndtlibdir}/ant-contrib-1.0b3.jar"/>
+	<!-- External tasks of Ant-Contrib -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${jndtlibdir}/ant-contrib-1.0b3.jar"/>
 	<!-- pure Java implementation of the RPM package builder -->
 	<taskdef name="pure-java-rpm" classname="org.redline_rpm.ant.RedlineTask">
-	    <classpath>
-	        <pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
-	        <pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
-	        <pathelement location="${jndtlibdir}/slf4j-api-1.7.7.jar"/>
-	        <pathelement location="${jndtlibdir}/slf4j-simple-1.7.7.jar"/>
-	        <pathelement location="${jndtlibdir}/xz-1.4.jar"/>
-	        <pathelement location="${jndtlibdir}/redline-1.2.2.jar"/>
-	    </classpath>
+		<classpath>
+			<pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
+			<pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
+			<pathelement location="${jndtlibdir}/slf4j-api-1.7.7.jar"/>
+			<pathelement location="${jndtlibdir}/slf4j-simple-1.7.7.jar"/>
+			<pathelement location="${jndtlibdir}/xz-1.4.jar"/>
+			<pathelement location="${jndtlibdir}/redline-1.2.2.jar"/>
+		</classpath>
 	</taskdef>
 	<!-- pure Java implementation of the DEB package builder -->
 	<taskdef name="pure-java-deb" classname="org.vafer.jdeb.ant.DebAntTask">
-	    <classpath>
-	        <pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
-	        <pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
-	        <pathelement location="${jndtlibdir}/commons-io-2.4.jar"/>
-	        <pathelement location="${jndtlibdir}/jdeb-1.4.jar"/>
-	    </classpath>
+		<classpath>
+			<pathelement location="${jndtlibdir}/bcpg-jdk15on-151.jar"/>
+			<pathelement location="${jndtlibdir}/commons-compress-1.8.1.jar"/>
+			<pathelement location="${jndtlibdir}/commons-io-2.4.jar"/>
+			<pathelement location="${jndtlibdir}/jdeb-1.4.jar"/>
+		</classpath>
 	</taskdef>
 	<!-- task of image format conversion -->
 	<taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="${jndtlibdir}/commons-imaging-1.0-SNAPSHOT.jar"/>
- 	
+
 	<macrodef name="to-basename-without-extension">
 		<attribute name="property" description="The name of the property to set that will contain the basename without the very last extension (output)" />
 		<attribute name="input" description="The input string to be used as a basename without extension if possible" />
@@ -59,54 +58,54 @@
 			<local name="basename"/>
 			<basename file="@{input}" property="basename"/>
 			<propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\1" override="true" />
-	    </sequential>
+		</sequential>
 	</macrodef>
-	
+
 	<macrodef name="to-extension">
-	    <attribute name="property" description="The name of the property to set that will contain the very last extension (output)" />
-	    <attribute name="input" description="The input string to be used as an extension if possible" />
-	    <sequential>
-	        <basename file="@{input}" property="basename"/>
-	        <propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\2" override="true" />
-	    </sequential>
+		<attribute name="property" description="The name of the property to set that will contain the very last extension (output)" />
+		<attribute name="input" description="The input string to be used as an extension if possible" />
+		<sequential>
+			<basename file="@{input}" property="basename"/>
+			<propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\2" override="true" />
+		</sequential>
 	</macrodef>
-	
+
 	<!-- The package name mustn't contain whitespaces and special characters, it must be lowercase -->
 	<macrodef name="to-package-name">
-	    <attribute name="property" description="The name of the property to set that will contain the package name (output)" />
-	    <attribute name="input" description="The input string to be used as a package name if possible" />
-	    <sequential>
-	        <var name="@{property}" value="@{input}"/>
-	        <!-- Removes any character that isn't a letter of the English alphabet from the package name -->
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="/[^a-zA-Z]/gi" replace=""/>
-	        <!-- Ensures that the package name is lowercase -->
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="A" replace="a"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="B" replace="b"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="C" replace="c"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="D" replace="d"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="E" replace="e"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="F" replace="f"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="G" replace="g"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="H" replace="h"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="I" replace="i"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="J" replace="j"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="K" replace="k"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="L" replace="l"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="M" replace="m"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="N" replace="n"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="O" replace="o"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="P" replace="p"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Q" replace="q"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="R" replace="r"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="S" replace="s"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="T" replace="t"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="U" replace="u"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="V" replace="v"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="W" replace="w"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="X" replace="x"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Y" replace="y"/>
-	        <propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Z" replace="z"/>
-	    </sequential>
+		<attribute name="property" description="The name of the property to set that will contain the package name (output)" />
+		<attribute name="input" description="The input string to be used as a package name if possible" />
+		<sequential>
+			<var name="@{property}" value="@{input}"/>
+			<!-- Removes any character that isn't a letter of the English alphabet from the package name -->
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="/[^a-zA-Z]/gi" replace=""/>
+			<!-- Ensures that the package name is lowercase -->
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="A" replace="a"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="B" replace="b"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="C" replace="c"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="D" replace="d"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="E" replace="e"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="F" replace="f"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="G" replace="g"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="H" replace="h"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="I" replace="i"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="J" replace="j"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="K" replace="k"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="L" replace="l"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="M" replace="m"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="N" replace="n"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="O" replace="o"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="P" replace="p"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Q" replace="q"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="R" replace="r"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="S" replace="s"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="T" replace="t"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="U" replace="u"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="V" replace="v"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="W" replace="w"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="X" replace="x"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Y" replace="y"/>
+			<propertyregex property="@{property}" input="${@{property}}" global="true" override="true" regexp="Z" replace="z"/>
+		</sequential>
 	</macrodef>
 	<macrodef name="to-archive-extension">
 		<attribute name="property" description="The name of the property to set that will contain the archive extension (output)" />
@@ -114,557 +113,387 @@
 		<sequential>
 			<if>
 				<or>
-			        <equals arg1="@{input}" arg2="zip"/>
-				    <equals arg1="@{input}" arg2="tar"/>
+					<equals arg1="@{input}" arg2="zip"/>
+					<equals arg1="@{input}" arg2="tar"/>
 				</or>
-			    <then>
-			        <var name="@{property}" value="@{input}"/>
-			    </then>
-			    <else>
-			        <if>
-			            <equals arg1="@{input}" arg2="gzip"/>
-			            <then>
-			                <var name="@{property}" value="tar.gz"/>
-			            </then>
-			            <else>
-			                <if>
-			                    <equals arg1="@{input}" arg2="bzip2"/>
-			                    <then>
-			                        <var name="@{property}" value="tar.bz2"/>
-			                    </then>
-			                    <else>
-			                        <fail message="archive file format @{input} unsupported"/>
-			                    </else>
-			                </if>      
-			            </else>
-			        </if>
-			    </else>
+				<then>
+					<var name="@{property}" value="@{input}"/>
+				</then>
+				<else>
+					<if>
+						<equals arg1="@{input}" arg2="gzip"/>
+						<then>
+							<var name="@{property}" value="tar.gz"/>
+						</then>
+						<else>
+							<if>
+								<equals arg1="@{input}" arg2="bzip2"/>
+								<then>
+									<var name="@{property}" value="tar.bz2"/>
+								</then>
+								<else>
+									<fail message="archive file format @{input} unsupported"/>
+								</else>
+							</if>
+						</else>
+					</if>
+				</else>
 			</if>
 		</sequential>
 	</macrodef>
-    <macrodef name="create-app-dir" description="Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...)">
-    	<attribute name="os" description="one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)"/>
-    	<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
-    	<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
-    	<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true, if os is set to 'Linux' and if nativelauncherenabled is set to false"/>
-        <attribute name="appjar" description="file location of the JAR to package"/>
-    	<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
-        <attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
-        <attribute name="outdir" description="output directory"/>
-        <attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
-        <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
-        <attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
-        <attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
-        <attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
-        <attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac). No conversion is done if antreimplementationenabled is set to false"/>
-        <attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of PackR which uses only its native launcher"/>
-        <attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-        <attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-        <sequential>
-            <!-- Mac has a distinct directory layout -->
-            <if>
-                <equals arg1="@{os}" arg2="Mac OS X" />
-                <then>
-                    <var name="contentstarget" value="@{outdir}/Contents/MacOS" />
-                    <var name="iconstarget" value="@{outdir}/Contents/Resources" />
-                </then>
-                <else>
-                    <var name="contentstarget" value="@{outdir}" />
-                    <var name="iconstarget" value="@{outdir}" />
-                </else>
-            </if>
-            <!-- checks which implementation to use -->
-            <if>
-                <equals arg1="@{antreimplementationenabled}" arg2="true" />
-                <then>
-                	<fail message="Invalid operating system '@{os}', must be Linux, Mac OS X or Windows">
-                		<condition>
-                		    <not>
-                		        <or>
-                		            <equals arg1="@{os}" arg2="Linux" />
-                		            <equals arg1="@{os}" arg2="Mac OS X" />
-                		            <equals arg1="@{os}" arg2="Windows" />
-                		        </or>
-                		    </not>
-                		</condition>
-                	</fail>
-                    <fail message="Invalid architecture '@{arch}', must be i386, amd64, universal or arm">
-                        <condition>
-                            <not>
-                                <or>
-                                    <equals arg1="@{arch}" arg2="i386" />
-                                    <equals arg1="@{arch}" arg2="amd64" />
-                                    <equals arg1="@{arch}" arg2="universal" />
-                                    <equals arg1="@{arch}" arg2="arm" />
-                                	<equals arg1="@{arch}" arg2="none" />
-                                </or>
-                            </not>
-                        </condition>
-                    </fail>
-                	<fail message="Invalid combination of os '@{os}' and architecture '@{arch}'">
-                		<condition>
-                		    <and>
-                		    	<equals arg1="@{arch}" arg2="universal" />
-                		    	<not>
-                		    		<equals arg1="@{os}" arg2="Mac OS X" />
-                		    	</not>
-                		    </and>
-                		</condition>
-                	</fail>
-                	<fail message="'jdk' must be empty if 'arch' is set to 'none'">
-                		<condition>
-                		    <and>
-                		    	<not>
-                		    		<equals arg1="@{jdk}" arg2="" />
-                		    	</not>
-                		    	<equals arg1="@{arch}" arg2="none" />
-                		    </and>
-                		</condition>
-                	</fail>
-                	<if>
-                	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                		<then>
-                			<fail message="Combination of os '@{os}' and architecture '@{arch}' unsupported by the native launcher">
-                			     <condition>
-                			         <not>
-                			         	<or>
-                			         		<and>
-                			         			<or>
-                			         		        <equals arg1="@{os}" arg2="Linux" />
-                			         				<equals arg1="@{os}" arg2="Windows" />
-                			         			</or>
-                			         			<or>
-                			         		        <equals arg1="@{arch}" arg2="i386" />
-                			         			    <equals arg1="@{arch}" arg2="amd64" />
-                			         			</or>
-                			         		</and>
-                			         		<and>
-                			         			<equals arg1="@{os}" arg2="Mac OS X" />
-                			         			<equals arg1="@{arch}" arg2="universal" />
-                			         		</and>
-                			         	</or>
-                			         </not>
-                			    </condition>
-                			</fail>
-                		</then>
-                    </if>
-                    <if>
-                        <and>
-                            <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                            <equals arg1="@{jdk}" arg2="" />
-                        </and>
-                        <then>
-                            <fail message="'jdk' must not be empty when nativelauncherenabled is set to true"/>
-                        </then>
-                    </if>
-                	<if>
-                		<and>
-                		    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                	        <equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
-                	    </and>
-                		<then>
-                	        <echo message="nativelauncherenabled is set to true, no script is used to launch the program, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
-                	    </then>
-                	</if>
-                	<if>
-                	    <and>
-                	        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                	        <equals arg1="@{mainclass}" arg2="" />
-                	    </and>
-                	    <then>
-                	        <fail message="'mainclass' must not be empty when nativelauncherenabled is set to true"/>
-                	    </then>
-                	</if>
-                	<if>
-                	    <and>
-                	        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                	        <not>
-                	            <available file="${packrlibpath}"/>
-                	        </not>
-                	    </and>
-                	    <then>
-                	        <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=true and nativelauncherenabled=true"/>
-                	    </then>
-                	</if>
-                	<if>
-                        <available file="@{outdir}" />
-                        <then>
-                            <fail message="Output directory equals working directory, aborting">
-                                <condition>
-                                    <equals arg1="@{outdir}" arg2="." />
-                                </condition>
-                            </fail>
-                            <echo message="Output directory '@{outdir}' exists, deleting" />
-                            <delete dir="@{outdir}" failonerror="false" />
-                        </then>
-                    </if>
-                    <!-- creates the application directory -->
-                    <mkdir dir="@{outdir}" />
-                	<if>
-                	    <equals arg1="@{os}" arg2="Mac OS X" />
-                	    <then>
-                	        <mkdir dir="@{outdir}/Contents/Resources" />
-                	        <mkdir dir="@{outdir}/Contents/MacOS" />
-                	    </then>
-                	</if>
-                	<!-- manages the icons file -->
-                	<if>
-                		<and>
-                	        <not>
-                	    	    <equals arg1="@{iconsfile}" arg2="" />
-                	        </not>
-                			<available file="@{iconsfile}"/>
-                		</and>
-                	    <then>
-                	        <if>
-                	            <equals arg1="@{os}" arg2="Windows" />
-                	            <then>
-                	            	<to-extension input="@{iconsfile}" property="iconsfileextension" />
-                	    	        <if>
-                	    	        	<not>
-                	    	                <equals arg1="${iconsfileextension}" arg2="ico" />
-                	    	        	</not>
-                	    	            <then>
-                	    	            	<!-- tries to remove all extensions -->
-                	    	            	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                	    	    	        <!-- converts the icon file into the proper format for Windows icons -->
-                	    	            	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.ico" />
-                	    	            	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	    	            	<echo message="icons file '@{iconsfile}' exists, converting into ico" />
-                	    	    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
-                	    	            </then>
-                	    	        	<else>
-                	    	        		<local name="iconsfilebasename" />
-                	    	        		<basename property="iconsfilebasename" file="@{iconsfile}" />
-                	    	        		<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	    	        		<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	    	        		<echo message="icons file '@{iconsfile}' exists, copying" />
-                	    	        		<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
-                	    	        	</else>
-                	    	        </if>
-                	            </then>
-                	        	<else>
-                	        	    <if>
-                	        	    	<equals arg1="@{os}" arg2="Linux" />
-                	        	    	<then>
-                	        	    		<to-extension input="@{iconsfile}" property="iconsfileextension" />
-                	        	    		<if>
-                	        	    			<not>
-                	        	    			    <equals arg1="${iconsfileextension}" arg2="png" />
-                	        	    			</not>
-                	        	    		    <then>
-                	        	    		    	<!-- tries to remove all extensions -->
-                	        	    		    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                	        	    		        <!-- converts the icon file into the proper format for GNU Linux icons, see http://standards.freedesktop.org/icon-theme-spec/latest/ar01s02.html -->
-                	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.png" />
-                	        	    		    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	        	    		        <echo message="icons file '@{iconsfile}' exists, converting into png" />
-                	        	    		        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
-                	        	    		    </then>
-                	        	    		    <else>
-                	        	    		    	<local name="iconsfilebasename" />
-                	        	    		    	<basename property="iconsfilebasename" file="@{iconsfile}" />
-                	        	    		    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	        	    		    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	        	    		    	<echo message="icons file '@{iconsfile}' exists, copying" />
-                	        	    		    	<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
-                	        	    		   </else>
-                	        	    		</if>
-                	        	    	</then>
-                	        	    	<else>
-                	        	    		<if>
-                	        	    		    <equals arg1="@{os}" arg2="Mac OS X" />
-                	        	    		    <then>
-                	        	    		    	<to-extension input="@{iconsfile}" property="iconsfileextension" />
-                	        	    		    	<if>
-                	        	    		    		<not>
-                	        	    		    		    <equals arg1="${iconsfileextension}" arg2="icns" />
-                	        	    		    		</not>
-                	        	    		    	    <then>
-                	        	    		    	    	<!-- tries to remove all extensions -->
-                	        	    		    	    	<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                	        	    		    	        <!-- converts the icon file into the proper format for Mac OS X icons -->
-                	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.icns" />
-                	        	    		    	    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	        	    		    	    	<echo message="icons file '@{iconsfile}' exists, converting into icns" />
-                	        	    		    	        <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
-                	        	    		    	    </then>
-                	        	    		    	    <else>
-                	        	    		    	    	<local name="iconsfilebasename" />
-                	        	    		    	    	<basename property="iconsfilebasename" file="@{iconsfile}" />
-                	        	    		    	    	<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
-                	        	    		    	    	<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                	        	    		    	    	<echo message="icons file '@{iconsfile}' exists, copying" />
-                	        	    		    	    	<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
-                	        	    		    	    </else>
-                	        	    		    	</if>
-                	        	    		    </then>
-                	        	    		</if>
-                	        	    	</else>
-                	        	    </if>
-                	        	</else>
-                	        </if>
-                	    </then>
-                		<else>
-                			<var name="dsticonsfile" value="" />
-                			<var name="dsticonsfilebasename" value="" />
-                			<echo message="icons file '@{iconsfile}' not found, no icons file for the application bundle" />
-                		</else>
-                	</if>
-                    <!-- creates Mac specific files if needed -->
-                    <if>
-                        <equals arg1="@{os}" arg2="Mac OS X" />
-                        <then>
-                            <echo file="@{outdir}/Contents/Info.plist">
-                                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-                                <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                                <plist version="1.0">
-                                    <dict>
-                                        <key>CFBundleGetInfoString</key>
-                                        <string>@{executable}</string>
-                                        <key>CFBundleExecutable</key>
-                                        <string>@{executable}</string>
-                                        <key>CFBundleIdentifier</key>
-                                        <string>@{bundleIdentifier}</string>
-                                        <key>CFBundleName</key>
-                                        <string>@{executable}</string>
-                                        <key>CFBundleIconFile</key>
-                                        <string>${dsticonsfilebasename}</string>
-                                        <key>CFBundleShortVersionString</key>
-                                        <string>1.0</string>
-                                        <key>CFBundleInfoDictionaryVersion</key>
-                                        <string>6.0</string>
-                                        <key>CFBundlePackageType</key>
-                                        <string>APPL</string>
-                                        <key>IFMajorVersion</key>
-                                        <integer>0</integer>
-                                        <key>IFMinorVersion</key>
-                                        <integer>1</integer>
-                                    </dict>
-                                </plist>
+	<macrodef name="create-app-dir" description="Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...)">
+		<attribute name="os" description="one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)"/>
+		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
+		<attribute name="executable" description="name of the script, without extension such as .exe and .sh"/>
+		<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if os is set to 'Linux'"/>
+		<attribute name="appjar" description="file location of the JAR to package"/>
+		<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
+		<attribute name="outdir" description="output directory"/>
+		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
+		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
+		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
+		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
+		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
+		<sequential>
+			<!-- Mac has a distinct directory layout -->
+			<if>
+				<equals arg1="@{os}" arg2="Mac OS X" />
+				<then>
+					<var name="contentstarget" value="@{outdir}/Contents/MacOS" />
+					<var name="iconstarget" value="@{outdir}/Contents/Resources" />
+				</then>
+				<else>
+					<var name="contentstarget" value="@{outdir}" />
+					<var name="iconstarget" value="@{outdir}" />
+				</else>
+			</if>
+			<fail message="Invalid operating system '@{os}', must be Linux, Mac OS X or Windows">
+				<condition>
+					<not>
+						<or>
+							<equals arg1="@{os}" arg2="Linux" />
+							<equals arg1="@{os}" arg2="Mac OS X" />
+							<equals arg1="@{os}" arg2="Windows" />
+						</or>
+					</not>
+				</condition>
+			</fail>
+			<fail message="Invalid architecture '@{arch}', must be i386, amd64, universal or arm">
+				<condition>
+					<not>
+						<or>
+							<equals arg1="@{arch}" arg2="i386" />
+							<equals arg1="@{arch}" arg2="amd64" />
+							<equals arg1="@{arch}" arg2="universal" />
+							<equals arg1="@{arch}" arg2="arm" />
+							<equals arg1="@{arch}" arg2="none" />
+						</or>
+					</not>
+				</condition>
+			</fail>
+			<fail message="Invalid combination of os '@{os}' and architecture '@{arch}'">
+				<condition>
+					<and>
+						<equals arg1="@{arch}" arg2="universal" />
+						<not>
+							<equals arg1="@{os}" arg2="Mac OS X" />
+						</not>
+					</and>
+				</condition>
+			</fail>
+			<fail message="'jdk' must be empty if 'arch' is set to 'none'">
+				<condition>
+					<and>
+						<not>
+							<equals arg1="@{jdk}" arg2="" />
+						</not>
+						<equals arg1="@{arch}" arg2="none" />
+					</and>
+				</condition>
+			</fail>
+			<if>
+				<available file="@{outdir}" />
+				<then>
+					<fail message="Output directory equals working directory, aborting">
+						<condition>
+							<equals arg1="@{outdir}" arg2="." />
+						</condition>
+					</fail>
+					<echo message="Output directory '@{outdir}' exists, deleting" />
+					<delete dir="@{outdir}" failonerror="false" />
+				</then>
+			</if>
+			<!-- creates the application directory -->
+			<mkdir dir="@{outdir}" />
+			<if>
+				<equals arg1="@{os}" arg2="Mac OS X" />
+				<then>
+					<mkdir dir="@{outdir}/Contents/Resources" />
+					<mkdir dir="@{outdir}/Contents/MacOS" />
+				</then>
+			</if>
+			<!-- manages the icons file -->
+			<if>
+				<and>
+					<not>
+						<equals arg1="@{iconsfile}" arg2="" />
+					</not>
+					<available file="@{iconsfile}" />
+				</and>
+				<then>
+					<if>
+						<equals arg1="@{os}" arg2="Windows" />
+						<then>
+							<to-extension input="@{iconsfile}" property="iconsfileextension" />
+							<if>
+								<not>
+									<equals arg1="${iconsfileextension}" arg2="ico" />
+								</not>
+								<then>
+									<!-- tries to remove all extensions -->
+									<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
+									<!-- converts the icon file into the proper format for Windows icons -->
+									<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.ico" />
+									<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+									<echo message="icons file '@{iconsfile}' exists, converting into ico" />
+									<convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+								</then>
+								<else>
+									<local name="iconsfilebasename" />
+									<basename property="iconsfilebasename" file="@{iconsfile}" />
+									<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
+									<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+									<echo message="icons file '@{iconsfile}' exists, copying" />
+									<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
+								</else>
+							</if>
+						</then>
+						<else>
+							<if>
+								<equals arg1="@{os}" arg2="Linux" />
+								<then>
+									<to-extension input="@{iconsfile}" property="iconsfileextension" />
+									<if>
+										<not>
+											<equals arg1="${iconsfileextension}" arg2="png" />
+										</not>
+										<then>
+											<!-- tries to remove all extensions -->
+											<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
+											<!-- converts the icon file into the proper format for GNU Linux icons, see http://standards.freedesktop.org/icon-theme-spec/latest/ar01s02.html -->
+											<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.png" />
+											<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+											<echo message="icons file '@{iconsfile}' exists, converting into png" />
+											<convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+										</then>
+										<else>
+											<local name="iconsfilebasename" />
+											<basename property="iconsfilebasename" file="@{iconsfile}" />
+											<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
+											<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+											<echo message="icons file '@{iconsfile}' exists, copying" />
+											<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
+										</else>
+									</if>
+								</then>
+								<else>
+									<if>
+										<equals arg1="@{os}" arg2="Mac OS X" />
+										<then>
+											<to-extension input="@{iconsfile}" property="iconsfileextension" />
+											<if>
+												<not>
+													<equals arg1="${iconsfileextension}" arg2="icns" />
+												</not>
+												<then>
+													<!-- tries to remove all extensions -->
+													<to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
+													<!-- converts the icon file into the proper format for Mac OS X icons -->
+													<var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.icns" />
+													<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+													<echo message="icons file '@{iconsfile}' exists, converting into icns" />
+													<convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+												</then>
+												<else>
+													<local name="iconsfilebasename" />
+													<basename property="iconsfilebasename" file="@{iconsfile}" />
+													<var name="dsticonsfilebasename" value="${iconsfilebasename}" />
+													<var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
+													<echo message="icons file '@{iconsfile}' exists, copying" />
+													<copy file="@{iconsfile}" tofile="${dsticonsfile}"  />
+												</else>
+											</if>
+										</then>
+									</if>
+								</else>
+							</if>
+						</else>
+					</if>
+				</then>
+				<else>
+					<var name="dsticonsfile" value="" />
+					<var name="dsticonsfilebasename" value="" />
+					<echo message="icons file '@{iconsfile}' not found, no icons file for the application bundle" />
+				</else>
+			</if>
+			<!-- creates Mac specific files if needed -->
+			<if>
+				<equals arg1="@{os}" arg2="Mac OS X" />
+				<then>
+					<echo file="@{outdir}/Contents/Info.plist">
+						<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+						<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+						<plist version="1.0">
+							<dict>
+								<key>CFBundleGetInfoString</key>
+								<string>@{executable}</string>
+								<key>CFBundleExecutable</key>
+								<string>@{executable}</string>
+								<key>CFBundleIdentifier</key>
+								<string>@{bundleIdentifier}</string>
+								<key>CFBundleName</key>
+								<string>@{executable}</string>
+								<key>CFBundleIconFile</key>
+								<string>${dsticonsfilebasename}</string>
+								<key>CFBundleShortVersionString</key>
+								<string>1.0</string>
+								<key>CFBundleInfoDictionaryVersion</key>
+								<string>6.0</string>
+								<key>CFBundlePackageType</key>
+								<string>APPL</string>
+								<key>IFMajorVersion</key>
+								<integer>0</integer>
+								<key>IFMinorVersion</key>
+								<integer>1</integer>
+							</dict>
+						</plist>
                                ]]>
                             </echo>
-                        </then>
-                    </if>
-                    <!-- handles the other files of the application directory -->
-                    <copy file="@{appjar}" todir="${contentstarget}" />
-                    <local name="appjarbasename" />
-                    <basename property="appjarbasename" file="@{appjar}" />
-                    <!-- handles the VM arguments -->
-                    <var name="vmargsstring" value="" />
-                    <var name="vmargscount" value="0" />
-                    <for list="@{vmargs}" delimiter=";" param="vmarg">
-                        <sequential>
-                            <math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
-                        </sequential>
-                    </for>
-                    <var name="vmargindex" value="0" />
-                    <math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
-                    <if>
-                        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                        <then>
-                            <!-- puts the double quotes around each argument and uses ',\n' as a separator to feed the native launcher -->
-                            <for list="@{vmargs}" delimiter=";" param="vmarg">
-                                <sequential>
-                                    <var name="vmargsstring" value="${vmargsstring}&quot;@{vmarg}&quot;" />
-                                    <if>
-                                        <not>
-                                            <equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
-                                        </not>
-                                        <then>
-                                            <var name="vmargsstring" value="${vmargsstring},${line.separator}" />
-                                        </then>
-                                    </if>
-                                    <math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
-                                </sequential>
-                            </for>
-                            <!-- this JSON file is read by the native launcher -->
-                            <echo file="${contentstarget}/config.json">
-                                <![CDATA[{
-"jar": "${appjarbasename}",
-"mainClass": "@{mainclass}",
-"vmArgs": [
-${vmargsstring}
-]}
-]]>
-                            </echo>
-                        </then>
-                        <else>
-                            <var name="altvmargs" value="" />
-                            <if>
-                                <equals arg1="@{useserverjre}" arg2="true" />
-                                <then>
-                                    <var name="altvmargs" value="-server;@{vmargs}" />
-                                    <math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
-                                    <math result="vmarglastindex" operand1="${vmarglastindex}" operation="+" operand2="1" datatype="int"/>
-                                </then>
-                                <else>
-                                    <var name="altvmargs" value="@{vmargs}" />
-                                </else>
-                            </if>
-                            <!-- uses ' ' as a separator to feed the script -->
-                            <for list="${altvmargs}" delimiter=";" param="vmarg">
-                                <sequential>
-                                    <var name="vmargsstring" value="${vmargsstring}@{vmarg}" />
-                                    <if>
-                                        <not>
-                                            <equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
-                                        </not>
-                                        <then>
-                                            <var name="vmargsstring" value="${vmargsstring} " />
-                                        </then>
-                                    </if>
-                                    <math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
-                                </sequential>
-                            </for>
-                        </else>
-                    </if>
-                    <!-- handles the native launcher or the script -->
-                	<if>
-                	    <equals arg1="@{os}" arg2="Windows" />
-                	    <then>
-                	    	<if>
-                	    	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                	    	    <then>
-                	    	        <var name="exedstfilename" value="@{executable}.exe" />
-                	    	    </then>
-                	    	    <else>
-                	    	        <var name="exedstfilename" value="@{executable}.bat" />
-                	    	    </else>
-                	    	</if>
-                	    </then>
-                		<else>
-                			<var name="exedstfilename" value="@{executable}" />
-                		</else>
-                	</if>
-                	<if>
-                	    <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                	    <then>
-                	        <if>
-                    	        <and>
-                                    <equals arg1="@{os}" arg2="Linux" />
-                    		        <equals arg1="@{arch}" arg2="i386" />
-                                </and>
-                    	        <then>
-                                    <var name="exesrcfilename" value="packr-linux" />
-                                </then>
-                                <else>
-                                    <if>
-                            	        <and>
-                            	            <equals arg1="@{os}" arg2="Linux" />
-                            	            <equals arg1="@{arch}" arg2="amd64" />
-                            	        </and>
-                                        <then>
-                                            <var name="exesrcfilename" value="packr-linux-x64" />
-                                        </then>
-                                        <else>
-                                            <if>
-                                            	<and>
-                                                    <equals arg1="@{os}" arg2="Mac OS X" />
-                                            		<equals arg1="@{arch}" arg2="universal" />
-                                            	</and>
-                                                <then>
-                                                    <var name="exesrcfilename" value="packr-mac" />
-                                                </then>
-                                                <else>
-                                                    <if>
-                                                	    <and>
-                                                            <equals arg1="@{os}" arg2="Windows" />
-                                                    	    <or>
-                                                    	    	<equals arg1="@{arch}" arg2="i386" />
-                                                    	    	<equals arg1="@{arch}" arg2="amd64" />
-                                                    	    </or>
-                                                	    </and>
-                                                        <then>
-                                                            <var name="exesrcfilename" value="packr-windows.exe" />
-                                                        </then>
-                                                        <else>
-                                                            <fail message="Combination of operating system '@{os}' and architecture '@{arch}' unsupported by PackR" />
-                                                        </else>
-                                                    </if>
-                                                </else>
-                                            </if>
-                                        </else>
-                                    </if>
-                                </else>
-                            </if>
-                        </then>
-                	</if>
-                    <if>
-                        <equals arg1="@{nativelauncherenabled}" arg2="true" />
-                        <then>
-                            <!-- extracts the executable of the native launcher from PackR's JAR -->
-                            <unzip src="${packrlibpath}" dest="${contentstarget}">
-                                <patternset>
-                                    <include name="${exesrcfilename}"/>
-                                </patternset>
-                            </unzip>
-                            <move file="${contentstarget}/${exesrcfilename}" tofile="${contentstarget}/${exedstfilename}" />
-                        </then>
-                        <else>
-                            <!-- creates the platform dependent script -->
-                            <if>
-                                <equals arg1="@{os}" arg2="Windows" />
-                                <!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
-                                <!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
-                                <then>
-                                    <if>
-                                        <equals arg1="@{jdk}" arg2="" />
-                                        <then>
-                                            <!-- uses the system JRE if any -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
-                                        </then>
-                                        <else>
-                                            <!-- uses the packaged JRE -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
-                                        </else>
-                                    </if>
-                                </then>
-                                <else>
-                                	<if>
-                                	    <equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
-                                	    <then>
-                                	    	<if>
-                                	    		<equals arg1="@{os}" arg2="Mac OS X" />
-                                	    		<then>
-                                	                <echo message="'os=Mac OS X', 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
-                                	            </then>
-                                	    		<else>
-                                	    			<if>
-                                	    				<equals arg1="@{appname}" arg2="" />
-                                	    				<then>
-                                	    					<fail message="'appname' is empty whereas it is required to generate the package name as 'linuxpackageshscriptenabled' is set to true" />
-                                	    				</then>
-                                	    				<else>
-                                	    					<to-package-name property="package-name" input="@{appname}"/>
-                                	    				</else>
-                                	    			</if>
-                                	    			<if>
-                                	    			    <equals arg1="@{jdk}" arg2="" />
-                                	    			    <then>
-                                	    			        <!-- uses the system JRE if any -->
-                                	    			        <echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
+				</then>
+			</if>
+			<!-- handles the other files of the application directory -->
+			<copy file="@{appjar}" todir="${contentstarget}" />
+			<local name="appjarbasename" />
+			<basename property="appjarbasename" file="@{appjar}" />
+			<!-- handles the VM arguments -->
+			<var name="vmargsstring" value="" />
+			<var name="vmargscount" value="0" />
+			<for list="@{vmargs}" delimiter=";" param="vmarg">
+				<sequential>
+					<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
+				</sequential>
+			</for>
+			<var name="vmargindex" value="0" />
+			<math result="vmarglastindex" operand1="${vmargscount}" operation="-" operand2="1" datatype="int"/>
+
+			<var name="altvmargs" value="" />
+			<if>
+				<equals arg1="@{useserverjre}" arg2="true" />
+				<then>
+					<var name="altvmargs" value="-server;@{vmargs}" />
+					<math result="vmargscount" operand1="${vmargscount}" operation="+" operand2="1" datatype="int"/>
+					<math result="vmarglastindex" operand1="${vmarglastindex}" operation="+" operand2="1" datatype="int"/>
+				</then>
+				<else>
+					<var name="altvmargs" value="@{vmargs}" />
+				</else>
+			</if>
+			<!-- uses ' ' as a separator to feed the script -->
+			<for list="${altvmargs}" delimiter=";" param="vmarg">
+				<sequential>
+					<var name="vmargsstring" value="${vmargsstring}@{vmarg}" />
+					<if>
+						<not>
+							<equals arg1="${vmargindex}" arg2="${vmarglastindex}" />
+						</not>
+						<then>
+							<var name="vmargsstring" value="${vmargsstring} " />
+						</then>
+					</if>
+					<math result="vmargindex" operand1="${vmargindex}" operation="+" operand2="1" datatype="int" />
+				</sequential>
+			</for>
+			<!-- handles the native launcher or the script -->
+			<if>
+				<equals arg1="@{os}" arg2="Windows" />
+				<then>
+					<var name="exedstfilename" value="@{executable}.bat" />
+				</then>
+				<else>
+					<var name="exedstfilename" value="@{executable}" />
+				</else>
+			</if>
+			<!-- creates the platform dependent script -->
+			<if>
+				<equals arg1="@{os}" arg2="Windows" />
+				<!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
+				<!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
+				<then>
+					<if>
+						<equals arg1="@{jdk}" arg2="" />
+						<then>
+							<!-- uses the system JRE if any -->
+							<echo file="${contentstarget}/${exedstfilename}">
+								<![CDATA[java.exe ${vmargsstring} -jar ${appjarbasename}]]>
+							</echo>
+						</then>
+						<else>
+							<!-- uses the packaged JRE -->
+							<echo file="${contentstarget}/${exedstfilename}">
+								<![CDATA[jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}]]>
+							</echo>
+						</else>
+					</if>
+				</then>
+				<else>
+					<if>
+						<equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
+						<then>
+							<if>
+								<equals arg1="@{os}" arg2="Mac OS X" />
+								<then>
+									<echo message="'os=Mac OS X', 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
+								</then>
+								<else>
+									<if>
+										<equals arg1="@{appname}" arg2="" />
+										<then>
+											<fail message="'appname' is empty whereas it is required to generate the package name as 'linuxpackageshscriptenabled' is set to true" />
+										</then>
+										<else>
+											<to-package-name property="package-name" input="@{appname}"/>
+										</else>
+									</if>
+									<if>
+										<equals arg1="@{jdk}" arg2="" />
+										<then>
+											<!-- uses the system JRE if any -->
+											<echo file="${contentstarget}/packagesh_${exedstfilename}">
+												<![CDATA[#!/bin/env sh
 java ${vmargsstring} -jar /usr/share/${package-name}/${appjarbasename}
 ]]>
-                                	    			        </echo>
-                                	    			    </then>
-                                	    				<else>
-                                	    					<!-- uses the packaged JRE -->
-                                	    					<echo file="${contentstarget}/packagesh_${exedstfilename}"><![CDATA[#!/bin/env sh
+											</echo>
+										</then>
+										<else>
+											<!-- uses the packaged JRE -->
+											<echo file="${contentstarget}/packagesh_${exedstfilename}">
+												<![CDATA[#!/bin/env sh
 /usr/share/${package-name}/jre/bin/java ${vmargsstring} -jar /usr/share/${package-name}/${appjarbasename}
 ]]>
-                                	    					</echo>
-                                	    				</else>
-                                	    			</if>
-                                	    		</else>
-                                	    	</if>
-                                	    </then>
-                                	</if>
-                                    <if>
-                                        <equals arg1="@{jdk}" arg2="" />
-                                        <then>
-                                            <!-- uses the system JRE if any -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/bin/env bash
+											</echo>
+										</else>
+									</if>
+								</else>
+							</if>
+						</then>
+					</if>
+					<if>
+						<equals arg1="@{jdk}" arg2="" />
+						<then>
+							<!-- uses the system JRE if any -->
+							<echo file="${contentstarget}/${exedstfilename}">
+								<![CDATA[#!/bin/env bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -675,11 +504,12 @@ done
 APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
 ]]>
-                                            </echo>
-                                        </then>
-                                        <else>
-                                            <!-- uses the packaged JRE -->
-                                            <echo file="${contentstarget}/${exedstfilename}"><![CDATA[#!/bin/env bash
+							</echo>
+						</then>
+						<else>
+							<!-- uses the packaged JRE -->
+							<echo file="${contentstarget}/${exedstfilename}">
+								<![CDATA[#!/bin/env bash
 #code snippet written by Dave Dopson: http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -690,236 +520,78 @@ done
 APP_LAUNCHER_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarbasename}
 ]]>
-                                            </echo>
-                                        </else>
-                                    </if>
-                                </else>
-                            </if>
-                        </else>
-                    </if>
-                    <!-- ensures that the native launcher or the script is executable -->
-                    <chmod file="${contentstarget}/${exedstfilename}" perm="755" />
-                    <!-- handles the packaged JRE (extracts it from the JDK) if any -->
-                    <if>
-                        <not>
-                            <equals arg1="@{jdk}" arg2="" />
-                        </not>
-                        <then>
-                            <if>
-                                <available file="@{jdk}" />
-                                <then>
-                                    <var name="jdkFile" value="@{jdk}" />
-                                </then>
-                                <else>
-                                    <get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
-                                    <var name="jdkFile" value="${contentstarget}/jdk.zip" />
-                                </else>
-                            </if>
-                        </then>
-                    </if>
-                    <mkdir dir="${contentstarget}/tmp" />
-                    <!-- the file permissions are lost when unzipping the archive -->
-                    <unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
-                    <mkdir dir="${contentstarget}/jre" />
-                    <!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
-                    <for param="dir">
-                        <path>
-                            <dirset dir="${contentstarget}/tmp/" />
-                        </path>
-                        <sequential>
-                            <if>
-                                <available file="@{dir}/jre/bin" />
-                                <then>
-                                    <copy todir="${contentstarget}/jre" failonerror="true">
-                                        <fileset dir="@{dir}/jre" />
-                                    </copy>
-                                    <!-- drives "java" executable anew -->
-                                    <chmod file="${contentstarget}/jre/bin/java" perm="755" />
-                                </then>
-                            </if>
-                        </sequential>
-                    </for>
-                    <delete dir="${contentstarget}/tmp" failonerror="true" />
-                    <delete file="${contentstarget}/jdk.zip" failonerror="true" />
-                    <!-- handles the resources if any -->
-                    <for list="@{resources}" delimiter=";" param="resource">
-                        <sequential>
-                            <copy file="@{resource}" todir="${contentstarget}" />
-                        </sequential>
-                    </for>
-                    <!-- handles the minimization (not implemented yet) -->
-                    <if>
-                        <not>
-                            <equals arg1="@{minimizejre}" arg2="" />
-                        </not>
-                        <then>
-                            <echo message="JRE minimization not implemented yet, 'minimizejre=@{minimizejre}' ignored" />
-                        </then>
-                    </if>
-                </then>
-                <else>
-                	<if>
-                		<not>
-                	        <available file="${packrlibpath}"/>
-                	    </not>
-                		<then>
-                		    <fail message="PackR JAR missing in ${packrlibpath}, required as antreimplementationenabled=false"/>
-                		</then>
-                	</if>
-                	<if>
-                		<equals arg1="@{linuxpackageshscriptenabled}" arg2="true" />
-                		<then>
-                			<echo message="PackR uses its own native launcher, 'linuxpackageshscriptenabled=@{linuxpackageshscriptenabled}' ignored" />
-                		</then>
-                	</if>
-                	<if>
-                		<equals arg1="@{os}" arg2="Linux" />
-                		<then>
-                		    <if>
-                		    	<equals arg1="@{arch}" arg2="i386" />
-                		    	<then>
-                		    	    <var name="platform" value="linux32"/>
-                		    	</then>
-                		    	<else>
-                		    		<if>
-                		    			<equals arg1="@{arch}" arg2="amd64" />
-                		    			<then>
-                		    				<var name="platform" value="linux64"/>
-                		    			</then>
-                		    			<else>
-                		    				<var name="platform" value=""/>
-                		    			</else>
-                		    	    </if>
-                		    	</else>
-                		    </if>
-                		</then>
-                		<else>
-                		    <if>
-                		    	<equals arg1="@{os}" arg2="Mac OS X" />
-                		    	<then>
-                		    		<if>
-                		    		    <equals arg1="@{arch}" arg2="universal" />
-                		    			<then>
-                		    			    <var name="platform" value="mac"/>
-                		    			</then>
-                		    			<else>
-                		    				<var name="platform" value=""/>
-                		    			</else>
-                		    		</if>
-                		    	</then>
-                		    	<else>
-                		    	    <if>
-                		    	    	<and>
-                		    	    	    <equals arg1="@{os}" arg2="Windows" />
-                		    	    		<or>
-                		    	    		    <equals arg1="@{arch}" arg2="i386" />
-                		    	    		    <equals arg1="@{arch}" arg2="amd64" />
-                		    	    		</or>
-                		    	    	</and>
-                		    	    	<then>
-                		    	    		<var name="platform" value="windows"/>
-                		    	    	</then>
-                		    	    	<else>
-                		    	    		<var name="platform" value=""/>
-                		    	    	</else>
-                		    	    </if>
-                		    	</else>
-                		    </if>
-                		</else>
-                	</if>
-                	<fail message="Combination of os '@{os}' and architecture '@{arch}' unsupported by PackR">
-                	    <condition>
-                	    	<equals arg1="${platform}" arg2="" />
-                	    </condition>
-                	</fail>
-                    <if>
-                        <equals arg1="@{useserverjre}" arg2="false" />
-                        <then>
-                            <echo message="impossible to use the client Hotspot VM with PackR, 'useserverjre=@{useserverjre}' ignored" />
-                        </then>
-                    </if>
-                    <if>
-                        <not>
-                            <equals arg1="@{nativelauncherenabled}" arg2="false" />
-                        </not>
-                        <then>
-                            <echo message="the native launcher is mandatory for PackR, 'nativelauncherenabled=@{nativelauncherenabled}' ignored" />
-                        </then>
-                    </if>
-                    <if>
-                        <equals arg1="@{minimizejre}" arg2="" />
-                        <then>
-                            <java jar="${packrlibpath}" fork="true" failonerror="true">
-                                <arg value="-platform" />
-                                <arg value="${platform}" />
-                                <arg value="-executable" />
-                                <arg value="@{executable}" />
-                                <arg value="-appjar" />
-                                <arg value="@{appjar}" />
-                                <arg value="-mainclass" />
-                                <arg value="@{mainclass}" />
-                                <arg value="-outdir" />
-                                <arg value="@{outdir}" />
-                                <arg value="-vmargs" />
-                                <arg value="@{vmargs}" />
-                                <arg value="-jdk" />
-                                <arg value="@{jdk}" />
-                                <arg value="-resources" />
-                                <arg value="@{resources}" />
-                            </java>
-                        </then>
-                        <else>
-                            <java jar="${packrlibpath}" fork="true" failonerror="true">
-                                <arg value="-platform" />
-                                <arg value="${platform}" />
-                                <arg value="-executable" />
-                                <arg value="@{executable}" />
-                                <arg value="-appjar" />
-                                <arg value="@{appjar}" />
-                                <arg value="-mainclass" />
-                                <arg value="@{mainclass}" />
-                                <arg value="-outdir" />
-                                <arg value="@{outdir}" />
-                                <arg value="-vmargs" />
-                                <arg value="@{vmargs}" />
-                                <arg value="-jdk" />
-                                <arg value="@{jdk}" />
-                                <arg value="-resources" />
-                                <arg value="@{resources}" />
-                                <arg value="-minimizejre" />
-                                <arg value="@{minimizejre}" />
-                            </java>
-                        </else>
-                    </if>
-                    <!-- TODO test this option -->
-                    <!--<if>
-                        <equals arg1="${os}" arg2="Mac OS X" />
-                        <then>
-                            <replace file="@{outdir}/Contents/Info.plist" token="@{bundleIdentifier}" value="@{bundleIdentifier}"/>
-                        </then>
-                    </if>-->
-                </else>
-            </if>
-        </sequential>
-    </macrodef>
+							</echo>
+						</else>
+					</if>
+				</else>
+			</if>
+
+			<!-- ensures that the native launcher or the script is executable -->
+			<chmod file="${contentstarget}/${exedstfilename}" perm="755" />
+			<!-- handles the packaged JRE (extracts it from the JDK) if any -->
+			<if>
+				<not>
+					<equals arg1="@{jdk}" arg2="" />
+				</not>
+				<then>
+					<if>
+						<available file="@{jdk}" />
+						<then>
+							<var name="jdkFile" value="@{jdk}" />
+						</then>
+						<else>
+							<get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
+							<var name="jdkFile" value="${contentstarget}/jdk.zip" />
+						</else>
+					</if>
+				</then>
+			</if>
+			<mkdir dir="${contentstarget}/tmp" />
+			<!-- the file permissions are lost when unzipping the archive -->
+			<unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
+			<mkdir dir="${contentstarget}/jre" />
+			<!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
+			<for param="dir">
+				<path>
+					<dirset dir="${contentstarget}/tmp/" />
+				</path>
+				<sequential>
+					<if>
+						<available file="@{dir}/jre/bin" />
+						<then>
+							<copy todir="${contentstarget}/jre" failonerror="true">
+								<fileset dir="@{dir}/jre" />
+							</copy>
+							<!-- drives "java" executable anew -->
+							<chmod file="${contentstarget}/jre/bin/java" perm="755" />
+						</then>
+					</if>
+				</sequential>
+			</for>
+			<delete dir="${contentstarget}/tmp" failonerror="true" />
+			<delete file="${contentstarget}/jdk.zip" failonerror="true" />
+			<!-- handles the resources if any -->
+			<for list="@{resources}" delimiter=";" param="resource">
+				<sequential>
+					<copy file="@{resource}" todir="${contentstarget}" />
+				</sequential>
+			</for>
+		</sequential>
+	</macrodef>
 	<macrodef name="create-linux-app-bundles" description="creates a RPM package, a DEB package and an archive for GNU Linux">
-		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+		<attribute name="executable" description="name of the script, without extension such as .sh"/>
 		<attribute name="packageexecutabledir" default="/usr/bin" description="directory containing the executable after the install of a RPM or DEB package"/>
-		<attribute name="packageshscriptenabled" default="true" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if nativelauncherenabled is set to false"/>
+		<attribute name="packageshscriptenabled" default="true" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
-		<attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
-		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)"/>
-		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
-		<attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
-		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
+		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
+		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
 		<attribute name="categories" default="" description="list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html"/>
 		<attribute name="comment" default="" description="comment of the shortcut"/>
 		<attribute name="vendor" default="" description="organization that distributes the software"/>
@@ -946,111 +618,115 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<element name="depends" optional="true" implicit="false" description="dependencies of the Redhat package, with a 'name' and 'version' attribute"/>
 		<sequential>
 			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
-	    	<if>
-	    	    <equals arg1="@{arch}" arg2="i386" />
-	    		<then>
-	    			<var name="rpmarchitecture" value="I386"/>
-	    			<var name="debarchitecture" value="i386"/>
-	    			<var name="jrearchitecture" value="i386"/>
-	    			<var name="archivearchitecture" value="i386"/>
-	    		</then>
-	    		<else>
-	    			<if>
-	    			    <equals arg1="@{arch}" arg2="amd64" />
-	    			    <then>
-	    			    	<var name="rpmarchitecture" value="X86_64"/>
-	    			    	<var name="debarchitecture" value="amd64"/>
-	    			    	<var name="jrearchitecture" value="amd64"/>
-	    			    	<var name="archivearchitecture" value="amd64"/>
-	    			    </then>
-	    			    <else>
-	    			    	<if>
-	    			    		<equals arg1="@{arch}" arg2="arm" />
-	    			    		<then>
-	    			    			<var name="rpmarchitecture" value="ARM"/>
-	    			    			<var name="debarchitecture" value="arm"/>
-	    			    			<var name="jrearchitecture" value="arm"/>
-	    			    			<var name="archivearchitecture" value="arm"/>
-	    			    		</then>
-	    			    		<else>
-	    			    			<if>
-	    			    			    <equals arg1="@{arch}" arg2="none" />
-	    			    			    <then>
-	    			    			    	<var name="rpmarchitecture" value="NOARCH"/>
-	    			    			    	<var name="debarchitecture" value="all"/>
-	    			    			    	<var name="jrearchitecture" value=""/>
-	    			    			    	<var name="archivearchitecture" value="all"/>
-	    			    			    </then>
-	    			    				<else>
-	    			    					<fail message="unsupported architecture '@{arch}'" />
-	    			    				</else>
-	    			    			</if>
-	    			    		</else>
-	    			    	</if>
-	    			    </else>
-	    		    </if>
-	    		</else>
-	    	</if>
+			<if>
+				<equals arg1="@{arch}" arg2="i386" />
+				<then>
+					<var name="rpmarchitecture" value="I386"/>
+					<var name="debarchitecture" value="i386"/>
+					<var name="jrearchitecture" value="i386"/>
+					<var name="archivearchitecture" value="i386"/>
+				</then>
+				<else>
+					<if>
+						<equals arg1="@{arch}" arg2="amd64" />
+						<then>
+							<var name="rpmarchitecture" value="X86_64"/>
+							<var name="debarchitecture" value="amd64"/>
+							<var name="jrearchitecture" value="amd64"/>
+							<var name="archivearchitecture" value="amd64"/>
+						</then>
+						<else>
+							<if>
+								<equals arg1="@{arch}" arg2="arm" />
+								<then>
+									<var name="rpmarchitecture" value="ARM"/>
+									<var name="debarchitecture" value="arm"/>
+									<var name="jrearchitecture" value="arm"/>
+									<var name="archivearchitecture" value="arm"/>
+								</then>
+								<else>
+									<if>
+										<equals arg1="@{arch}" arg2="none" />
+										<then>
+											<var name="rpmarchitecture" value="NOARCH"/>
+											<var name="debarchitecture" value="all"/>
+											<var name="jrearchitecture" value=""/>
+											<var name="archivearchitecture" value="all"/>
+										</then>
+										<else>
+											<fail message="unsupported architecture '@{arch}'" />
+										</else>
+									</if>
+								</else>
+							</if>
+						</else>
+					</if>
+				</else>
+			</if>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
-			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" appname="@{appname}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
-			    antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}" linuxpackageshscriptenabled="@{packageshscriptenabled}"/>
+			<create-app-dir os="Linux" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" appname="@{appname}" resources="@{resources}"
+			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" 
+				useserverjre="@{useserverjre}" linuxpackageshscriptenabled="@{packageshscriptenabled}"/>
 			<!-- Removes the extension from the icon name -->
 			<to-basename-without-extension input="@{iconsfile}" property="icon-name" />
 			<!-- Creates the .desktop file for the shortcut -->
 			<if>
-			    <available file="${appdir}/${icon-name}.png"/>
-			    <then>
-			        <echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
+				<available file="${appdir}/${icon-name}.png"/>
+				<then>
+					<echo file="@{outdir}/${package-name}.desktop">
+						<![CDATA[[Desktop Entry]
 Name=@{appname}
 Comment=@{comment}
 Exec=@{executable}
 Icon=${icon-name}
 Terminal=false
 Type=Application
-Categories=@{categories}]]></echo>
-			    </then>
-			    <else>
-			    	<echo file="@{outdir}/${package-name}.desktop"><![CDATA[[Desktop Entry]
+Categories=@{categories}]]>
+					</echo>
+				</then>
+				<else>
+					<echo file="@{outdir}/${package-name}.desktop">
+						<![CDATA[[Desktop Entry]
 Name=@{appname}
 Comment=@{comment}
 Exec=@{executable}
 Terminal=false
 Type=Application
-Categories=@{categories}]]></echo>
-			    </else>
+Categories=@{categories}]]>
+					</echo>
+				</else>
 			</if>
 			<!-- Handles the documentation -->
 			<if>
-			    <not>
-			        <equals arg1="@{docdir}" arg2=""/>
-			    </not>
-			    <then>
-			        <if>
-			            <available file="@{docdir}"/>
-			            <then>
-			                <var name="useemptydocdir" value="false"/>
-			            </then>
-			            <else>
-			                <var name="useemptydocdir" value="true"/>
-			                <echo message="'docdir' @{docdir} not found, skipped"/>
-			            </else>
-			        </if>
-			    </then>
-			    <else>
-			        <var name="useemptydocdir" value="true"/>
-			    </else>
+				<not>
+					<equals arg1="@{docdir}" arg2=""/>
+				</not>
+				<then>
+					<if>
+						<available file="@{docdir}"/>
+						<then>
+							<var name="useemptydocdir" value="false"/>
+						</then>
+						<else>
+							<var name="useemptydocdir" value="true"/>
+							<echo message="'docdir' @{docdir} not found, skipped"/>
+						</else>
+					</if>
+				</then>
+				<else>
+					<var name="useemptydocdir" value="true"/>
+				</else>
 			</if>
 			<if>
-			    <equals arg1="${useemptydocdir}" arg2="true"/>
-			    <then>
-			        <var name="tmpdocdir" value="@{outdir}/emptydir"/>
-			        <mkdir dir="${tmpdocdir}"/>
-			    </then>
-			    <else>
-			        <var name="tmpdocdir" value="@{docdir}"/>
-			    </else>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
+				<then>
+					<var name="tmpdocdir" value="@{outdir}/emptydir"/>
+					<mkdir dir="${tmpdocdir}"/>
+				</then>
+				<else>
+					<var name="tmpdocdir" value="@{docdir}"/>
+				</else>
 			</if>
 			<!-- packages -->
 			<if>
@@ -1062,87 +738,87 @@ Categories=@{categories}]]></echo>
 			</if>
 			<!-- RPM -->
 			<if>
-			    <equals arg1="@{jdk}" arg2=""/>
-			    <then>
-			    	<if>
-			    		<available file="${appdir}/${icon-name}.png"/>
-			    		<then>
-			    	        <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+				<equals arg1="@{jdk}" arg2=""/>
+				<then>
+					<if>
+						<available file="${appdir}/${icon-name}.png"/>
+						<then>
+							<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    	            summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    	            version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			    	            <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			    	                <exclude name="@{executable}"/>
-			    	            	<exclude name="nopackagesh_@{executable}"/>
-			    	    	        <exclude name="${icon-name}.png"/>
-			    	            </zipfileset>
-			    	            <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
-			    	            <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    	            <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
-			    	            <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    	            <depends/>
-			    	        </pure-java-rpm>
-			    	    </then>
-			    		<else>
-			    			<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+								<zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="nopackagesh_@{executable}"/>
+									<exclude name="${icon-name}.png"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+								<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
+								<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+								<depends/>
+							</pure-java-rpm>
+						</then>
+						<else>
+							<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    			    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    			    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			    			    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			    			        <exclude name="@{executable}"/>
-			    			    	<exclude name="nopackagesh_@{executable}"/>
-			    			    </zipfileset>
-			    			    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
-			    			    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    			    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    			    <depends/>
-			    			</pure-java-rpm>
-			    		</else>
-			    	</if>
-			    </then>
-			    <else>
-			    	<if>
-			    	    <available file="${appdir}/${icon-name}.png"/>
-			    	    <then>
-			                <pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+								<zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="nopackagesh_@{executable}"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+								<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+								<depends/>
+							</pure-java-rpm>
+						</else>
+					</if>
+				</then>
+				<else>
+					<if>
+						<available file="${appdir}/${icon-name}.png"/>
+						<then>
+							<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			                    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			                    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			                    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			                        <exclude name="@{executable}"/>
-			                    	<exclude name="nopackagesh_@{executable}"/>
-			            	        <exclude name="${icon-name}.png"/>
-			                        <exclude name="jre/bin/*"/>
-			                        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			    	                <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			                    </zipfileset>
-			                    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
-				                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			                    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			                    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			                    <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
-				                <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-				                <depends/>
-			                </pure-java-rpm>
-			    	    </then>
-			    	    <else>                    	
-			    	    	<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
+								<zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="nopackagesh_@{executable}"/>
+									<exclude name="${icon-name}.png"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/${jrearchitecture}/*.so"/>
+									<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+								<zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+								<zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
+								<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+								<depends/>
+							</pure-java-rpm>
+						</then>
+						<else>
+							<pure-java-rpm vendor="@{vendor}" packager="@{packager}" license="@{license}" description="@{description}" 
 			    	    	    summary="@{summary}" group="@{group}" provides="${package-name}" name="${package-name}" distribution="@{distribution}"
 			    	    	    version="@{version}" release="@{release}" architecture="${rpmarchitecture}" destination="@{outdir}" host="@{host}" url="@{url}" type="BINARY">
-			    	    	    <zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
-			    	    	        <exclude name="@{executable}"/>
-			    	    	    	<exclude name="nopackagesh_@{executable}"/>
-			    	    	        <exclude name="jre/bin/*"/>
-			    	    	        <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			    	    	        <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			    	    	    </zipfileset>
-			    	    	    <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
-			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			    	    	    <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			    	    	    <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
-			    	    	    <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    	    	    <depends/>
-			    	    	</pure-java-rpm>
-			    		</else>
-			        </if>
-			    </else>
+								<zipfileset prefix="/usr/share/${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="nopackagesh_@{executable}"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/${jrearchitecture}/*.so"/>
+									<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+								<zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
+								<zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+								<depends/>
+							</pure-java-rpm>
+						</else>
+					</if>
+				</else>
 			</if>
 			<!-- DEB -->
 			<mkdir dir="@{outdir}/controldir"/>
@@ -1160,188 +836,188 @@ Urgency: @{urgency}
 Essential: @{essential}
 Multi-Arch: @{multiarch}]]></echo>
 			<if>
-			    <equals arg1="@{jdk}" arg2=""/>
-			    <then>
-			    	<if>
-			    	    <available file="${appdir}/${icon-name}.png"/>
-			    	    <then>
-			    	        <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    	            <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png">
-			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	            </data>
-			    	            <data src="@{appjar}" type="file">
-			    	                <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	            </data>
-			    	            <data src="${appdir}/@{executable}" type="file">
-			    	                <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
-			    	            </data>
-			    	            <data src="@{outdir}/${package-name}.desktop" type="file">
-			    	                <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
-			    	            </data>
-			    	            <data src="${appdir}/${icon-name}.png" type="file">
-			    	                <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			    	            </data>
-			    	            <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-			    	                <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-			    	            </data>
-			    	        </pure-java-deb>
-			    	    </then>
-			    	    <else>
-			    	    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			    	    	    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable}">
-			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	    	    </data>
-			    	    	    <data src="@{appjar}" type="file">
-			    	    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			    	    	    </data>
-			    	    	    <data src="${appdir}/@{executable}" type="file">
-			    	    	        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
-			    	    	    </data>
-			    	    	    <data src="@{outdir}/${package-name}.desktop" type="file">
-			    	    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
-			    	    	    </data>
-			    	    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-			    	    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-			    	    	    </data>
-			    	    	</pure-java-deb>
-			    	    </else>
-			    	</if>
-			    </then>
+				<equals arg1="@{jdk}" arg2=""/>
+				<then>
+					<if>
+						<available file="${appdir}/${icon-name}.png"/>
+						<then>
+							<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+								<data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="@{appjar}" type="file">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="${appdir}/@{executable}" type="file">
+									<mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
+								</data>
+								<data src="@{outdir}/${package-name}.desktop" type="file">
+									<mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
+								</data>
+								<data src="${appdir}/${icon-name}.png" type="file">
+									<mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+								</data>
+								<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+									<mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+								</data>
+							</pure-java-deb>
+						</then>
+						<else>
+							<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+								<data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable}">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="@{appjar}" type="file">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="${appdir}/@{executable}" type="file">
+									<mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
+								</data>
+								<data src="@{outdir}/${package-name}.desktop" type="file">
+									<mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
+								</data>
+								<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+									<mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+								</data>
+							</pure-java-deb>
+						</else>
+					</if>
+				</then>
 				<else>
 					<if>
-					    <available file="${appdir}/${icon-name}.png"/>
-					    <then>
-			                <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-			                    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
-			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			                    </data>
-			                    <data src="@{appjar}" type="file">
-			                        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-			                    </data>
-			                    <data src="${appdir}/@{executable}" type="file">
-			                        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
-			                    </data>
-			                    <data src="${appdir}/jre/bin" type="directory" includes="*">
-			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
-			                    </data>
-			                    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-			                        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
-			                    </data>
-			                    <data src="@{outdir}/${package-name}.desktop" type="file">
-			                        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
-			                    </data>
-			                    <data src="${appdir}/${icon-name}.png" type="file">
-			                        <mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
-			                    </data>
-				                <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-				                    <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-				                </data>
-			                </pure-java-deb>
-					    </then>
-					    <else>
-					    	<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-					    	    <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
-					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-					    	    </data>
-					    	    <data src="@{appjar}" type="file">
-					    	        <mapper type="perm" prefix="/usr/share/${package-name}"/>
-					    	    </data>
-					    	    <data src="${appdir}/@{executable}" type="file">
-					    	        <mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
-					    	    </data>
-					    	    <data src="${appdir}/jre/bin" type="directory" includes="*">
-					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
-					    	    </data>
-					    	    <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-					    	        <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
-					    	    </data>
-					    	    <data src="@{outdir}/${package-name}.desktop" type="file">
-					    	        <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
-					    	    </data>
-					    	    <data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
-					    	        <mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
-					    	    </data>
-					    	</pure-java-deb>
-					    </else>
+						<available file="${appdir}/${icon-name}.png"/>
+						<then>
+							<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+								<data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="@{appjar}" type="file">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="${appdir}/@{executable}" type="file">
+									<mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
+								</data>
+								<data src="${appdir}/jre/bin" type="directory" includes="*">
+									<mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+								</data>
+								<data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
+									<mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+								</data>
+								<data src="@{outdir}/${package-name}.desktop" type="file">
+									<mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
+								</data>
+								<data src="${appdir}/${icon-name}.png" type="file">
+									<mapper type="perm" prefix="/usr/share/icons/hicolor/64x64/apps"/>
+								</data>
+								<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+									<mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+								</data>
+							</pure-java-deb>
+						</then>
+						<else>
+							<pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
+								<data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="@{appjar}" type="file">
+									<mapper type="perm" prefix="/usr/share/${package-name}"/>
+								</data>
+								<data src="${appdir}/@{executable}" type="file">
+									<mapper type="perm" prefix="@{packageexecutabledir}" filemode="755"/>
+								</data>
+								<data src="${appdir}/jre/bin" type="directory" includes="*">
+									<mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
+								</data>
+								<data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
+									<mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+								</data>
+								<data src="@{outdir}/${package-name}.desktop" type="file">
+									<mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
+								</data>
+								<data src="${tmpdocdir}" type="directory" includes="@{docdirincludes}">
+									<mapper type="perm" prefix="/usr/share/doc/${package-name}"/>
+								</data>
+							</pure-java-deb>
+						</else>
 					</if>
 				</else>
 			</if>
 			<if>
-			    <equals arg1="@{packageshscriptenabled}" arg2="true" />
-			    <then>
-			    	<move file="${appdir}/nopackagesh_@{executable}" tofile="${appdir}/@{executable}" overwrite="true"/>
-			    </then>
+				<equals arg1="@{packageshscriptenabled}" arg2="true" />
+				<then>
+					<move file="${appdir}/nopackagesh_@{executable}" tofile="${appdir}/@{executable}" overwrite="true"/>
+				</then>
 			</if>
 			<delete failonerror="false">
-			    <fileset dir="@{outdir}" includes="*.changes"/>
+				<fileset dir="@{outdir}" includes="*.changes"/>
 			</delete>
 			<delete dir="@{outdir}/controldir" failonerror="false"/>
 			<!-- archive -->
 			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.linux.${archivearchitecture}.${archiveextension}"/>
 			<if>
-			    <equals arg1="@{archivefileformat}" arg2="zip"/>
-			    <then>
-			    	<if>
-			    	    <equals arg1="@{jdk}" arg2=""/>
-			    	    <then>
-			    	    	<zip destfile="${apparchive}">
-			    	    	    <zipfileset prefix="${package-name}" dir="${appdir}">
-			    	    	        <exclude name="@{executable}"/>
-			    	    	    </zipfileset>
-			    	    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-			    	    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			    	    	</zip>
-			    	    </then>
-			    	    <else>
-			                <zip destfile="${apparchive}">
-			        	        <zipfileset prefix="${package-name}" dir="${appdir}">
-			        	            <exclude name="@{executable}"/>
-			        	            <exclude name="jre/bin/*"/>
-			        	            <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-			        	            <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-			        	        </zipfileset>
-			        	        <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-			        	        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-			        	        <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-			        	        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			                </zip>
-			    	    </else>
-			        </if>
-			    </then>
+				<equals arg1="@{archivefileformat}" arg2="zip"/>
+				<then>
+					<if>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<zip destfile="${apparchive}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
+						</then>
+						<else>
+							<zip destfile="${apparchive}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/${jrearchitecture}/*.so"/>
+									<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
+						</else>
+					</if>
+				</then>
 				<else>
 					<if>
-					    <equals arg1="@{archivefileformat}" arg2="tar"/>
-					    <then>
-					        <var name="compression" value="none"/>
-					    </then>
-					    <else>
-					        <var name="compression" value="@{archivefileformat}"/>
-					    </else>
+						<equals arg1="@{archivefileformat}" arg2="tar"/>
+						<then>
+							<var name="compression" value="none"/>
+						</then>
+						<else>
+							<var name="compression" value="@{archivefileformat}"/>
+						</else>
 					</if>
 					<if>
-					    <equals arg1="@{jdk}" arg2=""/>
-					    <then>
-					    	<tar destfile="${apparchive}" compression="${compression}">
-					    	    <zipfileset prefix="${package-name}" dir="${appdir}">
-					    	        <exclude name="@{executable}"/>
-					    	    </zipfileset>
-					    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-					    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					    	</tar>
-					    </then>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
+						</then>
 						<else>
-						    <tar destfile="${apparchive}" compression="${compression}">
-					            <zipfileset prefix="${package-name}" dir="${appdir}">
-					                <exclude name="@{executable}"/>
-					                <exclude name="jre/bin/*"/>
-					                <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-					                <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
-					            </zipfileset>
-					            <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
-					            <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-					            <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
-					            <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					        </tar>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/${jrearchitecture}/*.so"/>
+									<exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
 						</else>
 					</if>
 				</else>
@@ -1349,30 +1025,26 @@ Multi-Arch: @{multiarch}]]></echo>
 			<!-- Deletes the directory, only keeps the ZIP archive -->
 			<delete file="@{outdir}/${package-name}.desktop" failonerror="true" />
 			<if>
-			    <equals arg1="${useemptydocdir}" arg2="true"/>
-			    <then>
-			        <delete dir="${tmpdocdir}" failonerror="true" />
-			    </then>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
+				<then>
+					<delete dir="${tmpdocdir}" failonerror="true" />
+				</then>
 			</if>
 			<delete dir="${appdir}" failonerror="true" />
-	    </sequential>
+		</sequential>
 	</macrodef>
 	<macrodef name="create-os-x-app-bundle" description="creates a zipped APP file for Mac OS X">
-		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with antreimplementationenabled set to true, nativelauncherenabled set to false and jdk set to ''"/>
-		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+		<attribute name="arch" default="universal" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
+		<attribute name="executable" description="name of the script, without extension such as .sh"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
-		<attribute name="mainclass" default="" description="the fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;"/>
-		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
-		<attribute name="iconsfile" default="" description="icons file (preferably in .icns format, otherwise it is converted into this format), must be icons.icns if antreimplementationenabled is set to false as the icon filename is hardcoded in PackR"/>
-		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
-		<attribute name="nativelauncherenabled" default="true" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
+		<attribute name="iconsfile" default="" description="icons file (preferably in .icns format, otherwise it is converted into this format)"/>
+		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
 		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
@@ -1380,147 +1052,142 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="archivefileformat" default="bzip2" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
 		<sequential>
 			<to-archive-extension property="archiveextension" input="@{archivefileformat}"/>
-			<!-- N.B: the icon filename is hardcoded in Packr, do NOT modify it -->
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
 			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.macosx.@{arch}.${archiveextension}"/>
 			<!-- Creates the Mac OS X application bundle which is a directory -->
-			<create-app-dir os="Mac OS X" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
-				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
+			<create-app-dir os="Mac OS X" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" resources="@{resources}"
+			    outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}"
+				useserverjre="@{useserverjre}"/>
 			<!-- Handles the documentation -->
 			<if>
-			    <not>
-			        <equals arg1="@{docdir}" arg2=""/>
-			    </not>
-			    <then>
-			        <if>
-			            <available file="@{docdir}"/>
-			            <then>
-			                <var name="useemptydocdir" value="false"/>
-			            </then>
-			            <else>
-			                <var name="useemptydocdir" value="true"/>
-			                <echo message="'docdir' @{docdir} not found, skipped"/>
-			            </else>
-			        </if>
-			    </then>
-			    <else>
-			        <var name="useemptydocdir" value="true"/>
-			    </else>
+				<not>
+					<equals arg1="@{docdir}" arg2=""/>
+				</not>
+				<then>
+					<if>
+						<available file="@{docdir}"/>
+						<then>
+							<var name="useemptydocdir" value="false"/>
+						</then>
+						<else>
+							<var name="useemptydocdir" value="true"/>
+							<echo message="'docdir' @{docdir} not found, skipped"/>
+						</else>
+					</if>
+				</then>
+				<else>
+					<var name="useemptydocdir" value="true"/>
+				</else>
 			</if>
 			<if>
-			    <equals arg1="${useemptydocdir}" arg2="true"/>
-			    <then>
-			        <var name="tmpdocdir" value="@{outdir}/emptydir"/>
-			        <mkdir dir="${tmpdocdir}"/>
-			    </then>
-			    <else>
-			        <var name="tmpdocdir" value="@{docdir}"/>
-			    </else>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
+				<then>
+					<var name="tmpdocdir" value="@{outdir}/emptydir"/>
+					<mkdir dir="${tmpdocdir}"/>
+				</then>
+				<else>
+					<var name="tmpdocdir" value="@{docdir}"/>
+				</else>
 			</if>
 			<!-- Makes an archive from the directory in order to provide a single file (there is no cross-platform way of making a .dmg file yet) -->
 			<if>
 				<equals arg1="@{archivefileformat}" arg2="zip"/>
 				<then>
 					<if>
-					    <equals arg1="@{jdk}" arg2=""/>
-					    <then>
-					    	<zip destfile="${apparchive}">
-					    	    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-					    	        <exclude name="@{executable}"/>
-					    	    </zipfileset>
-					    	    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					    	</zip>
-					    </then>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<zip destfile="${apparchive}">
+								<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+								<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+									<exclude name="@{executable}"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
+						</then>
 						<else>
-			                <zip destfile="${apparchive}">
-			                    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-			                    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-			                    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-			    	                <exclude name="@{executable}"/>
-			                        <exclude name="jre/bin/*"/>
-			                        <exclude name="jre/lib/*.dylib"/>
-			    	                <exclude name="jre/lib/**/*.dylib"/>
-			                    </zipfileset>
-				                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-			                    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-				                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
-				                <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			                </zip>
+							<zip destfile="${apparchive}">
+								<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+								<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+									<exclude name="@{executable}"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/*.dylib"/>
+									<exclude name="jre/lib/**/*.dylib"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
 						</else>
 					</if>
-			    </then>
+				</then>
 				<else>
 					<if>
-					    <equals arg1="@{archivefileformat}" arg2="tar"/>
-					    <then>
-					        <var name="compression" value="none"/>
-					    </then>
-					    <else>
-					        <var name="compression" value="@{archivefileformat}"/>
-					    </else>
+						<equals arg1="@{archivefileformat}" arg2="tar"/>
+						<then>
+							<var name="compression" value="none"/>
+						</then>
+						<else>
+							<var name="compression" value="@{archivefileformat}"/>
+						</else>
 					</if>
 					<if>
-					    <equals arg1="@{jdk}" arg2=""/>
-					    <then>
-					    	<tar destfile="${apparchive}" compression="${compression}">
-					    	    <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-					    	        <exclude name="@{executable}"/>
-					    	    </zipfileset>
-					    	    <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-					    	    <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					    	</tar>
-					    </then>
-					    <else>
-					        <tar destfile="${apparchive}" compression="${compression}">
-						        <zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
-						        <zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
-						        <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
-						            <exclude name="@{executable}"/>
-						            <exclude name="jre/bin/*"/>
-						            <exclude name="jre/lib/*.dylib"/>
-						            <exclude name="jre/lib/**/*.dylib"/>
-						        </zipfileset>
-						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
-						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-						        <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
-						        <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					        </tar>
-					    </else>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+								<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+									<exclude name="@{executable}"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
+						</then>
+						<else>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}.app/Contents/Resources" dir="${appdir}/Contents/Resources"/>
+								<zipfileset prefix="${package-name}.app/Contents/" file="${appdir}/Contents/Info.plist"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
+									<exclude name="@{executable}"/>
+									<exclude name="jre/bin/*"/>
+									<exclude name="jre/lib/*.dylib"/>
+									<exclude name="jre/lib/**/*.dylib"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
+								<zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+								<zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
+						</else>
 					</if>
 				</else>
 			</if>
 			<!-- Deletes the directories, only keeps the archive -->
 			<if>
-			    <equals arg1="${useemptydocdir}" arg2="true"/>
-			    <then>
-			        <delete dir="${tmpdocdir}" failonerror="true" />
-			    </then>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
+				<then>
+					<delete dir="${tmpdocdir}" failonerror="true" />
+				</then>
 			</if>
 			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
 	<macrodef name="create-windows-app-bundle" description="creates a zipped application archive for Microsoft Windows">
-		<attribute name="executable" description="name of the native executable or script (see nativelauncherenabled), without extension such as .exe"/>
+		<attribute name="executable" description="name of the script without extension such as .bat"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
-		<attribute name="mainclass" default="" description="fully qualified name of the main class, using forward slashes to delimit package names, taken into account if nativelauncherenabled is set to true, otherwise the Main-Class manifest attribute of the application JAR is used"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
 		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
-		<attribute name="minimizejre" default="" description="minimize the JRE by removing directories and files as specified by the config file. Comes with two config files out of the box called 'soft' and 'hard'. See below for details on the minimization config file."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
-		<attribute name="iconsfile" default="" description="icons file (preferably in .icns format, otherwise it is converted into this format), must be icons.icns if antreimplementationenabled is set to false as the icon filename is hardcoded in PackR"/>
-		<attribute name="antreimplementationenabled" default="true" description="enables the Ant reimplementation of Packr which uses only its native launcher"/>
-		<attribute name="nativelauncherenabled" default="false" description="uses PackR's native launcher if true, otherwise replaces it by a script"/>
-		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre. The server jre is always used when antreimplementationenabled is set to false" />
+		<attribute name="iconsfile" default="" description="icons file (preferably in .ico format, otherwise it is converted into this format)"/>
+		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
 		<attribute name="version" default="0.0" description="version"/>
 		<attribute name="release" default="0" description="release"/>
 		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified)"/>
@@ -1532,44 +1199,32 @@ Multi-Arch: @{multiarch}]]></echo>
 			<to-package-name property="package-name" input="@{appname}"/>
 			<var name="appdir" value="@{outdir}/tmp_app_dir"/>
 			<var name="apparchive" value="@{outdir}/${package-name}-@{version}-@{release}.windows.@{arch}.${archiveextension}"/>
-			<create-app-dir os="Windows" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" mainclass="@{mainclass}" resources="@{resources}" minimizejre="@{minimizejre}"
-                outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}" useserverjre="@{useserverjre}"
-				antreimplementationenabled="@{antreimplementationenabled}" nativelauncherenabled="@{nativelauncherenabled}"/>
-			<if>
-				<and>
-			        <equals arg1="@{antreimplementationenabled}" arg2="true"/>
-					<equals arg1="@{nativelauncherenabled}" arg2="false"/>
-				</and>
-				<then>
-				    <var name="exeextension" value=".bat"/>
-				</then>
-				<else>
-					<var name="exeextension" value=".exe"/>
-				</else>
-			</if>
+			<create-app-dir os="Windows" arch="@{arch}" executable="${package-name}" appjar="@{appjar}" resources="@{resources}"
+                outdir="${appdir}" vmargs="@{vmargs}" jdk="@{jdk}" bundleidentifier="@{bundleidentifier}" iconsfile="@{iconsfile}"
+				useserverjre="@{useserverjre}"/>
 			<!-- Handles the documentation -->
 			<if>
-			    <not>
-			        <equals arg1="@{docdir}" arg2=""/>
-			    </not>
-			    <then>
-			        <if>
-			            <available file="@{docdir}"/>
-			            <then>
-			            	<var name="useemptydocdir" value="false"/>
-			            </then>
-			            <else>
-			            	<var name="useemptydocdir" value="true"/>
-			                <echo message="'docdir' @{docdir} not found, skipped"/>
-			            </else>
-			        </if>
-			    </then>
+				<not>
+					<equals arg1="@{docdir}" arg2=""/>
+				</not>
+				<then>
+					<if>
+						<available file="@{docdir}"/>
+						<then>
+							<var name="useemptydocdir" value="false"/>
+						</then>
+						<else>
+							<var name="useemptydocdir" value="true"/>
+							<echo message="'docdir' @{docdir} not found, skipped"/>
+						</else>
+					</if>
+				</then>
 				<else>
 					<var name="useemptydocdir" value="true"/>
 				</else>
 			</if>
 			<if>
-			    <equals arg1="${useemptydocdir}" arg2="true"/>
+				<equals arg1="${useemptydocdir}" arg2="true"/>
 				<then>
 					<var name="tmpdocdir" value="@{outdir}/emptydir"/>
 					<mkdir dir="${tmpdocdir}"/>
@@ -1586,75 +1241,75 @@ Multi-Arch: @{multiarch}]]></echo>
 						<equals arg1="@{jdk}" arg2=""/>
 						<then>
 							<zip destfile="${apparchive}">
-							    <zipfileset prefix="${package-name}" dir="${appdir}">
-							        <exclude name="@{executable}${exeextension}"/>
-							    </zipfileset>
-							    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-							    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}.bat"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}.bat"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
 							</zip>
 						</then>
 						<else>
-						    <zip destfile="${apparchive}">
-			                    <zipfileset prefix="${package-name}" dir="${appdir}">
-			                        <exclude name="@{executable}${exeextension}"/>
-			                        <exclude name="jre/bin/*.dll"/>
-			    	                <exclude name="jre/bin/**/*.dll"/>
-			                        <exclude name="jre/bin/*.exe"/>
-			                    </zipfileset>
-			                    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-			                    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
-			                    <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
-				                <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-			                </zip>
-					    </else>
+							<zip destfile="${apparchive}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}.bat"/>
+									<exclude name="jre/bin/*.dll"/>
+									<exclude name="jre/bin/**/*.dll"/>
+									<exclude name="jre/bin/*.exe"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}.bat"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</zip>
+						</else>
 					</if>
-			    </then>
+				</then>
 				<else>
 					<if>
-					    <equals arg1="@{archivefileformat}" arg2="tar"/>
-					    <then>
-					    	<var name="compression" value="none"/>
-					    </then>
+						<equals arg1="@{archivefileformat}" arg2="tar"/>
+						<then>
+							<var name="compression" value="none"/>
+						</then>
 						<else>
 							<var name="compression" value="@{archivefileformat}"/>
 						</else>
 					</if>
 					<if>
-					    <equals arg1="@{jdk}" arg2=""/>
-					    <then>
-					    	<tar destfile="${apparchive}" compression="${compression}">
-					    	    <zipfileset prefix="${package-name}" dir="${appdir}">
-					    	        <exclude name="@{executable}${exeextension}"/>
-					    	    </zipfileset>
-					    	    <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-					    	    <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					    	</tar>
-					    </then>
-					    <else>
-					        <tar destfile="${apparchive}" compression="${compression}">
-						        <zipfileset prefix="${package-name}" dir="${appdir}">
-						            <exclude name="@{executable}${exeextension}"/>
-						            <exclude name="jre/bin/*.dll"/>
-						            <exclude name="jre/bin/**/*.dll"/>
-						            <exclude name="jre/bin/*.exe"/>
-						        </zipfileset>
-						        <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}${exeextension}"/>
-						        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
-					 	        <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
-						        <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
-					        </tar>
-					    </else>
+						<equals arg1="@{jdk}" arg2=""/>
+						<then>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}.bat"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}.bat"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
+						</then>
+						<else>
+							<tar destfile="${apparchive}" compression="${compression}">
+								<zipfileset prefix="${package-name}" dir="${appdir}">
+									<exclude name="@{executable}.bat"/>
+									<exclude name="jre/bin/*.dll"/>
+									<exclude name="jre/bin/**/*.dll"/>
+									<exclude name="jre/bin/*.exe"/>
+								</zipfileset>
+								<zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}.bat"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.exe"/>
+								<zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*.dll,**/*.dll"/>
+								<zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
+							</tar>
+						</else>
 					</if>
 				</else>
 			</if>
 			<!-- Deletes the directories, only keeps the archive -->
 			<if>
 				<equals arg1="${useemptydocdir}" arg2="true"/>
-			    <then>
-			        <delete dir="${tmpdocdir}" failonerror="true" />
+				<then>
+					<delete dir="${tmpdocdir}" failonerror="true" />
 				</then>
 			</if>
-		    <delete dir="${appdir}" failonerror="true" />
+			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
- </project>
+</project>
