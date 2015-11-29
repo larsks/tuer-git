@@ -144,14 +144,14 @@
 	<macrodef name="create-app-dir" description="Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...)">
 		<attribute name="os" description="one of Linux, Mac OS X, Windows (similar to the 'os' attribute of the 'resources' tag in JNLP)"/>
 		<attribute name="arch" description="one of i386, amd64, universal, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''"/>
-		<attribute name="executable" description="name of the script, without extension such as .exe and .sh"/>
+		<attribute name="executable" description="name of the script, without extension such as .bat and .sh"/>
 		<attribute name="linuxpackageshscriptenabled" default="false" description="creates a simplified portable two-line shell script used as a launcher for any GNU Linux package if true and if os is set to 'Linux'"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ';'."/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the script, separated by ';'."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
@@ -587,7 +587,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the script, separated by ;."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
@@ -1041,7 +1041,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;"/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the script, separated by ;"/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably in .icns format, otherwise it is converted into this format)"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
@@ -1184,7 +1184,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="outdir" description="output directory"/>
 		<attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ;, e.g. -Xmx1G"/>
 		<attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
-		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the native executable, separated by ;."/>
+		<attribute name="resources" default=";" description="list of files and directories to be packaged next to the script, separated by ;."/>
 		<attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
 		<attribute name="iconsfile" default="" description="icons file (preferably in .ico format, otherwise it is converted into this format)"/>
 		<attribute name="useserverjre" default="true" description="uses the server jre if true, otherwise uses the client jre" />
