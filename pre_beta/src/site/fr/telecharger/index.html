@@ -183,26 +183,26 @@ Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.
 <tr><td>iconsfile</td><td>fichier d'icônes (préférablement ni au format .icns ni au format .ico, sinon il est converti en PNG)</td><td>Non, par défaut à ""</td></tr>
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 <tr><td>arch</td><td>Un parmi i386, amd64, arm, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Oui</td></tr>
-<tr><td>categories</td><td>list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>Non, par défaut à ""</td></tr>
-<tr><td>comment</td><td>comment of the shortcut</td><td>Non, par défaut à ""</td></tr>
-<tr><td>vendor</td><td>organization that distributes the software</td><td>Non, par défaut à ""</td></tr>
-<tr><td>packager</td><td>organization that actually packaged the software</td><td>Non, par défaut à ""</td></tr>
-<tr><td>license</td><td>license</td><td>Non, par défaut à ""</td></tr>
-<tr><td>summary</td><td>short description of the packaged software (generally on a single line)</td><td>Non, par défaut à ""</td></tr>
-<tr><td>description</td><td>detailed description of the packaged software (can take up more than one line)</td><td>Non, par défaut à ""</td></tr>
-<tr><td>group</td><td>string composed of a series of words separated by slashes that defines how the packaged software should be grouped with other packages</td><td>Non, par défaut à "Applications"</td></tr>
-<tr><td>section</td><td>classifier of the application for the Debian package, see http://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections</td><td>Non, par défaut à "java"</td></tr>
+<tr><td>categories</td><td>liste de catégories séparées par ";", utilisée pour mettre le raccourci dans le menu de démarrage, voir http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>Non, par défaut à ""</td></tr>
+<tr><td>comment</td><td>commentaire du raccourci</td><td>Non, par défaut à ""</td></tr>
+<tr><td>vendor</td><td>organisation qui distribue le logiciel</td><td>Non, par défaut à ""</td></tr>
+<tr><td>packager</td><td>organisation qui a empaqueté le logiciel</td><td>Non, par défaut à ""</td></tr>
+<tr><td>license</td><td>licence</td><td>Non, par défaut à ""</td></tr>
+<tr><td>summary</td><td>description courte du logiciel empaqueté (généralement sur une seule ligne)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>description</td><td>description détaillée du logiciel empaqueté (peut prendre plus d'une ligne)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>group</td><td>chaine composée d'une série de mots séparés par des slashes qui définit comment le logiciel empaqueté devrait être groupé avec les autres paquetages</td><td>Non, par défaut à "Applications"</td></tr>
+<tr><td>section</td><td>classifieur de l'application pour le paquet Debian, voir http://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections</td><td>Non, par défaut à "java"</td></tr>
 <tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>
-<tr><td>host</td><td>host (codebase)</td><td>Non, par défaut à ""</td></tr>
-<tr><td>url</td><td>homepage url, generally pointing to the documentation of the software being packaged</td><td>Non, par défaut à ""</td></tr>
+<tr><td>host</td><td>hôte (codebase)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>url</td><td>URL de la page d'accueil, généralement pointant vers la documentation du logiciel en train d'être empaqueté</td><td>Non, par défaut à ""</td></tr>
 <tr><td>email</td><td>email</td><td>Non, par défaut à ""</td></tr>
-<tr><td>distribution</td><td>target GNU Linux distribution</td><td>Non, par défaut à "unknown"</td></tr>
-<tr><td>priority</td><td>how important it is that the user have the package installed: required, important, standard, optional or extra</td><td>Non, par défaut à "optional"</td></tr>
-<tr><td>urgency</td><td>how important it is to upgrade to this version from previous ones: low, medium, high, emergency, or critical followed by an optional comment</td><td>Non, par défaut à "low"</td></tr>
-<tr><td>essential</td><td>whether the package management system will refuse to remove the package</td><td>Non, par défaut à "no"</td></tr>
-<tr><td>debdepends</td><td>dependencies of the Debian package, can end with ':any' (see 'multiarch')</td><td>Non, par défaut à ""</td></tr>
-<tr><td>multiarch</td><td>support of multiple architecture, see https://wiki.ubuntu.com/MultiarchSpec</td><td>Non, par défaut à "no"</td></tr>
+<tr><td>distribution</td><td>distribution GNU Linux cible</td><td>Non, par défaut à "unknown"</td></tr>
+<tr><td>priority</td><td>l'importance pour l'utilisateur d'avoir ce paquet installé : required, important, standard, optional ou extra</td><td>Non, par défaut à "optional"</td></tr>
+<tr><td>urgency</td><td>l'importance d'upgrader vers cette version depuis la précédente : low, medium, high, emergency, ou critical suivi d'un commentaire optionnel</td><td>Non, par défaut à "low"</td></tr>
+<tr><td>essential</td><td>si le système de gestion des paquets refusera de supprimer le paquetage</td><td>Non, par défaut à "no"</td></tr>
+<tr><td>debdepends</td><td>dépendances du paquet Debian, peut finir par ':any' (voir 'multiarch')</td><td>Non, par défaut à ""</td></tr>
+<tr><td>multiarch</td><td>support de multiple architectures, voir http://wiki.ubuntu.com/MultiarchSpec</td><td>Non, par défaut à "no"</td></tr>
 <tr><td>docdir</td><td>répertoire contenant la documentation</td><td>Non, par défaut à ""</td></tr>
 <tr><td>docdirincludes</td><td>filtre d'inclusion du répertoire de la documentation</td><td>Non, par défaut à "*"</td></tr>
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "gzip"</td></tr>
