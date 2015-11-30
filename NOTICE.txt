@@ -15,7 +15,6 @@ Ant-Contrib under Apache license
 Ant classloader task under Apache license
 jDeb under Apache license
 Redline RPM under MIT license
-PackR under Apache license
 Apache Commons Compress under Apache license
 Apache Commons Imaging under Apache license
 Apache Commons IO under Apache license
