@@ -45,6 +45,7 @@
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="src/main/java"/>
+	<property name="sitesrcdir" value="src/site"/>
 	<property name="testsrcdir" value="src/test/java"/>
 	<property name="testbindir" value="target/test-classes"/>
 	<property name="homepage-url" value="http://${project-unix-name}.sourceforge.net" />
@@ -528,19 +529,18 @@
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the files of the website onto the SFTP server in the Project Web Space -->
-		<!--<for param="file-to-upload">
+		<for param="file-to-upload">
 		    <path>
-		        <fileset dir="src/site"/>
+		        <fileset dir="${sitesrcdir}"/>
 		    </path>
 		    <sequential>
+		    	<local name="remote-file-to-upload"/>
+		    	<property name="remote-file-to-upload" location="@{file-to-upload}" relative="true" basedir="${sitesrcdir}"/>
 		    	<echo message="Upload of the file @{file-to-upload} in progress..." />
-		        <scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}"/>
+		        <scp sftp="true" trust="true" file="@{file-to-upload}" remoteTofile="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}/${remote-file-to-upload}"/>
 		    	<echo message="Upload of the file @{file-to-upload} successful" />
 		    </sequential>
-	    </for>-->
-		<scp sftp="true" trust="true" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}">
-		    <fileset dir="src/site"/>
-		</scp>
+	    </for>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
