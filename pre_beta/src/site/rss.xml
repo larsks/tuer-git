@@ -32,6 +32,10 @@
        <link>http://tuer.sourceforge.net</link>
        <pubDate>Sat, 07 Oct 2015 1:00:00 GMT</pubDate>
        <description>This updated version should no longer crash under Windows and the packages for GNU Linux are valid anew.</description>
+       <title>JNDT has just been updated</title>
+       <link>http://tuer.sourceforge.net</link>
+       <pubDate>Mon, 30 Nov 2015 23:15:00 GMT</pubDate>
+       <description>This updated version drops PackR support, is more simple to use and fully documented in English and French.</description>
     </item>
   </channel>
 </rss>
