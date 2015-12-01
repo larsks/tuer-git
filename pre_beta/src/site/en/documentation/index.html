@@ -24,10 +24,37 @@
 <a href="../contact/">Contact</a>&nbsp;&nbsp;&nbsp;
 <a href="../../rss.xml" type="application/rss+xml"><img src="../../rss.png" alt="TUER RSS feed" height="15" width="15"></a>
 <hr>
-<p>You need these programs to use my game for development purposes:</p>
+Summary:
+<ul>
+    <li><a href="#howtobuildandrunthegame">How to build and run the game</a>
+        <ul>
+            <li><a href="#softwarerequirements">Software requirements</a></li>
+            <li><a href="#sourcecoderepositories">Source code repositories</a></li>
+            <li><a href="#buildsteps">Build steps</a></li>
+            <li><a href="#sourcecoderepositories">Source code of the dependencies</a></li>
+        </ul>
+    </li>
+    <li><a href="#jndt">JNDT: Java Native Deployment Toolkit</a>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#sourcecode">Source code</a></li>
+            <li><a href="#manualoftheanttasks">Manual of the Ant tasks</a>
+                <ul>
+                    <li><a href="#create-app-dir">create-app-dir</a></li>
+                    <li><a href="#create-linux-app-bundles">create-linux-app-bundles</a></li>
+                    <li><a href="#create-os-x-app-bundle">create-os-x-app-bundle</a></li>
+                    <li><a href="#create-windows-app-bundle">create-windows-app-bundle</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<h1><a name="howtobuildandrunthegame" href="./#howtobuildandrunthegame">How to build and run the game</a></h1>
+<h2><a name="softwarerequirements" href="./#softwarerequirements">Software requirements</a></h2>
+<p>You need these programs to use the game for development purposes:</p>
 <ul>
 <li>Java Development Kit 1.7 or higher: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">here</a> or in the official repository of your GNU Linux distribution</li>
-<li>Eclipse 3.7 or higher (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
+<li>Eclipse (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
 <li>Subversion (SVN)
 <ul>
 <li>Command line users: <a href="http://subversion.tigris.org/">here</a></li>
@@ -36,6 +63,7 @@
 </li>
 <li>ANT: <a href="http://ant.apache.org/">here</a> (already supported and bundled with major IDEs like Eclipse and Netbeans)</li>
 </ul>
+<h2><a name="sourcecoderepositories" href="./#sourcecoderepositories">Source code repositories</a></h2>
 These are the URLs of the SVN repositories for all versions:
 <ul>
     <li>read only access
@@ -53,6 +81,7 @@ These are the URLs of the SVN repositories for all versions:
         </ul>
     </li>
 </ul>
+<h2><a name="buildsteps" href="./#buildsteps">Build steps</a></h2>
 Please follow one of these methods:
 <ul>
 <li>In <b>command line</b>, follow these steps:
@@ -106,6 +135,7 @@ Please follow one of these methods:
 </li>
 <li>In <b>other IDEs</b>, make your own way with them, I have no time to waste with proprietary IDEs and IDEs with a confidential audience</li>
 </ul>
+<h2><a name="sourcecodeofthedependencies" href="./#sourcecodeofthedependencies">Source code of the dependencies</a></h2>
 You can get the source code of the dependencies here :
 <ul>
 <li><a href="http://hg.openjdk.java.net">OpenJDK</a></li>
@@ -134,10 +164,15 @@ You can get the source code of the dependencies here :
 <p>TUER requires less than 32 MB (the latest version may require more than 64 MB) but <b>some programs used to precompute its data require 1 GB and even 2 GB</b>. Do not try to build the game 
 from the source code if your computer does not have enough RAM. Use the VM argument "-Xmx" if a particular map needs much memory.
 </p>
-<hr>
-<p><a name="jndt" href="./#jndt">JNDT</a> is used to build the self-contained native application bundles of the project. You can find the documentation of its targets below:</p>
-<b>create-app-dir</b><br/>
-Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...).
+<h1><a name="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
+<h2><a name="introduction" href="./#introduction">Introduction</a></h2>
+<p>JNDT is used to build the self-contained native application bundles of the project. It turns a fat JAR into some bundles easy to deploy and to install. It builds both some convenient native installers with a full desktop integration and some archives as fallbacks.</p>
+<h2><a name="sourcecode" href="./#sourcecode">Source code</a></h2>
+<p>The source code of JNDT is in a single Ant build file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">here</a>. Its dependencies are in the directory "lib/ant", you must edit the value of the Ant property "jndtlibdir" if you move them elsewhere.</p>
+<h2><a name="manualoftheanttasks" href="./#manualoftheanttasks">Manual of the Ant tasks</a></h2>
+<p>JNDT is composed of the 4 Ant tasks below:</p>
+<h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
+<p>Creates the directory of the application, i.e the directory containing the necessary files to run the application, its JAR, its resources (optional), the JRE (optional), the native launcher or the launch script and the files for the native integration in the desktop (the icon, ...).</p>
 <table border="1">
 <thead>
 <tr>
@@ -160,9 +195,8 @@ Creates the directory of the application, i.e the directory containing the neces
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 </tbody>
 </table>
-<br>
-<b>create-linux-app-bundles</b><br>
-Creates a RPM package, a DEB package and an archive for GNU Linux.
+<h3><a name="create-linux-app-bundles" href="./#create-linux-app-bundles">create-linux-app-bundles</a></h3>
+<p>Creates a RPM package, a DEB package and an archive for GNU Linux.</p>
 <table border="1">
 <thead>
 <tr>
@@ -208,9 +242,8 @@ Creates a RPM package, a DEB package and an archive for GNU Linux.
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "gzip"</td></tr>
 </tbody>
 </table>
-<br>
-<b>create-os-x-app-bundle</b><br>
-Creates a zipped APP file for Mac OS X.
+<h3><a name="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
+<p>Creates a zipped APP file for Mac OS X.</p>
 <table border="1">
 <thead>
 <tr>
@@ -236,9 +269,8 @@ Creates a zipped APP file for Mac OS X.
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "bzip2"</td></tr>
 </tbody>
 </table>
-<br>
-<b>create-windows-app-bundle</b><br>
-Creates a zipped application archive for Microsoft Windows.
+<h3><a name="create-windows-app-bundle" href="./#create-windows-app-bundle">create-windows-app-bundle</a></h3>
+<p>Creates a zipped application archive for Microsoft Windows.</p>
 <table border="1">
 <thead>
 <tr>
@@ -264,7 +296,6 @@ Creates a zipped application archive for Microsoft Windows.
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "bzip2"</td></tr>
 </tbody>
 </table>
-<br>
 <p>
    <a href="http://validator.w3.org/check?uri=referer">
       <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
