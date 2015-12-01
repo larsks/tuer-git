@@ -11,7 +11,7 @@
 <br>
 <br>
 <br>
-<a style="float:right;margin-left:10px;margin-right:10px;" href="../../en/download/"><img src="../../en.png" alt="English"></a><a style="float:right;margin-left:10px;margin-right:10px;" href="./"><img src="../../fr.png" alt="Français"></a>
+<a style="float:right;margin-left:10px;margin-right:10px;" href="../../en/documentation/"><img src="../../en.png" alt="English"></a><a style="float:right;margin-left:10px;margin-right:10px;" href="./"><img src="../../fr.png" alt="Français"></a>
 <br>
 <hr>
 <a href="../">Accueil</a>&nbsp;&nbsp;&nbsp;
@@ -24,6 +24,33 @@
 <a href="./">Contact</a>&nbsp;&nbsp;&nbsp;
 <a href="../../rss.xml" type="application/rss+xml"><img src="../../rss.png" alt="flux RSS de TUER" height="15" width="15"></a>
 <hr>
+Sommaire:
+<ul>
+    <li><a href="#commentgenereretlancerlejeu">Comment générer et lancer le jeu</a>
+        <ul>
+            <li><a href="#logicielsrequis">Logiciels requis</a></li>
+            <li><a href="#depotsducodesource">Dépôts du code source</a></li>
+            <li><a href="#etapesdegeneration">Étapes de génération</a></li>
+            <li><a href="#codesourcedesdependances">Code source des dépendances</a></li>
+        </ul>
+    </li>
+    <li><a href="#jndt">JNDT: Java Native Deployment Toolkit</a>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#codesource">Code source</a></li>
+            <li><a href="#manueldestachesant">Manuel des tâches Ant</a>
+                <ul>
+                    <li><a href="#create-app-dir">create-app-dir</a></li>
+                    <li><a href="#create-linux-app-bundles">create-linux-app-bundles</a></li>
+                    <li><a href="#create-os-x-app-bundle">create-os-x-app-bundle</a></li>
+                    <li><a href="#create-windows-app-bundle">create-windows-app-bundle</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<h1><a name="commentgenereretlancerlejeu" href="./#commentgenereretlancerlejeu">Comment générer et lancer le jeu</a></h1>
+<h2><a name="logicielsrequis" href="./#logicielsrequis">Logiciels requis</a></h2>
 <p>Vous avez besoin de ces programmes pour utiliser mon jeu à des fins de développement : </p>
 <ul>
 <li>Kit de développement Java 1.7 ou supérieur : <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
@@ -36,7 +63,8 @@
 </li>
 <li>ANT: <a href="http://ant.apache.org/">ici</a> (déjà supporté et livré avec les EDI majeurs tel qu'Eclipse et Netbeans)</li>
 </ul>
-Ce sont les URLs des dépôts SVN pour toutes les versions :
+<h2><a name="depotsducodesource" href="./#depotsducodesource">Dépôts du code source</a></h2>
+<p>Ce sont les URLs des dépôts SVN pour toutes les versions : </p>
 <ul>
     <li>accès en lecture seule
         <ul>
@@ -53,7 +81,8 @@ Ce sont les URLs des dépôts SVN pour toutes les versions :
         </ul>
     </li>
 </ul>
-Veuillez suivre une de ces méthodes :
+<h2><a name="etapesdegeneration" href="./#etapesdegeneration">Étapes de génération</a></h2>
+<p>Veuillez suivre une de ces méthodes : </p>
 <ul>
 <li>En <b>ligne de commande</b>, suivez ces étapes :
 <ul>
@@ -106,7 +135,8 @@ Veuillez suivre une de ces méthodes :
 </li>
 <li>Dans <b>les autres EDIs</b>, débrouillez-vous, je n'ai pas de temps à perdre avec les EDIs propriétaires et ceux avec une audience confidentielle</li>
 </ul>
-Vous pouvez obtenir le code source de toutes les dépendences ici :
+<h2><a name="codesourcedesdependances" href="./#codesourcedesdependances">Code source des dépendances</a></h2>
+<p>Vous pouvez obtenir le code source de toutes les dépendances ici : </p>
 <ul>
 <li><a href="http://hg.openjdk.java.net">OpenJDK</a></li>
 <li><a href="http://github.com/sgothel/jogl/archive/master.zip">JOGL</a></li>
@@ -134,10 +164,15 @@ Vous pouvez obtenir le code source de toutes les dépendences ici :
 <p>TUER requiert moins de 32 Mo (la dernière version peut requérir plus de 64 Mo) mais <b>quelques programmes utilisés pour précalculer ses données requièrent 1 Go voire même 2 Go</b>. N'essayez pas de construire le jeu 
 à partir du code source si votre ordinateur n'a pas assez de RAM. Utilisez l'argument de la machine virtuelle "-Xmx" si une carte particulière a besoin de plus de mémoire.
 </p>
-<hr>
-<p><a name="jndt" href="./#jndt">JNDT</a> est utilisé pour construire les paquets applicatifs natifs autonomes du projet. vous pouvez trouver la documentation de ses cibles ci-dessous :</p>
-<b>create-app-dir</b><br/>
-Crée le répertoire de l'application, c'est-à-dire le répertoire contenant les fichiers nécessaires pour lancer l'application, son JAR, ses ressources (optionnelles), son JRE (optionnel), le lanceur natif ou le script de démarrage et les fichiers pour l'intégration native dans le bureau (l'icône, ...).
+<h1><a name="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
+<h2><a name="introduction" href="./#introduction">Introduction</a></h2>
+<p>JNDT est utilisé pour générer les paquets applicatifs natifs autonomes du projet. Il fait à partir d'un "fat JAR" des bundles faciles à déployer et à installer. Il génère à la fois des installeurs natifs pratiques avec une intégration complète dans le bureau et des archives comme solutions de repli.</p>
+<h2><a name="codesource" href="./#codesource">Code source</a></h2>
+<p>Le code source de JNDT est dans un seul fichier de génération Ant <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">ici</a>. Ses dépendances sont dans le répertoire "lib/ant", vous devez éditer la valeur de la propriété Ant "jndtlibdir" si vous les déplacez.</p>
+<h2><a name="manueldestachesant" href="./#manueldestachesant">Manuel des tâches Ant</a></h2>
+<p>JNDT est composé des 4 tâches Ant ci-dessous:</p>
+<h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
+<p>Crée le répertoire de l'application, c'est-à-dire le répertoire contenant les fichiers nécessaires pour lancer l'application, son JAR, ses ressources (optionnelles), son JRE (optionnel), le lanceur natif ou le script de démarrage et les fichiers pour l'intégration native dans le bureau (l'icône, ...).</p>
 <table border="1">
 <thead>
 <tr>
@@ -160,9 +195,8 @@ Crée le répertoire de l'application, c'est-à-dire le répertoire contenant le
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 </tbody>
 </table>
-<br>
-<b>create-linux-app-bundles</b><br>
-Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.
+<h3><a name="create-linux-app-bundles" href="./#create-linux-app-bundles">create-linux-app-bundles</a></h3>
+<p>Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.</p>
 <table border="1">
 <thead>
 <tr>
@@ -208,9 +242,8 @@ Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "gzip"</td></tr>
 </tbody>
 </table>
-<br>
-<b>create-os-x-app-bundle</b><br>
-Crée un fichier APP zippé pour Mac OS X.
+<h3><a name="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
+<p>Crée un fichier APP zippé pour Mac OS X.</p>
 <table border="1">
 <thead>
 <tr>
@@ -237,8 +270,8 @@ Crée un fichier APP zippé pour Mac OS X.
 </tbody>
 </table>
 <br>
-<b>create-windows-app-bundle</b><br>
-Crée une archive d'application zippée pour Microsoft Windows.
+<h3><a name="create-windows-app-bundle" href="./#create-windows-app-bundle">create-windows-app-bundle</a></h3>
+<p>Crée une archive d'application zippée pour Microsoft Windows.</p>
 <table border="1">
 <thead>
 <tr>
@@ -264,7 +297,6 @@ Crée une archive d'application zippée pour Microsoft Windows.
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
 </tbody>
 </table>
-<br>
 <p>
    <a href="http://validator.w3.org/check?uri=referer">
       <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
