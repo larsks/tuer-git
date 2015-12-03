@@ -376,41 +376,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	}
 	
 	private void updateConvertedModelExtensionLabel(){
-		convertedModelExtensionLabel.setText(getEntity().getConvertedModelFileFormat().getExtension());
+		convertedModelExtensionLabel.setText("."+getEntity().getConvertedModelFileFormat().getExtension());
 		updateConversionButton();
 	}
-	
-	/*private static final class ConvertibleModelFileFilter extends FileNameExtensionFilter{
-
-		private final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
-		
-		private ConvertibleModelFileFilter(final EngineServiceProviderInterface<?,?,?,?,?> seeker){
-			super();
-			for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
-				if(seeker.isLoadable(modelFileFormat))
-					convertibleFileFormatsExtensions.add(modelFileFormat.getExtension());
-		}
-		
-		@Override
-		public final boolean accept(File f){
-			boolean result=false;
-			if(f!=null)
-				if(f.isDirectory())
-					result=true;
-				else
-				    if(f.isFile())
-			            {for(String convertibleFileFormatExtension:convertibleFileFormatsExtensions)
-				             if(f.getName().endsWith(convertibleFileFormatExtension))
-				    	         {result=true;
-			    		          break;
-			                     }
-			            }
-			return(result);
-		}
-
-		@Override
-		public final String getDescription(){
-			return("Convertible models");
-		}
-	}*/
 }
