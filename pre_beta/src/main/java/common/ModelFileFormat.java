@@ -65,7 +65,7 @@ public enum ModelFileFormat{
 		if(filePath!=null)
 		    {final int lastIndexOfDot=filePath.lastIndexOf('.');
 		     if(lastIndexOfDot!=-1)
-		         {final String modelFileExtension=filePath.substring(lastIndexOfDot);
+		         {final String modelFileExtension=filePath.substring(lastIndexOfDot).toLowerCase();
 		          for(ModelFileFormat currentModelFileFormat:ModelFileFormat.values())
 	    	          if(modelFileExtension.equals(currentModelFileFormat.getExtension()))
 	                      {modelFileFormat=currentModelFileFormat;
