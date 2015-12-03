@@ -24,12 +24,12 @@ package common;
  *
  */
 public enum ModelFileFormat{
-	ARDOR3D_BINARY("Ardor3D Binary",".abin",null),
-	ARDOR3D_XML("Ardor3D XML",".axml",null),
-	COLLADA("Collada",".dae",null),
-	MD2("MD2",".md2",null),
-	MD3("MD3",".md3",null),
-	WAVEFRONT_OBJ("WaveFront OBJ",".obj",".mtl");
+	ARDOR3D_BINARY("Ardor3D Binary","abin",null),
+	ARDOR3D_XML("Ardor3D XML","axml",null),
+	COLLADA("Collada","dae",null),
+	MD2("MD2","md2",null),
+	MD3("MD3","md3",null),
+	WAVEFRONT_OBJ("WaveFront OBJ","obj","mtl");
 	
 	private final String description;
 	
@@ -64,8 +64,8 @@ public enum ModelFileFormat{
 		ModelFileFormat modelFileFormat=null;
 		if(filePath!=null)
 		    {final int lastIndexOfDot=filePath.lastIndexOf('.');
-		     if(lastIndexOfDot!=-1)
-		         {final String modelFileExtension=filePath.substring(lastIndexOfDot).toLowerCase();
+		     if(lastIndexOfDot!=-1&&lastIndexOfDot<filePath.length()-1)
+		         {final String modelFileExtension=filePath.substring(lastIndexOfDot+1).toLowerCase();
 		          for(ModelFileFormat currentModelFileFormat:ModelFileFormat.values())
 	    	          if(modelFileExtension.equals(currentModelFileFormat.getExtension()))
 	                      {modelFileFormat=currentModelFileFormat;
