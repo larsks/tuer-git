@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -43,8 +42,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-
-import common.EngineServiceProviderInterface;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import common.ModelFileFormat;
 
 /**
@@ -62,8 +60,6 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	
 	private static final long serialVersionUID=1L;
 	
-	private final JFileChooser fileChooser;
-	
 	private final JLabel convertibleModelContentLabel;
 	
 	private final JLabel convertibleModelFormatContentLabel;
@@ -77,10 +73,16 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	private final JComboBox<ModelFileFormat> convertedModelFormatCombobox;
 	
 	private final JButton conversionButton;
+	
+	private final FileNameExtensionFilter convertibleModelFileNameExtensionFilter;
 
 	public ModelConverterViewer(final ModelConverter modelConverter,final ToolManager toolManager){
 		super(modelConverter,toolManager);
-		fileChooser=new JFileChooser();
+		final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
+		for(ModelFileFormat modelFileFormat:ModelFileFormat.values())
+			if(toolManager.getSeeker().isLoadable(modelFileFormat))
+				convertibleFileFormatsExtensions.add(modelFileFormat.getExtension());
+		convertibleModelFileNameExtensionFilter=new FileNameExtensionFilter("Convertible models",convertibleFileFormatsExtensions.toArray(new String[convertibleFileFormatsExtensions.size()]));
 		setLayout(new BorderLayout());
 		final JPanel modelConversionSetupPanel=new JPanel(new GridBagLayout());
 		final TitledBorder setupBorder=BorderFactory.createTitledBorder("Setup");
@@ -182,12 +184,13 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	}
 	
 	private void convertibleModelButtonActionPerformed(ActionEvent ae){
+		final JFileChooser fileChooser=new JFileChooser();
 		fileChooser.setCurrentDirectory(getEntity().getConvertibleModelFilePath()==null?null:new File(getEntity().getConvertibleModelFilePath()));
 		fileChooser.setSelectedFile(null);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		for(FileFilter fileFilter:Arrays.asList(fileChooser.getChoosableFileFilters()))
 			fileChooser.removeChoosableFileFilter(fileFilter);
-		fileChooser.addChoosableFileFilter(new ConvertibleModelFileFilter(toolManager.getSeeker()));
+		fileChooser.setFileFilter(convertibleModelFileNameExtensionFilter);
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
 		    {//updates the data model first
 			 getEntity().setConvertibleModelFilePath(fileChooser.getSelectedFile().getAbsolutePath());
@@ -201,11 +204,10 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 	}
 	
 	private void convertedModelButtonActionPerformed(ActionEvent ae){
+		final JFileChooser fileChooser=new JFileChooser();
 		fileChooser.setCurrentDirectory(getEntity().getConvertedModelDirectoryPath()==null?null:new File(getEntity().getConvertedModelDirectoryPath()));
 		fileChooser.setSelectedFile(null);
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		for(FileFilter fileFilter:Arrays.asList(fileChooser.getChoosableFileFilters()))
-			fileChooser.removeChoosableFileFilter(fileFilter);
 		if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION)
 	        {//updates the data model first
 			 getEntity().setConvertedModelDirectoryPath(fileChooser.getSelectedFile().getAbsolutePath());
@@ -242,7 +244,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 			throw new IllegalArgumentException("The input file "+inputModelFile.getAbsolutePath()+" cannot be read");
 		final File convertedModelDirectory=new File(getEntity().getConvertedModelDirectoryPath());
 		final String convertedModelFilename=getEntity().getConvertedModelFilename();
-		final File outputModelFile=new File(convertedModelDirectory,convertedModelFilename+getEntity().getConvertedModelFileFormat().getExtension());
+		final File outputModelFile=new File(convertedModelDirectory,convertedModelFilename+"."+getEntity().getConvertedModelFileFormat().getExtension());
 		if(!outputModelFile.exists())
 		    {boolean success=false;
 			 try{success=outputModelFile.createNewFile();}
@@ -257,7 +259,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		if(getEntity().getConvertedModelFileFormat().getSecondaryExtension()==null)
 			secondaryOutputModelFile=null;
 		else
-			{secondaryOutputModelFile=new File(convertedModelDirectory,convertedModelFilename+getEntity().getConvertedModelFileFormat().getSecondaryExtension());
+			{secondaryOutputModelFile=new File(convertedModelDirectory,convertedModelFilename+"."+getEntity().getConvertedModelFileFormat().getSecondaryExtension());
 			 if(!secondaryOutputModelFile.exists())
 		         {boolean success=false;
 			      try{success=secondaryOutputModelFile.createNewFile();}
@@ -378,7 +380,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		updateConversionButton();
 	}
 	
-	private static final class ConvertibleModelFileFilter extends FileFilter{
+	/*private static final class ConvertibleModelFileFilter extends FileNameExtensionFilter{
 
 		private final ArrayList<String> convertibleFileFormatsExtensions=new ArrayList<>();
 		
@@ -410,5 +412,5 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer{
 		public final String getDescription(){
 			return("Convertible models");
 		}
-	}
+	}*/
 }
