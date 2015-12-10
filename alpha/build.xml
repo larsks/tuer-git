@@ -446,7 +446,7 @@
 			<arg value="texture/wallTexture0.png"/>
 		</java>
 	</target>
-	<target name="run-tuer" description="Runs the game TUER">
+	<target name="run-game" description="Runs the game">
 		<java classname="connection.GameServiceProvider"
 	              fork="true"
 	              dir="${destdir}"
