@@ -291,7 +291,7 @@
     <!-- =================================================================== -->
     <!-- Run Targets                                                         -->
     <!-- =================================================================== -->  
-    <target name="run-game" depends="set-jogl-library-path" description="Runs the game TUER">
+    <!--<target name="run-game" depends="set-jogl-library-path" description="Runs the game TUER">
         <java classname="connection.GameServiceProvider"
               fork="true"
               dir="${destdir}"
@@ -300,7 +300,7 @@
         	<classpath refid="project.class.path"/>
         	<jvmarg value="-Djava.library.path=${jogl.library.path}"/>
         </java>
-    </target>
+	</target>-->
 	<target name="run-datapreprocessor" description="Runs the program that generates the tiles and the cells">
 		<mkdir dir="${destdir}/xml" />
 		<mkdir dir="${destdir}/data" />
@@ -417,7 +417,7 @@
 			<arg value="jbin/agent.jbin"/>
 	    </java>
 	</target>
-	<target name="run-tuer" depends="set-jogl-library-path" description="Runs the experimental version of the game TUER">
+	<target name="run-game" depends="set-jogl-library-path" description="Runs the experimental version of the game">
 		<java classname="jme.JMEGameServiceProvider"
 					              fork="true"
 					              dir="${destdir}"
