@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2015 Julien Gouesse
+ * Copyright (c) 2006-2016 Julien Gouesse
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
