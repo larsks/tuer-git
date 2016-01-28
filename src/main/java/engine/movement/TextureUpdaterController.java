@@ -106,8 +106,8 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         //creates texture from resource name
         texture=(Texture2D)TextureManager.load(resourceSource,Texture.MinificationFilter.Trilinear,true);
         //copies the image
-        final Image currentImage = texture.getImage();
-        final ByteBuffer originalImageData = BufferUtils.createByteBuffer(currentImage.getData(0).capacity());
+        final Image currentImage=texture.getImage();
+        final ByteBuffer originalImageData=BufferUtils.createByteBuffer(currentImage.getData(0).capacity());
         originalImageData.put(currentImage.getData(0)).rewind();
         currentImage.getData(0).rewind();
         originalImage=new Image(currentImage.getDataFormat(),currentImage.getDataType(),currentImage.getWidth(),currentImage.getHeight(),originalImageData,null);
