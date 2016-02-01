@@ -155,7 +155,7 @@ public abstract class TextureUpdaterController implements Serializable,SpatialCo
         //update elapsed time
         elapsedTime+=timeSinceLastCall;
         //use the movement equation
-        final int updatablePixelsCount=Math.max(0,getScannablePixelsCount(elapsedTime)-updatedPixelsCount);		
+        final int updatablePixelsCount=Math.max(0,getScannablePixelsCount(elapsedTime)-updatedPixelsCount);
         if(updatablePixelsCount>0)
             {//modify the buffer
              Point updatedVertex;

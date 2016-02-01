@@ -63,8 +63,8 @@ public final class CircularSpreadTextureUpdaterController extends TextureUpdater
                                  final Entry<Point,ReadOnlyColorRGBA> o2){
             final Point p1=o1.getKey();
             final Point p2=o2.getKey();
-            double d1=distance(p1, spreadCenter);
-            double d2=distance(p2, spreadCenter);
+            double d1=distance(p1,spreadCenter);
+            double d2=distance(p2,spreadCenter);
             return(d1==d2?0:d1<d2?-1:1);
         } 
     }

@@ -17,16 +17,28 @@
  */
 package engine.misc;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map.Entry;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
+import com.ardor3d.math.ColorRGBA;
+import com.ardor3d.math.type.ReadOnlyColorRGBA;
+import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.util.TextureManager;
+import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+import com.jogamp.nativewindow.util.Point;
+
+import engine.movement.MovementEquation;
+import engine.movement.UniformlyVariableMovementEquation;
 
 /**
  * The introduction state shows a map of Europe becoming red, it modifies the texture data at runtime which seems to be slow on some hardware.
@@ -48,24 +60,64 @@ public class TestIntroductionReimplementation{
 		final int frameCount=durationInSeconds*framesPerSecond;
 		final List<MeshData> meshDataList=new ArrayList<>();
 		final int[][] argbArray=new int[introImage.getHeight()][introImage.getWidth()];
+		final Point spreadCenter=new Point(205,265);
+		final MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
+		HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<>();
+        colorSubstitutionTable.put(ColorRGBA.BLUE,ColorRGBA.RED);
+		final ArrayList<Entry<Point,ReadOnlyColorRGBA>> coloredVerticesList=new ArrayList<>();
+		//fills
+        ReadOnlyColorRGBA sourceColor,destinationColor;
+        for(int y=0;y<introImage.getHeight();y++)
+            for(int x=0;x<introImage.getWidth();x++)
+                {final int argb=ImageUtils.getARGB(introImage,x,y);
+                 //just copies the pixels of the image into the array, it's going to be used for the very first frame
+                 argbArray[y][x]=argb;
+                 sourceColor=new ColorRGBA().fromIntARGB(argb);
+                 destinationColor=colorSubstitutionTable.get(sourceColor);
+                 if(destinationColor==null)
+                     {//TODO use the array helper to build several smaller full arrays only for the white pixels as their color doesn't change
+                     }
+                 else
+                     coloredVerticesList.add(new AbstractMap.SimpleEntry<>(new Point(x,y),destinationColor));
+                }
+        //creates the vertex buffer (indirect NIO buffer), 2 * 6 * w * h if unoptimized
+        final FloatBufferData vertexBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(introImage.getWidth()*introImage.getHeight()*2*6),2);
+        for(int y=0;y<introImage.getHeight();y++)
+            for(int x=0;x<introImage.getWidth();x++)
+                {//TODO fill it, its data won't change
+            	 //TODO six vertices
+            	 //TODO first triangle
+            	 //TODO second triangle
+                }
+        //sorts
+        Collections.sort(coloredVerticesList,new CenteredColoredPointComparator(spreadCenter));
 		//for each frame
 		for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
-		    {//for each ordinate
-			 for(int y=0;y<introImage.getHeight();y++)
-                 //for each abscissa
-				 for(int x=0;x<introImage.getWidth();x++)
-                     {//retrieves the color of the pixel
-                	  final int argb=ImageUtils.getARGB(introImage,x,y);
-                	  //TODO use the frame index and the equation to modify the color
-                	  argbArray[y][x]=argb;
-                     }
-			 //TODO use the array helper to build several smaller full arrays
+		    {final double previousElapsedTime=frameIndex==0?0:(frameIndex-1)/(double)framesPerSecond;
+			 final double elapsedTime=frameIndex/(double)framesPerSecond;
+			 final int updatedPixelsCount=getScannablePixelsCount(equation,previousElapsedTime);
+			 final int updatablePixelsCount=Math.max(0,getScannablePixelsCount(equation,elapsedTime)-updatedPixelsCount);
+			 //if it isn't the very first frame
+			 if(frameIndex!=0)
+			     {//if there are some pixels to update
+				  if(updatablePixelsCount>0)
+			          {//updates the pixels (incrementally)
+			           for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
+		                   {final int rgbVal=coloredVerticesList.get(i).getValue().asIntARGB();
+		                    final Point updatedVertex=coloredVerticesList.get(i).getKey();
+		                    argbArray[updatedVertex.getY()][updatedVertex.getX()]=rgbVal;
+		                   }
+			          }
+			     }
 			 final MeshData meshData=new MeshData();
-			 //TODO create the vertex buffer (indirect NIO buffer), 3 * 6 * w * h in the worst case
-		     //TODO create the color buffer (indirect NIO buffer), 4 * 6 * w * h in the worst case
-		     //TODO add these buffers into the mesh data
-			 //TODO add the vertices of the arrays into the vertex buffer
+			 //uses the shared vertex buffer (all frames use the same one)
+			 meshData.setVertexCoords(vertexBufferData);
+		     //creates the color buffer (indirect NIO buffer), 4 * 6 * w * h in the worst case
+			 final FloatBufferData colorBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(introImage.getWidth()*introImage.getHeight()*4*6),4);
+		     //sets this color buffer to the mesh data
+			 meshData.setColorCoords(colorBufferData);
              //TODO add the colors of the arrays into the color buffer
+			 
 			 meshDataList.add(meshData);
 		    }
 		//TODO create a Mesh
@@ -74,4 +126,34 @@ public class TestIntroductionReimplementation{
 		//TODO add all MeshData instances into it
 		//TODO show the result
 	}
+	
+	private static final int getScannablePixelsCount(final MovementEquation equation,final double elapsedTime){
+	    return((int)Math.ceil(equation.getValueAtTime(elapsedTime)));
+	}
+	
+    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point,ReadOnlyColorRGBA>>{
+        
+        private final Point spreadCenter;
+        
+        private CenteredColoredPointComparator(final Point spreadCenter){
+            this.spreadCenter=spreadCenter;
+        }
+        
+        
+        @Override
+        public final int compare(final Entry<Point,ReadOnlyColorRGBA> o1,
+                                 final Entry<Point,ReadOnlyColorRGBA> o2){
+            final Point p1=o1.getKey();
+            final Point p2=o2.getKey();
+            double d1=distance(p1,spreadCenter);
+            double d2=distance(p2,spreadCenter);
+            return(d1==d2?0:d1<d2?-1:1);
+        } 
+    }
+    
+    private static double distance(final Point p1,final Point p2) {
+    	double abscissaSub=p2.getX()-p1.getX();
+    	double ordinateSub=p2.getY()-p1.getY();
+    	return Math.sqrt((abscissaSub*abscissaSub)+(ordinateSub*ordinateSub));
+    }
 }
