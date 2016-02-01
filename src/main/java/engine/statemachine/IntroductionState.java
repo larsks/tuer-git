@@ -79,7 +79,7 @@ public final class IntroductionState extends ScenegraphState{
         box.setModelBound(new BoundingBox());
         box.setTranslation(new Vector3(0,0,-75));
         //configures the spread effect
-        final Point spreadCenter=new Point(205,265);     
+        final Point spreadCenter=new Point(205,265);
         HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE,ColorRGBA.RED);
         MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
