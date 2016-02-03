@@ -34,8 +34,7 @@
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
-		<pathelement location="lib/jogl/jogl-all.jar"/>
-		<pathelement location="lib/gluegen-rt/gluegen-rt.jar"/>
+		<pathelement location="lib/jogamp/jogamp-fat.jar"/>
 	</path>
 	<macrodef name="override-permissions-and-codebase-manifest-attributes">
 		<attribute name="jar" />
@@ -117,24 +116,7 @@
 		<delete file="${destdir}/${tuer-jnlp-filename}" failonerror="false" />
 		<delete failonerror="false">
 			<fileset file="${destdir}/tuer.jar" />
-			<fileset file="${destdir}/jogl-all.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
-			<!--<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>-->
-			<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
-			<fileset file="${destdir}/jogl-all-natives-solaris-i586.jar"/>
-			<fileset file="${destdir}/gluegen-rt.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-			<!--<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>-->
-			<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
-			<fileset file="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
+			<fileset file="${destdir}/jogamp-fat.jar"/>
 		</delete>
 		<delete dir="${basedir}/snap" failonerror="false" />
 		<delete dir="${basedir}/obj" failonerror="false" />
@@ -207,47 +189,9 @@
 	<!-- ================================================================= -->
 	<target name="prepare-third-party-jars">
 		<!-- copies these JARs into the local destination directory (to avoid mixing unsigned JARs with signed JARs) -->
-		<copy file="lib/jogl/jogl-all.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-linux-amd64.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-linux-i586.jar" todir="${destdir}" />
-		<!--<copy file="lib/jogl/jogl-all-natives-macosx-ppc.jar" todir="${destdir}" />-->
-		<copy file="lib/jogl/jogl-all-natives-macosx-universal.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-windows-amd64.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-windows-i586.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-solaris-amd64.jar" todir="${destdir}" />
-		<copy file="lib/jogl/jogl-all-natives-solaris-i586.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-linux-amd64.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-linux-i586.jar" todir="${destdir}" />
-		<!--<copy file="lib/gluegen-rt/gluegen-rt-natives-macosx-ppc.jar" todir="${destdir}" />-->
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-macosx-universal.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-windows-amd64.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-windows-i586.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-solaris-amd64.jar" todir="${destdir}" />
-		<copy file="lib/gluegen-rt/gluegen-rt-natives-solaris-i586.jar" todir="${destdir}" />
+		<copy file="lib/jogamp/jogamp-fat.jar" todir="${destdir}" />
 		<!-- repurposes the JARs of the third party libraries, overrides the permissions and codebase manifest attributes -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-linux-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-i586.jar" />
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparc.jar"/> -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-solaris-sparcv9.jar"/> -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-macosx-universal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogl-all-natives-windows-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-linux-i586.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-i586.jar" />
-		<!-- There is no JAR for these architectures yet -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparc.jar"/> -->
-		<!-- <override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-solaris-sparcv9.jar"/> -->
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-macosx-universal.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-amd64.jar" />
-		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/gluegen-rt-natives-windows-i586.jar" />
+		<override-permissions-and-codebase-manifest-attributes jar="${destdir}/jogamp-fat.jar" />
 	</target>
 
 	<!-- ================================================================= -->
@@ -273,24 +217,7 @@
 		<signjar alias="${alias}" storepass="${storepass}" keystore="${keystore}" lazy="false" tsaurl="http://timestamping.edelweb.fr/service/tsp">
 			<path>
 				<fileset file="${destdir}/tuer.jar"/>
-				<fileset file="${destdir}/jogl-all.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-linux-amd64.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-linux-i586.jar"/>
-				<!--<fileset file="${destdir}/jogl-all-natives-macosx-ppc.jar"/>-->
-				<fileset file="${destdir}/jogl-all-natives-macosx-universal.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-windows-amd64.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-windows-i586.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-solaris-amd64.jar"/>
-				<fileset file="${destdir}/jogl-all-natives-solaris-i586.jar"/>
-				<fileset file="${destdir}/gluegen-rt.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-linux-amd64.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-linux-i586.jar"/>
-				<!--<fileset file="${destdir}/gluegen-rt-natives-macosx-ppc.jar"/>-->
-				<fileset file="${destdir}/gluegen-rt-natives-macosx-universal.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-windows-amd64.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-windows-i586.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-solaris-amd64.jar"/>
-				<fileset file="${destdir}/gluegen-rt-natives-solaris-i586.jar"/>
+				<fileset file="${destdir}/jogamp-fat.jar"/>
 			</path>
 		</signjar>
 		<!-- deletes the keystore if any -->
@@ -326,64 +253,7 @@
 					<property name="sun.java2d.d3d" value="false"/>
 					<property name="sun.java2d.opengl" value="false"/>
 					<jar href="${tuer-jar-filename}" download="eager" main="true"/>
-					<jar href="gluegen-rt.jar" download="eager" main="false"/>
-					<jar href="jogl-all.jar" download="eager" main="false"/>
-				</resources>
-				<resources os="Linux" arch="i386">
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="x86">
-					<nativelib href = "jogl-all-natives-linux-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-i586.jar" />
-				</resources>
-				<resources os="Linux" arch="amd64">
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="Linux" arch="x86_64">
-					<nativelib href = "jogl-all-natives-linux-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-linux-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparc">
-					<nativelib href = "jogl-all-natives-solaris-sparc.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparc.jar" />
-				</resources>
-				<resources os="SunOS" arch="sparcv9">
-					<nativelib href = "jogl-all-natives-solaris-sparcv9.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-sparcv9.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86">
-					<nativelib href = "jogl-all-natives-solaris-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-i586.jar" />
-				</resources>
-				<resources os="SunOS" arch="amd64">
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="SunOS" arch="x86_64">
-					<nativelib href = "jogl-all-natives-solaris-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-solaris-amd64.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="i386">
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Mac OS X" arch="x86_64">
-					<nativelib href = "jogl-all-natives-macosx-universal.jar" />
-					<nativelib href = "gluegen-rt-natives-macosx-universal.jar" />
-				</resources>
-				<resources os="Windows" arch="x86">
-					<nativelib href = "jogl-all-natives-windows-i586.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-i586.jar" />
-				</resources>
-				<resources os="Windows" arch="amd64">
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
-				</resources>
-				<resources os="Windows" arch="x86_64">
-					<nativelib href = "jogl-all-natives-windows-amd64.jar" />
-					<nativelib href = "gluegen-rt-natives-windows-amd64.jar" />
+					<jar href="jogamp-fat.jar" download="eager" main="false"/>
 				</resources>
 				<application-desc main-class="${tuer-main-class}" />
 			</jnlp>
