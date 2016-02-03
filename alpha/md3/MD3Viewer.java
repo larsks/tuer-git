@@ -16,9 +16,9 @@ package md3;
 
 
 import java.awt.Frame;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.util.Animator;
 
 

@@ -17,24 +17,27 @@ package main;
 import com.jogamp.common.nio.Buffers;
 
 import java.awt.Font;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Vector;
+
+import javax.imageio.ImageIO;
+
 import java.util.Map.Entry;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLException;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.gl2.GLUgl2;
-
-import com.jogamp.opengl.util.awt.Screenshot;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.gl2.GLUgl2;
+import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -734,7 +737,9 @@ public class GameGLView implements GLEventListener{
 	         boolean screenshotSuccessfullyDone;
 	         try {final File screenshotFile=getScreenshotFile();
 	              if(screenshotFile!=null)
-	                  {Screenshot.writeToTargaFile(screenshotFile,screenWidth,screenHeight);
+	                  {final AWTGLReadBufferUtil awtGLReadBufferUtil=new AWTGLReadBufferUtil(drawable.getGLProfile(),false);
+	                   final BufferedImage screenshot=awtGLReadBufferUtil.readPixelsToBufferedImage(gl,true);
+	                   ImageIO.write(screenshot,"tga",screenshotFile);
 	                   screenshotSuccessfullyDone=true;
 	                  }
 	              else

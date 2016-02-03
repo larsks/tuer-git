@@ -15,8 +15,8 @@ package drawer;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 
 
 class CompiledVertexArrayFactory{

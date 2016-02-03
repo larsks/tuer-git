@@ -18,9 +18,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 
@@ -61,7 +61,7 @@ public final class GLMenuItem {
     public void display(GLAutoDrawable drawable,float x,float y,TextRenderer textRenderer){
 		GL gl=drawable.getGL();
 		gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);		
-		textRenderer.beginRendering(drawable.getWidth(),drawable.getHeight());	
+		textRenderer.beginRendering(drawable.getSurfaceWidth(),drawable.getSurfaceHeight());	
 		switch(state)
 		    {case UNSELECTED:
 		         {textRenderer.setColor(UNSELECTED_COLOR); 

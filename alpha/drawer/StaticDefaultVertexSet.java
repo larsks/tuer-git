@@ -16,9 +16,9 @@ package drawer;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.glu.GLU;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.glu.GLU;
 
 import com.jogamp.common.nio.Buffers;
 

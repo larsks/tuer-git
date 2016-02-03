@@ -15,8 +15,8 @@ package tools;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUquadric;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUquadric;
 
 import com.jogamp.common.nio.Buffers;
 

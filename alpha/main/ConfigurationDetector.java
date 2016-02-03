@@ -2,7 +2,7 @@ package main;
 
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.jogamp.common.nio.Buffers;
 
