@@ -17,6 +17,7 @@
  */
 package engine.misc;
 
+import java.nio.ByteBuffer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +60,6 @@ public class TestIntroductionReimplementation{
 		final int framesPerSecond=30;
 		final int frameCount=durationInSeconds*framesPerSecond;
 		final List<MeshData> meshDataList=new ArrayList<>();
-		final int[][] argbArray=new int[introImage.getHeight()][introImage.getWidth()];
 		final Point spreadCenter=new Point(205,265);
 		final MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
 		HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<>();
@@ -70,60 +70,106 @@ public class TestIntroductionReimplementation{
         for(int y=0;y<introImage.getHeight();y++)
             for(int x=0;x<introImage.getWidth();x++)
                 {final int argb=ImageUtils.getARGB(introImage,x,y);
-                 //just copies the pixels of the image into the array, it's going to be used for the very first frame
-                 argbArray[y][x]=argb;
                  sourceColor=new ColorRGBA().fromIntARGB(argb);
                  destinationColor=colorSubstitutionTable.get(sourceColor);
-                 if(destinationColor==null)
-                     {//TODO use the array helper to build several smaller full arrays only for the white pixels as their color doesn't change
-                     }
-                 else
+                 if(destinationColor!=null)
                      coloredVerticesList.add(new AbstractMap.SimpleEntry<>(new Point(x,y),destinationColor));
                 }
-        //creates the vertex buffer (indirect NIO buffer), 2 * 6 * w * h if unoptimized
-        final FloatBufferData vertexBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(introImage.getWidth()*introImage.getHeight()*2*6),2);
-        for(int y=0;y<introImage.getHeight();y++)
+        //sorts
+        Collections.sort(coloredVerticesList,new CenteredColoredPointComparator(spreadCenter));
+        //creates one image per frame
+        final Image[] introImages=new Image[frameCount];
+        //for each frame
+      	for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
+      	    {//gets the image of the previous frame
+      		 final Image previousImage=frameIndex==0?introImage:introImages[frameIndex-1];
+      		 //copies its image data
+      		 final ByteBuffer data=BufferUtils.clone(previousImage.getData(0));
+      	     data.rewind();
+      	     //creates the image by copying this previous image
+      		 final Image image=new Image(previousImage.getDataFormat(),previousImage.getDataType(),previousImage.getWidth(),previousImage.getHeight(),data,null);
+      	     //performs the modification of this image for this frame
+      		 final double previousElapsedTime=frameIndex==0?0:(frameIndex-1)/(double)framesPerSecond;
+			 final double elapsedTime=frameIndex/(double)framesPerSecond;
+			 final int updatedPixelsCount=getScannablePixelsCount(equation,previousElapsedTime);
+			 final int updatablePixelsCount=Math.max(0,getScannablePixelsCount(equation,elapsedTime)-updatedPixelsCount);
+			 //if there are some pixels to update
+			 if(updatablePixelsCount>0)
+			     {//updates the pixels (incrementally)
+			      for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
+		              {final int argb=coloredVerticesList.get(i).getValue().asIntARGB();
+		               final Point updatedVertex=coloredVerticesList.get(i).getKey();
+		               ImageUtils.setARGB(image,updatedVertex.getX(),updatedVertex.getY(),argb);
+		              }
+			     }
+      		 //stores the new image into the array
+      		 introImages[frameIndex]=image;
+      	    }
+      	//the generic treatment starts here
+      	//detects the pixels whose color doesn't change
+      	final int[][] argbUnchangedPixelsArray=new int[introImage.getHeight()][introImage.getWidth()];
+      	//for each ordinate
+      	for(int y=0;y<introImage.getHeight();y++)
+            //for each abscissa
+      		for(int x=0;x<introImage.getWidth();x++)
+            	{//assumes the pixel's color doesn't change
+            	 boolean identical=true;
+            	 //for each frame
+            	 for(int frameIndex=1;frameIndex<frameCount&&identical;frameIndex++)
+                     {//retrieves the pixels at this coordinate in the image of the current frame and in the image of the previous frame
+            		  final Image previousIntroImage=introImages[frameIndex-1];
+            		  final Image currentIntroImage=introImages[frameIndex];
+            		  //compares them
+            		  identical=ImageUtils.getARGB(previousIntroImage,x,y)==ImageUtils.getARGB(currentIntroImage,x,y);
+                     }
+            	 //if the pixel is identical at this coordinate in all frames
+            	 if(identical)
+            	     {//saves the color if and only if it's not a fully transparent color
+            		  if(ImageUtils.getRGBA(introImage,x,y,null).getAlpha()==0)
+            			  argbUnchangedPixelsArray[y][x]=ColorRGBA.BLACK_NO_ALPHA.asIntARGB();
+            		  else
+            		      argbUnchangedPixelsArray[y][x]=ImageUtils.getARGB(introImage,x,y);
+            		  //for each image
+            		  for(final Image frameIntroImage:introImages)
+            		      {//marks the constant pixel fully transparent so that it's not treated with the non constant pixels
+            			   ImageUtils.setARGB(frameIntroImage,x,y,ColorRGBA.BLACK_NO_ALPHA.asIntARGB());
+            		      }
+            	     }
+            	 else
+            	     {//marks the non constant pixel fully transparent in this array so that it's not treated with the constant pixels
+            		  argbUnchangedPixelsArray[y][x]=ColorRGBA.BLACK_NO_ALPHA.asIntARGB();
+            	     }
+            	}
+      	//TODO use the array helper to compute full arrays
+        
+        /*for(int y=0;y<introImage.getHeight();y++)
             for(int x=0;x<introImage.getWidth();x++)
                 {//TODO fill it, its data won't change
             	 //TODO six vertices
             	 //TODO first triangle
             	 //TODO second triangle
-                }
-        //sorts
-        Collections.sort(coloredVerticesList,new CenteredColoredPointComparator(spreadCenter));
+                }*/
 		//for each frame
 		for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
-		    {final double previousElapsedTime=frameIndex==0?0:(frameIndex-1)/(double)framesPerSecond;
-			 final double elapsedTime=frameIndex/(double)framesPerSecond;
-			 final int updatedPixelsCount=getScannablePixelsCount(equation,previousElapsedTime);
-			 final int updatablePixelsCount=Math.max(0,getScannablePixelsCount(equation,elapsedTime)-updatedPixelsCount);
-			 //if it isn't the very first frame
-			 if(frameIndex!=0)
-			     {//if there are some pixels to update
-				  if(updatablePixelsCount>0)
-			          {//updates the pixels (incrementally)
-			           for(int i=updatedPixelsCount;i<updatedPixelsCount+updatablePixelsCount;i++)
-		                   {final int rgbVal=coloredVerticesList.get(i).getValue().asIntARGB();
-		                    final Point updatedVertex=coloredVerticesList.get(i).getKey();
-		                    argbArray[updatedVertex.getY()][updatedVertex.getX()]=rgbVal;
-		                   }
-			          }
-			     }
+		    {//TODO computes the triangle count from the full arrays
+			 final int triCount=introImage.getWidth()*introImage.getHeight()*2;//w * h * number of triangles per cell in the worst case
 			 final MeshData meshData=new MeshData();
-			 //uses the shared vertex buffer (all frames use the same one)
+			 //creates the vertex buffer (indirect NIO buffer), triangle count * number of vertices per triangle * floats per vertex (only 2 as we're in 2D)
+             final FloatBufferData vertexBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(triCount*3*2),2);
+			 //sets this vertex buffer to the mesh data
 			 meshData.setVertexCoords(vertexBufferData);
-		     //creates the color buffer (indirect NIO buffer), 4 * 6 * w * h in the worst case
-			 final FloatBufferData colorBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(introImage.getWidth()*introImage.getHeight()*4*6),4);
+		     //creates the color buffer (indirect NIO buffer), triangle count * number of vertices per triangle * floats per color (no alpha, RGB)
+			 final FloatBufferData colorBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(triCount*3*3),3);
 		     //sets this color buffer to the mesh data
 			 meshData.setColorCoords(colorBufferData);
-             //TODO add the colors of the arrays into the color buffer
+             //TODO add the vertices and the colors of the arrays into the vertex buffer and the color buffer
 			 
 			 meshDataList.add(meshData);
 		    }
-		//TODO create a Mesh
-		//TODO add the first MeshData into it
-		//TODO create a KeyframeController
-		//TODO add all MeshData instances into it
+		//TODO create a SwitchNode
+		//TODO create a Node per frame
+		//TODO add a MeshData into each Node
+		//TODO create a custom controller that just picks a frame with no interpolation
 		//TODO show the result
 	}
 	
