@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.ImageIcon;
 
 public final class GameIO{

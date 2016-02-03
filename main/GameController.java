@@ -26,9 +26,9 @@ import java.util.BitSet;*/
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 
 import tools.Full3DCell;
 import tools.Full3DCellController;

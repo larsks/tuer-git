@@ -17,9 +17,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.event.ChangeListener;
@@ -222,7 +222,7 @@ public final class GLProgressBar {
              int progressStringy = (int)(y-2-((progressHeight-progressStringBounds.getHeight())/2)-progressStringBounds.getHeight());           
              gl.getGL2().glPushAttrib(GL2.GL_CURRENT_BIT);
              gl.getGL2().glColor3f(0.0f,0.0f,0.0f);          
-             textRenderer.beginRendering(drawable.getWidth(),drawable.getHeight());
+             textRenderer.beginRendering(drawable.getSurfaceWidth(),drawable.getSurfaceHeight());
              textRenderer.setColor(Color.BLACK);
              textRenderer.draw(trueProgressString,progressStringx,progressStringy);            
              textRenderer.endRendering();

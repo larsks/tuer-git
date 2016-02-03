@@ -23,8 +23,8 @@ package main;
 
 import java.util.List;
 import java.util.Vector;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.util.texture.Texture;
 
 class Object3DView{

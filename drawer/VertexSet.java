@@ -15,7 +15,7 @@ package drawer;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 
 abstract class VertexSet implements IVertexSet{

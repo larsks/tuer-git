@@ -29,7 +29,7 @@ import java.nio.*;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.jogamp.common.nio.Buffers;
 

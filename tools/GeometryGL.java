@@ -15,8 +15,8 @@ package tools;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.TraceGL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.TraceGL2;
 
 public class GeometryGL extends TraceGL2
 {
