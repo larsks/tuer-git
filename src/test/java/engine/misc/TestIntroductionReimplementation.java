@@ -18,13 +18,19 @@
 package engine.misc;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageUtils;
@@ -32,7 +38,11 @@ import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.scenegraph.FloatBufferData;
+import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
+import com.ardor3d.scenegraph.controller.ComplexSpatialController;
+import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
+import com.ardor3d.scenegraph.extension.SwitchNode;
 import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
@@ -40,6 +50,9 @@ import com.jogamp.nativewindow.util.Point;
 
 import engine.movement.MovementEquation;
 import engine.movement.UniformlyVariableMovementEquation;
+import jfpsm.ArrayHelper;
+import jfpsm.ArrayHelper.OccupancyCheck;
+import jfpsm.ArrayHelper.Vector2i;
 
 /**
  * The introduction state shows a map of Europe becoming red, it modifies the texture data at runtime which seems to be slow on some hardware.
@@ -64,6 +77,7 @@ public class TestIntroductionReimplementation{
 		final MovementEquation equation=new UniformlyVariableMovementEquation(0,10000,0);
 		HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable=new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE,ColorRGBA.RED);
+        System.out.println("[START] Fill color table");
 		final ArrayList<Entry<Point,ReadOnlyColorRGBA>> coloredVerticesList=new ArrayList<>();
 		//fills
         ReadOnlyColorRGBA sourceColor,destinationColor;
@@ -75,13 +89,16 @@ public class TestIntroductionReimplementation{
                  if(destinationColor!=null)
                      coloredVerticesList.add(new AbstractMap.SimpleEntry<>(new Point(x,y),destinationColor));
                 }
+        System.out.println("[ END ] Fill color table");
         //sorts
         Collections.sort(coloredVerticesList,new CenteredColoredPointComparator(spreadCenter));
+        System.out.println("[START] Compute key frames images");
         //creates one image per frame
         final Image[] introImages=new Image[frameCount];
         //for each frame
       	for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
-      	    {//gets the image of the previous frame
+      	    {System.out.println("[START] Compute key frames image "+frameIndex);
+      		 //gets the image of the previous frame
       		 final Image previousImage=frameIndex==0?introImage:introImages[frameIndex-1];
       		 //copies its image data
       		 final ByteBuffer data=BufferUtils.clone(previousImage.getData(0));
@@ -104,73 +121,234 @@ public class TestIntroductionReimplementation{
 			     }
       		 //stores the new image into the array
       		 introImages[frameIndex]=image;
+      		 System.out.println("[ END ] Compute key frames image "+frameIndex);
       	    }
+      	System.out.println("[ END ] Compute key frames images");
       	//the generic treatment starts here
-      	//detects the pixels whose color doesn't change
-      	final int[][] argbUnchangedPixelsArray=new int[introImage.getHeight()][introImage.getWidth()];
-      	//for each ordinate
-      	for(int y=0;y<introImage.getHeight();y++)
-            //for each abscissa
-      		for(int x=0;x<introImage.getWidth();x++)
-            	{//assumes the pixel's color doesn't change
-            	 boolean identical=true;
-            	 //for each frame
-            	 for(int frameIndex=1;frameIndex<frameCount&&identical;frameIndex++)
-                     {//retrieves the pixels at this coordinate in the image of the current frame and in the image of the previous frame
-            		  final Image previousIntroImage=introImages[frameIndex-1];
-            		  final Image currentIntroImage=introImages[frameIndex];
-            		  //compares them
-            		  identical=ImageUtils.getARGB(previousIntroImage,x,y)==ImageUtils.getARGB(currentIntroImage,x,y);
-                     }
-            	 //if the pixel is identical at this coordinate in all frames
-            	 if(identical)
-            	     {//saves the color if and only if it's not a fully transparent color
-            		  if(ImageUtils.getRGBA(introImage,x,y,null).getAlpha()==0)
-            			  argbUnchangedPixelsArray[y][x]=ColorRGBA.BLACK_NO_ALPHA.asIntARGB();
-            		  else
-            		      argbUnchangedPixelsArray[y][x]=ImageUtils.getARGB(introImage,x,y);
-            		  //for each image
-            		  for(final Image frameIntroImage:introImages)
-            		      {//marks the constant pixel fully transparent so that it's not treated with the non constant pixels
-            			   ImageUtils.setARGB(frameIntroImage,x,y,ColorRGBA.BLACK_NO_ALPHA.asIntARGB());
-            		      }
-            	     }
-            	 else
-            	     {//marks the non constant pixel fully transparent in this array so that it's not treated with the constant pixels
-            		  argbUnchangedPixelsArray[y][x]=ColorRGBA.BLACK_NO_ALPHA.asIntARGB();
-            	     }
-            	}
-      	//TODO use the array helper to compute full arrays
-        
-        /*for(int y=0;y<introImage.getHeight();y++)
-            for(int x=0;x<introImage.getWidth();x++)
-                {//TODO fill it, its data won't change
-            	 //TODO six vertices
-            	 //TODO first triangle
-            	 //TODO second triangle
-                }*/
+      	System.out.println("[START] Compute key frames");
 		//for each frame
 		for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
-		    {//TODO computes the triangle count from the full arrays
-			 final int triCount=introImage.getWidth()*introImage.getHeight()*2;//w * h * number of triangles per cell in the worst case
+		    {System.out.println("[START] Compute key frame "+frameIndex);
+			 //retrieves the image of the frame
+			 final Image image=introImages[frameIndex];
+			 //retrieves the pixels of the image
+			 final Integer[][] pixels=new Integer[image.getHeight()][image.getWidth()];
+			 for(int y=0;y<introImage.getHeight();y++)
+		            for(int x=0;x<introImage.getWidth();x++)
+		            	{//gets the ARGB value of the pixel
+		            	 final int argb=ImageUtils.getARGB(introImage,x,y);
+		            	 final int alpha=(byte)(argb>>24)&0xFF;
+		            	 //keeps only non fully transparent pixels
+		            	 if(alpha>0)
+		            	     pixels[y][x]=Integer.valueOf(argb);
+		            	}
+			 //creates the array helper
+			 final ArrayHelper arrayHelper=new ArrayHelper();
+			 //uses the array helper to compute full arrays (without fully transparent pixels)
+			 final Map<Vector2i,Integer[][]> fullPixelsArraysMap=arrayHelper.computeFullArraysFromNonFullArray(pixels);
+			 final Map<Vector2i,Integer[][]> globalDistinctColorsPixelsArraysMap=new HashMap<>();
+			 //loops on all full arrays, there is no risk of having any holes
+			 for(final Entry<Vector2i,Integer[][]> fullPixelsArrayEntry:fullPixelsArraysMap.entrySet())
+			     {//retrieves where the pixels come from
+				  final Vector2i location=fullPixelsArrayEntry.getKey();
+				  //retrieves the non fully transparent pixels
+				  final Integer[][] nonFullyTransparentPixels=fullPixelsArrayEntry.getValue();
+				  //computes the list of colors in this array
+				  final Set<Integer> colors=new HashSet<>();
+				  for(int y=0;y<nonFullyTransparentPixels.length;y++)
+			          for(int x=0;x<nonFullyTransparentPixels[y].length;x++)
+			        	  colors.add(nonFullyTransparentPixels[y][x]);
+				  //for each color
+				  for(final Integer color:colors)
+				      {//builds an occupancy check to keep the pixels of a single color, 
+					   final OccupancyCheck<Integer> colorFilterOccupancyCheck=new IntegerFilterOccupancyCheck(color);
+					   //uses it to build some full arrays with distinct colors
+					   final Map<Vector2i,Integer[][]> localDistinctColorsPixelsArraysMap=arrayHelper.computeFullArraysFromNonFullArray(nonFullyTransparentPixels,colorFilterOccupancyCheck);
+					   for(final Entry<Vector2i,Integer[][]> localDistinctColorsPixelsArraysEntry:localDistinctColorsPixelsArraysMap.entrySet())
+					       {//retrieves where the pixels come from
+							final Vector2i subLocation=localDistinctColorsPixelsArraysEntry.getKey();
+							//computes the right location
+							final Vector2i globalLocation=new Vector2i(subLocation.getX()+location.getX(),subLocation.getY()+location.getY());
+							//retrieves the non fully transparent pixels
+							final Integer[][] localDistinctColorsPixels=localDistinctColorsPixelsArraysEntry.getValue();
+							//stores the full array with distinct colors
+							globalDistinctColorsPixelsArraysMap.put(globalLocation,localDistinctColorsPixels);
+					       }
+				      }
+			     }
+			 //computes the triangle count
+			 int triCount=0;
+			 //for each array of pixels of the same color
+			 for(final Integer[][] globalDictinctColorPixels:globalDistinctColorsPixelsArraysMap.values())
+				 {//one pair of triangles per pixel, the array is full (all rows and all columns have respectively the same sizes)
+				  triCount+=(globalDictinctColorPixels.length*globalDictinctColorPixels[0].length)*2;
+				 }
 			 final MeshData meshData=new MeshData();
 			 //creates the vertex buffer (indirect NIO buffer), triangle count * number of vertices per triangle * floats per vertex (only 2 as we're in 2D)
-             final FloatBufferData vertexBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(triCount*3*2),2);
+			 final FloatBuffer vertexBuffer=BufferUtils.createFloatBufferOnHeap(triCount*3*2);
+             final FloatBufferData vertexBufferData=new FloatBufferData(vertexBuffer,2);
 			 //sets this vertex buffer to the mesh data
 			 meshData.setVertexCoords(vertexBufferData);
 		     //creates the color buffer (indirect NIO buffer), triangle count * number of vertices per triangle * floats per color (no alpha, RGB)
-			 final FloatBufferData colorBufferData=new FloatBufferData(BufferUtils.createFloatBufferOnHeap(triCount*3*3),3);
+			 final FloatBuffer colorBuffer=BufferUtils.createFloatBufferOnHeap(triCount*3*3);
+			 final FloatBufferData colorBufferData=new FloatBufferData(colorBuffer,3);
 		     //sets this color buffer to the mesh data
 			 meshData.setColorCoords(colorBufferData);
-             //TODO add the vertices and the colors of the arrays into the vertex buffer and the color buffer
-			 
+             //adds the vertices and the colors of the arrays into the vertex buffer and the color buffer
+			 for(final Entry<Vector2i,Integer[][]> globalDictinctColorPixelsEntry:globalDistinctColorsPixelsArraysMap.entrySet())
+			     {//retrieves where the pixels come from
+				  final Vector2i location=globalDictinctColorPixelsEntry.getKey();
+				  //retrieves the pixels of the same color
+				  final Integer[][] globalDictinctColorPixels=globalDictinctColorPixelsEntry.getValue();
+				  final int height=globalDictinctColorPixels.length;
+				  final int width=globalDictinctColorPixels[0].length;
+				  //computes the coordinates of the 4 vertices
+				  final int x0=location.getX();
+				  final int y0=location.getY();
+				  final int x1=location.getX()+width;
+				  final int y1=location.getY();
+				  final int x2=location.getX()+width;
+				  final int y2=location.getY()+height;
+				  final int x3=location.getX();
+				  final int y3=location.getY()+height;
+				  //puts the vertices into the vertex buffer to build a pair of triangles
+				  vertexBuffer.put(x0).put(y0).put(x1).put(y1).put(x2).put(y2).put(x2).put(y2).put(x3).put(y3).put(x0).put(y0);
+				  //retrieves the ARGB color
+				  final int argb=globalDictinctColorPixels[0][0].intValue();
+				  final int red=(byte) (argb >> 16) & 0xFF;
+				  final int green=(byte) (argb >> 8) & 0xFF;
+				  final int blue=(byte) argb & 0xFF;
+				  //puts the color into the color buffer
+				  colorBuffer.put(red).put(green).put(blue);
+				  colorBuffer.put(red).put(green).put(blue);
+				  colorBuffer.put(red).put(green).put(blue);
+				  colorBuffer.put(red).put(green).put(blue);
+				  colorBuffer.put(red).put(green).put(blue);
+				  colorBuffer.put(red).put(green).put(blue);
+			     }
+			 vertexBuffer.rewind();
+			 colorBuffer.rewind();
 			 meshDataList.add(meshData);
+			 System.out.println("[ END ] Compute key frame "+frameIndex);
 		    }
-		//TODO create a SwitchNode
-		//TODO create a Node per frame
-		//TODO add a MeshData into each Node
-		//TODO create a custom controller that just picks a frame with no interpolation
+		System.out.println("[END] Compute key frames");
+		System.out.println("[START] Normalize vertex coordinates");
+		//computes the minimal and maximal values of the vertex coordinates, then normalize them
+		float minx=Float.POSITIVE_INFINITY,miny=Float.POSITIVE_INFINITY,minz=Float.POSITIVE_INFINITY;
+		float maxx=Float.NEGATIVE_INFINITY,maxy=Float.NEGATIVE_INFINITY,maxz=Float.NEGATIVE_INFINITY;
+		for(final MeshData meshData:meshDataList)
+		    {final FloatBuffer vertexBuffer=meshData.getVertexBuffer();
+			 while(vertexBuffer.hasRemaining())
+			     {float x=vertexBuffer.get(),y=vertexBuffer.get(),z=vertexBuffer.get();
+				  minx=Math.min(minx,x);
+			      miny=Math.min(miny,y);
+			      minz=Math.min(minz,z);
+			      maxx=Math.max(maxx,x);
+			      maxy=Math.max(maxy,y);
+			      maxz=Math.max(maxz,z);
+			     }
+			 vertexBuffer.rewind();
+		    }
+		//normalizes them
+		final float xdiff=maxx-minx;
+		final float ydiff=maxy-miny;
+		final float zdiff=maxz-minz;
+		for(final MeshData meshData:meshDataList)
+	        {final FloatBuffer vertexBuffer=meshData.getVertexBuffer();
+		     while(vertexBuffer.hasRemaining())
+		         {final int pos=vertexBuffer.position();
+		    	  float x=vertexBuffer.get(),y=vertexBuffer.get(),z=vertexBuffer.get();
+		    	  vertexBuffer.position(pos);
+		    	  vertexBuffer.put(xdiff==0?x-minx:(x-minx)/xdiff);
+		    	  vertexBuffer.put(ydiff==0?y-miny:(y-miny)/ydiff);
+		    	  vertexBuffer.put(zdiff==0?z-minz:(z-minz)/zdiff);
+		         }
+		     vertexBuffer.rewind();
+	        }
+		System.out.println("[ END ] Normalize vertex coordinates");
+		//creates a SwitchNode containing all meshes of the frames
+		System.out.println("[START] Build switch node");
+		final SwitchNode switchNode=new SwitchNode();
+		int frameIndex=0;
+		for(final MeshData meshData:meshDataList)
+		    {//creates a Mesh for this frame
+			 final Mesh mesh=new Mesh("frame n°"+frameIndex);
+			 mesh.setMeshData(meshData);
+			 //adds it into the SwitchNode
+			 switchNode.attachChild(mesh);
+			 frameIndex++;
+		    }
+		//creates a custom controller that just picks a frame with no interpolation
+		final BasicKeyframeController controller=new BasicKeyframeController(framesPerSecond);
+		controller.setRepeatType(RepeatType.CLAMP);
+		controller.setActive(true);
+		controller.setMinTime(0);
+		controller.setMaxTime(durationInSeconds);
+		switchNode.addController(controller);
+		System.out.println("[ END ] Build switch node");
 		//TODO show the result
+	}
+	
+	private static final class BasicKeyframeController extends ComplexSpatialController<SwitchNode>{
+
+		private static final long serialVersionUID = 1L;
+
+		private double startTime;
+		
+		private final int framesPerSecond;
+		
+		private BasicKeyframeController(final int framesPerSecond){
+			super();
+			startTime=Double.NaN;
+			this.framesPerSecond=framesPerSecond;
+		}
+		
+		@Override
+		public final void update(final double time,final SwitchNode caller){
+			if(Double.isNaN(startTime))
+				startTime=Double.valueOf(time);
+			final double elapsedTime=time-startTime;
+			final int frameCount=(int)(getMaxTime()*framesPerSecond);
+			final int frameIndex;
+			switch(getRepeatType())
+			    {case CLAMP:
+			    	 {frameIndex=Math.min(frameCount-1,(int)(Math.min(elapsedTime,getMaxTime())*framesPerSecond));
+			          break;
+			    	 }
+			     case WRAP:
+			         {frameIndex=((int)(elapsedTime*framesPerSecond))%frameCount;
+			          break;
+			         }
+			     case CYCLE:
+			         {final int tmpFrameIndex=(int)(elapsedTime*framesPerSecond);
+			          if((tmpFrameIndex/frameCount)%2==0)
+			        	  frameIndex=tmpFrameIndex%frameCount;
+			          else
+			        	  frameIndex=(frameCount-1)-tmpFrameIndex%frameCount;
+			          break;
+			         }
+			     default:
+			    	 //it should never happen
+			    	 frameIndex=0;
+			    }
+			caller.setSingleVisible(frameIndex);
+		}
+		
+	}
+	
+	private static final class IntegerFilterOccupancyCheck implements OccupancyCheck<Integer>{
+
+		private final Integer integerFilter;
+		
+		private IntegerFilterOccupancyCheck(final Integer integerFilter){
+			super();
+			this.integerFilter=integerFilter;
+		}
+		
+		@Override
+		public final boolean isOccupied(final Integer value){
+			return(Objects.equals(value,integerFilter));
+		}
 	}
 	
 	private static final int getScannablePixelsCount(final MovementEquation equation,final double elapsedTime){
