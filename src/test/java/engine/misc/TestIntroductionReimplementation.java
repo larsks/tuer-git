@@ -136,8 +136,8 @@ public class TestIntroductionReimplementation{
 			 //retrieves the image of the frame
 			 final Image image=introImages[frameIndex];
 			 //retrieves the pixels of the image and computes the list of colors in this array
-			 final Integer[][] pixels=new Integer[image.getHeight()][image.getWidth()];
-			 final Set<Integer> colors=new HashSet<>();
+			 final Integer[][] pixels=new Integer[image.getWidth()][image.getHeight()];
+			 final Set<Integer> frameColors=new HashSet<>();
 			 for(int y=0;y<introImage.getHeight();y++)
 		         {for(int x=0;x<introImage.getWidth();x++)
 		              {//gets the ARGB value of the pixel
@@ -145,16 +145,16 @@ public class TestIntroductionReimplementation{
 		               final int alpha=(byte)(argb>>24)&0xFF;
 		               //keeps only non fully transparent pixels
 		               if(alpha>0)
-		            	   {pixels[y][x]=Integer.valueOf(argb);
-		            	    colors.add(argb);
+		            	   {pixels[x][y]=Integer.valueOf(argb);
+		            	    frameColors.add(Integer.valueOf(argb));
 		                   }
 		              }
 		         }
 			 final Map<Vector2i,Integer[][]> globalDistinctColorsPixelsArraysMap=new HashMap<>();
 			 //for each color
-			 for(final Integer color:colors)
+			 for(final Integer frameColor:frameColors)
 			      {//builds an occupancy check to keep the pixels of a single color, 
-				   final OccupancyCheck<Integer> colorFilterOccupancyCheck=new IntegerFilterOccupancyCheck(color);
+				   final OccupancyCheck<Integer> colorFilterOccupancyCheck=new IntegerFilterOccupancyCheck(frameColor);
 				   //uses it to build some full arrays with distinct colors (without fully transparent pixels)
 				   final Map<Vector2i,Integer[][]> localDistinctColorsPixelsArraysMap=arrayHelper.computeFullArraysFromNonFullArray(pixels,colorFilterOccupancyCheck);
 				   for(final Entry<Vector2i,Integer[][]> localDistinctColorsPixelsArraysEntry:localDistinctColorsPixelsArraysMap.entrySet())
