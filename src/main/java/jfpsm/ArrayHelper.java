@@ -18,6 +18,7 @@
 package jfpsm;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -363,6 +364,28 @@ public class ArrayHelper{
 		    else
 		    	isolated=false;
 		    return(isolated);
+		}
+
+		@Override
+		public int hashCode(){
+			final int prime=31;
+			int result=1;
+			result=prime*result+Arrays.deepHashCode(arrayMap);
+			result=prime*result+biggestColumnIndex;
+			result=prime*result+biggestRowIndex;
+			result=prime*result+occupiedCellCount;
+			result=prime*result+rowCount;
+			result=prime*result+smallestColumnIndex;
+			result=prime*result+smallestRowIndex;
+			return(result);
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			return(this==o||(o!=null&&o.getClass()==OccupancyMap.class&&((OccupancyMap)o).biggestColumnIndex==biggestColumnIndex&&
+				   ((OccupancyMap)o).biggestRowIndex==biggestRowIndex&&((OccupancyMap)o).occupiedCellCount==occupiedCellCount&&
+				   ((OccupancyMap)o).smallestColumnIndex==smallestColumnIndex&&((OccupancyMap)o).smallestRowIndex==smallestRowIndex&&
+				   Arrays.deepEquals(((OccupancyMap)o).arrayMap,arrayMap)));
 		}
 	}
 
