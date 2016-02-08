@@ -80,7 +80,7 @@ public class ArrayHelper{
 	 * Occupancy map, structure representing the occupation of an array, can be ragged. This class isn't thread safe and the passed array 
 	 * shouldn't be modified outside of this class. It's not copied in order to avoid increasing the memory footprint.
 	 */
-	public static final class OccupancyMap{
+	public static final class OccupancyMap implements Cloneable{
 		
 		/**
 		 * array map that indicates which cells are occupied
@@ -157,6 +157,47 @@ public class ArrayHelper{
 			this.smallestColumnIndex=smallestColumnIndex;
 			this.biggestColumnIndex=biggestColumnIndex;
 			this.rowCount=rowCount;
+		}
+		
+		/**
+		 * Constructor only used to clone occupancy maps
+		 * 
+		 * @param arrayMap array map that indicates which cells are occupied
+		 * @param smallestRowIndex smallest row index or minimum ordinate of an occupied cell in the array used to compute the array map
+		 * @param biggestRowIndex biggest row index or maximum ordinate of an occupied cell in the array used to compute the array map
+		 * @param smallestColumnIndex smallest column index or minimum abscissa of an occupied cell in the array used to compute the array map
+		 * @param biggestColumnIndex biggest column index or maximum abscissa of an occupied cell in the array used to compute the array map
+		 * @param rowCount row count maximum row count of a column, a column of the array map mustn't have a greater row count
+		 * @param occupiedCellCount count of occupied cells, i.e count of cells set to true
+		 */
+		private OccupancyMap(final boolean[][] arrayMap,final int smallestRowIndex,final int biggestRowIndex,
+	                         final int smallestColumnIndex,final int biggestColumnIndex,
+	                         final int rowCount,final int occupiedCellCount){
+			super();
+			this.arrayMap=arrayMap;
+			this.smallestRowIndex=smallestRowIndex;
+			this.biggestRowIndex=biggestRowIndex;
+			this.smallestColumnIndex=smallestColumnIndex;
+			this.biggestColumnIndex=biggestColumnIndex;
+			this.rowCount=rowCount;
+			this.occupiedCellCount=occupiedCellCount;
+		}
+		
+		@Override
+		public OccupancyMap clone(){
+			final boolean[][] arrayMapCopy=new boolean[arrayMap.length][];
+			//for each column, i.e for each abscissa
+			for(int x=0;x<arrayMap.length;x++)
+			    {//skips the column if null
+				 if(arrayMap[x]!=null)
+			    	 {//creates the new column
+					  arrayMapCopy[x]=new boolean[arrayMap[x].length];
+					  //copies the data of the column into the new column
+			    	  System.arraycopy(arrayMap[x],0,arrayMapCopy[x],0,arrayMap[x].length);
+			    	 }
+				}
+			final OccupancyMap copy=new OccupancyMap(arrayMapCopy,smallestRowIndex,biggestRowIndex,smallestColumnIndex,biggestColumnIndex,rowCount,occupiedCellCount);
+			return(copy);
 		}
 		
 		/**
