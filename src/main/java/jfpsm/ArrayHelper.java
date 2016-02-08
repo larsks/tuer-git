@@ -738,7 +738,7 @@ public class ArrayHelper{
 	 * @return map of full arrays whose keys are their respective locations
 	 */
 	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array){
-		return(computeFullArraysFromNonFullArray(array,null));
+		return(computeFullArraysFromNonFullArray(array,(OccupancyCheck<T>)null));
 	}
 	
 	/**
@@ -752,6 +752,18 @@ public class ArrayHelper{
 	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array,final OccupancyCheck<T> occupancyCheck){
 		//creates an occupancy map that will be updated (instead of modifying the supplied array)
 		final OccupancyMap occupancyMapObj=createPackedOccupancyMap(array,occupancyCheck);
+		return(computeFullArraysFromNonFullArray(array,occupancyMapObj));
+	}
+	
+	/**
+	 * Creates a map of full arrays from a potentially non full array. It tries to 
+	 * minimize the count of full arrays and to maximize their respective sizes.
+	 * 
+	 * @param array potentially non full array
+	 * @param occupancyCheckMapObj occupancy map reflecting the occupancy of the passed array
+	 * @return map of full arrays whose keys are their respective locations
+	 */
+	public <T> java.util.Map<Vector2i,T[][]> computeFullArraysFromNonFullArray(final T[][] array,final OccupancyMap occupancyMapObj){
 		final java.util.Map<Vector2i,T[][]> fullArraysMap=new LinkedHashMap<>();
 		//if the array isn't empty (then the occupancy map isn't empty)
 		if(!occupancyMapObj.isEmpty())
