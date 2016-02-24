@@ -17,6 +17,9 @@
  */
 package engine.misc;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.AbstractMap;
@@ -44,6 +47,10 @@ import com.ardor3d.scenegraph.controller.ComplexSpatialController;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.extension.SwitchNode;
 import com.ardor3d.util.TextureManager;
+import com.ardor3d.util.export.binary.BinaryClassObject;
+import com.ardor3d.util.export.binary.BinaryExporter;
+import com.ardor3d.util.export.binary.BinaryIdContentPair;
+import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 import com.jogamp.nativewindow.util.Point;
@@ -68,10 +75,11 @@ public class TestIntroductionReimplementation{
 	public static void main(final String[] args){
 		JoglImageLoader.registerLoader();
 		System.out.println("[START] Load texture");
-		final Texture introTexture=TextureManager.load(new URLResourceSource(TestIntroductionReimplementation.class.getResource(textureFilePath)),Texture.MinificationFilter.Trilinear,true);
+		final URLResourceSource source=new URLResourceSource(TestIntroductionReimplementation.class.getResource(textureFilePath));
+		final Texture introTexture=TextureManager.load(source,Texture.MinificationFilter.Trilinear,true);
 		System.out.println("[ END ] Load texture");
 		final Image introImage=introTexture.getImage();
-		final int durationInSeconds=10;
+		final int durationInSeconds=/*10*/1;
 		final int framesPerSecond=30;
 		final int frameCount=durationInSeconds*framesPerSecond;
 		final List<MeshData> meshDataList=new ArrayList<>();
@@ -130,6 +138,8 @@ public class TestIntroductionReimplementation{
       	System.out.println("[START] Compute key frames");
       	//creates the array helper
 	    final ArrayHelper arrayHelper=new ArrayHelper();
+	    //creates a map to store the full arrays of the occupancy maps
+	    final Map<ArrayHelper.OccupancyMap,Map<Vector2i,Integer[][]>> pixelsArrayOccupancyMapMap=new HashMap<>();
 		//for each frame
 		for(int frameIndex=0;frameIndex<frameCount;frameIndex++)
 		    {System.out.println("[START] Compute key frame "+frameIndex);
@@ -153,19 +163,31 @@ public class TestIntroductionReimplementation{
 			 final Map<Vector2i,Integer[][]> globalDistinctColorsPixelsArraysMap=new HashMap<>();
 			 //for each color
 			 for(final Integer frameColor:frameColors)
-			      {//builds an occupancy check to keep the pixels of a single color, 
-				   final OccupancyCheck<Integer> colorFilterOccupancyCheck=new IntegerFilterOccupancyCheck(frameColor);
-				   //uses it to build some full arrays with distinct colors (without fully transparent pixels)
-				   final Map<Vector2i,Integer[][]> localDistinctColorsPixelsArraysMap=arrayHelper.computeFullArraysFromNonFullArray(pixels,colorFilterOccupancyCheck);
-				   for(final Entry<Vector2i,Integer[][]> localDistinctColorsPixelsArraysEntry:localDistinctColorsPixelsArraysMap.entrySet())
-				       {//retrieves where the pixels come from
-						final Vector2i location=localDistinctColorsPixelsArraysEntry.getKey();
-						//retrieves the non fully transparent pixels
-						final Integer[][] localDistinctColorsPixels=localDistinctColorsPixelsArraysEntry.getValue();
-						//stores the full array with distinct colors
-						globalDistinctColorsPixelsArraysMap.put(location,localDistinctColorsPixels);
-				       }
-			      }
+			     {//builds an occupancy check to keep the pixels of a single color
+				  final OccupancyCheck<Integer> colorFilterOccupancyCheck=new IntegerFilterOccupancyCheck(frameColor);
+				  //creates the occupancy map
+				  final ArrayHelper.OccupancyMap occupancyMap=arrayHelper.createPackedOccupancyMap(pixels,colorFilterOccupancyCheck);
+				  //looks for a full arrays map matching with this occupancy map
+				  Map<Vector2i,Integer[][]> localDistinctColorsPixelsArraysMap=pixelsArrayOccupancyMapMap.get(occupancyMap);
+				  if(localDistinctColorsPixelsArraysMap==null)
+				      {//uses a clone to avoid using a mutable instance as a key
+					   final ArrayHelper.OccupancyMap occupancyMapClone=occupancyMap.clone();
+					   //uses it to build some full arrays with distinct colors (without fully transparent pixels)
+				       localDistinctColorsPixelsArraysMap=arrayHelper.computeFullArraysFromNonFullArray(pixels,occupancyMap);
+					   //stores the computed full arrays map
+				       pixelsArrayOccupancyMapMap.put(occupancyMapClone,localDistinctColorsPixelsArraysMap);
+				      }
+				  else
+				      {System.out.println("[ ... ] Reuse a full array map");}
+				  for(final Entry<Vector2i,Integer[][]> localDistinctColorsPixelsArraysEntry:localDistinctColorsPixelsArraysMap.entrySet())
+				      {//retrieves where the pixels come from
+					   final Vector2i location=localDistinctColorsPixelsArraysEntry.getKey();
+					   //retrieves the non fully transparent pixels
+					   final Integer[][] localDistinctColorsPixels=localDistinctColorsPixelsArraysEntry.getValue();
+					   //stores the full array with distinct colors
+					   globalDistinctColorsPixelsArraysMap.put(location,localDistinctColorsPixels);
+				      }
+			     }
 			 //computes the triangle count
 			 int triCount=0;
 			 //for each array of pixels of the same color
@@ -221,7 +243,7 @@ public class TestIntroductionReimplementation{
 			 meshDataList.add(meshData);
 			 System.out.println("[ END ] Compute key frame "+frameIndex);
 		    }
-		System.out.println("[END] Compute key frames");
+		System.out.println("[ END ] Compute key frames");
 		System.out.println("[START] Normalize vertex coordinates");
 		//computes the minimal and maximal values of the vertex coordinates, then normalize them
 		float minx=Float.POSITIVE_INFINITY,miny=Float.POSITIVE_INFINITY,minz=Float.POSITIVE_INFINITY;
@@ -276,8 +298,25 @@ public class TestIntroductionReimplementation{
 		controller.setMaxTime(durationInSeconds);
 		switchNode.addController(controller);
 		System.out.println("[ END ] Build switch node");
-		//TODO show the result
+		System.out.println("[START] Save switch node");
+		BinaryExporter binaryExporter=new DirectBinaryExporter();
+		try
+		    {final File directory=new File(source.getURL().toURI()).getParentFile();
+		     final File destFile=new File(directory,"introduction.abin");
+		     binaryExporter.save(switchNode,destFile);
+		    }
+		catch(URISyntaxException|IOException e)
+		{e.printStackTrace();}
+		System.out.println("[ END ] Save switch node");
 	}
+	
+	private static final class DirectBinaryExporter extends BinaryExporter{
+        @Override
+		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
+            return pair;
+        }
+    }
 	
 	private static final class BasicKeyframeController extends ComplexSpatialController<SwitchNode>{
 
@@ -338,6 +377,16 @@ public class TestIntroductionReimplementation{
 		@Override
 		public final boolean isOccupied(final Integer value){
 			return(Objects.equals(value,integerFilter));
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			return(o!=null&&o.getClass()==IntegerFilterOccupancyCheck.class&&Objects.equals(((IntegerFilterOccupancyCheck)o).integerFilter,this.integerFilter));
+		}
+		
+		@Override
+		public int hashCode(){
+			return(integerFilter==null?0:integerFilter.hashCode());
 		}
 	}
 	
