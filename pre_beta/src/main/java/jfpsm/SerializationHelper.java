@@ -26,34 +26,40 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 /**
  * helper class to use the XML encoding
+ * 
  * @author Julien Gouesse
  *
  */
-public final class SerializationHelper{
-    
-    public static final Object decodeObjectInXMLFile(String path){
-    	Object resultingObject=null;
-    	try(final InputStream inputStream=SerializationHelper.class.getResourceAsStream(path);final BufferedInputStream bis=new BufferedInputStream(inputStream);final XMLDecoder decoder=new XMLDecoder(bis))
-    	    {resultingObject=decoder.readObject();}
-        catch(IOException ioe)
-            {throw new RuntimeException("Unable to close the file "+path,ioe);}
-        return(resultingObject);
+public final class SerializationHelper {
+
+    public static final Object decodeObjectInXMLFile(String path) {
+        Object resultingObject = null;
+        try (final InputStream inputStream = SerializationHelper.class.getResourceAsStream(path);
+                final BufferedInputStream bis = new BufferedInputStream(inputStream);
+                final XMLDecoder decoder = new XMLDecoder(bis)) {
+            resultingObject = decoder.readObject();
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to close the file " + path, ioe);
+        }
+        return (resultingObject);
     }
 
-    public static final void encodeObjectInFile(Object o,String filename){
-        File file=new File(filename);   
-        try
-            {if(!file.exists())
-                 if(!file.createNewFile())
-                     throw new IOException("Unable to create the file "+filename);
-             try(final FileOutputStream fos=new FileOutputStream(file);final BufferedOutputStream bos=new BufferedOutputStream(fos);final XMLEncoder encoder=new XMLEncoder(bos))
-                 {encoder.writeObject(o);}
+    public static final void encodeObjectInFile(Object o, String filename) {
+        File file = new File(filename);
+        try {
+            if (!file.exists())
+                if (!file.createNewFile())
+                    throw new IOException("Unable to create the file " + filename);
+            try (final FileOutputStream fos = new FileOutputStream(file);
+                    final BufferedOutputStream bos = new BufferedOutputStream(fos);
+                    final XMLEncoder encoder = new XMLEncoder(bos)) {
+                encoder.writeObject(o);
             }
-        catch(IOException ioe)
-            {throw new RuntimeException("Unable to encode the file "+filename,ioe);}
-        
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to encode the file " + filename, ioe);
+        }
+
     }
 }

@@ -36,180 +36,183 @@ import javax.swing.tree.TreeSelectionModel;
 import common.EngineServiceProviderInterface;
 
 /**
- * Panel that allows to manipulate the entities in a tree containing their sub-components.
+ * Panel that allows to manipulate the entities in a tree containing their
+ * sub-components.
  * 
  * @author Julien Gouesse
  */
-public abstract class EntityManager extends JPanel{
+public abstract class EntityManager extends JPanel {
 
-	
-	private static final long serialVersionUID=1L;
-	/**
-	 * flag indicating whether the application automatically opens the viewer of an entity at its creation
-	 * */
-	public static boolean automaticOpeningOfNewlyCreatedEntityViewerEnabled=true;
-	
+    private static final long serialVersionUID = 1L;
+    /**
+     * flag indicating whether the application automatically opens the viewer of
+     * an entity at its creation
+     */
+    public static boolean automaticOpeningOfNewlyCreatedEntityViewerEnabled = true;
+
     protected final MainWindow mainWindow;
-    
-    protected final EngineServiceProviderInterface<?,?,?,?,?> seeker;
-    
-    protected final ProgressDialog progressDialog;
-    
-    protected final JTree tree;
-	
-	private boolean quitEnabled;
-	
-	protected final JPopupMenu treePopupMenu;
-	
-	protected final JMenuItem newMenuItem;
-	
-	protected final JMenuItem openMenuItem;
-	
-	protected final JMenuItem closeMenuItem;
-	
-	protected final JMenuItem deleteMenuItem;
 
-	public EntityManager(final MainWindow mainWindow,final DefaultTreeModel treeModel,final EngineServiceProviderInterface<?,?,?,?,?> seeker){
-		super();
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-		this.seeker=seeker;
-		this.mainWindow=mainWindow;
-		this.progressDialog=new ProgressDialog(mainWindow.getApplicativeFrame(),"Work in progress...");
-		this.quitEnabled=true;
-		this.treePopupMenu=new JPopupMenu();
-		this.tree=new JTree(treeModel);
-		tree.setShowsRootHandles(true);
-		tree.addTreeWillExpandListener(new TreeWillExpandListener(){
+    protected final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker;
+
+    protected final ProgressDialog progressDialog;
+
+    protected final JTree tree;
+
+    private boolean quitEnabled;
+
+    protected final JPopupMenu treePopupMenu;
+
+    protected final JMenuItem newMenuItem;
+
+    protected final JMenuItem openMenuItem;
+
+    protected final JMenuItem closeMenuItem;
+
+    protected final JMenuItem deleteMenuItem;
+
+    public EntityManager(final MainWindow mainWindow, final DefaultTreeModel treeModel,
+            final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
+        super();
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.seeker = seeker;
+        this.mainWindow = mainWindow;
+        this.progressDialog = new ProgressDialog(mainWindow.getApplicativeFrame(), "Work in progress...");
+        this.quitEnabled = true;
+        this.treePopupMenu = new JPopupMenu();
+        this.tree = new JTree(treeModel);
+        tree.setShowsRootHandles(true);
+        tree.addTreeWillExpandListener(new TreeWillExpandListener() {
 
             @Override
-            public final void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{             
-            	EntityManager.this.treeWillCollapse(event);
+            public final void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {
+                EntityManager.this.treeWillCollapse(event);
             }
 
             @Override
-            public final void treeWillExpand(final TreeExpansionEvent event)throws ExpandVetoException{}
+            public final void treeWillExpand(final TreeExpansionEvent event) throws ExpandVetoException {
+            }
         });
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-		//creates the menu item
-		newMenuItem=new JMenuItem("New");
-        openMenuItem=new JMenuItem("Open");
-        closeMenuItem=new JMenuItem("Close");
-        deleteMenuItem=new JMenuItem("Delete");
-        //fills the popup menu
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+        // creates the menu item
+        newMenuItem = new JMenuItem("New");
+        openMenuItem = new JMenuItem("Open");
+        closeMenuItem = new JMenuItem("Close");
+        deleteMenuItem = new JMenuItem("Delete");
+        // fills the popup menu
         treePopupMenu.add(newMenuItem);
         treePopupMenu.add(openMenuItem);
         treePopupMenu.add(closeMenuItem);
         treePopupMenu.add(deleteMenuItem);
-        //adds the action listeners into the menu items
-        newMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				newMenuItemActionPerformed(ae);
-			}
-		});
-        openMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				openMenuItemActionPerformed(ae);
-			}
-		});
-        closeMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				closeMenuItemActionPerformed(ae);
-			}
-		});
-        deleteMenuItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae){
-				deleteMenuItemActionPerformed(ae);
-			}
-		});
-		final JScrollPane treePane=new JScrollPane(tree);
-		add(treePane);
-	}
-	
-	protected void newMenuItemActionPerformed(ActionEvent ae){
-		if(automaticOpeningOfNewlyCreatedEntityViewerEnabled)
-		    {final SimpleEntry<? extends JFPSMUserObject,DefaultMutableTreeNode> entry=createNewEntityFromSelectedEntity();
-			 if(entry!=null)
-			     {final JFPSMUserObject userObject=entry.getKey();
-			      final DefaultMutableTreeNode node=entry.getValue();
-			      final TreePath path=new TreePath(((DefaultTreeModel)tree.getModel()).getPathToRoot(node));
-			      openEntity(path,node,userObject);
-			     }
-		    }
-		else
-			createNewEntityFromSelectedEntity();
-	}
-	
-	protected void openMenuItemActionPerformed(ActionEvent ae){
-		openSelectedEntities();
-	}
-	
-	protected void closeMenuItemActionPerformed(ActionEvent ae){
-		closeSelectedEntities();
-	}
-	
-    protected void deleteMenuItemActionPerformed(ActionEvent ae){
-		deleteSelectedEntities();
-	}
-	
-	protected final void displayErrorMessage(Throwable throwable,boolean fatal){
-        mainWindow.displayErrorMessage(throwable,fatal);
-    }
-	
-	private void expandPathDeeplyFromPath(TreePath path){
-		tree.expandPath(path);
-	    final DefaultMutableTreeNode node=(DefaultMutableTreeNode)path.getLastPathComponent();
-	    final DefaultTreeModel treeModel=(DefaultTreeModel)tree.getModel();
-	    for(int i=0;i<node.getChildCount();i++)
-	        expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
-	}
-	
-	private void openSelectedEntities(){
-        final TreePath[] paths=tree.getSelectionPaths();
-        for(TreePath path:paths)
-            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
-             openEntity(path,selectedNode,userObject);
+        // adds the action listeners into the menu items
+        newMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                newMenuItemActionPerformed(ae);
             }
+        });
+        openMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                openMenuItemActionPerformed(ae);
+            }
+        });
+        closeMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                closeMenuItemActionPerformed(ae);
+            }
+        });
+        deleteMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                deleteMenuItemActionPerformed(ae);
+            }
+        });
+        final JScrollPane treePane = new JScrollPane(tree);
+        add(treePane);
     }
-	
-	protected void openEntity(final TreePath path,final DefaultMutableTreeNode node,final JFPSMUserObject userObject){
-		if(userObject.isOpenable())
+
+    protected void newMenuItemActionPerformed(ActionEvent ae) {
+        if (automaticOpeningOfNewlyCreatedEntityViewerEnabled) {
+            final SimpleEntry<? extends JFPSMUserObject, DefaultMutableTreeNode> entry = createNewEntityFromSelectedEntity();
+            if (entry != null) {
+                final JFPSMUserObject userObject = entry.getKey();
+                final DefaultMutableTreeNode node = entry.getValue();
+                final TreePath path = new TreePath(((DefaultTreeModel) tree.getModel()).getPathToRoot(node));
+                openEntity(path, node, userObject);
+            }
+        } else
+            createNewEntityFromSelectedEntity();
+    }
+
+    protected void openMenuItemActionPerformed(ActionEvent ae) {
+        openSelectedEntities();
+    }
+
+    protected void closeMenuItemActionPerformed(ActionEvent ae) {
+        closeSelectedEntities();
+    }
+
+    protected void deleteMenuItemActionPerformed(ActionEvent ae) {
+        deleteSelectedEntities();
+    }
+
+    protected final void displayErrorMessage(Throwable throwable, boolean fatal) {
+        mainWindow.displayErrorMessage(throwable, fatal);
+    }
+
+    private void expandPathDeeplyFromPath(TreePath path) {
+        tree.expandPath(path);
+        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        for (int i = 0; i < node.getChildCount(); i++)
+            expandPathDeeplyFromPath(new TreePath(treeModel.getPathToRoot(node.getChildAt(i))));
+    }
+
+    private void openSelectedEntities() {
+        final TreePath[] paths = tree.getSelectionPaths();
+        for (TreePath path : paths) {
+            final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+            final JFPSMUserObject userObject = (JFPSMUserObject) selectedNode.getUserObject();
+            openEntity(path, selectedNode, userObject);
+        }
+    }
+
+    protected void openEntity(final TreePath path, final DefaultMutableTreeNode node,
+            final JFPSMUserObject userObject) {
+        if (userObject.isOpenable())
             expandPathDeeplyFromPath(path);
-	}
-	
-	protected void closeSelectedEntities(){
-        final TreePath[] paths=tree.getSelectionPaths();
-        for(TreePath path:paths)
-            {final DefaultMutableTreeNode selectedNode=(DefaultMutableTreeNode)path.getLastPathComponent();
-             final JFPSMUserObject userObject=(JFPSMUserObject)selectedNode.getUserObject();
-             if(userObject.isOpenable())
-                 tree.collapsePath(path);
-            }
     }
-	
-	protected abstract void deleteSelectedEntities();
-	
-	protected abstract SimpleEntry<? extends JFPSMUserObject,DefaultMutableTreeNode> createNewEntityFromSelectedEntity();
-	
-	public synchronized boolean isQuitEnabled(){
-    	return(quitEnabled);
+
+    protected void closeSelectedEntities() {
+        final TreePath[] paths = tree.getSelectionPaths();
+        for (TreePath path : paths) {
+            final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+            final JFPSMUserObject userObject = (JFPSMUserObject) selectedNode.getUserObject();
+            if (userObject.isOpenable())
+                tree.collapsePath(path);
+        }
     }
-    
-	public synchronized void setQuitEnabled(final boolean quitEnabled){
-    	this.quitEnabled=quitEnabled;
+
+    protected abstract void deleteSelectedEntities();
+
+    protected abstract SimpleEntry<? extends JFPSMUserObject, DefaultMutableTreeNode> createNewEntityFromSelectedEntity();
+
+    public synchronized boolean isQuitEnabled() {
+        return (quitEnabled);
     }
-	
-	protected void treeWillCollapse(final TreeExpansionEvent event)throws ExpandVetoException{
-		//prevents the user from collapsing the root
-        if(event.getPath().getLastPathComponent()==tree.getModel().getRoot())
+
+    public synchronized void setQuitEnabled(final boolean quitEnabled) {
+        this.quitEnabled = quitEnabled;
+    }
+
+    protected void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {
+        // prevents the user from collapsing the root
+        if (event.getPath().getLastPathComponent() == tree.getModel().getRoot())
             throw new ExpandVetoException(event);
-	}
-	
-	public EngineServiceProviderInterface getSeeker(){
-		return(seeker);
-	}
+    }
+
+    public EngineServiceProviderInterface getSeeker() {
+        return (seeker);
+    }
 }

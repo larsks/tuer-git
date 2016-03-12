@@ -19,30 +19,27 @@ package engine.movement;
 
 /**
  * equation of a uniformly variable rotation in degrees
+ * 
  * @author Julien Gouesse
  *
  */
-public final class UniformlyVariableRotationEquation extends UniformlyVariableMovementEquation{
+public final class UniformlyVariableRotationEquation extends UniformlyVariableMovementEquation {
 
-    
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-    
-    public UniformlyVariableRotationEquation(){
-        this(0,0,0);
+    public UniformlyVariableRotationEquation() {
+        this(0, 0, 0);
     }
 
-    public UniformlyVariableRotationEquation(double initialAcceleration,
-            double initialSpeed, double initialValue) {
-        super(initialAcceleration,initialSpeed,initialValue);
+    public UniformlyVariableRotationEquation(double initialAcceleration, double initialSpeed, double initialValue) {
+        super(initialAcceleration, initialSpeed, initialValue);
     }
 
-    
     @Override
-    protected final double validateValue(final double value){
-        double validValue=validateNumber(value);
-        if(Math.abs(validValue)>180)
-            validValue-=(validValue>0?1:-1)*(Math.floor((validValue-180)/360)+1)*360;
-        return(validValue);
+    protected final double validateValue(final double value) {
+        double validValue = validateNumber(value);
+        if (Math.abs(validValue) > 180)
+            validValue -= (validValue > 0 ? 1 : -1) * (Math.floor((validValue - 180) / 360) + 1) * 360;
+        return (validValue);
     }
 }

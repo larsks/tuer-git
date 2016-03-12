@@ -25,57 +25,56 @@ import java.util.Objects;
  * @author Julien Gouesse
  *
  */
-public class Skybox implements Comparable<Skybox>{
+public class Skybox implements Comparable<Skybox> {
 
-	/**name (can contain space)*/
+    /** name (can contain space) */
     private final String label;
-    /**unique name (cannot contain any space)*/
+    /** unique name (cannot contain any space) */
     private final String identifier;
-    /**resource names of the textures used by the sky box*/
+    /** resource names of the textures used by the sky box */
     private final String[] textureResourceNames;
-    
-	
-	public Skybox(final String label,final String identifier,final String[] textureResourceNames){
-		super();
-		this.label=label;
-		this.identifier=Objects.requireNonNull(identifier,"the identifier must not be null");
-		this.textureResourceNames=textureResourceNames;
-	}
-	
-	@Override
-	public String toString(){
-		return(identifier);
-	}
-	
-	public String getLabel(){
-		return(label);
-	}
-	
-	public String getIdentifier(){
-		return(identifier);
-	}
-	
-	@Override
-	public int hashCode(){
-		return(identifier.hashCode());
-	}
-	
-	@Override
-	public boolean equals(final Object o){
-		final boolean result=o!=null&&o instanceof Skybox&&identifier.equals(((Skybox)o).identifier);
-		return(result);
-	}
-	
-	@Override
-	public int compareTo(final Skybox skybox){
-		return(identifier.compareTo(skybox.identifier));
-	}
-	
-	public int getTextureResourceNameCount(){
-		return(textureResourceNames==null?0:textureResourceNames.length);
-	}
-	
-	public String getTextureResourceName(final int index){
-		return(textureResourceNames[index]);
-	}
+
+    public Skybox(final String label, final String identifier, final String[] textureResourceNames) {
+        super();
+        this.label = label;
+        this.identifier = Objects.requireNonNull(identifier, "the identifier must not be null");
+        this.textureResourceNames = textureResourceNames;
+    }
+
+    @Override
+    public String toString() {
+        return (identifier);
+    }
+
+    public String getLabel() {
+        return (label);
+    }
+
+    public String getIdentifier() {
+        return (identifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return (identifier.hashCode());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        final boolean result = o != null && o instanceof Skybox && identifier.equals(((Skybox) o).identifier);
+        return (result);
+    }
+
+    @Override
+    public int compareTo(final Skybox skybox) {
+        return (identifier.compareTo(skybox.identifier));
+    }
+
+    public int getTextureResourceNameCount() {
+        return (textureResourceNames == null ? 0 : textureResourceNames.length);
+    }
+
+    public String getTextureResourceName(final int index) {
+        return (textureResourceNames[index]);
+    }
 }

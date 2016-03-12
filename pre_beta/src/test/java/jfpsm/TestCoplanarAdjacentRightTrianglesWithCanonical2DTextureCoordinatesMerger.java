@@ -29,61 +29,80 @@ import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.RightTriangleInfo;
 
 /**
- * Test of a mesh optimizer focused on coplanar adjacent right triangles whose all 2D texture coordinates 
- * are canonical ([0;0], [0;1], [1;0] or [1;1]).
+ * Test of a mesh optimizer focused on coplanar adjacent right triangles whose
+ * all 2D texture coordinates are canonical ([0;0], [0;1], [1;0] or [1;1]).
  * 
  * @author Julien Gouesse
  *
  */
-public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger{
+public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger {
 
-	private static void testComputeAdjacentMergeableTrisArraysList(){
-		final RightTriangleInfo info=new RightTriangleInfo(0,0,0);
-		//FIXME reverse the whole array?
-		final RightTriangleInfo[][][] adjacentTrisArray=new RightTriangleInfo[][][]{new RightTriangleInfo[][]{null,null,null,null,null,null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info}},
-				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},new RightTriangleInfo[]{info,info},null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,null,new RightTriangleInfo[]{info,info},null,null,null,null,null},
-				                                                                    new RightTriangleInfo[][]{null,null,null,null,null,null,null,null,null}};
-		System.out.println("Input:");
-		final ArrayHelper arrayHelper=new ArrayHelper();
-		final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck=new ArrayHelper.OccupancyCheck<RightTriangleInfo[]>(){
+    private static void testComputeAdjacentMergeableTrisArraysList() {
+        final RightTriangleInfo info = new RightTriangleInfo(0, 0, 0);
+        // FIXME reverse the whole array?
+        final RightTriangleInfo[][][] adjacentTrisArray = new RightTriangleInfo[][][] {
+                new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null },
+                new RightTriangleInfo[][] { null, null, null, null, new RightTriangleInfo[] { info, info }, null, null,
+                        null, null },
+                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info } },
+                new RightTriangleInfo[][] { null, null, null, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, null, null },
+                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, null, null, null },
+                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
+                        new RightTriangleInfo[] { info, info }, null, null, null },
+                new RightTriangleInfo[][] { null, null, null, new RightTriangleInfo[] { info, info }, null, null, null,
+                        null, null },
+                new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null } };
+        System.out.println("Input:");
+        final ArrayHelper arrayHelper = new ArrayHelper();
+        final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck = new ArrayHelper.OccupancyCheck<RightTriangleInfo[]>() {
 
-			@Override
-			public boolean isOccupied(RightTriangleInfo[] value) {
-				return(value!=null&&value[0]!=null&&value[1]!=null);
-			}
-			
-		};
-		System.out.println(arrayHelper.toString(adjacentTrisArray,false,trisOccupancyCheck));
-		java.util.Map<Vector2i,RightTriangleInfo[][][]> adjacentTrisArraysMap=CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
-		System.out.println("Output:");
-		System.out.println(arrayHelper.toString(adjacentTrisArraysMap));
-	}
-	
-	private static void testOptimize(){
-		JoglImageLoader.registerLoader();
-		try{SimpleResourceLocator srl=new SimpleResourceLocator(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/images"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-           } 
-        catch(final URISyntaxException urise)
-        {urise.printStackTrace();}
-		try{final Node levelNode=(Node)new BinaryImporter().load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
-		    final Mesh mesh=(Mesh)((Node)levelNode.getChild(0)).getChild(1);
-		    System.out.println("Input: "+mesh.getMeshData().getVertexCount());
-		    CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.optimize(mesh);
-		    System.out.println("Output: "+mesh.getMeshData().getVertexCount());
-	       }
-	    catch(IOException ioe)
-	    {throw new RuntimeException("level loading failed",ioe);}
-	}
-	
-	public static void main(String[] args){
-		testComputeAdjacentMergeableTrisArraysList();
-		testOptimize();
-	}
+            @Override
+            public boolean isOccupied(RightTriangleInfo[] value) {
+                return (value != null && value[0] != null && value[1] != null);
+            }
+
+        };
+        System.out.println(arrayHelper.toString(adjacentTrisArray, false, trisOccupancyCheck));
+        java.util.Map<Vector2i, RightTriangleInfo[][][]> adjacentTrisArraysMap = CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger
+                .computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
+        System.out.println("Output:");
+        System.out.println(arrayHelper.toString(adjacentTrisArraysMap));
+    }
+
+    private static void testOptimize() {
+        JoglImageLoader.registerLoader();
+        try {
+            SimpleResourceLocator srl = new SimpleResourceLocator(
+                    TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class
+                            .getResource("/images"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
+        } catch (final URISyntaxException urise) {
+            urise.printStackTrace();
+        }
+        try {
+            final Node levelNode = (Node) new BinaryImporter()
+                    .load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class
+                            .getResource("/abin/LID0.abin"));
+            final Mesh mesh = (Mesh) ((Node) levelNode.getChild(0)).getChild(1);
+            System.out.println("Input: " + mesh.getMeshData().getVertexCount());
+            CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.optimize(mesh);
+            System.out.println("Output: " + mesh.getMeshData().getVertexCount());
+        } catch (IOException ioe) {
+            throw new RuntimeException("level loading failed", ioe);
+        }
+    }
+
+    public static void main(String[] args) {
+        testComputeAdjacentMergeableTrisArraysList();
+        testOptimize();
+    }
 
 }

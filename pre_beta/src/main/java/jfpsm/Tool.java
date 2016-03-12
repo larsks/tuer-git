@@ -17,38 +17,39 @@
  */
 package jfpsm;
 
-public abstract class Tool extends JFPSMToolUserObject{
+public abstract class Tool extends JFPSMToolUserObject {
 
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID=1L;
-	
-	public Tool(final String name){
-		super(name);
-	}
-	
-	@Override
-    public final boolean isDirty(){
-		return(false);
-	}
-	
-	@Override
-    public final void unmarkDirty(){}
-    
-    @Override
-    public final void markDirty(){}
-
-	@Override
-    final boolean canInstantiateChildren(){
-        return(true);
+    public Tool(final String name) {
+        super(name);
     }
 
     @Override
-    final boolean isOpenable(){
-        return(true);
+    public final boolean isDirty() {
+        return (false);
     }
 
     @Override
-    final boolean isRemovable(){
-        return(false);
+    public final void unmarkDirty() {
+    }
+
+    @Override
+    public final void markDirty() {
+    }
+
+    @Override
+    final boolean canInstantiateChildren() {
+        return (true);
+    }
+
+    @Override
+    final boolean isOpenable() {
+        return (true);
+    }
+
+    @Override
+    final boolean isRemovable() {
+        return (false);
     }
 }

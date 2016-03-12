@@ -25,29 +25,30 @@ import engine.statemachine.GameStatistics;
  * @author Julien Gouesse
  *
  */
-public abstract class Objective{
-	
-	/**description*/
-	private final String description;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param description description
-	 */
-	public Objective(final String description){
-		super();
-		this.description=description;
-	}
-	
-	public abstract ObjectiveStatus getStatus(final GameStatistics gameStats);
-	
-	/**
-	 * Returns the description
-	 * 
-	 * @return description
-	 */
-	public String getDescription(){
-		return(description);
-	}
+public abstract class Objective {
+
+    /** description */
+    private final String description;
+
+    /**
+     * Constructor
+     * 
+     * @param description
+     *            description
+     */
+    public Objective(final String description) {
+        super();
+        this.description = description;
+    }
+
+    public abstract ObjectiveStatus getStatus(final GameStatistics gameStats);
+
+    /**
+     * Returns the description
+     * 
+     * @return description
+     */
+    public String getDescription() {
+        return (description);
+    }
 }

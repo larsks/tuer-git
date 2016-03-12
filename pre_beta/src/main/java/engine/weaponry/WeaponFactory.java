@@ -19,21 +19,24 @@ package engine.weaponry;
 
 import engine.abstraction.AbstractFactory;
 
-public class WeaponFactory extends AbstractFactory<Weapon>{
-	
-	public WeaponFactory(){
-		super();
-	}
-	
-	public boolean addNewWeapon(final String label,final String identifier,final String resourceName,final String pickingUpSoundSamplePath,
-			final String blowOrShotSoundSamplePath,final String reloadSoundSamplePath,final boolean twoHanded,
-			final int magazineSize,final Ammunition ammunition,final int ammunitionPerShot,final int blowOrShotDurationInMillis,
-			final boolean fullyAutomatic){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-			{final Weapon weapon=new Weapon(label,resourceName,pickingUpSoundSamplePath,blowOrShotSoundSamplePath,reloadSoundSamplePath,twoHanded,magazineSize,ammunition,ammunitionPerShot,blowOrShotDurationInMillis,fullyAutomatic);
-			 success=add(identifier,weapon);
-			}
-		return(success);
-	}
+public class WeaponFactory extends AbstractFactory<Weapon> {
+
+    public WeaponFactory() {
+        super();
+    }
+
+    public boolean addNewWeapon(final String label, final String identifier, final String resourceName,
+            final String pickingUpSoundSamplePath, final String blowOrShotSoundSamplePath,
+            final String reloadSoundSamplePath, final boolean twoHanded, final int magazineSize,
+            final Ammunition ammunition, final int ammunitionPerShot, final int blowOrShotDurationInMillis,
+            final boolean fullyAutomatic) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final Weapon weapon = new Weapon(label, resourceName, pickingUpSoundSamplePath, blowOrShotSoundSamplePath,
+                    reloadSoundSamplePath, twoHanded, magazineSize, ammunition, ammunitionPerShot,
+                    blowOrShotDurationInMillis, fullyAutomatic);
+            success = add(identifier, weapon);
+        }
+        return (success);
+    }
 }

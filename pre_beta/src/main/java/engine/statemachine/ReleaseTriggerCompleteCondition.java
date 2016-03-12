@@ -20,22 +20,23 @@ package engine.statemachine;
 import engine.data.PlayerData;
 
 /**
- * Condition satisfied when the "release trigger" is complete, when the latest attack is going to an end
+ * Condition satisfied when the "release trigger" is complete, when the latest
+ * attack is going to an end
  * 
  * @author Julien Gouesse
  *
  */
-public class ReleaseTriggerCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+public class ReleaseTriggerCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
-	private final PlayerData playerData;
-	
-	public ReleaseTriggerCompleteCondition(final PlayerData playerData){
-		super();
-		this.playerData=playerData;
-	}
-	
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isReleaseTriggerComplete());
-	}
+    private final PlayerData playerData;
+
+    public ReleaseTriggerCompleteCondition(final PlayerData playerData) {
+        super();
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isReleaseTriggerComplete());
+    }
 }

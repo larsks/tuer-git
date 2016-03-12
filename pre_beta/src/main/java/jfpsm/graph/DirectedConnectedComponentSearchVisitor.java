@@ -18,31 +18,33 @@
 package jfpsm.graph;
 
 /**
- * Object used to traverse the connected component of a directed graph until a 
+ * Object used to traverse the connected component of a directed graph until a
  * supplied vertex is found
  * 
  * @author Julien Gouesse
  *
  */
-public class DirectedConnectedComponentSearchVisitor<V,E,G extends DirectedGraph<V,E>> extends
-		DirectedConnectedComponentVisitor<V,E,G> {
+public class DirectedConnectedComponentSearchVisitor<V, E, G extends DirectedGraph<V, E>>
+        extends DirectedConnectedComponentVisitor<V, E, G> {
 
-	private final V searchedVertex;
-	
-	/**
-	 * Constructor
-	 */
-	public DirectedConnectedComponentSearchVisitor(final V searchedVertex){
-		super();
-		this.searchedVertex=searchedVertex;
-	}
+    private final V searchedVertex;
 
-	/* (non-Javadoc)
-	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(jfpsm.graph.DirectedGraph, java.lang.Object)
-	 */
-	@Override
-	protected boolean performOnCurrentlyVisitedVertex(
-			final G graph,final V currentlyVisitedVertex){
-		return(!currentlyVisitedVertex.equals(searchedVertex));
-	}
+    /**
+     * Constructor
+     */
+    public DirectedConnectedComponentSearchVisitor(final V searchedVertex) {
+        super();
+        this.searchedVertex = searchedVertex;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(jfpsm.graph.
+     * DirectedGraph, java.lang.Object)
+     */
+    @Override
+    protected boolean performOnCurrentlyVisitedVertex(final G graph, final V currentlyVisitedVertex) {
+        return (!currentlyVisitedVertex.equals(searchedVertex));
+    }
 }

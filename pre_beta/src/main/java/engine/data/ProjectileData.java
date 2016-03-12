@@ -24,51 +24,51 @@ import com.ardor3d.math.Vector3;
  * @author Julien Gouesse
  *
  */
-public class ProjectileData{
-    
-	private final String originator;
-	
-	private final Vector3 initialLocation;
-	
-	private final double initialSpeed;
-	
-	private final double initialAcceleration;
-	
-	private final Vector3 initialDirection;
-	
-	private final long initialTimeInNanos;
-	
-	public ProjectileData(final String originator,final Vector3 initialLocation,final double initialSpeed,final double initialAcceleration,
-			final Vector3 initialDirection,final long initialTimeInNanos){
-		this.originator=originator;
-		this.initialLocation=initialLocation;
-		this.initialSpeed=initialSpeed;
-		this.initialAcceleration=initialAcceleration;
-		this.initialDirection=initialDirection;
-		this.initialTimeInNanos=initialTimeInNanos;
-	}
-	
-	public String getOriginator(){
-		return(originator);
-	}
-	
-	public Vector3 getInitialLocation(){
-		return(initialLocation);
-	}
+public class ProjectileData {
 
-	public double getInitialSpeed(){
-		return(initialSpeed);
-	}
+    private final String originator;
 
-	public double getInitialAcceleration(){
-		return(initialAcceleration);
-	}
-	
-	public Vector3 getInitialDirection(){
-		return(initialDirection);
-	}
+    private final Vector3 initialLocation;
 
-	public long getInitialTimeInNanos(){
-		return(initialTimeInNanos);
-	}
+    private final double initialSpeed;
+
+    private final double initialAcceleration;
+
+    private final Vector3 initialDirection;
+
+    private final long initialTimeInNanos;
+
+    public ProjectileData(final String originator, final Vector3 initialLocation, final double initialSpeed,
+            final double initialAcceleration, final Vector3 initialDirection, final long initialTimeInNanos) {
+        this.originator = originator;
+        this.initialLocation = initialLocation;
+        this.initialSpeed = initialSpeed;
+        this.initialAcceleration = initialAcceleration;
+        this.initialDirection = initialDirection;
+        this.initialTimeInNanos = initialTimeInNanos;
+    }
+
+    public String getOriginator() {
+        return (originator);
+    }
+
+    public Vector3 getInitialLocation() {
+        return (initialLocation);
+    }
+
+    public double getInitialSpeed() {
+        return (initialSpeed);
+    }
+
+    public double getInitialAcceleration() {
+        return (initialAcceleration);
+    }
+
+    public Vector3 getInitialDirection() {
+        return (initialDirection);
+    }
+
+    public long getInitialTimeInNanos() {
+        return (initialTimeInNanos);
+    }
 }

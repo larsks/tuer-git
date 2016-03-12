@@ -17,27 +17,27 @@
  */
 package engine.data.common;
 
-public class MatchType{
-	
-	private final String label;
-	
-	private final String noLimitObjectiveDescriptionLabel;
+public class MatchType {
 
-	public MatchType(final String label,final String noLimitObjectiveDescriptionLabel){
-		this.label=label;
-		this.noLimitObjectiveDescriptionLabel=noLimitObjectiveDescriptionLabel;
-	}
-	
-	@Override
-	public String toString(){
-		return(label);
-	}
-	
-	public String getLabel(){
-		return(label);
-	}
-	
-	public String getNoLimitObjectiveDescriptionLabel(){
-		return(noLimitObjectiveDescriptionLabel);
-	}
+    private final String label;
+
+    private final String noLimitObjectiveDescriptionLabel;
+
+    public MatchType(final String label, final String noLimitObjectiveDescriptionLabel) {
+        this.label = label;
+        this.noLimitObjectiveDescriptionLabel = noLimitObjectiveDescriptionLabel;
+    }
+
+    @Override
+    public String toString() {
+        return (label);
+    }
+
+    public String getLabel() {
+        return (label);
+    }
+
+    public String getNoLimitObjectiveDescriptionLabel() {
+        return (noLimitObjectiveDescriptionLabel);
+    }
 }

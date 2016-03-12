@@ -54,186 +54,197 @@ import common.EngineServiceProviderInterface;
 import common.ModelFileFormat;
 
 /**
- * service provider of the engine, this part is dependent on the underneath 3D engine. It should be quite
- * easy to modify this class to support any other engine
+ * service provider of the engine, this part is dependent on the underneath 3D
+ * engine. It should be quite easy to modify this class to support any other
+ * engine
  * 
  * @author Julien Gouesse
  *
  */
-public class EngineServiceProvider implements EngineServiceProviderInterface<Savable,Node,Spatial,Mesh,BoundingBox>{
-    
-    private static final class DirectBinaryExporter extends BinaryExporter{
+public class EngineServiceProvider
+        implements EngineServiceProviderInterface<Savable, Node, Spatial, Mesh, BoundingBox> {
+
+    private static final class DirectBinaryExporter extends BinaryExporter {
         @Override
-		protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
-            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++, new BinaryOutputCapsule(this, bco, true));
+        protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
+            final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++,
+                    new BinaryOutputCapsule(this, bco, true));
             return pair;
         }
     }
-    
-    private static final class MeshFinder implements Visitor{
-    	
-    	private final List<Mesh> meshList;
-		
-		private MeshFinder(){
-			super();
-			meshList=new ArrayList<>();
-		}
-		
-		@Override
-    	public void visit(final Spatial spatial){
-			if(spatial instanceof Mesh)
-			    {final Mesh mesh=(Mesh)spatial;
-			     meshList.add(mesh);
-			    }
-		}
-	}
-    
+
+    private static final class MeshFinder implements Visitor {
+
+        private final List<Mesh> meshList;
+
+        private MeshFinder() {
+            super();
+            meshList = new ArrayList<>();
+        }
+
+        @Override
+        public void visit(final Spatial spatial) {
+            if (spatial instanceof Mesh) {
+                final Mesh mesh = (Mesh) spatial;
+                meshList.add(mesh);
+            }
+        }
+    }
+
     private final BinaryExporter binaryExporter;
-    
-    public EngineServiceProvider(){
-    	super();
-    	this.binaryExporter=new DirectBinaryExporter();
+
+    public EngineServiceProvider() {
+        super();
+        this.binaryExporter = new DirectBinaryExporter();
         JoglImageLoader.registerLoader();
     }
-    
+
     @Override
-    public boolean writeSavableInstanceIntoFile(final Savable savable,final File file){
-    	boolean success=true;
-    	try{binaryExporter.save(savable,file);}
-        catch(IOException ioe)
-        {success=false;
-         ioe.printStackTrace();
+    public boolean writeSavableInstanceIntoFile(final Savable savable, final File file) {
+        boolean success = true;
+        try {
+            binaryExporter.save(savable, file);
+        } catch (IOException ioe) {
+            success = false;
+            ioe.printStackTrace();
         }
-        return(success);
+        return (success);
     }
-    
+
     @Override
-    public boolean writeSavableInstancesListIntoFile(final List<Savable> savablesList,final File file){
-        boolean success=true;
-        try(FileOutputStream fos=new FileOutputStream(file)){
-        	for(Savable savable:savablesList)
-                {try{binaryExporter.save(savable,fos);}
-                 catch(Throwable t)
-                 {success=false;}
-            	  if(!success)
-                      break;
-                 }
+    public boolean writeSavableInstancesListIntoFile(final List<Savable> savablesList, final File file) {
+        boolean success = true;
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            for (Savable savable : savablesList) {
+                try {
+                    binaryExporter.save(savable, fos);
+                } catch (Throwable t) {
+                    success = false;
+                }
+                if (!success)
+                    break;
+            }
+        } catch (Throwable t) {
+            success = false;
+            t.printStackTrace();
         }
-        catch(Throwable t)
-        {success=false;
-         t.printStackTrace();
-        }
-        return(success);
+        return (success);
     }
-    
+
     @Override
-    public void attachChildToNode(final Node parent,final Spatial child){
-    	parent.attachChild(child);
+    public void attachChildToNode(final Node parent, final Spatial child) {
+        parent.attachChild(child);
     }
-    
+
     @Override
-    public Node createNode(final String name){
-    	return(new Node(name));
+    public Node createNode(final String name) {
+        return (new Node(name));
     }
-    
+
     @Override
-    public Mesh createMeshFromBuffers(final String name,
-    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
-    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer){  	
-    	MeshData meshData=new MeshData();
+    public Mesh createMeshFromBuffers(final String name, final FloatBuffer vertexBuffer, final IntBuffer indexBuffer,
+            final FloatBuffer normalBuffer, final FloatBuffer texCoordBuffer) {
+        MeshData meshData = new MeshData();
         meshData.setVertexBuffer(vertexBuffer);
         meshData.setIndexBuffer(indexBuffer);
         meshData.setNormalBuffer(normalBuffer);
-        meshData.setTextureBuffer(texCoordBuffer,0);
-        Mesh mesh=new Mesh(name);
+        meshData.setTextureBuffer(texCoordBuffer, 0);
+        Mesh mesh = new Mesh(name);
         mesh.setMeshData(meshData);
-    	return(mesh);
+        return (mesh);
     }
-    
+
     @Override
-    public void attachTextureToSpatial(final Spatial spatial,final URL url){
-        TextureState ts=new TextureState();
+    public void attachTextureToSpatial(final Spatial spatial, final URL url) {
+        TextureState ts = new TextureState();
         ts.setEnabled(true);
-        ts.setTexture(TextureManager.load(new URLResourceSource(url),Texture.MinificationFilter.Trilinear,true));
+        ts.setTexture(TextureManager.load(new URLResourceSource(url), Texture.MinificationFilter.Trilinear, true));
         spatial.setRenderState(ts);
     }
 
-	@Override
-	public BoundingBox createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent){
-		return(new BoundingBox(new Vector3(xCenter,yCenter,zCenter),xExtent,yExtent,zExtent));
-	}
-	
-	@Override
-	public boolean isLoadable(final ModelFileFormat inputModelFileFormat){
-		switch(inputModelFileFormat)
-            {case ARDOR3D_BINARY:
-        	     return(true);
-             case COLLADA:
-        	     return(true);
-             case MD2:
-        	     return(true);
-             case WAVEFRONT_OBJ:
-        	     return(true);
-             default:
-    	         return(false);
-            }
-	}
-	
-	@Override
-    public boolean isSavable(final ModelFileFormat outputModelFileFormat){
-		switch(outputModelFileFormat)
-            {case ARDOR3D_BINARY:
-    	         return(true);
-             case WAVEFRONT_OBJ:
-    	         return(true);
-             default:
-	             return(false);
-            }
-    }
-	
-	@Override
-	public Spatial load(final File inputModelFile,final ModelFileFormat inputModelFileFormat)throws IOException,UnsupportedOperationException{
-    	final Spatial convertible;
-	    switch(inputModelFileFormat)
-	        {case ARDOR3D_BINARY:
-	    	     convertible=(Spatial)new BinaryImporter().load(inputModelFile);
-	    	     break;
-	         case COLLADA:
-	    	     convertible=new ColladaImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
-	    	     break;
-	         case MD2:
-	    	     convertible=new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
-	    	     break;
-	         case WAVEFRONT_OBJ:
-	    	     convertible=new ObjImporter().load(new URLResourceSource(inputModelFile.toURI().toURL()),new GeometryTool(true)).getScene();
-	    	     break;
-	         default:
-	    	     convertible=null;
-	    	     throw new UnsupportedOperationException(inputModelFileFormat.getDescription()+" not supported as an input model file format");
-	        }
-	    return(convertible);
-    }
-    
     @Override
-	public void save(final File outputModelFile,final ModelFileFormat outputModelFileFormat,final File secondaryOutputModelFile,final Spatial convertible)throws IOException,UnsupportedOperationException{
-    	switch(outputModelFileFormat)
-	        {case ARDOR3D_BINARY:
-	    	     new DirectBinaryExporter().save(convertible,outputModelFile);
-	    	     break;
-	         case WAVEFRONT_OBJ:
-	    	     if(convertible instanceof Mesh)
-	    	    	 new ObjExporter().save((Mesh)convertible,outputModelFile,secondaryOutputModelFile);
-	    	     else
-	    		     if(convertible instanceof Node)
-	    		         {//creates a mesh list by visiting the spatial
-	    			      final MeshFinder meshFinder=new MeshFinder();
-	    			      meshFinder.visit(convertible);
-	    			      //exports the whole
-	    			      new ObjExporter().save(meshFinder.meshList,outputModelFile,secondaryOutputModelFile,null);
-	    		         }
-	    	     break;
-	         default:
-	    	     throw new UnsupportedOperationException(outputModelFileFormat.getDescription()+" not supported as an input model file format");
-	        }
+    public BoundingBox createBoundingBox(final double xCenter, final double yCenter, final double zCenter,
+            final double xExtent, final double yExtent, final double zExtent) {
+        return (new BoundingBox(new Vector3(xCenter, yCenter, zCenter), xExtent, yExtent, zExtent));
+    }
+
+    @Override
+    public boolean isLoadable(final ModelFileFormat inputModelFileFormat) {
+        switch (inputModelFileFormat) {
+        case ARDOR3D_BINARY:
+            return (true);
+        case COLLADA:
+            return (true);
+        case MD2:
+            return (true);
+        case WAVEFRONT_OBJ:
+            return (true);
+        default:
+            return (false);
+        }
+    }
+
+    @Override
+    public boolean isSavable(final ModelFileFormat outputModelFileFormat) {
+        switch (outputModelFileFormat) {
+        case ARDOR3D_BINARY:
+            return (true);
+        case WAVEFRONT_OBJ:
+            return (true);
+        default:
+            return (false);
+        }
+    }
+
+    @Override
+    public Spatial load(final File inputModelFile, final ModelFileFormat inputModelFileFormat)
+            throws IOException, UnsupportedOperationException {
+        final Spatial convertible;
+        switch (inputModelFileFormat) {
+        case ARDOR3D_BINARY:
+            convertible = (Spatial) new BinaryImporter().load(inputModelFile);
+            break;
+        case COLLADA:
+            convertible = new ColladaImporter()
+                    .load(new URLResourceSource(inputModelFile.toURI().toURL()), new GeometryTool(true)).getScene();
+            break;
+        case MD2:
+            convertible = new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
+            break;
+        case WAVEFRONT_OBJ:
+            convertible = new ObjImporter()
+                    .load(new URLResourceSource(inputModelFile.toURI().toURL()), new GeometryTool(true)).getScene();
+            break;
+        default:
+            convertible = null;
+            throw new UnsupportedOperationException(
+                    inputModelFileFormat.getDescription() + " not supported as an input model file format");
+        }
+        return (convertible);
+    }
+
+    @Override
+    public void save(final File outputModelFile, final ModelFileFormat outputModelFileFormat,
+            final File secondaryOutputModelFile, final Spatial convertible)
+                    throws IOException, UnsupportedOperationException {
+        switch (outputModelFileFormat) {
+        case ARDOR3D_BINARY:
+            new DirectBinaryExporter().save(convertible, outputModelFile);
+            break;
+        case WAVEFRONT_OBJ:
+            if (convertible instanceof Mesh)
+                new ObjExporter().save((Mesh) convertible, outputModelFile, secondaryOutputModelFile);
+            else if (convertible instanceof Node) {// creates a mesh list by
+                                                   // visiting the spatial
+                final MeshFinder meshFinder = new MeshFinder();
+                meshFinder.visit(convertible);
+                // exports the whole
+                new ObjExporter().save(meshFinder.meshList, outputModelFile, secondaryOutputModelFile, null);
+            }
+            break;
+        default:
+            throw new UnsupportedOperationException(
+                    outputModelFileFormat.getDescription() + " not supported as an input model file format");
+        }
     }
 }

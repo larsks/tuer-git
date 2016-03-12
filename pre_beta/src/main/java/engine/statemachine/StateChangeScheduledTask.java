@@ -18,26 +18,34 @@
 package engine.statemachine;
 
 /**
- * Scheduled task whose condition is on a state change. It is not focused on a given 
- * transition but rather on the entry or the exit from a state.
+ * Scheduled task whose condition is on a state change. It is not focused on a
+ * given transition but rather on the entry or the exit from a state.
  * 
  * @author Julien Gouesse
  *
- * @param <S> state class
+ * @param <S>
+ *            state class
  */
-public class StateChangeScheduledTask<S> extends ScheduledTask<S>{
-    
-	/**
-	 * Constructor
-	 * 
-	 * @param executionCount condition that triggers the execution of this task
-	 * @param runnable operation run by this task
-	 * @param timeOffsetInSeconds delay between the satisfaction of the condition and the execution of this task
-	 * @param state listened state
-	 * @param stateChangeType listened change type
-	 */
-    public StateChangeScheduledTask(final int executionCount,final Runnable runnable,final double timeOffsetInSeconds,
-    		final S state,final StateChangeType stateChangeType){
-        super(new StateChangeScheduledTaskCondition<>(state,stateChangeType),executionCount,runnable,timeOffsetInSeconds);
+public class StateChangeScheduledTask<S> extends ScheduledTask<S> {
+
+    /**
+     * Constructor
+     * 
+     * @param executionCount
+     *            condition that triggers the execution of this task
+     * @param runnable
+     *            operation run by this task
+     * @param timeOffsetInSeconds
+     *            delay between the satisfaction of the condition and the
+     *            execution of this task
+     * @param state
+     *            listened state
+     * @param stateChangeType
+     *            listened change type
+     */
+    public StateChangeScheduledTask(final int executionCount, final Runnable runnable, final double timeOffsetInSeconds,
+            final S state, final StateChangeType stateChangeType) {
+        super(new StateChangeScheduledTaskCondition<>(state, stateChangeType), executionCount, runnable,
+                timeOffsetInSeconds);
     }
 }

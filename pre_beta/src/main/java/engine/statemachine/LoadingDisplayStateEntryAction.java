@@ -26,20 +26,21 @@ import se.hiflyer.fettle.StateMachine;
  * @author Julien Gouesse
  *
  */
-public class LoadingDisplayStateEntryAction extends ScenegraphStateEntryAction{
-	
-	private final GameState gameState;
+public class LoadingDisplayStateEntryAction extends ScenegraphStateEntryAction {
 
-	public LoadingDisplayStateEntryAction(final GameState gameState){
-		super();
-		this.gameState=gameState;
-	}
-	
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-		final String levelIdentifier=sttaArgs.getNextLevelIdentifier();
-		gameState.setLevelIdentifier(levelIdentifier);
-		super.onTransition(from,to,cause,args,stateMachine);
-	}
+    private final GameState gameState;
+
+    public LoadingDisplayStateEntryAction(final GameState gameState) {
+        super();
+        this.gameState = gameState;
+    }
+
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        final ScenegraphTransitionTriggerActionArguments sttaArgs = (ScenegraphTransitionTriggerActionArguments) args;
+        final String levelIdentifier = sttaArgs.getNextLevelIdentifier();
+        gameState.setLevelIdentifier(levelIdentifier);
+        super.onTransition(from, to, cause, args, stateMachine);
+    }
 }

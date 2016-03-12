@@ -19,26 +19,21 @@ package jfpsm;
 
 enum VolumeType {
 
-    CUBOID("cuboid"),
-    PARALLELEPIPED("parallelepiped"),
-    QUADRILATERAL_FRUSTUM("quadrilateral frustum"),
-    DISPLACEMENT_TELEPORTER("displacement teleporter"),
-    FLOOR_LINK("floor link");
-    
+    CUBOID("cuboid"), PARALLELEPIPED("parallelepiped"), QUADRILATERAL_FRUSTUM(
+            "quadrilateral frustum"), DISPLACEMENT_TELEPORTER("displacement teleporter"), FLOOR_LINK("floor link");
+
     private final String label;
-    
-    
-    VolumeType(final String label){
-        this.label=label;
+
+    VolumeType(final String label) {
+        this.label = label;
     }
-    
-    
-    final String getLabel(){
-        return(label);
+
+    final String getLabel() {
+        return (label);
     }
-    
+
     @Override
-    public final String toString(){
-        return(label);
+    public final String toString() {
+        return (label);
     }
 }

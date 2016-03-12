@@ -19,31 +19,36 @@ package jfpsm;
 
 /**
  * logical spatial abstract data type
+ * 
  * @author Julien Gouesse
  *
  */
-public interface Grid{
+public interface Grid {
 
     /**
      * get the physical position of a section from its logical position
-     * @param i logical abscissa
-     * @param j logical ordinate
-     * @param k logical applicate
+     * 
+     * @param i
+     *            logical abscissa
+     * @param j
+     *            logical ordinate
+     * @param k
+     *            logical applicate
      * @return physical position of a section
      */
-    public float[] getSectionPhysicalPosition(int i,int j,int k);
-    
-    public int[] getSectionLogicalPosition(float x,float y,float z);
-    
+    public float[] getSectionPhysicalPosition(int i, int j, int k);
+
+    public int[] getSectionLogicalPosition(float x, float y, float z);
+
     public int getLogicalWidth();
-    
+
     public int getLogicalHeight();
-    
+
     public int getLogicalDepth();
-    
-    public float getSectionPhysicalWidth(int i,int j,int k);
-    
-    public float getSectionPhysicalHeight(int i,int j,int k);
-    
-    public float getSectionPhysicalDepth(int i,int j,int k);
+
+    public float getSectionPhysicalWidth(int i, int j, int k);
+
+    public float getSectionPhysicalHeight(int i, int j, int k);
+
+    public float getSectionPhysicalDepth(int i, int j, int k);
 }

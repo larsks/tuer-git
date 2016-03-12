@@ -21,82 +21,83 @@ import com.ardor3d.math.type.ReadOnlyMatrix3;
 import engine.weaponry.AmmunitionContainer;
 import engine.weaponry.Weapon;
 
-public final class WeaponUserData extends CollectibleUserData<Weapon>{
-	
-	private final ReadOnlyMatrix3 rotation;
-	
-	private AmmunitionContainer ammunitionInMagazine;
-	
-	private int ownerUid;
-	/**flag indicating whether a weapon can change of owner*/
-	private boolean digitalWatermarkEnabled;
-	/**flag indicating whether a weapon is primary*/
+public final class WeaponUserData extends CollectibleUserData<Weapon> {
+
+    private final ReadOnlyMatrix3 rotation;
+
+    private AmmunitionContainer ammunitionInMagazine;
+
+    private int ownerUid;
+    /** flag indicating whether a weapon can change of owner */
+    private boolean digitalWatermarkEnabled;
+    /** flag indicating whether a weapon is primary */
     private final boolean primary;
-	
-	
-	public WeaponUserData(final Weapon weapon,final ReadOnlyMatrix3 rotation,final int ownerUid,final boolean digitalWatermarkEnabled,final boolean primary){
-		super(weapon,null);
-		if(!primary&&!weapon.isTwoHanded())
-		    throw new IllegalArgumentException("The weapon " + weapon + " cannot be used as a secondary weapon");
-		this.rotation=rotation;
-		this.ownerUid=ownerUid;
-		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
-		this.primary=primary;
-		this.ammunitionInMagazine=new AmmunitionContainer(weapon.isForMelee()?0:weapon.getMagazineSize());
-	}
-	
-	
-	public final Weapon getWeapon(){
-		return(collectible);
-	}
-	
-	@Override
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
-	
-	public final String getBlowOrShotSourcename(){
-		return(collectible.getBlowOrShotSoundSampleIdentifier());
-	}
-	
-	public final ReadOnlyMatrix3 getRotation(){
-		return(rotation);
-	}
-	
-	public final int getOwnerUid(){
-		return(ownerUid);
-	}
-	
-	public final void setOwnerUid(final int ownerUid){
-		if(!digitalWatermarkEnabled)
-		    this.ownerUid=ownerUid;
-	}
-	
-	public final boolean isDigitalWatermarkEnabled(){
-		return(digitalWatermarkEnabled);
-	}
-	
-	public final void setDigitalWatermarkEnabled(final boolean digitalWatermarkEnabled){
-		this.digitalWatermarkEnabled=digitalWatermarkEnabled;
-	}
-	
-	/**
-     * tells whether a weapon is primary
-     * @return <code>true</code> if a weapon is primary, otherwise <code>false</code>
-     */
-    public final boolean isPrimary(){
-        return(primary);
+
+    public WeaponUserData(final Weapon weapon, final ReadOnlyMatrix3 rotation, final int ownerUid,
+            final boolean digitalWatermarkEnabled, final boolean primary) {
+        super(weapon, null);
+        if (!primary && !weapon.isTwoHanded())
+            throw new IllegalArgumentException("The weapon " + weapon + " cannot be used as a secondary weapon");
+        this.rotation = rotation;
+        this.ownerUid = ownerUid;
+        this.digitalWatermarkEnabled = digitalWatermarkEnabled;
+        this.primary = primary;
+        this.ammunitionInMagazine = new AmmunitionContainer(weapon.isForMelee() ? 0 : weapon.getMagazineSize());
     }
-	
-	public final int getAmmunitionCountInMagazine(){
-		return(ammunitionInMagazine.getAmmunitionCount());
-	}
-	
-	public final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine){
-		return(ammunitionInMagazine.add(ammunitionCountToAddIntoMagazine));
-	}
-	
-	public final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine){
-		return(ammunitionInMagazine.remove(ammunitionCountToRemoveFromMagazine));
-	}
+
+    public final Weapon getWeapon() {
+        return (collectible);
+    }
+
+    @Override
+    public String getPickingUpSoundSampleIdentifier() {
+        return (collectible.getPickingUpSoundSampleIdentifier());
+    }
+
+    public final String getBlowOrShotSourcename() {
+        return (collectible.getBlowOrShotSoundSampleIdentifier());
+    }
+
+    public final ReadOnlyMatrix3 getRotation() {
+        return (rotation);
+    }
+
+    public final int getOwnerUid() {
+        return (ownerUid);
+    }
+
+    public final void setOwnerUid(final int ownerUid) {
+        if (!digitalWatermarkEnabled)
+            this.ownerUid = ownerUid;
+    }
+
+    public final boolean isDigitalWatermarkEnabled() {
+        return (digitalWatermarkEnabled);
+    }
+
+    public final void setDigitalWatermarkEnabled(final boolean digitalWatermarkEnabled) {
+        this.digitalWatermarkEnabled = digitalWatermarkEnabled;
+    }
+
+    /**
+     * tells whether a weapon is primary
+     * 
+     * @return <code>true</code> if a weapon is primary, otherwise
+     *         <code>false</code>
+     */
+    public final boolean isPrimary() {
+        return (primary);
+    }
+
+    public final int getAmmunitionCountInMagazine() {
+        return (ammunitionInMagazine.getAmmunitionCount());
+    }
+
+    public final int addAmmunitionIntoMagazine(final int ammunitionCountToAddIntoMagazine) {
+        return (ammunitionInMagazine.add(ammunitionCountToAddIntoMagazine));
+    }
+
+    public final int removeAmmunitionFromMagazine(final int ammunitionCountToRemoveFromMagazine) {
+        return (ammunitionInMagazine.remove(ammunitionCountToRemoveFromMagazine));
+    }
 }

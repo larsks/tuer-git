@@ -19,30 +19,31 @@ package engine.data.common;
 
 import engine.weaponry.Ammunition;
 
-public class AmmunitionBox extends Collectible{
-	/**ammunition type*/
-	private final Ammunition ammunition;
-	/**resource name of the texture used by the box of ammunition*/
+public class AmmunitionBox extends Collectible {
+    /** ammunition type */
+    private final Ammunition ammunition;
+    /** resource name of the texture used by the box of ammunition */
     private final String textureResourceName;
-    /**ammunition count*/
+    /** ammunition count */
     private final int ammunitionCount;
 
-	public AmmunitionBox(final String label,final String pickingUpSoundSamplePath,final Ammunition ammunition,final String textureResourceName,final int ammunitionCount){
-		super(label,pickingUpSoundSamplePath);
-		this.ammunition=ammunition;
-		this.textureResourceName=textureResourceName;
-		this.ammunitionCount=ammunitionCount;
-	}
-	
-	public Ammunition getAmmunition(){
-		return(ammunition);
-	}
-	
-	public String getTextureResourceName(){
-		return(textureResourceName);
-	}
-	
-	public int getAmmunitionCount(){
-		return(ammunitionCount);
-	}
+    public AmmunitionBox(final String label, final String pickingUpSoundSamplePath, final Ammunition ammunition,
+            final String textureResourceName, final int ammunitionCount) {
+        super(label, pickingUpSoundSamplePath);
+        this.ammunition = ammunition;
+        this.textureResourceName = textureResourceName;
+        this.ammunitionCount = ammunitionCount;
+    }
+
+    public Ammunition getAmmunition() {
+        return (ammunition);
+    }
+
+    public String getTextureResourceName() {
+        return (textureResourceName);
+    }
+
+    public int getAmmunitionCount() {
+        return (ammunitionCount);
+    }
 }

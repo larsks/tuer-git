@@ -26,26 +26,26 @@ import engine.weaponry.Ammunition;
  * @author Julien Gouesse
  *
  */
-public final class AmmunitionBoxUserData extends CollectibleUserData<AmmunitionBox>{
-	
-	public AmmunitionBoxUserData(final AmmunitionBox ammunitionBox){
-		super(ammunitionBox,ammunitionBox.getAmmunition().getLabel());
-	}
-	
-	@Override
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
-	
-	public final AmmunitionBox getAmmunitionBox(){
-		return(collectible);
-	}
-	
-	public final int getAmmunitionCount(){
-		return(collectible.getAmmunitionCount());
-	}
-	
-	public Ammunition getAmmunition(){
-		return(collectible.getAmmunition());
-	}
+public final class AmmunitionBoxUserData extends CollectibleUserData<AmmunitionBox> {
+
+    public AmmunitionBoxUserData(final AmmunitionBox ammunitionBox) {
+        super(ammunitionBox, ammunitionBox.getAmmunition().getLabel());
+    }
+
+    @Override
+    public String getPickingUpSoundSampleIdentifier() {
+        return (collectible.getPickingUpSoundSampleIdentifier());
+    }
+
+    public final AmmunitionBox getAmmunitionBox() {
+        return (collectible);
+    }
+
+    public final int getAmmunitionCount() {
+        return (collectible.getAmmunitionCount());
+    }
+
+    public Ammunition getAmmunition() {
+        return (collectible.getAmmunition());
+    }
 }

@@ -21,76 +21,77 @@ import java.util.ArrayList;
 
 /**
  * Container of levels
+ * 
  * @author Julien Gouesse
  *
  */
-public final class LevelSet extends JFPSMProjectUserObject{
-    
-    
+public final class LevelSet extends JFPSMProjectUserObject {
+
     private static final long serialVersionUID = 1L;
-    
+
     private ArrayList<FloorSet> floorSetsList;
-    
-    
-    public LevelSet(){
+
+    public LevelSet() {
         this("");
     }
-    
-    public LevelSet(String name){
+
+    public LevelSet(String name) {
         super(name);
-        floorSetsList=new ArrayList<>();
-        markDirty();
-    }
-    
-    @Override
-    public final boolean isDirty(){
-        boolean dirty=false;
-        if(!dirty)
-            for(FloorSet floorset:floorSetsList)
-                if(floorset.isDirty())
-                    {dirty=true;
-                     break;
-                    }
-        return(dirty);
-    }
-    
-    @Override
-    public final void unmarkDirty(){}
-    
-    @Override
-    public final void markDirty(){}
-    
-    public final void addFloorSet(FloorSet floorSet){
-    	floorSetsList.add(floorSet);
-        markDirty();
-    }
-    
-    public final void removeFloorSet(FloorSet floorSet){
-    	floorSetsList.remove(floorSet);
+        floorSetsList = new ArrayList<>();
         markDirty();
     }
 
-    public final ArrayList<FloorSet> getFloorSetsList(){
-		return(floorSetsList);
-	}
-
-	public final void setFloorSetsList(ArrayList<FloorSet> floorSetsList){
-		this.floorSetsList=floorSetsList;
-		markDirty();
-	}
-    
     @Override
-    final boolean canInstantiateChildren(){
-        return(true);
+    public final boolean isDirty() {
+        boolean dirty = false;
+        if (!dirty)
+            for (FloorSet floorset : floorSetsList)
+                if (floorset.isDirty()) {
+                    dirty = true;
+                    break;
+                }
+        return (dirty);
     }
 
     @Override
-    final boolean isOpenable(){
-        return(true);
+    public final void unmarkDirty() {
     }
 
     @Override
-    final boolean isRemovable(){
-        return(false);
+    public final void markDirty() {
+    }
+
+    public final void addFloorSet(FloorSet floorSet) {
+        floorSetsList.add(floorSet);
+        markDirty();
+    }
+
+    public final void removeFloorSet(FloorSet floorSet) {
+        floorSetsList.remove(floorSet);
+        markDirty();
+    }
+
+    public final ArrayList<FloorSet> getFloorSetsList() {
+        return (floorSetsList);
+    }
+
+    public final void setFloorSetsList(ArrayList<FloorSet> floorSetsList) {
+        this.floorSetsList = floorSetsList;
+        markDirty();
+    }
+
+    @Override
+    final boolean canInstantiateChildren() {
+        return (true);
+    }
+
+    @Override
+    final boolean isOpenable() {
+        return (true);
+    }
+
+    @Override
+    final boolean isRemovable() {
+        return (false);
     }
 }

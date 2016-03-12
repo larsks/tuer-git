@@ -20,52 +20,54 @@ package engine.weaponry;
 import java.util.Map;
 
 /**
- * Container of ammunition containers, one ammunition container per ammunition type
+ * Container of ammunition containers, one ammunition container per ammunition
+ * type
  * 
  * @author Julien Gouesse
  *
  */
-public class AmmunitionContainerContainer{
-	
+public class AmmunitionContainerContainer {
+
     private final AmmunitionContainer[] ammunitionContainers;
-    
+
     private final AmmunitionFactory ammunitionFactory;
-	
-	public AmmunitionContainerContainer(final AmmunitionFactory ammunitionFactory,final Map<Ammunition,Integer> ammunitionMaxCountMap){
-		this.ammunitionFactory=ammunitionFactory;
-		ammunitionContainers=new AmmunitionContainer[ammunitionFactory.getSize()];
-		for(int ammoIndex=0;ammoIndex<ammunitionContainers.length;ammoIndex++)
-		    {final Ammunition ammo=ammunitionFactory.get(ammoIndex);
-		     final Integer ammunitionMaxCountObj=ammunitionMaxCountMap.get(ammo);
-		     if(ammunitionMaxCountObj!=null)
-		         {final int ammunitionMaxCount=ammunitionMaxCountObj.intValue();
-		    	  ammunitionContainers[ammoIndex]=new AmmunitionContainer(ammunitionMaxCount);
-		         }
-		    }
-	}
-	
-	public final void empty(){
-		for(AmmunitionContainer ammunitionContainer:ammunitionContainers)
-			ammunitionContainer.empty();
-	}
-	
-	public final int getMax(final Ammunition ammunition){
-		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
-		return(ammunitionContainers[ammunitionId].getAmmunitionMaxCount());
-	}
-	
-	public final int get(final Ammunition ammunition){
-		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
-		return(ammunitionContainers[ammunitionId].getAmmunitionCount());
-	}
-	
-	public final int add(final Ammunition ammunition,final int ammunitionCountToAdd){
-		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
-		return(ammunitionContainers[ammunitionId].add(ammunitionCountToAdd));
-	}
-	
-	public final int remove(final Ammunition ammunition,final int ammunitionCountToRemove){
-		final int ammunitionId=ammunitionFactory.getIntIdentifier(ammunition);
-		return(ammunitionContainers[ammunitionId].remove(ammunitionCountToRemove));
-	}
+
+    public AmmunitionContainerContainer(final AmmunitionFactory ammunitionFactory,
+            final Map<Ammunition, Integer> ammunitionMaxCountMap) {
+        this.ammunitionFactory = ammunitionFactory;
+        ammunitionContainers = new AmmunitionContainer[ammunitionFactory.getSize()];
+        for (int ammoIndex = 0; ammoIndex < ammunitionContainers.length; ammoIndex++) {
+            final Ammunition ammo = ammunitionFactory.get(ammoIndex);
+            final Integer ammunitionMaxCountObj = ammunitionMaxCountMap.get(ammo);
+            if (ammunitionMaxCountObj != null) {
+                final int ammunitionMaxCount = ammunitionMaxCountObj.intValue();
+                ammunitionContainers[ammoIndex] = new AmmunitionContainer(ammunitionMaxCount);
+            }
+        }
+    }
+
+    public final void empty() {
+        for (AmmunitionContainer ammunitionContainer : ammunitionContainers)
+            ammunitionContainer.empty();
+    }
+
+    public final int getMax(final Ammunition ammunition) {
+        final int ammunitionId = ammunitionFactory.getIntIdentifier(ammunition);
+        return (ammunitionContainers[ammunitionId].getAmmunitionMaxCount());
+    }
+
+    public final int get(final Ammunition ammunition) {
+        final int ammunitionId = ammunitionFactory.getIntIdentifier(ammunition);
+        return (ammunitionContainers[ammunitionId].getAmmunitionCount());
+    }
+
+    public final int add(final Ammunition ammunition, final int ammunitionCountToAdd) {
+        final int ammunitionId = ammunitionFactory.getIntIdentifier(ammunition);
+        return (ammunitionContainers[ammunitionId].add(ammunitionCountToAdd));
+    }
+
+    public final int remove(final Ammunition ammunition, final int ammunitionCountToRemove) {
+        final int ammunitionId = ammunitionFactory.getIntIdentifier(ammunition);
+        return (ammunitionContainers[ammunitionId].remove(ammunitionCountToRemove));
+    }
 }

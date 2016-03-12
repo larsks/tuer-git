@@ -24,70 +24,65 @@ import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 import com.ardor3d.renderer.jogl.JoglRenderer;
 
 /**
- * Canvas renderer enhanced for higher frame rates especially 
- * when the vertical synchronization is turned off by avoiding explicit 
- * OpenGL context operations.
+ * Canvas renderer enhanced for higher frame rates especially when the vertical
+ * synchronization is turned off by avoiding explicit OpenGL context operations.
  * 
  * @author Julien Gouesse
  *
  */
-public class ReliableCanvasRenderer extends JoglCanvasRenderer{
+public class ReliableCanvasRenderer extends JoglCanvasRenderer {
 
-	public ReliableCanvasRenderer(Scene scene){
-		super(scene);
-	}
+    public ReliableCanvasRenderer(Scene scene) {
+        super(scene);
+    }
 
-	public ReliableCanvasRenderer(Scene scene,boolean useDebug){
-		super(scene,useDebug,new CapsUtil(),false);
-	}
-	
-	@Override
-	public final JoglRenderer createRenderer(){
-		return new ReliableRenderer();
-	}
+    public ReliableCanvasRenderer(Scene scene, boolean useDebug) {
+        super(scene, useDebug, new CapsUtil(), false);
+    }
 
-	@Override
-	public final JoglContextCapabilities createContextCapabilities(){
-		final JoglContextCapabilities defaultCaps = super.createContextCapabilities();
+    @Override
+    public final JoglRenderer createRenderer() {
+        return new ReliableRenderer();
+    }
+
+    @Override
+    public final JoglContextCapabilities createContextCapabilities() {
+        final JoglContextCapabilities defaultCaps = super.createContextCapabilities();
         final ReliableContextCapabilities realCaps = new ReliableContextCapabilities(defaultCaps);
         /**
-    	 * TODO Remove this code as JogAmp's Ardor3D Continuation already supports OpenGL 1.1. This game uses no fancy 
-    	 * feature, it should work as is. Test it before definitely removing this piece of code
-    	 */
-        //checks if the operating system is Windows
-        /*if(System.getProperty("os.name").toLowerCase().startsWith("windows"))
-            {//gets some information about the OpenGL driver
-        	 final String vendor=realCaps.getDisplayVendor();
-        	 final String renderer=realCaps.getDisplayRenderer();
-             //checks whether Microsoft’s generic software emulation driver (OpenGL emulation through Direct3D) is installed
-        	 if(vendor!=null&&renderer!=null&&vendor.equalsIgnoreCase("Microsoft Corporation")&&
-        		realCaps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
-                 {if(Platform.AWT_AVAILABLE)
-                      {//uses Java Reflection to remove this dependency at runtime
-                	   try{final Class<?> jOptionPaneClass=Class.forName("javax.swing.JOptionPane");
-                	       final Class<?> componentClass=Class.forName("java.awt.Component");
-                	       final Method showMessageDialogMethod=jOptionPaneClass.getMethod("showMessageDialog",componentClass,Object.class,String.class,int.class);
-                	       //prevents the use of this crap, recommends to the end user to install a proper OpenGL driver
-                	       showMessageDialogMethod.invoke(null,null,
-               				    "The game cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).",
-            				    "OpenGL driver error",0);
-					      }
-                	   catch(ClassNotFoundException cnfe)
-                	   {cnfe.printStackTrace();} 
-                	   catch(SecurityException se)
-                	   {se.printStackTrace();}
-                	   catch(NoSuchMethodException nsme)
-                	   {nsme.printStackTrace();}
-                	   catch(IllegalArgumentException iae)
-                	   {iae.printStackTrace();}
-                	   catch(IllegalAccessException e)
-                	   {e.printStackTrace();}
-                	   catch(InvocationTargetException ite)
-                	   {ite.printStackTrace();}
-                      }
-        		  System.exit(0);
-                 }
-            }*/
-        return(realCaps);
-	}
+         * TODO Remove this code as JogAmp's Ardor3D Continuation already
+         * supports OpenGL 1.1. This game uses no fancy feature, it should work
+         * as is. Test it before definitely removing this piece of code
+         */
+        // checks if the operating system is Windows
+        /*
+         * if(System.getProperty("os.name").toLowerCase().startsWith("windows"))
+         * {//gets some information about the OpenGL driver final String
+         * vendor=realCaps.getDisplayVendor(); final String
+         * renderer=realCaps.getDisplayRenderer(); //checks whether Microsoft’s
+         * generic software emulation driver (OpenGL emulation through Direct3D)
+         * is installed
+         * if(vendor!=null&&renderer!=null&&vendor.equalsIgnoreCase(
+         * "Microsoft Corporation")&&
+         * realCaps.getDisplayRenderer().equalsIgnoreCase("GDI Generic"))
+         * {if(Platform.AWT_AVAILABLE) {//uses Java Reflection to remove this
+         * dependency at runtime try{final Class<?>
+         * jOptionPaneClass=Class.forName("javax.swing.JOptionPane"); final
+         * Class<?> componentClass=Class.forName("java.awt.Component"); final
+         * Method showMessageDialogMethod=jOptionPaneClass.getMethod(
+         * "showMessageDialog",componentClass,Object.class,String.class,int.
+         * class); //prevents the use of this crap, recommends to the end user
+         * to install a proper OpenGL driver
+         * showMessageDialogMethod.invoke(null,null,
+         * "The game cannot run with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel)."
+         * , "OpenGL driver error",0); } catch(ClassNotFoundException cnfe)
+         * {cnfe.printStackTrace();} catch(SecurityException se)
+         * {se.printStackTrace();} catch(NoSuchMethodException nsme)
+         * {nsme.printStackTrace();} catch(IllegalArgumentException iae)
+         * {iae.printStackTrace();} catch(IllegalAccessException e)
+         * {e.printStackTrace();} catch(InvocationTargetException ite)
+         * {ite.printStackTrace();} } System.exit(0); } }
+         */
+        return (realCaps);
+    }
 }

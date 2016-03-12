@@ -20,28 +20,29 @@ package engine.data.common.userdata;
 import com.ardor3d.math.Vector3;
 import engine.data.common.Teleporter;
 
-public final class TeleporterUserData extends CollectibleUserData<Teleporter>{
-	
-	private final Vector3 destination;
-	
-	private final String destinationLevelIdentifier;
-	
-	public TeleporterUserData(final Teleporter teleporter,final Vector3 destination,final String destinationLevelIdentifier){
-		super(teleporter,null);
-		this.destination=destination;
-		this.destinationLevelIdentifier=destinationLevelIdentifier;
-	}
-	
-	public final Vector3 getDestination(){
-		return(destination);
-	}
-	
-	public final String getDestinationLevelIdentifier(){
-		return(destinationLevelIdentifier);
-	}
-	
-	@Override
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
+public final class TeleporterUserData extends CollectibleUserData<Teleporter> {
+
+    private final Vector3 destination;
+
+    private final String destinationLevelIdentifier;
+
+    public TeleporterUserData(final Teleporter teleporter, final Vector3 destination,
+            final String destinationLevelIdentifier) {
+        super(teleporter, null);
+        this.destination = destination;
+        this.destinationLevelIdentifier = destinationLevelIdentifier;
+    }
+
+    public final Vector3 getDestination() {
+        return (destination);
+    }
+
+    public final String getDestinationLevelIdentifier() {
+        return (destinationLevelIdentifier);
+    }
+
+    @Override
+    public String getPickingUpSoundSampleIdentifier() {
+        return (collectible.getPickingUpSoundSampleIdentifier());
+    }
 }

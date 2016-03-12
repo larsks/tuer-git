@@ -18,38 +18,44 @@
 package jfpsm.graph;
 
 /**
- * Graph composed of vertices and directed edges, that does not allow 
- * self-loops and parallel edges
+ * Graph composed of vertices and directed edges, that does not allow self-loops
+ * and parallel edges
  * 
  * @author Julien Gouesse
  *
- * @param <V> vertex class
- * @param <E> edge class
+ * @param <V>
+ *            vertex class
+ * @param <E>
+ *            edge class
  */
-public class DirectedSimpleGraph<V,E> extends DirectedGraphWithoutMultiEdge<V,E>{
+public class DirectedSimpleGraph<V, E> extends DirectedGraphWithoutMultiEdge<V, E> {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param ordered flag indicating whether the vertices and the edges are 
-	 * stored in a way that preserves the order by insertion time
-	 */
-	public DirectedSimpleGraph(final boolean ordered){
-		super(ordered);
-	}
+    /**
+     * Constructor
+     * 
+     * @param ordered
+     *            flag indicating whether the vertices and the edges are stored
+     *            in a way that preserves the order by insertion time
+     */
+    public DirectedSimpleGraph(final boolean ordered) {
+        super(ordered);
+    }
 
-	/* (non-Javadoc)
-	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
-	 */
-	@Override
-	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
-		boolean valid=super.isEdgeAdditionValid(edge,vertices);
-		if(valid)
-		    {final V firstVertex=vertices.getFirst();
-		     final V secondVertex=vertices.getSecond();
-		     //does not allow self-loops
-			 valid=!firstVertex.equals(secondVertex);
-		    }
-		return(valid);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object,
+     * jfpsm.graph.Pair)
+     */
+    @Override
+    protected boolean isEdgeAdditionValid(E edge, Pair<V> vertices) {
+        boolean valid = super.isEdgeAdditionValid(edge, vertices);
+        if (valid) {
+            final V firstVertex = vertices.getFirst();
+            final V secondVertex = vertices.getSecond();
+            // does not allow self-loops
+            valid = !firstVertex.equals(secondVertex);
+        }
+        return (valid);
+    }
 }

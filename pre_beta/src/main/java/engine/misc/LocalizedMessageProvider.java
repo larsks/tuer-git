@@ -21,24 +21,25 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Provider of localized messages. It looks for the language chosen by the end user in the configuration file. It uses the 
- * default language of the operating system as a fallback.
+ * Provider of localized messages. It looks for the language chosen by the end
+ * user in the configuration file. It uses the default language of the operating
+ * system as a fallback.
  * 
  * @author Julien Gouesse
  *
  */
-public class LocalizedMessageProvider{
-	
-	private ResourceBundle resourceBundle;
+public class LocalizedMessageProvider {
 
-	public LocalizedMessageProvider(final Locale locale){
-		super();
-		if(locale==null)
-		    throw new IllegalArgumentException("The locale cannot be null");
-		resourceBundle=ResourceBundle.getBundle("i18n.MessagesBundle",locale);
-	}
-	
-	public String getString(final String key){
-		return(resourceBundle.getString(key));
-	}
+    private ResourceBundle resourceBundle;
+
+    public LocalizedMessageProvider(final Locale locale) {
+        super();
+        if (locale == null)
+            throw new IllegalArgumentException("The locale cannot be null");
+        resourceBundle = ResourceBundle.getBundle("i18n.MessagesBundle", locale);
+    }
+
+    public String getString(final String key) {
+        return (resourceBundle.getString(key));
+    }
 }

@@ -17,44 +17,44 @@
  */
 package engine.weaponry;
 
-public class Ammunition implements Comparable<Ammunition>{
-    
-	/**name (can contain space)*/
+public class Ammunition implements Comparable<Ammunition> {
+
+    /** name (can contain space) */
     private final String label;
-	
-    public Ammunition(final String label){
-    	super();
-    	this.label=label;
+
+    public Ammunition(final String label) {
+        super();
+        this.label = label;
     }
-    
+
     @Override
-	public int hashCode(){
-		return(label.hashCode());
-	}
-	
-	public String getLabel(){
-		return(label);
-	}
-	
-	@Override
-	public String toString(){
-		return(label);
-	}
-	
-	@Override
-	public int compareTo(final Ammunition ammunition){
-		return(label.compareTo(ammunition.label));
-	}
-	
-	@Override
-	public boolean equals(final Object o){
-		final boolean result;
-		if(o==null||!(o instanceof Ammunition))
-		    result=false;
-		else
-		    {final Ammunition ammunition=(Ammunition)o;
-			 result=getLabel().equals(ammunition.getLabel());
-		    }
-		return(result);
-	}
+    public int hashCode() {
+        return (label.hashCode());
+    }
+
+    public String getLabel() {
+        return (label);
+    }
+
+    @Override
+    public String toString() {
+        return (label);
+    }
+
+    @Override
+    public int compareTo(final Ammunition ammunition) {
+        return (label.compareTo(ammunition.label));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        final boolean result;
+        if (o == null || !(o instanceof Ammunition))
+            result = false;
+        else {
+            final Ammunition ammunition = (Ammunition) o;
+            result = getLabel().equals(ammunition.getLabel());
+        }
+        return (result);
+    }
 }

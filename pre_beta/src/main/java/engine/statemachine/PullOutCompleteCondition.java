@@ -25,16 +25,16 @@ import engine.data.PlayerData;
  * @author Julien Gouesse
  *
  */
-public class PullOutCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+public class PullOutCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
     private final PlayerData playerData;
-	
-	public PullOutCompleteCondition(final PlayerData playerData){
-		this.playerData=playerData;
-	}
-	
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isPullOutComplete());
-	}
+
+    public PullOutCompleteCondition(final PlayerData playerData) {
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isPullOutComplete());
+    }
 }

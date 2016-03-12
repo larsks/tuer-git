@@ -17,23 +17,24 @@
  */
 package engine.data.common;
 
-public class Medikit extends Collectible{
-    /**resource name of the texture used by the box of ammunition*/
+public class Medikit extends Collectible {
+    /** resource name of the texture used by the box of ammunition */
     private final String textureResourceName;
-	
-	private final int health;
-	
-	public Medikit(final String label,final String textureResourceName,final String pickingUpSoundSamplePath,final int health){
-		super(label,pickingUpSoundSamplePath);
-    	this.textureResourceName=textureResourceName;
-		this.health=health;
-	}
-	
-	public int getHealth(){
-		return(health);
-	}
-	
-	public String getTextureResourceName(){
-		return(textureResourceName);
-	}
+
+    private final int health;
+
+    public Medikit(final String label, final String textureResourceName, final String pickingUpSoundSamplePath,
+            final int health) {
+        super(label, pickingUpSoundSamplePath);
+        this.textureResourceName = textureResourceName;
+        this.health = health;
+    }
+
+    public int getHealth() {
+        return (health);
+    }
+
+    public String getTextureResourceName() {
+        return (textureResourceName);
+    }
 }

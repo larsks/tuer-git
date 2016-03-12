@@ -20,24 +20,26 @@ package engine.renderer;
 import com.ardor3d.renderer.jogl.JoglContextCapabilities;
 
 /**
- * Context capabilities with some management of wrong values returned by some OpenGL drivers
+ * Context capabilities with some management of wrong values returned by some
+ * OpenGL drivers
  * 
  * @author Julien Gouesse
  *
  */
-public class ReliableContextCapabilities extends JoglContextCapabilities{
+public class ReliableContextCapabilities extends JoglContextCapabilities {
 
-	public ReliableContextCapabilities(final JoglContextCapabilities defaultCaps){
-		super(defaultCaps);
-        //System.err.println(defaultCaps.getDisplayRenderer());
-        //System.err.println(defaultCaps.getDisplayVendor());
-        //System.err.println(defaultCaps.getDisplayVersion());
-        if(defaultCaps.getDisplayRenderer().startsWith("Mesa DRI R200 "))
-      	    /**
-      	     * Some very old ATI Radeon graphics cards do not support 2048*2048 textures
-      	     * despite their specifications.
-      	     */
-            _maxTextureSize=defaultCaps.getMaxTextureSize()/2;
-        //FIXME R300 and R500 drivers on Mac OS X sometimes return absurd values
-	}
+    public ReliableContextCapabilities(final JoglContextCapabilities defaultCaps) {
+        super(defaultCaps);
+        // System.err.println(defaultCaps.getDisplayRenderer());
+        // System.err.println(defaultCaps.getDisplayVendor());
+        // System.err.println(defaultCaps.getDisplayVersion());
+        if (defaultCaps.getDisplayRenderer().startsWith("Mesa DRI R200 "))
+            /**
+             * Some very old ATI Radeon graphics cards do not support 2048*2048
+             * textures despite their specifications.
+             */
+            _maxTextureSize = defaultCaps.getMaxTextureSize() / 2;
+        // FIXME R300 and R500 drivers on Mac OS X sometimes return absurd
+        // values
+    }
 }

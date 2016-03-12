@@ -23,19 +23,20 @@ import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.SwitchNode;
 
 /**
- * switch node that updates only the bounding volumes and the transforms of visible children
- * */
-public final class StateMachineSwitchNode extends SwitchNode{
+ * switch node that updates only the bounding volumes and the transforms of
+ * visible children
+ */
+public final class StateMachineSwitchNode extends SwitchNode {
 
-    public StateMachineSwitchNode(){
+    public StateMachineSwitchNode() {
         this("StateMachineSwitchNode");
     }
 
-    public StateMachineSwitchNode(final String name){
+    public StateMachineSwitchNode(final String name) {
         super(name);
         setAllNonVisible();
     }
-    
+
     @Override
     public void updateWorldTransform(final boolean recurse) {
         // do what a spatial does
@@ -62,7 +63,7 @@ public final class StateMachineSwitchNode extends SwitchNode{
     public void updateWorldBound(final boolean recurse) {
         BoundingVolume worldBound = null;
         for (int i = getNumberOfChildren() - 1; i >= 0; i--) {
-            //if the child is visible
+            // if the child is visible
             if (_childMask.get(i)) {
                 final Spatial child = _children.get(i);
                 if (child != null) {

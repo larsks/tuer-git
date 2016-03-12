@@ -19,28 +19,31 @@ package engine.data.common.userdata;
 
 import engine.data.common.Collectible;
 
-public abstract class CollectibleUserData<T extends Collectible>{
-	
-	protected final T collectible;
-	
-	/**name of elements contained by this object, can be null if it is not a container*/
-	private final String subElementName;
-	
-	public CollectibleUserData(final T collectible,final String subElementName){
-		super();
-		this.collectible=collectible;
-		this.subElementName=subElementName;
-	}
-	
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
-	
-	public String getLabel(){
-		return(collectible.getLabel());
-	}
-	
-	public String getSubElementName(){
-		return(subElementName);
-	}
+public abstract class CollectibleUserData<T extends Collectible> {
+
+    protected final T collectible;
+
+    /**
+     * name of elements contained by this object, can be null if it is not a
+     * container
+     */
+    private final String subElementName;
+
+    public CollectibleUserData(final T collectible, final String subElementName) {
+        super();
+        this.collectible = collectible;
+        this.subElementName = subElementName;
+    }
+
+    public String getPickingUpSoundSampleIdentifier() {
+        return (collectible.getPickingUpSoundSampleIdentifier());
+    }
+
+    public String getLabel() {
+        return (collectible.getLabel());
+    }
+
+    public String getSubElementName() {
+        return (subElementName);
+    }
 }

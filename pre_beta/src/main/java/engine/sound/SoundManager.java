@@ -27,130 +27,127 @@ import paulscode.sound.codecs.CodecJOrbis;
 import paulscode.sound.libraries.LibraryJOAL;
 
 /**
- * Sound manager that relies on JOAL based on Paul Lamb's library.
- * If the sound is not available, it simply does nothing.
+ * Sound manager that relies on JOAL based on Paul Lamb's library. If the sound
+ * is not available, it simply does nothing.
+ * 
  * @author Julien Gouesse
  *
  */
-public final class SoundManager{
+public final class SoundManager {
 
-	private static class ExtendedSoundSystem extends SoundSystem{
-		
-		@SuppressWarnings("rawtypes")
-		private ExtendedSoundSystem(Class libraryClass) throws SoundSystemException{
-			super(libraryClass);
-		}
-		
-		private void stop(){
-			LinkedList<String> sourcenames=soundLibrary.getAllSourcenames();
-			for(String sourcename:sourcenames)
-			    stop(sourcename);
-			removeTemporarySources();
-		}
-	}	
-	
-    /**underlying sound system written by Paul Lamb*/
+    private static class ExtendedSoundSystem extends SoundSystem {
+
+        @SuppressWarnings("rawtypes")
+        private ExtendedSoundSystem(Class libraryClass) throws SoundSystemException {
+            super(libraryClass);
+        }
+
+        private void stop() {
+            LinkedList<String> sourcenames = soundLibrary.getAllSourcenames();
+            for (String sourcename : sourcenames)
+                stop(sourcename);
+            removeTemporarySources();
+        }
+    }
+
+    /** underlying sound system written by Paul Lamb */
     private ExtendedSoundSystem soundSystem;
-    /**flag indicating whether the sound is enabled*/
+    /** flag indicating whether the sound is enabled */
     private boolean enabled;
-    
+
     private float latestMasterVolume;
-    
-    
-    public SoundManager(){
-        try
-            {try{soundSystem=new ExtendedSoundSystem(LibraryJOAL.class);}
-    	     catch(SoundSystemException sseOpenAL)
-    	         {System.out.println("The initialization of the sound manager (based on JOAL) failed: "+sseOpenAL);}
-    	     if(soundSystem!=null)
-                 SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
-    	    }
-        catch(SoundSystemException sse)
-            {enabled=false;
-             latestMasterVolume=0;
-        	 System.out.println("The initialization of the sound manager failed: "+sse);
-        	}
-        finally
-            {if(soundSystem!=null)
-        	     {enabled=true;
-                  latestMasterVolume=soundSystem.getMasterVolume();
-        	     }
+
+    public SoundManager() {
+        try {
+            try {
+                soundSystem = new ExtendedSoundSystem(LibraryJOAL.class);
+            } catch (SoundSystemException sseOpenAL) {
+                System.out.println("The initialization of the sound manager (based on JOAL) failed: " + sseOpenAL);
             }
-    }
-    
-    public final boolean isEnabled(){
-    	return(enabled);
-    }
-    
-    public final void setEnabled(final boolean enabled){
-    	this.enabled=enabled;
-    	if(enabled)
-    	    {if(soundSystem!=null)
-    	         {//resets the volume to its latest non null value
-    		      soundSystem.setMasterVolume(latestMasterVolume);
-    	         }
-    	    }
-    	else
-    	    {if(soundSystem!=null)
-    	         {//gets the current volume before muting
-    		      latestMasterVolume=soundSystem.getMasterVolume();
-    		      soundSystem.setMasterVolume(0);
-    	         }
-    	    }
-    }
-    
-    public final String loadSound(final URL url){
-    	final String identifier;
-        if(soundSystem!=null)
-            {final String path=url.getPath();
-             identifier=path.substring(path.lastIndexOf("/"));
-             soundSystem.loadSound(url,identifier);
+            if (soundSystem != null)
+                SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
+        } catch (SoundSystemException sse) {
+            enabled = false;
+            latestMasterVolume = 0;
+            System.out.println("The initialization of the sound manager failed: " + sse);
+        } finally {
+            if (soundSystem != null) {
+                enabled = true;
+                latestMasterVolume = soundSystem.getMasterVolume();
             }
-        else
-        	identifier=null;
-        return(identifier);
+        }
     }
-    
-    public final void unloadSound(final URL url){
-        if(soundSystem!=null)
-            {final String path=url.getPath();
-             soundSystem.unloadSound(path);
+
+    public final boolean isEnabled() {
+        return (enabled);
+    }
+
+    public final void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+        if (enabled) {
+            if (soundSystem != null) {// resets the volume to its latest non
+                                      // null value
+                soundSystem.setMasterVolume(latestMasterVolume);
             }
-    }
-    
-    public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier,float x,float y,float z){
-    	if(soundSystem!=null)
-    	    {final boolean priority;
-             final int attenuationModel;
-             final float rollOffFactor;
-    		 if(backgroundMusic)
-                 {priority=true;
-                  attenuationModel=SoundSystemConfig.ATTENUATION_NONE;
-                  rollOffFactor=0;
-                 }
-             else
-                 {priority=false;
-                  attenuationModel=SoundSystemConfig.ATTENUATION_ROLLOFF;
-                  rollOffFactor=SoundSystemConfig.getDefaultRolloff();
-                 }
-    		 soundSystem.quickPlay(priority,null,identifier,toLoop,x,y,z,attenuationModel,rollOffFactor);
-    	    }
-    }
-    
-    public final void play(final boolean backgroundMusic,final boolean toLoop,final String identifier){
-    	play(backgroundMusic,toLoop,identifier,0,0,0);
-    }
-    
-    public final void stop(){
-        if(soundSystem!=null)
-        	soundSystem.stop();
-    }
-    
-    public final void cleanup(){
-        if(soundSystem!=null)
-            {soundSystem.cleanup();
-             //prevents the manager from playing another sound
-             soundSystem=null;
+        } else {
+            if (soundSystem != null) {// gets the current volume before muting
+                latestMasterVolume = soundSystem.getMasterVolume();
+                soundSystem.setMasterVolume(0);
             }
+        }
+    }
+
+    public final String loadSound(final URL url) {
+        final String identifier;
+        if (soundSystem != null) {
+            final String path = url.getPath();
+            identifier = path.substring(path.lastIndexOf("/"));
+            soundSystem.loadSound(url, identifier);
+        } else
+            identifier = null;
+        return (identifier);
+    }
+
+    public final void unloadSound(final URL url) {
+        if (soundSystem != null) {
+            final String path = url.getPath();
+            soundSystem.unloadSound(path);
+        }
+    }
+
+    public final void play(final boolean backgroundMusic, final boolean toLoop, final String identifier, float x,
+            float y, float z) {
+        if (soundSystem != null) {
+            final boolean priority;
+            final int attenuationModel;
+            final float rollOffFactor;
+            if (backgroundMusic) {
+                priority = true;
+                attenuationModel = SoundSystemConfig.ATTENUATION_NONE;
+                rollOffFactor = 0;
+            } else {
+                priority = false;
+                attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
+                rollOffFactor = SoundSystemConfig.getDefaultRolloff();
+            }
+            soundSystem.quickPlay(priority, null, identifier, toLoop, x, y, z, attenuationModel, rollOffFactor);
+        }
+    }
+
+    public final void play(final boolean backgroundMusic, final boolean toLoop, final String identifier) {
+        play(backgroundMusic, toLoop, identifier, 0, 0, 0);
+    }
+
+    public final void stop() {
+        if (soundSystem != null)
+            soundSystem.stop();
+    }
+
+    public final void cleanup() {
+        if (soundSystem != null) {
+            soundSystem.cleanup();
+            // prevents the manager from playing another sound
+            soundSystem = null;
+        }
     }
 }

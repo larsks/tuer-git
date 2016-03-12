@@ -19,19 +19,17 @@ package jfpsm;
 
 import javax.swing.JPanel;
 
-public abstract class Viewer extends JPanel{
+public abstract class Viewer extends JPanel {
 
-    
-    private static final long serialVersionUID=1L;
-    
+    private static final long serialVersionUID = 1L;
+
     private final Dirtyable entity;
-    
-    
-    public Viewer(final Dirtyable entity){
-        this.entity=entity;
+
+    public Viewer(final Dirtyable entity) {
+        this.entity = entity;
     }
-    
-    public Dirtyable getEntity(){
-    	return(entity);
+
+    public Dirtyable getEntity() {
+        return (entity);
     }
 }

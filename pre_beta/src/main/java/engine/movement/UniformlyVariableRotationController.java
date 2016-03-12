@@ -24,36 +24,33 @@ import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.scenegraph.Spatial;
 
-public final class UniformlyVariableRotationController extends MovementEquationController{
+public final class UniformlyVariableRotationController extends MovementEquationController {
 
-    
-    private static final long serialVersionUID=1L;
-    
+    private static final long serialVersionUID = 1L;
 
-    public UniformlyVariableRotationController(){
-        this(0,0,0,Vector3.ZERO,new LinkedHashMap<Double,Double>());
+    public UniformlyVariableRotationController() {
+        this(0, 0, 0, Vector3.ZERO, new LinkedHashMap<Double, Double>());
     }
-    
-    public UniformlyVariableRotationController(final double constantAcceleration,
-            final double initialSpeed,final double initialAngle,
-            final ReadOnlyVector3 axisVector,
-            final LinkedHashMap<Double,Double> timeWindowsTable){
-        super(new UniformlyVariableRotationEquation(constantAcceleration,initialSpeed,initialAngle),axisVector,timeWindowsTable);
+
+    public UniformlyVariableRotationController(final double constantAcceleration, final double initialSpeed,
+            final double initialAngle, final ReadOnlyVector3 axisVector,
+            final LinkedHashMap<Double, Double> timeWindowsTable) {
+        super(new UniformlyVariableRotationEquation(constantAcceleration, initialSpeed, initialAngle), axisVector,
+                timeWindowsTable);
     }
-    
-    
+
     @Override
-    protected final void apply(final double angle,final Spatial caller){
-        if(getAxis()!=null)
-            {Vector3 axisVector=Vector3.fetchTempInstance();
-             axisVector.set(getAxis()[0],getAxis()[1],getAxis()[2]);             
-             if(Vector3.isValid(axisVector))
-                 {Matrix3 rotationMatrix=Matrix3.fetchTempInstance();
-                  rotationMatrix.fromAngleNormalAxis(angle*MathUtils.DEG_TO_RAD,axisVector);             
-                  caller.setRotation(rotationMatrix);
-                  Matrix3.releaseTempInstance(rotationMatrix);
-                 }
-             Vector3.releaseTempInstance(axisVector);            
-            }        
+    protected final void apply(final double angle, final Spatial caller) {
+        if (getAxis() != null) {
+            Vector3 axisVector = Vector3.fetchTempInstance();
+            axisVector.set(getAxis()[0], getAxis()[1], getAxis()[2]);
+            if (Vector3.isValid(axisVector)) {
+                Matrix3 rotationMatrix = Matrix3.fetchTempInstance();
+                rotationMatrix.fromAngleNormalAxis(angle * MathUtils.DEG_TO_RAD, axisVector);
+                caller.setRotation(rotationMatrix);
+                Matrix3.releaseTempInstance(rotationMatrix);
+            }
+            Vector3.releaseTempInstance(axisVector);
+        }
     }
 }

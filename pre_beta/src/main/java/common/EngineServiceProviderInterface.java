@@ -29,25 +29,42 @@ import java.util.List;
  * 
  * @author Julien Gouesse
  *
- * @param <S> class of encodable or serializable objects
- * @param <T> class of scenegraph nodes
- * @param <U> class of scenegraph objects
- * @param <V> class of leaf nodes managing the geometry
- * @param <W> class of bounding box
+ * @param <S>
+ *            class of encodable or serializable objects
+ * @param <T>
+ *            class of scenegraph nodes
+ * @param <U>
+ *            class of scenegraph objects
+ * @param <V>
+ *            class of leaf nodes managing the geometry
+ * @param <W>
+ *            class of bounding box
  */
-public interface EngineServiceProviderInterface<S,T,U,V,W>{
+public interface EngineServiceProviderInterface<S, T, U, V, W> {
 
-	public boolean writeSavableInstanceIntoFile(final S savable,final File file);
-    public boolean writeSavableInstancesListIntoFile(final List<S> savablesList,final File file);
-    public void attachChildToNode(final T parent,final U child);
+    public boolean writeSavableInstanceIntoFile(final S savable, final File file);
+
+    public boolean writeSavableInstancesListIntoFile(final List<S> savablesList, final File file);
+
+    public void attachChildToNode(final T parent, final U child);
+
     public T createNode(final String name);
-    public V createMeshFromBuffers(final String name,
-    		final FloatBuffer vertexBuffer,final IntBuffer indexBuffer,
-    		final FloatBuffer normalBuffer,final FloatBuffer texCoordBuffer);
-    public void attachTextureToSpatial(final U spatial,final URL url);
-    public W createBoundingBox(final double xCenter,final double yCenter,final double zCenter,final double xExtent,final double yExtent,final double zExtent);
+
+    public V createMeshFromBuffers(final String name, final FloatBuffer vertexBuffer, final IntBuffer indexBuffer,
+            final FloatBuffer normalBuffer, final FloatBuffer texCoordBuffer);
+
+    public void attachTextureToSpatial(final U spatial, final URL url);
+
+    public W createBoundingBox(final double xCenter, final double yCenter, final double zCenter, final double xExtent,
+            final double yExtent, final double zExtent);
+
     public boolean isLoadable(final ModelFileFormat inputModelFileFormat);
+
     public boolean isSavable(final ModelFileFormat outputModelFileFormat);
-    public U load(final File inputModelFile,final ModelFileFormat inputModelFileFormat)throws IOException,UnsupportedOperationException;
-    public void save(final File outputModelFile,final ModelFileFormat outputModelFileFormat,final File secondaryOutputModelFile,final U convertible)throws IOException,UnsupportedOperationException;
+
+    public U load(final File inputModelFile, final ModelFileFormat inputModelFileFormat)
+            throws IOException, UnsupportedOperationException;
+
+    public void save(final File outputModelFile, final ModelFileFormat outputModelFileFormat,
+            final File secondaryOutputModelFile, final U convertible) throws IOException, UnsupportedOperationException;
 }

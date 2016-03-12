@@ -22,36 +22,38 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Object used to traverse the connected component of a directed graph that 
+ * Object used to traverse the connected component of a directed graph that
  * stores all visited vertices
  * 
  * @author Julien Gouesse
  *
  */
-public class DirectedConnectedComponentVisitorWithHistory<V,E,G extends DirectedGraph<V,E>> extends
-		DirectedConnectedComponentVisitor<V,E,G> {
+public class DirectedConnectedComponentVisitorWithHistory<V, E, G extends DirectedGraph<V, E>>
+        extends DirectedConnectedComponentVisitor<V, E, G> {
 
-	private final List<V> visitedVertices;
-	
-	/**
-	 * Constructor
-	 */
-	public DirectedConnectedComponentVisitorWithHistory(){
-		super();
-		visitedVertices=new ArrayList<>();
-	}
+    private final List<V> visitedVertices;
 
-	/* (non-Javadoc)
-	 * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(jfpsm.graph.DirectedGraph, java.lang.Object)
-	 */
-	@Override
-	protected boolean performOnCurrentlyVisitedVertex(final G graph,
-			final V currentlyVisitedVertex){
-		visitedVertices.add(currentlyVisitedVertex);
-		return(true);
-	}
+    /**
+     * Constructor
+     */
+    public DirectedConnectedComponentVisitorWithHistory() {
+        super();
+        visitedVertices = new ArrayList<>();
+    }
 
-	public List<V> getVisitedVertices(){
-		return(Collections.unmodifiableList(visitedVertices));
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jfpsm.graph.Visitor#performOnCurrentlyVisitedVertex(jfpsm.graph.
+     * DirectedGraph, java.lang.Object)
+     */
+    @Override
+    protected boolean performOnCurrentlyVisitedVertex(final G graph, final V currentlyVisitedVertex) {
+        visitedVertices.add(currentlyVisitedVertex);
+        return (true);
+    }
+
+    public List<V> getVisitedVertices() {
+        return (Collections.unmodifiableList(visitedVertices));
+    }
 }

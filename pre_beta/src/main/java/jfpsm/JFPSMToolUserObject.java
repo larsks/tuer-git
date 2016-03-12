@@ -17,22 +17,23 @@
  */
 package jfpsm;
 
-public abstract class JFPSMToolUserObject extends JFPSMUserObject{
+public abstract class JFPSMToolUserObject extends JFPSMUserObject {
 
-	
-	private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-	public JFPSMToolUserObject(final String name){
-		super(name);
-	}
-	
-	/**
-     * Creates a dedicated viewer for this object, it returns <code>null</code> if it has no such viewer
+    public JFPSMToolUserObject(final String name) {
+        super(name);
+    }
+
+    /**
+     * Creates a dedicated viewer for this object, it returns <code>null</code>
+     * if it has no such viewer
      * 
-     * @param toolManager tool manager
+     * @param toolManager
+     *            tool manager
      * @return
      */
-    public Viewer createViewer(final ToolManager toolManager){
-    	return(null);
+    public Viewer createViewer(final ToolManager toolManager) {
+        return (null);
     }
 }

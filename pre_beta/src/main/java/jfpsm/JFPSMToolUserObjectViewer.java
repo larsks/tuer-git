@@ -17,20 +17,19 @@
  */
 package jfpsm;
 
-public abstract class JFPSMToolUserObjectViewer extends Viewer{
-	
-	private static final long serialVersionUID=1L;
-	
-	protected final ToolManager toolManager;
-	
-	
-	public JFPSMToolUserObjectViewer(final JFPSMToolUserObject entity,final ToolManager toolManager){
-		super(entity);
-		this.toolManager=toolManager;
-	}
+public abstract class JFPSMToolUserObjectViewer extends Viewer {
 
-	@Override
-	public JFPSMToolUserObject getEntity(){
-		return((JFPSMToolUserObject)super.getEntity());
-	}
+    private static final long serialVersionUID = 1L;
+
+    protected final ToolManager toolManager;
+
+    public JFPSMToolUserObjectViewer(final JFPSMToolUserObject entity, final ToolManager toolManager) {
+        super(entity);
+        this.toolManager = toolManager;
+    }
+
+    @Override
+    public JFPSMToolUserObject getEntity() {
+        return ((JFPSMToolUserObject) super.getEntity());
+    }
 }

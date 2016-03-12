@@ -25,16 +25,16 @@ import engine.data.PlayerData;
  * @author Julien Gouesse
  *
  */
-public class PutBackCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+public class PutBackCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
-	private final PlayerData playerData;
-	
-	public PutBackCompleteCondition(final PlayerData playerData){
-		this.playerData=playerData;
-	}
-	
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isPutBackComplete());
-	}
+    private final PlayerData playerData;
+
+    public PutBackCompleteCondition(final PlayerData playerData) {
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isPutBackComplete());
+    }
 }

@@ -19,26 +19,27 @@ package jfpsm;
 
 import java.awt.Color;
 
-public abstract class JFPSMProjectUserObjectViewer extends Viewer{
-	
-	private static final long serialVersionUID=1L;
+public abstract class JFPSMProjectUserObjectViewer extends Viewer {
+
+    private static final long serialVersionUID = 1L;
 
     private final ProjectManager projectManager;
-    
+
     private final Project project;
-	
-	
-	public JFPSMProjectUserObjectViewer(final JFPSMProjectUserObject entity,final Project project,final ProjectManager projectManager){
-		super(entity);
-		this.project=project;
-        this.projectManager=projectManager;
-	}
-	
-	final Color getSelectedTileColor(){
-        return(projectManager.getSelectedTileColor(project));
+
+    public JFPSMProjectUserObjectViewer(final JFPSMProjectUserObject entity, final Project project,
+            final ProjectManager projectManager) {
+        super(entity);
+        this.project = project;
+        this.projectManager = projectManager;
     }
-    
-    /*final BufferedImage openFileAndLoadImage(){
-        return(projectManager.openFileAndLoadImage());
-    }*/
+
+    final Color getSelectedTileColor() {
+        return (projectManager.getSelectedTileColor(project));
+    }
+
+    /*
+     * final BufferedImage openFileAndLoadImage(){
+     * return(projectManager.openFileAndLoadImage()); }
+     */
 }

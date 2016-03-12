@@ -24,18 +24,18 @@ import engine.abstraction.AbstractFactory;
  * @author Julien Gouesse
  *
  */
-public class SkyboxFactory extends AbstractFactory<Skybox>{
-	
-	public SkyboxFactory(){
-		super();
-	}
+public class SkyboxFactory extends AbstractFactory<Skybox> {
 
-	public boolean addNewSkybox(final String label,final String identifier,final String[] textureResourceNames){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-		    {final Skybox skybox=new Skybox(label,identifier,textureResourceNames);
-			 success=add(identifier,skybox);
-		    }
-		return(success);
-	}
+    public SkyboxFactory() {
+        super();
+    }
+
+    public boolean addNewSkybox(final String label, final String identifier, final String[] textureResourceNames) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final Skybox skybox = new Skybox(label, identifier, textureResourceNames);
+            success = add(identifier, skybox);
+        }
+        return (success);
+    }
 }

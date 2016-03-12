@@ -23,54 +23,56 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public enum PlayerState{
-	/**
-	 * the entity is not yet really available (only used very early as an initial state)
-	 */
-	NOT_YET_AVAILABLE,
-	/**
-	 * no operation currently run
-	 */
-	IDLE,
-	/**
-	 * the current weapon is being put back
-	 */
-	PUT_BACK,
-	/**
-	 * the current weapon is being pulled out
-	 */
-	PULL_OUT,
-	/**
-	 * the trigger of the current weapon is being pressed
-	 */
-	PRESS_TRIGGER,
-	/**
-	 * the magazine of the current weapon is empty or the attack with a non fully automatic 
-	 * weapon has ended (therefore the trigger should be released)
-	 */
-	WAIT_FOR_TRIGGER_RELEASE,
-	/**
-	 * the trigger of the current weapon is being released
-	 */
-	RELEASE_TRIGGER,
-	/**
-	 * the current weapon is being used to attack
-	 */
-	ATTACK,
-	/**
-	 * the latest attack is ending
-	 */
-	WAIT_FOR_ATTACK_END,
-	/**
-	 * the current weapon is being reloaded
-	 */
-	RELOAD,
-	/**
-	 * the previous weapon is going to be selected very soon
-	 */
-	SELECT_PREVIOUS,
-	/**
-	 * the next weapon is going to be selected very soon
-	 */
-	SELECT_NEXT
+public enum PlayerState {
+    /**
+     * the entity is not yet really available (only used very early as an
+     * initial state)
+     */
+    NOT_YET_AVAILABLE,
+    /**
+     * no operation currently run
+     */
+    IDLE,
+    /**
+     * the current weapon is being put back
+     */
+    PUT_BACK,
+    /**
+     * the current weapon is being pulled out
+     */
+    PULL_OUT,
+    /**
+     * the trigger of the current weapon is being pressed
+     */
+    PRESS_TRIGGER,
+    /**
+     * the magazine of the current weapon is empty or the attack with a non
+     * fully automatic weapon has ended (therefore the trigger should be
+     * released)
+     */
+    WAIT_FOR_TRIGGER_RELEASE,
+    /**
+     * the trigger of the current weapon is being released
+     */
+    RELEASE_TRIGGER,
+    /**
+     * the current weapon is being used to attack
+     */
+    ATTACK,
+    /**
+     * the latest attack is ending
+     */
+    WAIT_FOR_ATTACK_END,
+    /**
+     * the current weapon is being reloaded
+     */
+    RELOAD,
+    /**
+     * the previous weapon is going to be selected very soon
+     */
+    SELECT_PREVIOUS,
+    /**
+     * the next weapon is going to be selected very soon
+     */
+    SELECT_NEXT
 }

@@ -19,38 +19,36 @@ package jfpsm;
 
 /**
  * grid with a finite size
+ * 
  * @author Julien Gouesse
  *
  */
-public abstract class FiniteGrid implements Grid{
-    
-    
+public abstract class FiniteGrid implements Grid {
+
     private int logicalWidth;
-    
+
     private int logicalHeight;
-    
+
     private int logicalDepth;
-    
-    
-    public FiniteGrid(final int logicalWidth,final int logicalHeight,final int logicalDepth){
-        this.logicalWidth=logicalWidth;
-        this.logicalHeight=logicalHeight;
-        this.logicalDepth=logicalDepth;
-    }
 
-    
-    @Override
-    public final int getLogicalDepth(){
-        return(logicalDepth);
+    public FiniteGrid(final int logicalWidth, final int logicalHeight, final int logicalDepth) {
+        this.logicalWidth = logicalWidth;
+        this.logicalHeight = logicalHeight;
+        this.logicalDepth = logicalDepth;
     }
 
     @Override
-    public final int getLogicalHeight(){
-        return(logicalHeight);
+    public final int getLogicalDepth() {
+        return (logicalDepth);
     }
 
     @Override
-    public final int getLogicalWidth(){
-        return(logicalWidth);
+    public final int getLogicalHeight() {
+        return (logicalHeight);
+    }
+
+    @Override
+    public final int getLogicalWidth() {
+        return (logicalWidth);
     }
 }

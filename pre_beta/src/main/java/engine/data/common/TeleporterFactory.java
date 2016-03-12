@@ -19,18 +19,19 @@ package engine.data.common;
 
 import engine.abstraction.AbstractFactory;
 
-public class TeleporterFactory extends AbstractFactory<Teleporter>{
+public class TeleporterFactory extends AbstractFactory<Teleporter> {
 
-	public TeleporterFactory(){
-		super();
-	}
-	
-	public boolean addNewTeleporter(final String label,final String identifier,final String pickingUpSoundSamplePath){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-		    {final Teleporter teleporter=new Teleporter(label,pickingUpSoundSamplePath);
-			 success=add(identifier,teleporter);
-		    }
-		return(success);
-	}
+    public TeleporterFactory() {
+        super();
+    }
+
+    public boolean addNewTeleporter(final String label, final String identifier,
+            final String pickingUpSoundSamplePath) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final Teleporter teleporter = new Teleporter(label, pickingUpSoundSamplePath);
+            success = add(identifier, teleporter);
+        }
+        return (success);
+    }
 }

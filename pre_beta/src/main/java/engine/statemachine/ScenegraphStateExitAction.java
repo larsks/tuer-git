@@ -27,11 +27,12 @@ import se.hiflyer.fettle.StateMachine;
  * @author Julien Gouesse
  *
  */
-public class ScenegraphStateExitAction implements Action<ScenegraphState,String>{
+public class ScenegraphStateExitAction implements Action<ScenegraphState, String> {
 
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-        if(from!=null)
-		    from.setEnabled(false);
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        if (from != null)
+            from.setEnabled(false);
     }
 }

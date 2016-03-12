@@ -19,19 +19,19 @@ package engine.statemachine;
 
 import engine.data.PlayerData;
 
-public class AttackPossibleCondition extends ScheduledTaskCondition<PlayerState>{
+public class AttackPossibleCondition extends ScheduledTaskCondition<PlayerState> {
 
-	private final PlayerData playerData;
+    private final PlayerData playerData;
 
-	public AttackPossibleCondition(final PlayerData playerData){
-		super();
-		this.playerData=playerData;
-	}
+    public AttackPossibleCondition(final PlayerData playerData) {
+        super();
+        this.playerData = playerData;
+    }
 
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		//TODO check whether there is no incomplete attack
-		return(playerData.canAttack());
-	}
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        // TODO check whether there is no incomplete attack
+        return (playerData.canAttack());
+    }
 
 }

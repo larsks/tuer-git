@@ -26,34 +26,34 @@ import engine.misc.FontStore;
 import engine.misc.LocalizedMessageProvider;
 import engine.sound.SoundManager;
 
-public final class ContentRatingSystemState extends ScenegraphState{
-	
-	
-	private MouseManager mouseManager;
-	
-    
-	public ContentRatingSystemState(final NativeCanvas canvas,final PhysicalLayer physicalLayer,final MouseManager mouseManager,final SoundManager soundManager,
-			final FontStore fontStore,final LocalizedMessageProvider localizedMessageProvider){
+public final class ContentRatingSystemState extends ScenegraphState {
+
+    private MouseManager mouseManager;
+
+    public ContentRatingSystemState(final NativeCanvas canvas, final PhysicalLayer physicalLayer,
+            final MouseManager mouseManager, final SoundManager soundManager, final FontStore fontStore,
+            final LocalizedMessageProvider localizedMessageProvider) {
         super(soundManager);
-        this.mouseManager=mouseManager;
-        final String text=localizedMessageProvider.getString("CONTENT_RATING_WARNING");
-        final BMText textNode=new BMText("contentSystemRatingNode",text,fontStore.getFontsList().get(2),BMText.Align.Center,BMText.Justify.Center);
+        this.mouseManager = mouseManager;
+        final String text = localizedMessageProvider.getString("CONTENT_RATING_WARNING");
+        final BMText textNode = new BMText("contentSystemRatingNode", text, fontStore.getFontsList().get(2),
+                BMText.Align.Center, BMText.Justify.Center);
         getRoot().attachChild(textNode);
     }
-    
+
     @Override
-    public final void init(){
-        //do nothing here because this method will be called
-        //after the display of this state
+    public final void init() {
+        // do nothing here because this method will be called
+        // after the display of this state
     }
-    
+
     @Override
-    public void setEnabled(final boolean enabled){
-        final boolean wasEnabled=isEnabled();
-        if(wasEnabled!=enabled)
-            {super.setEnabled(enabled);
-             if(enabled)
-                 mouseManager.setGrabbed(GrabbedState.GRABBED);
-            }
+    public void setEnabled(final boolean enabled) {
+        final boolean wasEnabled = isEnabled();
+        if (wasEnabled != enabled) {
+            super.setEnabled(enabled);
+            if (enabled)
+                mouseManager.setGrabbed(GrabbedState.GRABBED);
+        }
     }
 }

@@ -20,18 +20,21 @@ package engine.data.common;
 import engine.abstraction.AbstractFactory;
 import engine.weaponry.Ammunition;
 
-public class AmmunitionBoxFactory extends AbstractFactory<AmmunitionBox>{
+public class AmmunitionBoxFactory extends AbstractFactory<AmmunitionBox> {
 
-	public AmmunitionBoxFactory(){
-		super();
-	}
-	
-	public boolean addNewAmmunitionBox(final String label,final String identifier,final String pickingUpSoundSamplePath,final Ammunition ammunition,final String textureResourceName,final int ammunitionCount){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-			{final AmmunitionBox ammunitionBox=new AmmunitionBox(label,pickingUpSoundSamplePath,ammunition,textureResourceName,ammunitionCount);
-			 success=add(identifier,ammunitionBox);
-			}
-		return(success);
-	}
+    public AmmunitionBoxFactory() {
+        super();
+    }
+
+    public boolean addNewAmmunitionBox(final String label, final String identifier,
+            final String pickingUpSoundSamplePath, final Ammunition ammunition, final String textureResourceName,
+            final int ammunitionCount) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final AmmunitionBox ammunitionBox = new AmmunitionBox(label, pickingUpSoundSamplePath, ammunition,
+                    textureResourceName, ammunitionCount);
+            success = add(identifier, ammunitionBox);
+        }
+        return (success);
+    }
 }

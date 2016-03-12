@@ -33,24 +33,38 @@ import engine.statemachine.ScenegraphStateMachine;
  * @author Julien Gouesse
  *
  */
-public class FontStore{
+public class FontStore {
 
-	private final List<BMFont> fontsList;
-	
-	public FontStore(){
-		fontsList=new ArrayList<>();
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-        try{fontsList.add(new BMFont(new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold-regular.fnt")),false));}
-        catch(IOException ioe)
-        {ioe.printStackTrace();}
-	}
+    private final List<BMFont> fontsList;
 
-	public final List<BMFont> getFontsList(){
-        return(Collections.unmodifiableList(fontsList));
+    public FontStore() {
+        fontsList = new ArrayList<>();
+        try {
+            fontsList.add(new BMFont(
+                    new URLResourceSource(
+                            ScenegraphStateMachine.class.getResource("/fonts/DejaVuSansCondensed-20-bold-regular.fnt")),
+                    false));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        try {
+            fontsList.add(new BMFont(
+                    new URLResourceSource(
+                            ScenegraphStateMachine.class.getResource("/fonts/Computerfont-35-medium-regular.fnt")),
+                    false));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        try {
+            fontsList.add(new BMFont(
+                    new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold-regular.fnt")),
+                    false));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
+    public final List<BMFont> getFontsList() {
+        return (Collections.unmodifiableList(fontsList));
     }
 }
