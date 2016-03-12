@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 
 public class MouseWheelMovedUpCondition implements Predicate<TwoInputStates> {
     @Override
-	public boolean apply(final TwoInputStates states) {
+    public boolean apply(final TwoInputStates states) {
         final InputState currentState = states.getCurrent();
         final InputState previousState = states.getPrevious();
 

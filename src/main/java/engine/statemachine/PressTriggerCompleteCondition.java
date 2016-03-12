@@ -20,22 +20,23 @@ package engine.statemachine;
 import engine.data.PlayerData;
 
 /**
- * Condition satisfied when the "press trigger" is complete, when the attack is going to start very soon
+ * Condition satisfied when the "press trigger" is complete, when the attack is
+ * going to start very soon
  * 
  * @author Julien Gouesse
  *
  */
-public class PressTriggerCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+public class PressTriggerCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
-	private final PlayerData playerData;
-	
-	public PressTriggerCompleteCondition(final PlayerData playerData){
-		super();
-		this.playerData=playerData;
-	}
-	
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isPressTriggerComplete());
-	}
+    private final PlayerData playerData;
+
+    public PressTriggerCompleteCondition(final PlayerData playerData) {
+        super();
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isPressTriggerComplete());
+    }
 }

@@ -19,18 +19,18 @@ package engine.data.common.userdata;
 
 import engine.data.common.Medikit;
 
-public final class MedikitUserData extends CollectibleUserData<Medikit>{
-	
-	public MedikitUserData(final Medikit medikit){
-		super(medikit,"health point");
-	}
-	
-	public int getHealth(){
-		return(collectible.getHealth());
-	}
-	
-	@Override
-	public String getPickingUpSoundSampleIdentifier(){
-		return(collectible.getPickingUpSoundSampleIdentifier());
-	}
+public final class MedikitUserData extends CollectibleUserData<Medikit> {
+
+    public MedikitUserData(final Medikit medikit) {
+        super(medikit, "health point");
+    }
+
+    public int getHealth() {
+        return (collectible.getHealth());
+    }
+
+    @Override
+    public String getPickingUpSoundSampleIdentifier() {
+        return (collectible.getPickingUpSoundSampleIdentifier());
+    }
 }

@@ -26,60 +26,57 @@ import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.RenderContext;
 import com.ardor3d.renderer.Renderer;
 
-public final class CircularSpreadTextureUpdaterController extends TextureUpdaterController{
+public final class CircularSpreadTextureUpdaterController extends TextureUpdaterController {
 
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-    /**location from where we start spreading*/
+    /** location from where we start spreading */
     private Point spreadCenter;
-    
-    
-    public CircularSpreadTextureUpdaterController(){}
 
-    public CircularSpreadTextureUpdaterController(String imageResourceName,
-            MovementEquation equation,
-            HashMap<ReadOnlyColorRGBA,ReadOnlyColorRGBA> colorSubstitutionTable,
-            final Point spreadCenter,final Renderer renderer,final RenderContext renderContext){
-        super(imageResourceName,equation,colorSubstitutionTable,renderer,renderContext);
-        this.spreadCenter=spreadCenter;
+    public CircularSpreadTextureUpdaterController() {
+    }
+
+    public CircularSpreadTextureUpdaterController(String imageResourceName, MovementEquation equation,
+            HashMap<ReadOnlyColorRGBA, ReadOnlyColorRGBA> colorSubstitutionTable, final Point spreadCenter,
+            final Renderer renderer, final RenderContext renderContext) {
+        super(imageResourceName, equation, colorSubstitutionTable, renderer, renderContext);
+        this.spreadCenter = spreadCenter;
     }
 
     @Override
-    protected Comparator<Entry<Point,ReadOnlyColorRGBA>> getColoredPointComparator() {
-        return(new CenteredColoredPointComparator(spreadCenter));
+    protected Comparator<Entry<Point, ReadOnlyColorRGBA>> getColoredPointComparator() {
+        return (new CenteredColoredPointComparator(spreadCenter));
     }
-    
-    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point,ReadOnlyColorRGBA>>{
-        
+
+    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point, ReadOnlyColorRGBA>> {
+
         private final Point spreadCenter;
-        
-        private CenteredColoredPointComparator(final Point spreadCenter){
-            this.spreadCenter=spreadCenter;
+
+        private CenteredColoredPointComparator(final Point spreadCenter) {
+            this.spreadCenter = spreadCenter;
         }
-        
-        
+
         @Override
-        public final int compare(final Entry<Point,ReadOnlyColorRGBA> o1,
-                                 final Entry<Point,ReadOnlyColorRGBA> o2){
-            final Point p1=o1.getKey();
-            final Point p2=o2.getKey();
-            double d1=distance(p1,spreadCenter);
-            double d2=distance(p2,spreadCenter);
-            return(d1==d2?0:d1<d2?-1:1);
-        } 
-    }
-    
-    private static double distance(final Point p1,final Point p2) {
-    	double abscissaSub=p2.getX()-p1.getX();
-    	double ordinateSub=p2.getY()-p1.getY();
-    	return Math.sqrt((abscissaSub*abscissaSub)+(ordinateSub*ordinateSub));
+        public final int compare(final Entry<Point, ReadOnlyColorRGBA> o1, final Entry<Point, ReadOnlyColorRGBA> o2) {
+            final Point p1 = o1.getKey();
+            final Point p2 = o2.getKey();
+            double d1 = distance(p1, spreadCenter);
+            double d2 = distance(p2, spreadCenter);
+            return (d1 == d2 ? 0 : d1 < d2 ? -1 : 1);
+        }
     }
 
-    public final Point getSpreadCenter(){
-        return(spreadCenter);
+    private static double distance(final Point p1, final Point p2) {
+        double abscissaSub = p2.getX() - p1.getX();
+        double ordinateSub = p2.getY() - p1.getY();
+        return Math.sqrt((abscissaSub * abscissaSub) + (ordinateSub * ordinateSub));
     }
 
-    public final void setSpreadCenter(final Point spreadCenter){
-        this.spreadCenter=spreadCenter;
+    public final Point getSpreadCenter() {
+        return (spreadCenter);
+    }
+
+    public final void setSpreadCenter(final Point spreadCenter) {
+        this.spreadCenter = spreadCenter;
     }
 }

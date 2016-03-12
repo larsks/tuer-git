@@ -30,58 +30,76 @@ import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.util.resource.URLResourceSource;
 import common.EngineServiceProviderInterface;
 
-public class TestComputeCollisionBoundingVolumes{
+public class TestComputeCollisionBoundingVolumes {
 
-	public static void main(String[] args){
-		JoglImageLoader.registerLoader();
-		final URL mapUrl=TestComputeCollisionBoundingVolumes.class.getResource("/images/containermap.png");
-    	final URLResourceSource mapSource=new URLResourceSource(mapUrl);
-    	final Image map=ImageLoaderUtil.loadImage(mapSource,false);
-    	final Boolean[][] collisionMap=new Boolean[map.getWidth()][map.getHeight()];
-    	for(int y=0;y<map.getHeight();y++)
-	    	for(int x=0;x<map.getWidth();x++)
-	    		{final int argb=ImageUtils.getARGB(map,x,y);
-	    		 collisionMap[x][y]=argb==ColorRGBA.BLUE.asIntARGB()?Boolean.TRUE:null;
-	    		}
-    	System.out.println("Input: ");
-    	final ArrayHelper arrayHelper=new ArrayHelper();
-    	System.out.println(arrayHelper.toString(collisionMap,false,null));
-    	final OccupancyMap occupancyMap=arrayHelper.createPackedOccupancyMap(collisionMap);
-    	System.out.println("rowCount: "+occupancyMap.getRowCount());
-    	System.out.println("columnCount: "+occupancyMap.getColumnCount());
-    	System.out.println("smallestRowIndex: "+occupancyMap.getSmallestRowIndex());
-    	System.out.println("biggestRowIndex: "+occupancyMap.getBiggestRowIndex());
-    	System.out.println("smallestColumnIndex: "+occupancyMap.getSmallestColumnIndex());
-    	System.out.println("biggestColumnIndex: "+occupancyMap.getBiggestColumnIndex());
-    	
-    	boolean occupancyMapConsistentWithCollisionMap=true;
-    	final int smallestColumnIndex=occupancyMap.getSmallestColumnIndex();
-    	final int smallestRowIndex=occupancyMap.getSmallestRowIndex();
-    	for(int y=0;y<map.getHeight()&&occupancyMapConsistentWithCollisionMap;y++)
-	    	for(int x=0;x<map.getWidth()&&occupancyMapConsistentWithCollisionMap;x++)
-    	        {final boolean cellInArray=0<=x-smallestColumnIndex&&x-smallestColumnIndex<occupancyMap.getColumnCount()&&
-    	         occupancyMap.hasNonNullColumn(x-smallestColumnIndex)&&0<=y-smallestRowIndex&&y-smallestRowIndex<occupancyMap.getRowCount(x-smallestColumnIndex);
-	    		 if(collisionMap[x][y]!=null&&collisionMap[x][y].booleanValue())
-    	        	 {//checks whether there is a cell at these coordinates and the cell is occupied
-	    			  occupancyMapConsistentWithCollisionMap&=cellInArray&&occupancyMap.getValue(x-smallestColumnIndex,y-smallestRowIndex);
-    	        	 }
-    	         else
-    	             {//checks whether there is no cell at these coordinates or the cell isn't occupied
-    	        	  occupancyMapConsistentWithCollisionMap&=!cellInArray||!occupancyMap.getValue(x-smallestColumnIndex,y-smallestRowIndex);
-    	             }
-    	        }
-    	System.out.println("Occupancy check: "+(occupancyMapConsistentWithCollisionMap?"OK":"NOK"));
-    	final long startTime=System.currentTimeMillis();
-    	System.out.println("Start");
-    	final java.util.Map<Vector2i,Boolean[][]> fullArrayMap=arrayHelper.computeFullArraysFromNonFullArray(collisionMap);
-    	final long durationInMilliseconds=System.currentTimeMillis()-startTime;
-    	System.out.println("Output:");
-    	System.out.println(arrayHelper.toString(fullArrayMap,map.getHeight(),map.getWidth()));
-    	System.out.println("End. Duration: "+durationInMilliseconds+" ms");
-    	
-    	//computes the bounding boxes
-    	final EngineServiceProviderInterface<?,?,?,?,?> seeker=ServiceLoader.load(EngineServiceProviderInterface.class).iterator().next();
-    	List<?> boundingBoxList=new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap,0,1,false,false);
-    	System.out.println("Bounding boxes: "+boundingBoxList.size());
-	}
+    public static void main(String[] args) {
+        JoglImageLoader.registerLoader();
+        final URL mapUrl = TestComputeCollisionBoundingVolumes.class.getResource("/images/containermap.png");
+        final URLResourceSource mapSource = new URLResourceSource(mapUrl);
+        final Image map = ImageLoaderUtil.loadImage(mapSource, false);
+        final Boolean[][] collisionMap = new Boolean[map.getWidth()][map.getHeight()];
+        for (int y = 0; y < map.getHeight(); y++)
+            for (int x = 0; x < map.getWidth(); x++) {
+                final int argb = ImageUtils.getARGB(map, x, y);
+                collisionMap[x][y] = argb == ColorRGBA.BLUE.asIntARGB() ? Boolean.TRUE : null;
+            }
+        System.out.println("Input: ");
+        final ArrayHelper arrayHelper = new ArrayHelper();
+        System.out.println(arrayHelper.toString(collisionMap, false, null));
+        final OccupancyMap occupancyMap = arrayHelper.createPackedOccupancyMap(collisionMap);
+        System.out.println("rowCount: " + occupancyMap.getRowCount());
+        System.out.println("columnCount: " + occupancyMap.getColumnCount());
+        System.out.println("smallestRowIndex: " + occupancyMap.getSmallestRowIndex());
+        System.out.println("biggestRowIndex: " + occupancyMap.getBiggestRowIndex());
+        System.out.println("smallestColumnIndex: " + occupancyMap.getSmallestColumnIndex());
+        System.out.println("biggestColumnIndex: " + occupancyMap.getBiggestColumnIndex());
+
+        boolean occupancyMapConsistentWithCollisionMap = true;
+        final int smallestColumnIndex = occupancyMap.getSmallestColumnIndex();
+        final int smallestRowIndex = occupancyMap.getSmallestRowIndex();
+        for (int y = 0; y < map.getHeight() && occupancyMapConsistentWithCollisionMap; y++)
+            for (int x = 0; x < map.getWidth() && occupancyMapConsistentWithCollisionMap; x++) {
+                final boolean cellInArray = 0 <= x - smallestColumnIndex
+                        && x - smallestColumnIndex < occupancyMap.getColumnCount()
+                        && occupancyMap.hasNonNullColumn(x - smallestColumnIndex) && 0 <= y - smallestRowIndex
+                        && y - smallestRowIndex < occupancyMap.getRowCount(x - smallestColumnIndex);
+                if (collisionMap[x][y] != null && collisionMap[x][y].booleanValue()) {// checks
+                                                                                      // whether
+                                                                                      // there
+                                                                                      // is
+                                                                                      // a
+                                                                                      // cell
+                                                                                      // at
+                                                                                      // these
+                                                                                      // coordinates
+                                                                                      // and
+                                                                                      // the
+                                                                                      // cell
+                                                                                      // is
+                                                                                      // occupied
+                    occupancyMapConsistentWithCollisionMap &= cellInArray
+                            && occupancyMap.getValue(x - smallestColumnIndex, y - smallestRowIndex);
+                } else {// checks whether there is no cell at these coordinates
+                        // or the cell isn't occupied
+                    occupancyMapConsistentWithCollisionMap &= !cellInArray
+                            || !occupancyMap.getValue(x - smallestColumnIndex, y - smallestRowIndex);
+                }
+            }
+        System.out.println("Occupancy check: " + (occupancyMapConsistentWithCollisionMap ? "OK" : "NOK"));
+        final long startTime = System.currentTimeMillis();
+        System.out.println("Start");
+        final java.util.Map<Vector2i, Boolean[][]> fullArrayMap = arrayHelper
+                .computeFullArraysFromNonFullArray(collisionMap);
+        final long durationInMilliseconds = System.currentTimeMillis() - startTime;
+        System.out.println("Output:");
+        System.out.println(arrayHelper.toString(fullArrayMap, map.getHeight(), map.getWidth()));
+        System.out.println("End. Duration: " + durationInMilliseconds + " ms");
+
+        // computes the bounding boxes
+        final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker = ServiceLoader
+                .load(EngineServiceProviderInterface.class).iterator().next();
+        List<?> boundingBoxList = new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap, 0, 1,
+                false, false);
+        System.out.println("Bounding boxes: " + boundingBoxList.size());
+    }
 }

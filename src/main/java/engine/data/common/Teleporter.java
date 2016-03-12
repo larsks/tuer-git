@@ -17,9 +17,9 @@
  */
 package engine.data.common;
 
-public class Teleporter extends Collectible{
-	
-	public Teleporter(final String label,final String pickingUpSoundSamplePath){
-		super(label,pickingUpSoundSamplePath);
-	}
+public class Teleporter extends Collectible {
+
+    public Teleporter(final String label, final String pickingUpSoundSamplePath) {
+        super(label, pickingUpSoundSamplePath);
+    }
 }

@@ -30,38 +30,38 @@ import engine.misc.DeallocationHelper;
  * @author Julien Gouesse
  *
  */
-public class ReliableRenderer extends JoglRenderer{
-	
-	private final DeallocationHelper deallocationHelper;
+public class ReliableRenderer extends JoglRenderer {
 
-	public ReliableRenderer(){
-		this(new DeallocationHelper());
-	}
-	
-	public ReliableRenderer(final DeallocationHelper deallocationHelper){
-		super();
-		this.deallocationHelper=deallocationHelper;
-	}
-	
-	@Override
-	public void deleteVBOs(final AbstractBufferData<?> buffer){
-		super.deleteVBOs(buffer);
-		final Buffer realNioBuffer=buffer.getBuffer();
-		deleteBuffer(realNioBuffer);
-	}
-	
-	@Override
-	public void deleteTexture(final Texture texture){
-		super.deleteTexture(texture);
-		final Image image=texture.getImage();
-		if(image!=null&&image.getDataSize()>=1)
-		    {for(Buffer data:image.getData())
-		    	 deleteBuffer(data);
-		    }
-	}
-	
-	public void deleteBuffer(final Buffer realNioBuffer){
-		if(deallocationHelper!=null)
-		    deallocationHelper.deallocate(realNioBuffer);
-	}
+    private final DeallocationHelper deallocationHelper;
+
+    public ReliableRenderer() {
+        this(new DeallocationHelper());
+    }
+
+    public ReliableRenderer(final DeallocationHelper deallocationHelper) {
+        super();
+        this.deallocationHelper = deallocationHelper;
+    }
+
+    @Override
+    public void deleteVBOs(final AbstractBufferData<?> buffer) {
+        super.deleteVBOs(buffer);
+        final Buffer realNioBuffer = buffer.getBuffer();
+        deleteBuffer(realNioBuffer);
+    }
+
+    @Override
+    public void deleteTexture(final Texture texture) {
+        super.deleteTexture(texture);
+        final Image image = texture.getImage();
+        if (image != null && image.getDataSize() >= 1) {
+            for (Buffer data : image.getData())
+                deleteBuffer(data);
+        }
+    }
+
+    public void deleteBuffer(final Buffer realNioBuffer) {
+        if (deallocationHelper != null)
+            deallocationHelper.deallocate(realNioBuffer);
+    }
 }

@@ -22,22 +22,22 @@ import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
-public class SelectionAction implements Action<PlayerState,PlayerEvent>{
+public class SelectionAction implements Action<PlayerState, PlayerEvent> {
 
-	private final PlayerData playerData;
-	
-	public SelectionAction(final PlayerData playerData){
-        this.playerData=playerData;
+    private final PlayerData playerData;
+
+    public SelectionAction(final PlayerData playerData) {
+        this.playerData = playerData;
     }
-	
-	@Override
-    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
-		//FIXME if the selection fails, attempt to select the current weapon
-		if(from.equals(PlayerState.SELECT_NEXT))
-			playerData.selectNextWeapon();
-		else
-			if(from.equals(PlayerState.SELECT_PREVIOUS))
-				playerData.selectPreviousWeapon();
-		//FIXME handle other transitions
-	}
+
+    @Override
+    public void onTransition(PlayerState from, PlayerState to, PlayerEvent event, Arguments args,
+            StateMachine<PlayerState, PlayerEvent> stateMachine) {
+        // FIXME if the selection fails, attempt to select the current weapon
+        if (from.equals(PlayerState.SELECT_NEXT))
+            playerData.selectNextWeapon();
+        else if (from.equals(PlayerState.SELECT_PREVIOUS))
+            playerData.selectPreviousWeapon();
+        // FIXME handle other transitions
+    }
 }

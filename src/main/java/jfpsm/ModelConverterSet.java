@@ -21,43 +21,43 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ModelConverterSet extends Tool{
+public class ModelConverterSet extends Tool {
 
-	private static final long serialVersionUID=1L;
-	
-	private ArrayList<ModelConverter> modelConvertersList;
-	
-	public ModelConverterSet(){
-		this("");
-	}
-	
-	public ModelConverterSet(final String name){
-		super(name);
-		modelConvertersList=new ArrayList<>();
-		markDirty();
-	}
-	
-	public final void addModelConverter(final ModelConverter modelConverter){
-		modelConvertersList.add(modelConverter);
-        markDirty();
+    private static final long serialVersionUID = 1L;
+
+    private ArrayList<ModelConverter> modelConvertersList;
+
+    public ModelConverterSet() {
+        this("");
     }
-    
-    public final void removeModelConverter(final ModelConverter modelConverter){
-    	modelConvertersList.remove(modelConverter);
-        markDirty();
-    }
-    
-    public final void removeAllModelConverters(){
-    	modelConvertersList.clear();
+
+    public ModelConverterSet(final String name) {
+        super(name);
+        modelConvertersList = new ArrayList<>();
         markDirty();
     }
 
-    public final List<ModelConverter> getModelConvertersList(){
-        return(Collections.unmodifiableList(modelConvertersList));
+    public final void addModelConverter(final ModelConverter modelConverter) {
+        modelConvertersList.add(modelConverter);
+        markDirty();
     }
 
-    public final void setModelConvertersList(final ArrayList<ModelConverter> modelConvertersList){
-        this.modelConvertersList=modelConvertersList;
+    public final void removeModelConverter(final ModelConverter modelConverter) {
+        modelConvertersList.remove(modelConverter);
+        markDirty();
+    }
+
+    public final void removeAllModelConverters() {
+        modelConvertersList.clear();
+        markDirty();
+    }
+
+    public final List<ModelConverter> getModelConvertersList() {
+        return (Collections.unmodifiableList(modelConvertersList));
+    }
+
+    public final void setModelConvertersList(final ArrayList<ModelConverter> modelConvertersList) {
+        this.modelConvertersList = modelConvertersList;
         markDirty();
     }
 }

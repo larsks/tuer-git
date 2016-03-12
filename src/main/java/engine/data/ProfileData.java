@@ -23,64 +23,72 @@ import java.util.Set;
 import engine.statemachine.GameStatistics;
 
 /**
- * Data of the profile, manages the unlocked levels. It will be used to store the other achievements too. It should contain the player's 
- * statistics (the latest GameStatistics instance should transfer its data into it when ending a mission).
+ * Data of the profile, manages the unlocked levels. It will be used to store
+ * the other achievements too. It should contain the player's statistics (the
+ * latest GameStatistics instance should transfer its data into it when ending a
+ * mission).
  * 
  * @author Julien Gouesse
  *
  */
-public class ProfileData{
-	
-	/**
-	 * list of the level identifiers that the player unlocks (to which he can go)
-	 * */
-	final Set<String> unlockedLevelIdentifiers;
-	
-	/**
-	 * Constructor
-	 */
-	public ProfileData(){
-		super();
-		this.unlockedLevelIdentifiers=new HashSet<>();
-	}
+public class ProfileData {
 
-	/**
-	 * Unlocks a level
-	 * 
-	 * @param levelIdentifier identifier of the level to add
-	 * @return <code>true</code> if the identifier points to a level that wasn't already unlocked before this call, otherwise <code>false</code>
-	 */
-	public boolean addUnlockedLevelIdentifier(final String levelIdentifier){
-		return(unlockedLevelIdentifiers.add(levelIdentifier));
-	}
-	
-	/**
-	 * Tells whether a level is unlocked
-	 * 
-	 * @param levelIdentifier identifier of the level
-	 * @return <code>true</code> if the identifier points to an unlocked level, otherwise <code>false</code>
-	 */
-	public boolean containsUnlockedLevelIdentifier(final String levelIdentifier){
-		return(unlockedLevelIdentifiers.contains(levelIdentifier));
-	}
-	
-	/**
-	 * Updates the games statistics of the player with the statistics of a game
-	 * 
-	 * @param gameStats statistics of a game
-	 */
-	public void updateGamesStatistics(final GameStatistics gameStats){
-		//TODO
-	}
-	
-	public void save(){
-		//TODO
-	}
-	
-	public void load(){
-		//unlocks at least the first level
-		//FIXME the identifier of the first level shouldn't be hardcoded
-		unlockedLevelIdentifiers.add("0");
-		//TODO if the file exists, use it to get the unlocked levels
-	}
+    /**
+     * list of the level identifiers that the player unlocks (to which he can
+     * go)
+     */
+    final Set<String> unlockedLevelIdentifiers;
+
+    /**
+     * Constructor
+     */
+    public ProfileData() {
+        super();
+        this.unlockedLevelIdentifiers = new HashSet<>();
+    }
+
+    /**
+     * Unlocks a level
+     * 
+     * @param levelIdentifier
+     *            identifier of the level to add
+     * @return <code>true</code> if the identifier points to a level that wasn't
+     *         already unlocked before this call, otherwise <code>false</code>
+     */
+    public boolean addUnlockedLevelIdentifier(final String levelIdentifier) {
+        return (unlockedLevelIdentifiers.add(levelIdentifier));
+    }
+
+    /**
+     * Tells whether a level is unlocked
+     * 
+     * @param levelIdentifier
+     *            identifier of the level
+     * @return <code>true</code> if the identifier points to an unlocked level,
+     *         otherwise <code>false</code>
+     */
+    public boolean containsUnlockedLevelIdentifier(final String levelIdentifier) {
+        return (unlockedLevelIdentifiers.contains(levelIdentifier));
+    }
+
+    /**
+     * Updates the games statistics of the player with the statistics of a game
+     * 
+     * @param gameStats
+     *            statistics of a game
+     */
+    public void updateGamesStatistics(final GameStatistics gameStats) {
+        // TODO
+    }
+
+    public void save() {
+        // TODO
+    }
+
+    public void load() {
+        // unlocks at least the first level
+        // FIXME the identifier of the first level shouldn't be hardcoded
+        unlockedLevelIdentifiers.add("0");
+        // TODO if the file exists, use it to get the unlocked levels
+    }
 }

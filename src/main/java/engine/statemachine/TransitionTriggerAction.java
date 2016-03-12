@@ -34,73 +34,86 @@ import com.ardor3d.util.GameTaskQueueManager;
  * @author Julien Gouesse
  *
  */
-public class TransitionTriggerAction<S,E> implements TriggerAction, Runnable, Action<S,E>{
+public class TransitionTriggerAction<S, E> implements TriggerAction, Runnable, Action<S, E> {
 
-	/**state machine to which events are fired*/
-    protected final StateMachine<S,E> stateMachine;
-    
-    /**event fired in this state machine*/
+    /** state machine to which events are fired */
+    protected final StateMachine<S, E> stateMachine;
+
+    /** event fired in this state machine */
     protected final E event;
-    
-    /**arguments used when the event is fired*/
+
+    /** arguments used when the event is fired */
     protected final ScenegraphTransitionTriggerActionArguments arguments;
-    
-    /**render context if the event must be fired on the update queue, otherwise null*/
+
+    /**
+     * render context if the event must be fired on the update queue, otherwise
+     * null
+     */
     protected final RenderContext renderContext;
-    
+
     /**
      * Constructor
      * 
-     * @param stateMachine state machine to which events are fired (must not be null)
-     * @param event event fired in this state machine (must not be null)
-     * @param renderContext render context if the event must be fired on the update queue, otherwise null
+     * @param stateMachine
+     *            state machine to which events are fired (must not be null)
+     * @param event
+     *            event fired in this state machine (must not be null)
+     * @param renderContext
+     *            render context if the event must be fired on the update queue,
+     *            otherwise null
      */
-    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,RenderContext renderContext){
-        this(stateMachine,event,null,renderContext);
+    public TransitionTriggerAction(StateMachine<S, E> stateMachine, E event, RenderContext renderContext) {
+        this(stateMachine, event, null, renderContext);
     }
-    
+
     /**
      * Constructor
      * 
-     * @param stateMachine state machine to which events are fired (must not be null)
-     * @param event event fired in this state machine (must not be null)
-     * @param arguments arguments used when the event is fired (can be null)
-     * @param renderContext render context if the event must be fired on the update queue, otherwise null
+     * @param stateMachine
+     *            state machine to which events are fired (must not be null)
+     * @param event
+     *            event fired in this state machine (must not be null)
+     * @param arguments
+     *            arguments used when the event is fired (can be null)
+     * @param renderContext
+     *            render context if the event must be fired on the update queue,
+     *            otherwise null
      */
-    public TransitionTriggerAction(StateMachine<S,E> stateMachine,E event,ScenegraphTransitionTriggerActionArguments arguments,RenderContext renderContext){
-        this.stateMachine=stateMachine;
-        this.event=event;
-        this.arguments=arguments;
-        this.renderContext=renderContext;
+    public TransitionTriggerAction(StateMachine<S, E> stateMachine, E event,
+            ScenegraphTransitionTriggerActionArguments arguments, RenderContext renderContext) {
+        this.stateMachine = stateMachine;
+        this.event = event;
+        this.arguments = arguments;
+        this.renderContext = renderContext;
     }
 
     @Override
-    public void perform(final Canvas source,final TwoInputStates inputState,final double tpf){
+    public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
         run();
     }
-    
+
     @Override
-    public void onTransition(S from,S to,E event,Arguments args,StateMachine<S,E> stateMachine){
-    	run();
+    public void onTransition(S from, S to, E event, Arguments args, StateMachine<S, E> stateMachine) {
+        run();
     }
-    
-    protected void doFireEvent(){
-    	//fires the event in the state machine to cause the transition
-        stateMachine.fireEvent(event,arguments);
+
+    protected void doFireEvent() {
+        // fires the event in the state machine to cause the transition
+        stateMachine.fireEvent(event, arguments);
     }
-    
+
     @Override
-    public void run(){
-    	if(renderContext!=null)
-            //this operation must be done on the update queue
-            GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>(){
+    public void run() {
+        if (renderContext != null)
+            // this operation must be done on the update queue
+            GameTaskQueueManager.getManager(renderContext).update(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception{
-                	doFireEvent();
-                    return(null);
+                public Void call() throws Exception {
+                    doFireEvent();
+                    return (null);
                 }
             });
-    	else
-    		doFireEvent();
+        else
+            doFireEvent();
     }
 }

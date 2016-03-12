@@ -19,30 +19,29 @@ package jfpsm;
 
 import java.io.Serializable;
 
-public abstract class Namable implements Serializable{
-    
-    
+public abstract class Namable implements Serializable {
+
     private static final long serialVersionUID = 1L;
-    
+
     private String name;
-    
-    
-    public Namable(){}
-    
-    public Namable(String name){
-        this.name=name;
+
+    public Namable() {
     }
-    
+
+    public Namable(String name) {
+        this.name = name;
+    }
+
     @Override
-    public String toString(){
-        return(getName());
+    public String toString() {
+        return (getName());
     }
 
-    public String getName(){
-        return(name);
+    public String getName() {
+        return (name);
     }
 
-    public void setName(String name){
-        this.name=name;
+    public void setName(String name) {
+        this.name = name;
     }
 }

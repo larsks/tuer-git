@@ -24,18 +24,19 @@ import engine.abstraction.AbstractFactory;
  * @author Julien Gouesse
  *
  */
-public class MedikitFactory extends AbstractFactory<Medikit>{
-	
-	public MedikitFactory(){
-		super();
-	}
+public class MedikitFactory extends AbstractFactory<Medikit> {
 
-	public boolean addNewMedikit(final String label,final String identifier,final String textureResourceName,final String pickingUpSoundSamplePath,final int health){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-		    {final Medikit medikit=new Medikit(label,textureResourceName,pickingUpSoundSamplePath,health);
-			 success=add(identifier,medikit);
-		    }
-		return(success);
-	}
+    public MedikitFactory() {
+        super();
+    }
+
+    public boolean addNewMedikit(final String label, final String identifier, final String textureResourceName,
+            final String pickingUpSoundSamplePath, final int health) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final Medikit medikit = new Medikit(label, textureResourceName, pickingUpSoundSamplePath, health);
+            success = add(identifier, medikit);
+        }
+        return (success);
+    }
 }

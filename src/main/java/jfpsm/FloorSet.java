@@ -22,93 +22,92 @@ import java.util.ArrayList;
 
 /**
  * Container of floors => level
+ * 
  * @author Julien Gouesse
  *
  */
-public final class FloorSet extends JFPSMProjectUserObject{
-    
-    
-    private static final long serialVersionUID=1L;
-    
+public final class FloorSet extends JFPSMProjectUserObject {
+
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<Floor> floorsList;
-    
+
     private transient boolean dirty;
-    
-    
-    public FloorSet(){
+
+    public FloorSet() {
         this("");
     }
-    
-    public FloorSet(String name){
+
+    public FloorSet(String name) {
         super(name);
-        floorsList=new ArrayList<>();
+        floorsList = new ArrayList<>();
         markDirty();
     }
-    
+
     @Transient
     @Override
-    public final boolean isDirty(){
-        boolean dirty=this.dirty;
-        if(!dirty)
-            for(Floor floor:floorsList)
-                if(floor.isDirty())
-                    {dirty=true;
-                     break;
-                    }
-        return(dirty);
+    public final boolean isDirty() {
+        boolean dirty = this.dirty;
+        if (!dirty)
+            for (Floor floor : floorsList)
+                if (floor.isDirty()) {
+                    dirty = true;
+                    break;
+                }
+        return (dirty);
     }
-    
+
     @Override
-    public final void unmarkDirty(){
-        dirty=false;
+    public final void unmarkDirty() {
+        dirty = false;
     }
-    
+
     @Override
-    public final void markDirty(){
-        dirty=true;
+    public final void markDirty() {
+        dirty = true;
     }
-    
-    public final void addFloor(Floor floor){
+
+    public final void addFloor(Floor floor) {
         floorsList.add(floor);
         markDirty();
     }
-    
-    public final void removeFloor(Floor floor){
+
+    public final void removeFloor(Floor floor) {
         floorsList.remove(floor);
         markDirty();
     }
-    
-    public final void removeAllFloors(){
+
+    public final void removeAllFloors() {
         floorsList.clear();
         markDirty();
     }
 
-    public final ArrayList<Floor> getFloorsList(){
-        return(floorsList);
+    public final ArrayList<Floor> getFloorsList() {
+        return (floorsList);
     }
 
-    public final void setFloorsList(ArrayList<Floor> floorsList){
-        this.floorsList=floorsList;
+    public final void setFloorsList(ArrayList<Floor> floorsList) {
+        this.floorsList = floorsList;
         markDirty();
     }
-    
+
     @Override
-    final boolean canInstantiateChildren(){
-        return(true);
+    final boolean canInstantiateChildren() {
+        return (true);
     }
 
     @Override
-    final boolean isOpenable(){
-        return(true);
+    final boolean isOpenable() {
+        return (true);
     }
 
     @Override
-    final boolean isRemovable(){
-        return(true);
+    final boolean isRemovable() {
+        return (true);
     }
-    
+
     @Override
-    public Viewer createViewer(final Project project,final ProjectManager projectManager){
-    	return(new FloorSetViewer(this,project,projectManager));
+    public Viewer createViewer(final Project project, final ProjectManager projectManager) {
+        return (new FloorSetViewer(this, project, projectManager));
     }
 }

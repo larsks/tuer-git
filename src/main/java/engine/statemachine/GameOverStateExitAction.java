@@ -21,18 +21,20 @@ import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
 /**
- * Action used when exiting the game over state, it just removes the game statistics from it
+ * Action used when exiting the game over state, it just removes the game
+ * statistics from it
  * 
  * @author Julien Gouesse
  *
  */
-public class GameOverStateExitAction extends ScenegraphStateExitAction{
+public class GameOverStateExitAction extends ScenegraphStateExitAction {
 
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		super.onTransition(from,to,cause,args,stateMachine);
-		final GameOverState gameOverState=(GameOverState)from;
-		gameOverState.setGameStatistics(null);
-		gameOverState.setObjectives(null);
-	}
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        super.onTransition(from, to, cause, args, stateMachine);
+        final GameOverState gameOverState = (GameOverState) from;
+        gameOverState.setGameStatistics(null);
+        gameOverState.setObjectives(null);
+    }
 }

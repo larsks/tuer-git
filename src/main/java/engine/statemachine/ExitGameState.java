@@ -37,48 +37,48 @@ import engine.sound.SoundManager;
  * @author Julien Gouesse
  *
  */
-public class ExitGameState extends ScenegraphState{
-	
-	private final NativeCanvas canvas;
-	
-	private final SoundManager soundManager;
-	
-	private final ProfileData profileData;
-	
-	private final SettingsProvider settingsProvider;
+public class ExitGameState extends ScenegraphState {
 
-	public ExitGameState(final NativeCanvas canvas,final SoundManager soundManager,final ProfileData profileData,final SettingsProvider settingsProvider){
-		super(soundManager);
-		this.canvas=canvas;
-		this.soundManager=soundManager;
-		this.profileData=profileData;
-		this.settingsProvider=settingsProvider;
-		getRoot().addController(new SpatialController<Node>(){
-			@Override
-			public void update(final double timeSinceLastCall,final Node caller){
-				performFinalCleanupAndExit();
-			}
-		});
-	}
-	
-	protected void performFinalCleanupAndExit(){
-		try{settingsProvider.save();
-			profileData.save();
-			soundManager.stop();
-			soundManager.cleanup();
-		    final RenderContext renderContext=canvas.getCanvasRenderer().getRenderContext();
-		    GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>(){
+    private final NativeCanvas canvas;
+
+    private final SoundManager soundManager;
+
+    private final ProfileData profileData;
+
+    private final SettingsProvider settingsProvider;
+
+    public ExitGameState(final NativeCanvas canvas, final SoundManager soundManager, final ProfileData profileData,
+            final SettingsProvider settingsProvider) {
+        super(soundManager);
+        this.canvas = canvas;
+        this.soundManager = soundManager;
+        this.profileData = profileData;
+        this.settingsProvider = settingsProvider;
+        getRoot().addController(new SpatialController<Node>() {
+            @Override
+            public void update(final double timeSinceLastCall, final Node caller) {
+                performFinalCleanupAndExit();
+            }
+        });
+    }
+
+    protected void performFinalCleanupAndExit() {
+        try {
+            settingsProvider.save();
+            profileData.save();
+            soundManager.stop();
+            soundManager.cleanup();
+            final RenderContext renderContext = canvas.getCanvasRenderer().getRenderContext();
+            GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception{
-            	    ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
-                    return(null);
+                public Void call() throws Exception {
+                    ContextGarbageCollector.doFinalCleanup(canvas.getCanvasRenderer().getRenderer());
+                    return (null);
                 }
             });
-		    ((JoglNewtWindow)canvas).getNewtWindow().destroy();
-		   }
-		finally
-		{//necessary for Java Web Start
-	     System.exit(0);
-		}
-	}
+            ((JoglNewtWindow) canvas).getNewtWindow().destroy();
+        } finally {// necessary for Java Web Start
+            System.exit(0);
+        }
+    }
 }

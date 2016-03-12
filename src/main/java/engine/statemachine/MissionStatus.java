@@ -23,22 +23,24 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public enum MissionStatus{
+public enum MissionStatus {
 
-	/**
-	 * the objectives of the mission have been achieved and the player is still alive
-	 * */
-	COMPLETED,
-	/**
-	 * the player is still alive and has reached the end of the mission but some objectives haven't been achieved
-	 */
-	FAILED,
-	/**
-	 * the player has just died during the mission
-	 */
-	DECEASED,
-	/**
-	 * the player has just aborted the mission
-	 */
-	ABORTED;
+    /**
+     * the objectives of the mission have been achieved and the player is still
+     * alive
+     */
+    COMPLETED,
+    /**
+     * the player is still alive and has reached the end of the mission but some
+     * objectives haven't been achieved
+     */
+    FAILED,
+    /**
+     * the player has just died during the mission
+     */
+    DECEASED,
+    /**
+     * the player has just aborted the mission
+     */
+    ABORTED;
 }

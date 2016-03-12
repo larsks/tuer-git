@@ -21,18 +21,17 @@ import engine.data.PlayerData;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.Condition;
 
-
-public class ReloadPossibleCondition implements Condition{
+public class ReloadPossibleCondition implements Condition {
 
     private final PlayerData playerData;
 
-    public ReloadPossibleCondition(final PlayerData playerData){
-        this.playerData=playerData;
+    public ReloadPossibleCondition(final PlayerData playerData) {
+        this.playerData = playerData;
     }
 
     @Override
-    public boolean isSatisfied(Arguments args){
-        return(playerData.canReload());
+    public boolean isSatisfied(Arguments args) {
+        return (playerData.canReload());
     }
 
 }

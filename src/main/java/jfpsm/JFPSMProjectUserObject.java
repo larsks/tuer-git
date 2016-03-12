@@ -17,23 +17,26 @@
  */
 package jfpsm;
 
-public abstract class JFPSMProjectUserObject extends JFPSMUserObject{
+public abstract class JFPSMProjectUserObject extends JFPSMUserObject {
 
-	
-	private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
-	public JFPSMProjectUserObject(final String name){
-		super(name);
-	}
-	
-	/**
-     * Creates a dedicated viewer for this object, it returns <code>null</code> if it has no such viewer
+    public JFPSMProjectUserObject(final String name) {
+        super(name);
+    }
+
+    /**
+     * Creates a dedicated viewer for this object, it returns <code>null</code>
+     * if it has no such viewer
      * 
-     * @param project project in which this object is, can be null if it does not depend on any project
-     * @param projectManager project manager
+     * @param project
+     *            project in which this object is, can be null if it does not
+     *            depend on any project
+     * @param projectManager
+     *            project manager
      * @return
      */
-    public Viewer createViewer(final Project project,final ProjectManager projectManager){
-    	return(null);
+    public Viewer createViewer(final Project project, final ProjectManager projectManager) {
+        return (null);
     }
 }

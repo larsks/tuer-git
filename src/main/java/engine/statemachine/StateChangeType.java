@@ -23,13 +23,13 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public enum StateChangeType{
-	/**
-	 * the state machine enters a state
-	 */
-	ENTRY,
-	/**
-	 * the state machine exits a state
-	 */
-	EXIT
+public enum StateChangeType {
+    /**
+     * the state machine enters a state
+     */
+    ENTRY,
+    /**
+     * the state machine exits a state
+     */
+    EXIT
 }

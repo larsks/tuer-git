@@ -23,63 +23,64 @@ import com.ardor3d.scenegraph.extension.SwitchNode;
 
 import engine.sound.SoundManager;
 
-public class ScenegraphState{
+public class ScenegraphState {
 
-	/**flag indicating whether this state is enabled*/
+    /** flag indicating whether this state is enabled */
     private boolean enabled;
-	/**layer used to handle the input*/
-    private LogicalLayer logicalLayer;    
-    /**root node*/
+    /** layer used to handle the input */
+    private LogicalLayer logicalLayer;
+    /** root node */
     private final Node root;
-    /**class used to play some sound samples*/
+    /** class used to play some sound samples */
     private final SoundManager soundManager;
-	
-    public ScenegraphState(){
-    	this(null,null,null);
-    }
-	
-	public ScenegraphState(final SoundManager soundManager){
-		this(soundManager,new LogicalLayer(),new Node());
-	}
-	
-	protected ScenegraphState(final SoundManager soundManager,final LogicalLayer logicalLayer,final Node root){
-		super();
-		this.soundManager=soundManager;
-        this.logicalLayer=logicalLayer;
-        this.root=root;
-	}
-	
-	public void init(){}
-	
-	public final boolean isEnabled(){
-        return(this.enabled);
+
+    public ScenegraphState() {
+        this(null, null, null);
     }
 
-	public final Node getRoot(){
-        return(root);
+    public ScenegraphState(final SoundManager soundManager) {
+        this(soundManager, new LogicalLayer(), new Node());
     }
 
-	public final LogicalLayer getLogicalLayer(){
-        return(logicalLayer);
+    protected ScenegraphState(final SoundManager soundManager, final LogicalLayer logicalLayer, final Node root) {
+        super();
+        this.soundManager = soundManager;
+        this.logicalLayer = logicalLayer;
+        this.root = root;
     }
 
-	public final SoundManager getSoundManager(){
-	    return(soundManager);
+    public void init() {
     }
-    
-    public void setEnabled(final boolean enabled){
-    	if(this.enabled!=enabled)
-    	    {this.enabled=enabled;
-    	     if(root!=null)
-    	         {final SwitchNode switchNode=(SwitchNode)root.getParent();
-       	          final int index=switchNode.getChildIndex(root);
-                  if(index!=-1)
-                	  //shows only this child node
-                      switchNode.setVisible(index,enabled);
-                  else
-                	  //shows no child node
-                	  switchNode.setAllNonVisible();
-    	         }
-    	    }
+
+    public final boolean isEnabled() {
+        return (this.enabled);
+    }
+
+    public final Node getRoot() {
+        return (root);
+    }
+
+    public final LogicalLayer getLogicalLayer() {
+        return (logicalLayer);
+    }
+
+    public final SoundManager getSoundManager() {
+        return (soundManager);
+    }
+
+    public void setEnabled(final boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            if (root != null) {
+                final SwitchNode switchNode = (SwitchNode) root.getParent();
+                final int index = switchNode.getChildIndex(root);
+                if (index != -1)
+                    // shows only this child node
+                    switchNode.setVisible(index, enabled);
+                else
+                    // shows no child node
+                    switchNode.setAllNonVisible();
+            }
+        }
     }
 }

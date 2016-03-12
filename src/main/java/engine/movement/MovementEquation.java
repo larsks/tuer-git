@@ -19,10 +19,12 @@ package engine.movement;
 
 import java.io.Serializable;
 
-public interface MovementEquation extends Serializable{
+public interface MovementEquation extends Serializable {
     /**
      * get the value of the movement after elapsedTime seconds
-     * @param elapsedTime elapsed time in seconds
+     * 
+     * @param elapsedTime
+     *            elapsed time in seconds
      * @return value after elapsedTime seconds
      */
     public double getValueAtTime(final double elapsedTime);

@@ -25,16 +25,16 @@ import engine.taskmanagement.TaskManager;
  * @author Julien Gouesse
  *
  */
-public class NoPendingTaskCondition extends ScheduledTaskCondition<ScenegraphState>{
+public class NoPendingTaskCondition extends ScheduledTaskCondition<ScenegraphState> {
 
     protected final TaskManager taskManager;
 
-    public NoPendingTaskCondition(TaskManager taskManager){
-        this.taskManager=taskManager;
+    public NoPendingTaskCondition(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
     @Override
-    public boolean isSatisfied(final ScenegraphState previousState,final ScenegraphState currentState){
-        return taskManager.getTaskCount()==0;
+    public boolean isSatisfied(final ScenegraphState previousState, final ScenegraphState currentState) {
+        return taskManager.getTaskCount() == 0;
     }
 }

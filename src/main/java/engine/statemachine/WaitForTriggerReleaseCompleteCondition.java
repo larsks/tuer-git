@@ -19,17 +19,17 @@ package engine.statemachine;
 
 import engine.data.PlayerData;
 
-public class WaitForTriggerReleaseCompleteCondition extends ScheduledTaskCondition<PlayerState>{
+public class WaitForTriggerReleaseCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
-	private final PlayerData playerData;
-	
-	public WaitForTriggerReleaseCompleteCondition(final PlayerData playerData){
-		super();
-		this.playerData=playerData;
-	}
-	
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isWaitForTriggerReleaseComplete());
-	}
+    private final PlayerData playerData;
+
+    public WaitForTriggerReleaseCompleteCondition(final PlayerData playerData) {
+        super();
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isWaitForTriggerReleaseComplete());
+    }
 }

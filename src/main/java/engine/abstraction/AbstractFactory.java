@@ -22,67 +22,66 @@ import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractFactory<T>{
-	
-	protected final AtomicInteger autoIncrementalIndex=new AtomicInteger(0);
-	/**
-	 * map containing string identifiers
-	 * for its components
-	 */
-	protected final HashMap<String,T> componentMap;
-	
-	/**
-	 * map containing integer identifiers for its 
-	 * components
-	 */
-	protected final HashMap<Integer,T> componentIdentifierMap;
+public abstract class AbstractFactory<T> {
 
-	public AbstractFactory(){
-		componentMap=new HashMap<>();
-		componentIdentifierMap=new HashMap<>();
-	}
+    protected final AtomicInteger autoIncrementalIndex = new AtomicInteger(0);
+    /**
+     * map containing string identifiers for its components
+     */
+    protected final HashMap<String, T> componentMap;
 
-	protected boolean add(final String stringId,final T component){
-		Objects.requireNonNull(stringId,"the string identifier must not be null");
-		Objects.requireNonNull(component,"the component must not be null");
-		boolean success=!componentMap.containsKey(stringId)&&!componentMap.containsValue(component)&&
-				        !componentIdentifierMap.containsValue(component);
-		if(success)
-		    {final int generatedId=autoIncrementalIndex.getAndIncrement();
-			 final Integer generatedIdObj=Integer.valueOf(generatedId);
-			 componentMap.put(stringId,component);
-		     componentIdentifierMap.put(generatedIdObj,component);
-		    }
-		return(success);
-	}
-	
-	public int getIntIdentifier(final T component){
-		int id=-1;
-		if(component!=null)
-		    for(Entry<Integer,T> entry:componentIdentifierMap.entrySet())
-			    if(entry.getValue().equals(component))
-				    id=entry.getKey().intValue();
-		return(id);
-	}
-	
-	public String getStringIdentifier(final T component){
-		String id=null;
-		if(component!=null)
-		    for(Entry<String,T> entry:componentMap.entrySet())
-			    if(entry.getValue().equals(component))
-				    id=entry.getKey();
-		return(id);
-	}
-	
-	public T get(final int integerId){
-		return(0<=integerId&&integerId<getSize()?componentIdentifierMap.get(Integer.valueOf(integerId)):null);
-	}
-	
-	public T get(final String stringId){
-		return(componentMap.get(stringId));
-	}
-	
-	public int getSize(){
-		return(componentMap.size());
-	}
+    /**
+     * map containing integer identifiers for its components
+     */
+    protected final HashMap<Integer, T> componentIdentifierMap;
+
+    public AbstractFactory() {
+        componentMap = new HashMap<>();
+        componentIdentifierMap = new HashMap<>();
+    }
+
+    protected boolean add(final String stringId, final T component) {
+        Objects.requireNonNull(stringId, "the string identifier must not be null");
+        Objects.requireNonNull(component, "the component must not be null");
+        boolean success = !componentMap.containsKey(stringId) && !componentMap.containsValue(component)
+                && !componentIdentifierMap.containsValue(component);
+        if (success) {
+            final int generatedId = autoIncrementalIndex.getAndIncrement();
+            final Integer generatedIdObj = Integer.valueOf(generatedId);
+            componentMap.put(stringId, component);
+            componentIdentifierMap.put(generatedIdObj, component);
+        }
+        return (success);
+    }
+
+    public int getIntIdentifier(final T component) {
+        int id = -1;
+        if (component != null)
+            for (Entry<Integer, T> entry : componentIdentifierMap.entrySet())
+                if (entry.getValue().equals(component))
+                    id = entry.getKey().intValue();
+        return (id);
+    }
+
+    public String getStringIdentifier(final T component) {
+        String id = null;
+        if (component != null)
+            for (Entry<String, T> entry : componentMap.entrySet())
+                if (entry.getValue().equals(component))
+                    id = entry.getKey();
+        return (id);
+    }
+
+    public T get(final int integerId) {
+        return (0 <= integerId && integerId < getSize() ? componentIdentifierMap.get(Integer.valueOf(integerId))
+                : null);
+    }
+
+    public T get(final String stringId) {
+        return (componentMap.get(stringId));
+    }
+
+    public int getSize() {
+        return (componentMap.size());
+    }
 }

@@ -23,29 +23,31 @@ import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
 /**
- * Entry action used for the game over state to get some parameters about the latest played level
+ * Entry action used for the game over state to get some parameters about the
+ * latest played level
  * 
  * @author Julien Gouesse
  *
  */
-public class GameOverStateEntryAction extends ScenegraphStateEntryAction{
+public class GameOverStateEntryAction extends ScenegraphStateEntryAction {
 
-	public GameOverStateEntryAction(){
-		super();
-	}
+    public GameOverStateEntryAction() {
+        super();
+    }
 
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-		final String latestPlayedLevelIdentifier=sttaArgs.getPreviousLevelIdentifier();
-		final String latestNextPlayableLevelIdentifier=sttaArgs.getNextLevelIdentifier();
-		final GameStatistics gameStats=sttaArgs.getGameStatistics();
-		final List<Objective> objectives=sttaArgs.getObjectives();
-		final GameOverState gameOverState=(GameOverState)to;
-		gameOverState.setLatestPlayedLevelIdentifier(latestPlayedLevelIdentifier);
-		gameOverState.setLatestNextPlayableLevelIdentifier(latestNextPlayableLevelIdentifier);
-		gameOverState.setGameStatistics(gameStats);
-		gameOverState.setObjectives(objectives);
-		super.onTransition(from,to,cause,args,stateMachine);
-	}
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        final ScenegraphTransitionTriggerActionArguments sttaArgs = (ScenegraphTransitionTriggerActionArguments) args;
+        final String latestPlayedLevelIdentifier = sttaArgs.getPreviousLevelIdentifier();
+        final String latestNextPlayableLevelIdentifier = sttaArgs.getNextLevelIdentifier();
+        final GameStatistics gameStats = sttaArgs.getGameStatistics();
+        final List<Objective> objectives = sttaArgs.getObjectives();
+        final GameOverState gameOverState = (GameOverState) to;
+        gameOverState.setLatestPlayedLevelIdentifier(latestPlayedLevelIdentifier);
+        gameOverState.setLatestNextPlayableLevelIdentifier(latestNextPlayableLevelIdentifier);
+        gameOverState.setGameStatistics(gameStats);
+        gameOverState.setObjectives(objectives);
+        super.onTransition(from, to, cause, args, stateMachine);
+    }
 }

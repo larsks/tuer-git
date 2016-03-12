@@ -22,17 +22,17 @@ import se.hiflyer.fettle.Action;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.StateMachine;
 
-
-public class ReloadAction implements Action<PlayerState,PlayerEvent>{
+public class ReloadAction implements Action<PlayerState, PlayerEvent> {
 
     private final PlayerData playerData;
 
-    public ReloadAction(final PlayerData playerData){
-        this.playerData=playerData;
+    public ReloadAction(final PlayerData playerData) {
+        this.playerData = playerData;
     }
 
     @Override
-    public void onTransition(PlayerState from,PlayerState to,PlayerEvent event,Arguments args,StateMachine<PlayerState,PlayerEvent> stateMachine){
+    public void onTransition(PlayerState from, PlayerState to, PlayerEvent event, Arguments args,
+            StateMachine<PlayerState, PlayerEvent> stateMachine) {
         playerData.reload();
     }
 }

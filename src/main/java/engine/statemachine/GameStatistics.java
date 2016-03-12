@@ -23,68 +23,69 @@ package engine.statemachine;
  * @author Julien Gouesse
  *
  */
-public class GameStatistics{
+public class GameStatistics {
 
-	private MissionStatus missionStatus;
-	
-	private int enemiesCount;
-	
-	private int killedEnemiesCount;
-	
-	/**
-	 * Constructor
-	 */
-	public GameStatistics(){
-		super();
-		
-	}
+    private MissionStatus missionStatus;
 
-	public MissionStatus getMissionStatus(){
-		return missionStatus;
-	}
+    private int enemiesCount;
 
-	public void setMissionStatus(final MissionStatus missionStatus){
-		this.missionStatus = missionStatus;
-	}
-	
-	/**
-	 * Returns the time spent in the mission
-	 * 
-	 * @return time spent in the mission
-	 */
-	public long getTime(){
-		return(0L);
-	}
-	
-	/**
-	 * Returns the accuracy of the player during this mission, i.e the 
-	 * proportion of hits
-	 * 
-	 * @return accuracy of the player during this mission
-	 */
-	public double getAccuracy(){
-		return(1.0d);
-	}
-	
-	public int getEnemiesCount(){
-		return(enemiesCount);
-	}
-	
-	public void setEnemiesCount(final int enemiesCount){
-		if(enemiesCount<0)
-		    throw new IllegalArgumentException("The enemies count cannot be negative");
-		this.enemiesCount=enemiesCount;
-	}
-	
-	public int getKilledEnemiesCount(){
-		return(killedEnemiesCount);
-	}
-	
-	public void setKilledEnemiesCount(final int killedEnemiesCount){
-		if(killedEnemiesCount<0)
-		    throw new IllegalArgumentException("The killed enemies count cannot be negative");
-		this.killedEnemiesCount=killedEnemiesCount;
-	}
-	
-	//TODO weapon of choice, shot total, kill total, head hits, body hits, limb hits, other hits
+    private int killedEnemiesCount;
+
+    /**
+     * Constructor
+     */
+    public GameStatistics() {
+        super();
+
+    }
+
+    public MissionStatus getMissionStatus() {
+        return missionStatus;
+    }
+
+    public void setMissionStatus(final MissionStatus missionStatus) {
+        this.missionStatus = missionStatus;
+    }
+
+    /**
+     * Returns the time spent in the mission
+     * 
+     * @return time spent in the mission
+     */
+    public long getTime() {
+        return (0L);
+    }
+
+    /**
+     * Returns the accuracy of the player during this mission, i.e the
+     * proportion of hits
+     * 
+     * @return accuracy of the player during this mission
+     */
+    public double getAccuracy() {
+        return (1.0d);
+    }
+
+    public int getEnemiesCount() {
+        return (enemiesCount);
+    }
+
+    public void setEnemiesCount(final int enemiesCount) {
+        if (enemiesCount < 0)
+            throw new IllegalArgumentException("The enemies count cannot be negative");
+        this.enemiesCount = enemiesCount;
+    }
+
+    public int getKilledEnemiesCount() {
+        return (killedEnemiesCount);
+    }
+
+    public void setKilledEnemiesCount(final int killedEnemiesCount) {
+        if (killedEnemiesCount < 0)
+            throw new IllegalArgumentException("The killed enemies count cannot be negative");
+        this.killedEnemiesCount = killedEnemiesCount;
+    }
+
+    // TODO weapon of choice, shot total, kill total, head hits, body hits, limb
+    // hits, other hits
 }

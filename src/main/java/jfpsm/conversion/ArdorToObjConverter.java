@@ -34,63 +34,65 @@ import com.ardor3d.util.resource.URLResourceSource;
 
 public class ArdorToObjConverter {
 
-	public ArdorToObjConverter(){
-		super();
-	}
-	
-	public void run(final String[] args) throws IOException,URISyntaxException{
-		JoglImageLoader.registerLoader();
-		try{SimpleResourceLocator srl=new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/images"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE,srl);
-            srl=new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/abin"));
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL,srl);
-           }
-        catch(final URISyntaxException urise)
-        {urise.printStackTrace();}
-		final ObjExporter objExporter=new ObjExporter();
-		final BinaryImporter binaryImporter=new BinaryImporter();
-		Spatial binarySpatial;
-		for(String arg:args)
-            {System.out.println("Loading "+arg+" ...");
-             URLResourceSource source=(URLResourceSource)ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_MODEL,arg);
-             File sourceFile=new File(source.getURL().toURI());
-             binarySpatial=(Spatial)binaryImporter.load(sourceFile);
-             final String filenameWithoutExtension=sourceFile.getAbsolutePath().substring(0,sourceFile.getAbsolutePath().lastIndexOf(".abin"));
-             File objDestFile=new File(filenameWithoutExtension+".obj");
-             File mtlDestFile=new File(filenameWithoutExtension+".mtl");
-             if(!objDestFile.exists())
-                 if(!objDestFile.createNewFile())
-                     {System.out.println(objDestFile.getAbsolutePath()+" cannot be created!");
-                      continue;
-                     }
-             if(!mtlDestFile.exists())
-                 if(!mtlDestFile.createNewFile())
-                     {System.out.println(mtlDestFile.getAbsolutePath()+" cannot be created!");
-                      continue;
-                     }
-             System.out.println("Converting "+arg+" ...");
-             if(binarySpatial instanceof Mesh)
-                 {final Mesh mesh=(Mesh)binarySpatial;
-                  objExporter.save(mesh,objDestFile,mtlDestFile);
-            	 }
-             else
-                 if(binarySpatial instanceof Node)
-                     {final Node node=(Node)binarySpatial;
-                      ArrayList<Mesh> meshes=new ArrayList<>();
-                      for(Spatial child:node.getChildren())
-                          if(child instanceof Mesh)
-                        	  meshes.add((Mesh)child);
-                      objExporter.save(meshes,objDestFile,mtlDestFile,null);
-                     }
-             System.out.println(arg+" successfully converted");
-            }
-	}
+    public ArdorToObjConverter() {
+        super();
+    }
 
-	public static final void main(final String[] args){
-		try{final ArdorToObjConverter converter=new ArdorToObjConverter();
-		    converter.run(args);
-		   }
-		catch(Throwable t)
-		{t.printStackTrace();}
+    public void run(final String[] args) throws IOException, URISyntaxException {
+        JoglImageLoader.registerLoader();
+        try {
+            SimpleResourceLocator srl = new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/images"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
+            srl = new SimpleResourceLocator(ArdorToObjConverter.class.getResource("/abin"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
+        } catch (final URISyntaxException urise) {
+            urise.printStackTrace();
+        }
+        final ObjExporter objExporter = new ObjExporter();
+        final BinaryImporter binaryImporter = new BinaryImporter();
+        Spatial binarySpatial;
+        for (String arg : args) {
+            System.out.println("Loading " + arg + " ...");
+            URLResourceSource source = (URLResourceSource) ResourceLocatorTool
+                    .locateResource(ResourceLocatorTool.TYPE_MODEL, arg);
+            File sourceFile = new File(source.getURL().toURI());
+            binarySpatial = (Spatial) binaryImporter.load(sourceFile);
+            final String filenameWithoutExtension = sourceFile.getAbsolutePath().substring(0,
+                    sourceFile.getAbsolutePath().lastIndexOf(".abin"));
+            File objDestFile = new File(filenameWithoutExtension + ".obj");
+            File mtlDestFile = new File(filenameWithoutExtension + ".mtl");
+            if (!objDestFile.exists())
+                if (!objDestFile.createNewFile()) {
+                    System.out.println(objDestFile.getAbsolutePath() + " cannot be created!");
+                    continue;
+                }
+            if (!mtlDestFile.exists())
+                if (!mtlDestFile.createNewFile()) {
+                    System.out.println(mtlDestFile.getAbsolutePath() + " cannot be created!");
+                    continue;
+                }
+            System.out.println("Converting " + arg + " ...");
+            if (binarySpatial instanceof Mesh) {
+                final Mesh mesh = (Mesh) binarySpatial;
+                objExporter.save(mesh, objDestFile, mtlDestFile);
+            } else if (binarySpatial instanceof Node) {
+                final Node node = (Node) binarySpatial;
+                ArrayList<Mesh> meshes = new ArrayList<>();
+                for (Spatial child : node.getChildren())
+                    if (child instanceof Mesh)
+                        meshes.add((Mesh) child);
+                objExporter.save(meshes, objDestFile, mtlDestFile, null);
+            }
+            System.out.println(arg + " successfully converted");
+        }
+    }
+
+    public static final void main(final String[] args) {
+        try {
+            final ArdorToObjConverter converter = new ArdorToObjConverter();
+            converter.run(args);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 }

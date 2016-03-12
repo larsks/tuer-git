@@ -17,88 +17,89 @@
  */
 package jfpsm;
 
-final class ZoomParameters{
-    
-    
+final class ZoomParameters {
+
     private int factor;
-    
+
     private int width;
-    
+
     private int height;
-    
+
     /**
      * center abscissa in the absolute reference
      */
     private int centerx;
-    
+
     /**
      * center ordinate in the absolute reference
      */
     private int centery;
 
-    
-    ZoomParameters(int factor,int width,int height){
-        this.factor=factor;
-        this.width=width;
-        this.height=height;
-        this.centerx=width/2;
-        this.centery=height/2;
-    }
-    
-    
-    final void setFactor(int factor){
-        this.factor=factor;
-    }
-    
-    final int getFactor(){
-        return(factor);
+    ZoomParameters(int factor, int width, int height) {
+        this.factor = factor;
+        this.width = width;
+        this.height = height;
+        this.centerx = width / 2;
+        this.centery = height / 2;
     }
 
-    final int getCenterx(){
-        return(centerx);
+    final void setFactor(int factor) {
+        this.factor = factor;
     }
-    
-    final int getWidth(){
-        return(width);
+
+    final int getFactor() {
+        return (factor);
     }
-    
-    final void setWidth(final int width){
-    	this.width=width;
+
+    final int getCenterx() {
+        return (centerx);
     }
-    
-    final int getHeight(){
-        return(height);
+
+    final int getWidth() {
+        return (width);
     }
-    
-    final void setHeight(final int height){
-    	this.height=height;
+
+    final void setWidth(final int width) {
+        this.width = width;
     }
-    
-    final int getAbsoluteXFromRelativeX(int relativeX){
-        return(centerx-(width/(2*factor))+(relativeX/factor));
+
+    final int getHeight() {
+        return (height);
     }
-    
-    final int getAbsoluteYFromRelativeY(int relativeY){
-        return(centery-(height/(2*factor))+(relativeY/factor));
+
+    final void setHeight(final int height) {
+        this.height = height;
+    }
+
+    final int getAbsoluteXFromRelativeX(int relativeX) {
+        return (centerx - (width / (2 * factor)) + (relativeX / factor));
+    }
+
+    final int getAbsoluteYFromRelativeY(int relativeY) {
+        return (centery - (height / (2 * factor)) + (relativeY / factor));
     }
 
     /**
      * Set the center abscissa in the absolute reference
-     * @param centerx center abscissa in the absolute reference
+     * 
+     * @param centerx
+     *            center abscissa in the absolute reference
      */
-    final void setCenterx(int centerx){
-        this.centerx=Math.max(((width/factor)/2),Math.min(centerx,width-((width/factor)/2)));
+    final void setCenterx(int centerx) {
+        this.centerx = Math.max(((width / factor) / 2), Math.min(centerx, width - ((width / factor) / 2)));
     }
 
-    final int getCentery(){
-        return(centery);
+    final int getCentery() {
+        return (centery);
     }
 
     /**
      * Set the center ordinate in the absolute reference
-     * @param centerx center ordinate in the absolute reference
+     * 
+     * @param centerx
+     *            center ordinate in the absolute reference
      */
-    final void setCentery(int centery){
-        this.centery=Math.max(((height/factor)/2),Math.min(centery,height-((height/factor)/2)));
+    final void setCentery(int centery) {
+        this.centery = Math.max(((height / factor) / 2), Math.min(centery, height - ((height / factor) / 2)));
     }
 }

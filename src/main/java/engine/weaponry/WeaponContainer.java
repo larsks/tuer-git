@@ -21,46 +21,44 @@ import java.util.Arrays;
 
 import com.ardor3d.scenegraph.Node;
 
-public final class WeaponContainer{
-	
-	private final Node[] weaponsNodes;
-	
-	private final WeaponFactory weaponFactory;
-	
-    public WeaponContainer(final WeaponFactory weaponFactory){
-    	this.weaponFactory=weaponFactory;
-    	final int weaponCount=weaponFactory.getSize();
-    	this.weaponsNodes=new Node[weaponCount];
-    	Arrays.fill(weaponsNodes,null);
+public final class WeaponContainer {
+
+    private final Node[] weaponsNodes;
+
+    private final WeaponFactory weaponFactory;
+
+    public WeaponContainer(final WeaponFactory weaponFactory) {
+        this.weaponFactory = weaponFactory;
+        final int weaponCount = weaponFactory.getSize();
+        this.weaponsNodes = new Node[weaponCount];
+        Arrays.fill(weaponsNodes, null);
     }
-    
-    public final boolean add(final Node weaponNode,final Weapon weapon){
-    	final boolean success;
-    	if(weaponNode!=null)
-    	    {final int index=weaponFactory.getIntIdentifier(weapon);
-    	     if(weaponsNodes[index]==null)
-    	         {weaponsNodes[index]=weaponNode;
-    	    	  success=true;
-    	         }
-    	     else
-    	    	 success=false;
-    	    }
-    	else
-    		success=false;
-    	return(success);
+
+    public final boolean add(final Node weaponNode, final Weapon weapon) {
+        final boolean success;
+        if (weaponNode != null) {
+            final int index = weaponFactory.getIntIdentifier(weapon);
+            if (weaponsNodes[index] == null) {
+                weaponsNodes[index] = weaponNode;
+                success = true;
+            } else
+                success = false;
+        } else
+            success = false;
+        return (success);
     }
-    
-    public final boolean isAvailable(final Weapon weapon){
-    	final int weaponId=weaponFactory.getIntIdentifier(weapon);
-    	return(weaponsNodes[weaponId]!=null);
+
+    public final boolean isAvailable(final Weapon weapon) {
+        final int weaponId = weaponFactory.getIntIdentifier(weapon);
+        return (weaponsNodes[weaponId] != null);
     }
-    
-    public final Node getNode(final Weapon weapon){
-    	final int weaponId=weaponFactory.getIntIdentifier(weapon);
-    	return(weaponsNodes[weaponId]);
+
+    public final Node getNode(final Weapon weapon) {
+        final int weaponId = weaponFactory.getIntIdentifier(weapon);
+        return (weaponsNodes[weaponId]);
     }
-    
-    public final void empty(){
-    	Arrays.fill(weaponsNodes,null);
+
+    public final void empty() {
+        Arrays.fill(weaponsNodes, null);
     }
 }

@@ -19,17 +19,17 @@ package engine.statemachine;
 
 import engine.data.PlayerData;
 
-public class AttackCompleteCondition extends ScheduledTaskCondition<PlayerState>{
-	
-	private final PlayerData playerData;
+public class AttackCompleteCondition extends ScheduledTaskCondition<PlayerState> {
 
-	public AttackCompleteCondition(final PlayerData playerData){
-		super();
-		this.playerData=playerData;
-	}
+    private final PlayerData playerData;
 
-	@Override
-	public boolean isSatisfied(final PlayerState previousState,final PlayerState currentState){
-		return(playerData.isAttackComplete());
-	}
+    public AttackCompleteCondition(final PlayerData playerData) {
+        super();
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(final PlayerState previousState, final PlayerState currentState) {
+        return (playerData.isAttackComplete());
+    }
 }

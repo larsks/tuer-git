@@ -17,33 +17,30 @@
  */
 package jfpsm;
 
-enum MapType{
-	
-	CONTAINER_MAP("container map","containermap.png"),
-	CONTENT_MAP("content map","contentmap.png"),
-	LIGHT_MAP("light map","lightmap.png");
+enum MapType {
 
-	private final String label;
-	
-	private final String filename;
-	
-	
-	MapType(final String label,final String filename){
-		this.label=label;
-		this.filename=filename;
-	}
+    CONTAINER_MAP("container map", "containermap.png"), CONTENT_MAP("content map",
+            "contentmap.png"), LIGHT_MAP("light map", "lightmap.png");
 
-	
-	final String getLabel(){
-		return(label);
-	}
-	
-	final String getFilename(){
-		return(filename);
-	}
-	
-	@Override
-	public final String toString(){
-		return(label);
-	}
+    private final String label;
+
+    private final String filename;
+
+    MapType(final String label, final String filename) {
+        this.label = label;
+        this.filename = filename;
+    }
+
+    final String getLabel() {
+        return (label);
+    }
+
+    final String getFilename() {
+        return (filename);
+    }
+
+    @Override
+    public final String toString() {
+        return (label);
+    }
 }

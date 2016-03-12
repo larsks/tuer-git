@@ -31,33 +31,32 @@ import com.ardor3d.scenegraph.controller.SpatialController;
 
 import engine.misc.LocalizedMessageProvider;
 
-public final class TaskManagementProgressionNode extends Node{
-	
-	
-	private final UIProgressBar bar;
-    
+public final class TaskManagementProgressionNode extends Node {
+
+    private final UIProgressBar bar;
+
     private int maxTaskCount;
-    
+
     private final TaskManager taskManager;
-    
+
     private final UIFrame frame;
-    
+
     private final Rectangle2 bounds;
-    
-    
-    public TaskManagementProgressionNode(final Camera cam,final TaskManager taskManager,final LocalizedMessageProvider localizedMessageProvider){
+
+    public TaskManagementProgressionNode(final Camera cam, final TaskManager taskManager,
+            final LocalizedMessageProvider localizedMessageProvider) {
         super("task progression node");
-        bounds=new Rectangle2();
-        this.taskManager=taskManager;
-        maxTaskCount=0;
-        bar=new UIProgressBar("",true);
+        bounds = new Rectangle2();
+        this.taskManager = taskManager;
+        maxTaskCount = 0;
+        bar = new UIProgressBar("", true);
         bar.setPercentFilled(0);
-        //bar.setComponentWidth(250);
-        final UIPanel panel=new UIPanel(new RowLayout(false));
-        final String text=localizedMessageProvider.getString("LOADING_PLEASE_WAIT");
+        // bar.setComponentWidth(250);
+        final UIPanel panel = new UIPanel(new RowLayout(false));
+        final String text = localizedMessageProvider.getString("LOADING_PLEASE_WAIT");
         panel.add(new UILabel(text));
         panel.add(bar);
-        frame=new UIFrame("");
+        frame = new UIFrame("");
         frame.setDecorated(false);
         frame.setContentPanel(panel);
         frame.updateMinimumSizeFromContents();
@@ -67,32 +66,32 @@ public final class TaskManagementProgressionNode extends Node{
         frame.setOpacity(1f);
         frame.setName("task progression frame");
         frame.getRelativeComponentBounds(bounds);
-        final UIHud hud=new UIHud();
+        final UIHud hud = new UIHud();
         hud.add(frame);
         attachChild(hud);
-        addController(new SpatialController<Spatial>(){
+        addController(new SpatialController<Spatial>() {
             @Override
-            public final void update(final double time,final Spatial caller){
-                final int taskCount=taskManager.getTaskCount();
-                if(maxTaskCount==0)
+            public final void update(final double time, final Spatial caller) {
+                final int taskCount = taskManager.getTaskCount();
+                if (maxTaskCount == 0)
                     bar.setPercentFilled(0);
                 else
-                    bar.setPercentFilled(1-((double)taskCount)/maxTaskCount);
+                    bar.setPercentFilled(1 - ((double) taskCount) / maxTaskCount);
             }
         });
-        //centers this node by default
-        final int x=(cam.getWidth()-getBounds().getWidth())/2;
-        final int y=(cam.getHeight()-getBounds().getHeight())/2;
-        setTranslation(x,y,0);
+        // centers this node by default
+        final int x = (cam.getWidth() - getBounds().getWidth()) / 2;
+        final int y = (cam.getHeight() - getBounds().getHeight()) / 2;
+        setTranslation(x, y, 0);
         updateGeometricState(0);
     }
-    
-    public final Rectangle2 getBounds(){
-    	frame.getRelativeComponentBounds(bounds);
-    	return(bounds);
+
+    public final Rectangle2 getBounds() {
+        frame.getRelativeComponentBounds(bounds);
+        return (bounds);
     }
-    
-    public final void reset(){
-        maxTaskCount=taskManager.getTaskCount();
+
+    public final void reset() {
+        maxTaskCount = taskManager.getTaskCount();
     }
 }

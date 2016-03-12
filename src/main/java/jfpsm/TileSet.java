@@ -22,83 +22,82 @@ import java.util.ArrayList;
 
 /**
  * Container of tiles
+ * 
  * @author Julien Gouesse
  *
  */
-public final class TileSet extends JFPSMProjectUserObject{
-    
-    
-    private static final long serialVersionUID=1L;
-    
+public final class TileSet extends JFPSMProjectUserObject {
+
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<Tile> tilesList;
-    
+
     private transient boolean dirty;
-    
-    
-    public TileSet(){
+
+    public TileSet() {
         this("");
     }
-    
-    public TileSet(String name){
+
+    public TileSet(String name) {
         super(name);
-        tilesList=new ArrayList<>();
-        dirty=true;
+        tilesList = new ArrayList<>();
+        dirty = true;
     }
-    
+
     @Transient
     @Override
-    public final boolean isDirty(){
-        boolean dirty=this.dirty;
-        if(!dirty)
-            for(Tile tile:tilesList)
-                if(tile.isDirty())
-                    {dirty=true;
-                     break;
-                    }
-        return(dirty);
-    }
-    
-    @Override
-    public final void unmarkDirty(){
-        dirty=false;
-    }
-    
-    @Override
-    public final void markDirty(){
-        dirty=true;
+    public final boolean isDirty() {
+        boolean dirty = this.dirty;
+        if (!dirty)
+            for (Tile tile : tilesList)
+                if (tile.isDirty()) {
+                    dirty = true;
+                    break;
+                }
+        return (dirty);
     }
 
-    public final void addTile(Tile tile){
+    @Override
+    public final void unmarkDirty() {
+        dirty = false;
+    }
+
+    @Override
+    public final void markDirty() {
+        dirty = true;
+    }
+
+    public final void addTile(Tile tile) {
         tilesList.add(tile);
-        dirty=true;
+        dirty = true;
     }
-    
-    public final void removeTile(Tile tile){
+
+    public final void removeTile(Tile tile) {
         tilesList.remove(tile);
-        dirty=true;
-    }
-    
-    public final ArrayList<Tile> getTilesList(){
-        return(tilesList);
+        dirty = true;
     }
 
-    public final void setTilesList(ArrayList<Tile> tilesList){
-        this.tilesList=tilesList;
-        dirty=true;
+    public final ArrayList<Tile> getTilesList() {
+        return (tilesList);
     }
-    
-    @Override
-    final boolean canInstantiateChildren(){
-        return(true);
+
+    public final void setTilesList(ArrayList<Tile> tilesList) {
+        this.tilesList = tilesList;
+        dirty = true;
     }
 
     @Override
-    final boolean isOpenable(){
-        return(true);
+    final boolean canInstantiateChildren() {
+        return (true);
     }
 
     @Override
-    final boolean isRemovable(){
-        return(false);
+    final boolean isOpenable() {
+        return (true);
+    }
+
+    @Override
+    final boolean isRemovable() {
+        return (false);
     }
 }

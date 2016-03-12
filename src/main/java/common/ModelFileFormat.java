@@ -23,56 +23,52 @@ package common;
  * @author Julien Gouesse
  *
  */
-public enum ModelFileFormat{
-	ARDOR3D_BINARY("Ardor3D Binary","abin",null),
-	ARDOR3D_XML("Ardor3D XML","axml",null),
-	COLLADA("Collada","dae",null),
-	MD2("MD2","md2",null),
-	MD3("MD3","md3",null),
-	WAVEFRONT_OBJ("WaveFront OBJ","obj","mtl");
-	
-	private final String description;
-	
-	private final String extension;
-	
-	private final String secondaryExtension;
-	
-    private ModelFileFormat(final String description,final String extension,final String secondaryExtension){
-		this.description=description;
-		this.extension=extension;
-		this.secondaryExtension=secondaryExtension;
-	}
-    
-    public final String getDescription(){
-    	return(description);
+public enum ModelFileFormat {
+    ARDOR3D_BINARY("Ardor3D Binary", "abin", null), ARDOR3D_XML("Ardor3D XML", "axml", null), COLLADA("Collada", "dae",
+            null), MD2("MD2", "md2", null), MD3("MD3", "md3", null), WAVEFRONT_OBJ("WaveFront OBJ", "obj", "mtl");
+
+    private final String description;
+
+    private final String extension;
+
+    private final String secondaryExtension;
+
+    private ModelFileFormat(final String description, final String extension, final String secondaryExtension) {
+        this.description = description;
+        this.extension = extension;
+        this.secondaryExtension = secondaryExtension;
     }
-    
-    public final String getExtension(){
-    	return(extension);
+
+    public final String getDescription() {
+        return (description);
     }
-    
-    public final String getSecondaryExtension(){
-    	return(secondaryExtension);
+
+    public final String getExtension() {
+        return (extension);
     }
-    
+
+    public final String getSecondaryExtension() {
+        return (secondaryExtension);
+    }
+
     @Override
-    public final String toString(){
-    	return(getDescription());
+    public final String toString() {
+        return (getDescription());
     }
-    
-    public static ModelFileFormat get(final String filePath){
-		ModelFileFormat modelFileFormat=null;
-		if(filePath!=null)
-		    {final int lastIndexOfDot=filePath.lastIndexOf('.');
-		     if(lastIndexOfDot!=-1&&lastIndexOfDot<filePath.length()-1)
-		         {final String modelFileExtension=filePath.substring(lastIndexOfDot+1).toLowerCase();
-		          for(ModelFileFormat currentModelFileFormat:ModelFileFormat.values())
-	    	          if(modelFileExtension.equals(currentModelFileFormat.getExtension()))
-	                      {modelFileFormat=currentModelFileFormat;
-	                       break;
-	                      }
-		         }
-		    }
-		return(modelFileFormat);
-	}
+
+    public static ModelFileFormat get(final String filePath) {
+        ModelFileFormat modelFileFormat = null;
+        if (filePath != null) {
+            final int lastIndexOfDot = filePath.lastIndexOf('.');
+            if (lastIndexOfDot != -1 && lastIndexOfDot < filePath.length() - 1) {
+                final String modelFileExtension = filePath.substring(lastIndexOfDot + 1).toLowerCase();
+                for (ModelFileFormat currentModelFileFormat : ModelFileFormat.values())
+                    if (modelFileExtension.equals(currentModelFileFormat.getExtension())) {
+                        modelFileFormat = currentModelFileFormat;
+                        break;
+                    }
+            }
+        }
+        return (modelFileFormat);
+    }
 }

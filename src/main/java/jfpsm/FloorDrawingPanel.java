@@ -22,31 +22,29 @@ import java.awt.image.BufferedImage;
 
 final class FloorDrawingPanel extends DrawingPanel {
 
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID=1L;
-    
     private final Map map;
 
-    
-	FloorDrawingPanel(final Floor floor,final MapType type,final ZoomParameters zoomParams,final FloorViewer floorViewer){
-		super(type.getLabel(),floor.getMap(type).getImage(),zoomParams,floorViewer);
-		map=floor.getMap(type);
-	}
-	
-	
-	@Override
-	protected final boolean draw(int x1,int y1,int x2,int y2){
-	    final boolean success;
-	    if(success=super.draw(x1,y1,x2,y2))
-	        map.markDirty();
-	    return(success);
-	}
-	
-	@Override
-    protected void paintComponent(Graphics g){
-        BufferedImage mapImage=map.getImage();
-        //check if the underlying image has been changed (during import)
-        if(mapImage!=getImage())
+    FloorDrawingPanel(final Floor floor, final MapType type, final ZoomParameters zoomParams,
+            final FloorViewer floorViewer) {
+        super(type.getLabel(), floor.getMap(type).getImage(), zoomParams, floorViewer);
+        map = floor.getMap(type);
+    }
+
+    @Override
+    protected final boolean draw(int x1, int y1, int x2, int y2) {
+        final boolean success;
+        if (success = super.draw(x1, y1, x2, y2))
+            map.markDirty();
+        return (success);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        BufferedImage mapImage = map.getImage();
+        // check if the underlying image has been changed (during import)
+        if (mapImage != getImage())
             setImage(mapImage);
         super.paintComponent(g);
     }

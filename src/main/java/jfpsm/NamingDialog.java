@@ -39,165 +39,166 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 /**
- * Modal dialog used to name an entity. A single instance can be reused several times.
- * The accepted names are cross-platform filenames only and without file extension.
+ * Modal dialog used to name an entity. A single instance can be reused several
+ * times. The accepted names are cross-platform filenames only and without file
+ * extension.
+ * 
  * @author Julien Gouesse
  *
  */
-public class NamingDialog extends JDialog implements ActionListener,PropertyChangeListener{
-    
-    
+public class NamingDialog extends JDialog implements ActionListener, PropertyChangeListener {
+
     private static final long serialVersionUID = 1L;
-    
+
     private String typedText;
-    
+
     private final ArrayList<String> names;
-    
+
     private final JTextField textField;
-    
+
     private final JOptionPane optionPane;
-    
+
     private final JButton confirmButton;
-        
 
     /** Creates the reusable naming dialog. */
-    public NamingDialog(JFrame aFrame,final ArrayList<String> names,String namedEntity){
+    public NamingDialog(JFrame aFrame, final ArrayList<String> names, String namedEntity) {
         super(aFrame, true);
-        this.names=names;
-        typedText=null;
-        setTitle("New "+namedEntity);
-        textField=new JTextField(10);           
-        //Create the JOptionPane with an array of the text and components to be displayed.
-        optionPane=new JOptionPane(new Object[]{"Enter a "+namedEntity+" name",textField},JOptionPane.QUESTION_MESSAGE,JOptionPane.OK_CANCEL_OPTION);
-        //Make this dialog display it.
+        this.names = names;
+        typedText = null;
+        setTitle("New " + namedEntity);
+        textField = new JTextField(10);
+        // Create the JOptionPane with an array of the text and components to be
+        // displayed.
+        optionPane = new JOptionPane(new Object[] { "Enter a " + namedEntity + " name", textField },
+                JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+        // Make this dialog display it.
         setContentPane(optionPane);
-        //Handle window closing correctly.
+        // Handle window closing correctly.
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter(){
+        addWindowListener(new WindowAdapter() {
             @Override
-			public void windowClosing(WindowEvent we) {
+            public void windowClosing(WindowEvent we) {
                 /*
-                 * Instead of directly closing the window,
-                 * we're going to change the JOptionPane's
-                 * value property.
+                 * Instead of directly closing the window, we're going to change
+                 * the JOptionPane's value property.
                  */
                 optionPane.setValue(Integer.valueOf(JOptionPane.CLOSED_OPTION));
             }
         });
-        //Ensure the text field always gets the first focus.
+        // Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
             @Override
-			public void componentShown(ComponentEvent ce) {
+            public void componentShown(ComponentEvent ce) {
                 textField.requestFocusInWindow();
             }
         });
-        //Register an event handler that puts the text into the option pane.
+        // Register an event handler that puts the text into the option pane.
         textField.addActionListener(this);
-        //Register an event handler that reacts to option pane state changes.
+        // Register an event handler that reacts to option pane state changes.
         optionPane.addPropertyChangeListener(this);
-        confirmButton=(JButton)((JPanel)optionPane.getComponent(1)).getComponent(0);
-        textField.getDocument().addDocumentListener(new DocumentListener(){
+        confirmButton = (JButton) ((JPanel) optionPane.getComponent(1)).getComponent(0);
+        textField.getDocument().addDocumentListener(new DocumentListener() {
 
             @Override
-            public final void changedUpdate(DocumentEvent e){
+            public final void changedUpdate(DocumentEvent e) {
                 updateConfirmationAbility();
             }
 
             @Override
-            public final void insertUpdate(DocumentEvent e){
+            public final void insertUpdate(DocumentEvent e) {
                 updateConfirmationAbility();
             }
 
             @Override
-            public final void removeUpdate(DocumentEvent e){
+            public final void removeUpdate(DocumentEvent e) {
                 updateConfirmationAbility();
-            }           
+            }
         });
         pack();
     }
-    
+
     private static final String REGEXP_INVALID_PUBLISHED_PATH_CHARS = "(\\[|#|\\*|\\?|\"|<|>|\\||!|%|/|\\])+";
 
     private static final String REGEXP_INVALID_PUBLISHED_PATH_CHARS_LINUX = "(\\[|#|\\*|\\?|\"|<|>|\\||!|%|\\])+";
 
     private static final String REGEXP_INVALID_FILENAME_CHARS = "(\\[|#|/|\\\\|\\:|\\*|\\?|\"|<|>|\\||\\]|\\s)+";
 
-    
-    private final boolean checkNameAvailabilityAndValidity(){
-        boolean confirmationEnabled=false;
-        Document doc=textField.getDocument();
-        try{String text=doc.getText(0,doc.getLength());
-            //check if the name is not empty, not used and valid
-            confirmationEnabled=text!=null&&!text.equals("")&&!names.contains(text)&&
-                                text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS,"").equals(text)&& 
-                                text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS_LINUX,"").equals(text)&&
-                                text.replaceAll(REGEXP_INVALID_FILENAME_CHARS,"").equals(text);
-           } 
-        catch(BadLocationException ble)
-        {confirmationEnabled=false;}
-        return(confirmationEnabled);
+    private final boolean checkNameAvailabilityAndValidity() {
+        boolean confirmationEnabled = false;
+        Document doc = textField.getDocument();
+        try {
+            String text = doc.getText(0, doc.getLength());
+            // check if the name is not empty, not used and valid
+            confirmationEnabled = text != null && !text.equals("") && !names.contains(text)
+                    && text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS, "").equals(text)
+                    && text.replaceAll(REGEXP_INVALID_PUBLISHED_PATH_CHARS_LINUX, "").equals(text)
+                    && text.replaceAll(REGEXP_INVALID_FILENAME_CHARS, "").equals(text);
+        } catch (BadLocationException ble) {
+            confirmationEnabled = false;
+        }
+        return (confirmationEnabled);
     }
-    
-    protected boolean checkDataValidity(){
-        return(checkNameAvailabilityAndValidity());
+
+    protected boolean checkDataValidity() {
+        return (checkNameAvailabilityAndValidity());
     }
-    
-    protected final boolean updateConfirmationAbility(){
-        boolean confirmationEnabled=checkDataValidity();
+
+    protected final boolean updateConfirmationAbility() {
+        boolean confirmationEnabled = checkDataValidity();
         confirmButton.setEnabled(confirmationEnabled);
-        return(confirmationEnabled);
+        return (confirmationEnabled);
     }
-    
+
     @Override
-    public final void setVisible(boolean visible){
+    public final void setVisible(boolean visible) {
         updateConfirmationAbility();
         super.setVisible(visible);
     }
-    
-   /**
-     * Returns null if the typed string was invalid;
-     * otherwise, returns the string as the user entered it.
+
+    /**
+     * Returns null if the typed string was invalid; otherwise, returns the
+     * string as the user entered it.
      */
     public final String getValidatedText() {
         return typedText;
     }
-    
+
     /** This method handles events for the text field. */
     @Override
-	public final void actionPerformed(ActionEvent e){
-        if(updateConfirmationAbility())
+    public final void actionPerformed(ActionEvent e) {
+        if (updateConfirmationAbility())
             optionPane.setValue(Integer.valueOf(JOptionPane.OK_OPTION));
     }
 
     /** This method reacts to state changes in the option pane. */
     @Override
-	public final void propertyChange(PropertyChangeEvent e){
+    public final void propertyChange(PropertyChangeEvent e) {
         String prop = e.getPropertyName();
-        if(isVisible()&&(e.getSource()==optionPane) && (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop)))
-            {Object value = optionPane.getValue();
-             if(value==JOptionPane.UNINITIALIZED_VALUE)
-                 {//ignore reset
-                  return;
-                 }
-             //Reset the JOptionPane's value.
-             //If you don't do this, then if the user
-             //presses the same button next time, no
-             //property change event will be fired.
-             optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
-             updateValidationData(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)));
-             clearAndHide();
-           }
+        if (isVisible() && (e.getSource() == optionPane)
+                && (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
+            Object value = optionPane.getValue();
+            if (value == JOptionPane.UNINITIALIZED_VALUE) {// ignore reset
+                return;
+            }
+            // Reset the JOptionPane's value.
+            // If you don't do this, then if the user
+            // presses the same button next time, no
+            // property change event will be fired.
+            optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
+            updateValidationData(value.equals(Integer.valueOf(JOptionPane.OK_OPTION)));
+            clearAndHide();
+        }
     }
-    
-    protected void updateValidationData(boolean validate){
-        if(validate)
-            typedText=textField.getText();
+
+    protected void updateValidationData(boolean validate) {
+        if (validate)
+            typedText = textField.getText();
         else
-            typedText=null;
+            typedText = null;
     }
 
     /** This method clears the dialog and hides it. */
-    public void clearAndHide(){
+    public void clearAndHide() {
         textField.setText(null);
         setVisible(false);
     }

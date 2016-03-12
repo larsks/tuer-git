@@ -22,26 +22,33 @@ package jfpsm.graph;
  * 
  * @author Julien Gouesse
  *
- * @param <V> vertex class
- * @param <E> edge class
+ * @param <V>
+ *            vertex class
+ * @param <E>
+ *            edge class
  */
-public class DirectedCyclicGraph<V,E> extends DirectedGraphWithoutMultiEdge<V,E>{
+public class DirectedCyclicGraph<V, E> extends DirectedGraphWithoutMultiEdge<V, E> {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param ordered flag indicating whether the vertices and the edges are 
-	 * stored in a way that preserves the order by insertion time
-	 */
-	public DirectedCyclicGraph(final boolean ordered) {
-		super(ordered);
-	}
-	
-	//TODO when adding a vertex, create a synthetic edge to link the first vertex and the last vertex if necessary
-	
-	//TODO when adding an edge, create a synthetic edge to link the first vertex and the last vertex if necessary
-	
-	//TODO when removing a vertex, create a synthetic edge to link the first vertex and the last vertex if necessary
-	
-	//TODO when removing an edge, create a synthetic edge to link the first vertex and the last vertex if necessary
+    /**
+     * Constructor
+     * 
+     * @param ordered
+     *            flag indicating whether the vertices and the edges are stored
+     *            in a way that preserves the order by insertion time
+     */
+    public DirectedCyclicGraph(final boolean ordered) {
+        super(ordered);
+    }
+
+    // TODO when adding a vertex, create a synthetic edge to link the first
+    // vertex and the last vertex if necessary
+
+    // TODO when adding an edge, create a synthetic edge to link the first
+    // vertex and the last vertex if necessary
+
+    // TODO when removing a vertex, create a synthetic edge to link the first
+    // vertex and the last vertex if necessary
+
+    // TODO when removing an edge, create a synthetic edge to link the first
+    // vertex and the last vertex if necessary
 }

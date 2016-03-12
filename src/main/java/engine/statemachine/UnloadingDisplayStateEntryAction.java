@@ -26,61 +26,63 @@ import se.hiflyer.fettle.StateMachine;
  * @author Julien Gouesse
  *
  */
-public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction{
-	
-	private final Scheduler<ScenegraphState> scheduler;
-	
-	private final NoPendingTaskCondition noPendingTaskCondition;
-	
-	private final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction;
-	
-	private final TransitionTriggerAction<ScenegraphState,String> toMainMenuTriggerAction;
-	
-	private final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayTriggerAction;
-	
-	public static final String EXIT_TAG = "EXIT";
-	
-	public static final String MAIN_MENU_TAG = "MAIN_MENU";
-	
-	public static final String LEVEL_TAG = "LEVEL";
-	
-	
+public class UnloadingDisplayStateEntryAction extends ScenegraphStateEntryAction {
 
-	public UnloadingDisplayStateEntryAction(final Scheduler<ScenegraphState> scheduler,final NoPendingTaskCondition noPendingTaskCondition,
-			final TransitionTriggerAction<ScenegraphState,String> toExitGameTriggerAction,
-			final TransitionTriggerAction<ScenegraphState,String> toMainMenuTriggerAction,
-			final TransitionTriggerAction<ScenegraphState,String> toLoadingDisplayTriggerAction){
-		this.scheduler=scheduler;
-		this.noPendingTaskCondition=noPendingTaskCondition;
-		this.toExitGameTriggerAction=toExitGameTriggerAction;
-		this.toMainMenuTriggerAction=toMainMenuTriggerAction;
-		this.toLoadingDisplayTriggerAction=toLoadingDisplayTriggerAction;
-	}
-	
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-        super.onTransition(from,to,cause,args,stateMachine);
+    private final Scheduler<ScenegraphState> scheduler;
+
+    private final NoPendingTaskCondition noPendingTaskCondition;
+
+    private final TransitionTriggerAction<ScenegraphState, String> toExitGameTriggerAction;
+
+    private final TransitionTriggerAction<ScenegraphState, String> toMainMenuTriggerAction;
+
+    private final TransitionTriggerAction<ScenegraphState, String> toLoadingDisplayTriggerAction;
+
+    public static final String EXIT_TAG = "EXIT";
+
+    public static final String MAIN_MENU_TAG = "MAIN_MENU";
+
+    public static final String LEVEL_TAG = "LEVEL";
+
+    public UnloadingDisplayStateEntryAction(final Scheduler<ScenegraphState> scheduler,
+            final NoPendingTaskCondition noPendingTaskCondition,
+            final TransitionTriggerAction<ScenegraphState, String> toExitGameTriggerAction,
+            final TransitionTriggerAction<ScenegraphState, String> toMainMenuTriggerAction,
+            final TransitionTriggerAction<ScenegraphState, String> toLoadingDisplayTriggerAction) {
+        this.scheduler = scheduler;
+        this.noPendingTaskCondition = noPendingTaskCondition;
+        this.toExitGameTriggerAction = toExitGameTriggerAction;
+        this.toMainMenuTriggerAction = toMainMenuTriggerAction;
+        this.toLoadingDisplayTriggerAction = toLoadingDisplayTriggerAction;
+    }
+
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        super.onTransition(from, to, cause, args, stateMachine);
         /**
-         * adds a (one shot) scheduled task that exits this state when there is no pending task. The arguments are used to determine the destination. 
+         * adds a (one shot) scheduled task that exits this state when there is
+         * no pending task. The arguments are used to determine the destination.
          * The pending tasks are used to cleanup the game state
          */
-        if(args!=null&&args instanceof ScenegraphTransitionTriggerActionArguments)
-            {final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-        	 final String destinationTag=sttaArgs.getTag();
-        	 if(destinationTag!=null)
-        	     {if(destinationTag.equals(EXIT_TAG))
-        		      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toExitGameTriggerAction,0));
-        	      else
-        		      if(destinationTag.equals(MAIN_MENU_TAG))
-        			      scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toMainMenuTriggerAction,0));
-        		      else
-        			      if(destinationTag.equals(LEVEL_TAG))
-        			          {final String levelIdentifier=sttaArgs.getNextLevelIdentifier();
-        			           //uses an argument to pass the level index
-        			           toLoadingDisplayTriggerAction.arguments.setNextLevelIdentifier(levelIdentifier);
-        			           scheduler.addScheduledTask(new ScheduledTask<>(noPendingTaskCondition,1,toLoadingDisplayTriggerAction,0));
-        			          }
-                 }
+        if (args != null && args instanceof ScenegraphTransitionTriggerActionArguments) {
+            final ScenegraphTransitionTriggerActionArguments sttaArgs = (ScenegraphTransitionTriggerActionArguments) args;
+            final String destinationTag = sttaArgs.getTag();
+            if (destinationTag != null) {
+                if (destinationTag.equals(EXIT_TAG))
+                    scheduler.addScheduledTask(
+                            new ScheduledTask<>(noPendingTaskCondition, 1, toExitGameTriggerAction, 0));
+                else if (destinationTag.equals(MAIN_MENU_TAG))
+                    scheduler.addScheduledTask(
+                            new ScheduledTask<>(noPendingTaskCondition, 1, toMainMenuTriggerAction, 0));
+                else if (destinationTag.equals(LEVEL_TAG)) {
+                    final String levelIdentifier = sttaArgs.getNextLevelIdentifier();
+                    // uses an argument to pass the level index
+                    toLoadingDisplayTriggerAction.arguments.setNextLevelIdentifier(levelIdentifier);
+                    scheduler.addScheduledTask(
+                            new ScheduledTask<>(noPendingTaskCondition, 1, toLoadingDisplayTriggerAction, 0));
+                }
             }
+        }
     }
 }

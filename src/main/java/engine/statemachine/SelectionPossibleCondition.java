@@ -23,20 +23,21 @@ import engine.data.PlayerData;
 import se.hiflyer.fettle.Arguments;
 import se.hiflyer.fettle.Condition;
 
-public class SelectionPossibleCondition implements Condition{
+public class SelectionPossibleCondition implements Condition {
 
-	private final PlayerData playerData;
-	
-	private final boolean next;
-	
-	public SelectionPossibleCondition(final PlayerData playerData,final boolean next){
-		this.next=next;
-		this.playerData=playerData;
-	}
-	
-	@Override
-    public boolean isSatisfied(Arguments args){
-		Entry<Integer,Boolean> selectableWeaponIndexAndDualHandEnabledFlag=playerData.getSelectableWeaponIndexAndDualHandEnabledFlag(next);
-		return(selectableWeaponIndexAndDualHandEnabledFlag!=null);
-	}
+    private final PlayerData playerData;
+
+    private final boolean next;
+
+    public SelectionPossibleCondition(final PlayerData playerData, final boolean next) {
+        this.next = next;
+        this.playerData = playerData;
+    }
+
+    @Override
+    public boolean isSatisfied(Arguments args) {
+        Entry<Integer, Boolean> selectableWeaponIndexAndDualHandEnabledFlag = playerData
+                .getSelectableWeaponIndexAndDualHandEnabledFlag(next);
+        return (selectableWeaponIndexAndDualHandEnabledFlag != null);
+    }
 }

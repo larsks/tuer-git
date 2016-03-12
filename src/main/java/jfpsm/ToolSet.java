@@ -27,57 +27,57 @@ import java.util.List;
  * @author Julien Gouesse
  *
  */
-public final class ToolSet extends JFPSMToolUserObject{
+public final class ToolSet extends JFPSMToolUserObject {
 
-	private static final long serialVersionUID=1L;
-	
-	private final ArrayList<Tool> toolsList;
-	
-	public ToolSet(){
-		this("");
-	}
-	
-	public ToolSet(final String name){
-		super(name);
-		toolsList=new ArrayList<>();
-	}
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public boolean isDirty(){
-		return(false);
-	}
+    private final ArrayList<Tool> toolsList;
 
-	@Override
-	public void markDirty(){
-	}
+    public ToolSet() {
+        this("");
+    }
 
-	@Override
-	public void unmarkDirty(){
-	}
-	
-	final void addTool(final Tool tool){
-		toolsList.add(tool);
-		markDirty();
-	}
-	
-	final List<Tool> getToolsList(){
-		//it should be unmodifiable if and only if it is not serialized
-		return(Collections.unmodifiableList(toolsList));
-	}
-
-	@Override
-    final boolean isOpenable(){
-        //it is always open and it cannot be closed
-        return(false);
+    public ToolSet(final String name) {
+        super(name);
+        toolsList = new ArrayList<>();
     }
 
     @Override
-    final boolean isRemovable(){
-        return(false);
+    public boolean isDirty() {
+        return (false);
     }
 
-	@Override
-	boolean canInstantiateChildren(){
-		return(false);
-	}
+    @Override
+    public void markDirty() {
+    }
+
+    @Override
+    public void unmarkDirty() {
+    }
+
+    final void addTool(final Tool tool) {
+        toolsList.add(tool);
+        markDirty();
+    }
+
+    final List<Tool> getToolsList() {
+        // it should be unmodifiable if and only if it is not serialized
+        return (Collections.unmodifiableList(toolsList));
+    }
+
+    @Override
+    final boolean isOpenable() {
+        // it is always open and it cannot be closed
+        return (false);
+    }
+
+    @Override
+    final boolean isRemovable() {
+        return (false);
+    }
+
+    @Override
+    boolean canInstantiateChildren() {
+        return (false);
+    }
 }

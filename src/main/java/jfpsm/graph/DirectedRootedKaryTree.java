@@ -18,54 +18,59 @@
 package jfpsm.graph;
 
 /**
- * Weakly connected graph composed of directed edges and vertices that have no 
- * more than k outgoing (or exiting) vertices and exactly one incoming (or 
- * entering) vertex except the root that has no incoming vertex, that does not 
- * allow self-loops, parallel edges and cycles, i.e a directed rooted k-ary 
- * tree
+ * Weakly connected graph composed of directed edges and vertices that have no
+ * more than k outgoing (or exiting) vertices and exactly one incoming (or
+ * entering) vertex except the root that has no incoming vertex, that does not
+ * allow self-loops, parallel edges and cycles, i.e a directed rooted k-ary tree
  * 
  * @author Julien Gouesse
  *
- * @param <V> vertex class
- * @param <E> edge class
+ * @param <V>
+ *            vertex class
+ * @param <E>
+ *            edge class
  */
-public class DirectedRootedKaryTree<V,E> extends DirectedRootedTree<V,E>{
-	
-	private final int k;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param ordered flag indicating whether the vertices and the edges are 
-	 * stored in a way that preserves the order by insertion time
-	 */
-	public DirectedRootedKaryTree(final boolean ordered, final int k){
-		super(ordered);
-		if(k<0)
-			throw new IllegalArgumentException("k must be positive");
-		this.k=k;
-	}
-	
-	public final int getK(){
-		return(k);
-	}
-	
-	/* (non-Javadoc)
-	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
-	 */
-	@Override
-	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
-		boolean result=super.isEdgeAdditionValid(edge,vertices);
-		if(result)
-		    {final V firstVertex=vertices.getFirst();
-		     final int outgoingEdgesCount;
-		     //vertices cannot have more than k children
-		     if(containsVertex(firstVertex))
-		    	 outgoingEdgesCount=internalGetOutgoingEdges(firstVertex).size();
-		     else
-		    	 outgoingEdgesCount=0;
-		     result=outgoingEdgesCount<k;
-		    }
-		return(result);
-	}
+public class DirectedRootedKaryTree<V, E> extends DirectedRootedTree<V, E> {
+
+    private final int k;
+
+    /**
+     * Constructor
+     * 
+     * @param ordered
+     *            flag indicating whether the vertices and the edges are stored
+     *            in a way that preserves the order by insertion time
+     */
+    public DirectedRootedKaryTree(final boolean ordered, final int k) {
+        super(ordered);
+        if (k < 0)
+            throw new IllegalArgumentException("k must be positive");
+        this.k = k;
+    }
+
+    public final int getK() {
+        return (k);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object,
+     * jfpsm.graph.Pair)
+     */
+    @Override
+    protected boolean isEdgeAdditionValid(E edge, Pair<V> vertices) {
+        boolean result = super.isEdgeAdditionValid(edge, vertices);
+        if (result) {
+            final V firstVertex = vertices.getFirst();
+            final int outgoingEdgesCount;
+            // vertices cannot have more than k children
+            if (containsVertex(firstVertex))
+                outgoingEdgesCount = internalGetOutgoingEdges(firstVertex).size();
+            else
+                outgoingEdgesCount = 0;
+            result = outgoingEdgesCount < k;
+        }
+        return (result);
+    }
 }

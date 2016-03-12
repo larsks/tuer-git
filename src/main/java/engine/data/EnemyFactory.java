@@ -19,18 +19,19 @@ package engine.data;
 
 import engine.abstraction.AbstractFactory;
 
-public class EnemyFactory extends AbstractFactory<Enemy>{
+public class EnemyFactory extends AbstractFactory<Enemy> {
 
-	public EnemyFactory(){
-		super();
-	}
-	
-	public final boolean addNewEnemy(final String label,final String identifier,final String resourceName,final String[] painSoundSamplePaths){
-		boolean success=identifier!=null&&!componentMap.containsKey(identifier);
-		if(success)
-		    {final Enemy enemy=new Enemy(label,resourceName,painSoundSamplePaths);
-			 success=add(identifier,enemy);
-		    }
-		return(success);
-	}
+    public EnemyFactory() {
+        super();
+    }
+
+    public final boolean addNewEnemy(final String label, final String identifier, final String resourceName,
+            final String[] painSoundSamplePaths) {
+        boolean success = identifier != null && !componentMap.containsKey(identifier);
+        if (success) {
+            final Enemy enemy = new Enemy(label, resourceName, painSoundSamplePaths);
+            success = add(identifier, enemy);
+        }
+        return (success);
+    }
 }

@@ -18,31 +18,37 @@
 package jfpsm.graph;
 
 /**
- * Graph composed of vertices and directed edges, that allows self-loops and 
+ * Graph composed of vertices and directed edges, that allows self-loops and
  * parallel edges
  * 
  * @author Julien Gouesse
  *
- * @param <V> vertex class
- * @param <E> edge class
+ * @param <V>
+ *            vertex class
+ * @param <E>
+ *            edge class
  */
-public class DirectedMultiGraph<V,E> extends DirectedGraph<V,E>{
+public class DirectedMultiGraph<V, E> extends DirectedGraph<V, E> {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param ordered flag indicating whether the vertices and the edges are 
-	 * stored in a way that preserves the order by insertion time
-	 */
-	public DirectedMultiGraph(final boolean ordered){
-		super(ordered);
-	}
-	
-	/* (non-Javadoc)
-	 * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object, jfpsm.graph.Pair)
-	 */
-	@Override
-	protected boolean isEdgeAdditionValid(E edge,Pair<V> vertices){
-		return(true);
-	}
+    /**
+     * Constructor
+     * 
+     * @param ordered
+     *            flag indicating whether the vertices and the edges are stored
+     *            in a way that preserves the order by insertion time
+     */
+    public DirectedMultiGraph(final boolean ordered) {
+        super(ordered);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jfpsm.graph.DirectedGraph#isEdgeAdditionValid(java.lang.Object,
+     * jfpsm.graph.Pair)
+     */
+    @Override
+    protected boolean isEdgeAdditionValid(E edge, Pair<V> vertices) {
+        return (true);
+    }
 }

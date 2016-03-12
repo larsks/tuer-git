@@ -17,22 +17,22 @@
  */
 package engine.statemachine;
 
-public class StateChangeScheduledTaskCondition<S> extends ScheduledTaskCondition<S>{
+public class StateChangeScheduledTaskCondition<S> extends ScheduledTaskCondition<S> {
 
-	private final S state;
+    private final S state;
 
     private final StateChangeType stateChangeType;
-	
-	public StateChangeScheduledTaskCondition(final S state,final StateChangeType stateChangeType){
-		super();
-		this.state=state;
-        this.stateChangeType=stateChangeType;
-	}
 
-	@Override
-	public boolean isSatisfied(final S previousState,final S currentState){
-		return(previousState!=currentState&&
-				((stateChangeType.equals(StateChangeType.ENTRY)&&state.equals(currentState))||
-				 (stateChangeType.equals(StateChangeType.EXIT)&&state.equals(previousState))));
-	}	
+    public StateChangeScheduledTaskCondition(final S state, final StateChangeType stateChangeType) {
+        super();
+        this.state = state;
+        this.stateChangeType = stateChangeType;
+    }
+
+    @Override
+    public boolean isSatisfied(final S previousState, final S currentState) {
+        return (previousState != currentState
+                && ((stateChangeType.equals(StateChangeType.ENTRY) && state.equals(currentState))
+                        || (stateChangeType.equals(StateChangeType.EXIT) && state.equals(previousState))));
+    }
 }

@@ -20,103 +20,103 @@ package jfpsm;
 import common.ModelFileFormat;
 
 /**
- * Data model of the 3D model converter, it contains some information
- * about the output file and the input file
+ * Data model of the 3D model converter, it contains some information about the
+ * output file and the input file
  * 
  * @author Julien Gouesse
  *
  */
-public class ModelConverter extends JFPSMToolUserObject{
+public class ModelConverter extends JFPSMToolUserObject {
 
-	private static final long serialVersionUID=1L;
-	
-	private transient boolean dirty;
-	
-	private String convertibleModelFilePath;
-	
-	private String convertedModelDirectoryPath;
-	
-	private String convertedModelFilename;
-	
-	private ModelFileFormat convertedModelFileFormat;
+    private static final long serialVersionUID = 1L;
 
-	public ModelConverter(){
-		this("");
-	}
-	
-	public ModelConverter(final String name){
-		super(name);
-		dirty=true;
-	}
-	
-	@Override
-    public Viewer createViewer(final ToolManager toolManager){
-    	return(new ModelConverterViewer(this,toolManager));
+    private transient boolean dirty;
+
+    private String convertibleModelFilePath;
+
+    private String convertedModelDirectoryPath;
+
+    private String convertedModelFilename;
+
+    private ModelFileFormat convertedModelFileFormat;
+
+    public ModelConverter() {
+        this("");
     }
 
-	public String getConvertibleModelFilePath(){
-		return(convertibleModelFilePath);
-	}
-
-	public void setConvertibleModelFilePath(String convertibleModelFilePath){
-		this.convertibleModelFilePath=convertibleModelFilePath;
-		dirty=true;
-	}
-
-	public String getConvertedModelDirectoryPath(){
-		return(convertedModelDirectoryPath);
-	}
-
-	public void setConvertedModelDirectoryPath(String convertedModelDirectoryPath){
-		this.convertedModelDirectoryPath=convertedModelDirectoryPath;
-		dirty=true;
-	}
-
-	public String getConvertedModelFilename(){
-		return(convertedModelFilename);
-	}
-
-	public void setConvertedModelFilename(String convertedModelFilename){
-		this.convertedModelFilename=convertedModelFilename;
-		dirty=true;
-	}
-
-	public ModelFileFormat getConvertedModelFileFormat(){
-		return(convertedModelFileFormat);
-	}
-
-	public void setConvertedModelFileFormat(ModelFileFormat convertedModelFileFormat){
-		this.convertedModelFileFormat=convertedModelFileFormat;
-		dirty=true;
-	}
-
-	@Override
-	public boolean isDirty(){
-		return(dirty);
-	}
-
-	@Override
-    public final void unmarkDirty(){
-        dirty=false;
+    public ModelConverter(final String name) {
+        super(name);
+        dirty = true;
     }
-    
+
     @Override
-    public final void markDirty(){
-        dirty=true;
+    public Viewer createViewer(final ToolManager toolManager) {
+        return (new ModelConverterViewer(this, toolManager));
     }
 
-	@Override
-	boolean isRemovable(){
-		return(true);
-	}
+    public String getConvertibleModelFilePath() {
+        return (convertibleModelFilePath);
+    }
 
-	@Override
-	boolean isOpenable(){
-		return(true);
-	}
+    public void setConvertibleModelFilePath(String convertibleModelFilePath) {
+        this.convertibleModelFilePath = convertibleModelFilePath;
+        dirty = true;
+    }
 
-	@Override
-	boolean canInstantiateChildren(){
-		return(false);
-	}
+    public String getConvertedModelDirectoryPath() {
+        return (convertedModelDirectoryPath);
+    }
+
+    public void setConvertedModelDirectoryPath(String convertedModelDirectoryPath) {
+        this.convertedModelDirectoryPath = convertedModelDirectoryPath;
+        dirty = true;
+    }
+
+    public String getConvertedModelFilename() {
+        return (convertedModelFilename);
+    }
+
+    public void setConvertedModelFilename(String convertedModelFilename) {
+        this.convertedModelFilename = convertedModelFilename;
+        dirty = true;
+    }
+
+    public ModelFileFormat getConvertedModelFileFormat() {
+        return (convertedModelFileFormat);
+    }
+
+    public void setConvertedModelFileFormat(ModelFileFormat convertedModelFileFormat) {
+        this.convertedModelFileFormat = convertedModelFileFormat;
+        dirty = true;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return (dirty);
+    }
+
+    @Override
+    public final void unmarkDirty() {
+        dirty = false;
+    }
+
+    @Override
+    public final void markDirty() {
+        dirty = true;
+    }
+
+    @Override
+    boolean isRemovable() {
+        return (true);
+    }
+
+    @Override
+    boolean isOpenable() {
+        return (true);
+    }
+
+    @Override
+    boolean canInstantiateChildren() {
+        return (false);
+    }
 }

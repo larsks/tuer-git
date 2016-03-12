@@ -17,7 +17,7 @@
  */
 package engine.data;
 
-public enum ObjectiveStatus{
+public enum ObjectiveStatus {
 
-	UNCOMPLETED,COMPLETED,FAILED;
+    UNCOMPLETED, COMPLETED, FAILED;
 }

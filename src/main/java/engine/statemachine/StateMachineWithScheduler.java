@@ -29,84 +29,101 @@ import se.hiflyer.fettle.impl.MutableTransitionModelImpl;
  * 
  * @author Julien Gouesse
  *
- * @param <S> state class
- * @param <E> event class
+ * @param <S>
+ *            state class
+ * @param <E>
+ *            event class
  */
-public class StateMachineWithScheduler<S,E>{
+public class StateMachineWithScheduler<S, E> {
 
-    /**internal state machine based on Fettle API*/
-    protected final StateMachine<S,E> internalStateMachine;
-    /**transition model based on Fettle API*/
-    protected final MutableTransitionModelImpl<S,E> transitionModel;
-    /**tool used to postpone state changes*/
+    /** internal state machine based on Fettle API */
+    protected final StateMachine<S, E> internalStateMachine;
+    /** transition model based on Fettle API */
+    protected final MutableTransitionModelImpl<S, E> transitionModel;
+    /** tool used to postpone state changes */
     protected final Scheduler<S> scheduler;
-    /**state before the latest logical update*/
+    /** state before the latest logical update */
     protected S previousState;
-    
+
     /**
      * Constructor
      * 
-     * @param stateClass state class
-     * @param eventClass event class
-     * @param initialState initial state (can be null but a NullPointerException 
-     * will be thrown if StateMachine.forceSetState(S) is called any further)
+     * @param stateClass
+     *            state class
+     * @param eventClass
+     *            event class
+     * @param initialState
+     *            initial state (can be null but a NullPointerException will be
+     *            thrown if StateMachine.forceSetState(S) is called any further)
      */
-    public StateMachineWithScheduler(Class<S> stateClass,Class<E> eventClass,S initialState){
-        //creates the transition model
-        transitionModel=Fettle.newTransitionModel(stateClass,eventClass);
+    public StateMachineWithScheduler(Class<S> stateClass, Class<E> eventClass, S initialState) {
+        // creates the transition model
+        transitionModel = Fettle.newTransitionModel(stateClass, eventClass);
         /**
-         * creates the state machine used internally, based on Fettle API. If null is passed, 
-         * any further call of StateMachine.forceSetState(S) will throw a NullPointerException
+         * creates the state machine used internally, based on Fettle API. If
+         * null is passed, any further call of StateMachine.forceSetState(S)
+         * will throw a NullPointerException
          */
-        internalStateMachine=transitionModel.newStateMachine(initialState);
-        //creates the scheduler
-        scheduler=new Scheduler<>();
+        internalStateMachine = transitionModel.newStateMachine(initialState);
+        // creates the scheduler
+        scheduler = new Scheduler<>();
     }
-    
+
     /**
-     * Adds a state and its actions triggered on transitions into the state machine
-     * @param state added state
-     * @param entryAction action used when the state machine enter the supplied state (can be null)
-     * @param exitAction action used when the state machine exits the supplied state (can be null)
+     * Adds a state and its actions triggered on transitions into the state
+     * machine
+     * 
+     * @param state
+     *            added state
+     * @param entryAction
+     *            action used when the state machine enter the supplied state
+     *            (can be null)
+     * @param exitAction
+     *            action used when the state machine exits the supplied state
+     *            (can be null)
      */
-    protected void addState(S state,Action<S,E> entryAction,Action<S,E> exitAction){
-        //adds an entry action to the transition model
-        if(entryAction!=null)
-            transitionModel.addEntryAction(state,entryAction);
-        //adds an exit action to the transition model
-        if(exitAction!=null)
-            transitionModel.addExitAction(state,exitAction);
+    protected void addState(S state, Action<S, E> entryAction, Action<S, E> exitAction) {
+        // adds an entry action to the transition model
+        if (entryAction != null)
+            transitionModel.addEntryAction(state, entryAction);
+        // adds an exit action to the transition model
+        if (exitAction != null)
+            transitionModel.addExitAction(state, exitAction);
     }
-    
+
     /**
      * Updates the logical layer by running the scheduler
      * 
-     * @param timer general timer
+     * @param timer
+     *            general timer
      */
-    public void updateLogicalLayer(final ReadOnlyTimer timer){
-        final S currentStateBeforeUpdate=internalStateMachine.getCurrentState();
-        scheduler.update(previousState,currentStateBeforeUpdate,timer.getTimePerFrame());
-        //obviously the current state may change during the update
-        final S currentStateAfterUpdate=internalStateMachine.getCurrentState();
-        previousState=currentStateAfterUpdate;
+    public void updateLogicalLayer(final ReadOnlyTimer timer) {
+        final S currentStateBeforeUpdate = internalStateMachine.getCurrentState();
+        scheduler.update(previousState, currentStateBeforeUpdate, timer.getTimePerFrame());
+        // obviously the current state may change during the update
+        final S currentStateAfterUpdate = internalStateMachine.getCurrentState();
+        previousState = currentStateAfterUpdate;
     }
-    
+
     /**
      * Fires an event that may cause a transition
      * 
      * @param event
      */
-    public void fireEvent(E event){
-    	internalStateMachine.fireEvent(event);
+    public void fireEvent(E event) {
+        internalStateMachine.fireEvent(event);
     }
-    
+
     /**
-     * Fires an event that may cause a transition and supplies some transitional arguments
+     * Fires an event that may cause a transition and supplies some transitional
+     * arguments
      * 
-     * @param event event that may cause a transition
-     * @param args arguments used in the transition if any
+     * @param event
+     *            event that may cause a transition
+     * @param args
+     *            arguments used in the transition if any
      */
-    public void fireEvent(E event,Arguments args){
-    	internalStateMachine.fireEvent(event,args);
+    public void fireEvent(E event, Arguments args) {
+        internalStateMachine.fireEvent(event, args);
     }
 }

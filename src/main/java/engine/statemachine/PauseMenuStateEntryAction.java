@@ -27,26 +27,27 @@ import se.hiflyer.fettle.StateMachine;
  * @author Julien Gouesse
  *
  */
-public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction{
+public class PauseMenuStateEntryAction extends ScenegraphStateEntryAction {
 
-	public static final String NO_PRESELECTED_MENU_ITEM = "(No Preselected Menu Item)";
-	
-	public static final String EXIT_CONFIRM_TAG = "(For Exit Confirm)";
-	
-	@Override
-    public void onTransition(ScenegraphState from,ScenegraphState to,String cause,Arguments args,StateMachine<ScenegraphState,String> stateMachine){
-		final PauseMenuState pauseMenuState=(PauseMenuState)to;
-		final ScenegraphTransitionTriggerActionArguments sttaArgs=(ScenegraphTransitionTriggerActionArguments)args;
-		final String latestPlayedLevelIdentifier=sttaArgs.getPreviousLevelIdentifier();
-		final String latestNextPlayableLevelIdentifier=sttaArgs.getNextLevelIdentifier();
-		pauseMenuState.setLatestPlayedLevelIdentifier(latestPlayedLevelIdentifier);
-		pauseMenuState.setLatestNextPlayableLevelIdentifier(latestNextPlayableLevelIdentifier);
-		final boolean openedForExitConfirm=EXIT_CONFIRM_TAG.equals(sttaArgs.getTag());
-		pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
-		final GameStatistics gameStats=sttaArgs.getGameStatistics();
-		final List<Objective> objectives=sttaArgs.getObjectives();
-		pauseMenuState.setGameStatistics(gameStats);
-		pauseMenuState.setObjectives(objectives);
-		super.onTransition(from,to,cause,args,stateMachine);
+    public static final String NO_PRESELECTED_MENU_ITEM = "(No Preselected Menu Item)";
+
+    public static final String EXIT_CONFIRM_TAG = "(For Exit Confirm)";
+
+    @Override
+    public void onTransition(ScenegraphState from, ScenegraphState to, String cause, Arguments args,
+            StateMachine<ScenegraphState, String> stateMachine) {
+        final PauseMenuState pauseMenuState = (PauseMenuState) to;
+        final ScenegraphTransitionTriggerActionArguments sttaArgs = (ScenegraphTransitionTriggerActionArguments) args;
+        final String latestPlayedLevelIdentifier = sttaArgs.getPreviousLevelIdentifier();
+        final String latestNextPlayableLevelIdentifier = sttaArgs.getNextLevelIdentifier();
+        pauseMenuState.setLatestPlayedLevelIdentifier(latestPlayedLevelIdentifier);
+        pauseMenuState.setLatestNextPlayableLevelIdentifier(latestNextPlayableLevelIdentifier);
+        final boolean openedForExitConfirm = EXIT_CONFIRM_TAG.equals(sttaArgs.getTag());
+        pauseMenuState.setOpenedForExitConfirm(openedForExitConfirm);
+        final GameStatistics gameStats = sttaArgs.getGameStatistics();
+        final List<Objective> objectives = sttaArgs.getObjectives();
+        pauseMenuState.setGameStatistics(gameStats);
+        pauseMenuState.setObjectives(objectives);
+        super.onTransition(from, to, cause, args, stateMachine);
     }
 }
