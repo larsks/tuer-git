@@ -74,7 +74,8 @@ public class TestIntroductionReimplementation {
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
         final Image[] introImages = loadImages(source);
-        computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond, introImages);
+        computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond,
+                introImages);
     }
 
     private static final Image[] loadImages(final URLResourceSource source) {
@@ -83,13 +84,13 @@ public class TestIntroductionReimplementation {
             final String imageName = sourceImageFile.getName().substring(0, sourceImageFile.getName().lastIndexOf('.'));
             final File imageParentDir = sourceImageFile.getParentFile();
             final File[] imageFiles = imageParentDir.listFiles(new FilenameFilter() {
-                
+
                 @Override
                 public boolean accept(File dir, String name) {
                     boolean accepted = false;
                     if (name.startsWith(imageName) && name.endsWith(".png")) {
                         try {
-                            Integer.parseInt(name.substring(imageName.length(),name.length() - 4));
+                            Integer.parseInt(name.substring(imageName.length(), name.length() - 4));
                             accepted = true;
                         } catch (NumberFormatException nfe) {
                         }
@@ -105,31 +106,35 @@ public class TestIntroductionReimplementation {
                 Arrays.sort(imageFiles, new Comparator<File>() {
                     @Override
                     public int compare(File f1, File f2) {
-                        final int n1 = Integer.parseInt(f1.getName().substring(imageName.length(),f1.getName().length() - 4));
-                        final int n2 = Integer.parseInt(f2.getName().substring(imageName.length(),f2.getName().length() - 4));
+                        final int n1 = Integer
+                                .parseInt(f1.getName().substring(imageName.length(), f1.getName().length() - 4));
+                        final int n2 = Integer
+                                .parseInt(f2.getName().substring(imageName.length(), f2.getName().length() - 4));
                         return Integer.compare(n1, n2);
                     }
                 });
                 JoglImageLoader.registerLoader();
                 System.out.println("[START] Load textures");
-                for (int imageIndex = 0 ; imageIndex < imageFiles.length ; imageIndex++ ) {
+                for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
                     final URLResourceSource imageSource = new URLResourceSource(imageFiles[imageIndex].toURI().toURL());
                     System.out.println("[START] Load texture " + imageFiles[imageIndex].getAbsolutePath());
-                    final Texture texture = TextureManager.load(imageSource, Texture.MinificationFilter.Trilinear, false);
+                    final Texture texture = TextureManager.load(imageSource, Texture.MinificationFilter.Trilinear,
+                            false);
                     System.out.println("[ END ] Load texture " + imageFiles[imageIndex].getAbsolutePath());
                     images[imageIndex] = texture.getImage();
                 }
                 System.out.println("[ END ] Load textures");
             }
             return images;
-        } catch (URISyntaxException|MalformedURLException e) {
+        } catch (URISyntaxException | MalformedURLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(final URLResourceSource source, final int durationInSeconds,
-            final int framesPerSecond, final Image[] introImages) {
+    private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(
+            final URLResourceSource source, final int durationInSeconds, final int framesPerSecond,
+            final Image[] introImages) {
         final int frameCount = durationInSeconds * framesPerSecond;
         // the generic treatment starts here
         final List<MeshData> meshDataList = new ArrayList<>();
@@ -148,6 +153,7 @@ public class TestIntroductionReimplementation {
             // in this array
             final Integer[][] pixels = new Integer[image.getWidth()][image.getHeight()];
             final Set<Integer> frameColors = new HashSet<>();
+            int skippedTransparentPixelCount = 0;
             for (int y = 0; y < image.getHeight(); y++) {
                 for (int x = 0; x < image.getWidth(); x++) {
                     // gets the ARGB value of the pixel
@@ -157,10 +163,13 @@ public class TestIntroductionReimplementation {
                     if (alpha > 0) {
                         pixels[x][y] = Integer.valueOf(argb);
                         frameColors.add(Integer.valueOf(argb));
+                    } else {
+                        skippedTransparentPixelCount++;
                     }
                 }
             }
             final Map<Vector2i, Integer[][]> globalDistinctColorsPixelsArraysMap = new HashMap<>();
+            int totalOccupiedCellCount = 0;
             // for each color
             for (final Integer frameColor : frameColors) {
                 // builds an occupancy check to keep the pixels of a single
@@ -169,6 +178,8 @@ public class TestIntroductionReimplementation {
                 // creates the occupancy map
                 final ArrayHelper.OccupancyMap occupancyMap = arrayHelper.createPackedOccupancyMap(pixels,
                         colorFilterOccupancyCheck);
+                System.out.println("[ ... ] Occupied cell count " + occupancyMap.getOccupiedCellCount());
+                totalOccupiedCellCount += occupancyMap.getOccupiedCellCount();
                 // looks for a full arrays map matching with this occupancy map
                 Map<Vector2i, Integer[][]> localDistinctColorsPixelsArraysMap = pixelsArrayOccupancyMapMap
                         .get(occupancyMap);
@@ -179,29 +190,43 @@ public class TestIntroductionReimplementation {
                     // (without fully transparent pixels)
                     localDistinctColorsPixelsArraysMap = arrayHelper.computeFullArraysFromNonFullArray(pixels,
                             occupancyMap);
+                    System.out.println("[ ... ] Occupied cell count " + occupancyMap.getOccupiedCellCount());
                     // stores the computed full arrays map
                     pixelsArrayOccupancyMapMap.put(occupancyMapClone, localDistinctColorsPixelsArraysMap);
                 } else {
                     System.out.println("[ ... ] Reuse a full array map");
                 }
                 for (final Entry<Vector2i, Integer[][]> localDistinctColorsPixelsArraysEntry : localDistinctColorsPixelsArraysMap
-                        .entrySet()) {// retrieves where the pixels come from
+                        .entrySet()) {
+                    // retrieves where the pixels come from
                     final Vector2i location = localDistinctColorsPixelsArraysEntry.getKey();
                     // retrieves the non fully transparent pixels
                     final Integer[][] localDistinctColorsPixels = localDistinctColorsPixelsArraysEntry.getValue();
                     // stores the full array with distinct colors
-                    globalDistinctColorsPixelsArraysMap.put(location, localDistinctColorsPixels);
+                    if (globalDistinctColorsPixelsArraysMap.put(location, localDistinctColorsPixels) != null) {
+                        System.err.println("[WARN ] Collision at " + location.getX() + " " + location.getY());
+                    }
                 }
             }
-            // computes the triangle count
-            int triCount = 0;
+            System.out.println("[ ... ] Total occupied cell count " + totalOccupiedCellCount);
+            int pixelCount = 0;
             // for each array of pixels of the same color
-            //for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {
-                // one pair of triangles per pixel, the array is full (all rows
-                // and all columns have respectively the same sizes)
-                //triCount += (globalDictinctColorPixels.length * globalDictinctColorPixels[0].length) * 2;
-            //}
-            triCount = 2 * globalDistinctColorsPixelsArraysMap.size();
+            for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {
+                // the array is full (all rows and all columns have respectively
+                // the same sizes)
+                pixelCount += globalDictinctColorPixels.length * globalDictinctColorPixels[0].length;
+            }
+            final int maxPixelCount = image.getWidth() * image.getHeight();
+            if (pixelCount == maxPixelCount) {
+                System.out.println("[     ] Key frame " + frameIndex + " total pixel coverage");
+            } else {
+                final int skippedPixelCount = maxPixelCount - pixelCount;
+                System.out.println("[     ] Key frame " + frameIndex + " pixel coverage " + pixelCount + " pixels on "
+                        + maxPixelCount + ". " + skippedTransparentPixelCount + " transparent pixels, skipped pixels "
+                        + skippedPixelCount);
+            }
+            // computes the triangle count
+            final int triCount = 2 * globalDistinctColorsPixelsArraysMap.size();
             System.out.println("[     ] Key frame " + frameIndex + " triangle count: " + triCount);
             final MeshData meshData = new MeshData();
             // creates the vertex buffer (indirect NIO buffer), triangle count *
@@ -258,13 +283,14 @@ public class TestIntroductionReimplementation {
             colorBuffer.rewind();
             meshDataList.add(meshData);
             System.out.println("[ END ] Compute key frame " + frameIndex);
-            final long endTime=System.currentTimeMillis();
+            final long endTime = System.currentTimeMillis();
             long keyFrameComputationDurationInMillis = endTime - startTime;
             long keyFrameComputationDurationInSeconds = keyFrameComputationDurationInMillis / 1000;
             keyFrameComputationDurationInMillis -= keyFrameComputationDurationInSeconds * 1000;
             long keyFrameComputationDurationInMinutes = keyFrameComputationDurationInSeconds / 60;
             keyFrameComputationDurationInSeconds -= keyFrameComputationDurationInMinutes * 60;
-            System.out.println("[     ] Key frame compute time " + keyFrameComputationDurationInMinutes + " m " + keyFrameComputationDurationInSeconds + " s " + keyFrameComputationDurationInMillis);
+            System.out.println("[     ] Key frame compute time " + keyFrameComputationDurationInMinutes + " m "
+                    + keyFrameComputationDurationInSeconds + " s " + keyFrameComputationDurationInMillis);
         }
         System.out.println("[ END ] Compute key frames");
         System.out.println("[START] Normalize vertex coordinates");
