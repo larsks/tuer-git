@@ -45,6 +45,12 @@ import com.jogamp.nativewindow.util.Point;
 import engine.movement.MovementEquation;
 import engine.movement.UniformlyVariableMovementEquation;
 
+/**
+ * Tests the creation of the images used in the introduction state
+ * 
+ * @author Julien Gouesse
+ *
+ */
 public class TestIntroductionStateImageCreation {
     
     public static void main(String[] args) {
@@ -66,6 +72,7 @@ public class TestIntroductionStateImageCreation {
                 urise.printStackTrace();
             }
             if (introImageParentDir != null && introImageSimpleFilenameWithoutExtension != null) {
+                System.out.println("[START] Write images");
                 int imageIndex = 0;
                 for (final Image introImage : introImages) {
                     final BufferedImage bufferedImage = new BufferedImage(introImage.getWidth(), introImage.getHeight(),
@@ -91,6 +98,7 @@ public class TestIntroductionStateImageCreation {
                     }
                     imageIndex++;
                 }
+                System.out.println("[ END ] Write images");
             }
         }
     }
@@ -104,7 +112,7 @@ public class TestIntroductionStateImageCreation {
         final Image introImage = introTexture.getImage();
         final int frameCount = durationInSeconds * framesPerSecond;
         final Point spreadCenter = new Point(205, 265);
-        final MovementEquation equation = new UniformlyVariableMovementEquation(0, 10000, 0);
+        final MovementEquation equation = new UniformlyVariableMovementEquation(0, 10500, 0);
         HashMap<ReadOnlyColorRGBA, ReadOnlyColorRGBA> colorSubstitutionTable = new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE, ColorRGBA.RED);
         System.out.println("[START] Fill color table");
@@ -143,12 +151,24 @@ public class TestIntroductionStateImageCreation {
             final int updatablePixelsCount = Math.max(0,
                     getScannablePixelsCount(equation, elapsedTime) - updatedPixelsCount);
             // if there are some pixels to update
-            if (updatablePixelsCount > 0) {// updates the pixels (incrementally)
-                for (int i = updatedPixelsCount; i < updatedPixelsCount + updatablePixelsCount; i++) {
+            if (updatablePixelsCount > 0) {
+                System.out.println("[     ] " + updatablePixelsCount + " updatable pixels");
+                // updates the pixels (incrementally)
+                final int maxUpdatedPixelsCount;
+                if (updatedPixelsCount + updatablePixelsCount > coloredVerticesList.size()) {
+                    maxUpdatedPixelsCount = coloredVerticesList.size();
+                    final int nonUpdatedPixelsCount = updatedPixelsCount + updatablePixelsCount - coloredVerticesList.size();
+                    System.out.println("[     ] " + nonUpdatedPixelsCount + " non updated pixels (updatable pixels according to the equation > updatable pixels)");
+                } else {
+                    maxUpdatedPixelsCount = updatedPixelsCount + updatablePixelsCount;
+                }
+                for (int i = updatedPixelsCount; i < maxUpdatedPixelsCount; i++) {
                     final int argb = coloredVerticesList.get(i).getValue().asIntARGB();
                     final Point updatedVertex = coloredVerticesList.get(i).getKey();
                     ImageUtils.setARGB(image, updatedVertex.getX(), updatedVertex.getY(), argb);
                 }
+            } else {
+                System.out.println("[     ] No pixel to update");
             }
             // stores the new image into the array
             introImages[frameIndex] = image;
