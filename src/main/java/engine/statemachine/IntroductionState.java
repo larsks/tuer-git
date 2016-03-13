@@ -80,7 +80,7 @@ public final class IntroductionState extends ScenegraphState {
         final Point spreadCenter = new Point(205, 265);
         HashMap<ReadOnlyColorRGBA, ReadOnlyColorRGBA> colorSubstitutionTable = new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE, ColorRGBA.RED);
-        MovementEquation equation = new UniformlyVariableMovementEquation(0, 10000, 0);
+        MovementEquation equation = new UniformlyVariableMovementEquation(0, 10500, 0);
         // sets a controller that modifies the image
         /**
          * TODO: replace this controller by another one that simply switches the
