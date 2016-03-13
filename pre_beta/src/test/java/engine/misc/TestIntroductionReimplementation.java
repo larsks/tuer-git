@@ -18,13 +18,13 @@
 package engine.misc;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +38,6 @@ import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
-import com.ardor3d.math.ColorRGBA;
-import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -53,10 +51,7 @@ import com.ardor3d.util.export.binary.BinaryIdContentPair;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
-import com.jogamp.nativewindow.util.Point;
 
-import engine.movement.MovementEquation;
-import engine.movement.UniformlyVariableMovementEquation;
 import jfpsm.ArrayHelper;
 import jfpsm.ArrayHelper.OccupancyCheck;
 import jfpsm.ArrayHelper.Vector2i;
@@ -74,70 +69,70 @@ public class TestIntroductionReimplementation {
     private static final String textureFilePath = "/images/introduction.png";
 
     public static void main(final String[] args) {
-        JoglImageLoader.registerLoader();
-        System.out.println("[START] Load texture");
+        final int durationInSeconds = 10;
+        final int framesPerSecond = 30;
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
-        final Texture introTexture = TextureManager.load(source, Texture.MinificationFilter.Trilinear, true);
-        System.out.println("[ END ] Load texture");
-        final Image introImage = introTexture.getImage();
-        final int durationInSeconds = /* 10 */1;
-        final int framesPerSecond = 30;
-        final int frameCount = durationInSeconds * framesPerSecond;
-        final List<MeshData> meshDataList = new ArrayList<>();
-        final Point spreadCenter = new Point(205, 265);
-        final MovementEquation equation = new UniformlyVariableMovementEquation(0, 10000, 0);
-        HashMap<ReadOnlyColorRGBA, ReadOnlyColorRGBA> colorSubstitutionTable = new HashMap<>();
-        colorSubstitutionTable.put(ColorRGBA.BLUE, ColorRGBA.RED);
-        System.out.println("[START] Fill color table");
-        final ArrayList<Entry<Point, ReadOnlyColorRGBA>> coloredVerticesList = new ArrayList<>();
-        // fills
-        ReadOnlyColorRGBA sourceColor, destinationColor;
-        for (int y = 0; y < introImage.getHeight(); y++)
-            for (int x = 0; x < introImage.getWidth(); x++) {
-                final int argb = ImageUtils.getARGB(introImage, x, y);
-                sourceColor = new ColorRGBA().fromIntARGB(argb);
-                destinationColor = colorSubstitutionTable.get(sourceColor);
-                if (destinationColor != null)
-                    coloredVerticesList.add(new AbstractMap.SimpleEntry<>(new Point(x, y), destinationColor));
-            }
-        System.out.println("[ END ] Fill color table");
-        // sorts
-        Collections.sort(coloredVerticesList, new CenteredColoredPointComparator(spreadCenter));
-        System.out.println("[START] Compute key frames images");
-        // creates one image per frame
-        final Image[] introImages = new Image[frameCount];
-        // for each frame
-        for (int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
-            System.out.println("[START] Compute key frames image " + frameIndex);
-            // gets the image of the previous frame
-            final Image previousImage = frameIndex == 0 ? introImage : introImages[frameIndex - 1];
-            // copies its image data
-            final ByteBuffer data = BufferUtils.clone(previousImage.getData(0));
-            data.rewind();
-            // creates the image by copying this previous image
-            final Image image = new Image(previousImage.getDataFormat(), previousImage.getDataType(),
-                    previousImage.getWidth(), previousImage.getHeight(), data, null);
-            // performs the modification of this image for this frame
-            final double previousElapsedTime = frameIndex == 0 ? 0 : (frameIndex - 1) / (double) framesPerSecond;
-            final double elapsedTime = frameIndex / (double) framesPerSecond;
-            final int updatedPixelsCount = getScannablePixelsCount(equation, previousElapsedTime);
-            final int updatablePixelsCount = Math.max(0,
-                    getScannablePixelsCount(equation, elapsedTime) - updatedPixelsCount);
-            // if there are some pixels to update
-            if (updatablePixelsCount > 0) {// updates the pixels (incrementally)
-                for (int i = updatedPixelsCount; i < updatedPixelsCount + updatablePixelsCount; i++) {
-                    final int argb = coloredVerticesList.get(i).getValue().asIntARGB();
-                    final Point updatedVertex = coloredVerticesList.get(i).getKey();
-                    ImageUtils.setARGB(image, updatedVertex.getX(), updatedVertex.getY(), argb);
+        final Image[] introImages = loadImages(source);
+        computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond, introImages);
+    }
+
+    private static final Image[] loadImages(final URLResourceSource source) {
+        try {
+            final File sourceImageFile = new File(source.getURL().toURI());
+            final String imageName = sourceImageFile.getName().substring(0, sourceImageFile.getName().lastIndexOf('.'));
+            final File imageParentDir = sourceImageFile.getParentFile();
+            final File[] imageFiles = imageParentDir.listFiles(new FilenameFilter() {
+                
+                @Override
+                public boolean accept(File dir, String name) {
+                    boolean accepted = false;
+                    if (name.startsWith(imageName) && name.endsWith(".png")) {
+                        try {
+                            Integer.parseInt(name.substring(imageName.length(),name.length() - 4));
+                            accepted = true;
+                        } catch (NumberFormatException nfe) {
+                        }
+                    }
+                    return accepted;
                 }
+            });
+            final Image[] images;
+            if (imageFiles == null) {
+                images = null;
+            } else {
+                images = new Image[imageFiles.length];
+                Arrays.sort(imageFiles, new Comparator<File>() {
+                    @Override
+                    public int compare(File f1, File f2) {
+                        final int n1 = Integer.parseInt(f1.getName().substring(imageName.length(),f1.getName().length() - 4));
+                        final int n2 = Integer.parseInt(f2.getName().substring(imageName.length(),f2.getName().length() - 4));
+                        return Integer.compare(n1, n2);
+                    }
+                });
+                JoglImageLoader.registerLoader();
+                System.out.println("[START] Load textures");
+                for (int imageIndex = 0 ; imageIndex < imageFiles.length ; imageIndex++ ) {
+                    final URLResourceSource imageSource = new URLResourceSource(imageFiles[imageIndex].toURI().toURL());
+                    System.out.println("[START] Load texture " + imageFiles[imageIndex].getAbsolutePath());
+                    final Texture texture = TextureManager.load(imageSource, Texture.MinificationFilter.Trilinear, false);
+                    System.out.println("[ END ] Load texture " + imageFiles[imageIndex].getAbsolutePath());
+                    images[imageIndex] = texture.getImage();
+                }
+                System.out.println("[ END ] Load textures");
             }
-            // stores the new image into the array
-            introImages[frameIndex] = image;
-            System.out.println("[ END ] Compute key frames image " + frameIndex);
+            return images;
+        } catch (URISyntaxException|MalformedURLException e) {
+            e.printStackTrace();
         }
-        System.out.println("[ END ] Compute key frames images");
+        return null;
+    }
+
+    private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(final URLResourceSource source, final int durationInSeconds,
+            final int framesPerSecond, final Image[] introImages) {
+        final int frameCount = durationInSeconds * framesPerSecond;
         // the generic treatment starts here
+        final List<MeshData> meshDataList = new ArrayList<>();
         System.out.println("[START] Compute key frames");
         // creates the array helper
         final ArrayHelper arrayHelper = new ArrayHelper();
@@ -152,11 +147,10 @@ public class TestIntroductionReimplementation {
             // in this array
             final Integer[][] pixels = new Integer[image.getWidth()][image.getHeight()];
             final Set<Integer> frameColors = new HashSet<>();
-            for (int y = 0; y < introImage.getHeight(); y++) {
-                for (int x = 0; x < introImage.getWidth(); x++) {// gets the
-                                                                 // ARGB value
-                                                                 // of the pixel
-                    final int argb = ImageUtils.getARGB(introImage, x, y);
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    // gets the ARGB value of the pixel
+                    final int argb = ImageUtils.getARGB(image, x, y);
                     final int alpha = (byte) (argb >> 24) & 0xFF;
                     // keeps only non fully transparent pixels
                     if (alpha > 0) {
@@ -167,10 +161,9 @@ public class TestIntroductionReimplementation {
             }
             final Map<Vector2i, Integer[][]> globalDistinctColorsPixelsArraysMap = new HashMap<>();
             // for each color
-            for (final Integer frameColor : frameColors) {// builds an occupancy
-                                                          // check to keep the
-                                                          // pixels of a single
-                                                          // color
+            for (final Integer frameColor : frameColors) {
+                // builds an occupancy check to keep the pixels of a single
+                // color
                 final OccupancyCheck<Integer> colorFilterOccupancyCheck = new IntegerFilterOccupancyCheck(frameColor);
                 // creates the occupancy map
                 final ArrayHelper.OccupancyMap occupancyMap = arrayHelper.createPackedOccupancyMap(pixels,
@@ -178,12 +171,8 @@ public class TestIntroductionReimplementation {
                 // looks for a full arrays map matching with this occupancy map
                 Map<Vector2i, Integer[][]> localDistinctColorsPixelsArraysMap = pixelsArrayOccupancyMapMap
                         .get(occupancyMap);
-                if (localDistinctColorsPixelsArraysMap == null) {// uses a clone
-                                                                 // to avoid
-                                                                 // using a
-                                                                 // mutable
-                                                                 // instance as
-                                                                 // a key
+                if (localDistinctColorsPixelsArraysMap == null) {
+                    // uses a clone to avoid using a mutable instance as a key
                     final ArrayHelper.OccupancyMap occupancyMapClone = occupancyMap.clone();
                     // uses it to build some full arrays with distinct colors
                     // (without fully transparent pixels)
@@ -206,26 +195,9 @@ public class TestIntroductionReimplementation {
             // computes the triangle count
             int triCount = 0;
             // for each array of pixels of the same color
-            for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {// one
-                                                                                                              // pair
-                                                                                                              // of
-                                                                                                              // triangles
-                                                                                                              // per
-                                                                                                              // pixel,
-                                                                                                              // the
-                                                                                                              // array
-                                                                                                              // is
-                                                                                                              // full
-                                                                                                              // (all
-                                                                                                              // rows
-                                                                                                              // and
-                                                                                                              // all
-                                                                                                              // columns
-                                                                                                              // have
-                                                                                                              // respectively
-                                                                                                              // the
-                                                                                                              // same
-                                                                                                              // sizes)
+            for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {
+                // one pair of triangles per pixel, the array is full (all rows
+                // and all columns have respectively the same sizes)
                 triCount += (globalDictinctColorPixels.length * globalDictinctColorPixels[0].length) * 2;
             }
             final MeshData meshData = new MeshData();
@@ -246,7 +218,8 @@ public class TestIntroductionReimplementation {
             // adds the vertices and the colors of the arrays into the vertex
             // buffer and the color buffer
             for (final Entry<Vector2i, Integer[][]> globalDictinctColorPixelsEntry : globalDistinctColorsPixelsArraysMap
-                    .entrySet()) {// retrieves where the pixels come from
+                    .entrySet()) {
+                // retrieves where the pixels come from
                 final Vector2i location = globalDictinctColorPixelsEntry.getKey();
                 // retrieves the pixels of the same color
                 final Integer[][] globalDictinctColorPixels = globalDictinctColorPixelsEntry.getValue();
@@ -323,8 +296,8 @@ public class TestIntroductionReimplementation {
         System.out.println("[START] Build switch node");
         final SwitchNode switchNode = new SwitchNode();
         int frameIndex = 0;
-        for (final MeshData meshData : meshDataList) {// creates a Mesh for this
-                                                      // frame
+        for (final MeshData meshData : meshDataList) {
+            // creates a Mesh for this frame
             final Mesh mesh = new Mesh("frame n°" + frameIndex);
             mesh.setMeshData(meshData);
             // adds it into the SwitchNode
@@ -432,33 +405,5 @@ public class TestIntroductionReimplementation {
         public int hashCode() {
             return (integerFilter == null ? 0 : integerFilter.hashCode());
         }
-    }
-
-    private static final int getScannablePixelsCount(final MovementEquation equation, final double elapsedTime) {
-        return ((int) Math.ceil(equation.getValueAtTime(elapsedTime)));
-    }
-
-    private static final class CenteredColoredPointComparator implements Comparator<Entry<Point, ReadOnlyColorRGBA>> {
-
-        private final Point spreadCenter;
-
-        private CenteredColoredPointComparator(final Point spreadCenter) {
-            this.spreadCenter = spreadCenter;
-        }
-
-        @Override
-        public final int compare(final Entry<Point, ReadOnlyColorRGBA> o1, final Entry<Point, ReadOnlyColorRGBA> o2) {
-            final Point p1 = o1.getKey();
-            final Point p2 = o2.getKey();
-            double d1 = distance(p1, spreadCenter);
-            double d2 = distance(p2, spreadCenter);
-            return (d1 == d2 ? 0 : d1 < d2 ? -1 : 1);
-        }
-    }
-
-    private static double distance(final Point p1, final Point p2) {
-        double abscissaSub = p2.getX() - p1.getX();
-        double ordinateSub = p2.getY() - p1.getY();
-        return Math.sqrt((abscissaSub * abscissaSub) + (ordinateSub * ordinateSub));
     }
 }
