@@ -910,7 +910,7 @@ public class ArrayHelper {
             final OccupancyMap occupancyMapObj) {
         final java.util.Map<Vector2i, T[][]> fullArraysMap = new LinkedHashMap<>();
         // if the array isn't empty (then the occupancy map isn't empty)
-        if (!occupancyMapObj.isEmpty()) {
+        while (!occupancyMapObj.isEmpty()) {
             final int smallestRowIndex = occupancyMapObj.getSmallestRowIndex();
             final int smallestColumnIndex = occupancyMapObj.getSmallestColumnIndex();
             final int rowCount = occupancyMapObj.getRowCount();
