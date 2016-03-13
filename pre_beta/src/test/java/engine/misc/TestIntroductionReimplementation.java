@@ -140,6 +140,7 @@ public class TestIntroductionReimplementation {
         final Map<ArrayHelper.OccupancyMap, Map<Vector2i, Integer[][]>> pixelsArrayOccupancyMapMap = new HashMap<>();
         // for each frame
         for (int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
+            final long startTime = System.currentTimeMillis();
             System.out.println("[START] Compute key frame " + frameIndex);
             // retrieves the image of the frame
             final Image image = introImages[frameIndex];
@@ -195,11 +196,13 @@ public class TestIntroductionReimplementation {
             // computes the triangle count
             int triCount = 0;
             // for each array of pixels of the same color
-            for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {
+            //for (final Integer[][] globalDictinctColorPixels : globalDistinctColorsPixelsArraysMap.values()) {
                 // one pair of triangles per pixel, the array is full (all rows
                 // and all columns have respectively the same sizes)
-                triCount += (globalDictinctColorPixels.length * globalDictinctColorPixels[0].length) * 2;
-            }
+                //triCount += (globalDictinctColorPixels.length * globalDictinctColorPixels[0].length) * 2;
+            //}
+            triCount = 2 * globalDistinctColorsPixelsArraysMap.size();
+            System.out.println("[     ] Key frame " + frameIndex + " triangle count: " + triCount);
             final MeshData meshData = new MeshData();
             // creates the vertex buffer (indirect NIO buffer), triangle count *
             // number of vertices per triangle * floats per vertex (only 2 as
@@ -255,6 +258,13 @@ public class TestIntroductionReimplementation {
             colorBuffer.rewind();
             meshDataList.add(meshData);
             System.out.println("[ END ] Compute key frame " + frameIndex);
+            final long endTime=System.currentTimeMillis();
+            long keyFrameComputationDurationInMillis = endTime - startTime;
+            long keyFrameComputationDurationInSeconds = keyFrameComputationDurationInMillis / 1000;
+            keyFrameComputationDurationInMillis -= keyFrameComputationDurationInSeconds * 1000;
+            long keyFrameComputationDurationInMinutes = keyFrameComputationDurationInSeconds / 60;
+            keyFrameComputationDurationInSeconds -= keyFrameComputationDurationInMinutes * 60;
+            System.out.println("[     ] Key frame compute time " + keyFrameComputationDurationInMinutes + " m " + keyFrameComputationDurationInSeconds + " s " + keyFrameComputationDurationInMillis);
         }
         System.out.println("[ END ] Compute key frames");
         System.out.println("[START] Normalize vertex coordinates");
