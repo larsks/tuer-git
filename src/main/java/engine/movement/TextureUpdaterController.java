@@ -147,17 +147,20 @@ public abstract class TextureUpdaterController implements Serializable, SpatialC
             init();
             inited = true;
         }
-        // get previous elapsed time
+        // gets the previous elapsed time
         final double previousElapsedTime = elapsedTime;
         final int updatedPixelsCount = getScannablePixelsCount(previousElapsedTime);
-        // update elapsed time
+        // updates elapsed time
         elapsedTime += timeSinceLastCall;
-        // use the movement equation
+        // uses the movement equation
         final int updatablePixelsCount = Math.max(0, getScannablePixelsCount(elapsedTime) - updatedPixelsCount);
-        if (updatablePixelsCount > 0) {// modify the buffer
+        if (updatablePixelsCount > 0) {
+            // modifies the buffer
             Point updatedVertex;
             int rgbVal, minX = originalImage.getWidth(), minY = originalImage.getHeight(), maxX = -1, maxY = -1;
-            for (int i = updatedPixelsCount; i < updatedPixelsCount + updatablePixelsCount; i++) {
+            // the maximum updatable pixels count indicated by the equation might exceed the updatable pixels count
+            final int maxUpdatedPixelsCount = Math.min(updatedPixelsCount + updatablePixelsCount, coloredVerticesList.size());
+            for (int i = updatedPixelsCount; i < maxUpdatedPixelsCount; i++) {
                 rgbVal = coloredVerticesList.get(i).getValue().asIntARGB();
                 updatedVertex = coloredVerticesList.get(i).getKey();
                 minX = Math.min(minX, updatedVertex.getX());
@@ -166,13 +169,13 @@ public abstract class TextureUpdaterController implements Serializable, SpatialC
                 maxY = Math.max(maxY, updatedVertex.getY());
                 ImageUtils.setARGB(modifiedImage, updatedVertex.getX(), updatedVertex.getY(), rgbVal);
             }
-            if (minX < originalImage.getWidth()) {// compute the zone that needs
-                                                  // an update
+            if (minX < originalImage.getWidth()) {
+                // computes the zone that needs an update
                 updateX = minX;
                 updateY = minY;
                 updateWidth = maxX - minX + 1;
                 updateHeight = maxY - minY + 1;
-                // update the texture on the rendering thread
+                // updates the texture on the rendering thread
                 GameTaskQueueManager.getManager(renderContext).render(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
@@ -191,14 +194,14 @@ public abstract class TextureUpdaterController implements Serializable, SpatialC
 
     /** update the texture */
     private final void updateTexture() {
-        // modify the texture by using the image data
+        // modifies the texture by using the image data
         renderer.updateTexture2DSubImage(texture, updateX, updateY, updateWidth, updateHeight, modifiedImage.getData(0),
                 updateX, updateY, texture.getImage().getWidth());
     }
 
     public final void reset() {
         elapsedTime = 0;
-        // put the data of the original image back into the buffer
+        // puts the data of the original image back into the buffer
         final ByteBuffer originalImageData = originalImage.getData(0);
         modifiedImage.getData(0).rewind();
         modifiedImage.getData(0).put(originalImageData).rewind();
