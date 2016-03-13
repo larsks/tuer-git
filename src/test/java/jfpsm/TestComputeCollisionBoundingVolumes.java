@@ -83,6 +83,17 @@ public class TestComputeCollisionBoundingVolumes {
                 .computeFullArraysFromNonFullArray(collisionMap, occupancyMap);
         final long durationInMilliseconds = System.currentTimeMillis() - startTime;
         System.out.println("Occupied cell count: " + occupancyMap.getOccupiedCellCount());
+        if (occupancyMap.getOccupiedCellCount() > 0) {
+            for (int columnIndex = 0; columnIndex < occupancyMap.getColumnCount(); columnIndex++) {
+                if (occupancyMap.hasNonNullColumn(columnIndex)) {
+                    for (int rowIndex = 0; rowIndex < occupancyMap.getRowCount(columnIndex); rowIndex++) {
+                        if (occupancyMap.getValue(columnIndex, rowIndex)) {
+                            System.out.println("Occupied cell at [" + columnIndex + "][" + rowIndex + "]");
+                        }
+                    }
+                }
+            }
+        }
         System.out.println("Output:");
         System.out.println(arrayHelper.toString(fullArrayMap, map.getHeight(), map.getWidth()));
         System.out.println("End. Duration: " + durationInMilliseconds + " ms");
