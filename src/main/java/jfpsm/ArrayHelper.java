@@ -868,9 +868,9 @@ public class ArrayHelper {
      * 
      * @param array
      *            potentially non full array
-     * @return map of full arrays whose keys are their respective locations
+     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
      */
-    public <T> java.util.Map<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array) {
+    public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array) {
         return (computeFullArraysFromNonFullArray(array, (OccupancyCheck<T>) null));
     }
 
@@ -885,9 +885,9 @@ public class ArrayHelper {
      *            occupancy check, tells whether the object "occupies" the array
      *            cell, can be null. If <code>null</code>, the cell isn't
      *            occupied if it contains <code>null</code>
-     * @return map of full arrays whose keys are their respective locations
+     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
      */
-    public <T> java.util.Map<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
+    public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
             final OccupancyCheck<T> occupancyCheck) {
         // creates an occupancy map that will be updated (instead of modifying
         // the supplied array)
@@ -904,11 +904,11 @@ public class ArrayHelper {
      *            potentially non full array
      * @param occupancyCheckMapObj
      *            occupancy map reflecting the occupancy of the passed array
-     * @return map of full arrays whose keys are their respective locations
+     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
      */
-    public <T> java.util.Map<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
+    public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
             final OccupancyMap occupancyMapObj) {
-        final java.util.Map<Vector2i, T[][]> fullArraysMap = new LinkedHashMap<>();
+        final LinkedHashMap<Vector2i, T[][]> fullArraysMap = new LinkedHashMap<>();
         // if the array isn't empty (then the occupancy map isn't empty)
         while (!occupancyMapObj.isEmpty()) {
             final int smallestRowIndex = occupancyMapObj.getSmallestRowIndex();
