@@ -868,7 +868,8 @@ public class ArrayHelper {
      * 
      * @param array
      *            potentially non full array
-     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
+     * @return map of full arrays whose keys are their respective locations, the
+     *         insertion order is preserved
      */
     public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array) {
         return (computeFullArraysFromNonFullArray(array, (OccupancyCheck<T>) null));
@@ -885,7 +886,8 @@ public class ArrayHelper {
      *            occupancy check, tells whether the object "occupies" the array
      *            cell, can be null. If <code>null</code>, the cell isn't
      *            occupied if it contains <code>null</code>
-     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
+     * @return map of full arrays whose keys are their respective locations, the
+     *         insertion order is preserved
      */
     public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
             final OccupancyCheck<T> occupancyCheck) {
@@ -902,9 +904,10 @@ public class ArrayHelper {
      * 
      * @param array
      *            potentially non full array
-     * @param occupancyCheckMapObj
+     * @param occupancyMapObj
      *            occupancy map reflecting the occupancy of the passed array
-     * @return map of full arrays whose keys are their respective locations, the insertion order is preserved
+     * @return map of full arrays whose keys are their respective locations, the
+     *         insertion order is preserved
      */
     public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array,
             final OccupancyMap occupancyMapObj) {
