@@ -45,6 +45,8 @@ import com.ardor3d.scenegraph.controller.ComplexSpatialController;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.extension.SwitchNode;
 import com.ardor3d.util.TextureManager;
+import com.ardor3d.util.export.InputCapsule;
+import com.ardor3d.util.export.OutputCapsule;
 import com.ardor3d.util.export.binary.BinaryClassObject;
 import com.ardor3d.util.export.binary.BinaryExporter;
 import com.ardor3d.util.export.binary.BinaryIdContentPair;
@@ -370,38 +372,40 @@ public class TestIntroductionReimplementation {
         }
     }
 
-    private static final class BasicKeyframeController extends ComplexSpatialController<SwitchNode> {
+    public static final class BasicKeyframeController extends ComplexSpatialController<SwitchNode> {
 
         private static final long serialVersionUID = 1L;
 
-        private double startTime;
+        private double currentTime;
 
-        private final int framesPerSecond;
+        private int framesPerSecond;
+        
+        public BasicKeyframeController() {
+            this(0);
+        }
 
-        private BasicKeyframeController(final int framesPerSecond) {
+        public BasicKeyframeController(final int framesPerSecond) {
             super();
-            startTime = Double.NaN;
+            this.currentTime = 0;
             this.framesPerSecond = framesPerSecond;
         }
 
         @Override
         public final void update(final double time, final SwitchNode caller) {
-            if (Double.isNaN(startTime))
-                startTime = Double.valueOf(time);
-            final double elapsedTime = time - startTime;
+            currentTime += time;
             final int frameCount = (int) (getMaxTime() * framesPerSecond);
             final int frameIndex;
             switch (getRepeatType()) {
             case CLAMP: {
-                frameIndex = Math.min(frameCount - 1, (int) (Math.min(elapsedTime, getMaxTime()) * framesPerSecond));
+                frameIndex = Math.min(frameCount - 1, (int) (Math.min(currentTime, getMaxTime()) * framesPerSecond));
                 break;
             }
             case WRAP: {
-                frameIndex = ((int) (elapsedTime * framesPerSecond)) % frameCount;
+                frameIndex = ((int) (currentTime * framesPerSecond)) % frameCount;
                 break;
             }
             case CYCLE: {
-                final int tmpFrameIndex = (int) (elapsedTime * framesPerSecond);
+                final int tmpFrameIndex = (int) (currentTime * framesPerSecond);
                 if ((tmpFrameIndex / frameCount) % 2 == 0)
                     frameIndex = tmpFrameIndex % frameCount;
                 else
@@ -414,7 +418,26 @@ public class TestIntroductionReimplementation {
             }
             caller.setSingleVisible(frameIndex);
         }
+        
+        public double getCurrentTime() {
+            return currentTime;
+        }
 
+        public void setCurrentTime(final double currentTime) {
+            this.currentTime = currentTime;
+        }
+        
+        @Override
+        public void read(final InputCapsule capsule) throws IOException {
+            super.read(capsule);
+            framesPerSecond = capsule.readInt("framesPerSecond", 0);
+        }
+
+        @Override
+        public void write(final OutputCapsule capsule) throws IOException {
+            super.write(capsule);
+            capsule.write(framesPerSecond, "framesPerSecond", 0);
+        }
     }
 
     private static final class IntegerFilterOccupancyCheck implements OccupancyCheck<Integer> {
