@@ -18,9 +18,9 @@
 package engine.misc;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.ardor3d.image.Image;
-import com.ardor3d.image.Texture;
+import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.FloatBufferData;
@@ -44,7 +44,6 @@ import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController;
 import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.extension.SwitchNode;
-import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.export.InputCapsule;
 import com.ardor3d.util.export.OutputCapsule;
 import com.ardor3d.util.export.binary.BinaryClassObject;
@@ -75,12 +74,13 @@ public class TestIntroductionReimplementation {
         final int framesPerSecond = 30;
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
-        final Image[] introImages = loadImages(source);
+        final File[] imageFiles = findImages(source);
+        //final Image[] introImages = loadImages(source);
         computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond,
-                introImages);
+                imageFiles);
     }
 
-    private static final Image[] loadImages(final URLResourceSource source) {
+    private static final File[] findImages(final URLResourceSource source) {
         try {
             final File sourceImageFile = new File(source.getURL().toURI());
             final String imageName = sourceImageFile.getName().substring(0, sourceImageFile.getName().lastIndexOf('.'));
@@ -100,11 +100,7 @@ public class TestIntroductionReimplementation {
                     return accepted;
                 }
             });
-            final Image[] images;
-            if (imageFiles == null) {
-                images = null;
-            } else {
-                images = new Image[imageFiles.length];
+            if (imageFiles != null) {
                 Arrays.sort(imageFiles, new Comparator<File>() {
                     @Override
                     public int compare(File f1, File f2) {
@@ -115,28 +111,17 @@ public class TestIntroductionReimplementation {
                         return Integer.compare(n1, n2);
                     }
                 });
-                JoglImageLoader.registerLoader();
-                System.out.println("[START] Load textures");
-                for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
-                    final URLResourceSource imageSource = new URLResourceSource(imageFiles[imageIndex].toURI().toURL());
-                    System.out.println("[START] Load texture " + imageFiles[imageIndex].getAbsolutePath());
-                    final Texture texture = TextureManager.load(imageSource, Texture.MinificationFilter.Trilinear,
-                            false);
-                    System.out.println("[ END ] Load texture " + imageFiles[imageIndex].getAbsolutePath());
-                    images[imageIndex] = texture.getImage();
-                }
-                System.out.println("[ END ] Load textures");
             }
-            return images;
-        } catch (URISyntaxException | MalformedURLException e) {
-            e.printStackTrace();
+            return imageFiles;
+        } catch (URISyntaxException urise) {
+            urise.printStackTrace();
         }
         return null;
     }
 
     private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(
             final URLResourceSource source, final int durationInSeconds, final int framesPerSecond,
-            final Image[] introImages) {
+            final File[] imageFiles) {
         final int frameCount = durationInSeconds * framesPerSecond;
         // the generic treatment starts here
         final List<MeshData> meshDataList = new ArrayList<>();
@@ -145,12 +130,26 @@ public class TestIntroductionReimplementation {
         final ArrayHelper arrayHelper = new ArrayHelper();
         // creates a map to store the full arrays of the occupancy maps
         final Map<ArrayHelper.OccupancyMap, Map<Vector2i, Integer[][]>> pixelsArrayOccupancyMapMap = new HashMap<>();
+        // prepares the image loaders
+        JoglImageLoader.registerLoader();
+        ImageLoaderUtil.registerDefaultHandler(new JoglImageLoader());
+        // avoids using the memory on the native heap, uses the Java heap
+        JoglImageLoader.createOnHeap = true;
         // for each frame
         for (int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
             final long startTime = System.currentTimeMillis();
-            System.out.println("[START] Compute key frame " + frameIndex);
+            final File imageFile = imageFiles[frameIndex];
+            System.out.println("[START] Load image " + imageFile.getAbsolutePath());
             // retrieves the image of the frame
-            final Image image = introImages[frameIndex];
+            final String imageType = imageFile.getName().substring(imageFile.getName().lastIndexOf('.'));
+            Image image = null;
+            try (final FileInputStream imageInputStream = new FileInputStream(imageFile)) {
+                image = ImageLoaderUtil.loadImage(imageType, imageInputStream, false);
+            } catch (IOException ioe) {
+                throw new RuntimeException("The image file " + imageFile.getAbsolutePath() + " cannot be found", ioe);
+            }
+            System.out.println("[ END ] Load image " + imageFile.getAbsolutePath());
+            System.out.println("[START] Compute key frame " + frameIndex);
             // retrieves the pixels of the image and computes the list of colors
             // in this array
             final Integer[][] pixels = new Integer[image.getWidth()][image.getHeight()];
