@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,7 +76,7 @@ public class TestIntroductionReimplementation {
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
         final File[] imageFiles = findImages(source);
-        //final Image[] introImages = loadImages(source);
+        // final Image[] introImages = loadImages(source);
         computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond,
                 imageFiles);
     }
@@ -119,6 +120,17 @@ public class TestIntroductionReimplementation {
         return null;
     }
 
+    private static final String getMemory(final long totalBytes) {
+        long bytes = totalBytes;
+        long kiloBytes = bytes / 1000;
+        bytes -= kiloBytes * 1000;
+        long megaBytes = kiloBytes / 1000;
+        kiloBytes -= megaBytes * 1000;
+        final long gigaBytes = megaBytes / 1000;
+        megaBytes -= gigaBytes * 1000;
+        return gigaBytes + " GB " + megaBytes + " MB " + kiloBytes + " KB " + bytes + " B";
+    }
+    
     private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(
             final URLResourceSource source, final int durationInSeconds, final int framesPerSecond,
             final File[] imageFiles) {
@@ -128,8 +140,9 @@ public class TestIntroductionReimplementation {
         System.out.println("[START] Compute key frames");
         // creates the array helper
         final ArrayHelper arrayHelper = new ArrayHelper();
-        // creates a map to store the full arrays of the occupancy maps
-        final Map<ArrayHelper.OccupancyMap, Map<Vector2i, Integer[][]>> pixelsArrayOccupancyMapMap = new HashMap<>();
+        // creates a map to store the full arrays and the occupancy maps of the
+        // previous frame
+        final Map<ArrayHelper.OccupancyMap, Map<Vector2i, Integer[][]>> previousFramePixelArrayOccupancyMapMap = new LinkedHashMap<>();
         // prepares the image loaders
         JoglImageLoader.registerLoader();
         ImageLoaderUtil.registerDefaultHandler(new JoglImageLoader());
@@ -150,6 +163,7 @@ public class TestIntroductionReimplementation {
             }
             System.out.println("[ END ] Load image " + imageFile.getAbsolutePath());
             System.out.println("[START] Compute key frame " + frameIndex);
+            System.out.println("[     ] Used memory: " + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
             // retrieves the pixels of the image and computes the list of colors
             // in this array
             final Integer[][] pixels = new Integer[image.getWidth()][image.getHeight()];
@@ -182,8 +196,8 @@ public class TestIntroductionReimplementation {
                 System.out.println("[ ... ] Occupied cell count " + occupancyMap.getOccupiedCellCount());
                 totalOccupiedCellCount += occupancyMap.getOccupiedCellCount();
                 // looks for a full arrays map matching with this occupancy map
-                Map<Vector2i, Integer[][]> localDistinctColorsPixelsArraysMap = pixelsArrayOccupancyMapMap
-                        .get(occupancyMap);
+                Map<Vector2i, Integer[][]> localDistinctColorsPixelsArraysMap = previousFramePixelArrayOccupancyMapMap
+                        .remove(occupancyMap);
                 if (localDistinctColorsPixelsArraysMap == null) {
                     // uses a clone to avoid using a mutable instance as a key
                     final ArrayHelper.OccupancyMap occupancyMapClone = occupancyMap.clone();
@@ -193,8 +207,12 @@ public class TestIntroductionReimplementation {
                             occupancyMap);
                     System.out.println("[ ... ] Occupied cell count " + occupancyMap.getOccupiedCellCount());
                     // stores the computed full arrays map
-                    pixelsArrayOccupancyMapMap.put(occupancyMapClone, localDistinctColorsPixelsArraysMap);
+                    previousFramePixelArrayOccupancyMapMap.put(occupancyMapClone, localDistinctColorsPixelsArraysMap);
                 } else {
+                    // there is no need to clone the occupancy map as it hasn't
+                    // been modified
+                    // stores the full arrays map
+                    previousFramePixelArrayOccupancyMapMap.put(occupancyMap, localDistinctColorsPixelsArraysMap);
                     System.out.println("[ ... ] Reuse a full array map");
                 }
                 for (final Entry<Vector2i, Integer[][]> localDistinctColorsPixelsArraysEntry : localDistinctColorsPixelsArraysMap
@@ -208,6 +226,15 @@ public class TestIntroductionReimplementation {
                         System.err.println("[WARN ] Collision at " + location.getX() + " " + location.getY());
                     }
                 }
+            }
+            // removes a full array of the previous frame, keeps only the full
+            // arrays of the current frame
+            final int currentFrameEntryCount = frameColors.size();
+            int previousFrameEntryCount = previousFramePixelArrayOccupancyMapMap.size() - currentFrameEntryCount;
+            while (previousFrameEntryCount > 0) {
+                previousFramePixelArrayOccupancyMapMap
+                        .remove(previousFramePixelArrayOccupancyMapMap.keySet().iterator().next());
+                previousFrameEntryCount--;
             }
             System.out.println("[ ... ] Total occupied cell count " + totalOccupiedCellCount);
             int pixelCount = 0;
@@ -283,6 +310,7 @@ public class TestIntroductionReimplementation {
             vertexBuffer.rewind();
             colorBuffer.rewind();
             meshDataList.add(meshData);
+            System.out.println("[     ] Used memory: " + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
             System.out.println("[ END ] Compute key frame " + frameIndex);
             final long endTime = System.currentTimeMillis();
             long keyFrameComputationDurationInMillis = endTime - startTime;
@@ -378,7 +406,7 @@ public class TestIntroductionReimplementation {
         private double currentTime;
 
         private int framesPerSecond;
-        
+
         public BasicKeyframeController() {
             this(0);
         }
@@ -417,7 +445,7 @@ public class TestIntroductionReimplementation {
             }
             caller.setSingleVisible(frameIndex);
         }
-        
+
         public double getCurrentTime() {
             return currentTime;
         }
@@ -425,7 +453,7 @@ public class TestIntroductionReimplementation {
         public void setCurrentTime(final double currentTime) {
             this.currentTime = currentTime;
         }
-        
+
         @Override
         public void read(final InputCapsule capsule) throws IOException {
             super.read(capsule);
