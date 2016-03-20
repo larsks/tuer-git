@@ -32,13 +32,11 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 
 import com.ardor3d.image.Image;
-import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.math.type.ReadOnlyColorRGBA;
-import com.ardor3d.util.TextureManager;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
 import com.jogamp.nativewindow.util.Point;
