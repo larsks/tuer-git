@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
 
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
+import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
@@ -52,7 +53,7 @@ import engine.movement.UniformlyVariableMovementEquation;
  *
  */
 public class TestIntroductionStateImageCreation {
-    
+
     public static void main(String[] args) {
         final String textureFilePath = "/images/introduction.png";
         final int durationInSeconds = 10;
@@ -66,7 +67,8 @@ public class TestIntroductionStateImageCreation {
             String introImageSimpleFilenameWithoutExtension = null;
             try {
                 final File introImageFile = new File(source.getURL().toURI());
-                introImageSimpleFilenameWithoutExtension = introImageFile.getName().substring(0, introImageFile.getName().lastIndexOf('.'));
+                introImageSimpleFilenameWithoutExtension = introImageFile.getName().substring(0,
+                        introImageFile.getName().lastIndexOf('.'));
                 introImageParentDir = introImageFile.getParentFile();
             } catch (URISyntaxException urise) {
                 urise.printStackTrace();
@@ -105,11 +107,12 @@ public class TestIntroductionStateImageCreation {
 
     private static final Image[] generateImages(final URLResourceSource source, final int durationInSeconds,
             final int framesPerSecond) {
+        JoglImageLoader.createOnHeap = true;
         JoglImageLoader.registerLoader();
+        ImageLoaderUtil.registerDefaultHandler(new JoglImageLoader());
         System.out.println("[START] Load texture");
-        final Texture introTexture = TextureManager.load(source, Texture.MinificationFilter.Trilinear, false);
+        final Image introImage = ImageLoaderUtil.loadImage(source, false);
         System.out.println("[ END ] Load texture");
-        final Image introImage = introTexture.getImage();
         final int frameCount = durationInSeconds * framesPerSecond;
         final Point spreadCenter = new Point(205, 265);
         final MovementEquation equation = new UniformlyVariableMovementEquation(0, 10500, 0);
@@ -157,8 +160,10 @@ public class TestIntroductionStateImageCreation {
                 final int maxUpdatedPixelsCount;
                 if (updatedPixelsCount + updatablePixelsCount > coloredVerticesList.size()) {
                     maxUpdatedPixelsCount = coloredVerticesList.size();
-                    final int nonUpdatedPixelsCount = updatedPixelsCount + updatablePixelsCount - coloredVerticesList.size();
-                    System.out.println("[     ] " + nonUpdatedPixelsCount + " non updated pixels (updatable pixels according to the equation > updatable pixels)");
+                    final int nonUpdatedPixelsCount = updatedPixelsCount + updatablePixelsCount
+                            - coloredVerticesList.size();
+                    System.out.println("[     ] " + nonUpdatedPixelsCount
+                            + " non updated pixels (updatable pixels according to the equation > updatable pixels)");
                 } else {
                     maxUpdatedPixelsCount = updatedPixelsCount + updatablePixelsCount;
                 }
@@ -177,7 +182,7 @@ public class TestIntroductionStateImageCreation {
         System.out.println("[ END ] Compute key frames images");
         return introImages;
     }
-    
+
     private static final int getScannablePixelsCount(final MovementEquation equation, final double elapsedTime) {
         return ((int) Math.ceil(equation.getValueAtTime(elapsedTime)));
     }
