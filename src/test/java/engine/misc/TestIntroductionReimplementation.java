@@ -130,7 +130,7 @@ public class TestIntroductionReimplementation {
         megaBytes -= gigaBytes * 1000;
         return gigaBytes + " GB " + megaBytes + " MB " + kiloBytes + " KB " + bytes + " B";
     }
-    
+
     private static final void computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(
             final URLResourceSource source, final int durationInSeconds, final int framesPerSecond,
             final File[] imageFiles) {
@@ -163,7 +163,8 @@ public class TestIntroductionReimplementation {
             }
             System.out.println("[ END ] Load image " + imageFile.getAbsolutePath());
             System.out.println("[START] Compute key frame " + frameIndex);
-            System.out.println("[     ] Used memory: " + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+            System.out.println("[     ] Used memory: "
+                    + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
             // retrieves the pixels of the image and computes the list of colors
             // in this array
             final Integer[][] pixels = new Integer[image.getWidth()][image.getHeight()];
@@ -310,7 +311,8 @@ public class TestIntroductionReimplementation {
             vertexBuffer.rewind();
             colorBuffer.rewind();
             meshDataList.add(meshData);
-            System.out.println("[     ] Used memory: " + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+            System.out.println("[     ] Used memory: "
+                    + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
             System.out.println("[ END ] Compute key frame " + frameIndex);
             final long endTime = System.currentTimeMillis();
             long keyFrameComputationDurationInMillis = endTime - startTime;
@@ -325,34 +327,30 @@ public class TestIntroductionReimplementation {
         System.out.println("[START] Normalize vertex coordinates");
         // computes the minimal and maximal values of the vertex coordinates,
         // then normalize them
-        float minx = Float.POSITIVE_INFINITY, miny = Float.POSITIVE_INFINITY, minz = Float.POSITIVE_INFINITY;
-        float maxx = Float.NEGATIVE_INFINITY, maxy = Float.NEGATIVE_INFINITY, maxz = Float.NEGATIVE_INFINITY;
+        float minx = Float.POSITIVE_INFINITY, miny = Float.POSITIVE_INFINITY;
+        float maxx = Float.NEGATIVE_INFINITY, maxy = Float.NEGATIVE_INFINITY;
         for (final MeshData meshData : meshDataList) {
             final FloatBuffer vertexBuffer = meshData.getVertexBuffer();
             while (vertexBuffer.hasRemaining()) {
-                float x = vertexBuffer.get(), y = vertexBuffer.get(), z = vertexBuffer.get();
+                float x = vertexBuffer.get(), y = vertexBuffer.get();
                 minx = Math.min(minx, x);
                 miny = Math.min(miny, y);
-                minz = Math.min(minz, z);
                 maxx = Math.max(maxx, x);
                 maxy = Math.max(maxy, y);
-                maxz = Math.max(maxz, z);
             }
             vertexBuffer.rewind();
         }
         // normalizes them
         final float xdiff = maxx - minx;
         final float ydiff = maxy - miny;
-        final float zdiff = maxz - minz;
         for (final MeshData meshData : meshDataList) {
             final FloatBuffer vertexBuffer = meshData.getVertexBuffer();
             while (vertexBuffer.hasRemaining()) {
                 final int pos = vertexBuffer.position();
-                float x = vertexBuffer.get(), y = vertexBuffer.get(), z = vertexBuffer.get();
+                float x = vertexBuffer.get(), y = vertexBuffer.get();
                 vertexBuffer.position(pos);
                 vertexBuffer.put(xdiff == 0 ? x - minx : (x - minx) / xdiff);
                 vertexBuffer.put(ydiff == 0 ? y - miny : (y - miny) / ydiff);
-                vertexBuffer.put(zdiff == 0 ? z - minz : (z - minz) / zdiff);
             }
             vertexBuffer.rewind();
         }
