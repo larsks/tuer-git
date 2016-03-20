@@ -160,15 +160,10 @@ public class Level implements Comparable<Level> {
             if (url != null) {// creates the list to store the bounding boxes
                 final ArrayList<BoundingBox> localBoundingBoxList = new ArrayList<>();
                 // uses a try with resource to ensure that there is no leak
-                try (final InputStream inputStream = url.openStream()) {// loops
-                                                                        // on
-                                                                        // the
-                                                                        // savable
-                                                                        // instances
-                                                                        // in
-                                                                        // the
-                                                                        // stream
-                    while (inputStream.available() > 0) {// loads a bounding box
+                try (final InputStream inputStream = url.openStream()) {
+                    // loops on the savable instances in the stream
+                    while (inputStream.available() > 0) {
+                        // loads a bounding box
                         final BoundingBox boundingBox = (BoundingBox) binaryImporter.load(inputStream);
                         // adds it into the list
                         localBoundingBoxList.add(boundingBox);
