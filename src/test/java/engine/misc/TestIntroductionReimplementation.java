@@ -53,6 +53,7 @@ import com.ardor3d.util.export.binary.BinaryIdContentPair;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.nativewindow.util.Dimension;
 
 import jfpsm.ArrayHelper;
@@ -72,7 +73,7 @@ public class TestIntroductionReimplementation {
     private static final String textureFilePath = "/images/introduction.png";
 
     public static void main(final String[] args) {
-        final int durationInSeconds = 10;
+        final int durationInSeconds = 3;
         final int framesPerSecond = 30;
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
@@ -150,7 +151,7 @@ public class TestIntroductionReimplementation {
         JoglImageLoader.createOnHeap = true;
         final List<Dimension> frameSizeList = new ArrayList<>();
         // for each frame
-        for (int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
+        for (int frameIndex = 0; frameIndex < frameCount && frameIndex < imageFiles.length; frameIndex++) {
             final long startTime = System.currentTimeMillis();
             final File imageFile = imageFiles[frameIndex];
             System.out.println("[START] Load image " + imageFile.getAbsolutePath());
@@ -312,6 +313,8 @@ public class TestIntroductionReimplementation {
             }
             vertexBuffer.rewind();
             colorBuffer.rewind();
+            System.out.println("Mesh data size: "
+                    + getMemory(Buffers.SIZEOF_FLOAT * (vertexBuffer.capacity() + colorBuffer.capacity())));
             meshDataList.add(meshData);
             System.out.println("[     ] Used memory: "
                     + getMemory(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
