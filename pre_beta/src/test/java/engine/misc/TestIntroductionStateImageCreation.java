@@ -54,7 +54,7 @@ public class TestIntroductionStateImageCreation {
 
     public static void main(String[] args) {
         final String textureFilePath = "/images/introduction.png";
-        final int durationInSeconds = 10;
+        final int durationInSeconds = 3;
         final int framesPerSecond = 30;
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
@@ -108,12 +108,12 @@ public class TestIntroductionStateImageCreation {
         JoglImageLoader.createOnHeap = true;
         JoglImageLoader.registerLoader();
         ImageLoaderUtil.registerDefaultHandler(new JoglImageLoader());
-        System.out.println("[START] Load texture");
+        System.out.println("[START] Load image");
         final Image introImage = ImageLoaderUtil.loadImage(source, false);
-        System.out.println("[ END ] Load texture");
+        System.out.println("[ END ] Load image");
         final int frameCount = durationInSeconds * framesPerSecond;
         final Point spreadCenter = new Point(205, 265);
-        final MovementEquation equation = new UniformlyVariableMovementEquation(0, 10500, 0);
+        final MovementEquation equation = new UniformlyVariableMovementEquation(0, 35000, 0);
         HashMap<ReadOnlyColorRGBA, ReadOnlyColorRGBA> colorSubstitutionTable = new HashMap<>();
         colorSubstitutionTable.put(ColorRGBA.BLUE, ColorRGBA.RED);
         System.out.println("[START] Fill color table");
