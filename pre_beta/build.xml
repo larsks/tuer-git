@@ -41,6 +41,7 @@
 	</if>
 	<!-- Properties -->
 	<property name="bindir" value="target/classes"/>
+	<property name="testbindir" value="target/test-classes"/>
 	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
@@ -133,6 +134,7 @@
 	<path id="project.class.path">
 		<!-- N.B: do not add java.class.path -->
 		<pathelement path="${bindir}"/>
+		<pathelement path="${testbindir}"/>
 		<pathelement location="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-math-${ardor3d-version}.jar"/>
@@ -201,7 +203,7 @@
 			<fileset dir="src/main/resources"/>
 		</copy>
 		<copy todir="${testbindir}">
-		    <fileset dir="src/test/resources"/>
+			<fileset dir="src/test/resources"/>
 		</copy>
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
@@ -497,24 +499,24 @@
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the packages and the archives (the binaries and the source code) onto the SFTP server in the Project file release -->
 		<for param="file-to-upload">
-		    <path>
-		    	<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" />
-		    </path>
+			<path>
+				<fileset dir="${destdir}" includes="${project-unix-name}-${game-version}-${game-release}.*" />
+			</path>
 			<sequential>
-			    <echo message="Upload of the file @{file-to-upload} in progress..." />
-			    <scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}" />
-			    <echo message="Upload of the file @{file-to-upload} successful" />
+				<echo message="Upload of the file @{file-to-upload} in progress..." />
+				<scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}" />
+				<echo message="Upload of the file @{file-to-upload} successful" />
 			</sequential>
 		</for>
 		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
 		<for param="file-to-upload-into-the-project-web-space">
-		    <path>
-		    	<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
-		    </path>
+			<path>
+				<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
+			</path>
 			<sequential>
-			    <echo message="Upload of the file @{file-to-upload-into-the-project-web-space} in progress..." />
-			    <scp sftp="true" trust="true" file="@{file-to-upload-into-the-project-web-space}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}" />
-		        <echo message="Upload of the file @{file-to-upload-into-the-project-web-space} successful" />
+				<echo message="Upload of the file @{file-to-upload-into-the-project-web-space} in progress..." />
+				<scp sftp="true" trust="true" file="@{file-to-upload-into-the-project-web-space}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}" />
+				<echo message="Upload of the file @{file-to-upload-into-the-project-web-space} successful" />
 			</sequential>
 		</for>
 	</target>
@@ -530,17 +532,17 @@
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
 		<!-- Uploads the files of the website onto the SFTP server in the Project Web Space -->
 		<for param="file-to-upload">
-		    <path>
-		        <fileset dir="${sitesrcdir}"/>
-		    </path>
-		    <sequential>
-		    	<local name="remote-file-to-upload"/>
-		    	<property name="remote-file-to-upload" location="@{file-to-upload}" relative="true" basedir="${sitesrcdir}"/>
-		    	<echo message="Upload of the file @{file-to-upload} in progress..." />
-		        <scp sftp="true" trust="true" file="@{file-to-upload}" remoteTofile="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}/${remote-file-to-upload}"/>
-		    	<echo message="Upload of the file @{file-to-upload} successful" />
-		    </sequential>
-	    </for>
+			<path>
+				<fileset dir="${sitesrcdir}"/>
+			</path>
+			<sequential>
+				<local name="remote-file-to-upload"/>
+				<property name="remote-file-to-upload" location="@{file-to-upload}" relative="true" basedir="${sitesrcdir}"/>
+				<echo message="Upload of the file @{file-to-upload} in progress..." />
+				<scp sftp="true" trust="true" file="@{file-to-upload}" remoteTofile="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-website-remotedir}/${remote-file-to-upload}"/>
+				<echo message="Upload of the file @{file-to-upload} successful" />
+			</sequential>
+		</for>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Clean                                                             -->
@@ -579,6 +581,34 @@
 			<jvmarg value="-Djava.ext.dirs="/>
 			<jvmarg value="-Dsun.java2d.xrender=true"/>
 			<jvmarg value="-Dsun.java2d.opengl=false"/>
+		</java>
+	</target>
+	<target name="run-test-introduction-state-image-creation" description="Runs the test of the introduction state image creation">
+		<java classname="engine.misc.TestIntroductionStateImageCreation" fork="true" dir="${testbindir}" failonerror="true">
+			<classpath refid="project.class.path" />
+			<jvmarg value="-Xmx512m" />
+			<jvmarg value="-Djava.ext.dirs=" />
+			<jvmarg value="-Dsun.java2d.xrender=true" />
+			<jvmarg value="-Dsun.java2d.opengl=false" />
+		</java>
+	</target>
+	<target name="run-test-introduction-reimplementation" description="Runs the test of the introduction reimplementation">
+		<java classname="engine.misc.TestIntroductionReimplementation" fork="true" dir="${testbindir}" failonerror="true">
+			<classpath refid="project.class.path" />
+			<jvmarg value="-Xmx1024m" />
+			<jvmarg value="-Djava.ext.dirs=" />
+			<jvmarg value="-Dsun.java2d.xrender=true" />
+			<jvmarg value="-Dsun.java2d.opengl=false" />
+		</java>
+	</target>
+	<target name="run-test-introduction-scene" description="Runs the test of the introduction scene">
+		<java classname="engine.misc.TestIntroductionScene" fork="true" dir="${testbindir}" failonerror="true">
+			<classpath refid="project.class.path" />
+			<jvmarg value="-Xmx1024m" />
+			<jvmarg value="-XX:MaxDirectMemorySize=256M" />
+			<jvmarg value="-Djava.ext.dirs=" />
+			<jvmarg value="-Dsun.java2d.xrender=true" />
+			<jvmarg value="-Dsun.java2d.opengl=false" />
 		</java>
 	</target>
 </project>
