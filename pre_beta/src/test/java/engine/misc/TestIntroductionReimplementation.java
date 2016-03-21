@@ -280,8 +280,8 @@ public class TestIntroductionReimplementation {
                 final Vector2i location = globalDictinctColorPixelsEntry.getKey();
                 // retrieves the pixels of the same color
                 final Integer[][] globalDictinctColorPixels = globalDictinctColorPixelsEntry.getValue();
-                final int height = globalDictinctColorPixels.length;
-                final int width = globalDictinctColorPixels[0].length;
+                final int width = globalDictinctColorPixels.length;
+                final int height = globalDictinctColorPixels[0].length;
                 // computes the coordinates of the 4 vertices
                 final int x0 = location.getX();
                 final int y0 = location.getY();
