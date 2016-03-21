@@ -53,6 +53,7 @@ import com.ardor3d.util.export.binary.BinaryIdContentPair;
 import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.BufferUtils;
 import com.ardor3d.util.resource.URLResourceSource;
+import com.jogamp.nativewindow.util.Dimension;
 
 import jfpsm.ArrayHelper;
 import jfpsm.ArrayHelper.OccupancyCheck;
@@ -76,7 +77,6 @@ public class TestIntroductionReimplementation {
         final URLResourceSource source = new URLResourceSource(
                 TestIntroductionReimplementation.class.getResource(textureFilePath));
         final File[] imageFiles = findImages(source);
-        // final Image[] introImages = loadImages(source);
         computeUntexturedKeyframeSwitchNodeFromImagesAndKeyframeInfos(source, durationInSeconds, framesPerSecond,
                 imageFiles);
     }
@@ -148,6 +148,7 @@ public class TestIntroductionReimplementation {
         ImageLoaderUtil.registerDefaultHandler(new JoglImageLoader());
         // avoids using the memory on the native heap, uses the Java heap
         JoglImageLoader.createOnHeap = true;
+        final List<Dimension> frameSizeList = new ArrayList<>();
         // for each frame
         for (int frameIndex = 0; frameIndex < frameCount; frameIndex++) {
             final long startTime = System.currentTimeMillis();
@@ -157,7 +158,8 @@ public class TestIntroductionReimplementation {
             final String imageType = imageFile.getName().substring(imageFile.getName().lastIndexOf('.'));
             Image image = null;
             try (final FileInputStream imageInputStream = new FileInputStream(imageFile)) {
-                image = ImageLoaderUtil.loadImage(imageType, imageInputStream, false);
+                image = ImageLoaderUtil.loadImage(imageType, imageInputStream, true);
+                frameSizeList.add(new Dimension(image.getWidth(), image.getHeight()));
             } catch (IOException ioe) {
                 throw new RuntimeException("The image file " + imageFile.getAbsolutePath() + " cannot be found", ioe);
             }
@@ -324,37 +326,6 @@ public class TestIntroductionReimplementation {
                     + keyFrameComputationDurationInSeconds + " s " + keyFrameComputationDurationInMillis);
         }
         System.out.println("[ END ] Compute key frames");
-        System.out.println("[START] Normalize vertex coordinates");
-        // computes the minimal and maximal values of the vertex coordinates,
-        // then normalize them
-        float minx = Float.POSITIVE_INFINITY, miny = Float.POSITIVE_INFINITY;
-        float maxx = Float.NEGATIVE_INFINITY, maxy = Float.NEGATIVE_INFINITY;
-        for (final MeshData meshData : meshDataList) {
-            final FloatBuffer vertexBuffer = meshData.getVertexBuffer();
-            while (vertexBuffer.hasRemaining()) {
-                float x = vertexBuffer.get(), y = vertexBuffer.get();
-                minx = Math.min(minx, x);
-                miny = Math.min(miny, y);
-                maxx = Math.max(maxx, x);
-                maxy = Math.max(maxy, y);
-            }
-            vertexBuffer.rewind();
-        }
-        // normalizes them
-        final float xdiff = maxx - minx;
-        final float ydiff = maxy - miny;
-        for (final MeshData meshData : meshDataList) {
-            final FloatBuffer vertexBuffer = meshData.getVertexBuffer();
-            while (vertexBuffer.hasRemaining()) {
-                final int pos = vertexBuffer.position();
-                float x = vertexBuffer.get(), y = vertexBuffer.get();
-                vertexBuffer.position(pos);
-                vertexBuffer.put(xdiff == 0 ? x - minx : (x - minx) / xdiff);
-                vertexBuffer.put(ydiff == 0 ? y - miny : (y - miny) / ydiff);
-            }
-            vertexBuffer.rewind();
-        }
-        System.out.println("[ END ] Normalize vertex coordinates");
         // creates a SwitchNode containing all meshes of the frames
         System.out.println("[START] Build switch node");
         final SwitchNode switchNode = new SwitchNode();
@@ -363,6 +334,8 @@ public class TestIntroductionReimplementation {
             // creates a Mesh for this frame
             final Mesh mesh = new Mesh("frame n°" + frameIndex);
             mesh.setMeshData(meshData);
+            final Dimension frameSize = frameSizeList.get(frameIndex);
+            mesh.setScale(1.0f / frameSize.getWidth(), 1.0f / frameSize.getHeight(), 1.0f);
             // adds it into the SwitchNode
             switchNode.attachChild(mesh);
             frameIndex++;
