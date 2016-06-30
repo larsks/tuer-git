@@ -42,7 +42,7 @@
 	<!-- Properties -->
 	<property name="bindir" value="target/classes"/>
 	<property name="testbindir" value="target/test-classes"/>
-	<!-- directory containing signed JARs, JNLP files and images that are used in the deployed product -->
+	<!-- directory containing signed JARs and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
 	<!-- directory containing the source code -->
 	<property name="srcdir" value="src/main/java"/>
@@ -106,7 +106,6 @@
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
 	<property name="game-main-class" value="engine.service.Ardor3DGameServiceProvider"/>
-	<property name="game-jnlp-filename" value="${project-unix-name}.jnlp" />
 	<property name="game-jar-filename" value="${project-unix-name}.jar" />
 	<property name="game-src-zip-filename" value="${project-unix-name}-${game-version}-${game-release}.src.zip" />
 	<!-- The logo of the game must be a PNG file composed of 64 * 64 pixels -->
@@ -115,7 +114,6 @@
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="jfpsm.MainWindow"/>
 	<property name="editor-splashscreen-image" value="images/jfpsm_splashscreen.png"/>
-	<property name="editor-jnlp-filename" value="jfpsm.jnlp" />
 	<property name="editor-jar-filename" value="jfpsm.jar" />
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_813-joal_557-jogl_1322-jocl_995/fat -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/fat -->
@@ -244,8 +242,6 @@
 		<antcall target="create-windows-pkgs" />
 		<!-- Signs the JARs -->
 		<antcall target="sign-jars" />
-		<!-- Creates the JNLP files used by the end users to run the application with Java Web Start -->
-		<antcall target="create-jnlp-files" />
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
@@ -362,77 +358,6 @@
 		<delete file="${keystore}" failonerror="false" />
 	</target>
 	<!-- ================================================================= -->
-	<!-- Create JNLP files                                                 -->
-	<!-- ================================================================= -->
-	<target name="create-jnlp-files">
-		<!-- generate the JNLP files used by Java Web Start -->
-		<echo file="${destdir}/${game-jnlp-filename}">
-			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
-			<jnlp spec="1.0+" codebase="${codebase-url}" href="${game-jnlp-filename}">
-				<information>
-					<title>${game-long-name}</title>
-					<vendor>${vendor}</vendor>
-					<homepage href="${homepage-url}"/>
-					<description>${game-long-description}</description>
-					<description kind="short">${game-short-description}</description>
-					<icon kind="default" href="${game-logo-filename}"/>
-					<icon kind="splash" href="${game-logo-filename}"/>
-					<icon kind="shortcut" href="${game-logo-filename}"/>
-					<shortcut online="false" install="true">
-						<desktop/>
-					</shortcut>
-					<offline-allowed/>
-				</information>
-				<security>
-					<all-permissions />
-				</security>
-				<update check="always" policy="always"/>
-				<resources>
-					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="256m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>
-					<property name="sun.nio.MaxDirectMemorySize" value="128M"/>
-					<property name="sun.java2d.noddraw" value="true"/>
-					<property name="sun.java2d.d3d" value="false"/>
-					<property name="sun.java2d.opengl" value="false"/>
-					<property name="sun.java2d.xrender" value="true"/>
-					<property name="java.ext.dirs" value="" />
-					<jar href="${game-jar-filename}" download="eager" main="true"/>
-				</resources>
-				<application-desc main-class="${game-main-class}" />
-			</jnlp>
-			]]>
-		</echo>
-		<echo file="${destdir}/${editor-jnlp-filename}">
-			<![CDATA[<?xml version="1.0" encoding="utf-8"?>
-			<jnlp spec="1.0+" codebase="${codebase-url}" href="${editor-jnlp-filename}">
-				<information>
-					<title>${editor-long-name}</title>
-					<vendor>${vendor}</vendor>
-					<homepage href="${homepage-url}"/>
-					<description>${editor-long-description}</description>
-					<description kind="short">${editor-short-description}</description>
-					<offline-allowed/>
-				</information>
-				<security>
-					<all-permissions />
-				</security>
-				<update check="always" policy="always"/>
-				<resources>
-					<j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se" initial-heap-size="32m" max-heap-size="512m" java-vm-args="-XX:MaxDirectMemorySize=128M"/>
-					<property name="sun.nio.MaxDirectMemorySize" value="128M"/>
-					<property name="sun.java2d.noddraw" value="true"/>
-					<property name="sun.java2d.d3d" value="false"/>
-					<property name="sun.java2d.opengl" value="false"/>
-					<property name="sun.java2d.xrender" value="true"/>
-					<property name="java.ext.dirs" value="" />
-					<property name="sun.awt.noerasebackground" value="true"/>
-					<jar href="${editor-jar-filename}" download="eager" main="true"/>
-				</resources>
-				<application-desc main-class="${editor-main-class}" />
-			</jnlp>
-			]]>
-		</echo>
-	</target>
-	<!-- ================================================================= -->
 	<!-- Create archive                                                    -->
 	<!-- ================================================================= -->
 	<target name="create-archive">
@@ -506,17 +431,6 @@
 				<echo message="Upload of the file @{file-to-upload} in progress..." />
 				<scp sftp="true" trust="true" file="@{file-to-upload}" todir="${sftp-userid}:${sftp-password}@${sftp-pfs-server}:${sftp-pfs-remotedir}" />
 				<echo message="Upload of the file @{file-to-upload} successful" />
-			</sequential>
-		</for>
-		<!-- Uploads the other files only used by Java Webstart onto the SFTP server in the Project Web Space -->
-		<for param="file-to-upload-into-the-project-web-space">
-			<path>
-				<fileset dir="${destdir}" includes="${game-logo-filename},${game-jnlp-filename},${editor-jnlp-filename},${game-jar-filename},${editor-jar-filename}"/>
-			</path>
-			<sequential>
-				<echo message="Upload of the file @{file-to-upload-into-the-project-web-space} in progress..." />
-				<scp sftp="true" trust="true" file="@{file-to-upload-into-the-project-web-space}" todir="${sftp-userid}:${sftp-password}@${sftp-server}:${sftp-remotedir}" />
-				<echo message="Upload of the file @{file-to-upload-into-the-project-web-space} successful" />
 			</sequential>
 		</for>
 	</target>
