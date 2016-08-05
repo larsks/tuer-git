@@ -89,7 +89,7 @@ public class DeallocationHelper {
             try {
                 final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
                 directByteBufferCleanerMethod = directByteBufferClass.getDeclaredMethod("cleaner");
-                final Class<?> cleanerClass = Class.forName("sun.misc.Cleaner");
+                final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();//Class.forName("sun.misc.Cleaner");
                 cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
             } catch (ClassNotFoundException | NoSuchMethodException e) {
                 logger.log(Level.WARNING,
@@ -102,12 +102,10 @@ public class DeallocationHelper {
             boolean success = false;
             if (directByteBufferCleanerMethod != null && cleanerCleanMethod != null) {
                 final boolean directByteBufferCleanerMethodWasAccessible = directByteBufferCleanerMethod.isAccessible();
-                final boolean cleanerCleanMethodMethodWasAccessible = cleanerCleanMethod.isAccessible();
                 try {
                     directByteBufferCleanerMethod.setAccessible(true);
                     final Object cleaner = directByteBufferCleanerMethod.invoke(directByteBuffer);
                     if (cleaner != null) {
-                        cleanerCleanMethod.setAccessible(true);
                         cleanerCleanMethod.invoke(cleaner);
                         success = true;
                     }
@@ -115,7 +113,6 @@ public class DeallocationHelper {
                     logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
                 } finally {
                     directByteBufferCleanerMethod.setAccessible(directByteBufferCleanerMethodWasAccessible);
-                    cleanerCleanMethod.setAccessible(cleanerCleanMethodMethodWasAccessible);
                 }
             }
             return (success);
@@ -305,8 +302,19 @@ public class DeallocationHelper {
                         "java.nio.ByteBufferAsShortBufferL", "java.nio.ByteBufferAsShortBufferRB",
                         "java.nio.ByteBufferAsShortBufferRL" };
                 final String[] javaVersionElements = System.getProperty("java.version").split("\\.");
-                final int major = Integer.parseInt(javaVersionElements[0]);
-                final int minor = Integer.parseInt(javaVersionElements[1]);
+                final int indexOfEarlyAccessSuffix = javaVersionElements[0].lastIndexOf("-ea");
+                if (indexOfEarlyAccessSuffix != -1) {
+                    // drops the "-ea" suffix from the major version number for an early access build
+                    javaVersionElements[0]=javaVersionElements[0].substring(0, indexOfEarlyAccessSuffix);
+                }
+                final int major, minor;
+                if (javaVersionElements.length >= 2) {
+                    major = Integer.parseInt(javaVersionElements[0]);
+                    minor = Integer.parseInt(javaVersionElements[1]);
+                } else {
+                    major = 1;
+                    minor = Integer.parseInt(javaVersionElements[0]);
+                }
                 final String directBufferAttachmentFieldName;
                 if (minor == 1 && major <= 6)
                     directBufferAttachmentFieldName = java14to16DirectBufferAttachmentFieldName;
