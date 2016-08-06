@@ -97,7 +97,7 @@ public class DeallocationHelper {
                  */
                 final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();
                 if (Arrays.asList(cleanerClass.getInterfaces()).contains(Runnable.class)) {
-                    cleanerCleanMethod = cleanerClass.getDeclaredMethod("run");
+                    cleanerCleanMethod = Runnable.class.getDeclaredMethod("run");
                 } else {
                     cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
                 }
@@ -116,17 +116,7 @@ public class DeallocationHelper {
                     directByteBufferCleanerMethod.setAccessible(true);
                     final Object cleaner = directByteBufferCleanerMethod.invoke(directByteBuffer);
                     if (cleaner != null) {
-                        if (cleanerCleanMethod.getName().equals("run")) {
-                            /**
-                             * doesn't use the reflection in order to avoid
-                             * getting an IllegalAccessException as the class is
-                             * in the unexported package "jdk.internal.ref" in
-                             * the module "java.base"
-                             */
-                            ((Runnable) cleaner).run();
-                        } else {
-                            cleanerCleanMethod.invoke(cleaner);
-                        }
+                        cleanerCleanMethod.invoke(cleaner);
                         success = true;
                     }
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
