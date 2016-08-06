@@ -25,6 +25,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,13 +45,13 @@ import java.util.logging.Logger;
  * it's robust enough to go on working (except when the implementors
  * intentionally use a very general class to store the buffers) despite minor
  * naming changes like those that occurred between Java 1.6 and Java 1.7. It
- * supports Java 1.9 (see the JEP 260) as the only internal class in use is
- * sun.misc.Cleaner. N.B: Releasing the native memory of a sliced direct NIO
- * buffer, the one of a direct NIO buffer created with JNI or the one of any
- * direct NIO buffer created by the virtual machine or by a framework not under
- * your control doesn't prevent the calls to methods attempting to access such
- * buffers. Those calls can throw an exception or crash the virtual machine
- * depending on the implementations.
+ * supports Java 1.9 despite the move of the cleaner from the package sun.misc
+ * to jdk.internal.ref (in the module java.base). N.B: Releasing the native
+ * memory of a sliced direct NIO buffer, the one of a direct NIO buffer created
+ * with JNI or the one of any direct NIO buffer created by the virtual machine
+ * or by a framework not under your control doesn't prevent the calls to methods
+ * attempting to access such buffers. Those calls can throw an exception or
+ * crash the virtual machine depending on the implementations.
  * 
  * @author Julien Gouesse
  */
@@ -89,8 +90,17 @@ public class DeallocationHelper {
             try {
                 final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
                 directByteBufferCleanerMethod = directByteBufferClass.getDeclaredMethod("cleaner");
-                final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();//Class.forName("sun.misc.Cleaner");
-                cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
+                /**
+                 * The return type is sun.misc.Cleaner in Java <= 1.8,
+                 * jdk.internal.ref.Cleaner in Java >= 1.9. Only the latter
+                 * implements the Runnable interface.
+                 */
+                final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();
+                if (Arrays.asList(cleanerClass.getInterfaces()).contains(Runnable.class)) {
+                    cleanerCleanMethod = cleanerClass.getDeclaredMethod("run");
+                } else {
+                    cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
+                }
             } catch (ClassNotFoundException | NoSuchMethodException e) {
                 logger.log(Level.WARNING,
                         "The initialization of the deallocator for Oracle Java, Sun Java and OpenJDK has failed", e);
@@ -106,7 +116,17 @@ public class DeallocationHelper {
                     directByteBufferCleanerMethod.setAccessible(true);
                     final Object cleaner = directByteBufferCleanerMethod.invoke(directByteBuffer);
                     if (cleaner != null) {
-                        cleanerCleanMethod.invoke(cleaner);
+                        if (cleanerCleanMethod.getName().equals("run")) {
+                            /**
+                             * doesn't use the reflection in order to avoid
+                             * getting an IllegalAccessException as the class is
+                             * in the unexported package "jdk.internal.ref" in
+                             * the module "java.base"
+                             */
+                            ((Runnable) cleaner).run();
+                        } else {
+                            cleanerCleanMethod.invoke(cleaner);
+                        }
                         success = true;
                     }
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -304,8 +324,9 @@ public class DeallocationHelper {
                 final String[] javaVersionElements = System.getProperty("java.version").split("\\.");
                 final int indexOfEarlyAccessSuffix = javaVersionElements[0].lastIndexOf("-ea");
                 if (indexOfEarlyAccessSuffix != -1) {
-                    // drops the "-ea" suffix from the major version number for an early access build
-                    javaVersionElements[0]=javaVersionElements[0].substring(0, indexOfEarlyAccessSuffix);
+                    // drops the "-ea" suffix from the major version number for
+                    // an early access build
+                    javaVersionElements[0] = javaVersionElements[0].substring(0, indexOfEarlyAccessSuffix);
                 }
                 final int major, minor;
                 if (javaVersionElements.length >= 2) {
