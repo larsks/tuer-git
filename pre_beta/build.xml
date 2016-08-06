@@ -25,9 +25,6 @@
 
 <project name="First person shooter and editor" default="build" basedir=".">
 	<import file="jndt.xml"/>
-	<!-- external tasks -->
-	<!-- task that allows the use of optional tasks without modifying the Ant install by modifying the classpath at runtime -->
-	<taskdef resource="net/jtools/classloadertask/antlib.xml" classpath="lib/ant/ant-classloadertask.jar"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
@@ -416,9 +413,6 @@
 	<!-- Upload                                                            -->
 	<!-- ================================================================= -->
 	<target name="upload">
-		<!-- Loads jsch-0.1.50.jar (which is required to use the optional scp task) into the system classloader
-		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
-		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
@@ -438,9 +432,6 @@
 	<!-- Upload site                                                       -->
 	<!-- ================================================================= -->
 	<target name="upload-site">
-		<!-- Loads jsch-0.1.50.jar (which is required to use the optional scp task) into the system classloader
-		     (trick provided by Alexey Razgulyaev: http://razgulyaev.blogspot.fr/2012/04/ant-how-to-load-library-on-fly-at.html) -->
-		<classloader loader="system" classpath="lib/ant/jsch-0.1.50.jar"/>
 		<!-- Gets the SFTP account's password from the end user's input -->
 		<input message="Please enter the password:" addproperty="sftp-password"/>
 		<!-- There is no way to delete obsolete files with Ant SCP, you have to do it yourself -->
