@@ -25,7 +25,6 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -96,7 +95,7 @@ public class DeallocationHelper {
                  * implements the Runnable interface.
                  */
                 final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();
-                if (Arrays.asList(cleanerClass.getInterfaces()).contains(Runnable.class)) {
+                if (Runnable.class.isAssignableFrom(cleanerClass)) {
                     cleanerCleanMethod = Runnable.class.getDeclaredMethod("run");
                 } else {
                     cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
@@ -112,10 +111,13 @@ public class DeallocationHelper {
             boolean success = false;
             if (directByteBufferCleanerMethod != null && cleanerCleanMethod != null) {
                 final boolean directByteBufferCleanerMethodWasAccessible = directByteBufferCleanerMethod.isAccessible();
+                final boolean cleanerCleanMethodWasAccessible = cleanerCleanMethod.isAccessible();
                 try {
+                    // according to the Java documentation, by default, a reflected object is not accessible
                     directByteBufferCleanerMethod.setAccessible(true);
                     final Object cleaner = directByteBufferCleanerMethod.invoke(directByteBuffer);
                     if (cleaner != null) {
+                        cleanerCleanMethod.setAccessible(true);
                         cleanerCleanMethod.invoke(cleaner);
                         success = true;
                     }
@@ -123,6 +125,7 @@ public class DeallocationHelper {
                     logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
                 } finally {
                     directByteBufferCleanerMethod.setAccessible(directByteBufferCleanerMethodWasAccessible);
+                    cleanerCleanMethod.setAccessible(cleanerCleanMethodWasAccessible);
                 }
             }
             return (success);
