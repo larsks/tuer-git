@@ -12,7 +12,7 @@ OSM2World under LGPL
 Guava under Apache license
 Ant under Apache license
 Ant-Contrib under Apache license
-Ant classloader task under Apache license
+NSIS-Ant under libpng/zlib license
 jDeb under Apache license
 Redline RPM under MIT license
 Apache Commons Compress under Apache license

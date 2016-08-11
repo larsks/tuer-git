@@ -26,6 +26,7 @@
 <project name="First person shooter and editor" default="build" basedir=".">
 	<import file="jndt.xml"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
+	<taskdef name="makensis" classname="com.danielreese.nsisant.Task" classpath="lib/ant/nsisant-1.3.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
 		<available file="branding.properties" />
