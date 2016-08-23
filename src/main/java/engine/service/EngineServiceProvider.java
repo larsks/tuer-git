@@ -31,6 +31,8 @@ import com.ardor3d.extension.model.collada.jdom.ColladaImporter;
 import com.ardor3d.extension.model.md2.Md2Importer;
 import com.ardor3d.extension.model.obj.ObjExporter;
 import com.ardor3d.extension.model.obj.ObjImporter;
+import com.ardor3d.extension.model.ply.PlyImporter;
+import com.ardor3d.extension.model.stl.StlImporter;
 import com.ardor3d.image.Texture;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.Vector3;
@@ -177,6 +179,10 @@ public class EngineServiceProvider
             return (true);
         case MD2:
             return (true);
+        case PLY:
+            return (true);
+        case STL:
+            return (true);
         case WAVEFRONT_OBJ:
             return (true);
         default:
@@ -211,6 +217,13 @@ public class EngineServiceProvider
         case MD2:
             convertible = new Md2Importer().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
             break;
+        case PLY:
+            convertible = new PlyImporter()
+                    .load(new URLResourceSource(inputModelFile.toURI().toURL()), new GeometryTool(true)).getScene();
+            break;
+        case STL:
+            convertible = new StlImporter().load(new URLResourceSource(inputModelFile.toURI().toURL())).getScene();
+            break;
         case WAVEFRONT_OBJ:
             convertible = new ObjImporter()
                     .load(new URLResourceSource(inputModelFile.toURI().toURL()), new GeometryTool(true)).getScene();
@@ -226,7 +239,7 @@ public class EngineServiceProvider
     @Override
     public void save(final File outputModelFile, final ModelFileFormat outputModelFileFormat,
             final File secondaryOutputModelFile, final Spatial convertible)
-                    throws IOException, UnsupportedOperationException {
+            throws IOException, UnsupportedOperationException {
         switch (outputModelFileFormat) {
         case ARDOR3D_BINARY:
             new DirectBinaryExporter().save(convertible, outputModelFile);
