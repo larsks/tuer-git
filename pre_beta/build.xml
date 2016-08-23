@@ -389,11 +389,11 @@
 	<!-- ================================================================= -->
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    arch="i386" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
-		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    arch="amd64" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>

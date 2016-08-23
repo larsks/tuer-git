@@ -1178,7 +1178,7 @@ Multi-Arch: @{multiarch}]]></echo>
 			<delete dir="${appdir}" failonerror="true" />
 		</sequential>
 	</macrodef>
-	<macrodef name="create-windows-app-bundle" description="creates a compressed application archive and an installer for Microsoft Windows">
+	<macrodef name="create-windows-app-bundles" description="creates a compressed application archive and an installer for Microsoft Windows">
 		<attribute name="executable" description="name of the script without extension such as .bat"/>
 		<attribute name="appjar" description="file location of the JAR to package"/>
 		<attribute name="appname" description="application name"/>
@@ -1195,7 +1195,7 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
 		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
-		<attribute name="licensefile" description="text file (.txt or .rtf) containing the licencing terms displayed during the install, only used by the installer"/>
+		<attribute name="licensefile" description="text file (.txt or .rtf) containing the licensing terms displayed during the install, only used by the installer"/>
 		<sequential>
 			<if>
 			    <not>
@@ -1342,7 +1342,7 @@ Var StartMenuFolder
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${package-name}" 
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
-!insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
+!insertmacro MUI_PAGE_STARTMENU "Application" $StartMenuFolder
 
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -1423,7 +1423,7 @@ File /r tmp_app_dir\*
 
 WriteRegStr HKCU "Software\${package-name}" "" $INSTDIR
 WriteUninstaller "$INSTDIR\Uninstall.exe"
-!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+!insertmacro MUI_STARTMENU_WRITE_BEGIN "Application"
 CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 CreateShortcut "$SMPROGRAMS\$StartMenuFolder\@{executable}.lnk" "$INSTDIR\@{executable}.bat"
 CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
