@@ -26,7 +26,6 @@
 <project name="First person shooter and editor" default="build" basedir=".">
 	<import file="jndt.xml"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
-	<taskdef resource="com/danielreese/nsisant/antlib.xml" classpath="lib/ant/nsisant-1.3.jar"/>
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
 		<available file="branding.properties" />
@@ -393,11 +392,11 @@
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    arch="i386" version="${game-version}" release="${game-release}"/>
+		    arch="i386" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
 		<create-windows-app-bundle executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    arch="amd64" version="${game-version}" release="${game-release}"/>
+		    arch="amd64" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create OS X APP                                                   -->
