@@ -43,7 +43,7 @@ Sommaire:
                     <li><a href="#create-app-dir">create-app-dir</a></li>
                     <li><a href="#create-linux-app-bundles">create-linux-app-bundles</a></li>
                     <li><a href="#create-os-x-app-bundle">create-os-x-app-bundle</a></li>
-                    <li><a href="#create-windows-app-bundle">create-windows-app-bundle</a></li>
+                    <li><a href="#create-windows-app-bundles">create-windows-app-bundles</a></li>
                 </ul>
             </li>
         </ul>
@@ -152,7 +152,6 @@ Sommaire:
 <li><a href="http://github.com/google/guava/archive/master.zip">Google Guava</a></li>
 <li><a href="http://ant.apache.org/srcdownload.cgi">Ant</a></li>
 <li><a href="http://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-src.zip/download">Ant-Contrib</a></li>
-<li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
@@ -168,8 +167,9 @@ Sommaire:
 <h1><a name="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
 <h2><a name="introduction" href="./#introduction">Introduction</a></h2>
 <p>JNDT est utilisé pour générer les paquets applicatifs natifs autonomes du projet. Il fait à partir d'un "fat JAR" des bundles faciles à déployer et à installer. Il génère à la fois des installeurs natifs pratiques avec une intégration complète dans le bureau et des archives comme solutions de repli.</p>
+<p>C'est un empaqueteur multi-plateforme, c'est-à-dire qu'il est à la fois capable de tourner sous plusieurs systèmes d'exploitation et de générer des paquets natifs pour un système d'exploitation différent de celui sur lequel il s'exécute.</p>
 <h2><a name="codesource" href="./#codesource">Code source</a></h2>
-<p>Le code source de JNDT est dans un seul fichier de génération Ant <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">ici</a>. Ses dépendances sont dans le répertoire "lib/ant", vous devez éditer la valeur de la propriété Ant "jndtlibdir" si vous les déplacez.</p>
+<p>Le code source de JNDT est dans un seul fichier de génération Ant <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">ici</a>. Ses dépendances sont dans le répertoire "lib/ant", vous devez éditer la valeur de la propriété Ant "jndtlibdir" si vous les déplacez. <a href="http://nsis.sourceforge.net">Nullsoft Scriptable Install System (NSIS)</a>, disponible dans de nombreuses distributions GNU Linux, sous Microsoft Windows et sous Mac OS X, doit être installé séparément pour générer un installeur pour Microsoft Windows.</p>
 <h2><a name="manueldestachesant" href="./#manueldestachesant">Manuel des tâches Ant</a></h2>
 <p>JNDT est composé des 4 tâches Ant ci-dessous:</p>
 <h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
@@ -244,7 +244,7 @@ Sommaire:
 </tbody>
 </table>
 <h3><a name="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
-<p>Crée un fichier APP zippé pour Mac OS X.</p>
+<p>Crée un fichier APP compressé pour Mac OS X.</p>
 <table border="1">
 <thead>
 <tr>
@@ -270,9 +270,8 @@ Sommaire:
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
 </tbody>
 </table>
-<br>
-<h3><a name="create-windows-app-bundle" href="./#create-windows-app-bundle">create-windows-app-bundle</a></h3>
-<p>Crée une archive d'application zippée pour Microsoft Windows.</p>
+<h3><a name="create-windows-app-bundles" href="./#create-windows-app-bundles">create-windows-app-bundles</a></h3>
+<p>Crée une archive d'application compressée et un installeur pour Microsoft Windows.</p>
 <table border="1">
 <thead>
 <tr>
@@ -296,6 +295,7 @@ Sommaire:
 <tr><td>docdir</td><td>répertoire contenant la documentation</td><td>Non, par défaut à ""</td></tr>
 <tr><td>docdirincludes</td><td>filtre d'inclusion du répertoire de la documentation</td><td>Non, par défaut à "*"</td></tr>
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
+<tr><td>licensefile</td><td>Fichier texte (.txt ou .rtf) contenant les termes de licence affichés durant l'installation, seulement utilisé par l'installeur</td><td>Oui</td></tr>
 </tbody>
 </table>
 <p>
