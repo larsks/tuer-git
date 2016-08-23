@@ -43,7 +43,7 @@ Summary:
                     <li><a href="#create-app-dir">create-app-dir</a></li>
                     <li><a href="#create-linux-app-bundles">create-linux-app-bundles</a></li>
                     <li><a href="#create-os-x-app-bundle">create-os-x-app-bundle</a></li>
-                    <li><a href="#create-windows-app-bundle">create-windows-app-bundle</a></li>
+                    <li><a href="#create-windows-app-bundles">create-windows-app-bundles</a></li>
                 </ul>
             </li>
         </ul>
@@ -152,7 +152,6 @@ Summary:
 <li><a href="http://github.com/google/guava/archive/master.zip">Google Guava</a></li>
 <li><a href="http://ant.apache.org/srcdownload.cgi">Ant</a></li>
 <li><a href="http://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-src.zip/download">Ant-Contrib</a></li>
-<li><a href="http://sourceforge.net/projects/enitsys/files/Ant%20Classloader%20Tasks/1.0-RC2/ant-classloadertask-1.0-RC2.zip/download">Ant classloader task</a></li>
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
@@ -168,8 +167,9 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <h1><a name="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
 <h2><a name="introduction" href="./#introduction">Introduction</a></h2>
 <p>JNDT is used to build the self-contained native application bundles of the project. It turns a fat JAR into some bundles easy to deploy and to install. It builds both some convenient native installers with a full desktop integration and some archives as fallbacks.</p>
+<p>It's a cross-platform packager, i.e it's able both to run under several operating systems and to generate native bundles for an operating system different from the one it's being executed.</p>
 <h2><a name="sourcecode" href="./#sourcecode">Source code</a></h2>
-<p>The source code of JNDT is in a single Ant build file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">here</a>. Its dependencies are in the directory "lib/ant", you must edit the value of the Ant property "jndtlibdir" if you move them.</p>
+<p>The source code of JNDT is in a single Ant build file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">here</a>. Its dependencies are in the directory "lib/ant", you must edit the value of the Ant property "jndtlibdir" if you move them. <a href="http://nsis.sourceforge.net">Nullsoft Scriptable Install System (NSIS)</a>, available in numerous GNU Linux distributions, under Microsoft Windows and under Mac OS X, must be installed separately to generate an installer for Microsoft Windows.</p>
 <h2><a name="manualoftheanttasks" href="./#manualoftheanttasks">Manual of the Ant tasks</a></h2>
 <p>JNDT is composed of the 4 Ant tasks below:</p>
 <h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
@@ -244,7 +244,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 </tbody>
 </table>
 <h3><a name="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
-<p>Creates a zipped APP file for Mac OS X.</p>
+<p>Creates a compressed APP file for Mac OS X.</p>
 <table border="1">
 <thead>
 <tr>
@@ -270,8 +270,8 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "bzip2"</td></tr>
 </tbody>
 </table>
-<h3><a name="create-windows-app-bundle" href="./#create-windows-app-bundle">create-windows-app-bundle</a></h3>
-<p>Creates a zipped application archive for Microsoft Windows.</p>
+<h3><a name="create-windows-app-bundles" href="./#create-windows-app-bundles">create-windows-app-bundles</a></h3>
+<p>Creates a compressed application archive and an installer for Microsoft Windows.</p>
 <table border="1">
 <thead>
 <tr>
@@ -295,6 +295,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>docdir</td><td>directory containing the documentation</td><td>No - default is ""</td></tr>
 <tr><td>docdirincludes</td><td>inclusion filter of the documentation directory</td><td>No - default is "*"</td></tr>
 <tr><td>archivefileformat</td><td>archive file format, with or without compression: zip, gzip, bzip2, tar</td><td>No - default is "bzip2"</td></tr>
+<tr><td>licensefile</td><td>text file (.txt or .rtf) containing the licensing terms displayed during the install, only used by the installer</td><td>Yes</td></tr>
 </tbody>
 </table>
 <p>
