@@ -1442,6 +1442,7 @@ SetOutPath "$INSTDIR"
 File /r "tmp_app_dir\*"
 ]]></echo>
 			<!-- FIXME use the default Windows directory separators in these paths -->
+			<var name="is-licensefile-already-added" value="false" />
 			<for param="doc-file">
 			    <path>
 			        <fileset dir="${tmpdocdir}" includes="@{docdirincludes}" />
@@ -1451,9 +1452,22 @@ File /r "tmp_app_dir\*"
 			    	<property name="relative-doc-file" location="@{doc-file}" relative="true" basedir="@{outdir}" />
 			    	<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[File "${relative-doc-file}"
 ]]></echo>
+			    	<if>
+			    		<equals arg1="${relativelicensefile}" arg2="${relative-doc-file}"/>
+			    		<then>
+			    			<var name="is-licensefile-already-added" value="true" />
+			    		</then>
+			    	</if>
 			    </sequential>	
 			</for>
-			<!-- FIXME if the license file is not in the documentation directory, it must be copied -->
+			<!-- if the license file is not in the documentation directory, copies it -->
+			<if>
+				<equals arg1="${is-licensefile-already-added}" arg2="false"/>
+				<then>
+					<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[File "${relativelicensefile}"
+]]></echo>
+				</then>
+			</if>
 			<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[
 WriteRegStr HKCU "Software\${package-name}" "" $INSTDIR
 WriteUninstaller "$INSTDIR\Uninstall.exe"
