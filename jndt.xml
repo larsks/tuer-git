@@ -428,22 +428,17 @@
 			<!-- creates the platform dependent script -->
 			<if>
 				<equals arg1="@{os}" arg2="Windows" />
-				<!-- TODO compute the folder of the running shell script with WSH, use "wscript //NoLogo //B ****.js" in the batch file -->
-				<!-- TODO use the following JScript code: http://blogs.technet.com/b/heyscriptingguy/archive/2006/04/05/how-can-i-determine-the-path-to-the-folder-where-a-script-is-running.aspx -->
+				<!-- Computing the folder of the running shell is useless as NSIS uses the output path to set the current directory -->
 				<then>
 					<if>
 						<equals arg1="@{jdk}" arg2="" />
 						<then>
 							<!-- uses the system JRE if any -->
-							<echo file="${contentstarget}/${exedstfilename}">
-								<![CDATA[java.exe ${vmargsstring} -jar ${appjarbasename}]]>
-							</echo>
+							<echo file="${contentstarget}/${exedstfilename}"><![CDATA[javaw.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
 						</then>
 						<else>
 							<!-- uses the packaged JRE -->
-							<echo file="${contentstarget}/${exedstfilename}">
-								<![CDATA[jre\bin\java.exe ${vmargsstring} -jar ${appjarbasename}]]>
-							</echo>
+							<echo file="${contentstarget}/${exedstfilename}"><![CDATA[jre\bin\javaw.exe ${vmargsstring} -jar ${appjarbasename}]]></echo>
 						</else>
 					</if>
 				</then>
@@ -1195,12 +1190,17 @@ Multi-Arch: @{multiarch}]]></echo>
 		<attribute name="docdir" default="" description="directory containing the documentation"/>
 		<attribute name="docdirincludes" default="*" description="inclusion filter of the documentation directory"/>
 		<attribute name="archivefileformat" default="zip" description="archive file format, with or without compression: zip, gzip, bzip2, tar"/>
-		<attribute name="licensefile" description="text file (.txt or .rtf) containing the licensing terms displayed during the install, only used by the installer"/>
+		<attribute name="licensefile" default="" description="text file (.txt or .rtf) containing the licensing terms displayed during the install, only used by the installer"/>
 		<sequential>
 			<if>
-			    <not>
-			    	<available file="@{licensefile}"/>
-			    </not>
+				<and>
+					<not>
+					    <equals arg1="@{licensefile}" arg2=""/>
+				    </not>
+			        <not>
+			    	    <available file="@{licensefile}"/>
+			        </not>
+				</and>
 			    <then>
 			        <fail message="Missing license file at @{licensefile}" />
 			    </then>
@@ -1312,9 +1312,8 @@ Multi-Arch: @{multiarch}]]></echo>
 					</if>
 				</else>
 			</if>
-			<local name="relativelicensefile" />
-			<property name="relativelicensefile" location="@{licensefile}" relative="true" basedir="@{outdir}" />
 			<!-- Creates the installer -->
+			<!-- Generates the NSI script first -->
 			<echo file="@{outdir}/${package-name}.nsi"><![CDATA[!include MUI2.nsh
 ;Unicode works only with NSIS >= 3.0
 ;Unicode true
@@ -1334,8 +1333,29 @@ Var StartMenuFolder
 !define MUI_LANGDLL_REGISTRY_KEY "Software\${package-name}" 
 !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
-!insertmacro MUI_PAGE_LICENSE "${relativelicensefile}"
-!insertmacro MUI_PAGE_COMPONENTS
+]]></echo>  <!-- FIXME use the default Windows directory separators in this path -->
+			<!-- Manages the license page -->
+			<local name="relativelicensefile" />
+			<if>
+			    <equals arg1="@{licensefile}" arg2=""/>
+			    <then>
+			        <property name="relativelicensefile" value="" />
+			    </then>
+			    <else>
+			        <property name="relativelicensefile" location="@{licensefile}" relative="true" basedir="@{outdir}" />
+			    </else>
+			</if>
+			<if>
+				<not>
+			        <equals arg1="${relativelicensefile}" arg2=""/>
+			    </not>
+			    <then>
+			        <echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[!insertmacro MUI_PAGE_LICENSE "${relativelicensefile}"
+				
+]]></echo>
+			    </then>
+			</if>
+			<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU" 
@@ -1419,8 +1439,22 @@ Var StartMenuFolder
 Section "Install" SecInstall
 SetOutPath "$INSTDIR"
 
-File /r tmp_app_dir\*
-
+File /r "tmp_app_dir\*"
+]]></echo>
+			<!-- FIXME use the default Windows directory separators in these paths -->
+			<for param="doc-file">
+			    <path>
+			        <fileset dir="${tmpdocdir}" includes="@{docdirincludes}" />
+			    </path>
+			    <sequential>
+			    	<local name="relative-doc-file" />
+			    	<property name="relative-doc-file" location="@{doc-file}" relative="true" basedir="@{outdir}" />
+			    	<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[File "${relative-doc-file}"
+]]></echo>
+			    </sequential>	
+			</for>
+			<!-- FIXME if the license file is not in the documentation directory, it must be copied -->
+			<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[
 WriteRegStr HKCU "Software\${package-name}" "" $INSTDIR
 WriteUninstaller "$INSTDIR\Uninstall.exe"
 !insertmacro MUI_STARTMENU_WRITE_BEGIN "Application"
@@ -1439,10 +1473,68 @@ FunctionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Section "Uninstall"
-;ADD YOUR OWN FILES HERE...
+
+]]></echo>
+			<!-- Deletes only the files that the installer extracted during the install -->
+			<for param="file-to-delete">
+				<path>
+				    <fileset dir="${appdir}" defaultexcludes="false" />
+				</path>
+				<sequential>
+					<local name="file-to-delete.windows" />
+					<pathconvert targetos="windows" property="file-to-delete.windows">
+					    <path path="@{file-to-delete}" />
+					</pathconvert>
+					<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[Delete "${file-to-delete.windows}"
+]]></echo>
+				</sequential>
+			</for>
+			<for param="doc-file-to-delete">
+			    <path>
+			        <fileset dir="${tmpdocdir}" includes="@{docdirincludes}" />
+			    </path>
+				<sequential>
+					<local name="doc-file-to-delete.windows" />
+					<pathconvert targetos="windows" property="doc-file-to-delete.windows">
+					    <path path="@{doc-file-to-delete}" />
+					</pathconvert>
+				    <echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[Delete "${doc-file-to-delete.windows}"
+]]></echo>
+				</sequential>
+			</for>
+			<!-- Removes only the directories that the installer extracted during the install -->
+			<!-- Loops over the directories in the reverse order so that the directories contain no sub-directories (are empty) when trying to remove them without having to use recursive removal -->
+			<var name="directories-to-delete" value="" />
+			<for param="directory-to-delete">
+				<path>
+				    <dirset dir="${appdir}" includes="*/**" />
+				</path>
+			    <sequential>
+			    	<local name="directory-to-delete.windows" />
+			    	<pathconvert targetos="windows" property="directory-to-delete.windows">
+			    	    <path path="@{directory-to-delete}" />
+			    	</pathconvert>
+			    	<if>
+			        	<equals arg1="${directories-to-delete}" arg2=""/>
+			        	<then>
+			        		<var name="directories-to-delete" value="${directory-to-delete.windows}" />
+			        	</then>
+			        	<else>
+			        		<var name="directories-to-delete" value="${directory-to-delete.windows},${directories-to-delete}" />
+			        	</else>
+			        </if>
+			    </sequential>
+			</for>
+			<for param="directory-to-delete" list="${directories-to-delete}">
+			    <sequential>
+			    	<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[RMDir "@{directory-to-delete}"
+]]></echo>
+			    </sequential>
+			</for>
+			<echo file="@{outdir}/${package-name}.nsi" append="true"><![CDATA[
 Delete "$INSTDIR\Uninstall.exe"
-RMDir "$INSTDIR"
-!insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
+RMDir /REBOOTOK "$INSTDIR"
+!insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuFolder
 Delete "$SMPROGRAMS\$StartMenuFolder\@{executable}.lnk"
 Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
 RMDir "$SMPROGRAMS\$StartMenuFolder"
@@ -1453,6 +1545,17 @@ Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
 FunctionEnd
 ]]></echo>
+			<local name="appdir.windows" />
+			<pathconvert targetos="windows" property="appdir.windows">
+			    <path path="${appdir}" />
+			</pathconvert>
+			<replace file="@{outdir}/${package-name}.nsi" token="${appdir.windows}" value="$INSTDIR" />
+			<local name="tmpdocdir.windows" />
+			<pathconvert targetos="windows" property="tmpdocdir.windows">
+			    <path path="${tmpdocdir}" />
+			</pathconvert>
+			<replace file="@{outdir}/${package-name}.nsi" token="${tmpdocdir.windows}" value="$INSTDIR" />
+			<!-- Calls NSIS "makensis" command to generate the installer based on the NSI script -->
 			<makensis script="@{outdir}/${package-name}.nsi" verbosity="4" />
 			<!-- Deletes the directories, only keeps the compressed archive and the installer -->
 			<delete file="@{outdir}/${package-name}.nsi" failonerror="true" />
