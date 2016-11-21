@@ -74,6 +74,7 @@ import com.ardor3d.scenegraph.controller.ComplexSpatialController.RepeatType;
 import com.ardor3d.scenegraph.controller.SpatialController;
 import com.ardor3d.scenegraph.event.DirtyType;
 import com.ardor3d.scenegraph.extension.CameraNode;
+import com.ardor3d.scenegraph.shape.Box;
 import com.ardor3d.scenegraph.visitor.Visitor;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueue;
@@ -706,18 +707,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                     hasCollision = collisionResults.getNumber() > 0;
                     collisionResults.clear();
                     // if the current position is inside a teleporter
-                    if (hasCollision) {/**
-                                        * The teleporter can be bi-directional.
-                                        * A player who was being teleported in a
-                                        * direction should not be immediately
-                                        * teleported in the opposite direction.
-                                        * I use a flag to avoid this case
-                                        * because applying naively the algorithm
-                                        * would be problematic as the previous
-                                        * position is outside the teleporter and
-                                        * the current position is inside the
-                                        * teleporter.
-                                        */
+                    if (hasCollision) {
+                        /**
+                         * The teleporter can be bi-directional. A player who
+                         * was being teleported in a direction should not be
+                         * immediately teleported in the opposite direction. I
+                         * use a flag to avoid this case because applying
+                         * naively the algorithm would be problematic as the
+                         * previous position is outside the teleporter and the
+                         * current position is inside the teleporter.
+                         */
                         // if the previous position is not on any teleporter
                         if (!wasBeingTeleported) {// the player enters a
                                                   // teleporter
@@ -727,10 +726,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                             final String teleporterDestinationLevelIdentifier = teleporterUserData
                                     .getDestinationLevelIdentifier();
                             // if the teleporter is in the current level
-                            if (level.getIdentifier().equals(teleporterDestinationLevelIdentifier)) {// then
-                                                                                                     // moves
-                                                                                                     // the
-                                                                                                     // player
+                            if (level.getIdentifier().equals(teleporterDestinationLevelIdentifier)) {
+                                // then moves the player
                                 playerNode.setTranslation(teleporterDestination);
                                 // updates the previous location to avoid any
                                 // problem when detecting the collisions
@@ -741,9 +738,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                                 if (teleporterUserData.getPickingUpSoundSampleIdentifier() != null)
                                     getSoundManager().play(false, false,
                                             teleporterUserData.getPickingUpSoundSampleIdentifier());
-                            } else if (playerData.isAlive()) {// otherwise
-                                                              // leaves the
-                                                              // level
+                            } else if (playerData.isAlive()) {
+                                // otherwise leaves the level
                                 MissionStatus missionStatus = MissionStatus.COMPLETED;
                                 // checks the objectives, the mission is
                                 // completed only if all objectives are
@@ -759,10 +755,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                                 // location to the trigger action
                                 toGameOverTriggerAction.arguments.setPreviousLevelIdentifier(level.getIdentifier());
                                 toGameOverTriggerAction.perform(null, null, -1);
-                                if (missionStatus == MissionStatus.COMPLETED) {// unlocks
-                                                                               // the
-                                                                               // next
-                                                                               // level
+                                if (missionStatus == MissionStatus.COMPLETED) {
+                                    // unlocks the next level
                                     profileData.addUnlockedLevelIdentifier(teleporterDestinationLevelIdentifier);
                                     // indicates the next level suggested to the
                                     // player
@@ -1040,13 +1034,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                 }
                 // looks for any changes in the objectives statuses
                 final List<Objective> updatedObjectives = new ArrayList<>();
-                for (Objective objective : level.getObjectives()) {// retrieves
-                                                                   // the
-                                                                   // previous
-                                                                   // and
-                                                                   // current
-                                                                   // objective
-                                                                   // statuses
+                for (Objective objective : level.getObjectives()) {
+                    // retrieves the previous and current objective statuses
                     final ObjectiveStatus previousObjectiveStatus = previousObjectivesStatusesMap.get(objective);
                     final ObjectiveStatus currentObjectiveStatus = objective.getStatus(gameStats);
                     // if the objective status has just changed
@@ -1074,9 +1063,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                     }
                     // updates the panel
                     objectivesDisplayLabel.setText(builder.toString());
-                    if (allObjectivesAreCompleted) {// plays a sound as all
-                                                    // updated objectives are
-                                                    // completed
+                    if (allObjectivesAreCompleted) {
+                        // plays a sound as all updated objectives are completed
                         getSoundManager().play(false, false, victory0SoundSampleIdentifier);
                     }
                 }
@@ -1879,8 +1867,49 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         }
     }
 
+    private final Box loadPoster(final String filename, final float ratio) {
+        // creates the thin box representing the poster
+        final Box poster = new Box(filename + " Poster", Vector3.ZERO, 0.5, 0.5, 0.01);
+        // retrieves the buffer containing the texture coordinates
+        final FloatBuffer posterTextureCoordsBuffer = poster.getMeshData().getTextureBuffer(0);
+        posterTextureCoordsBuffer.rewind();
+        // uses a ratio as the size of the image's part isn't a power of two
+        final float left = (1.0f - ratio) / 2.0f;
+        final float right = 1.0f - left;
+        final float top = right;
+        final float bottom = left;
+        for (int i = 0; i < 6; i++) {
+            // displays the poster only on the front face
+            if (i == 2) {
+                posterTextureCoordsBuffer.put(right).put(bottom);
+                posterTextureCoordsBuffer.put(left).put(bottom);
+                posterTextureCoordsBuffer.put(left).put(top);
+                posterTextureCoordsBuffer.put(right).put(top);
+            } else {
+                posterTextureCoordsBuffer.put(0).put(0);
+                posterTextureCoordsBuffer.put(0).put(0);
+                posterTextureCoordsBuffer.put(0).put(0);
+                posterTextureCoordsBuffer.put(0).put(0);
+            }
+        }
+        posterTextureCoordsBuffer.rewind();
+        poster.setModelBound(new BoundingBox());
+        // creates the texture of the poster's image
+        final TextureState ts = new TextureState();
+        ts.setEnabled(true);
+        ts.setTexture(TextureManager.load(filename, Texture.MinificationFilter.Trilinear, true));
+        poster.setRenderState(ts);
+        return poster;
+    }
+    
     private final void loadLevelModel() {
         final Node levelMainModel = level.loadMainModel();
+        if ("1".equals(level.getIdentifier())) {
+            // adds the poster into the level
+            final Box butWhatDoesThePoliceItBurstsTheEyesPoster = loadPoster("Mais_que_fait_la_police_ca_crève_les_yeux.png", (float) 0.6767578125);
+            butWhatDoesThePoliceItBurstsTheEyesPoster.setTranslation(new Vector3(115.5, 0.5, 214.01));
+            levelMainModel.attachChild(butWhatDoesThePoliceItBurstsTheEyesPoster);
+        }
         getRoot().attachChild(levelMainModel);
     }
 
@@ -1889,14 +1918,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     }
 
     private final void performInitialBasicSetup() {
-        if ("0".equals(level.getIdentifier()) || "1".equals(level.getIdentifier())) {// the
-                                                                                     // two
-                                                                                     // first
-                                                                                     // levels
-                                                                                     // use
-                                                                                     // a
-                                                                                     // collision
-                                                                                     // map
+        if ("0".equals(level.getIdentifier()) || "1".equals(level.getIdentifier())) {
+            // the two first levels use a collision map
             level.readCollisionMap();
         }
         level.readCollisionVolumes();
@@ -2195,12 +2218,13 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
 
         private void deleteTextures(final Spatial disposableSpatial) {
             final TextureState textureState = (TextureState) disposableSpatial.getLocalRenderState(StateType.Texture);
-            if (textureState != null) {// loops on all texture units
+            if (textureState != null) {
+                // loops on all texture units
                 for (int textureUnit = 0; textureUnit < textureState.getMaxTextureIndexUsed(); textureUnit++) {
                     final Texture texture = textureState.getTexture(textureUnit);
-                    if (texture != null) {// deletes the OpenGL identifier of
-                                          // the texture and releases the native
-                                          // memory of its direct NIO buffer
+                    if (texture != null) {
+                        // deletes the OpenGL identifier of the texture and
+                        // releases the native memory of its direct NIO buffer
                         renderer.deleteTexture(texture);
                     }
                 }
