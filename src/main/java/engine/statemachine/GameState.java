@@ -1552,8 +1552,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                     medikitPositions, weaponPositionsMap, ammoBoxPositionsMap, null, teleporterPositionsMap,
                     new KillAllEnemiesObjective());
         }
-        levelFactory.addNewLevel("Outdoor", "2", "/abin/LID2.abin", null, null, null, null, null, "BLUE_SKY", null);
-        levelFactory.addNewLevel("Bagnolet", "3", "/abin/LID3.abin", null, null, null, null, null, "BLUE_SKY", null);
+        {
+            final Map<String, Entry<String, ReadOnlyVector3[]>> teleporterPositionsMap = new HashMap<>();
+            teleporterPositionsMap.put("",
+                    new AbstractMap.SimpleImmutableEntry<>("3", new ReadOnlyVector3[] { new Vector3(0, 0, 10) }));
+            levelFactory.addNewLevel("Outdoor", "2", "/abin/LID2.abin", null, null, null, null, null, "BLUE_SKY",
+                    teleporterPositionsMap);
+        }
+        {
+            levelFactory.addNewLevel("Bagnolet", "3", "/abin/LID3.abin", null, null, null, null, null, "BLUE_SKY",
+                    null);
+        }
         return (levelFactory);
     }
 
@@ -1867,9 +1876,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         }
     }
 
-    private final Box loadPoster(final String filename, final float ratio) {
+    private final Box loadPoster(final String filename, final double xExtent, final double yExtent,
+            final double zExtent, final float ratio) {
         // creates the thin box representing the poster
-        final Box poster = new Box(filename + " Poster", Vector3.ZERO, 0.5, 0.5, 0.01);
+        final Box poster = new Box(filename + " Poster", Vector3.ZERO, xExtent, yExtent, zExtent);
         // retrieves the buffer containing the texture coordinates
         final FloatBuffer posterTextureCoordsBuffer = poster.getMeshData().getTextureBuffer(0);
         posterTextureCoordsBuffer.rewind();
@@ -1906,7 +1916,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         final Node levelMainModel = level.loadMainModel();
         if ("1".equals(level.getIdentifier())) {
             // adds the poster into the level
-            final Box butWhatDoesThePoliceItBurstsTheEyesPoster = loadPoster("Mais_que_fait_la_police_ca_crève_les_yeux.png", (float) 0.6767578125);
+            final Box butWhatDoesThePoliceItBurstsTheEyesPoster = loadPoster("Mais_que_fait_la_police_ca_crève_les_yeux.png", 0.5, 0.5, 0.01, (float) 0.6767578125);
             butWhatDoesThePoliceItBurstsTheEyesPoster.setTranslation(new Vector3(115.5, 0.5, 214.01));
             levelMainModel.attachChild(butWhatDoesThePoliceItBurstsTheEyesPoster);
         }
