@@ -53,6 +53,7 @@ import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
+import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
@@ -1547,7 +1548,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                     new ReadOnlyVector3[] { new Vector3(112.5, 0.1, 222.5) });
             final Map<String, Entry<String, ReadOnlyVector3[]>> teleporterPositionsMap = new HashMap<>();
             teleporterPositionsMap.put("",
-                    new AbstractMap.SimpleImmutableEntry<>("2", new ReadOnlyVector3[] { new Vector3(94.5, 0, 129.5) }));
+                    new AbstractMap.SimpleImmutableEntry<>("2", new ReadOnlyVector3[] { new Vector3(75.5, 0, 129.5) }));
             levelFactory.addNewLevel("Museum", "1", "/abin/LID1.abin", "/abin/LID1.collision.abin", enemyPositionsMap,
                     medikitPositions, weaponPositionsMap, ammoBoxPositionsMap, null, teleporterPositionsMap,
                     new KillAllEnemiesObjective());
@@ -1877,17 +1878,17 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     }
 
     private final Box loadPoster(final String filename, final double xExtent, final double yExtent,
-            final double zExtent, final float ratio) {
+            final double zExtent, final float xRatio, final float yRatio) {
         // creates the thin box representing the poster
         final Box poster = new Box(filename + " Poster", Vector3.ZERO, xExtent, yExtent, zExtent);
         // retrieves the buffer containing the texture coordinates
         final FloatBuffer posterTextureCoordsBuffer = poster.getMeshData().getTextureBuffer(0);
         posterTextureCoordsBuffer.rewind();
         // uses a ratio as the size of the image's part isn't a power of two
-        final float left = (1.0f - ratio) / 2.0f;
+        final float left = (1.0f - xRatio) / 2.0f;
         final float right = 1.0f - left;
-        final float top = right;
-        final float bottom = left;
+        final float bottom = (1.0f - yRatio) / 2.0f;
+        final float top = 1.0f - bottom;
         for (int i = 0; i < 6; i++) {
             // displays the poster only on the front face
             if (i == 2) {
@@ -1915,10 +1916,14 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     private final void loadLevelModel() {
         final Node levelMainModel = level.loadMainModel();
         if ("1".equals(level.getIdentifier())) {
-            // adds the poster into the level
-            final Box butWhatDoesThePoliceItBurstsTheEyesPoster = loadPoster("Mais_que_fait_la_police_ca_crève_les_yeux.png", 0.5, 0.5, 0.01, (float) 0.6767578125);
+            // adds the posters into the level
+            final Box butWhatDoesThePoliceItBurstsTheEyesPoster = loadPoster("Mais_que_fait_la_police_ca_crève_les_yeux.png", 0.5, 0.5, 0.01, (float) 0.6767578125, (float) 0.6767578125);
             butWhatDoesThePoliceItBurstsTheEyesPoster.setTranslation(new Vector3(115.5, 0.5, 214.01));
             levelMainModel.attachChild(butWhatDoesThePoliceItBurstsTheEyesPoster);
+            final Box communismWillWinOnAllFrontsPoster = loadPoster("Kommunismus_wird_an_allen_Fronten_siegen.png", 2.5, 0.1, 0.01, 1, (float) 0.06);
+            communismWillWinOnAllFrontsPoster.setTranslation(new Vector3(75, 0.9, 129.5));
+            communismWillWinOnAllFrontsPoster.setRotation(new Quaternion().fromAngleAxis(Math.PI / 2, new Vector3(0, 1, 0)));
+            levelMainModel.attachChild(communismWillWinOnAllFrontsPoster);
         }
         getRoot().attachChild(levelMainModel);
     }
