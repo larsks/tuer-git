@@ -53,6 +53,7 @@ import com.ardor3d.intersection.BoundingCollisionResults;
 import com.ardor3d.intersection.BoundingPickResults;
 import com.ardor3d.intersection.CollisionResults;
 import com.ardor3d.intersection.PickingUtil;
+import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Quaternion;
 import com.ardor3d.math.Ray3;
 import com.ardor3d.math.Vector3;
@@ -871,8 +872,8 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                                             soldierWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
                                             soldierWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
                                             soldierWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
-                                        } else {// there are only 173 frames for
-                                                // weapons
+                                        } else {
+                                            // there are only 173 frames for weapons
                                             soldierWeaponMesh.setVisible(false);
                                         }
                                     }
@@ -935,9 +936,10 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                 projectilesToRemove.addAll(projectilesMap.keySet());
                 // FIXME move this logic into a state machine
                 for (Entry<Mesh, EnemyData> enemyEntry : enemiesDataMap.entrySet()) {
-                    EnemyData enemyData = enemyEntry.getValue();
+                    final EnemyData enemyData = enemyEntry.getValue();
                     if (!editedEnemiesData.contains(enemyData) && enemyData.isAlive()) {
                         final Mesh enemyMesh = enemyEntry.getKey();
+                        //FIXME use getParent()?
                         final Mesh enemyWeaponMesh = (Mesh) getRoot()
                                 .getChild((getRoot().getChildren().indexOf(enemyMesh) + 1));
                         final KeyframeController<Mesh> enemyKeyframeController = (KeyframeController<Mesh>) enemyMesh
@@ -970,29 +972,72 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                                 enemiesLatestDetection.put(enemyData, Long.valueOf(absoluteElapsedTimeInNanoseconds));
                                 // checks whether the player is in front of this
                                 // enemy (defensive behavior)
-                                Ray3 ray = new Ray3(playerNode.getTranslation(),
+                                final Ray3 fromPlayerToEnemyRay = new Ray3(playerNode.getTranslation(),
                                         playerNode.getTransform().getMatrix().getColumn(2, null));
-                                BoundingPickResults results = new BoundingPickResults();
-                                PickingUtil.findPick(enemyMesh, ray, results);
+                                final BoundingPickResults results = new BoundingPickResults();
+                                PickingUtil.findPick(enemyMesh, fromPlayerToEnemyRay, results);
                                 hasCollision = results.getNumber() > 0;
                                 results.clear();
                                 if (hasCollision) {
-                                    enemyKeyframeController.setRepeatType(RepeatType.CLAMP);
-                                    // uses the "attack" animation
-                                    enemyKeyframeController.setSpeed(MD2FrameSet.ATTACK.getFramesPerSecond());
-                                    enemyKeyframeController.setCurTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
-                                    enemyKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
-                                    enemyKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
+                                    final Ray3 fromEnemyToPlayerRay = new Ray3(enemyMesh.getTranslation(), 
+                                            enemyMesh.getTransform().getMatrix().getColumn(2, null));
+                                    PickingUtil.findPick(playerNode, fromEnemyToPlayerRay, results);
+                                    hasCollision = results.getNumber() > 0;
+                                    results.clear();
+                                    // checks whether this enemy is in front of the player
+                                    if (hasCollision) {
+                                        //TODO this enemy should remember that this player is a threat for him
+                                        // it's worth opening fire
+                                        // uses the "attack" animation
+                                        final MD2FrameSet frameSet = MD2FrameSet.ATTACK;
+                                        enemyKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                        enemyKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                        enemyKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                        enemyKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                        enemyKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
 
-                                    enemyWeaponKeyframeController.setRepeatType(RepeatType.CLAMP);
-                                    enemyWeaponKeyframeController.setSpeed(MD2FrameSet.ATTACK.getFramesPerSecond());
-                                    enemyWeaponKeyframeController.setCurTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
-                                    enemyWeaponKeyframeController.setMinTime(MD2FrameSet.ATTACK.getFirstFrameIndex());
-                                    enemyWeaponKeyframeController.setMaxTime(MD2FrameSet.ATTACK.getLastFrameIndex());
+                                        enemyWeaponKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                        enemyWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                        enemyWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                        enemyWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                        enemyWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
 
-                                    // creates a new projectile
-                                    createEnemyProjectile(enemyData, enemyMesh, enemyWeaponMesh);
-                                    getSoundManager().play(false, false, enemyShotgunShotSampleIdentifier);
+                                        // creates a new projectile
+                                        createEnemyProjectile(enemyData, enemyMesh, enemyWeaponMesh);
+                                        getSoundManager().play(false, false, enemyShotgunShotSampleIdentifier);
+                                    } else {
+                                        final MD2FrameSet frameSet = MD2FrameSet.RUN;
+                                        enemyKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                        enemyKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                        enemyKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                        enemyKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                        enemyKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+
+                                        enemyWeaponKeyframeController.setRepeatType(RepeatType.CLAMP);
+                                        enemyWeaponKeyframeController.setSpeed(frameSet.getFramesPerSecond());
+                                        enemyWeaponKeyframeController.setCurTime(frameSet.getFirstFrameIndex());
+                                        enemyWeaponKeyframeController.setMinTime(frameSet.getFirstFrameIndex());
+                                        enemyWeaponKeyframeController.setMaxTime(frameSet.getLastFrameIndex());
+                                        
+                                        // previous enemy direction, extracts the forward vector of the rotation matrix
+                                        final Vector3 previousEnemyDirection = enemyMesh.getTransform().getMatrix().getColumn(2, null).normalizeLocal();
+                                        // vector from the enemy to the player
+                                        final Vector3 nextEnemyDirection = playerNode.getTranslation().subtract(enemyMesh.getTranslation(), null).normalizeLocal();
+                                        // rotation from the previous direction to the next direction
+                                        final Quaternion fromPreviousToNextEnemyDirectionRotation = new Quaternion().fromVectorToVector(previousEnemyDirection, nextEnemyDirection);
+                                        // previous rotation
+                                        final Quaternion startQuat = new Quaternion().fromRotationMatrix(enemyMesh.getRotation());
+                                        // next rotation
+                                        final Quaternion endQuat = startQuat.multiply(fromPreviousToNextEnemyDirectionRotation, null);
+                                        // current rotation
+                                        //TODO start rotating here and use SLERP step by step in the next frames instead of rotating completely now
+                                        final Quaternion currentQuat = Quaternion.slerp(startQuat, endQuat, 1.0, null);
+                                        // current rotation as a matrix
+                                        final Matrix3 enemyFacingPlayerMatrix = currentQuat.toRotationMatrix((Matrix3) null);
+                                        // applies the current rotation to the enemy and to his weapon
+                                        enemyMesh.setRotation(enemyFacingPlayerMatrix);
+                                        enemyWeaponMesh.setRotation(enemyFacingPlayerMatrix);
+                                    }
                                 }
                             }
                         }
@@ -1454,14 +1499,16 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         }
 
         @Override
-        public final void update(double time, BasicText caller) {
+        public final void update(final double time, final BasicText caller) {
             // if the label contains anything
-            if (!caller.getText().isEmpty()) {// if it contains the same text
-                if (latestText.equals(caller.getText())) {// increases the
-                                                          // display time
+            if (!caller.getText().isEmpty()) {
+                // if it contains the same text
+                if (latestText.equals(caller.getText())) {
+                    // increases the display time
                     duration += time;
                     // if it has been displayed for a too long time
-                    if (duration > maxDuration) {// remove it
+                    if (duration > maxDuration) {
+                        // removes it
                         caller.setText("");
                         duration = 0;
                     }
