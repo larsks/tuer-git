@@ -77,6 +77,12 @@ public final class Ardor3DGameServiceProvider implements Scene {
 
     /** storage of branding properties */
     private Properties brandingProperties;
+    
+    /** path of the versioning property file */
+    private final String versioningPropertyFilePath;
+
+    /** storage of versioning properties */
+    private Properties versioningProperties;
 
     /** short name of the game */
     private final String gameShortName;
@@ -97,6 +103,12 @@ public final class Ardor3DGameServiceProvider implements Scene {
 
     /** game title, visible only in windowed mode */
     private final String gameTitle;
+    
+    /** game version */
+    private final String gameVersion;
+    
+    /** game release */
+    private final String gameRelease;
 
     /** native window, not the GL surface itself */
     private final NativeCanvas canvas;
@@ -127,8 +139,8 @@ public final class Ardor3DGameServiceProvider implements Scene {
         System.setProperty("sun.java2d.opengl", "false");
         // disables OpenGL-ES
         System.setProperty("jogl.disable.opengles", "true");
-        if (DesktopIntegration.getOperatingSystem().equals(OS.Windows)) {// Windows-specific
-                                                                         // workarounds
+        if (DesktopIntegration.getOperatingSystem().equals(OS.Windows)) {
+            // Windows-specific workarounds
             /**
              * Forces the use of the high precision timer on Windows. See
              * http://bugs.sun.com/view_bug.do?bug_id=6435126
@@ -274,14 +286,24 @@ public final class Ardor3DGameServiceProvider implements Scene {
         } catch (IOException ioe) {
             throw new RuntimeException("Failed in loading the property file " + brandingPropertyFilePath, ioe);
         }
-        gameShortName = getPropertyValue("game-short-name");
+        gameShortName = getPropertyValue(brandingProperties, "game-short-name");
         settingsProvider = new SettingsProvider(gameShortName);
         settingsProvider.load();
         localizedMessageProvider = new LocalizedMessageProvider(settingsProvider.getLocale());
-        gameLongName = getPropertyValue("game-long-name");
+        gameLongName = getPropertyValue(brandingProperties, "game-long-name");
         gameIntroductionSubtitle = localizedMessageProvider.getString("END_OF_THE_INTERNATIONALE_COMMUNIST_ANTHEM");
-        gameRecommendedDownloadUrl = getPropertyValue("game-recommended-download-url");
+        gameRecommendedDownloadUrl = getPropertyValue(brandingProperties, "game-recommended-download-url");
         gameTitle = gameShortName + ": " + gameLongName;
+        // versioning, i.e version and release numbers
+        versioningPropertyFilePath = "/versioning.properties";
+        versioningProperties = new Properties();
+        try (InputStream stream = Ardor3DGameServiceProvider.class.getResourceAsStream(versioningPropertyFilePath)) {
+            versioningProperties.load(stream);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Failed in loading the property file " + versioningPropertyFilePath, ioe);
+        }
+        gameVersion = getPropertyValue(versioningProperties, "game-version");
+        gameRelease = getPropertyValue(versioningProperties, "game-release");
         // scene stuff
         timer = new Timer();
         root = new Node("root node of the game");
@@ -397,8 +419,8 @@ public final class Ardor3DGameServiceProvider implements Scene {
         final TriggerAction toggleScreenModeAction = new ToggleScreenModeAction();
         scenegraphStateMachine = new ScenegraphStateMachine(root, canvas, physicalLayer, mouseManager,
                 toggleScreenModeAction, launchRunnable, uninstallRunnable, gameShortName, gameLongName,
-                gameIntroductionSubtitle, gameRecommendedDownloadUrl, readmeContent, null, null, 0,
-                localizedMessageProvider, settingsProvider);
+                gameIntroductionSubtitle, gameRecommendedDownloadUrl, gameVersion, gameRelease, readmeContent, 
+                null, null, 0, localizedMessageProvider, settingsProvider);
     }
 
     private final void updateLogicalLayer(final ReadOnlyTimer timer) {
@@ -428,10 +450,10 @@ public final class Ardor3DGameServiceProvider implements Scene {
         return (null);
     }
 
-    private final String getPropertyValue(final String propertyKey) {
+    private final String getPropertyValue(final Properties properties, final String propertyKey) {
         if (propertyKey == null)
             throw new IllegalArgumentException("Cannot find a property whose key is null");
-        final String propertyValue = brandingProperties.getProperty(propertyKey);
+        final String propertyValue = properties.getProperty(propertyKey);
         if (propertyValue == null)
             throw new RuntimeException("Property " + propertyKey + " not found");
         return (propertyValue);

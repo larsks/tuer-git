@@ -88,6 +88,10 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
      * @param gameIntroductionSubtitle
      * @param gameRecommendedDownloadUrl
      *            recommended URL to download the game
+     * @param gameVersion
+     *            game version
+     * @param gameRelease
+     *            game release
      * @param readmeContent
      * @param defaultActionMap
      * @param defaultMouseAndKeyboardSettings
@@ -101,7 +105,8 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
     public ScenegraphStateMachine(final Node parent, final NativeCanvas canvas, final PhysicalLayer physicalLayer,
             final MouseManager mouseManager, final TriggerAction toggleScreenModeAction, final Runnable launchRunnable,
             final Runnable uninstallRunnable, final String gameShortName, final String gameLongName,
-            final String gameIntroductionSubtitle, final String gameRecommendedDownloadUrl, final String readmeContent,
+            final String gameIntroductionSubtitle, final String gameRecommendedDownloadUrl, 
+            final String gameVersion, final String gameRelease, final String readmeContent,
             final ActionMap defaultActionMap, final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
             final int firstUnlockedLevelIndex, final LocalizedMessageProvider localizedMessageProvider,
             final SettingsProvider settingsProvider) {
@@ -284,7 +289,7 @@ public class ScenegraphStateMachine extends StateMachineWithScheduler<Scenegraph
                 gameShortName, gameIntroductionSubtitle);
         final MainMenuState mainMenuState = new MainMenuState(canvas, physicalLayer, mouseManager,
                 mainMenuToExitGameTriggerAction, mainMenuToLoadingDisplayTriggerAction, soundManager, launchRunnable,
-                uninstallRunnable, gameLongName, gameRecommendedDownloadUrl, readmeContent, fontStore,
+                uninstallRunnable, gameLongName, gameRecommendedDownloadUrl, gameVersion, gameRelease, readmeContent, fontStore,
                 toggleScreenModeAction, this.defaultActionMap, this.customActionMap,
                 this.defaultMouseAndKeyboardSettings, this.customMouseAndKeyboardSettings, this.profileData,
                 localizedMessageProvider, settingsProvider);
