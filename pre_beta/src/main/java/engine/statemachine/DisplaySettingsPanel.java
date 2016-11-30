@@ -72,8 +72,18 @@ public class DisplaySettingsPanel extends UIPanel {
 
     private final HashMap<Integer, List<MonitorMode>> screenModesByRotation;
 
+    /**
+     * 
+     * @param mainMenuState
+     * @param toggleScreenModeAction
+     * @param localizedMessageProvider
+     * @param settingsProvider
+     * @param gameVersion
+     * @param gameRelease
+     */
     public DisplaySettingsPanel(final MainMenuState mainMenuState, final TriggerAction toggleScreenModeAction,
-            final LocalizedMessageProvider localizedMessageProvider, final SettingsProvider settingsProvider) {
+            final LocalizedMessageProvider localizedMessageProvider, final SettingsProvider settingsProvider,
+            final String gameVersion, final String gameRelease) {
         super();
         this.mainMenuState = mainMenuState;
         this.toggleScreenModeAction = toggleScreenModeAction;
@@ -190,21 +200,9 @@ public class DisplaySettingsPanel extends UIPanel {
         // checks whether Microsoft’s generic software emulation driver (OpenGL
         // emulation through Direct3D) is installed
         if (caps.getDisplayVendor().equalsIgnoreCase("Microsoft Corporation")
-                && caps.getDisplayRenderer().equalsIgnoreCase("GDI Generic")) {// recommends
-                                                                               // to
-                                                                               // the
-                                                                               // end
-                                                                               // user
-                                                                               // to
-                                                                               // install
-                                                                               // a
-                                                                               // proper
-                                                                               // OpenGL
-                                                                               // driver
-                                                                               // instead
-                                                                               // of
-                                                                               // this
-                                                                               // crap
+                && caps.getDisplayRenderer().equalsIgnoreCase("GDI Generic")) {
+            // recommends to the end user to install a proper OpenGL driver
+            // instead of this crap
             final String warning = "The game might crash or run very slowly with your broken OpenGL driver. To resolve this problem, please download and install the latest version of your graphical card's driver from the your graphical card manufacturer (Nvidia, ATI, Intel).";
             crappyDriverWarningLabel.setText(warning);
             crappyDriverWarningLabel.setForegroundColor(ColorRGBA.RED);
@@ -226,6 +224,11 @@ public class DisplaySettingsPanel extends UIPanel {
         openglGraphicalCardDriverInfoPanel.add(versionLabel);
         openglGraphicalCardDriverInfoPanel.add(crappyDriverWarningLabel);
         openglGraphicalCardDriverInfoPanel.add(joglVersionLabel);
+        final UIPanel gameVersioningInfoPanel = new UIPanel(new RowLayout(false));
+        final UILabel gameVersionLabel = new UILabel(localizedMessageProvider.getString("GAME_VERSION") + ": " + gameVersion);
+        final UILabel gameReleaseLabel = new UILabel(localizedMessageProvider.getString("GAME_RELEASE") + ": " + gameRelease);
+        gameVersioningInfoPanel.add(gameVersionLabel);
+        gameVersioningInfoPanel.add(gameReleaseLabel);
         add(windowingModeButton);
         add(vSyncPanel);
         add(screenModesLabel);
@@ -233,6 +236,7 @@ public class DisplaySettingsPanel extends UIPanel {
         if (rotationsPanel != null)
             add(rotationsPanel);
         add(openglGraphicalCardDriverInfoPanel);
+        add(gameVersioningInfoPanel);
         add(backButton);
     }
 

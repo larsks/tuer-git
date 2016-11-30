@@ -140,6 +140,10 @@ public final class MainMenuState extends ScenegraphState {
      *            full name of the game
      * @param gameRecommendedDownloadUrl
      *            recommended URL to download the game
+     * @param gameVersion
+     *            game version
+     * @param gameRelease
+     *            game release
      * @param readmeContent
      *            "read me" content (may be null)
      * @param fontStore
@@ -168,7 +172,8 @@ public final class MainMenuState extends ScenegraphState {
             final TransitionTriggerAction<ScenegraphState, String> toExitGameTriggerAction,
             final TransitionTriggerAction<ScenegraphState, String> toLoadingDisplayAction,
             final SoundManager soundManager, final Runnable launchRunnable, final Runnable uninstallRunnable,
-            final String gameLongName, final String gameRecommendedDownloadUrl, final String readmeContent,
+            final String gameLongName, final String gameRecommendedDownloadUrl, 
+            final String gameVersion, final String gameRelease, final String readmeContent,
             final FontStore fontStore, final TriggerAction toggleScreenModeAction, final ActionMap defaultActionMap,
             final ActionMap customActionMap, final MouseAndKeyboardSettings defaultMouseAndKeyboardSettings,
             final MouseAndKeyboardSettings customMouseAndKeyboardSettings, final ProfileData profileData,
@@ -199,7 +204,7 @@ public final class MainMenuState extends ScenegraphState {
         else
             readmePanel = null;
         displaySettingsMenuPanel = new DisplaySettingsPanel(this, toggleScreenModeAction, localizedMessageProvider,
-                settingsProvider);
+                settingsProvider, gameVersion, gameRelease);
         languageMenuPanel = createLanguageMenuPanel();
         soundSettingsMenuPanel = createSoundSettingsMenuPanel(soundManager);
         desktopShortcutsMenuPanel = createDesktopShortcutsMenuPanel();
