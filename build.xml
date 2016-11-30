@@ -36,8 +36,17 @@
 			<fail message="The branding property file is missing" />
 		</else>
 	</if>
+	<if>
+		<available file="versioning.properties" />
+		<then>
+			<property file="versioning.properties" />
+		</then>
+		<else>
+			<fail message="The versioning property file is missing" />
+		</else>
+	</if>
 	<!-- Properties -->
-	<property name="bindir" value="target/classes"/>
+	<property name="bindir" value="target/classes" />
 	<property name="testbindir" value="target/test-classes"/>
 	<!-- directory containing signed JARs and images that are used in the deployed product -->
 	<property name="destdir" value="target"/>
@@ -97,8 +106,6 @@
 			<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
 		</else>
 	</if>
-	<property name="game-version" value="0.0.0" />
-	<property name="game-release" value="0" />
 	<property name="game-group" value="Applications/Games" />
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
@@ -304,8 +311,6 @@
 			<attribute name="Trusted-Library" value="false"/>
 			<attribute name="Permissions" value="all-permissions"/>
 			<attribute name="Codebase" value="${codebase-url}"/>
-			<attribute name="Game-Version" value="${game-version}"/>
-			<attribute name="Game-Release" value="${game-release}"/>
 		</manifest>
 		<!-- the game only uses the models in Ardor3D binary format and it does not need the classes of the editor -->
 		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" excludes="common/,dae/,engine/service/EngineServiceProvider*.class,jfpsm/,md2/,obj/,osm/" compress="false">
