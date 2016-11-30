@@ -304,6 +304,8 @@
 			<attribute name="Trusted-Library" value="false"/>
 			<attribute name="Permissions" value="all-permissions"/>
 			<attribute name="Codebase" value="${codebase-url}"/>
+			<attribute name="Game-Version" value="${game-version}"/>
+			<attribute name="Game-Release" value="${game-release}"/>
 		</manifest>
 		<!-- the game only uses the models in Ardor3D binary format and it does not need the classes of the editor -->
 		<jar destfile="${destdir}/${game-jar-filename}" manifest="${destdir}/META-INF/MANIFEST.MF" basedir="${bindir}" excludes="common/,dae/,engine/service/EngineServiceProvider*.class,jfpsm/,md2/,obj/,osm/" compress="false">
