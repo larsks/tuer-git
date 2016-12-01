@@ -38,6 +38,7 @@ Summary:
         <ul>
             <li><a href="#introduction">Introduction</a></li>
             <li><a href="#sourcecode">Source code</a></li>
+            <li><a href="#setup">Setup</a></li>
             <li><a href="#manualoftheanttasks">Manual of the Ant tasks</a>
                 <ul>
                     <li><a href="#create-app-dir">create-app-dir</a></li>
@@ -169,7 +170,15 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <p>JNDT is used to build the self-contained native application bundles of the project. It turns a fat JAR into some bundles easy to deploy and to install. It builds both some convenient native installers with a full desktop integration and some archives as fallbacks.</p>
 <p>It's a cross-platform packager, i.e it's able both to run under several operating systems and to generate native bundles for an operating system different from the one it's being executed.</p>
 <h2><a name="sourcecode" href="./#sourcecode">Source code</a></h2>
-<p>The source code of JNDT is in a single Ant build file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/jndt.xml">here</a>. Its dependencies are in the directory "lib/ant", you must edit the value of the Ant property "jndtlibdir" if you move them. <a href="http://nsis.sourceforge.net">Nullsoft Scriptable Install System (NSIS)</a>, available in numerous GNU Linux distributions, under Microsoft Windows and under Mac OS X, must be installed separately to generate an installer for Microsoft Windows.</p>
+<p>The source code of JNDT is in a single Ant library file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/src/main/xml/jndt/antlib.xml">here</a>.</p>
+<h2><a name="setup" href="./#setup">Setup</a></h2>
+<p>The dependencies of JNDT are <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/lib/ant/">here</a>, you must copy them into a directory and set the value of the Ant property "jndtlibdir" to this path ("lib/ant" in the example below):</p>
+<pre>&lt;property name="jndt-version" value="0.0.0"/&gt;
+&lt;property name="jndt-release" value="0"/&gt;
+&lt;property name="jndt-jar-filename" value="jndt-${jndt-version}-${jndt-release}.jar"/&gt;
+&lt;property name="jndtlibdir" value="lib/ant"/&gt;
+&lt;taskdef resource="jndt/antlib.xml" classpath="${jndtlibdir}/${jndt-jar-filename}"/&gt;</pre>
+<p><a href="http://nsis.sourceforge.net">Nullsoft Scriptable Install System (NSIS)</a>, available in numerous GNU Linux distributions, under Microsoft Windows and under Mac OS X, must be installed separately to generate an installer for Microsoft Windows.</p>
 <h2><a name="manualoftheanttasks" href="./#manualoftheanttasks">Manual of the Ant tasks</a></h2>
 <p>JNDT is composed of the 4 Ant tasks below:</p>
 <h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
