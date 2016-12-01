@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2006-2015 Julien Gouesse
+    Copyright (c) 2006-2016 Julien Gouesse
  
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -24,8 +24,14 @@
 <!-- ===================================================================== -->
 
 <project name="First person shooter and editor" default="build" basedir=".">
-	<import file="jndt.xml"/>
+	<!-- Ant-Contrib tasks -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant/ant-contrib-1.0b3.jar"/>
+	<!-- JNDT Ant tasks -->
+	<property name="jndt-version" value="0.0.0" />
+	<property name="jndt-release" value="0" />
+	<property name="jndt-jar-filename" value="jndt-${jndt-version}-${jndt-release}.jar" />
+	<property name="jndtlibdir" value="lib/ant" />
+	<taskdef resource="jndt/antlib.xml" classpath="${jndtlibdir}/${jndt-jar-filename}" />
 	<!-- Branding properties (brands, logos, ... which should be modified in order to avoid any trademark infringement) -->
 	<if>
 		<available file="branding.properties" />
@@ -228,6 +234,24 @@
 	<!-- Build                                                               -->
 	<!-- =================================================================== -->
 	<target name="build" depends="clean,compile,dist" description="Performs a clean build of the source code and deploys the application"/>
+	<!-- =================================================================== -->
+	<!-- Build JNDT                                                          -->
+	<!-- =================================================================== -->
+	<target name="build-jndt" description="Performs a clean build of Java Native Deployment Toolkit">
+		<if>
+			<available file="${jndtlibdir}/${jndt-jar-filename}" />
+			<then>
+				<delete file="${jndtlibdir}/${jndt-jar-filename}" failonerror="true" />
+			</then>
+		</if>
+		<jar destfile="${jndtlibdir}/${jndt-jar-filename}" duplicate="fail">
+			<manifest>
+				<attribute name="Implementation-Title" value="JNDT Ant Tasks" />
+				<attribute name="Implementation-Version" value="0.0.0-0" />
+			</manifest>
+			<zipfileset file="src/main/xml/jndt/antlib.xml" prefix="jndt" />
+		</jar>
+	</target>
 	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
@@ -249,7 +273,7 @@
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
-		<antcall target="upload" />
+		<!--<antcall target="upload" />-->
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create JARs                                                       -->
