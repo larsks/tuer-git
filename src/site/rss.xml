@@ -1,37 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
+    <atom:link href="http://tuer.sourceforge.net/rss.xml" rel="self" type="application/rss+xml" />
     <title>TUER RSS Feed</title>
     <link>http://tuer.sourceforge.net</link>
     <pubDate>Wed, 17 Sep 2008 10:25:00 GMT</pubDate>
     <language>en-us</language>
-    <webMaster>gouessej@orange.fr</webMaster>
+    <webMaster>gouessej@orange.fr (Julien Gouesse)</webMaster>
     <description>TUER: Truly Unusual Experience of Revolution, pre-beta version, single player first person shooter created by Julien Gouesse</description>
     <item>
        <title>TUER now uses JOGL 2.0 and JOAL</title>
        <link>http://tuer.sourceforge.net</link>
        <pubDate>Thu, 8 Dec 2011 12:02:00 GMT</pubDate>
        <description>TUER now uses JOGL 2.0 and JOAL in order to provide a better support of the full screen mode under GNU/Linux and a better sound support with OpenJDK.</description>
+    </item>
+    <item>
        <title>The mouse cursor is correctly hidden under Mac OS X 10.6 in the pre-beta version</title>
        <link>http://tuer.sourceforge.net</link>
-       <pubDate>Wed, 18 Jan 2012 1:48:00 GMT</pubDate>
+       <pubDate>Wed, 18 Jan 2012 01:48:00 GMT</pubDate>
        <description>A bug of NEWT (JOGL 2.0) reproducible only on Mac OS X prevented the mouse cursor from being hidden. It has been fixed and the pre-beta version of TUER has been updated.</description>
+    </item>
+    <item>
        <title>The pre-beta version of TUER has just been updated</title>
        <link>http://tuer.sourceforge.net</link>
-       <pubDate>Sat, 03 Oct 2015 0:00:00 GMT</pubDate>
+       <pubDate>Sat, 03 Oct 2015 00:00:00 GMT</pubDate>
        <description>This updated version should no longer crash under Windows 10. The directory layout of the source code has been updated to allow the developers to find more easily the source code and the resources of the project.</description>
+    </item>
+    <item>
        <title>The pre-beta version of TUER has just been updated</title>
        <link>http://tuer.sourceforge.net</link>
-       <pubDate>Sat, 24 Oct 2015 1:43:00 GMT</pubDate>
+       <pubDate>Sat, 24 Oct 2015 01:43:00 GMT</pubDate>
        <description>This updated version has been translated into French and German and a minor regression preventing from retrying a mission has been fixed.</description>
+    </item>
+    <item>   
        <title>Truly Unusual Experience of Revolution®! Already 9 years!</title>
-       <link>gouessej.wordpress.com/2015/10/25/truly-unusual-experience-of-revolution-9-ans-deja-truly-unusual-experience-of-revolution-already-9-years/</link>
+       <link>http://gouessej.wordpress.com/2015/10/25/truly-unusual-experience-of-revolution-9-ans-deja-truly-unusual-experience-of-revolution-already-9-years/</link>
        <pubDate>Sun, 25 Oct 2015 17:42:00 GMT</pubDate>
        <description>This article explains the progress of the project Truly Unusual Experience of Revolution® since October 2014</description>
+    </item>
+    <item>
        <title>The pre-beta version of TUER has just been updated</title>
        <link>http://tuer.sourceforge.net</link>
-       <pubDate>Sat, 07 Oct 2015 1:00:00 GMT</pubDate>
+       <pubDate>Wed, 07 Oct 2015 01:00:00 GMT</pubDate>
        <description>This updated version should no longer crash under Windows and the packages for GNU Linux are valid anew.</description>
+    </item>
+    <item>
        <title>JNDT has just been updated</title>
        <link>http://tuer.sourceforge.net</link>
        <pubDate>Mon, 30 Nov 2015 23:15:00 GMT</pubDate>
