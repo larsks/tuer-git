@@ -20,7 +20,7 @@
 
 <!-- ===================================================================== -->
 <!-- First person shooter and editor                                       -->
-<!-- Ant 1.8 build file                                                    -->
+<!-- Ant 1.9 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="First person shooter and editor" default="build" basedir=".">
@@ -67,51 +67,11 @@
 	<property name="email" value="gouessej@orange.fr" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<if>
-		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip" />
-		<then>
-			<property name="openjdk-macosx-universal-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
-		</then>
-		<else>
-			<property name="openjdk-macosx-universal-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-macosx-x86_64-image.zip"/>
-		</else>
-	</if>
-	<if>
-		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip" />
-		<then>
-			<property name="openjdk-linux-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
-		</then>
-		<else>
-			<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>
-		</else>
-	</if>
-	<if>
-		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip" />
-		<then>
-			<property name="openjdk-linux-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
-		</then>
-		<else>
-			<property name="openjdk-linux-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-amd64-image.zip"/>
-		</else>
-	</if>
-	<if>
-		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip" />
-		<then>
-			<property name="openjdk-windows-i586-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-		</then>
-		<else>
-			<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>
-		</else>
-	</if>
-	<if>
-		<available file="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip" />
-		<then>
-			<property name="openjdk-windows-amd64-build-url" value="/home/gouessej/Téléchargements/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
-		</then>
-		<else>
-			<property name="openjdk-windows-amd64-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-amd64-image.zip"/>
-		</else>
-	</if>
+	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Mac_jdk8u144-b01.tar.gz"/>
+	<!--<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>-->
+	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Linux_jdk8u144-b01.tar.gz"/>
+	<!--<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>-->
+	<property name="openjdk-windows-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Win_jdk8u144-b01.zip"/>
 	<property name="game-group" value="Applications/Games" />
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
@@ -158,18 +118,17 @@
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
-		<fail message="Please build using Ant 1.8.4 or higher.">
+		<fail message="Please build using Ant 1.9.6 or higher.">
 			<condition>
 				<not>
-					<antversion atleast="1.8.4"/>
+					<antversion atleast="1.9.6"/>
 				</not>
 			</condition>
 		</fail>
-		<fail message="Please use Java SDK 1.7 or higher.">
+		<fail message="Please use Java SDK 1.8 or higher.">
 			<condition>
 				<not>
 					<or>
-						<equals arg1="${ant.java.version}" arg2="1.7"/>
 						<equals arg1="${ant.java.version}" arg2="1.8"/>
 						<equals arg1="${ant.java.version}" arg2="1.9"/>
 					</or>
@@ -216,13 +175,13 @@
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
-	           debug="on" source="1.7" target="1.7">
+	           debug="on" source="1.8" target="1.8">
 			<classpath refid="project.class.path"/>
 			<include name="**/*.java"/>
 		</javac>
 		<javac includeantruntime="false" srcdir="${testsrcdir}"              
 		       destdir="${testbindir}"
-		       debug="on" source="1.7" target="1.7">
+		       debug="on" source="1.8" target="1.8">
 			<classpath>
 				<path refid="project.class.path"/>
 				<fileset dir="${bindir}"/>
@@ -273,7 +232,7 @@
 		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 		<antcall target="create-archive" />
 		<!-- Sends all stuffs to the server(s) -->
-		<!--<antcall target="upload" />-->
+		<antcall target="upload" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create JARs                                                       -->
@@ -400,13 +359,13 @@
 	<!-- ================================================================= -->
 	<target name="create-linux-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		<!--<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    packageshscriptenabled="true" packageexecutabledir="/usr/bin" arch="i386" version="${game-version}" release="${game-release}"
 			categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
 			summary="${game-short-description}" description="${game-long-description}" group="${game-group}" section="${game-section}" 
-			host="${codebase-url}" url="${homepage-url}" email="${email}"/>
+			host="${codebase-url}" url="${homepage-url}" email="${email}"/>-->
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
@@ -420,10 +379,10 @@
 	<!-- ================================================================= -->
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
-		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
+		<!--<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
-		    arch="i386" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
+		    arch="i386" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>-->
 		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
