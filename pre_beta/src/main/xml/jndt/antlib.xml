@@ -19,7 +19,7 @@
  -->
 <!-- ===================================================================== -->
 <!-- JNDT: Java Native Deployment Toolkit                                  -->
-<!-- Ant 1.8 build file                                                    -->
+<!-- Ant 1.9 build file                                                    -->
 <!-- ===================================================================== -->
 
 <antlib>
@@ -64,6 +64,7 @@
         <attribute name="property" description="The name of the property to set that will contain the very last extension (output)" />
         <attribute name="input" description="The input string to be used as an extension if possible" />
         <sequential>
+            <local name="basename"/>
             <basename file="@{input}" property="basename"/>
             <propertyregex property="@{property}" input="${basename}" regexp="(.*)\.(.*)" select="\2" override="true" />
         </sequential>
@@ -149,7 +150,7 @@
         <attribute name="appname" default="" description="application name, mandatory to build the package name if linuxpackageshscriptenabled is set to true"/>
         <attribute name="outdir" description="output directory"/>
         <attribute name="vmargs" default=";" description="list of arguments for the JVM, separated by ';', e.g. -Xmx1G"/>
-        <attribute name="jdk" description="ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
+        <attribute name="jdk" description="TAR.GZ or ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system"/>
         <attribute name="resources" default=";" description="list of files and directories to be packaged next to the script, separated by ';'."/>
         <attribute name="bundleidentifier" default="com.yourcompany.identifier" description="bundle identifier similar to a Java package name"/>
         <attribute name="iconsfile" default="" description="icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)"/>
@@ -523,26 +524,47 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
             <!-- ensures that the native launcher or the script is executable -->
             <chmod file="${contentstarget}/${exedstfilename}" perm="755" />
             <!-- handles the packaged JRE (extracts it from the JDK) if any -->
+            <local name="jdkextension"/>
             <if>
                 <not>
                     <equals arg1="@{jdk}" arg2="" />
                 </not>
                 <then>
+                    <to-extension input="@{jdk}" property="jdkextension" />
                     <if>
                         <available file="@{jdk}" />
                         <then>
                             <var name="jdkFile" value="@{jdk}" />
                         </then>
                         <else>
-                            <get src="@{jdk}" dest="${contentstarget}/jdk.zip" verbose="true" usetimestamp="true" skipexisting="false" />
-                            <var name="jdkFile" value="${contentstarget}/jdk.zip" />
+                            <get src="@{jdk}" dest="${contentstarget}/jdk.${jdkextension}" verbose="true" usetimestamp="true" skipexisting="false" />
+                            <var name="jdkFile" value="${contentstarget}/jdk.${jdkextension}" />
                         </else>
                     </if>
                 </then>
+                <else>
+                    <property name="jdkextension" value="" />
+                </else>
             </if>
             <mkdir dir="${contentstarget}/tmp" />
-            <!-- the file permissions are lost when unzipping the archive -->
-            <unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
+            <!-- the file permissions are lost when uncompressing the archive -->
+            <if>
+                <equals arg1="${jdkextension}" arg2="zip" />
+                <then>
+                    <unzip src="${jdkFile}" dest="${contentstarget}/tmp" />
+                </then>
+                <else>
+                    <if>
+                        <equals arg1="${jdkextension}" arg2="gz" />
+                        <then>
+                            <untar src="${jdkFile}" dest="${contentstarget}/tmp" compression="gzip" />
+                        </then>
+                        <else>
+                            <fail message="Unsupported file extension ${jdkextension}, ${jdkFile} cannot be uncompressed" />
+                        </else>
+                    </if>
+                </else>
+            </if>
             <mkdir dir="${contentstarget}/jre" />
             <!-- finds the JRE (less robust than the original implementation) and copies it into the directory -->
             <for param="dir">
