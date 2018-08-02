@@ -67,11 +67,11 @@
 	<property name="email" value="gouessej@orange.fr" />
 	<property name="alias" value="gouessej"/>
 	<property name="keystore" value="${destdir}/key"/>
-	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Mac_jdk8u144-b01.tar.gz"/>
-	<!--<property name="openjdk-linux-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-linux-i586-image.zip"/>-->
-	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Linux_jdk8u144-b01.tar.gz"/>
-	<!--<property name="openjdk-windows-i586-build-url" value="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u60-unofficial-windows-i586-image.zip"/>-->
-	<property name="openjdk-windows-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u144-b01/OpenJDK8_x64_Win_jdk8u144-b01.zip"/>
+	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Mac_jdk8u172-b11.tar.gz"/>
+	<!--<property name="openjdk-linux-i586-build-url" value=""/>-->
+	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Linux_jdk8u172-b11.tar.gz"/>
+	<!--<property name="openjdk-windows-i586-build-url" value=""/>-->
+	<property name="openjdk-windows-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Win_jdk8u172-b11.zip"/>
 	<property name="game-group" value="Applications/Games" />
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
@@ -324,18 +324,18 @@
 		<!-- gets the storepass -->
 		<input message="Please enter the store pass:" addproperty="storepass"/>
 		<!-- creates the keystore -->
-		<genkey alias="${alias}" storepass="${storepass}" keystore="${keystore}">
+		<genkey alias="${alias}" storetype="pkcs12" storepass="${storepass}" keystore="${keystore}">
 			<dname>
 				<param name="CN" value="${vendor}"/>
 				<param name="OU" value="Engineer"/>
-				<param name="O"  value="FGF"/>
+				<param name="O"  value="None"/>
 				<param name="C"  value="FR"/>
 				<param name="L"  value="BAGNOLET"/>
 				<param name="S"  value="FRANCE"/>
 			</dname>
 		</genkey>
 		<!-- uses this keystore to sign the JARs -->
-		<signjar alias="${alias}" keystore="${keystore}" storepass="${storepass}" lazy="false" destDir="${destdir}">
+		<signjar alias="${alias}" keystore="${keystore}" storetype="pkcs12" storepass="${storepass}" lazy="false" destDir="${destdir}">
 			<path>
 				<pathelement location="${destdir}/${game-jar-filename}"/>
 				<pathelement location="${destdir}/${editor-jar-filename}"/>
