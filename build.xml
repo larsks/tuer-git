@@ -118,10 +118,10 @@
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
-		<fail message="Please build using Ant 1.9.6 or higher.">
+		<fail message="Please build using Ant 1.10.5 or higher.">
 			<condition>
 				<not>
-					<antversion atleast="1.9.6"/>
+					<antversion atleast="1.10.5"/>
 				</not>
 			</condition>
 		</fail>
@@ -130,7 +130,9 @@
 				<not>
 					<or>
 						<equals arg1="${ant.java.version}" arg2="1.8"/>
-						<equals arg1="${ant.java.version}" arg2="1.9"/>
+						<equals arg1="${ant.java.version}" arg2="9"/>
+						<equals arg1="${ant.java.version}" arg2="10"/>
+						<equals arg1="${ant.java.version}" arg2="11"/>
 					</or>
 				</not>
 			</condition>
