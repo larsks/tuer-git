@@ -125,7 +125,7 @@
 				</not>
 			</condition>
 		</fail>
-		<fail message="Please use Java SDK 1.8 or higher.">
+		<fail message="Please use JDK 1.8 or higher.">
 			<condition>
 				<not>
 					<or>
