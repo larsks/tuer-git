@@ -20,7 +20,7 @@
 
 <!-- ===================================================================== -->
 <!-- First person shooter and editor                                       -->
-<!-- Ant 1.9 build file                                                    -->
+<!-- Ant 1.10 build file                                                    -->
 <!-- ===================================================================== -->
 
 <project name="First person shooter and editor" default="build" basedir=".">
