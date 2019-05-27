@@ -64,6 +64,8 @@ public class GameOverState extends ScenegraphState {
     private final TransitionTriggerAction<ScenegraphState, String> toUnloadingDisplayTriggerActionForLoadingDisplay;
 
     private final UIFrame mainFrame;
+    
+    private final UIHud hud;
 
     private final UIPanel initialMenuPanel;
 
@@ -102,7 +104,7 @@ public class GameOverState extends ScenegraphState {
         // creates the main frame
         mainFrame = createMainFrame();
         // creates the head-up display
-        final UIHud hud = createHud();
+        hud = createHud();
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         // adds some text
@@ -211,8 +213,8 @@ public class GameOverState extends ScenegraphState {
     }
 
     private final UIHud createHud() {
-        final UIHud hud = new UIHud();
-        hud.setupInput(canvas, physicalLayer, getLogicalLayer());
+        final UIHud hud = new UIHud(canvas);
+        hud.setupInput(physicalLayer, getLogicalLayer());
         getRoot().addController(new SpatialController<Node>() {
             @Override
             public final void update(final double time, final Node caller) {
@@ -311,6 +313,6 @@ public class GameOverState extends ScenegraphState {
         mainFrame.updateMinimumSizeFromContents();
         mainFrame.layout();
         mainFrame.pack();
-        mainFrame.setLocationRelativeTo(canvas.getCanvasRenderer().getCamera());
+        mainFrame.centerOn(hud);
     }
 }

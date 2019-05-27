@@ -18,6 +18,7 @@
 package engine.input;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.input.Key;
 import com.ardor3d.input.KeyboardState;
@@ -31,8 +32,6 @@ import com.ardor3d.math.Matrix3;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.Camera;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import engine.input.ActionMap.KeyInput;
 
 /**
@@ -248,9 +247,9 @@ public final class ExtendedFirstPersonControl {
     public void setupMouseTriggers(final LogicalLayer layer, final boolean dragOnly,
             final Predicate<TwoInputStates> keysHeld) {
         // Mouse look
-        final Predicate<TwoInputStates> someMouseDown = Predicates.or(TriggerConditions.leftButtonDown(),
-                Predicates.or(TriggerConditions.rightButtonDown(), TriggerConditions.middleButtonDown()));
-        final Predicate<TwoInputStates> dragged = Predicates.and(TriggerConditions.mouseMoved(), someMouseDown);
+        final Predicate<TwoInputStates> someMouseDown = TriggerConditions.leftButtonDown().or(
+                TriggerConditions.rightButtonDown().or(TriggerConditions.middleButtonDown()));
+        final Predicate<TwoInputStates> dragged = TriggerConditions.mouseMoved().and(someMouseDown);
         final TriggerAction dragAction = new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputStates, final double tpf) {
@@ -286,7 +285,7 @@ public final class ExtendedFirstPersonControl {
         }
 
         @Override
-        public boolean apply(final TwoInputStates states) {
+        public boolean test(final TwoInputStates states) {
             boolean result = false;
             if (states.getCurrent() != null) {
                 for (KeyInput input : inputs) {

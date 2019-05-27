@@ -17,13 +17,13 @@
  */
 package engine.input;
 
+import java.util.function.Predicate;
 import com.ardor3d.input.InputState;
 import com.ardor3d.input.logical.TwoInputStates;
-import com.google.common.base.Predicate;
 
 public class MouseWheelMovedUpCondition implements Predicate<TwoInputStates> {
     @Override
-    public boolean apply(final TwoInputStates states) {
+    public boolean test(final TwoInputStates states) {
         final InputState currentState = states.getCurrent();
         final InputState previousState = states.getPrevious();
 

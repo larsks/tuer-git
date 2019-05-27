@@ -57,7 +57,7 @@ public class FontStore {
         }
         try {
             fontsList.add(new BMFont(
-                    new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold-regular.fnt")),
+                    new URLResourceSource(ScenegraphStateMachine.class.getResource("/fonts/arial-16-bold.fnt")),
                     false));
         } catch (IOException ioe) {
             ioe.printStackTrace();

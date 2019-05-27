@@ -54,8 +54,7 @@ public final class InitializationState extends ScenegraphState {
             final TriggerAction toIntroAction, final SoundManager soundManager, final TaskManager taskManager,
             final LocalizedMessageProvider localizedMessageProvider) {
         super(soundManager);
-        taskNode = new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(), taskManager,
-                localizedMessageProvider);
+        taskNode = new TaskManagementProgressionNode(canvas, canvas.getCanvasRenderer().getCamera(), taskManager, localizedMessageProvider);
         cam = canvas.getCanvasRenderer().getCamera();
         box = new Box("Initialization Box", Vector3.ZERO, 5, 5, 5);
         box.setModelBound(new BoundingBox());

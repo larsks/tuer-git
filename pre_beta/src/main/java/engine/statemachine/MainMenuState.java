@@ -78,6 +78,8 @@ public final class MainMenuState extends ScenegraphState {
     private final MouseManager mouseManager;
 
     final UIFrame mainFrame;
+    
+    final UIHud hud;
 
     private final UIPanel initialMenuPanel;
 
@@ -219,7 +221,7 @@ public final class MainMenuState extends ScenegraphState {
         // creates the main frame
         mainFrame = createMainFrame();
         // creates the head-up display
-        final UIHud hud = createHud();
+        hud = createHud();
         hud.add(mainFrame);
         getRoot().attachChild(hud);
         // adds some text
@@ -957,8 +959,8 @@ public final class MainMenuState extends ScenegraphState {
     }
 
     private final UIHud createHud() {
-        final UIHud hud = new UIHud();
-        hud.setupInput(canvas, physicalLayer, getLogicalLayer());
+        final UIHud hud = new UIHud(canvas);
+        hud.setupInput(physicalLayer, getLogicalLayer());
         getRoot().addController(new SpatialController<Node>() {
             @Override
             public final void update(final double time, final Node caller) {
@@ -983,6 +985,6 @@ public final class MainMenuState extends ScenegraphState {
         mainFrame.updateMinimumSizeFromContents();
         mainFrame.layout();
         mainFrame.pack();
-        mainFrame.setLocationRelativeTo(canvas.getCanvasRenderer().getCamera());
+        mainFrame.centerOn(hud);
     }
 }
