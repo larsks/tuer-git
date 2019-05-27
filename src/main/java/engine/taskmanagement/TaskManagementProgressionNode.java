@@ -23,6 +23,7 @@ import com.ardor3d.extension.ui.UILabel;
 import com.ardor3d.extension.ui.UIPanel;
 import com.ardor3d.extension.ui.UIProgressBar;
 import com.ardor3d.extension.ui.layout.RowLayout;
+import com.ardor3d.framework.NativeCanvas;
 import com.ardor3d.math.Rectangle2;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.scenegraph.Node;
@@ -43,8 +44,7 @@ public final class TaskManagementProgressionNode extends Node {
 
     private final Rectangle2 bounds;
 
-    public TaskManagementProgressionNode(final Camera cam, final TaskManager taskManager,
-            final LocalizedMessageProvider localizedMessageProvider) {
+    public TaskManagementProgressionNode(final NativeCanvas canvas, final Camera cam, final TaskManager taskManager, final LocalizedMessageProvider localizedMessageProvider) {
         super("task progression node");
         bounds = new Rectangle2();
         this.taskManager = taskManager;
@@ -66,7 +66,7 @@ public final class TaskManagementProgressionNode extends Node {
         frame.setOpacity(1f);
         frame.setName("task progression frame");
         frame.getRelativeComponentBounds(bounds);
-        final UIHud hud = new UIHud();
+        final UIHud hud = new UIHud(canvas);
         hud.add(frame);
         attachChild(hud);
         addController(new SpatialController<Spatial>() {

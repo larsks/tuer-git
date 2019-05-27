@@ -20,6 +20,7 @@ package engine.statemachine;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.ardor3d.extension.ui.Orientation;
 import com.ardor3d.extension.ui.UIButton;
@@ -38,8 +39,6 @@ import com.ardor3d.input.logical.InputTrigger;
 import com.ardor3d.input.logical.MouseButtonClickedCondition;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.input.logical.TwoInputStates;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
 import engine.input.Action;
 import engine.input.ActionMap;
@@ -274,10 +273,9 @@ public final class ControlsPanel extends UIPanel {
                 addMouseButtonBinding(mouseButton);
             }
         };
-        final Predicate<TwoInputStates> anyMouseButtonClickedCondition = Predicates.or(
-                Predicates.or(new MouseButtonClickedCondition(MouseButton.LEFT),
-                        new MouseButtonClickedCondition(MouseButton.RIGHT)),
-                new MouseButtonClickedCondition(MouseButton.MIDDLE));
+        final Predicate<TwoInputStates> anyMouseButtonClickedCondition = 
+                new MouseButtonClickedCondition(MouseButton.LEFT).or(new MouseButtonClickedCondition(MouseButton.RIGHT)).or(
+                        new MouseButtonClickedCondition(MouseButton.MIDDLE));
         final InputTrigger changeMouseButtonBindingTrigger = new InputTrigger(anyMouseButtonClickedCondition,
                 changeMouseButtonControlAction);
         final TriggerAction changeMouseWheelControlAction = new TriggerAction() {
@@ -288,8 +286,7 @@ public final class ControlsPanel extends UIPanel {
                 addMouseWheelBinding(mouseWheelUpFlag);
             }
         };
-        final Predicate<TwoInputStates> mouseWheelUpOrDownCondition = Predicates.or(new MouseWheelMovedUpCondition(),
-                new MouseWheelMovedDownCondition());
+        final Predicate<TwoInputStates> mouseWheelUpOrDownCondition = new MouseWheelMovedUpCondition().or(new MouseWheelMovedDownCondition());
         final InputTrigger changeMouseWheelBindingTrigger = new InputTrigger(mouseWheelUpOrDownCondition,
                 changeMouseWheelControlAction);
         // registers the triggers of this panel in the logical layer

@@ -37,7 +37,6 @@ import com.ardor3d.framework.CanvasRenderer;
 import com.ardor3d.framework.jogl.JoglNewtWindow;
 import com.ardor3d.input.logical.TriggerAction;
 import com.ardor3d.math.ColorRGBA;
-import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.ContextCapabilities;
 import com.ardor3d.renderer.ContextManager;
 import com.ardor3d.renderer.RenderContext;
@@ -314,11 +313,8 @@ public class DisplaySettingsPanel extends UIPanel {
             public Void call() throws Exception {
                 if (canvasRenderer.getCamera().getWidth() == width
                         && canvasRenderer.getCamera().getHeight() == height) {
-                    final Camera cam = mainMenuState.canvas.getCanvasRenderer().getCamera();
-                    mainMenuState.mainFrame.setLocationRelativeTo(cam);
-                    if (recurse > 0) {// some operating systems (especially
-                                      // Microsoft Windows) may require several
-                                      // attempts...
+                    mainMenuState.mainFrame.centerOn(mainMenuState.hud);
+                    if (recurse > 0) {// some operating systems (especially Microsoft Windows) may require several attempts...
                         updateUiLocationOnCameraChange(width, height, recurse - 1);
                     }
                 } else

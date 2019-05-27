@@ -64,8 +64,7 @@ public class UnloadingDisplayState extends ScenegraphState {
         super(soundManager);
         this.taskManager = taskManager;
         this.gameStateCleanupRunnable = gameStateCleanupRunnable;
-        taskNode = new TaskManagementProgressionNode(canvas.getCanvasRenderer().getCamera(), taskManager,
-                localizedMessageProvider);
+        taskNode = new TaskManagementProgressionNode(canvas, canvas.getCanvasRenderer().getCamera(), taskManager, localizedMessageProvider);
         cam = canvas.getCanvasRenderer().getCamera();
         getRoot().attachChild(taskNode);
         texturesPaths = new String[] { "communism.png", "venimus_vidimus_vicimus.png" };

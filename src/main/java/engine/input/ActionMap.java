@@ -17,12 +17,13 @@
  */
 package engine.input;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Predicate;
+
 import com.ardor3d.input.Key;
 import com.ardor3d.input.MouseButton;
 import com.ardor3d.input.logical.KeyPressedCondition;
@@ -31,8 +32,6 @@ import com.ardor3d.input.logical.MouseButtonPressedCondition;
 import com.ardor3d.input.logical.MouseButtonReleasedCondition;
 import com.ardor3d.input.logical.TriggerConditions;
 import com.ardor3d.input.logical.TwoInputStates;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
 public class ActionMap implements Cloneable {
 
@@ -123,10 +122,16 @@ public class ActionMap implements Cloneable {
             if (inputs.size() == 1)
                 predicate = getCondition(inputs.iterator().next(), pressed);
             else {
-                final ArrayList<Predicate<TwoInputStates>> conditions = new ArrayList<>();
-                for (Input input : inputs)
-                    conditions.add(getCondition(input, pressed));
-                predicate = Predicates.or(conditions);
+                Predicate<TwoInputStates> tempPredicate = null;
+                for (Input input : inputs) {
+                    final Predicate<TwoInputStates> condition = getCondition(input, pressed);
+                    if (tempPredicate == null) {
+                        tempPredicate = condition;
+                    } else {
+                        tempPredicate = tempPredicate.or(condition);
+                    }
+                }
+                predicate = tempPredicate;
             }
         }
         return (predicate);
