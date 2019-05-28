@@ -111,7 +111,6 @@
 		<pathelement location="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar"/>
 		<pathelement location="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar"/>
 		<pathelement location="lib/fettle/fettle-0.7.0.jar"/>
-		<pathelement location="lib/google-collect/guava-18.0.jar"/>
 		<pathelement location="lib/jogamp/jogamp-fat.jar"/>
 		<pathelement location="lib/pss/CodecJOrbis.jar"/>
 		<pathelement location="lib/pss/LibraryJOAL.jar"/>
@@ -244,7 +243,7 @@
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/*.bin,**/*.defl" />
-			<!-- Ardor3D, Paul Lamb Sound Library, Fettle and Guava -->
+			<!-- Ardor3D, Paul Lamb Sound Library and Fettle -->
 			<zipfileset src="lib/ardor3d/ardor3d-collada-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
@@ -253,7 +252,6 @@
 			<zipfileset src="lib/ardor3d/ardor3d-savable-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
-			<zipfileset src="lib/google-collect/guava-18.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
@@ -302,7 +300,7 @@
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/.bin,**/*.defl" excludes="**/*awt/**/*.class,**/AWT*.class,**/JavaSound*.class" />
-			<!-- JogAmp's Ardor3D Continuation, Paul Lamb Sound Library, Fettle and Guava -->
+			<!-- JogAmp's Ardor3D Continuation, Paul Lamb Sound Library and Fettle -->
 			<zipfileset src="lib/ardor3d/ardor3d-core-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-extras-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-jogl-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
@@ -310,7 +308,6 @@
 			<zipfileset src="lib/ardor3d/ardor3d-savable-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/ardor3d/ardor3d-ui-${ardor3d-version}.jar" includes="**/*.a3d,**/*.class,**/*.bmp,**/*.png,**/*.jpg,**/*.tga,**/*.fnt" />
 			<zipfileset src="lib/fettle/fettle-0.7.0.jar" includes="**/*.class" />
-			<zipfileset src="lib/google-collect/guava-18.0.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/CodecJOrbis.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/LibraryJOAL.jar" includes="**/*.class" />
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
