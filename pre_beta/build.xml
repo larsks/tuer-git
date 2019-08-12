@@ -117,21 +117,21 @@
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
-		<fail message="Please build using Ant 1.10.5 or higher.">
+		<fail message="Please build using Ant 1.10.6 or higher.">
 			<condition>
 				<not>
-					<antversion atleast="1.10.5"/>
+					<antversion atleast="1.10.6"/>
 				</not>
 			</condition>
 		</fail>
-		<fail message="Please use JDK 1.8 or higher.">
+		<fail message="Please use JDK 11 or higher.">
 			<condition>
 				<not>
 					<or>
-						<equals arg1="${ant.java.version}" arg2="1.8"/>
-						<equals arg1="${ant.java.version}" arg2="9"/>
-						<equals arg1="${ant.java.version}" arg2="10"/>
 						<equals arg1="${ant.java.version}" arg2="11"/>
+						<equals arg1="${ant.java.version}" arg2="12"/>
+						<equals arg1="${ant.java.version}" arg2="13"/>
+						<equals arg1="${ant.java.version}" arg2="14"/>
 					</or>
 				</not>
 			</condition>
@@ -176,13 +176,13 @@
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
-	           debug="on" source="1.8" target="1.8">
+	           debug="on" release="8">
 			<classpath refid="project.class.path"/>
 			<include name="**/*.java"/>
 		</javac>
 		<javac includeantruntime="false" srcdir="${testsrcdir}"              
 		       destdir="${testbindir}"
-		       debug="on" source="1.8" target="1.8">
+		       debug="on" release="8">
 			<classpath>
 				<path refid="project.class.path"/>
 				<fileset dir="${bindir}"/>
