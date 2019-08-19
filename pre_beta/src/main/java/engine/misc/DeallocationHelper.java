@@ -82,50 +82,70 @@ public class DeallocationHelper {
 
         private Method directByteBufferCleanerMethod;
 
-        private Method cleanerCleanMethod;
+        private Method cleanerCleanOrRunMethod;
+        
+        private Object unsafeObject;
+        
+        private Method invokeCleanerMethod;
 
         public OracleSunOpenJdkDeallocator() {
             super();
             try {
-                final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
-                directByteBufferCleanerMethod = directByteBufferClass.getDeclaredMethod("cleaner");
-                /**
-                 * The return type is sun.misc.Cleaner in Java <= 1.8,
-                 * jdk.internal.ref.Cleaner in Java >= 1.9. Only the latter
-                 * implements the Runnable interface.
-                 */
-                final Class<?> cleanerClass = directByteBufferCleanerMethod.getReturnType();
-                if (Runnable.class.isAssignableFrom(cleanerClass)) {
-                    cleanerCleanMethod = Runnable.class.getDeclaredMethod("run");
-                } else {
-                    cleanerCleanMethod = cleanerClass.getDeclaredMethod("clean");
+                try {
+                    // Java >= 1.9, code path inspired by JogAmp's Gluegen, big kudos to Sven Göthel: https://jogamp.org/cgit/gluegen.git/commit/?h=java11&id=6603026f1bfec02e3486c52270a09a355a1bf914
+                    final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+                    final Field theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
+                    theUnsafeField.setAccessible(true);
+                    unsafeObject = theUnsafeField.get(null);
+                    invokeCleanerMethod = unsafeClass.getMethod("invokeCleaner", java.nio.ByteBuffer.class);
+                    invokeCleanerMethod.setAccessible(true);
+                } catch (final Throwable t) {
+                    unsafeObject = null;
+                    invokeCleanerMethod = null;
+                    final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
+                    final Method localDirectByteBufferCleanerMethod = directByteBufferClass
+                            .getDeclaredMethod("cleaner");
+                    final Class<?> cleanerClass = localDirectByteBufferCleanerMethod.getReturnType();
+                    final Method localCleanerCleanOrRunMethod;
+                    if (Runnable.class.isAssignableFrom(cleanerClass)) {
+                        /**
+                         * The return type is jdk.internal.ref.Cleaner in Java >= 1.9 but it implements the Runnable interface only
+                         * in some early access builds of Java 9
+                         */
+                        localCleanerCleanOrRunMethod = Runnable.class.getDeclaredMethod("run");
+                    } else {
+                        // The return type is sun.misc.Cleaner in Java <= 1.8
+                        localCleanerCleanOrRunMethod = cleanerClass.getDeclaredMethod("clean");
+                    }
+                    // according to the Java documentation, by default, a reflected object is not accessible
+                    localDirectByteBufferCleanerMethod.setAccessible(true);
+                    localCleanerCleanOrRunMethod.setAccessible(true);
+                    cleanerCleanOrRunMethod = localCleanerCleanOrRunMethod;
+                    directByteBufferCleanerMethod = localCleanerCleanOrRunMethod;
                 }
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
-                logger.log(Level.WARNING,
-                        "The initialization of the deallocator for Oracle Java, Sun Java and OpenJDK has failed", e);
+            } catch (final Throwable t) {
+                logger.log(Level.WARNING, "The initialization of the deallocator for Oracle Java, Sun Java and OpenJDK has failed", t);
             }
         }
-
+       
         @Override
         public boolean run(final ByteBuffer directByteBuffer) {
             boolean success = false;
-            if (directByteBufferCleanerMethod != null && cleanerCleanMethod != null) {
-                final boolean directByteBufferCleanerMethodWasAccessible = directByteBufferCleanerMethod.isAccessible();
-                final boolean cleanerCleanMethodWasAccessible = cleanerCleanMethod.isAccessible();
+            if (directByteBufferCleanerMethod != null && cleanerCleanOrRunMethod != null) {
                 try {
-                    // according to the Java documentation, by default, a reflected object is not accessible
-                    directByteBufferCleanerMethod.setAccessible(true);
                     final Object cleaner = directByteBufferCleanerMethod.invoke(directByteBuffer);
                     if (cleaner != null) {
-                        cleanerCleanMethod.setAccessible(true);
-                        cleanerCleanMethod.invoke(cleaner);
+                        cleanerCleanOrRunMethod.invoke(cleaner);
                         success = true;
                     }
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
-                } finally {
-                    directByteBufferCleanerMethod.setAccessible(directByteBufferCleanerMethodWasAccessible);
-                    cleanerCleanMethod.setAccessible(cleanerCleanMethodWasAccessible);
+                }
+            } else if (unsafeObject != null && invokeCleanerMethod != null) {
+                try {
+                    invokeCleanerMethod.invoke(unsafeObject, directByteBuffer);
+                } catch (final IllegalAccessException | InvocationTargetException e) {
+                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
                 }
             }
             return (success);
@@ -140,9 +160,11 @@ public class DeallocationHelper {
             super();
             try {
                 final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
-                directByteBufferFreeMethod = directByteBufferClass.getDeclaredMethod("free");
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for Android has failed", e);
+                final Method localDirectByteBufferFreeMethod = directByteBufferClass.getDeclaredMethod("free");
+                localDirectByteBufferFreeMethod.setAccessible(true);
+                directByteBufferFreeMethod = localDirectByteBufferFreeMethod;
+            } catch (final Throwable t) {
+                logger.log(Level.WARNING, "The initialization of the deallocator for Android has failed", t);
             }
         }
 
@@ -150,15 +172,11 @@ public class DeallocationHelper {
         public boolean run(final ByteBuffer directByteBuffer) {
             boolean success = false;
             if (directByteBufferFreeMethod != null) {
-                final boolean directByteBufferFreeMethodWasAccessible = directByteBufferFreeMethod.isAccessible();
                 try {
-                    directByteBufferFreeMethod.setAccessible(true);
                     directByteBufferFreeMethod.invoke(directByteBuffer);
                     success = true;
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
-                } finally {
-                    directByteBufferFreeMethod.setAccessible(directByteBufferFreeMethodWasAccessible);
+                } catch (final Throwable t) {
+                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
@@ -176,11 +194,13 @@ public class DeallocationHelper {
             try {
                 final Class<?> vmDirectByteBufferClass = Class.forName("java.nio.VMDirectByteBuffer");
                 final Class<?> gnuClasspathPointerClass = Class.forName("gnu.classpath.Pointer");
-                vmDirectByteBufferFreeMethod = vmDirectByteBufferClass.getDeclaredMethod("free",
+                final Method localVmDirectByteBufferFreeMethod = vmDirectByteBufferClass.getDeclaredMethod("free",
                         gnuClasspathPointerClass);
+                localVmDirectByteBufferFreeMethod.setAccessible(true);
                 bufferAddressField = Buffer.class.getDeclaredField("address");
-            } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException e) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for GNU Classpath has failed", e);
+                vmDirectByteBufferFreeMethod = localVmDirectByteBufferFreeMethod;
+            } catch (final Throwable t) {
+                logger.log(Level.WARNING, "The initialization of the deallocator for GNU Classpath has failed", t);
             }
         }
 
@@ -188,21 +208,15 @@ public class DeallocationHelper {
         public boolean run(final ByteBuffer directByteBuffer) {
             boolean success = false;
             if (vmDirectByteBufferFreeMethod != null && bufferAddressField != null) {
-                final boolean bufferAddressFieldWasAccessible = bufferAddressField.isAccessible();
-                final boolean vmDirectByteBufferFreeMethodWasAccessible = vmDirectByteBufferFreeMethod.isAccessible();
                 try {
                     bufferAddressField.setAccessible(true);
                     final Object address = bufferAddressField.get(directByteBuffer);
                     if (address != null) {
-                        vmDirectByteBufferFreeMethod.setAccessible(true);
                         vmDirectByteBufferFreeMethod.invoke(null, address);
                         success = true;
                     }
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
-                } finally {
-                    bufferAddressField.setAccessible(bufferAddressFieldWasAccessible);
-                    vmDirectByteBufferFreeMethod.setAccessible(vmDirectByteBufferFreeMethodWasAccessible);
+                } catch (final Throwable t) {
+                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
@@ -217,9 +231,11 @@ public class DeallocationHelper {
             super();
             try {
                 final Class<?> directByteBufferClass = Class.forName("java.nio.DirectByteBuffer");
-                directByteBufferFreeMethod = directByteBufferClass.getDeclaredMethod("free");
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for Apache Harmony has failed", e);
+                final Method localDirectByteBufferFreeMethod = directByteBufferClass.getDeclaredMethod("free");
+                localDirectByteBufferFreeMethod.setAccessible(true);
+                directByteBufferFreeMethod = localDirectByteBufferFreeMethod;
+            } catch (final Throwable t) {
+                logger.log(Level.WARNING, "The initialization of the deallocator for Apache Harmony has failed", t);
             }
         }
 
@@ -227,15 +243,11 @@ public class DeallocationHelper {
         public boolean run(final ByteBuffer directByteBuffer) {
             boolean success = false;
             if (directByteBufferFreeMethod != null) {
-                final boolean directByteBufferFreeMethodWasAccessible = directByteBufferFreeMethod.isAccessible();
                 try {
-                    directByteBufferFreeMethod.setAccessible(true);
                     directByteBufferFreeMethod.invoke(directByteBuffer);
                     success = true;
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
-                } finally {
-                    directByteBufferFreeMethod.setAccessible(directByteBufferFreeMethodWasAccessible);
+                } catch (final Throwable t) {
+                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
@@ -267,6 +279,7 @@ public class DeallocationHelper {
      *            fully recomputed at runtime which is slower but safer),
      *            otherwise <code>false</code>
      */
+    @SuppressWarnings("cast")
     public DeallocationHelper(final boolean ignoreClassesAndFieldsHints) {
         super();
         final List<Buffer> buffersToDelete = new ArrayList<>();
@@ -287,7 +300,7 @@ public class DeallocationHelper {
         final String javaVendor = System.getProperty("java.vendor");
         final String javaVersion = System.getProperty("java.version");
         if (!ignoreClassesAndFieldsHints) {
-            if (javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation")) {
+            if (javaVendor.equals("AdoptOpenJDK") || javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation")) {
                 final String java14to16DirectBufferAttachmentFieldName = "viewedBuffer";
                 final String java17to19DirectBufferAttachmentFieldName = "att";
                 final String byteBufferAsNonByteBufferByteBufferFieldName = "bb";
@@ -381,8 +394,7 @@ public class DeallocationHelper {
             for (final String classnameToRemove : classnamesToRemove)
                 attachmentOrByteBufferFieldNameMap.remove(classnameToRemove);
         }
-        // builds the map used to determine the fields containing the direct
-        // byte buffers
+        // builds the map used to determine the fields containing the direct byte buffers
         attachmentOrByteBufferFieldMap = new HashMap<>();
         if (!attachmentOrByteBufferFieldNameMap.isEmpty())
             for (final Entry<String, String> attachmentOrByteBufferFieldNameEntry : attachmentOrByteBufferFieldNameMap
@@ -429,16 +441,9 @@ public class DeallocationHelper {
                     } else {// the field has been found, stores it into the map
                         attachmentOrByteBufferFieldMap.put(bufferClass, bufferField);
                     }
-                } catch (ClassNotFoundException cnfe) {// TODO The Java version
-                                                       // isn't very useful
-                                                       // under
-                                                       // Android as it is
-                                                       // always zero, rather
-                                                       // use
-                                                       // android.os.Build.VERSION.RELEASE
-                                                       // to show something
-                                                       // meaningful supported
-                                                       // since the API level 1
+                } catch (ClassNotFoundException cnfe) {
+                    // TODO The Java version isn't very useful under Android as it is always zero, rather use android.os.Build.VERSION.RELEASE
+                    // to show something meaningful supported since the API level 1
                     final String msg = "The class " + classname
                             + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                             + " Java version: " + javaVersion;
@@ -447,15 +452,9 @@ public class DeallocationHelper {
             }
         // if a known implementation has drastically changed or if the current
         // implementation is unknown
-        if (attachmentOrByteBufferFieldNameMap.isEmpty()) {// detects everything
-                                                           // with the
-                                                           // reflection API
-                                                           // creates all
-                                                           // possible kinds of
-                                                           // direct NIO buffer
-                                                           // that can contain
-                                                           // buffers (sliced
-                                                           // buffers and views)
+        if (attachmentOrByteBufferFieldNameMap.isEmpty()) {
+            // detects everything with the reflection API
+            // creates all possible kinds of direct NIO buffer that can contain buffers (sliced buffers and views)
             final ByteBuffer slicedBigEndianReadOnlyDirectByteBuffer = ((ByteBuffer) ByteBuffer.allocateDirect(2)
                     .order(ByteOrder.BIG_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2)).slice()
                             .asReadOnlyBuffer();
@@ -551,7 +550,6 @@ public class DeallocationHelper {
                     Class<?> bufferIntermediaryClass = bufferClass;
                     while (bufferIntermediaryClass != null && bufferField == null) {
                         for (final Field field : bufferIntermediaryClass.getDeclaredFields()) {
-                            final boolean fieldWasAccessible = field.isAccessible();
                             try {
                                 field.setAccessible(true);
                                 final Object fieldValue = field.get(buffer);
@@ -559,11 +557,9 @@ public class DeallocationHelper {
                                     bufferField = field;
                                     break;
                                 }
-                            } catch (IllegalAccessException iae) {
+                            } catch (final Throwable t) {
                                 logger.log(Level.WARNING, "Cannot access the field " + field.getName()
-                                        + " of the class " + bufferIntermediaryClass.getName(), iae);
-                            } finally {
-                                field.setAccessible(fieldWasAccessible);
+                                        + " of the class " + bufferIntermediaryClass.getName(), t);
                             }
                         }
                         bufferIntermediaryClass = bufferIntermediaryClass.getSuperclass();
@@ -577,7 +573,7 @@ public class DeallocationHelper {
         }
         // builds the set of classes whose instances can be deallocated
         deallocatableBufferClassSet = new HashSet<>();
-        if (javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation")
+        if (javaVendor.equals("AdoptOpenJDK") || javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation")
                 || javaVendor.equals("The Android Project")) {
             Class<?> directByteBufferClass = null;
             final String directByteBufferClassName = "java.nio.DirectByteBuffer";
@@ -645,8 +641,7 @@ public class DeallocationHelper {
         } else if (javaVendor.contains("IBM")) {// TODO J9
         }
         // if there is no known implementation class of the direct byte buffers
-        if (deallocatableBufferClassSet.isEmpty()) {// creates a read write
-                                                    // direct byte buffer
+        if (deallocatableBufferClassSet.isEmpty()) {// creates a read write direct byte buffer
             final ByteBuffer dummyReadWriteDirectByteBuffer = ByteBuffer.allocateDirect(1);
             // gets its class
             final Class<?> readWriteDirectByteBufferClass = dummyReadWriteDirectByteBuffer.getClass();
@@ -665,7 +660,7 @@ public class DeallocationHelper {
         }
         // builds the deallocator responsible for releasing the native memory of
         // a deallocatable byte buffer
-        if (javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation"))
+        if (javaVendor.equals("AdoptOpenJDK") || javaVendor.equals("Sun Microsystems Inc.") || javaVendor.equals("Oracle Corporation"))
             deallocator = new OracleSunOpenJdkDeallocator();
         else if (javaVendor.equals("The Android Project"))
             deallocator = new AndroidDeallocator();
@@ -697,14 +692,11 @@ public class DeallocationHelper {
                 attachmentBufferOrByteBuffer = null;
             else {
                 Object attachedObjectOrByteBuffer;
-                final boolean attachedObjectOrByteBufferFieldWasAccessible = attachmentOrByteBufferField.isAccessible();
                 try {
                     attachmentOrByteBufferField.setAccessible(true);
                     attachedObjectOrByteBuffer = attachmentOrByteBufferField.get(buffer);
                 } catch (IllegalArgumentException | IllegalAccessException iae) {
                     attachedObjectOrByteBuffer = null;
-                } finally {
-                    attachmentOrByteBufferField.setAccessible(attachedObjectOrByteBufferFieldWasAccessible);
                 }
                 if (attachedObjectOrByteBuffer instanceof Buffer)
                     attachmentBufferOrByteBuffer = (Buffer) attachedObjectOrByteBuffer;
