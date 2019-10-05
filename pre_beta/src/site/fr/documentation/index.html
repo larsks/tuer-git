@@ -49,8 +49,8 @@ Sommaire:
         </ul>
     </li>
 </ul>
-<h1><a name="commentgenereretlancerlejeu" href="./#commentgenereretlancerlejeu">Comment générer et lancer le jeu</a></h1>
-<h2><a name="logicielsrequis" href="./#logicielsrequis">Logiciels requis</a></h2>
+<h1><a id="commentgenereretlancerlejeu" href="./#commentgenereretlancerlejeu">Comment générer et lancer le jeu</a></h1>
+<h2><a id="logicielsrequis" href="./#logicielsrequis">Logiciels requis</a></h2>
 <p>Vous avez besoin de ces programmes pour utiliser mon jeu à des fins de développement : </p>
 <ul>
 <li>Kit de développement Java 1.8 ou supérieur : <a href="https://adoptopenjdk.net">ici</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
@@ -63,7 +63,7 @@ Sommaire:
 </li>
 <li>ANT: <a href="http://ant.apache.org/">ici</a> (déjà supporté et livré avec les EDI majeurs tel qu'Eclipse et Netbeans)</li>
 </ul>
-<h2><a name="depotsducodesource" href="./#depotsducodesource">Dépôts du code source</a></h2>
+<h2><a id="depotsducodesource" href="./#depotsducodesource">Dépôts du code source</a></h2>
 <p>Ce sont les URLs des dépôts SVN pour toutes les versions : </p>
 <ul>
     <li>accès en lecture seule
@@ -81,7 +81,7 @@ Sommaire:
         </ul>
     </li>
 </ul>
-<h2><a name="etapesdegeneration" href="./#etapesdegeneration">Étapes de génération</a></h2>
+<h2><a id="etapesdegeneration" href="./#etapesdegeneration">Étapes de génération</a></h2>
 <p>Tapez ceci quand vous êtes dans le répertoire d'ANT pour télécharger les JARs requis par quelques t&ecirc;ches optionnelles : ant networking -f fetch.xml -Ddest=system</p>
 <p>Veuillez suivre une de ces méthodes : </p>
 <ul>
@@ -136,7 +136,7 @@ Sommaire:
 </li>
 <li>Dans <b>les autres EDIs</b>, débrouillez-vous, je n'ai pas de temps à perdre avec les EDIs propriétaires et ceux avec une audience confidentielle</li>
 </ul>
-<h2><a name="codesourcedesdependances" href="./#codesourcedesdependances">Code source des dépendances</a></h2>
+<h2><a id="codesourcedesdependances" href="./#codesourcedesdependances">Code source des dépendances</a></h2>
 <p>Vous pouvez obtenir le code source de toutes les dépendances ici : </p>
 <ul>
 <li><a href="http://hg.openjdk.java.net">OpenJDK</a></li>
@@ -163,13 +163,13 @@ Sommaire:
 <p>TUER requiert moins de 32 Mo (la dernière version peut requérir plus de 64 Mo) mais <b>quelques programmes utilisés pour précalculer ses données requièrent 1 Go voire même 2 Go</b>. N'essayez pas de construire le jeu 
 à partir du code source si votre ordinateur n'a pas assez de RAM. Utilisez l'argument de la machine virtuelle "-Xmx" si une carte particulière a besoin de plus de mémoire.
 </p>
-<h1><a name="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
-<h2><a name="introduction" href="./#introduction">Introduction</a></h2>
+<h1><a id="jndt" href="./#jndt">JNDT: Java Native Deployment Toolkit</a></h1>
+<h2><a id="introduction" href="./#introduction">Introduction</a></h2>
 <p>JNDT est utilisé pour générer les paquets applicatifs natifs autonomes du projet. Il fait à partir d'un "fat JAR" des bundles faciles à déployer et à installer. Il génère à la fois des installeurs natifs pratiques avec une intégration complète dans le bureau et des archives comme solutions de repli.</p>
 <p>C'est un empaqueteur multi-plateforme, c'est-à-dire qu'il est à la fois capable de tourner sous plusieurs systèmes d'exploitation et de générer des paquets natifs pour un système d'exploitation différent de celui sur lequel il s'exécute.</p>
-<h2><a name="codesource" href="./#codesource">Code source</a></h2>
+<h2><a id="codesource" href="./#codesource">Code source</a></h2>
 <p>Le code source de JNDT est dans un seul fichier de bibliothèque Ant <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/src/main/xml/jndt/antlib.xml">ici</a>.</p>
-<h2><a name="configuration" href="./#configuration">Configuration</a></h2>
+<h2><a id="configuration" href="./#configuration">Configuration</a></h2>
 <p>Les dépendances de JNDT sont <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/lib/ant/">ici</a>, vous devez les copier dans un répertoire et renseigner la valeur de la propriété Ant "jndtlibdir" avec ce chemin ("lib/ant" dans l'exemple ci-dessous) :</p>
 <pre>&lt;property name="jndt-version" value="0.0.0"/&gt;
 &lt;property name="jndt-release" value="0"/&gt;
@@ -177,11 +177,11 @@ Sommaire:
 &lt;property name="jndtlibdir" value="lib/ant"/&gt;
 &lt;taskdef resource="jndt/antlib.xml" classpath="${jndtlibdir}/${jndt-jar-filename}"/&gt;</pre>
 <p><a href="http://nsis.sourceforge.net">Nullsoft Scriptable Install System (NSIS)</a>, disponible dans de nombreuses distributions GNU Linux, sous Microsoft Windows et sous Mac OS X, doit être installé séparément pour générer un installeur pour Microsoft Windows.</p>
-<h2><a name="manueldestachesant" href="./#manueldestachesant">Manuel des tâches Ant</a></h2>
+<h2><a id="manueldestachesant" href="./#manueldestachesant">Manuel des tâches Ant</a></h2>
 <p>JNDT est composé des 4 tâches Ant ci-dessous:</p>
-<h3><a name="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
+<h3><a id="create-app-dir" href="./#create-app-dir">create-app-dir</a></h3>
 <p>Crée le répertoire de l'application, c'est-à-dire le répertoire contenant les fichiers nécessaires pour lancer l'application, son JAR, ses ressources (optionnelles), son JRE (optionnel), le lanceur natif ou le script de démarrage et les fichiers pour l'intégration native dans le bureau (l'icône, ...).</p>
-<table border="1">
+<table style="border: 1px solid black;">
 <thead>
 <tr>
 <th>Attribut</th><th>Description</th><th>Requis</th>
@@ -203,9 +203,9 @@ Sommaire:
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 </tbody>
 </table>
-<h3><a name="create-linux-app-bundles" href="./#create-linux-app-bundles">create-linux-app-bundles</a></h3>
+<h3><a id="create-linux-app-bundles" href="./#create-linux-app-bundles">create-linux-app-bundles</a></h3>
 <p>Crée un paquetage RPM, un paquetage DEB et une archive pour GNU Linux.</p>
-<table border="1">
+<table style="border: 1px solid black;">
 <thead>
 <tr>
 <th>Attribut</th><th>Description</th><th>Requis</th>
@@ -250,9 +250,9 @@ Sommaire:
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "gzip"</td></tr>
 </tbody>
 </table>
-<h3><a name="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
+<h3><a id="create-os-x-app-bundle" href="./#create-os-x-app-bundle">create-os-x-app-bundle</a></h3>
 <p>Crée un fichier APP compressé pour Mac OS X.</p>
-<table border="1">
+<table style="border: 1px solid black;">
 <thead>
 <tr>
 <th>Attribut</th><th>Description</th><th>Requis</th>
@@ -277,9 +277,9 @@ Sommaire:
 <tr><td>archivefileformat</td><td>format de fichier d'archive, avec ou sans compression: zip, gzip, bzip2, tar</td><td>Non, par défaut à "bzip2"</td></tr>
 </tbody>
 </table>
-<h3><a name="create-windows-app-bundles" href="./#create-windows-app-bundles">create-windows-app-bundles</a></h3>
+<h3><a id="create-windows-app-bundles" href="./#create-windows-app-bundles">create-windows-app-bundles</a></h3>
 <p>Crée une archive d'application compressée et un installeur pour Microsoft Windows.</p>
-<table border="1">
+<table style="border: 1px solid black;">
 <thead>
 <tr>
 <th>Attribut</th><th>Description</th><th>Requis</th>
@@ -305,10 +305,5 @@ Sommaire:
 <tr><td>licensefile</td><td>Fichier texte (.txt ou .rtf) contenant les termes de licence affichés durant l'installation, seulement utilisé par l'installeur</td><td>Non, par défaut à ""</td></tr>
 </tbody>
 </table>
-<p>
-   <a href="http://validator.w3.org/check?uri=referer">
-      <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
-   </a>
-</p>
 </body>
 </html>
