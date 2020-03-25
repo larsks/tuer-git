@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2006-2019 Julien Gouesse
+    Copyright (c) 2006-2020 Julien Gouesse
  
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -47,8 +47,6 @@
             <pathelement location="${jndtlibdir}/jdeb-1.4.jar"/>
         </classpath>
     </taskdef>
-    <!-- task of image format conversion -->
-    <taskdef resource="org/apache/commons/imaging/antlib.xml" classpath="${jndtlibdir}/commons-imaging-1.0-SNAPSHOT.jar"/>
 
     <macrodef name="to-basename-without-extension">
         <attribute name="property" description="The name of the property to set that will contain the basename without the very last extension (output)" />
@@ -251,13 +249,7 @@
                                     <equals arg1="${iconsfileextension}" arg2="ico" />
                                 </not>
                                 <then>
-                                    <!-- tries to remove all extensions -->
-                                    <to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                                    <!-- converts the icon file into the proper format for Windows icons -->
-                                    <var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.ico" />
-                                    <var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                                    <echo message="icons file '@{iconsfile}' exists, converting into ico" />
-                                    <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+                                    <fail message="The file @{iconsfile} is not in the ico format"/>
                                 </then>
                                 <else>
                                     <local name="iconsfilebasename" />
@@ -279,13 +271,7 @@
                                             <equals arg1="${iconsfileextension}" arg2="png" />
                                         </not>
                                         <then>
-                                            <!-- tries to remove all extensions -->
-                                            <to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                                            <!-- converts the icon file into the proper format for GNU Linux icons, see http://standards.freedesktop.org/icon-theme-spec/latest/ar01s02.html -->
-                                            <var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.png" />
-                                            <var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                                            <echo message="icons file '@{iconsfile}' exists, converting into png" />
-                                            <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+                                            <fail message="The file @{iconsfile} is not in the png format"/>
                                         </then>
                                         <else>
                                             <local name="iconsfilebasename" />
@@ -307,13 +293,7 @@
                                                     <equals arg1="${iconsfileextension}" arg2="icns" />
                                                 </not>
                                                 <then>
-                                                    <!-- tries to remove all extensions -->
-                                                    <to-basename-without-extension input="@{iconsfile}" property="iconsfilebasenamewithoutextension" />
-                                                    <!-- converts the icon file into the proper format for Mac OS X icons -->
-                                                    <var name="dsticonsfilebasename" value="${iconsfilebasenamewithoutextension}.icns" />
-                                                    <var name="dsticonsfile" value="${iconstarget}/${dsticonsfilebasename}" />
-                                                    <echo message="icons file '@{iconsfile}' exists, converting into icns" />
-                                                    <convertimage src="@{iconsfile}" dst="${dsticonsfile}" sourceImageDuplicationAndRescaleEnabled="true" />
+                                                    <fail message="The file @{iconsfile} is not in the icns format"/>
                                                 </then>
                                                 <else>
                                                     <local name="iconsfilebasename" />
