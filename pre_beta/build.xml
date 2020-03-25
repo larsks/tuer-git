@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2006-2019 Julien Gouesse
+    Copyright (c) 2006-2020 Julien Gouesse
  
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -80,6 +80,8 @@
 	<property name="game-src-zip-filename" value="${project-unix-name}-${game-version}-${game-release}.src.zip" />
 	<!-- The logo of the game must be a PNG file composed of 64 * 64 pixels -->
 	<property name="game-logo-filename" value="${project-unix-name}Logo.png"/>
+	<property name="game-logo-icns-filename" value="${project-unix-name}Logo.icns"/>
+    <property name="game-logo-ico-filename" value="${project-unix-name}Logo.ico"/>
 	<property name="game-bundle-identifier" value="net.sourceforge.tuer" />
 	<property name="ardor3d-version" value="1.0-SNAPSHOT" />
 	<property name="editor-main-class" value="jfpsm.MainWindow"/>
@@ -218,8 +220,10 @@
 	<target name="dist" depends="compile" description="Creates the deployable files and uploads them onto the server(s)">
 		<!-- Creates the destination directory -->
 		<mkdir dir="${destdir}"/>
-		<!-- Copies the logo into it -->
+		<!-- Copies the logos into it -->
 		<copy file="src/main/resources/images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
+		<copy file="src/main/resources/images/${game-logo-icns-filename}" todir="${destdir}" overwrite="true" />
+	    <copy file="src/main/resources/images/${game-logo-ico-filename}" todir="${destdir}" overwrite="true" />
 		<!-- Creates the JARs of the applications -->
 		<antcall target="create-jars" />
 		<!-- Creates the GNU Linux archives and packages -->
@@ -380,11 +384,11 @@
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<!--<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
+		    jdk="${openjdk-windows-i586-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-ico-filename}" 
 		    arch="i386" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>-->
 		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
 		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs=" docdir="." docdirincludes="*.txt"
-		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
+		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-ico-filename}" 
 		    arch="amd64" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
 	</target>
 	<!-- ================================================================= -->
@@ -395,7 +399,7 @@
 		<create-os-x-app-bundle arch="universal" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
 		  	outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;-Djava.ext.dirs="
 			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
-			iconsfile="src/main/resources/images/${game-logo-filename}" version="${game-version}" 
+			iconsfile="src/main/resources/images/${game-logo-icns-filename}" version="${game-version}" 
 			release="${game-release}"/>
 	</target>
 	<!-- ================================================================= -->
