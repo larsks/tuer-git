@@ -15,7 +15,6 @@ NSIS-Ant under libpng/zlib license
 jDeb under Apache license
 Redline RPM under MIT license
 Apache Commons Compress under Apache license
-Apache Commons Imaging under Apache license
 Apache Commons IO under Apache license
 slf4j under MIT license
 XZ for Java in the public domain

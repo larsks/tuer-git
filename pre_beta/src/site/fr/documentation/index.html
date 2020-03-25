@@ -154,7 +154,6 @@ Sommaire:
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
-<li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
 <li><a href="http://commons.apache.org/proper/commons-io/source-repository.html">Apache Commons IO</a></li>
 <li><a href="http://slf4j.org/dist/slf4j-1.7.7.zip">slf4j</a></li>
 <li><a href="http://tukaani.org/xz/xz-java-1.5.zip">XZ for Java</a></li>
@@ -199,7 +198,7 @@ Sommaire:
 <tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
 <tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparés par ';'</td><td>Non, par défaut à ";"</td></tr>
 <tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>fichier d'icônes (préférablement .png pour GNU Linux, .ico pour Windows, .icns pour Mac)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (obligatoirement .png pour GNU Linux, .ico pour Windows, .icns pour Mac)</td><td>Non, par défaut à ""</td></tr>
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 </tbody>
 </table>
@@ -222,7 +221,7 @@ Sommaire:
 <tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
 <tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparés par ';'</td><td>Non, par défaut à ";"</td></tr>
 <tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>fichier d'icônes (préférablement ni au format .icns ni au format .ico, sinon il est converti en PNG)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (obligatoirement au format .png)</td><td>Non, par défaut à ""</td></tr>
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 <tr><td>arch</td><td>Un parmi i386, amd64, arm, none (similaire à l'attribut 'arch' de la balise 'resources' en JNLP mais simplifié). 'none' est supporté seulement avec jdk mis à ''</td><td>Oui</td></tr>
 <tr><td>categories</td><td>liste de catégories séparées par ";", utilisée pour mettre le raccourci dans le menu de démarrage, voir http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>Non, par défaut à ""</td></tr>
@@ -268,7 +267,7 @@ Sommaire:
 <tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
 <tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparés par ';'</td><td>Non, par défaut à ";"</td></tr>
 <tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>fichier d'icônes (préférablement au format .icns, sinon il est converti dans ce format)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (obligatoirement au format .icns)</td><td>Non, par défaut à ""</td></tr>
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 <tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>
@@ -294,7 +293,7 @@ Sommaire:
 <tr><td>jdk</td><td>emplacement du fichier ZIP ou URL du build d'OpenJDK contenant le JRE, peut être vide pour utiliser le JRE du système</td><td>Oui</td></tr>
 <tr><td>resources</td><td>liste des fichiers et des répertoires à empaqueter à côté du script, séparés par ';'</td><td>Non, par défaut à ";"</td></tr>
 <tr><td>bundleidentifier</td><td>identifiant du bundle similaire à un nom de paquetage Java</td><td>Non, par défaut à "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>fichier d'icônes (préférablement au format .ico, sinon il est converti dans ce format)</td><td>Non, par défaut à ""</td></tr>
+<tr><td>iconsfile</td><td>fichier d'icônes (obligatoirement au format .ico)</td><td>Non, par défaut à ""</td></tr>
 <tr><td>useserverjre</td><td>utilise le JRE serveur si "true", sinon utilise le JRE client</td><td>Non, par défaut à "true"</td></tr>
 <tr><td>version</td><td>version</td><td>Non, par défaut à "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>Non, par défaut à "0"</td></tr>

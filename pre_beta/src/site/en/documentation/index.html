@@ -154,7 +154,6 @@ Summary:
 <li><a href="http://github.com/tcurdt/jdeb/archive/master.zip">jDeb</a></li>
 <li><a href="http://github.com/craigwblake/redline/archive/master.zip">Redline RPM</a></li>
 <li><a href="http://commons.apache.org/proper/commons-compress/source-repository.html">Apache Commons Compress</a></li>
-<li><a href="http://commons.apache.org/proper/commons-imaging/source-repository.html">Apache Commons Imaging</a></li>
 <li><a href="http://commons.apache.org/proper/commons-io/source-repository.html">Apache Commons IO</a></li>
 <li><a href="http://slf4j.org/dist/slf4j-1.7.7.zip">slf4j</a></li>
 <li><a href="http://tukaani.org/xz/xz-java-1.5.zip">XZ for Java</a></li>
@@ -199,7 +198,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
 <tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably .png for GNU Linux, .ico for Windows, .icns for Mac)</td><td>No - default is ""</td></tr>
+<tr><td>iconsfile</td><td>icons file (imperatively .png for GNU Linux, .ico for Windows, .icns for Mac)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 </tbody>
 </table>
@@ -222,7 +221,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
 <tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ';'.</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably not in .icns or .ico format, otherwise it is converted into PNG)</td><td>No - default is ""</td></tr>
+<tr><td>iconsfile</td><td>icons file (imperatively in .png format)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 <tr><td>arch</td><td>one of i386, amd64, arm, none (similar to the 'arch' attribute of the 'resources' tag in JNLP but simplified). 'none' is supported only with jdk set to ''</td><td>Yes</td></tr>
 <tr><td>categories</td><td>list of categories separated by ;, used to put the shortcut into the start menu, see http://standards.freedesktop.org/menu-spec/latest/apa.html</td><td>No - default is ""</td></tr>
@@ -268,7 +267,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
 <tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ;</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably in .icns format, otherwise it is converted into this format)</td><td>No - default is ""</td></tr>
+<tr><td>iconsfile</td><td>icons file (imperatively in .icns format)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 <tr><td>version</td><td>version</td><td>No - default is "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>No - default is "0"</td></tr>
@@ -294,7 +293,7 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <tr><td>jdk</td><td>ZIP file location or URL to an OpenJDK build containing a JRE, can be empty to use the JRE of the system</td><td>Yes</td></tr>
 <tr><td>resources</td><td>list of files and directories to be packaged next to the script, separated by ;</td><td>No - default is ";"</td></tr>
 <tr><td>bundleidentifier</td><td>bundle identifier similar to a Java package name</td><td>No - default is "com.yourcompany.identifier"</td></tr>
-<tr><td>iconsfile</td><td>icons file (preferably in .ico format, otherwise it is converted into this format)</td><td>No - default is ""</td></tr>
+<tr><td>iconsfile</td><td>icons file (imperatively in .ico format)</td><td>No - default is ""</td></tr>
 <tr><td>useserverjre</td><td>uses the server jre if true, otherwise uses the client jre</td><td>No - default is "true"</td></tr>
 <tr><td>version</td><td>version</td><td>No - default is "0.0"</td></tr>
 <tr><td>release</td><td>release</td><td>No - default is "0"</td></tr>
