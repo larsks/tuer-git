@@ -61,7 +61,7 @@
 	<property name="sitesrcdir" value="src/site"/>
 	<property name="testsrcdir" value="src/test/java"/>
 	<property name="testbindir" value="target/test-classes"/>
-	<property name="homepage-url" value="http://${project-unix-name}.sourceforge.net" />
+	<property name="homepage-url" value="https://${project-unix-name}.sourceforge.io" />
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="email" value="gouessej@orange.fr" />
