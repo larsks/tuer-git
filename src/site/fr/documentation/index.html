@@ -57,8 +57,8 @@ Sommaire:
 <h2><a id="logicielsrequis" href="./#logicielsrequis">Logiciels requis</a></h2>
 <p>Vous avez besoin de ces programmes pour utiliser mon jeu à des fins de développement : </p>
 <ul>
-<li>Kit de développement Java 1.8 ou supérieur : <a href="https://adoptopenjdk.net">ici</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
-<li>Eclipse 4.3.2 ou supérieur (optionel mais recommandé): <a href="http://www.eclipse.org/downloads/">ici</a></li>
+<li>Kit de développement Java 11 ou supérieur : <a href="https://adoptopenjdk.net">ici</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">ici</a> ou dans le dépôt officiel de votre distribution GNU Linux</li>
+<li>Eclipse 4.15.0 ou supérieur (optionel mais recommandé): <a href="http://www.eclipse.org/downloads/">ici</a></li>
 <li>Subversion (SVN)
 <ul>
 <li>utilisateurs en ligne de commande: <a href="http://subversion.tigris.org/">ici</a></li>
@@ -86,7 +86,7 @@ Sommaire:
     </li>
 </ul>
 <h2><a id="etapesdegeneration" href="./#etapesdegeneration">Étapes de génération</a></h2>
-<p>Tapez ceci quand vous êtes dans le répertoire d'ANT pour télécharger les JARs requis par quelques t&ecirc;ches optionnelles : ant networking -f fetch.xml -Ddest=system</p>
+<p>Tapez ceci quand vous êtes dans le répertoire d'ANT pour télécharger les JARs requis par quelques t&ecirc;ches optionnelles : ./bin/ant networking -f fetch.xml -Ddest=system</p>
 <p>Veuillez suivre une de ces méthodes : </p>
 <ul>
 <li>En <b>ligne de commande</b>, suivez ces étapes :
@@ -96,7 +96,7 @@ Sommaire:
 <li>tapez ceci pour lancer le jeu : ant run-game</li>
 </ul>
 </li>
-<li>Dans <b>Eclipse</b> (version 4.3.2 ou supérieure), avec Subclipse (version 1.6.0 ou supérieure), suivez ces étapes :
+<li>Dans <b>Eclipse</b> (version 4.15.0 ou supérieure), avec Subclipse (version 1.6.0 ou supérieure), suivez ces étapes :
 <ul>
 <li>Faites un clic droit dans la zone de paquetage</li>
 <li>Sélectionnez "New" -> "Other..."</li>
@@ -119,7 +119,7 @@ Sommaire:
 </li>
 </ul>
 </li>
-<li>Dans <b>Netbeans</b> (version 6.9.1 ou supérieure), suivez ces étapes :
+<li>Dans <b>Netbeans</b> (version 11.0 ou supérieure), suivez ces étapes :
 <ul>
 <li>Allez dans le menu "Team" -> "Subversion" -> "Checkout..."</li>
 <li>Entrez l'URL du dépôt SVN en tant que "Repository URL"</li>

@@ -57,8 +57,8 @@ Summary:
 <h2><a id="softwarerequirements" href="./#softwarerequirements">Software requirements</a></h2>
 <p>You need these programs to use the game for development purposes:</p>
 <ul>
-<li>Java Development Kit 1.8 or higher: <a href="https://adoptopenjdk.net">here</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">here</a> or in the official repository of your GNU Linux distribution</li>
-<li>Eclipse 4.3.2 (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
+<li>Java Development Kit 11 or higher: <a href="https://adoptopenjdk.net">here</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">here</a> or in the official repository of your GNU Linux distribution</li>
+<li>Eclipse 4.15.0 (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
 <li>Subversion (SVN)
 <ul>
 <li>Command line users: <a href="http://subversion.tigris.org/">here</a></li>
@@ -86,7 +86,7 @@ Summary:
     </li>
 </ul>
 <h2><a id="buildsteps" href="./#buildsteps">Build steps</a></h2>
-<p>Enter this when you're in the ANT home to download the JARs required by some optional tasks: ant networking -f fetch.xml -Ddest=system</p>
+<p>Enter this when you're in the ANT home to download the JARs required by some optional tasks: ./bin/ant networking -f fetch.xml -Ddest=system</p>
 <p>Please follow one of these methods:</p>
 <ul>
 <li>In <b>command line</b>, follow these steps:
@@ -96,7 +96,7 @@ Summary:
 <li>enter this to run the game: ant run-game</li>
 </ul>
 </li>
-<li>In <b>Eclipse</b> (version 4.3.2 or higher), with Subclipse (version 1.6.0 or higher), follow these steps:
+<li>In <b>Eclipse</b> (version 4.15.0 or higher), with Subclipse (version 1.6.0 or higher), follow these steps:
 <ul>
 <li>Right click in the package area</li>
 <li>Select "New" -> "Other..."</li>
@@ -119,7 +119,7 @@ Summary:
 </li>
 </ul>
 </li>
-<li>In <b>Netbeans</b> (version 6.9.1 or higher), follow these steps:
+<li>In <b>Netbeans</b> (version 11.0 or higher), follow these steps:
 <ul>
 <li>Go to the "Team" menu -> "Subversion" -> "Checkout..."</li>
 <li>Enter the URL of the SVN repository as "Repository URL"</li>
