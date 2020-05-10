@@ -65,8 +65,6 @@
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="email" value="gouessej@orange.fr" />
-	<property name="alias" value="gouessej"/>
-	<property name="keystore" value="${destdir}/key"/>
 	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Mac_jdk8u172-b11.tar.gz"/>
 	<!--<property name="openjdk-linux-i586-build-url" value=""/>-->
 	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Linux_jdk8u172-b11.tar.gz"/>
@@ -232,8 +230,6 @@
 	    <antcall target="create-os-x-app" />
 	    <!-- Creates the Microsoft Windows archives -->
 	    <antcall target="create-windows-pkgs" />
-	    <!-- Signs the JARs -->
-	    <antcall target="sign-jars" />
 	    <!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
 	    <antcall target="create-archive" />
 	</target>
@@ -322,35 +318,6 @@
 			<zipfileset src="lib/pss/SoundSystem.jar" includes="**/*.class" />
 		</jar>
 		<delete dir="${destdir}/META-INF" failonerror="true"/>
-	</target>
-	<!-- ================================================================= -->
-	<!-- Sign JARs                                                         -->
-	<!-- ================================================================= -->
-	<target name="sign-jars">
-		<!-- deletes the keystore if any -->
-		<delete file="${keystore}" failonerror="false" />
-		<!-- gets the storepass -->
-		<input message="Please enter the store pass:" addproperty="storepass"/>
-		<!-- creates the keystore -->
-		<genkey alias="${alias}" storetype="pkcs12" storepass="${storepass}" keystore="${keystore}" keyalg="dsa">
-			<dname>
-				<param name="CN" value="${vendor}"/>
-				<param name="OU" value="Engineer"/>
-				<param name="O"  value="None"/>
-				<param name="C"  value="FR"/>
-				<param name="L"  value="BAGNOLET"/>
-				<param name="S"  value="FRANCE"/>
-			</dname>
-		</genkey>
-		<!-- uses this keystore to sign the JARs -->
-		<signjar alias="${alias}" keystore="${keystore}" storetype="pkcs12" storepass="${storepass}" lazy="false" destDir="${destdir}">
-			<path>
-				<pathelement location="${destdir}/${game-jar-filename}"/>
-				<pathelement location="${destdir}/${editor-jar-filename}"/>
-			</path>
-		</signjar>
-		<!-- deletes the keystore if any -->
-		<delete file="${keystore}" failonerror="false" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Create archive                                                    -->
