@@ -215,27 +215,32 @@
 		</jar>
 	</target>
 	<!-- ================================================================= -->
+	<!-- Local Dist                                                        -->
+	<!-- ================================================================= -->
+	<target name="local-dist" depends="compile" description="Creates the deployable files">
+	    <!-- Creates the destination directory -->
+	    <mkdir dir="${destdir}"/>
+	    <!-- Copies the logos into it -->
+	    <copy file="src/main/resources/images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
+	    <copy file="src/main/resources/images/${game-logo-icns-filename}" todir="${destdir}" overwrite="true" />
+	    <copy file="src/main/resources/images/${game-logo-ico-filename}" todir="${destdir}" overwrite="true" />
+	    <!-- Creates the JARs of the applications -->
+	    <antcall target="create-jars" />
+	    <!-- Creates the GNU Linux archives and packages -->
+	    <antcall target="create-linux-pkgs" />
+	    <!-- Creates the archived Mac OS X application bundle -->
+	    <antcall target="create-os-x-app" />
+	    <!-- Creates the Microsoft Windows archives -->
+	    <antcall target="create-windows-pkgs" />
+	    <!-- Signs the JARs -->
+	    <antcall target="sign-jars" />
+	    <!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
+	    <antcall target="create-archive" />
+	</target>
+	<!-- ================================================================= -->
 	<!-- Dist                                                              -->
 	<!-- ================================================================= -->
-	<target name="dist" depends="compile" description="Creates the deployable files and uploads them onto the server(s)">
-		<!-- Creates the destination directory -->
-		<mkdir dir="${destdir}"/>
-		<!-- Copies the logos into it -->
-		<copy file="src/main/resources/images/${game-logo-filename}" todir="${destdir}" overwrite="true" />
-		<copy file="src/main/resources/images/${game-logo-icns-filename}" todir="${destdir}" overwrite="true" />
-	    <copy file="src/main/resources/images/${game-logo-ico-filename}" todir="${destdir}" overwrite="true" />
-		<!-- Creates the JARs of the applications -->
-		<antcall target="create-jars" />
-		<!-- Creates the GNU Linux archives and packages -->
-		<antcall target="create-linux-pkgs" />
-		<!-- Creates the archived Mac OS X application bundle -->
-		<antcall target="create-os-x-app" />
-		<!-- Creates the Microsoft Windows archives -->
-		<antcall target="create-windows-pkgs" />
-		<!-- Signs the JARs -->
-		<antcall target="sign-jars" />
-		<!-- Deletes the archive to avoid getting an error when trying to compress itself and creates it -->
-		<antcall target="create-archive" />
+	<target name="dist" depends="local-dist" description="Creates the deployable files and uploads them onto the server(s)">
 		<!-- Sends all stuffs to the server(s) -->
 		<antcall target="upload" />
 	</target>
@@ -327,7 +332,7 @@
 		<!-- gets the storepass -->
 		<input message="Please enter the store pass:" addproperty="storepass"/>
 		<!-- creates the keystore -->
-		<genkey alias="${alias}" storetype="pkcs12" storepass="${storepass}" keystore="${keystore}">
+		<genkey alias="${alias}" storetype="pkcs12" storepass="${storepass}" keystore="${keystore}" keyalg="dsa">
 			<dname>
 				<param name="CN" value="${vendor}"/>
 				<param name="OU" value="Engineer"/>
