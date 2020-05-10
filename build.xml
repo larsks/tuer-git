@@ -65,11 +65,9 @@
 	<property name="codebase-url" value="${homepage-url}/very_experimental/" />
 	<property name="vendor" value="Julien GOUESSE" />
 	<property name="email" value="gouessej@orange.fr" />
-	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Mac_jdk8u172-b11.tar.gz"/>
-	<!--<property name="openjdk-linux-i586-build-url" value=""/>-->
-	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Linux_jdk8u172-b11.tar.gz"/>
-	<!--<property name="openjdk-windows-i586-build-url" value=""/>-->
-	<property name="openjdk-windows-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk8-releases/releases/download/jdk8u172-b11/OpenJDK8_x64_Win_jdk8u172-b11.zip"/>
+	<property name="openjdk-macosx-universal-build-url" value="https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jre_x64_mac_hotspot_14.0.1_7.tar.gz"/>
+	<property name="openjdk-linux-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jre_x64_linux_hotspot_14.0.1_7.tar.gz"/>
+	<property name="openjdk-windows-amd64-build-url" value="https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7.1/OpenJDK14U-jre_x64_windows_hotspot_14.0.1_7.zip"/>
 	<property name="game-group" value="Applications/Games" />
 	<property name="game-section" value="games" />
 	<property name="game-license" value="GPL" />
@@ -117,21 +115,21 @@
 		<pathelement location="lib/pss/SoundSystem.jar"/>
 	</path>
 	<target name="check-ant-and-java-versions" description="Checks Ant and Java versions">
-		<fail message="Please build using Ant 1.10.6 or higher.">
+		<fail message="Please build using Ant 1.10.7 or higher.">
 			<condition>
 				<not>
-					<antversion atleast="1.10.6"/>
+					<antversion atleast="1.10.7"/>
 				</not>
 			</condition>
 		</fail>
-		<fail message="Please use JDK 11 or higher.">
+		<fail message="Please use JDK 14 or higher.">
 			<condition>
 				<not>
 					<or>
-						<equals arg1="${ant.java.version}" arg2="11"/>
-						<equals arg1="${ant.java.version}" arg2="12"/>
-						<equals arg1="${ant.java.version}" arg2="13"/>
 						<equals arg1="${ant.java.version}" arg2="14"/>
+						<equals arg1="${ant.java.version}" arg2="15"/>
+						<equals arg1="${ant.java.version}" arg2="16"/>
+						<equals arg1="${ant.java.version}" arg2="17"/>
 					</or>
 				</not>
 			</condition>
@@ -176,13 +174,13 @@
 		<!-- Compiles the source code -->
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
-	           debug="on" release="8">
+	           debug="on" release="14">
 			<classpath refid="project.class.path"/>
 			<include name="**/*.java"/>
 		</javac>
 		<javac includeantruntime="false" srcdir="${testsrcdir}"              
 		       destdir="${testbindir}"
-		       debug="on" release="8">
+		       debug="on" release="14">
 			<classpath>
 				<path refid="project.class.path"/>
 				<fileset dir="${bindir}"/>
