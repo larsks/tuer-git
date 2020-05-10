@@ -553,17 +553,28 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 </path>
                 <sequential>
                     <if>
-                        <available file="@{dir}/jre/bin" />
+                        <or>
+                            <available file="@{dir}/bin/java" />
+                            <available file="@{dir}/bin/java.exe" />
+                        </or>
                         <then>
                             <copy todir="${contentstarget}/jre" failonerror="true">
-                                <fileset dir="@{dir}/jre" />
+                                <fileset dir="@{dir}" />
                             </copy>
-                            <!-- drives "java" executable anew -->
-                            <chmod file="${contentstarget}/jre/bin/java" perm="755" />
                         </then>
                     </if>
                 </sequential>
             </for>
+            <!-- drives "java" executable anew -->
+            <if>
+                <equals arg1="@{os}" arg2="Windows" />
+                <then>
+                    <chmod file="${contentstarget}/jre/bin/java.exe" perm="755" />
+                </then>
+                <else>
+                    <chmod file="${contentstarget}/jre/bin/java" perm="755" />
+                </else>
+            </if>
             <delete dir="${contentstarget}/tmp" failonerror="true" />
             <if>
                 <available file="${contentstarget}/jdk.${jdkextension}" />
@@ -624,7 +635,6 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 <then>
                     <var name="rpmarchitecture" value="I386"/>
                     <var name="debarchitecture" value="i386"/>
-                    <var name="jrearchitecture" value="i386"/>
                     <var name="archivearchitecture" value="i386"/>
                 </then>
                 <else>
@@ -633,7 +643,6 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                         <then>
                             <var name="rpmarchitecture" value="X86_64"/>
                             <var name="debarchitecture" value="amd64"/>
-                            <var name="jrearchitecture" value="amd64"/>
                             <var name="archivearchitecture" value="amd64"/>
                         </then>
                         <else>
@@ -642,7 +651,6 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                                 <then>
                                     <var name="rpmarchitecture" value="ARM"/>
                                     <var name="debarchitecture" value="arm"/>
-                                    <var name="jrearchitecture" value="arm"/>
                                     <var name="archivearchitecture" value="arm"/>
                                 </then>
                                 <else>
@@ -651,7 +659,6 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                                         <then>
                                             <var name="rpmarchitecture" value="NOARCH"/>
                                             <var name="debarchitecture" value="all"/>
-                                            <var name="jrearchitecture" value=""/>
                                             <var name="archivearchitecture" value="all"/>
                                         </then>
                                         <else>
@@ -787,12 +794,12 @@ Categories=@{categories}]]>
                                     <exclude name="nopackagesh_@{executable}"/>
                                     <exclude name="${icon-name}.png"/>
                                     <exclude name="jre/bin/*"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+                                    <exclude name="jre/lib/*.so"/>
+                                    <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
                                 <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
                                 <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
                                 <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
@@ -807,12 +814,12 @@ Categories=@{categories}]]>
                                     <exclude name="@{executable}"/>
                                     <exclude name="nopackagesh_@{executable}"/>
                                     <exclude name="jre/bin/*"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+                                    <exclude name="jre/lib/*.so"/>
+                                    <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
                                 <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
                                 <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                                 <depends/>
@@ -889,7 +896,7 @@ Multi-Arch: @{multiarch}]]></echo>
                         <available file="${appdir}/${icon-name}.png"/>
                         <then>
                             <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/*.so,jre/lib/**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}"/>
                                 </data>
                                 <data src="@{appjar}" type="file">
@@ -901,8 +908,8 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <data src="${appdir}/jre/bin" type="directory" includes="*">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
                                 </data>
-                                <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-                                    <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+                                <data src="${appdir}/jre/lib" type="directory" includes="*.so,**/*.so">
+                                    <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib" filemode="755"/>
                                 </data>
                                 <data src="@{outdir}/${package-name}.desktop" type="file">
                                     <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -917,7 +924,7 @@ Multi-Arch: @{multiarch}]]></echo>
                         </then>
                         <else>
                             <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/${jrearchitecture}/*.so,jre/lib/${jrearchitecture}/**/*.so">
+                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/*.so,jre/lib/**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}"/>
                                 </data>
                                 <data src="@{appjar}" type="file">
@@ -929,8 +936,8 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <data src="${appdir}/jre/bin" type="directory" includes="*">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
                                 </data>
-                                <data src="${appdir}/jre/lib/${jrearchitecture}" type="directory" includes="*.so,**/*.so">
-                                    <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib/${jrearchitecture}" filemode="755"/>
+                                <data src="${appdir}/jre/lib" type="directory" includes="*.so,**/*.so">
+                                    <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib" filemode="755"/>
                                 </data>
                                 <data src="@{outdir}/${package-name}.desktop" type="file">
                                     <mapper type="perm" prefix="/usr/share/applications" filemode="755"/>
@@ -974,12 +981,12 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}" dir="${appdir}">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+                                    <exclude name="jre/lib/*.so"/>
+                                    <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
                                 <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </zip>
                         </else>
@@ -1011,12 +1018,12 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}" dir="${appdir}">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/*.so"/>
-                                    <exclude name="jre/lib/${jrearchitecture}/**/*.so"/>
+                                    <exclude name="jre/lib/*.so"/>
+                                    <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}/jre/lib/${jrearchitecture}" dir="${appdir}/jre/lib/${jrearchitecture}" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
                                 <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </tar>
                         </else>
