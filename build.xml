@@ -90,7 +90,7 @@
 	<!-- example of value for an archived post build: http://jogamp.org/deployment/archive/master/gluegen_813-joal_557-jogl_1322-jocl_995/fat -->
 	<!-- example of value for the current release or release candidate: http://jogamp.org/deployment/jogamp-current/fat -->
 	<!-- example of value for a released version: http://jogamp.org/deployment/v2.2.4/fat -->
-	<property name="jogamp-unsigned-jars-url" value="https://jogamp.org/deployment/v2.4.0-rc-20200106/fat" />
+	<property name="jogamp-unsigned-jars-url" value="https://jogamp.org/deployment/v2.4.0-rc-20200307/fat" />
 	<!-- Sourceforge username -->
 	<property name="sftp-userid" value="gouessej" />
 	<!-- Sourceforge Project Web space -->
