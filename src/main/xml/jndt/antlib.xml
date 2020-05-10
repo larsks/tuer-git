@@ -565,7 +565,12 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 </sequential>
             </for>
             <delete dir="${contentstarget}/tmp" failonerror="true" />
-            <delete file="${contentstarget}/jdk.zip" failonerror="true" />
+            <if>
+                <available file="${contentstarget}/jdk.${jdkextension}" />
+                <then>
+                    <delete file="${contentstarget}/jdk.${jdkextension}" failonerror="true" />
+                </then>
+            </if>
             <!-- handles the resources if any -->
             <for list="@{resources}" delimiter=";" param="resource">
                 <sequential>
