@@ -35,7 +35,7 @@
             <pathelement location="${jndtlibdir}/slf4j-api-1.7.7.jar"/>
             <pathelement location="${jndtlibdir}/slf4j-simple-1.7.7.jar"/>
             <pathelement location="${jndtlibdir}/xz-1.4.jar"/>
-            <pathelement location="${jndtlibdir}/redline-1.2.2.jar"/>
+            <pathelement location="${jndtlibdir}/redline-1.2.9.jar"/>
         </classpath>
     </taskdef>
     <!-- pure Java implementation of the DEB package builder -->
@@ -554,8 +554,16 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 <sequential>
                     <if>
                         <or>
-                            <available file="@{dir}/bin/java" />
-                            <available file="@{dir}/bin/java.exe" />
+                            <and>
+                                <equals arg1="@{os}" arg2="Windows" />
+                                <available file="@{dir}/bin/java.exe" />
+                            </and>
+                            <and>
+                                <not>
+                                    <equals arg1="@{os}" arg2="Windows" />
+                                </not>
+                                <available file="@{dir}/bin/java" />
+                            </and>
                         </or>
                         <then>
                             <copy todir="${contentstarget}/jre" failonerror="true">
@@ -565,7 +573,7 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                     </if>
                 </sequential>
             </for>
-            <!-- drives "java" executable anew -->
+            <!-- drives "java", jexec and jspawnhelper executable anew -->
             <if>
                 <equals arg1="@{os}" arg2="Windows" />
                 <then>
@@ -573,6 +581,18 @@ $APP_LAUNCHER_DIR/jre/bin/java ${vmargsstring} -jar $APP_LAUNCHER_DIR/${appjarba
                 </then>
                 <else>
                     <chmod file="${contentstarget}/jre/bin/java" perm="755" />
+                    <if>
+                        <available file="${contentstarget}/jre/lib/jexec" />
+                        <then>
+                            <chmod file="${contentstarget}/jre/lib/jexec" perm="755" />
+                        </then>
+                    </if>
+                    <if>
+                        <available file="${contentstarget}/jre/lib/jspawnhelper" />
+                        <then>
+                            <chmod file="${contentstarget}/jre/lib/jspawnhelper" perm="755" />
+                        </then>
+                    </if>
                 </else>
             </if>
             <delete dir="${contentstarget}/tmp" failonerror="true" />
@@ -794,12 +814,14 @@ Categories=@{categories}]]>
                                     <exclude name="nopackagesh_@{executable}"/>
                                     <exclude name="${icon-name}.png"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jexec"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.so"/>
                                     <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="jexec,jspawnhelper,*.so,**/*.so"/>
                                 <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
                                 <zipfileset prefix="/usr/share/icons/hicolor/64x64/apps" file="${appdir}/${icon-name}.png"/>
                                 <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
@@ -814,12 +836,14 @@ Categories=@{categories}]]>
                                     <exclude name="@{executable}"/>
                                     <exclude name="nopackagesh_@{executable}"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jexec"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.so"/>
                                     <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="@{packageexecutabledir}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="/usr/share/${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="jexec,jspawnhelper,*.so,**/*.so"/>
                                 <zipfileset filemode="755" prefix="/usr/share/applications" file="@{outdir}/${package-name}.desktop"/>
                                 <zipfileset prefix="/usr/share/doc/${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                                 <depends/>
@@ -896,7 +920,7 @@ Multi-Arch: @{multiarch}]]></echo>
                         <available file="${appdir}/${icon-name}.png"/>
                         <then>
                             <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/*.so,jre/lib/**/*.so">
+                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},${icon-name}.png,jre/bin/*,jre/lib/jexec,jre/lib/jspawnhelper,jre/lib/*.so,jre/lib/**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}"/>
                                 </data>
                                 <data src="@{appjar}" type="file">
@@ -908,7 +932,7 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <data src="${appdir}/jre/bin" type="directory" includes="*">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
                                 </data>
-                                <data src="${appdir}/jre/lib" type="directory" includes="*.so,**/*.so">
+                                <data src="${appdir}/jre/lib" type="directory" includes="jexec,jspawnhelper,*.so,**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib" filemode="755"/>
                                 </data>
                                 <data src="@{outdir}/${package-name}.desktop" type="file">
@@ -924,7 +948,7 @@ Multi-Arch: @{multiarch}]]></echo>
                         </then>
                         <else>
                             <pure-java-deb destfile="@{outdir}/${package-name}-@{version}-@{release}.${debarchitecture}.deb" control="@{outdir}/controldir" verbose="true">
-                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/*.so,jre/lib/**/*.so">
+                                <data src="${appdir}" type="directory" excludes="@{executable},nopackagesh_@{executable},jre/bin/*,jre/lib/jexec,jre/lib/jspawnhelper,jre/lib/*.so,jre/lib/**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}"/>
                                 </data>
                                 <data src="@{appjar}" type="file">
@@ -936,7 +960,7 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <data src="${appdir}/jre/bin" type="directory" includes="*">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/bin" filemode="755"/>
                                 </data>
-                                <data src="${appdir}/jre/lib" type="directory" includes="*.so,**/*.so">
+                                <data src="${appdir}/jre/lib" type="directory" includes="jexec,jspawnhelper,*.so,**/*.so">
                                     <mapper type="perm" prefix="/usr/share/${package-name}/jre/lib" filemode="755"/>
                                 </data>
                                 <data src="@{outdir}/${package-name}.desktop" type="file">
@@ -981,12 +1005,14 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}" dir="${appdir}">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jexec"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.so"/>
                                     <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="jexec,jspawnhelper,*.so,**/*.so"/>
                                 <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </zip>
                         </else>
@@ -1018,12 +1044,14 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}" dir="${appdir}">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jexec"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.so"/>
                                     <exclude name="jre/lib/**/*.so"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}" file="${appdir}/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}/jre/bin" dir="${appdir}/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="*.so,**/*.so"/>
+                                <zipfileset filemode="755" prefix="${package-name}/jre/lib" dir="${appdir}/jre/lib" includes="jexec,jspawnhelper,*.so,**/*.so"/>
                                 <zipfileset prefix="${package-name}" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </tar>
                         </else>
@@ -1122,12 +1150,13 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.dylib"/>
                                     <exclude name="jre/lib/**/*.dylib"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+                                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="jspawnhelper,*.dylib,**/*.dylib"/>
                                 <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </zip>
                         </else>
@@ -1163,12 +1192,13 @@ Multi-Arch: @{multiarch}]]></echo>
                                 <zipfileset prefix="${package-name}.app/Contents/MacOS" dir="${appdir}/Contents/MacOS">
                                     <exclude name="@{executable}"/>
                                     <exclude name="jre/bin/*"/>
+                                    <exclude name="jre/lib/jspawnhelper"/>
                                     <exclude name="jre/lib/*.dylib"/>
                                     <exclude name="jre/lib/**/*.dylib"/>
                                 </zipfileset>
                                 <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/" file="${appdir}/Contents/MacOS/@{executable}"/>
                                 <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/bin" dir="${appdir}/Contents/MacOS/jre/bin" includes="*"/>
-                                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="*.dylib,**/*.dylib"/>
+                                <zipfileset filemode="755" prefix="${package-name}.app/Contents/MacOS/jre/lib" dir="${appdir}/Contents/MacOS/jre/lib" includes="jspawnhelper,*.dylib,**/*.dylib"/>
                                 <zipfileset prefix="${package-name}.app/Contents/MacOS/" dir="${tmpdocdir}" includes="@{docdirincludes}"/>
                             </tar>
                         </else>
