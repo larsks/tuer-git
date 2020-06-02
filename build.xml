@@ -140,7 +140,7 @@
 	<!-- ================================================================= -->
 	<target name="upgrade-jogamp" description="Upgrades JogAmp">
 		<!-- updates the local files -->
-		<get src="${jogamp-unsigned-jars-url}/jogamp-fat.jar" dest="lib/jogamp" verbose="true" usetimestamp="true" skipexisting="false" />
+		<get src="${jogamp-unsigned-jars-url}/jogamp-fat.jar" dest="lib/jogamp" verbose="true" usetimestamp="false" skipexisting="false" />
 	</target>
 	<!-- ================================================================= -->
 	<!-- Compile                                                           -->
