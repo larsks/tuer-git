@@ -175,12 +175,14 @@
 		<javac includeantruntime="false" srcdir="${srcdir}"       	   
 	           destdir="${bindir}"
 	           debug="on" release="14">
+			<compilerarg line="--add-modules jdk.incubator.foreign"/>
 			<classpath refid="project.class.path"/>
 			<include name="**/*.java"/>
 		</javac>
 		<javac includeantruntime="false" srcdir="${testsrcdir}"              
 		       destdir="${testbindir}"
 		       debug="on" release="14">
+			<compilerarg line="--add-modules jdk.incubator.foreign"/>
 			<classpath>
 				<path refid="project.class.path"/>
 				<fileset dir="${bindir}"/>

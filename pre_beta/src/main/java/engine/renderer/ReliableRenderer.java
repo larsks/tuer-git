@@ -18,11 +18,14 @@
 package engine.renderer;
 
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
+
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.renderer.jogl.JoglRenderer;
 import com.ardor3d.scenegraph.AbstractBufferData;
 import engine.misc.DeallocationHelper;
+import jdk.incubator.foreign.MemorySegment;
 
 /**
  * Reliable JOGL renderer able to cleanly release all native resources
@@ -61,7 +64,14 @@ public class ReliableRenderer extends JoglRenderer {
     }
 
     public void deleteBuffer(final Buffer realNioBuffer) {
-        if (deallocationHelper != null)
-            deallocationHelper.deallocate(realNioBuffer);
+        if (realNioBuffer.isDirect()) {
+            if (realNioBuffer instanceof ByteBuffer) {
+                MemorySegment.ofByteBuffer((ByteBuffer) realNioBuffer).close();
+            } else {
+                if (deallocationHelper != null) {
+                    deallocationHelper.deallocate(realNioBuffer);
+                }
+            }
+        }
     }
 }
