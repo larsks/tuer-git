@@ -37,11 +37,11 @@ public class TestDeallocationHelper {
         final ByteBuffer bigEndianReadOnlyDirectByteBuffer = ByteBuffer.allocateDirect(1).order(ByteOrder.BIG_ENDIAN)
                 .asReadOnlyBuffer();
         final ByteBuffer bigEndianReadWriteDirectByteBuffer = ByteBuffer.allocateDirect(1).order(ByteOrder.BIG_ENDIAN);
-        final ByteBuffer slicedBigEndianReadOnlyDirectByteBuffer = ((ByteBuffer) ByteBuffer.allocateDirect(2)
-                .order(ByteOrder.BIG_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2)).slice()
+        final ByteBuffer slicedBigEndianReadOnlyDirectByteBuffer = ByteBuffer.allocateDirect(2)
+                .order(ByteOrder.BIG_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2).slice()
                         .asReadOnlyBuffer();
-        final ByteBuffer slicedBigEndianReadWriteDirectByteBuffer = ((ByteBuffer) ByteBuffer.allocateDirect(2)
-                .order(ByteOrder.BIG_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2)).slice();
+        final ByteBuffer slicedBigEndianReadWriteDirectByteBuffer = ByteBuffer.allocateDirect(2)
+                .order(ByteOrder.BIG_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2).slice();
         final CharBuffer bigEndianReadOnlyDirectCharBuffer = ByteBuffer.allocateDirect(1).order(ByteOrder.BIG_ENDIAN)
                 .asReadOnlyBuffer().asCharBuffer();
         final CharBuffer bigEndianReadWriteDirectCharBuffer = ByteBuffer.allocateDirect(1).order(ByteOrder.BIG_ENDIAN)
@@ -70,11 +70,11 @@ public class TestDeallocationHelper {
                 .order(ByteOrder.LITTLE_ENDIAN).asReadOnlyBuffer();
         final ByteBuffer littleEndianReadWriteDirectByteBuffer = ByteBuffer.allocateDirect(1)
                 .order(ByteOrder.LITTLE_ENDIAN);
-        final ByteBuffer slicedLittleEndianReadOnlyDirectByteBuffer = ((ByteBuffer) ByteBuffer.allocateDirect(2)
-                .order(ByteOrder.LITTLE_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2)).slice()
+        final ByteBuffer slicedLittleEndianReadOnlyDirectByteBuffer = ByteBuffer.allocateDirect(2)
+                .order(ByteOrder.LITTLE_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2).slice()
                         .asReadOnlyBuffer();
-        final ByteBuffer slicedLittleEndianReadWriteDirectByteBuffer = ((ByteBuffer) ByteBuffer.allocateDirect(2)
-                .order(ByteOrder.LITTLE_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2)).slice();
+        final ByteBuffer slicedLittleEndianReadWriteDirectByteBuffer = ByteBuffer.allocateDirect(2)
+                .order(ByteOrder.LITTLE_ENDIAN).put((byte) 0).put((byte) 0).position(1).limit(2).slice();
         final CharBuffer littleEndianReadOnlyDirectCharBuffer = ByteBuffer.allocateDirect(1)
                 .order(ByteOrder.LITTLE_ENDIAN).asReadOnlyBuffer().asCharBuffer();
         final CharBuffer littleEndianReadWriteDirectCharBuffer = ByteBuffer.allocateDirect(1)
