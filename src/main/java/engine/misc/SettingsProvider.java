@@ -38,7 +38,7 @@ public class SettingsProvider {
 
     public static final int UNCHANGED_SIZE = 0;
 
-    private static final Logger logger = Logger.getLogger(SettingsProvider.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(SettingsProvider.class.getName());
 
     private static final String[] trueStrings = { Boolean.TRUE.toString(), "on", "1", "enabled", "activated" };
 
@@ -117,14 +117,14 @@ public class SettingsProvider {
             try (final FileReader fileReader = new FileReader(configFile);
                     final BufferedReader bufferedReader = new BufferedReader(fileReader)) {
                 properties.load(bufferedReader);
-                logger.log(Level.INFO, "Configuration file " + configFile.getAbsolutePath() + " found");
+                LOGGER.log(Level.INFO, "Configuration file " + configFile.getAbsolutePath() + " found");
             } catch (IOException ioe) {// something wrong has just happened
                                        // while reading the configuration file
-                logger.log(Level.WARNING, "Something wrong has occured while reading the configuration file "
+                LOGGER.log(Level.WARNING, "Something wrong has occured while reading the configuration file "
                         + configFile.getAbsolutePath(), ioe);
             }
         } else {// the configuration file is absent
-            logger.log(Level.WARNING, "Cannot find the configuration file " + configFile.getAbsolutePath());
+            LOGGER.log(Level.WARNING, "Cannot find the configuration file " + configFile.getAbsolutePath());
         }
         // language property
         locale = readLocalePropertyValue(properties, "LANGUAGE", Locale.getDefault());
@@ -149,16 +149,16 @@ public class SettingsProvider {
         final String languageCode = properties.getProperty(propertyKey);
         if (languageCode != null && !languageCode.isEmpty()) {
             localePropertyValue = new Locale(languageCode);
-            logger.log(Level.INFO, "Language code \"" + languageCode + "\" found, uses the language "
+            LOGGER.log(Level.INFO, "Language code \"" + languageCode + "\" found, uses the language "
                     + localePropertyValue.getDisplayLanguage() + " for the property " + propertyKey);
         } else {
             localePropertyValue = defaultLocale;
             // language not set
             if (localePropertyValue == null)
-                logger.log(Level.WARNING,
+                LOGGER.log(Level.WARNING,
                         "Language code not found, no default language, uses null for the property " + propertyKey);
             else
-                logger.log(Level.INFO, "Language code not found, uses the default language "
+                LOGGER.log(Level.INFO, "Language code not found, uses the default language "
                         + localePropertyValue.getDisplayLanguage() + " for the property " + propertyKey);
         }
         return (localePropertyValue);
@@ -184,15 +184,15 @@ public class SettingsProvider {
         if (booleanPropertyValue == null) {
             if (defaultValue == null) {
                 booleanPropertyValue = Boolean.FALSE;
-                logger.log(Level.WARNING,
+                LOGGER.log(Level.WARNING,
                         "Boolean property " + propertyKey + " not found, no default value, set to false");
             } else {
                 booleanPropertyValue = defaultValue;
-                logger.log(Level.INFO, "Boolean property " + propertyKey + " not found, set to the default value "
+                LOGGER.log(Level.INFO, "Boolean property " + propertyKey + " not found, set to the default value "
                         + defaultValue.booleanValue());
             }
         } else
-            logger.log(Level.INFO,
+            LOGGER.log(Level.INFO,
                     "Boolean property " + propertyKey + " found: " + booleanPropertyValue.booleanValue());
         return (booleanPropertyValue.booleanValue());
     }
@@ -211,26 +211,26 @@ public class SettingsProvider {
                             break;
                         }
                     if (intPropertyValue == null)
-                        logger.log(Level.WARNING,
+                        LOGGER.log(Level.WARNING,
                                 "Value " + resultCandidate + " rejected for the property " + propertyKey);
                 } else
                     intPropertyValue = resultCandidate;
             } catch (NumberFormatException nfe) {
-                logger.log(Level.WARNING, "A problem occured while reading the property " + propertyKey, nfe);
+                LOGGER.log(Level.WARNING, "A problem occured while reading the property " + propertyKey, nfe);
             }
         }
         if (intPropertyValue == null) {
             if (defaultValue == null) {
                 intPropertyValue = Integer.MIN_VALUE;
-                logger.log(Level.WARNING, "Integer property " + propertyKey + " not found, no default value, set to "
+                LOGGER.log(Level.WARNING, "Integer property " + propertyKey + " not found, no default value, set to "
                         + Integer.MIN_VALUE);
             } else {
                 intPropertyValue = defaultValue;
-                logger.log(Level.INFO, "Integer property " + propertyKey + " not found, set to the default value "
+                LOGGER.log(Level.INFO, "Integer property " + propertyKey + " not found, set to the default value "
                         + defaultValue.intValue());
             }
         } else
-            logger.log(Level.INFO, "Integer property " + propertyKey + " found: " + intPropertyValue.intValue());
+            LOGGER.log(Level.INFO, "Integer property " + propertyKey + " found: " + intPropertyValue.intValue());
         return (intPropertyValue.intValue());
     }
 
@@ -326,9 +326,9 @@ public class SettingsProvider {
                 final String comments = programShortName + " configuration file";
                 properties.store(bufferedWriter, comments);
             }
-            logger.log(Level.INFO, "Settings saved into the configuration file " + configFile.getAbsolutePath() + "\n");
+            LOGGER.log(Level.INFO, "Settings saved into the configuration file " + configFile.getAbsolutePath() + "\n");
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
+            LOGGER.log(Level.WARNING,
                     "Something wrong has happened while trying to save the settings into the configuration file "
                             + configFile.getAbsolutePath(),
                     t);

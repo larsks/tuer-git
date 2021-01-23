@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 public final class DesktopIntegration {
 
-    private static Logger logger = Logger.getLogger(DesktopIntegration.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(DesktopIntegration.class.getName());
 
     private static final DesktopIntegration instance = new DesktopIntegration();
 
@@ -108,7 +108,7 @@ public final class DesktopIntegration {
          */
         final String osName = System.getProperty("os.name").toLowerCase();
         final String userHome = System.getProperty("user.home");
-        logger.info("operating system: " + osName);
+        LOGGER.info("operating system: " + osName);
         if (osName.startsWith("linux"))
             operatingSystem = OS.Linux;
         else if (osName.startsWith("mac"))
@@ -119,14 +119,14 @@ public final class DesktopIntegration {
             operatingSystem = OS.Unix;
         if (operatingSystem.equals(OS.Linux) || operatingSystem.equals(OS.Unix)) {
             if (operatingSystem.equals(OS.Linux))
-                logger.info("operating system family: Linux");
+                LOGGER.info("operating system family: Linux");
             else if (osName.startsWith("solaris") || osName.startsWith("sunos") || osName.startsWith("hp-ux")
                     || osName.startsWith("aix") || osName.startsWith("freebsd") || osName.startsWith("openvms")
                     || osName.startsWith("os") || osName.startsWith("irix") || osName.startsWith("netware")
                     || osName.contains("unix"))
-                logger.warning("operating system family: Unix");
+                LOGGER.warning("operating system family: Unix");
             else
-                logger.warning("unknown operating system family, maybe Unix");
+                LOGGER.warning("unknown operating system family, maybe Unix");
             // any window manager following the FreeDesktop specification
             // supports the command below
             String XDG_DESKTOP_DIR = null;
@@ -151,53 +151,53 @@ public final class DesktopIntegration {
                 desktopDirDenotesExistingDir = false;
             if (!desktopDirSet || !desktopDirDenotesExistingDir) {
                 if (!desktopDirSet)
-                    logger.warning("XDG_DESKTOP_DIR is not set");
+                    LOGGER.warning("XDG_DESKTOP_DIR is not set");
                 if (!desktopDirDenotesExistingDir)
-                    logger.warning("XDG_DESKTOP_DIR doesn't denote an existing directory: " + XDG_DESKTOP_DIR);
+                    LOGGER.warning("XDG_DESKTOP_DIR doesn't denote an existing directory: " + XDG_DESKTOP_DIR);
                 final String defaultDesktopFolderPath = userHome + System.getProperty("file.separator") + "Desktop";
                 if (new File(defaultDesktopFolderPath).exists()) {
-                    logger.info("use the default desktop folder: " + defaultDesktopFolderPath);
+                    LOGGER.info("use the default desktop folder: " + defaultDesktopFolderPath);
                     desktopPath = defaultDesktopFolderPath;
                 } else {
-                    logger.warning("the default desktop folder " + defaultDesktopFolderPath + " does not exist");
+                    LOGGER.warning("the default desktop folder " + defaultDesktopFolderPath + " does not exist");
                     desktopPath = null;
                 }
             } else {
                 desktopPath = XDG_DESKTOP_DIR;
-                logger.info("XDG_DESKTOP_DIR denotes an existing directory: " + XDG_DESKTOP_DIR);
+                LOGGER.info("XDG_DESKTOP_DIR denotes an existing directory: " + XDG_DESKTOP_DIR);
             }
         } else if (operatingSystem.equals(OS.Mac)) {
-            logger.info("operating system family: Mac");
+            LOGGER.info("operating system family: Mac");
             final String oldMacDesktopFolderPath = userHome + System.getProperty("file.separator") + "Desktop Folder";
             final String modernMacDesktopFolderPath = userHome + System.getProperty("file.separator") + "Desktop";
             if (new File(oldMacDesktopFolderPath).exists()) {
-                logger.info("use old desktop folder: " + oldMacDesktopFolderPath);
+                LOGGER.info("use old desktop folder: " + oldMacDesktopFolderPath);
                 desktopPath = oldMacDesktopFolderPath;
             } else if (new File(modernMacDesktopFolderPath).exists()) {
-                logger.info("use modern desktop folder: " + modernMacDesktopFolderPath);
+                LOGGER.info("use modern desktop folder: " + modernMacDesktopFolderPath);
                 desktopPath = modernMacDesktopFolderPath;
             } else {
-                logger.warning("The desktop folder does not match with any known pattern. There is no way to find it");
+                LOGGER.warning("The desktop folder does not match with any known pattern. There is no way to find it");
                 desktopPath = null;
             }
         } else if (operatingSystem.equals(OS.Windows)) {
-            logger.info("operating system family: Windows");
+            LOGGER.info("operating system family: Windows");
             String specialFolderValue = null;
             File tmpWshFile = null;
             try {
-                logger.info("tries to create a temporary file to contain the WSH script...");
+                LOGGER.info("tries to create a temporary file to contain the WSH script...");
                 tmpWshFile = File.createTempFile("getDesktopFolder", ".js");
-                logger.info("temporary file " + tmpWshFile.getAbsolutePath() + " successfully created");
+                LOGGER.info("temporary file " + tmpWshFile.getAbsolutePath() + " successfully created");
                 try (PrintWriter pw = new PrintWriter(tmpWshFile)) {
                     pw.println("WScript.Echo(WScript.SpecialFolders(\"Desktop\"));");
-                    logger.info("temporary file " + tmpWshFile.getAbsolutePath() + " successfully filled");
+                    LOGGER.info("temporary file " + tmpWshFile.getAbsolutePath() + " successfully filled");
                 }
             } catch (IOException ioe) {
                 if (tmpWshFile != null) {
                     tmpWshFile = null;
-                    logger.warning("something was wrong while writing the data in the temporary file");
+                    LOGGER.warning("something was wrong while writing the data in the temporary file");
                 } else
-                    logger.warning("temporary file not created");
+                    LOGGER.warning("temporary file not created");
                 ioe.printStackTrace();
             }
             if (tmpWshFile != null) {// use Windows Scripting Host (supported
@@ -217,7 +217,7 @@ public final class DesktopIntegration {
                 }
             }
             if (specialFolderValue != null && new File(specialFolderValue).exists()) {
-                logger.info("special desktop folder path: " + specialFolderValue);
+                LOGGER.info("special desktop folder path: " + specialFolderValue);
                 desktopPath = specialFolderValue;
             } else {// use Windows registry
                 final String REGQUERY_UTIL = "reg query ";
@@ -260,17 +260,17 @@ public final class DesktopIntegration {
                     e.printStackTrace();
                 }
                 if (registryValue != null && new File(registryValue).exists()) {
-                    logger.info("registry value used as a desktop path: " + registryValue);
+                    LOGGER.info("registry value used as a desktop path: " + registryValue);
                     desktopPath = registryValue;
                 } else {// this is the default desktop folder on Windows Vista,
                         // 7 and 8, whatever the language
                     final String modernWindowsDesktopFolderPath = userHome + System.getProperty("file.separator")
                             + "Desktop";
                     if (new File(modernWindowsDesktopFolderPath).exists()) {
-                        logger.info("usual default desktop path: " + modernWindowsDesktopFolderPath);
+                        LOGGER.info("usual default desktop path: " + modernWindowsDesktopFolderPath);
                         desktopPath = modernWindowsDesktopFolderPath;
                     } else {
-                        logger.warning("There is no way to find the desktop folder");
+                        LOGGER.warning("There is no way to find the desktop folder");
                         desktopPath = null;
                     }
                 }
@@ -279,11 +279,11 @@ public final class DesktopIntegration {
             desktopPath = null;
         if (desktopPath != null) {
             if (operatingSystem.equals(OS.Unix))
-                logger.warning("operating system not supported. Desktop path: " + desktopPath);
+                LOGGER.warning("operating system not supported. Desktop path: " + desktopPath);
             else
-                logger.info("operating system supported. Desktop path: " + desktopPath);
+                LOGGER.info("operating system supported. Desktop path: " + desktopPath);
         } else
-            logger.warning("desktop path not found");
+            LOGGER.warning("desktop path not found");
     }
 
     public static final boolean isDesktopShortcutCreationSupported() {
@@ -308,13 +308,13 @@ public final class DesktopIntegration {
             final String desktopShortcutFilepath, final String command) {
         final boolean success;
         if (!isDesktopShortcutCreationSupported()) {
-            logger.warning("desktop shortcuts are not supported by this operating system");
+            LOGGER.warning("desktop shortcuts are not supported by this operating system");
             success = false;
         } else if (desktopShortcutFilepath == null) {
-            logger.warning("the path of the desktop shortcut file should not be null");
+            LOGGER.warning("the path of the desktop shortcut file should not be null");
             success = false;
         } else {
-            logger.info("desktop shortcuts are supported by this operating system");
+            LOGGER.info("desktop shortcuts are supported by this operating system");
             final File desktopShortcutFile = new File(desktopShortcutFilepath + System.getProperty("file.separator")
                     + desktopShortcutFilenameWithoutExtension + "."
                     + instance.operatingSystem.getDesktopShortcutFileExtension());
@@ -333,11 +333,11 @@ public final class DesktopIntegration {
                     ioe.printStackTrace();
                 }
                 if (!fileCreationSuccess) {
-                    logger.warning("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
+                    LOGGER.warning("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
                             + " has not been successfully created");
                     success = false;
                 } else {
-                    logger.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
+                    LOGGER.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
                             + " has been successfully created");
                     final String[] src = instance.operatingSystem.getDesktopShortcutFileContent();
                     final String[] desktopShortcutFileContent = new String[src.length];
@@ -363,11 +363,11 @@ public final class DesktopIntegration {
                     }
                     if (!fileWritingSuccess) {
                         desktopShortcutFile.delete();
-                        logger.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
+                        LOGGER.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
                                 + " has not been successfully filled");
                         success = false;
                     } else {
-                        logger.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
+                        LOGGER.info("the desktop shortcut file " + desktopShortcutFile.getAbsolutePath()
                                 + " has been successfully filled");
                         success = true;
                     }

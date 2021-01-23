@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class ArrayHelper {
 
-    private static final Logger logger = Logger.getLogger(ArrayHelper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ArrayHelper.class.getName());
 
     /**
      * Default constructor
@@ -819,7 +819,7 @@ public class ArrayHelper {
                                     // occupied
                                     if (stringNonFullArray[x + xOffset][y + yOffset] != null
                                             && !stringNonFullArray[x + xOffset][y + yOffset].isEmpty())
-                                        logger.warning("Overlap at [" + (x + xOffset) + "][" + (y + yOffset)
+                                        LOGGER.warning("Overlap at [" + (x + xOffset) + "][" + (y + yOffset)
                                                 + "] between full array n°"
                                                 + stringNonFullArray[x + xOffset][y + yOffset].trim()
                                                 + " and full array n°" + validFullArrayIndex);
@@ -998,7 +998,7 @@ public class ArrayHelper {
                                                             y + smallestRowIndex, fullArray[i], 0, subsectionRowCount);
                                                     for (int j = 0; j < subsectionRowCount; j++) {
                                                         if (!occupancyMapObj.getValue(i + x, j + y))
-                                                            logger.warning(
+                                                            LOGGER.warning(
                                                                     "Overlap at [" + (i + x + smallestColumnIndex)
                                                                             + "][" + (j + y + smallestRowIndex) + "]");
                                                         else
@@ -1011,7 +1011,7 @@ public class ArrayHelper {
                                                 if (fullArraysMap.put(
                                                         new Vector2i(x + smallestColumnIndex, y + smallestRowIndex),
                                                         fullArray) != null)
-                                                    logger.warning("Overlap at [" + (x + smallestColumnIndex) + "]["
+                                                    LOGGER.warning("Overlap at [" + (x + smallestColumnIndex) + "]["
                                                             + (y + smallestRowIndex) + "]");
                                             }
                                         } else {// vertical checks (columns)
@@ -1077,7 +1077,7 @@ public class ArrayHelper {
                                                                 subsectionRowCount);
                                                         for (int j = 0; j < subsectionRowCount; j++) {
                                                             if (!occupancyMapObj.getValue(i + x, j + y))
-                                                                logger.warning("Overlap at ["
+                                                                LOGGER.warning("Overlap at ["
                                                                         + (i + x + smallestColumnIndex) + "]["
                                                                         + (j + y + smallestRowIndex) + "]");
                                                             else
@@ -1090,7 +1090,7 @@ public class ArrayHelper {
                                                     if (fullArraysMap.put(
                                                             new Vector2i(x + smallestColumnIndex, y + smallestRowIndex),
                                                             fullArray) != null)
-                                                        logger.warning("Overlap at [" + (x + smallestColumnIndex) + "]["
+                                                        LOGGER.warning("Overlap at [" + (x + smallestColumnIndex) + "]["
                                                                 + (y + smallestRowIndex) + "]");
                                                 }
                                             }

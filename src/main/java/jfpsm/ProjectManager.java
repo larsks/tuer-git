@@ -66,7 +66,7 @@ public final class ProjectManager extends EntityManager {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = Logger.getLogger(ProjectManager.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ProjectManager.class.getName());
 
     private final GameFilesGenerator gameFilesGenerator;
 
@@ -534,7 +534,7 @@ public final class ProjectManager extends EntityManager {
                     } else {
                         newlyCreatedEntity = null;
                         treeNode = null;
-                        logger.warning("Unexpected case: " + userObject.getClass().getSimpleName()
+                        LOGGER.warning("Unexpected case: " + userObject.getClass().getSimpleName()
                                 + " cannot create a tree node");
                     }
                 } else {
@@ -545,13 +545,13 @@ public final class ProjectManager extends EntityManager {
             } else {
                 newlyCreatedEntity = null;
                 treeNode = null;
-                logger.warning(
+                LOGGER.warning(
                         "Unexpected case: " + userObject.getClass().getSimpleName() + " cannot create a naming dialog");
             }
         } else {
             newlyCreatedEntity = null;
             treeNode = null;
-            logger.warning("Unexpected case: attempt of creating a child of " + userObject.getClass().getSimpleName()
+            LOGGER.warning("Unexpected case: attempt of creating a child of " + userObject.getClass().getSimpleName()
                     + " which does not support this feature");
         }
         final SimpleEntry<JFPSMProjectUserObject, DefaultMutableTreeNode> entry;
