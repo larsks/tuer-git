@@ -124,7 +124,7 @@ public class DeallocationHelper {
                     directByteBufferCleanerMethod = localCleanerCleanOrRunMethod;
                 }
             } catch (final Throwable t) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for Oracle Java, Sun Java and OpenJDK has failed", t);
+                LOGGER.log(Level.WARNING, "The initialization of the deallocator for Oracle Java, Sun Java and OpenJDK has failed", t);
             }
         }
        
@@ -139,13 +139,13 @@ public class DeallocationHelper {
                         success = true;
                     }
                 } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
+                    LOGGER.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
                 }
             } else if (unsafeObject != null && invokeCleanerMethod != null) {
                 try {
                     invokeCleanerMethod.invoke(unsafeObject, directByteBuffer);
                 } catch (final IllegalAccessException | InvocationTargetException e) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
+                    LOGGER.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", e);
                 }
             }
             return (success);
@@ -164,7 +164,7 @@ public class DeallocationHelper {
                 localDirectByteBufferFreeMethod.setAccessible(true);
                 directByteBufferFreeMethod = localDirectByteBufferFreeMethod;
             } catch (final Throwable t) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for Android has failed", t);
+                LOGGER.log(Level.WARNING, "The initialization of the deallocator for Android has failed", t);
             }
         }
 
@@ -176,7 +176,7 @@ public class DeallocationHelper {
                     directByteBufferFreeMethod.invoke(directByteBuffer);
                     success = true;
                 } catch (final Throwable t) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
+                    LOGGER.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
@@ -200,7 +200,7 @@ public class DeallocationHelper {
                 bufferAddressField = Buffer.class.getDeclaredField("address");
                 vmDirectByteBufferFreeMethod = localVmDirectByteBufferFreeMethod;
             } catch (final Throwable t) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for GNU Classpath has failed", t);
+                LOGGER.log(Level.WARNING, "The initialization of the deallocator for GNU Classpath has failed", t);
             }
         }
 
@@ -216,7 +216,7 @@ public class DeallocationHelper {
                         success = true;
                     }
                 } catch (final Throwable t) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
+                    LOGGER.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
@@ -235,7 +235,7 @@ public class DeallocationHelper {
                 localDirectByteBufferFreeMethod.setAccessible(true);
                 directByteBufferFreeMethod = localDirectByteBufferFreeMethod;
             } catch (final Throwable t) {
-                logger.log(Level.WARNING, "The initialization of the deallocator for Apache Harmony has failed", t);
+                LOGGER.log(Level.WARNING, "The initialization of the deallocator for Apache Harmony has failed", t);
             }
         }
 
@@ -247,14 +247,14 @@ public class DeallocationHelper {
                     directByteBufferFreeMethod.invoke(directByteBuffer);
                     success = true;
                 } catch (final Throwable t) {
-                    logger.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
+                    LOGGER.log(Level.WARNING, "The deallocation of a direct NIO buffer has failed", t);
                 }
             }
             return (success);
         }
     }
 
-    private static final Logger logger = Logger.getLogger(DeallocationHelper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DeallocationHelper.class.getName());
 
     private Map<Class<?>, Field> attachmentOrByteBufferFieldMap;
 
@@ -436,7 +436,7 @@ public class DeallocationHelper {
                             }
                             superClassesMsg = builder.toString();
                         }
-                        logger.warning("The field " + fieldname + " hasn't been found in the class " + classname
+                        LOGGER.warning("The field " + fieldname + " hasn't been found in the class " + classname
                                 + superClassesMsg);
                     } else {// the field has been found, stores it into the map
                         attachmentOrByteBufferFieldMap.put(bufferClass, bufferField);
@@ -447,7 +447,7 @@ public class DeallocationHelper {
                     final String msg = "The class " + classname
                             + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                             + " Java version: " + javaVersion;
-                    logger.log(Level.WARNING, msg, cnfe);
+                    LOGGER.log(Level.WARNING, msg, cnfe);
                 }
             }
         // if a known implementation has drastically changed or if the current
@@ -558,7 +558,7 @@ public class DeallocationHelper {
                                     break;
                                 }
                             } catch (final Throwable t) {
-                                logger.log(Level.WARNING, "Cannot access the field " + field.getName()
+                                LOGGER.log(Level.WARNING, "Cannot access the field " + field.getName()
                                         + " of the class " + bufferIntermediaryClass.getName(), t);
                             }
                         }
@@ -583,7 +583,7 @@ public class DeallocationHelper {
                 final String msg = "The class " + directByteBufferClassName
                         + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                         + " Java version: " + javaVersion;
-                logger.log(Level.WARNING, msg, cnfe);
+                LOGGER.log(Level.WARNING, msg, cnfe);
             }
             if (directByteBufferClass != null)
                 deallocatableBufferClassSet.add(directByteBufferClass);
@@ -596,7 +596,7 @@ public class DeallocationHelper {
                 final String msg = "The class " + readOnlyDirectByteBufferClassName
                         + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                         + " Java version: " + javaVersion;
-                logger.log(Level.WARNING, msg, cnfe);
+                LOGGER.log(Level.WARNING, msg, cnfe);
             }
             if (readOnlyDirectByteBufferClass != null)
                 deallocatableBufferClassSet.add(readOnlyDirectByteBufferClass);
@@ -608,7 +608,7 @@ public class DeallocationHelper {
                 final String msg = "The class " + readWriteDirectByteBufferClassName
                         + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                         + " Java version: " + javaVersion;
-                logger.log(Level.WARNING, msg, cnfe);
+                LOGGER.log(Level.WARNING, msg, cnfe);
             }
             if (readWriteDirectByteBufferClass != null)
                 deallocatableBufferClassSet.add(readWriteDirectByteBufferClass);
@@ -621,7 +621,7 @@ public class DeallocationHelper {
                 final String msg = "The class " + readOnlyDirectByteBufferClassName
                         + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                         + " Java version: " + javaVersion;
-                logger.log(Level.WARNING, msg, cnfe);
+                LOGGER.log(Level.WARNING, msg, cnfe);
             }
             if (readOnlyDirectByteBufferClass != null)
                 deallocatableBufferClassSet.add(readOnlyDirectByteBufferClass);
@@ -633,7 +633,7 @@ public class DeallocationHelper {
                 final String msg = "The class " + readWriteDirectByteBufferClassName
                         + " hasn't been found while initializing the deallocator. Java vendor: " + javaVendor
                         + " Java version: " + javaVersion;
-                logger.log(Level.WARNING, msg, cnfe);
+                LOGGER.log(Level.WARNING, msg, cnfe);
             }
             if (readWriteDirectByteBufferClass != null)
                 deallocatableBufferClassSet.add(readWriteDirectByteBufferClass);
@@ -715,7 +715,7 @@ public class DeallocationHelper {
                       // deallocatable buffer
                     deallocatableDirectByteBuffer = null;
                     final String bufferClassName = bufferClass.getName();
-                    logger.warning("No deallocatable buffer has been found for an instance of the class "
+                    LOGGER.warning("No deallocatable buffer has been found for an instance of the class "
                             + bufferClassName + " whereas it is a direct NIO buffer");
                 }
             } else {// the passed buffer contains another buffer, looks for a
