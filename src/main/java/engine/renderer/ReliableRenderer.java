@@ -64,13 +64,11 @@ public class ReliableRenderer extends JoglRenderer {
     }
 
     public void deleteBuffer(final Buffer realNioBuffer) {
-        if (realNioBuffer.isDirect()) {
-            if (realNioBuffer instanceof ByteBuffer) {
-                MemorySegment.ofByteBuffer((ByteBuffer) realNioBuffer).close();
-            } else {
-                if (deallocationHelper != null) {
-                    deallocationHelper.deallocate(realNioBuffer);
-                }
+        if (deallocationHelper != null) {
+            //FIXME rather call attachment() or use the field named "bb", look for an instance of java.nio.DirectByteBuffer
+            final ByteBuffer realDirectNioBuffer = deallocationHelper.findDeallocatableBuffer(realNioBuffer);
+            if (realDirectNioBuffer != null) {
+                MemorySegment.ofByteBuffer(realDirectNioBuffer).close();
             }
         }
     }
