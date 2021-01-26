@@ -18,14 +18,12 @@
 package engine.renderer;
 
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 
 import com.ardor3d.image.Image;
 import com.ardor3d.image.Texture;
 import com.ardor3d.renderer.jogl.JoglRenderer;
 import com.ardor3d.scenegraph.AbstractBufferData;
-import engine.misc.DeallocationHelper;
-import jdk.incubator.foreign.MemorySegment;
+import engine.misc.SimpleDeallocationHelper;
 
 /**
  * Reliable JOGL renderer able to cleanly release all native resources
@@ -35,13 +33,13 @@ import jdk.incubator.foreign.MemorySegment;
  */
 public class ReliableRenderer extends JoglRenderer {
 
-    private final DeallocationHelper deallocationHelper;
+    private final SimpleDeallocationHelper deallocationHelper;
 
     public ReliableRenderer() {
-        this(new DeallocationHelper());
+        this(new SimpleDeallocationHelper());
     }
 
-    public ReliableRenderer(final DeallocationHelper deallocationHelper) {
+    public ReliableRenderer(final SimpleDeallocationHelper deallocationHelper) {
         super();
         this.deallocationHelper = deallocationHelper;
     }
@@ -58,18 +56,15 @@ public class ReliableRenderer extends JoglRenderer {
         super.deleteTexture(texture);
         final Image image = texture.getImage();
         if (image != null && image.getDataSize() >= 1) {
-            for (Buffer data : image.getData())
+            for (Buffer data : image.getData()) {
                 deleteBuffer(data);
+            }
         }
     }
 
     public void deleteBuffer(final Buffer realNioBuffer) {
         if (deallocationHelper != null) {
-            //FIXME rather call attachment() or use the field named "bb", look for an instance of java.nio.DirectByteBuffer
-            final ByteBuffer realDirectNioBuffer = deallocationHelper.findDeallocatableBuffer(realNioBuffer);
-            if (realDirectNioBuffer != null) {
-                MemorySegment.ofByteBuffer(realDirectNioBuffer).close();
-            }
+            deallocationHelper.deallocate(realNioBuffer);
         }
     }
 }
