@@ -133,7 +133,8 @@ public class TestDeallocationHelper {
         buffers.add(littleEndianReadOnlyDirectShortBuffer);
         buffers.add(littleEndianReadWriteDirectShortBuffer);
         final DeallocationHelper helper = new DeallocationHelper();
-        for (final Buffer buffer : buffers)
+        for (final Buffer buffer : buffers) {
             helper.deallocate(buffer);
+        }
     }
 }

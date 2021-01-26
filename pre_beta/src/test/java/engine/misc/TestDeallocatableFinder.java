@@ -12,8 +12,6 @@
  */
 package engine.misc;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,7 +24,6 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -139,40 +136,16 @@ public class TestDeallocatableFinder {
         buffers.add(littleEndianReadOnlyDirectShortBuffer);
         buffers.add(littleEndianReadWriteDirectShortBuffer);
         final DeallocationHelper helper = new DeallocationHelper();
+        final SimpleDeallocationHelper simpleHelper = new SimpleDeallocationHelper();
         for (final Buffer buffer : buffers) {
             final ByteBuffer deallocatableByteBufferFoundByLegacyMechanism = helper.findDeallocatableBuffer(buffer);
-            final ByteBuffer deallocatableByteBufferFoundByExperimentalMechanism = findDeallocatableBuffer(buffer);
+            final ByteBuffer deallocatableByteBufferFoundByExperimentalMechanism = simpleHelper.findDeallocatableBuffer(buffer);
             if (Objects.equals(deallocatableByteBufferFoundByLegacyMechanism, deallocatableByteBufferFoundByExperimentalMechanism)) {
                 LOGGER.info("OK :" + buffer.getClass().getName());
             } else {
                 LOGGER.warning("NOK:" + buffer.getClass().getName());
             }
+            simpleHelper.deallocate(buffer);
         }
-    }
-
-    private static final ByteBuffer findDeallocatableBuffer(final Buffer buffer) {
-        final ByteBuffer result;
-        if (buffer == null || !buffer.isDirect()) {
-            result = null;
-        } else if (buffer.getClass().getName().equals("java.nio.DirectByteBuffer")) {
-            Object attachment = null;
-            try {
-                final Method attachmentMethod = buffer.getClass().getDeclaredMethod("attachment");
-                attachmentMethod.setAccessible(true);
-                attachment = attachmentMethod.invoke(buffer);
-            } catch (final InvocationTargetException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException e) {
-                LOGGER.log(Level.WARNING, "Failed to find the attachment", e);
-            }
-            if (attachment == null) {
-                result = (ByteBuffer) buffer;
-            } else if (attachment instanceof Buffer) {
-                result = findDeallocatableBuffer((Buffer) attachment);
-            } else {
-                result = null;
-            }
-        } else {
-            result = null;
-        }
-        return result;
     }
 }
