@@ -335,7 +335,7 @@
 	<target name="create-linux-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-linux-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign" docdir="." docdirincludes="*.txt"
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign;--add-opens=java.base/java.nio=ALL-UNNAMED" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-linux-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-filename}" 
 		    packageshscriptenabled="true" packageexecutabledir="/usr/bin" arch="amd64" version="${game-version}" release="${game-release}"
 		    categories="Game;Shooter;" comment="${game-short-description}" vendor="${vendor}" packager="${vendor}" license="${game-license}" 
@@ -348,7 +348,7 @@
 	<target name="create-windows-pkgs">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-windows-app-bundles executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}"
-		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign" docdir="." docdirincludes="*.txt"
+		    outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign;--add-opens=java.base/java.nio=ALL-UNNAMED" docdir="." docdirincludes="*.txt"
 		    jdk="${openjdk-windows-amd64-build-url}" bundleidentifier="${game-bundle-identifier}" iconsfile="src/main/resources/images/${game-logo-ico-filename}" 
 		    arch="amd64" version="${game-version}" release="${game-release}" licensefile="./LICENSE.txt"/>
 	</target>
@@ -358,7 +358,7 @@
 	<target name="create-os-x-app">
 		<to-package-name property="game-package-name" input="${game-short-name}"/>
 		<create-os-x-app-bundle arch="universal" executable="${game-package-name}" appjar="${destdir}/${game-jar-filename}" appname="${game-short-name}" 
-		  	outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign"
+		  	outdir="${destdir}" vmargs="-Xmx256m;-XX:MaxDirectMemorySize=128M;--add-modules=jdk.incubator.foreign;--add-opens=java.base/java.nio=ALL-UNNAMED"
 			docdir="." docdirincludes="*.txt" jdk="${openjdk-macosx-universal-build-url}" bundleidentifier="${game-bundle-identifier}"
 			iconsfile="src/main/resources/images/${game-logo-icns-filename}" version="${game-version}" 
 			release="${game-release}"/>
@@ -435,6 +435,7 @@
 			  failonerror="true">
 			<classpath refid="project.class.path"/>
 			<jvmarg line="--add-modules=jdk.incubator.foreign"/>
+			<jvmarg line="--add-opens=java.base/java.nio=ALL-UNNAMED"/>
 			<jvmarg value="-Xmx256m"/>
 			<jvmarg value="-XX:MaxDirectMemorySize=128M"/>
 			<jvmarg value="-Dsun.java2d.xrender=true"/>
