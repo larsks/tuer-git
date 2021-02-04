@@ -62,7 +62,7 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
                 new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null } };
         System.out.println("Input:");
         final ArrayHelper arrayHelper = new ArrayHelper();
-        final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck = new ArrayHelper.OccupancyCheck<RightTriangleInfo[]>() {
+        final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck = new ArrayHelper.OccupancyCheck<>() {
 
             @Override
             public boolean isOccupied(RightTriangleInfo[] value) {
