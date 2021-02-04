@@ -69,7 +69,7 @@ public final class TaskManagementProgressionNode extends Node {
         final UIHud hud = new UIHud(canvas);
         hud.add(frame);
         attachChild(hud);
-        addController(new SpatialController<Spatial>() {
+        addController(new SpatialController<>() {
             @Override
             public final void update(final double time, final Spatial caller) {
                 final int taskCount = taskManager.getTaskCount();

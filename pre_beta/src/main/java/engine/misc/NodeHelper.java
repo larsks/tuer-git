@@ -17,6 +17,7 @@
  */
 package engine.misc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import com.ardor3d.bounding.BoundingVolume;
@@ -69,10 +70,8 @@ public final class NodeHelper {
                 setModelBound(child, boundingClass);
         } else if (spatial instanceof Mesh)
             try {
-                ((Mesh) spatial).setModelBound(boundingClass.newInstance());
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+                ((Mesh) spatial).setModelBound(boundingClass.getDeclaredConstructor().newInstance());
+            } catch (InstantiationException|InvocationTargetException|NoSuchMethodException|IllegalAccessException e) {
                 e.printStackTrace();
             }
     }

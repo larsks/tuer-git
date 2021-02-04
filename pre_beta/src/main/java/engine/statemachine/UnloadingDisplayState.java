@@ -70,7 +70,7 @@ public class UnloadingDisplayState extends ScenegraphState {
         texturesPaths = new String[] { "communism.png", "venimus_vidimus_vicimus.png" };
         textures = new Texture[texturesPaths.length];
         // executes tasks
-        taskNode.addController(new SpatialController<Spatial>() {
+        taskNode.addController(new SpatialController<>() {
 
             private boolean oneSkipDone = false;
 

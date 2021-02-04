@@ -538,7 +538,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         playerNode.attachChild(playerMesh);
         // adds a bounding box to the camera node
         NodeHelper.setModelBound(playerNode, BoundingBox.class);
-        playerNode.addController(new SpatialController<Spatial>() {
+        playerNode.addController(new SpatialController<>() {
 
             private final FloatBuffer projectileVertexBuffer;
 
@@ -1421,7 +1421,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     private final BasicText initializeAmmunitionTextLabel() {
         final BasicText ammoTextLabel = BasicText.createDefaultTextLabel("ammo display", "");
         ammoTextLabel.setTranslation(new Vector3(0, 80, 0));
-        ammoTextLabel.addController(new SpatialController<Spatial>() {
+        ammoTextLabel.addController(new SpatialController<>() {
             @Override
             public final void update(double time, Spatial caller) {
                 if (playerData.isCurrentWeaponAmmunitionCountDisplayable()) {
@@ -1444,7 +1444,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     private final BasicText initializeFpsTextLabel() {
         final BasicText fpsTextLabel = BasicText.createDefaultTextLabel("FPS display", "");
         fpsTextLabel.setTranslation(new Vector3(0, 20, 0));
-        fpsTextLabel.addController(new SpatialController<Spatial>() {
+        fpsTextLabel.addController(new SpatialController<>() {
 
             private double period;
 
@@ -1470,7 +1470,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
     private final BasicText initializeHealthTextLabel() {
         final BasicText healthTextLabel = BasicText.createDefaultTextLabel("health display", "");
         healthTextLabel.setTranslation(new Vector3(0, 60, 0));
-        healthTextLabel.addController(new SpatialController<Spatial>() {
+        healthTextLabel.addController(new SpatialController<>() {
             @Override
             public final void update(double time, Spatial caller) {
                 healthTextLabel.setText("HEALTH: " + playerData.getHealth());
@@ -1778,22 +1778,22 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                     painSoundSampleIdentifiers[painSoundIndex] = getSoundManager().loadSound(painSoundSampleUrl);
             }
         }
-        if (enemyShotgunShotSamplePath != null && enemyShotgunShotSampleIdentifier == null) {
+        if (/*enemyShotgunShotSamplePath != null && */enemyShotgunShotSampleIdentifier == null) {
             final URL enemyShotgunShotSampleUrl = GameState.class.getResource(enemyShotgunShotSamplePath);
             if (enemyShotgunShotSampleUrl != null)
                 enemyShotgunShotSampleIdentifier = getSoundManager().loadSound(enemyShotgunShotSampleUrl);
         }
-        if (gameoverSoundSamplePath != null && gameoverSoundSampleIdentifier == null) {
+        if (/*gameoverSoundSamplePath != null && */gameoverSoundSampleIdentifier == null) {
             final URL gameoverSoundSampleUrl = GameState.class.getResource(gameoverSoundSamplePath);
             if (gameoverSoundSampleUrl != null)
                 gameoverSoundSampleIdentifier = getSoundManager().loadSound(gameoverSoundSampleUrl);
         }
-        if (victory0SoundSamplePath != null && victory0SoundSampleIdentifier == null) {
+        if (/*victory0SoundSamplePath != null && */victory0SoundSampleIdentifier == null) {
             final URL victorySoundSampleUrl = GameState.class.getResource(victory0SoundSamplePath);
             if (victorySoundSampleUrl != null)
                 victory0SoundSampleIdentifier = getSoundManager().loadSound(victorySoundSampleUrl);
         }
-        if (victory1SoundSamplePath != null && victory1SoundSampleIdentifier == null) {
+        if (/*victory1SoundSamplePath != null && */victory1SoundSampleIdentifier == null) {
             final URL victorySoundSampleUrl = GameState.class.getResource(victory1SoundSamplePath);
             if (victorySoundSampleUrl != null)
                 victory1SoundSampleIdentifier = getSoundManager().loadSound(victorySoundSampleUrl);
@@ -1898,25 +1898,25 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
                 painSoundSampleIdentifiers[painSoundIndex] = null;
             }
         }
-        if (enemyShotgunShotSamplePath != null && enemyShotgunShotSampleIdentifier != null) {
+        if (/*enemyShotgunShotSamplePath != null && */enemyShotgunShotSampleIdentifier != null) {
             final URL enemyShotgunShotSampleUrl = GameState.class.getResource(enemyShotgunShotSamplePath);
             if (enemyShotgunShotSampleUrl != null)
                 getSoundManager().unloadSound(enemyShotgunShotSampleUrl);
             enemyShotgunShotSampleIdentifier = null;
         }
-        if (gameoverSoundSamplePath != null && gameoverSoundSampleIdentifier != null) {
+        if (/*gameoverSoundSamplePath != null && */gameoverSoundSampleIdentifier != null) {
             final URL gameoverSoundSampleUrl = GameState.class.getResource(gameoverSoundSamplePath);
             if (gameoverSoundSampleUrl != null)
                 getSoundManager().unloadSound(gameoverSoundSampleUrl);
             gameoverSoundSampleIdentifier = null;
         }
-        if (victory0SoundSamplePath != null && victory0SoundSampleIdentifier != null) {
+        if (/*victory0SoundSamplePath != null && */victory0SoundSampleIdentifier != null) {
             final URL victorySoundSampleUrl = GameState.class.getResource(victory0SoundSamplePath);
             if (victorySoundSampleUrl != null)
                 getSoundManager().unloadSound(victorySoundSampleUrl);
             victory0SoundSampleIdentifier = null;
         }
-        if (victory1SoundSamplePath != null && victory1SoundSampleIdentifier != null) {
+        if (/*victory1SoundSamplePath != null && */victory1SoundSampleIdentifier != null) {
             final URL victorySoundSampleUrl = GameState.class.getResource(victory1SoundSamplePath);
             if (victorySoundSampleUrl != null)
                 getSoundManager().unloadSound(victorySoundSampleUrl);
