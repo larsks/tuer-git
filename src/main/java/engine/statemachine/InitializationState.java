@@ -65,7 +65,7 @@ public final class InitializationState extends ScenegraphState {
         // set it to rotate
         box.addController(new UniformlyVariableRotationController(0, 25, 0, new Vector3(0, 1, 0), timeWindowsTable));
         // execute tasks
-        box.addController(new SpatialController<Spatial>() {
+        box.addController(new SpatialController<>() {
             @Override
             public final void update(final double time, final Spatial caller) {
                 taskManager.executeFirstTask();
