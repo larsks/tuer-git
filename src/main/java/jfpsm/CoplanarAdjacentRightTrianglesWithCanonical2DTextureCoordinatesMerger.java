@@ -31,7 +31,6 @@ import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
-import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
@@ -64,24 +63,28 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
         }
 
         @Override
-        public final boolean equals(Object o) {
+        public final boolean equals(final Object o) {
             final boolean result;
-            if (o == null || !(o instanceof RightTriangleInfo))
+            if (o == null || !(o instanceof RightTriangleInfo)) {
                 result = false;
-            else {
-                RightTriangleInfo r = (RightTriangleInfo) o;
-                if (r == this)
-                    result = true;
-                else
-                    result = primitiveIndex == r.primitiveIndex && sectionIndex == r.sectionIndex
+            } else if (o == this) {
+                result = true;
+            } else {
+                final RightTriangleInfo r = (RightTriangleInfo) o;
+                result = primitiveIndex == r.primitiveIndex && sectionIndex == r.sectionIndex
                             && sideIndexOfHypotenuse == r.sideIndexOfHypotenuse;
             }
-            return (result);
+            return result;
         }
 
         @Override
         public int hashCode() {
             return ((sideIndexOfHypotenuse & 0xff) | (sectionIndex & 0xff << 8) | (primitiveIndex & 0xffff << 16));
+        }
+        
+        @Override
+        public String toString() {
+            return "RightTriangleInfo {primitiveIndex: " + primitiveIndex + " sectionIndex: " + sectionIndex + " sideIndexOfHypotenuse: " + sideIndexOfHypotenuse + "}";
         }
     }
 
@@ -99,6 +102,18 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             this.indices = indices;
         }
     }
+    
+    private static final void canonicalizeLocal(final Vector3 vec) {
+        if (Double.doubleToLongBits(vec.getX()) == Double.doubleToLongBits(-0.0)) {
+            vec.setX(0.0);
+        }
+        if (Double.doubleToLongBits(vec.getY()) == Double.doubleToLongBits(-0.0)) {
+            vec.setY(0.0);
+        }
+        if (Double.doubleToLongBits(vec.getZ()) == Double.doubleToLongBits(-0.0)) {
+            vec.setZ(0.0);
+        }
+    }
 
     /**
      * 
@@ -108,17 +123,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
      */
     public static void optimize(final Mesh mesh) {
         final MeshData meshData = mesh.getMeshData();
-        // if there is exactly one texture unit, if there is a texture buffer
-        // for this first texture unit
-        // if there are 2 texture coordinates per vertex and 3 vertex
-        // coordinates per vertex
+        // if there is exactly one texture unit, if there is a texture buffer for this first texture unit
+        // if there are 2 texture coordinates per vertex and 3 vertex coordinates per vertex
         if (meshData.getNumberOfUnits() == 1 && meshData.getTextureBuffer(0) != null
                 && meshData.getTextureCoords(0).getValuesPerTuple() == 2 && meshData.getVertexBuffer() != null
                 && meshData.getVertexCoords().getValuesPerTuple() == 3) {
             // converts this geometry into non indexed geometry (if necessary) in order to ease further operations
             final boolean previousGeometryWasIndexed = meshData.getIndexBuffer() != null;
-            if (previousGeometryWasIndexed)
+            if (previousGeometryWasIndexed) {
                 new GeometryTool(true).convertIndexedGeometryIntoNonIndexedGeometry(meshData);
+                System.out.println("Non indexed input: " + meshData.getVertexCount());
+            }
             // first step: separates right triangles with canonical 2D texture
             // coordinates from the others
             final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = new ArrayList<>();
@@ -129,8 +144,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             double u, v;
             int sideIndexOfHypotenuse;
             boolean hasCanonicalTextureCoords;
-            for (int sectionIndex = 0, sectionCount = meshData
-                    .getSectionCount(); sectionIndex < sectionCount; sectionIndex++)
+            for (int sectionIndex = 0, sectionCount = meshData.getSectionCount(); sectionIndex < sectionCount; sectionIndex++)
                 // only takes care of sections containing triangles
                 if (meshData.getIndexMode(sectionIndex) == IndexMode.Triangles) {
                     // loops on all triangles of each section
@@ -181,31 +195,36 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             // normal + distance to plane)
             HashMap<Plane, ArrayList<RightTriangleInfo>> mapOfTrianglesByPlanes = new HashMap<>();
             Triangle tmpTriangle = new Triangle();
-            ReadOnlyVector3 triangleNormal;
             double distanceToPlane;
             for (RightTriangleInfo info : rightTrianglesWithCanonical2DTextureCoordinatesInfos) {
                 // gets the 3 vertices of the triangle
                 triangleVertices = meshData.getPrimitiveVertices(info.primitiveIndex, info.sectionIndex,
                         triangleVertices);
                 // sets the vertices of the temporary triangle
-                for (int vertexInternalIndex = 0; vertexInternalIndex < 3; vertexInternalIndex++)
+                for (int vertexInternalIndex = 0; vertexInternalIndex < 3; vertexInternalIndex++) {
+                    canonicalizeLocal(triangleVertices[vertexInternalIndex]);
                     tmpTriangle.set(vertexInternalIndex, triangleVertices[vertexInternalIndex]);
-                // computes its normal
-                triangleNormal = tmpTriangle.getNormal();
-                // computes its distance to plane d=dot(normal,vertex)
-                distanceToPlane = triangleNormal.dot(tmpTriangle.getCenter());
-                // creates the plane
-                final Plane plane = new Plane(new Vector3(triangleNormal), distanceToPlane);
-                // puts it into a map whose key is a given plane
-                ArrayList<RightTriangleInfo> infoList = mapOfTrianglesByPlanes.get(plane);
-                if (infoList == null) {
-                    infoList = new ArrayList<>();
-                    mapOfTrianglesByPlanes.put(plane, infoList);
                 }
+                // computes its normal
+                final Vector3 triangleNormal = new Vector3(tmpTriangle.getNormal());
+                final Vector3 triangleCenter = new Vector3(tmpTriangle.getCenter());
+                /**
+                 * Zero has two representations, -0.0 and 0.0 are considered different by Double.compare()
+                 * but not by ==). Then, replacing -0.0 by 0.0 is safer here
+                 */
+                canonicalizeLocal(triangleNormal);
+                canonicalizeLocal(triangleCenter);
+                // computes its distance to plane d=dot(normal,vertex)
+                distanceToPlane = triangleNormal.dot(triangleCenter);
+                // creates the plane
+                final Plane plane = new Plane(triangleNormal, distanceToPlane);
+                // puts it into a map whose key is a given plane
+                final ArrayList<RightTriangleInfo> infoList = mapOfTrianglesByPlanes.computeIfAbsent(plane, (final Plane currentPlane) -> new ArrayList<>());
                 infoList.add(info);
             }
-            // third step: retains only triangles by pairs which could be used
-            // to create rectangles
+            System.out.println("Number of planes: " + mapOfTrianglesByPlanes.size());
+            mapOfTrianglesByPlanes.entrySet().stream().forEach(System.out::println);
+            // third step: retains only triangles by pairs which could be used to create rectangles
             Vector3[] tri1Vertices = new Vector3[3];
             Vector3[] tri2Vertices = new Vector3[3];
             Vector2[] tri1TextureCoords = new Vector2[3];
@@ -229,12 +248,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                 tri2Vertices = meshData.getPrimitiveVertices(tri2.primitiveIndex, tri2.sectionIndex,
                                         tri2Vertices);
                                 /**
-                                 * checks if the both triangles have the same
-                                 * hypotenuse (i.e it is a quadrilateral with 2
-                                 * right angles) and if their opposite sides
-                                 * have the same length (i.e it is a
-                                 * parallelogram). As a parallelogram with 2
-                                 * right angles is necessarily a rectangle, such
+                                 * checks if the both triangles have the same hypotenuse (i.e it is a quadrilateral with 2 right angles) and if their opposite sides
+                                 * have the same length (i.e it is a parallelogram). As a parallelogram with 2 right angles is necessarily a rectangle, such
                                  * a shape is a rectangle.
                                  */
                                 boolean sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder = tri1Vertices[tri1.sideIndexOfHypotenuse]
@@ -302,20 +317,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                 && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3]
                                                         .equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse]);
                                     }
-                                    if (texCoordsMatch) {/**
-                                                          * checks if the
-                                                          * rectangle contains
-                                                          * all possible pairs
-                                                          * of canonical texture
-                                                          * coordinates i.e
-                                                          * [0;0], [0;1], [1;0]
-                                                          * and [1;1]
-                                                          */
+                                    if (texCoordsMatch) {
+                                        // checks if the rectangle contains all possible pairs of canonical texture coordinates  i.e [0;0], [0;1], [1;0] and [1;1]
                                         // resets the array of flags
                                         for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
                                             Arrays.fill(canonicalTexCoordsFound[abscissaIndex], false);
-                                        // checks the texture coordinates of the
-                                        // vertices of the right angles
+                                        // checks the texture coordinates of the vertices of the right angles
                                         for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
                                             for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
                                                 if (tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3]
@@ -331,12 +338,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                                 .getY() == ordinateIndex)
                                                     canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
                                         /**
-                                         * checks the texture coordinates of the
-                                         * vertices of the hypotenuse. Looking
-                                         * at the first triangle is enough as I
-                                         * have already tested that the vertices
-                                         * of the hypotenuse in both triangles
-                                         * have the same texture coordinates.
+                                         * checks the texture coordinates of the vertices of the hypotenuse. Looking at the first triangle is enough as I have 
+                                         * already tested that the vertices of the hypotenuse in both triangles have the same texture coordinates.
                                          */
                                         for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
                                             for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
@@ -352,9 +355,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                         && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3]
                                                                 .getY() == ordinateIndex)
                                                     canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
-                                        // checks all possible pairs of
-                                        // canonical texture coordinates have
-                                        // been found
+                                        // checks all possible pairs of canonical texture coordinates have been found
                                         for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length
                                                 && texCoordsMatch; abscissaIndex++)
                                             for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length
@@ -375,8 +376,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 rightTriangles.clear();
                 rightTriangles.addAll(rightTrianglesWithSameHypotenusesByPairs);
             }
-            // fourth step: creates lists containing all adjacent rectangles in
-            // the same planes
+            // fourth step: creates lists containing all adjacent rectangles in the same planes
             HashMap<Plane, ArrayList<ArrayList<RightTriangleInfo>>> mapOfListsOfTrianglesByPlanes = new HashMap<>();
             HashMap<RightTriangleInfo, ArrayList<Entry<RightTriangleInfo[], int[]>>> commonSidesInfosMap = new HashMap<>();
             Vector3[] tri3Vertices = new Vector3[3];
@@ -397,8 +397,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                             .get(plane);
                     ArrayList<RightTriangleInfo> listOfTris = null;
                     // if the list of lists for this plane exists
-                    if (listOfListsOfTris != null) {// checks if tri1 and tri2
-                                                    // are already in a list
+                    if (listOfListsOfTris != null) {
+                        // checks if tri1 and tri2 are already in a list
                         for (ArrayList<RightTriangleInfo> list : listOfListsOfTris)
                             // only looks for tri1 as tri1 and tri2 should be
                             // together
@@ -454,8 +454,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                             // {3;2}
                             ti3 = 2 + ((i + 1) % 2);
                             RightTriangleInfo tr3 = tris[ti3];
-                            // checks if both rectangles have exactly one common
-                            // side
+                            // checks if both rectangles have exactly one common side
                             for (int j = 0; j < 3 && !oneCommonVertex; j++)
                                 if (tv0[(tr0.sideIndexOfHypotenuse + 2) % 3]
                                         .equals(tv1[(tr1.sideIndexOfHypotenuse + j) % 3])) {
@@ -465,16 +464,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             if (tv0[(tr0.sideIndexOfHypotenuse + k) % 3]
                                                     .equals(tv1[(tr1.sideIndexOfHypotenuse + 2) % 3])) {
                                                 oneCommonSide = true;
-                                                // checks if the vertex order is
-                                                // correct
-                                                // FIXME this test seems to be
-                                                // wrong
-                                                oneCommonSideCorrectVertexOrder = /*
-                                                                                   * j
-                                                                                   * !
-                                                                                   * =
-                                                                                   * k
-                                                                                   */true;
+                                                // checks if the vertex order is correct
+                                                // FIXME this test seems to be wrong
+                                                oneCommonSideCorrectVertexOrder = /* j != k */true;
                                                 if (oneCommonSideCorrectVertexOrder) {
                                                     // checks if the orthogonal sides adjacent with this common side have the same length
                                                     if (tv0[(tr0.sideIndexOfHypotenuse + ((k + 1) % 2)) % 3]
@@ -484,22 +476,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                                                     tv1[(tr1.sideIndexOfHypotenuse + 2)
                                                                                             % 3])) {
                                                         oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength = true;
-                                                        // checks the texture
-                                                        // coordinates
+                                                        // checks the texture coordinates
                                                         boolean texCoordsMatch = true;
-                                                        // only considers the
-                                                        // first texture index
+                                                        // only considers the first texture index
                                                         final int textureIndex = 0;
-                                                        // gets all texture
-                                                        // coordinates
+                                                        // gets all texture coordinates
                                                         for (int l = 0; l < 4; l++)
                                                             trisTextureCoords[l] = getPrimitiveTextureCoords(meshData,
                                                                     tris[l].primitiveIndex, tris[l].sectionIndex,
                                                                     textureIndex, trisTextureCoords[l]);
-                                                        // checks if both
-                                                        // rectangles have the
-                                                        // same texture
-                                                        // coordinates
+                                                        // checks if both rectangles have the same texture coordinates
                                                         texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
                                                                 + 2) % 3]
                                                                         .equals(trisTextureCoords[ti3][(tr3.sideIndexOfHypotenuse
@@ -549,8 +535,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             if (tv0[(tr0.sideIndexOfHypotenuse + (k / 2)) % 3]
                                                     .equals(tv1[(tr1.sideIndexOfHypotenuse + (k % 2)) % 3])) {
                                                 oneCommonSide = true;
-                                                // checks if the vertex order is
-                                                // correct
+                                                // checks if the vertex order is correct
                                                 oneCommonSideCorrectVertexOrder = (k / 2) != (k % 2);
                                                 if (oneCommonSideCorrectVertexOrder) {
                                                     // checks if the orthogonal sides adjacent with this common side have the same length
@@ -561,22 +546,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                                                     tv1[(tr1.sideIndexOfHypotenuse + 2)
                                                                                             % 3])) {
                                                         oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength = true;
-                                                        // checks the texture
-                                                        // coordinates
+                                                        // checks the texture coordinates
                                                         boolean texCoordsMatch = true;
-                                                        // only considers the
-                                                        // first texture index
+                                                        // only considers the first texture index
                                                         final int textureIndex = 0;
-                                                        // gets all texture
-                                                        // coordinates
+                                                        // gets all texture coordinates
                                                         for (int l = 0; l < 4; l++)
                                                             trisTextureCoords[l] = getPrimitiveTextureCoords(meshData,
                                                                     tris[l].primitiveIndex, tris[l].sectionIndex,
                                                                     textureIndex, trisTextureCoords[l]);
-                                                        // checks if both
-                                                        // rectangles have the
-                                                        // same texture
-                                                        // coordinates
+                                                        // checks if both rectangles have the same texture coordinates
                                                         texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
                                                                 + (((k / 2) + 1) % 2)) % 3]
                                                                         .equals(trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
@@ -627,36 +606,27 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                         }
                         if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
                             ArrayList<RightTriangleInfo> previousListOfTris = null;
-                            // if the list of lists for this plane does not
-                            // exist
-                            if (listOfListsOfTris == null) {// creates it and
-                                                            // puts it into the
-                                                            // map
+                            // if the list of lists for this plane does not exist
+                            if (listOfListsOfTris == null) {// creates it and puts it into the map
                                 listOfListsOfTris = new ArrayList<>();
                                 mapOfListsOfTrianglesByPlanes.put(plane, listOfListsOfTris);
-                            } else {// checks if tri3 and tri4 are already in a
-                                    // list
+                            } else {// checks if tri3 and tri4 are already in a list
                                 for (ArrayList<RightTriangleInfo> list : listOfListsOfTris)
-                                    // only looks for tri3 as tri3 and tri4
-                                    // should be together
+                                    // only looks for tri3 as tri3 and tri4 should be together
                                     if (list.contains(tri3)) {
                                         previousListOfTris = list;
                                         break;
                                     }
                             }
                             // if the new list of triangles has not been created
-                            if (listOfTris == null) {// creates it, fills it
-                                                     // with the 4 triangles and
-                                                     // adds it into the list of
-                                                     // lists
+                            if (listOfTris == null) {// creates it, fills it with the 4 triangles and adds it into the list of lists
                                 listOfTris = new ArrayList<>();
                                 listOfTris.add(tri1);
                                 listOfTris.add(tri2);
                                 listOfTris.add(tri3);
                                 listOfTris.add(tri4);
                                 listOfListsOfTris.add(listOfTris);
-                            } else {// if tri3 and tri4 are not already in this
-                                    // list, adds them into it
+                            } else {// if tri3 and tri4 are not already in this list, adds them into it
                                 if (previousListOfTris != null && previousListOfTris != listOfTris) {
                                     listOfTris.add(tri3);
                                     listOfTris.add(tri4);
@@ -664,27 +634,19 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                             }
                             // if tri3 and tri4 are already in another list
                             if (previousListOfTris != null) {
-                                /**
-                                 * removes all elements already added into the
-                                 * new list from the previous list to keep only
-                                 * elements which are not in the new list
-                                 */
+                                // removes all elements already added into the new list from the previous list to keep only elements which are not in the new list
                                 previousListOfTris.removeAll(listOfTris);
-                                // adds all elements which are not in the new
-                                // list into it
+                                // adds all elements which are not in the new list into it
                                 listOfTris.addAll(previousListOfTris);
                             }
                         }
                     }
                 }
             }
-            // fifth step: creates lists of adjacent rectangles in the same
-            // planes usable to make bigger rectangles
+            // fifth step: creates lists of adjacent rectangles in the same planes usable to make bigger rectangles
             /**
-             * Each entry handles the triangles of a plane. Each entry contains
-             * several lists of groups of adjacent triangles. Each group of
-             * adjacent triangles is a list of arrays of adjacent triangles
-             * which could be merged to make bigger rectangles
+             * Each entry handles the triangles of a plane. Each entry contains several lists of groups of adjacent triangles. Each group of
+             * adjacent triangles is a list of arrays of adjacent triangles which could be merged to make bigger rectangles
              */
             HashMap<Plane, ArrayList<ArrayList<RightTriangleInfo[][][]>>> mapOfListsOfListsOfArraysOfMergeableTris = new HashMap<>();
             // for each plane
@@ -693,8 +655,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 final Plane plane = entry.getKey();
                 // for each list of adjacent triangles
                 for (ArrayList<RightTriangleInfo> trisList : entry.getValue())
-                    if (!trisList.isEmpty()) {// builds the 2D array from the
-                                              // list of triangles
+                    if (!trisList.isEmpty()) {
+                        // builds the 2D array from the list of triangles
                         final RightTriangleInfo[][][] adjacentTrisArray = compute2dTrisArrayFromAdjacentTrisList(
                                 trisList, commonSidesInfosMap);
                         // computes a list of arrays of adjacent triangles which
@@ -711,8 +673,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                         adjacentTrisArraysListsList.add(new ArrayList<>(adjacentTrisArraysMap.values()));
                     }
             }
-            // sixth step: creates these bigger rectangles with texture
-            // coordinates greater than 1 in order to use texture repeat
+            // sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
             HashMap<Plane, HashMap<RightTriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps = new HashMap<>();
             // for each plane
             for (Entry<Plane, ArrayList<ArrayList<RightTriangleInfo[][][]>>> entry : mapOfListsOfListsOfArraysOfMergeableTris
@@ -794,8 +755,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                 + 2) % 3];
                                         testedAdjacentTrisTextureCoords[3] = tri2TextureCoords[(tri2.sideIndexOfHypotenuse
                                                 + 2) % 3];
-                                        // looks for the real vertex of the
-                                        // corner
+                                        // looks for the real vertex of the corner
                                         boolean cornerVertexFound = false;
                                         for (int testedVertexIndex = 0; testedVertexIndex < 4
                                                 && !cornerVertexFound; testedVertexIndex++) {
@@ -872,8 +832,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             System.err.println("missing corner");
                                     }
                                 }
-                                // keeps the orientation of the previous
-                                // triangles
+                                // keeps the orientation of the previous triangles
                                 Arrays.fill(mergedAdjacentTrisVerticesIndices, -1);
                                 tri1 = mergedAdjacentTris[0];
                                 tri2 = mergedAdjacentTris[1];
@@ -889,8 +848,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             + 2) % 3];
                                     testedAdjacentTrisTextureCoords[3] = tri2TextureCoords[(tri2.sideIndexOfHypotenuse
                                             + 2) % 3];
-                                    // operates on the vertices not on the
-                                    // hypotenuse first
+                                    // operates on the vertices not on the hypotenuse first
                                     for (int localIndex = 0; localIndex < 4; localIndex++) {
                                         if (mergedAdjacentTrisTextureCoords[localIndex]
                                                 .equals(testedAdjacentTrisTextureCoords[0])) {
@@ -927,10 +885,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                         if (mergedAdjacentTrisTextureCoords[localIndex].getY() == 1)
                                             mergedAdjacentTrisTextureCoords[localIndex].setY(v);
                                     }
-                                    // stores the couple of old pairs and the
-                                    // new pairs (with some information) in
-                                    // order to remove the former and to add the
-                                    // latter
+                                    // stores the couple of old pairs and the new pairs (with some information) in order to remove the former and to add the latter
                                     final NextQuadInfo quadInfo = new NextQuadInfo(mergedAdjacentTrisVertices,
                                             mergedAdjacentTrisTextureCoords, mergedAdjacentTrisVerticesIndices);
                                     previousAdjacentTrisAndNextQuadInfosMaps.put(adjacentTrisArray, quadInfo);
@@ -939,23 +894,21 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                         }
                     }
             }
-            // seventh step: removes the triangles which are no more in the
-            // geometry of the mesh
+            // seventh step: removes the triangles which are no more in the geometry of the mesh
             final ArrayList<Integer> verticesIndicesToRemove = new ArrayList<>();
             int[] tri1Indices = new int[3];
             int[] tri2Indices = new int[3];
             // for each plane
             for (Entry<Plane, HashMap<RightTriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry : mapOfPreviousAndNextAdjacentTrisMaps
-                    .entrySet()) {// for each couple of old pairs and the new
-                                  // pairs (with some information)
+                    .entrySet()) {
+                // for each couple of old pairs and the new pairs (with some information)
                 for (Entry<RightTriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosEntry : mapOfPreviousAndNextAdjacentTrisMapsEntry
                         .getValue().entrySet()) {
                     final RightTriangleInfo[][][] previousAdjacentTrisArray = previousAdjacentTrisAndNextQuadInfosEntry
                             .getKey();
                     for (int rowIndex = 0; rowIndex < previousAdjacentTrisArray.length; rowIndex++)
-                        for (int columnIndex = 0; columnIndex < previousAdjacentTrisArray[rowIndex].length; columnIndex++) {// retrieves
-                                                                                                                            // the
-                                                                                                                            // vertices
+                        for (int columnIndex = 0; columnIndex < previousAdjacentTrisArray[rowIndex].length; columnIndex++) {
+                            // retrieves the vertices
                             tri1 = previousAdjacentTrisArray[rowIndex][columnIndex][0];
                             tri2 = previousAdjacentTrisArray[rowIndex][columnIndex][1];
                             tri1Vertices = meshData.getPrimitiveVertices(tri1.primitiveIndex, tri1.sectionIndex,
@@ -966,8 +919,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                     tri1Indices);
                             tri2Indices = meshData.getPrimitiveIndices(tri2.primitiveIndex, tri2.sectionIndex,
                                     tri2Indices);
-                            // does not keep these vertices, mark them as
-                            // removable
+                            // does not keep these vertices, mark them as removable
                             for (int triVertexIndex = 0; triVertexIndex < tri1Vertices.length; triVertexIndex++)
                                 verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
                             for (int triVertexIndex = 0; triVertexIndex < tri2Vertices.length; triVertexIndex++)
@@ -978,16 +930,15 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             // computes the count of added vertices
             int addedVerticesCount = 0;
             for (HashMap<RightTriangleInfo[][][], NextQuadInfo> previousAndNextAdjacentTrisMap : mapOfPreviousAndNextAdjacentTrisMaps
-                    .values()) {// there are (obviously) two triangles by quad
-                                // and three vertices by triangle
+                    .values()) {
+                // there are (obviously) two triangles by quad and three vertices by triangle
                 addedVerticesCount += previousAndNextAdjacentTrisMap.size() * 6;
             }
             // computes the next vertex count
             final int nextVertexCount = meshData.getVertexCount() - verticesIndicesToRemove.size() + addedVerticesCount;
             // creates the next vertex buffer
             final FloatBuffer nextVertexBuffer = FloatBuffer.allocate(nextVertexCount * 3);
-            // does not copy the vertices marked as removable into the next
-            // vertex buffer, copies the others
+            // does not copy the vertices marked as removable into the next vertex buffer, copies the others
             for (int vertexIndex = 0; vertexIndex < meshData.getVertexCount(); vertexIndex++)
                 if (!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex))) {
                     final int vertexCoordinateIndex = vertexIndex * 3;
@@ -996,9 +947,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                     final float z = meshData.getVertexBuffer().get(vertexCoordinateIndex + 2);
                     nextVertexBuffer.put(x).put(y).put(z);
                 }
-            // does not modify the position so that this vertex buffer is ready
-            // for the addition of the new vertices
-            // computes the next texture coordinate count
+            // does not modify the position so that this vertex buffer is ready for the addition of the new vertices computes the next texture coordinate count
             final int nextTextureCoordsCount = nextVertexCount;
             // creates the next texture buffer (2D)
             final FloatBuffer nextTextureBuffer = FloatBuffer.allocate(nextTextureCoordsCount * 2);
@@ -1011,8 +960,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                     final float fv = meshData.getVertexBuffer().get(textureCoordinateIndex + 1);
                     nextTextureBuffer.put(fu).put(fv);
                 }
-            // does not modify the position so that this texture buffer is ready
-            // for the addition of the new texture coordinates
+            // does not modify the position so that this texture buffer is ready for the addition of the new texture coordinates
             // eighth step: adds the new triangles into the geometry of the mesh
             for (HashMap<RightTriangleInfo[][][], NextQuadInfo> previousAndNextAdjacentTrisMap : mapOfPreviousAndNextAdjacentTrisMaps
                     .values())
@@ -1038,10 +986,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             nextTextureBuffer.rewind();
             meshData.setTextureCoords(new FloatBufferData(nextTextureBuffer, 2), 0);
             // if the supplied geometry was indexed
-            if (previousGeometryWasIndexed) {// converts the new geometry into
-                                             // an indexed geometry
-                                             // uses all conditions with
-                                             // GeometryTool
+            if (previousGeometryWasIndexed) {
+                // converts the new geometry into an indexed geometry uses all conditions with GeometryTool
                 final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal,
                         MatchCondition.Color);
                 // reduces the geometry to avoid duplication of vertices
