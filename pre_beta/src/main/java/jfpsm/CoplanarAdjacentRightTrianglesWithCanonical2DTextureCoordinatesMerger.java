@@ -23,7 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import jfpsm.ArrayHelper.Vector2i;
 
@@ -103,18 +109,47 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
         }
     }
     
+    /**
+     * Replaces -0.0 by +0.0 in the passed vector so that zero has a single canonical representation
+     * 
+     * @param vec vector
+     */
     private static final void canonicalizeLocal(final Vector3 vec) {
-        if (Double.doubleToLongBits(vec.getX()) == Double.doubleToLongBits(-0.0)) {
-            vec.setX(0.0);
-        }
-        if (Double.doubleToLongBits(vec.getY()) == Double.doubleToLongBits(-0.0)) {
-            vec.setY(0.0);
-        }
-        if (Double.doubleToLongBits(vec.getZ()) == Double.doubleToLongBits(-0.0)) {
-            vec.setZ(0.0);
-        }
+        IntStream.range(0, 3)
+                 .filter((final int valueIndex) -> Double.doubleToLongBits(vec.getValue(valueIndex)) == Double.doubleToLongBits(-0.0))
+                 .forEach((final int valueIndex) -> vec.setValue(valueIndex, 0.0));
     }
 
+    /**
+     * Returns the triangle side index of the hypotenuse if any, otherwise -1
+     * 
+     * @param triangleVertices triangle vertices
+     * @return triangle side index of the hypotenuse if any, otherwise -1
+     */
+    private static int getSideIndexOfHypotenuse(final Vector3[] triangleVertices) {
+        // computes the squared distances of all sides
+        final double[] triangleSideDistancesSquared = IntStream.range(0, triangleVertices.length)
+                                                               .mapToDouble((final int triangleSideIndex) -> triangleVertices[triangleSideIndex].distanceSquared(triangleVertices[(triangleSideIndex + 1) % 3]))
+                                                               .toArray();
+        // uses these squared distances to find the hypotenuse if any by (i.e if it's a right-angled triangle) using the Pythagorean theorem
+        return IntStream.range(0, triangleSideDistancesSquared.length)
+                        .filter((final int triangleSideIndex) -> triangleSideDistancesSquared[triangleSideIndex] == triangleSideDistancesSquared[(triangleSideIndex + 1) % 3] + triangleSideDistancesSquared[(triangleSideIndex + 2) % 3])
+                        .findFirst()
+                        .orElse(-1);
+    }
+    
+    /**
+     * Tells whether the passed texture coordinates are canonical (i.e if they're equal to 0 or 1)
+     * 
+     * @param textureCoords texture coordinates
+     * @return <code>true</code> if the passed texture coordinates are canonical, otherwise <code>false</code>
+     */
+    private static boolean hasCanonicalTextureCoords(final Vector2[] textureCoords) {
+        return Arrays.stream(textureCoords)
+                     .flatMapToDouble((final Vector2 textureCoord) -> DoubleStream.of(textureCoord.getX(), textureCoord.getY()))
+                     .allMatch((final double uv) -> uv == 0 || uv == 1);
+    }
+    
     /**
      * 
      * @param mesh
@@ -124,82 +159,47 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
     public static void optimize(final Mesh mesh) {
         final MeshData meshData = mesh.getMeshData();
         // if there is exactly one texture unit, if there is a texture buffer for this first texture unit
-        // if there are 2 texture coordinates per vertex and 3 vertex coordinates per vertex
-        if (meshData.getNumberOfUnits() == 1 && meshData.getTextureBuffer(0) != null
-                && meshData.getTextureCoords(0).getValuesPerTuple() == 2 && meshData.getVertexBuffer() != null
-                && meshData.getVertexCoords().getValuesPerTuple() == 3) {
+        if (meshData.getNumberOfUnits() == 1 && meshData.getTextureBuffer(0) != null && 
+            // if there are 2 texture coordinates per vertex and 3 vertex coordinates per vertex
+            meshData.getTextureCoords(0).getValuesPerTuple() == 2 && meshData.getVertexBuffer() != null && 
+            meshData.getVertexCoords().getValuesPerTuple() == 3 &&
+            // if all sections contains triangles
+            IntStream.range(0, meshData.getSectionCount()).mapToObj(meshData::getIndexMode).allMatch(IndexMode.Triangles::equals)) {
             // converts this geometry into non indexed geometry (if necessary) in order to ease further operations
             final boolean previousGeometryWasIndexed = meshData.getIndexBuffer() != null;
             if (previousGeometryWasIndexed) {
                 new GeometryTool(true).convertIndexedGeometryIntoNonIndexedGeometry(meshData);
                 System.out.println("Non indexed input: " + meshData.getVertexCount());
             }
-            // first step: separates right triangles with canonical 2D texture
-            // coordinates from the others
-            final ArrayList<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = new ArrayList<>();
-            // loops on all sections of the mesh data
-            Vector3[] triangleVertices = new Vector3[3];
-            Vector2[] triangleTextureCoords = new Vector2[3];
-            final double[] trianglesSidesDistancesSquared = new double[3];
-            double u, v;
-            int sideIndexOfHypotenuse;
-            boolean hasCanonicalTextureCoords;
-            for (int sectionIndex = 0, sectionCount = meshData.getSectionCount(); sectionIndex < sectionCount; sectionIndex++)
-                // only takes care of sections containing triangles
-                if (meshData.getIndexMode(sectionIndex) == IndexMode.Triangles) {
-                    // loops on all triangles of each section
-                    for (int trianglePrimitiveIndex = 0, triangleCount = meshData.getPrimitiveCount(
-                            sectionIndex); trianglePrimitiveIndex < triangleCount; trianglePrimitiveIndex++) {
-                        // gets the 3 vertices of the triangle
-                        triangleVertices = meshData.getPrimitiveVertices(trianglePrimitiveIndex, sectionIndex,
-                                triangleVertices);
-                        // uses Pythagorean theorem to check whether the
-                        // triangle is right
-                        // computes the squared distances of all sides
-                        for (int triangleSideIndex = 0; triangleSideIndex < 3; triangleSideIndex++)
-                            trianglesSidesDistancesSquared[triangleSideIndex] = triangleVertices[triangleSideIndex]
-                                    .distanceSquared(triangleVertices[(triangleSideIndex + 1) % 3]);
-                        // uses these squared distances to find the hypotenuse
-                        // if any
-                        sideIndexOfHypotenuse = -1;
-                        for (int triangleSideIndex = 0; triangleSideIndex < 3
-                                && sideIndexOfHypotenuse == -1; triangleSideIndex++)
-                            if (trianglesSidesDistancesSquared[triangleSideIndex] == trianglesSidesDistancesSquared[(triangleSideIndex
-                                    + 1) % 3] + trianglesSidesDistancesSquared[(triangleSideIndex + 2) % 3])
-                                sideIndexOfHypotenuse = triangleSideIndex;
-                        // if this triangle is right
-                        if (sideIndexOfHypotenuse != -1) {
-                            // checks whether its texture coordinates are canonical
-                            hasCanonicalTextureCoords = true;
-                            // only considers the first texture index
-                            final int textureIndex = 0;
-                            triangleTextureCoords = getPrimitiveTextureCoords(meshData, trianglePrimitiveIndex,
-                                    sectionIndex, textureIndex, triangleTextureCoords);
-                            for (int triangleTextureCoordsIndex = 0; triangleTextureCoordsIndex < 3
-                                    && hasCanonicalTextureCoords; triangleTextureCoordsIndex++) {
-                                u = triangleTextureCoords[triangleTextureCoordsIndex].getX();
-                                v = triangleTextureCoords[triangleTextureCoordsIndex].getY();
-                                if ((u != 0 && u != 1) || (v != 0 && v != 1))
-                                    hasCanonicalTextureCoords = false;
-                            }
-                            if (hasCanonicalTextureCoords) {
-                                // stores the side index of its hypotenuse and several indices allowing to retrieve the required data further
-                                RightTriangleInfo rightTriangleInfo = new RightTriangleInfo(trianglePrimitiveIndex,
-                                        sectionIndex, sideIndexOfHypotenuse);
-                                rightTrianglesWithCanonical2DTextureCoordinatesInfos.add(rightTriangleInfo);
-                            }
-                        }
+            // first step: separates right triangles with canonical 2D texture coordinates from the others, loops on all sections of the mesh data
+            final List<RightTriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = IntStream.range(0, meshData.getSectionCount())
+                // loops on all triangles of each section
+                .mapToObj((final int sectionIndex) -> IntStream.range(0, meshData.getPrimitiveCount(sectionIndex))
+                // checks whether its texture coordinates are canonical, only considers the first texture index
+                .filter((final int trianglePrimitiveIndex) -> hasCanonicalTextureCoords(getPrimitiveTextureCoords(meshData, trianglePrimitiveIndex, sectionIndex, 0, null)))
+                .mapToObj((final int trianglePrimitiveIndex) -> {
+                    final RightTriangleInfo rightTriangleInfo;
+                    // gets the 3 vertices of the triangle
+                    final Vector3[] triangleVertices = meshData.getPrimitiveVertices(trianglePrimitiveIndex, sectionIndex, null);
+                    final int sideIndexOfHypotenuse = getSideIndexOfHypotenuse(triangleVertices);
+                    // if this triangle is right-angled
+                    if (sideIndexOfHypotenuse == -1) {
+                        rightTriangleInfo = null;
+                    } else {
+                        // stores the side index of its hypotenuse and several indices allowing to retrieve the required data further
+                        rightTriangleInfo = new RightTriangleInfo(trianglePrimitiveIndex, sectionIndex, sideIndexOfHypotenuse);
                     }
-                }
-            // second step: sorts the triangles of the former set by planes (4D:
-            // normal + distance to plane)
+                    return rightTriangleInfo;
+                })
+                .filter(Objects::nonNull))
+                .flatMap(Stream::sequential)
+                .collect(Collectors.toList());
+            // second step: sorts the triangles of the former set by planes (4D: normal + distance to plane)
             HashMap<Plane, ArrayList<RightTriangleInfo>> mapOfTrianglesByPlanes = new HashMap<>();
             Triangle tmpTriangle = new Triangle();
-            double distanceToPlane;
             for (RightTriangleInfo info : rightTrianglesWithCanonical2DTextureCoordinatesInfos) {
                 // gets the 3 vertices of the triangle
-                triangleVertices = meshData.getPrimitiveVertices(info.primitiveIndex, info.sectionIndex,
-                        triangleVertices);
+                final Vector3[] triangleVertices = meshData.getPrimitiveVertices(info.primitiveIndex, info.sectionIndex, null);
                 // sets the vertices of the temporary triangle
                 for (int vertexInternalIndex = 0; vertexInternalIndex < 3; vertexInternalIndex++) {
                     canonicalizeLocal(triangleVertices[vertexInternalIndex]);
@@ -215,7 +215,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 canonicalizeLocal(triangleNormal);
                 canonicalizeLocal(triangleCenter);
                 // computes its distance to plane d=dot(normal,vertex)
-                distanceToPlane = triangleNormal.dot(triangleCenter);
+                final double distanceToPlane = triangleNormal.dot(triangleCenter);
                 // creates the plane
                 final Plane plane = new Plane(triangleNormal, distanceToPlane);
                 // puts it into a map whose key is a given plane
@@ -877,8 +877,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             mergedAdjacentTrisVerticesIndices[5] = localIndex;
                                     }
                                     // updates texture coordinates equal to 1
-                                    u = columnCount;
-                                    v = rowCount;
+                                    final double u = columnCount;
+                                    final double v = rowCount;
                                     for (int localIndex = 0; localIndex < 4; localIndex++) {
                                         if (mergedAdjacentTrisTextureCoords[localIndex].getX() == 1)
                                             mergedAdjacentTrisTextureCoords[localIndex].setX(u);
