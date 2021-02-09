@@ -37,6 +37,7 @@ import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
+import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
@@ -107,17 +108,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             this.textureCoords = textureCoords;
             this.indices = indices;
         }
-    }
-    
-    /**
-     * Replaces -0.0 by +0.0 in the passed vector so that zero has a single canonical representation
-     * 
-     * @param vec vector
-     */
-    private static final void canonicalizeLocal(final Vector3 vec) {
-        IntStream.range(0, 3)
-                 .filter((final int valueIndex) -> Double.doubleToLongBits(vec.getValue(valueIndex)) == Double.doubleToLongBits(-0.0))
-                 .forEach((final int valueIndex) -> vec.setValue(valueIndex, 0.0));
     }
 
     /**
@@ -202,20 +192,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 final Vector3[] triangleVertices = meshData.getPrimitiveVertices(info.primitiveIndex, info.sectionIndex, null);
                 // sets the vertices of the temporary triangle
                 for (int vertexInternalIndex = 0; vertexInternalIndex < 3; vertexInternalIndex++) {
-                    canonicalizeLocal(triangleVertices[vertexInternalIndex]);
                     tmpTriangle.set(vertexInternalIndex, triangleVertices[vertexInternalIndex]);
                 }
                 // computes its normal
-                final Vector3 triangleNormal = new Vector3(tmpTriangle.getNormal());
-                final Vector3 triangleCenter = new Vector3(tmpTriangle.getCenter());
-                /**
-                 * Zero has two representations, -0.0 and 0.0 are considered different by Double.compare()
-                 * but not by ==). Then, replacing -0.0 by 0.0 is safer here
-                 */
-                canonicalizeLocal(triangleNormal);
-                canonicalizeLocal(triangleCenter);
+                final ReadOnlyVector3 triangleNormal = tmpTriangle.getNormal();
                 // computes its distance to plane d=dot(normal,vertex)
-                final double distanceToPlane = triangleNormal.dot(triangleCenter);
+                final double distanceToPlane = triangleNormal.dot(tmpTriangle.getCenter());
                 // creates the plane
                 final Plane plane = new Plane(triangleNormal, distanceToPlane);
                 // puts it into a map whose key is a given plane
