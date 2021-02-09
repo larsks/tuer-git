@@ -18,12 +18,13 @@
 package jfpsm;
 
 import java.nio.FloatBuffer;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -185,9 +186,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .flatMap(Stream::sequential)
                 .collect(Collectors.toList());
             // second step: sorts the triangles of the former set by planes (4D: normal + distance to plane)
-            HashMap<Plane, ArrayList<RightTriangleInfo>> mapOfTrianglesByPlanes = new HashMap<>();
-            Triangle tmpTriangle = new Triangle();
-            for (RightTriangleInfo info : rightTrianglesWithCanonical2DTextureCoordinatesInfos) {
+            Map<Plane, List<RightTriangleInfo>> mapOfTrianglesByPlanes = rightTrianglesWithCanonical2DTextureCoordinatesInfos.stream()
+                    .map((final RightTriangleInfo info) -> {
+                final Triangle tmpTriangle = new Triangle();
                 // gets the 3 vertices of the triangle
                 final Vector3[] triangleVertices = meshData.getPrimitiveVertices(info.primitiveIndex, info.sectionIndex, null);
                 // sets the vertices of the temporary triangle
@@ -200,10 +201,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 final double distanceToPlane = triangleNormal.dot(tmpTriangle.getCenter());
                 // creates the plane
                 final Plane plane = new Plane(triangleNormal, distanceToPlane);
-                // puts it into a map whose key is a given plane
-                final ArrayList<RightTriangleInfo> infoList = mapOfTrianglesByPlanes.computeIfAbsent(plane, (final Plane currentPlane) -> new ArrayList<>());
-                infoList.add(info);
-            }
+                return new AbstractMap.SimpleImmutableEntry<>(plane, info);
+            }).collect(Collectors.groupingBy(AbstractMap.SimpleImmutableEntry::getKey, 
+                       Collectors.mapping(AbstractMap.SimpleImmutableEntry::getValue, Collectors.toList())));
             System.out.println("Number of planes: " + mapOfTrianglesByPlanes.size());
             mapOfTrianglesByPlanes.entrySet().stream().forEach(System.out::println);
             // third step: retains only triangles by pairs which could be used to create rectangles
@@ -214,9 +214,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             RightTriangleInfo tri1, tri2;
             final boolean[][] canonicalTexCoordsFound = new boolean[2][2];
             // for each plane of the map
-            for (Entry<Plane, ArrayList<RightTriangleInfo>> entry : mapOfTrianglesByPlanes.entrySet()) {
+            for (Entry<Plane, List<RightTriangleInfo>> entry : mapOfTrianglesByPlanes.entrySet()) {
                 ArrayList<RightTriangleInfo> rightTrianglesWithSameHypotenusesByPairs = new ArrayList<>();
-                ArrayList<RightTriangleInfo> rightTriangles = entry.getValue();
+                List<RightTriangleInfo> rightTriangles = entry.getValue();
                 final int triCount = rightTriangles.size();
                 // for each RightTriangleInfo instance
                 for (int triIndex1 = 0; triIndex1 < triCount - 1; triIndex1++) {
@@ -368,8 +368,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             RightTriangleInfo[] tris = new RightTriangleInfo[trisVertices.length];
             Vector2[][] trisTextureCoords = new Vector2[trisVertices.length][];
             // for each plane of the map
-            for (Entry<Plane, ArrayList<RightTriangleInfo>> entry : mapOfTrianglesByPlanes.entrySet()) {
-                ArrayList<RightTriangleInfo> rightTrianglesByPairs = entry.getValue();
+            for (Entry<Plane, List<RightTriangleInfo>> entry : mapOfTrianglesByPlanes.entrySet()) {
+                List<RightTriangleInfo> rightTrianglesByPairs = entry.getValue();
                 Plane plane = entry.getKey();
                 final int triCount = rightTrianglesByPairs.size();
                 for (int triIndex12 = 0; triIndex12 < triCount - 3; triIndex12 += 2) {
@@ -487,7 +487,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                         oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound = texCoordsMatch;
                                                         if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
                                                             // stores tr0, tr1, tr2, tr3 and the indices for further uses
-                                                            commonSideInfo = new SimpleEntry<>(
+                                                            commonSideInfo = new AbstractMap.SimpleEntry<>(
                                                                     new RightTriangleInfo[] { tr0, tr1, tr0, tr1 },
                                                                     new int[] { (tr0.sideIndexOfHypotenuse + 2) % 3,
                                                                             (tr1.sideIndexOfHypotenuse + j) % 3,
@@ -557,7 +557,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                         oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound = texCoordsMatch;
                                                         if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
                                                             // stores tr0, tr1, tr2, tr3 and the indices for further uses
-                                                            commonSideInfo = new SimpleEntry<>(
+                                                            commonSideInfo = new AbstractMap.SimpleEntry<>(
                                                                     new RightTriangleInfo[] { tr0, tr1, tr0, tr1 },
                                                                     new int[] { (tr0.sideIndexOfHypotenuse + 2) % 3,
                                                                             (tr1.sideIndexOfHypotenuse + j) % 3,
