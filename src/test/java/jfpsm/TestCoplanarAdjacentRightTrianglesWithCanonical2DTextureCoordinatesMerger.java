@@ -19,6 +19,7 @@ package jfpsm;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
@@ -36,10 +37,9 @@ import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
  *
  */
 public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger {
-
+    
     private static void testComputeAdjacentMergeableTrisArraysList() {
-        final RightTriangleInfo info = new RightTriangleInfo(0, 0, 0);
-        // FIXME reverse the whole array?
+        final RightTriangleInfo info = new RightTriangleInfo(0, 0, 0, null);
         final RightTriangleInfo[][][] adjacentTrisArray = new RightTriangleInfo[][][] {
                 new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null },
                 new RightTriangleInfo[][] { null, null, null, null, new RightTriangleInfo[] { info, info }, null, null,
