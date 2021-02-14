@@ -70,7 +70,9 @@ public class SimpleDeallocationHelper {
     public void deallocate(final Buffer buffer) {
         final ByteBuffer deallocatableBuffer = findDeallocatableBuffer(buffer);
         if (deallocatableBuffer != null) {
+            // marks the segment "not alive"
             MemorySegment.ofByteBuffer(deallocatableBuffer).close();
+            //TODO get the memory address and free it by using the C linker (requires Java >= 16)
         }
     }
 }
