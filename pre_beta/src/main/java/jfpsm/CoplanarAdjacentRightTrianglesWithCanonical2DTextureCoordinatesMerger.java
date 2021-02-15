@@ -146,16 +146,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
      * @return triangle side index of the hypotenuse if any, otherwise -1
      */
     private static int getSideIndexOfHypotenuse(final Vector3[] triangleVertices) {
-        //TODO rather check whether the dot product is equal to zero
-        // computes the squared distances of all sides
-        final double[] triangleSideDistancesSquared = IntStream.range(0, triangleVertices.length)
-                                                               .mapToDouble((final int triangleSideIndex) -> triangleVertices[triangleSideIndex].distanceSquared(triangleVertices[(triangleSideIndex + 1) % 3]))
-                                                               .toArray();
-        // uses these squared distances to find the hypotenuse if any by (i.e if it's a right-angled triangle) using the Pythagorean theorem
-        return IntStream.range(0, triangleSideDistancesSquared.length)
-                        .filter((final int triangleSideIndex) -> triangleSideDistancesSquared[triangleSideIndex] == triangleSideDistancesSquared[(triangleSideIndex + 1) % 3] + triangleSideDistancesSquared[(triangleSideIndex + 2) % 3])
-                        .findFirst()
-                        .orElse(-1);
+        return IntStream.range(0, 3)
+                 // computes the dot product of two vectors to check whether there's a right angle at their common vertex
+                 .filter((final int triangleSideIndex) -> triangleVertices[(triangleSideIndex + 2) % 3].subtract(triangleVertices[triangleSideIndex], null).dot(triangleVertices[(triangleSideIndex + 2) % 3].subtract(triangleVertices[(triangleSideIndex + 1) % 3], null)) == 0.0)
+                 .findFirst()
+                 .orElse(-1);
     }
     
     /**
@@ -262,10 +257,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                     tri1Vertices[(tri1.sideIndexOfHypotenuse + 2) % 3].subtract(tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3], null).equals(
                                     tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3].subtract(tri2Vertices[(tri2.sideIndexOfHypotenuse + 2) % 3], null)) &&
                                     // checks that all canonical texture coordinates are in the pair of triangles
-                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getX).filter((final double u) -> u == 0.0).count() == 2 &&
-                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getX).filter((final double u) -> u == 1.0).count() == 2 &&
-                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getY).filter((final double v) -> v == 0.0).count() == 2 &&
-                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getY).filter((final double v) -> v == 1.0).count() == 2;
+                                    IntStream.of(Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3])
+                                                       .map((final Vector2 textureCoord) -> new int[]{textureCoord.getX() == 0.0 ? 1 : 0, textureCoord.getX() == 1.0 ? 1 : 0, textureCoord.getY() == 0.0 ? 1 : 0, textureCoord.getY() == 1.0 ? 1 : 0})
+                                                       .reduce((final int[] v0, final int[] v1) -> new int[] {v0[0] + v1[0], v0[1] + v1[1], v0[2] + v1[2], v0[3] + v1[3]}).get())
+                                             .allMatch((final int texCoordCount) -> texCoordCount == 2);
                          })
                          .map((final int[] triIndices) -> new RightTriangleInfo[]{rightTriangles.get(triIndices[0]), rightTriangles.get(triIndices[1])})
                          .collect(Collectors.toList()));
