@@ -146,6 +146,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
      * @return triangle side index of the hypotenuse if any, otherwise -1
      */
     private static int getSideIndexOfHypotenuse(final Vector3[] triangleVertices) {
+        //TODO rather check whether the dot product is equal to zero
         // computes the squared distances of all sides
         final double[] triangleSideDistancesSquared = IntStream.range(0, triangleVertices.length)
                                                                .mapToDouble((final int triangleSideIndex) -> triangleVertices[triangleSideIndex].distanceSquared(triangleVertices[(triangleSideIndex + 1) % 3]))
@@ -233,6 +234,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                        Collectors.mapping(AbstractMap.SimpleImmutableEntry::getValue, Collectors.toList())));
             System.out.println("Number of planes: " + mapOfTrianglesByPlanes.size());
             mapOfTrianglesByPlanes.entrySet().stream().forEach(System.out::println);
+            System.out.println("Number of triangles: " + mapOfTrianglesByPlanes.values().stream().mapToInt(List::size).sum());
             // third step: retains only triangles by pairs which could be used to create rectangles
             final Map<Plane, List<RightTriangleInfo[]>> mapOfRightTrianglesWithSameHypotenusesByPairs = mapOfTrianglesByPlanes.entrySet().stream().map((final Entry<Plane, List<RightTriangleInfo>> entry) -> {
                 final List<RightTriangleInfo> rightTriangles = entry.getValue();
@@ -248,136 +250,32 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                              final RightTriangleInfo tri2 = rightTriangles.get(triIndices[1]);
                              final Vector3[] tri1Vertices = tri1.getVertices();
                              final Vector3[] tri2Vertices = tri2.getVertices();
-                             
-                             //TODO compare the hypotenuses
-                             //TODO ensure the vertices in the right angles are different
-                             //TODO ensure the vertices have distinct texture coordinates
-                             
-                             
-                             /**
-                              * checks if the both triangles have the same hypotenuse (i.e it is a quadrilateral with 2 right angles) and if their opposite sides
-                              * have the same length (i.e it is a parallelogram). As a parallelogram with 2 right angles is necessarily a rectangle, such
-                              * a shape is a rectangle.
-                              */
-                             boolean sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder = tri1Vertices[tri1.sideIndexOfHypotenuse]
-                                     .equals(tri2Vertices[tri2.sideIndexOfHypotenuse])
-                                     && tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                             .equals(tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3])
-                                     && tri1Vertices[tri1.sideIndexOfHypotenuse]
-                                             .distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
-                                                     % 3]) == tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3]
-                                                             .distanceSquared(
-                                                                     tri2Vertices[(tri2.sideIndexOfHypotenuse + 2)
-                                                                             % 3])
-                                     && tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                             .distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
-                                                     % 3]) == tri2Vertices[tri2.sideIndexOfHypotenuse]
-                                                             .distanceSquared(
-                                                                     tri2Vertices[(tri2.sideIndexOfHypotenuse + 2)
-                                                                             % 3]);
-                             boolean sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder = !sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder
-                                     && (tri1Vertices[tri1.sideIndexOfHypotenuse]
-                                             .equals(tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3])
-                                             && tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                                     .equals(tri2Vertices[tri2.sideIndexOfHypotenuse])
-                                             && tri1Vertices[tri1.sideIndexOfHypotenuse]
-                                                     .distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
-                                                             % 3]) == tri2Vertices[tri2.sideIndexOfHypotenuse]
-                                                                     .distanceSquared(
-                                                                             tri2Vertices[(tri2.sideIndexOfHypotenuse
-                                                                                     + 2) % 3])
-                                             && tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                                     .distanceSquared(tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
-                                                             % 3]) == tri2Vertices[(tri2.sideIndexOfHypotenuse + 1)
-                                                                     % 3].distanceSquared(
-                                                                             tri2Vertices[(tri2.sideIndexOfHypotenuse
-                                                                                     + 2) % 3]));
-                             // checks if their vertices at their right
-                             // angles are different
-                             boolean sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles = (sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder
-                                     || sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder)
-                                     && !tri1Vertices[(tri1.sideIndexOfHypotenuse + 2) % 3]
-                                             .equals(tri2Vertices[(tri2.sideIndexOfHypotenuse + 2) % 3]);
-                             final boolean result;
-                             // N.B: triangles must have different vertex
-                             // orders to have the same normal
-                             if (sameHypotenuseOppositeSidesOfSameLengthDifferentVerticesAtRightAngles
-                                     && sameHypotenuseOppositeSidesOfSameLengthReverseVertexOrder) {
-                                 // checks the texture coordinates
-                                 boolean texCoordsMatch;
-                                 final Vector2[] tri1TextureCoords = tri1.getTextureCoords();
-                                 final Vector2[] tri2TextureCoords = tri2.getTextureCoords();
-                                 // checks if the vertices of the hypotenuse
-                                 // must have the same texture coordinates in
-                                 // both triangles
-                                 if (sameHypotenuseOppositeSidesOfSameLengthSameVertexOrder) {
-                                     texCoordsMatch = tri1TextureCoords[tri1.sideIndexOfHypotenuse]
-                                             .equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse])
-                                             && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3].equals(
-                                                     tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 1) % 3]);
-                                 } else {
-                                     texCoordsMatch = tri1TextureCoords[tri1.sideIndexOfHypotenuse]
-                                             .equals(tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 1) % 3])
-                                             && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                                     .equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse]);
-                                 }
-                                 if (texCoordsMatch) {
-                                     final boolean[][] canonicalTexCoordsFound = new boolean[2][2];
-                                     // checks if the rectangle contains all possible pairs of canonical texture coordinates  i.e [0;0], [0;1], [1;0] and [1;1]
-                                     // resets the array of flags
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
-                                         Arrays.fill(canonicalTexCoordsFound[abscissaIndex], false);
-                                     // checks the texture coordinates of the vertices of the right angles
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
-                                         for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
-                                             if (tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3]
-                                                     .getX() == abscissaIndex
-                                                     && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3]
-                                                             .getY() == ordinateIndex)
-                                                 canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
-                                         for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
-                                             if (tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]
-                                                     .getX() == abscissaIndex
-                                                     && tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]
-                                                             .getY() == ordinateIndex)
-                                                 canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
-                                     /**
-                                      * checks the texture coordinates of the vertices of the hypotenuse. Looking at the first triangle is enough as I have 
-                                      * already tested that the vertices of the hypotenuse in both triangles have the same texture coordinates.
-                                      */
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
-                                         for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
-                                             if (tri1TextureCoords[tri1.sideIndexOfHypotenuse]
-                                                     .getX() == abscissaIndex
-                                                     && tri1TextureCoords[tri1.sideIndexOfHypotenuse]
-                                                             .getY() == ordinateIndex)
-                                                 canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length; abscissaIndex++)
-                                         for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length; ordinateIndex++)
-                                             if (tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                                     .getX() == abscissaIndex
-                                                     && tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3]
-                                                             .getY() == ordinateIndex)
-                                                 canonicalTexCoordsFound[abscissaIndex][ordinateIndex] = true;
-                                     // checks all possible pairs of canonical texture coordinates have been found
-                                     for (int abscissaIndex = 0; abscissaIndex < canonicalTexCoordsFound.length
-                                             && texCoordsMatch; abscissaIndex++)
-                                         for (int ordinateIndex = 0; ordinateIndex < canonicalTexCoordsFound[abscissaIndex].length
-                                                 && texCoordsMatch; ordinateIndex++)
-                                             if (!canonicalTexCoordsFound[abscissaIndex][ordinateIndex])
-                                                 texCoordsMatch = false;
-                                 }
-                                 result = texCoordsMatch;
-                             } else {
-                                 result = false;
-                             }
-                             return result;
+                             final Vector2[] tri1TextureCoords = tri1.getTextureCoords();
+                             final Vector2[] tri2TextureCoords = tri2.getTextureCoords();
+                             // checks if the vertices of the hypotenuse are the same but in the opposite order (so that both triangles have the same normal)
+                             return tri1Vertices[tri1.sideIndexOfHypotenuse].equals(tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3]) &&
+                                    tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3].equals(tri2Vertices[tri2.sideIndexOfHypotenuse]) &&
+                                    // checks that the texture coordinates of the vertices in the hypotenuse are the same
+                                    tri1TextureCoords[tri1.sideIndexOfHypotenuse].equals(tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 1) % 3]) &&
+                                    tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3].equals(tri2TextureCoords[tri2.sideIndexOfHypotenuse]) &&
+                                    // checks that there's a symmetry to go to the vertex outside of the hypotenuse
+                                    tri1Vertices[(tri1.sideIndexOfHypotenuse + 2) % 3].subtract(tri1Vertices[(tri1.sideIndexOfHypotenuse + 1) % 3], null).equals(
+                                    tri2Vertices[(tri2.sideIndexOfHypotenuse + 1) % 3].subtract(tri2Vertices[(tri2.sideIndexOfHypotenuse + 2) % 3], null)) &&
+                                    // checks that all canonical texture coordinates are in the pair of triangles
+                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getX).filter((final double u) -> u == 0.0).count() == 2 &&
+                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getX).filter((final double u) -> u == 1.0).count() == 2 &&
+                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getY).filter((final double v) -> v == 0.0).count() == 2 &&
+                                    Stream.of(tri1TextureCoords[tri1.sideIndexOfHypotenuse], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 1) % 3], tri1TextureCoords[(tri1.sideIndexOfHypotenuse + 2) % 3], tri2TextureCoords[(tri2.sideIndexOfHypotenuse + 2) % 3]).mapToDouble(Vector2::getY).filter((final double v) -> v == 1.0).count() == 2;
                          })
                          .map((final int[] triIndices) -> new RightTriangleInfo[]{rightTriangles.get(triIndices[0]), rightTriangles.get(triIndices[1])})
                          .collect(Collectors.toList()));
             })
                     .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
+            System.out.println("Number of planes: " + mapOfRightTrianglesWithSameHypotenusesByPairs.size());
+            mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet().stream()
+                .map((final Map.Entry<Plane, List<RightTriangleInfo[]>> entry) -> entry.getKey() + "=" + entry.getValue().stream().map(Arrays::stream).flatMap(Stream::sequential).collect(Collectors.toList()))
+                .forEach(System.out::println);
+            System.out.println("Number of triangles: " + mapOfRightTrianglesWithSameHypotenusesByPairs.values().stream().mapToInt(List::size).sum() * 2);
             // fourth step: creates lists containing all adjacent rectangles in the same planes
             HashMap<Plane, ArrayList<ArrayList<RightTriangleInfo>>> mapOfListsOfTrianglesByPlanes = new HashMap<>();
             HashMap<RightTriangleInfo, ArrayList<Entry<RightTriangleInfo[], int[]>>> commonSidesInfosMap = new HashMap<>();
