@@ -27,7 +27,7 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 import jfpsm.ArrayHelper.Vector2i;
-import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.RightTriangleInfo;
+import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.TriangleInfo;
 
 /**
  * Test of a mesh optimizer focused on coplanar adjacent right triangles whose
@@ -39,39 +39,39 @@ import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
 public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger {
     
     private static void testComputeAdjacentMergeableTrisArraysList() {
-        final RightTriangleInfo info = new RightTriangleInfo(0, 0, 0, null);
-        final RightTriangleInfo[][][] adjacentTrisArray = new RightTriangleInfo[][][] {
-                new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null },
-                new RightTriangleInfo[][] { null, null, null, null, new RightTriangleInfo[] { info, info }, null, null,
+        final TriangleInfo info = new TriangleInfo(0, 0, null);
+        final TriangleInfo[][][] adjacentTrisArray = new TriangleInfo[][][] {
+                new TriangleInfo[][] { null, null, null, null, null, null, null, null, null },
+                new TriangleInfo[][] { null, null, null, null, new TriangleInfo[] { info, info }, null, null,
                         null, null },
-                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info } },
-                new RightTriangleInfo[][] { null, null, null, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, null, null },
-                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, null, null, null },
-                new RightTriangleInfo[][] { null, null, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, new RightTriangleInfo[] { info, info },
-                        new RightTriangleInfo[] { info, info }, null, null, null },
-                new RightTriangleInfo[][] { null, null, null, new RightTriangleInfo[] { info, info }, null, null, null,
+                new TriangleInfo[][] { null, null, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info } },
+                new TriangleInfo[][] { null, null, null, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, null, null },
+                new TriangleInfo[][] { null, null, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, null, null, null },
+                new TriangleInfo[][] { null, null, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, new TriangleInfo[] { info, info },
+                        new TriangleInfo[] { info, info }, null, null, null },
+                new TriangleInfo[][] { null, null, null, new TriangleInfo[] { info, info }, null, null, null,
                         null, null },
-                new RightTriangleInfo[][] { null, null, null, null, null, null, null, null, null } };
+                new TriangleInfo[][] { null, null, null, null, null, null, null, null, null } };
         System.out.println("Input:");
         final ArrayHelper arrayHelper = new ArrayHelper();
-        final ArrayHelper.OccupancyCheck<RightTriangleInfo[]> trisOccupancyCheck = new ArrayHelper.OccupancyCheck<>() {
+        final ArrayHelper.OccupancyCheck<TriangleInfo[]> trisOccupancyCheck = new ArrayHelper.OccupancyCheck<>() {
 
             @Override
-            public boolean isOccupied(RightTriangleInfo[] value) {
+            public boolean isOccupied(TriangleInfo[] value) {
                 return (value != null && value[0] != null && value[1] != null);
             }
 
         };
         System.out.println(arrayHelper.toString(adjacentTrisArray, false, trisOccupancyCheck));
-        java.util.Map<Vector2i, RightTriangleInfo[][][]> adjacentTrisArraysMap = CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger
+        java.util.Map<Vector2i, TriangleInfo[][][]> adjacentTrisArraysMap = CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger
                 .computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
         System.out.println("Output:");
         System.out.println(arrayHelper.toString(adjacentTrisArraysMap));
