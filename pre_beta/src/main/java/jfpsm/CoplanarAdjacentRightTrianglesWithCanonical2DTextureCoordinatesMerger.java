@@ -274,24 +274,28 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                              final TriangleInfo tri3 = rightTrianglePairList.get(triPairIndices[1])[0];
                              final TriangleInfo tri4 = rightTrianglePairList.get(triPairIndices[1])[1];
                              final Map.Entry<Integer, TriangleInfo[]> orientationAndTriQuartet;
-                             // looks for a quartet that matches by looking for a common side and a projection of a vertex on the vector of the hypotenuse
-                             //TODO check the texture coordinates
-                             if (tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3].equals(tri4.getVertices()[tri4.rightAngleVertexIndex]) && 
-                                 tri1.getVertices()[tri1.rightAngleVertexIndex].equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 2)% 3]) &&
-                                 tri1.getVertices()[tri1.rightAngleVertexIndex].add(tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3].subtract(tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3], null), null).equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 1)% 3])) {
-                                 orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(0), new TriangleInfo[] {tri1, tri2, tri3, tri4});
-                             } else if (tri1.getVertices()[tri1.rightAngleVertexIndex].equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 1)% 3]) && 
-                                        tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3].equals(tri4.getVertices()[tri4.rightAngleVertexIndex]) &&
-                                        tri1.getVertices()[tri1.rightAngleVertexIndex].add(tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3].subtract(tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3], null), null).equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 2)% 3])) {
-                                 orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(1), new TriangleInfo[] {tri1, tri2, tri3, tri4});
-                             } else if (tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3].equals(tri3.getVertices()[tri3.rightAngleVertexIndex]) && 
-                                        tri2.getVertices()[tri2.rightAngleVertexIndex].equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 2)% 3]) &&
-                                        tri2.getVertices()[tri2.rightAngleVertexIndex].add(tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3].subtract(tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3], null), null).equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 1)% 3])) {
-                                 orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(2), new TriangleInfo[] {tri1, tri2, tri3, tri4});
-                             } else if (tri2.getVertices()[tri2.rightAngleVertexIndex].equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 1)% 3]) && 
-                                        tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3].equals(tri3.getVertices()[tri3.rightAngleVertexIndex]) &&
-                                        tri2.getVertices()[tri2.rightAngleVertexIndex].add(tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3].subtract(tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3], null), null).equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 2)% 3])) {
-                                 orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(3), new TriangleInfo[] {tri1, tri2, tri3, tri4});
+                             // checks that the texture coordinates matches so that there is a chance to merge them
+                             if (Arrays.equals(tri1.getTextureCoords(), tri3.getTextureCoords()) && Arrays.equals(tri2.getTextureCoords(), tri4.getTextureCoords())) {
+                                 // looks for a quartet that matches by looking for a common side and a projection of a vertex on the vector of the hypotenuse
+                                 if (tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3].equals(tri4.getVertices()[tri4.rightAngleVertexIndex]) && 
+                                     tri1.getVertices()[tri1.rightAngleVertexIndex].equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 2)% 3]) &&
+                                     tri1.getVertices()[tri1.rightAngleVertexIndex].add(tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3].subtract(tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3], null), null).equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 1)% 3])) {
+                                     orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(0), new TriangleInfo[] {tri1, tri2, tri3, tri4});
+                                 } else if (tri1.getVertices()[tri1.rightAngleVertexIndex].equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 1)% 3]) && 
+                                            tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3].equals(tri4.getVertices()[tri4.rightAngleVertexIndex]) &&
+                                            tri1.getVertices()[tri1.rightAngleVertexIndex].add(tri1.getVertices()[(tri1.rightAngleVertexIndex + 1)% 3].subtract(tri1.getVertices()[(tri1.rightAngleVertexIndex + 2)% 3], null), null).equals(tri4.getVertices()[(tri4.rightAngleVertexIndex + 2)% 3])) {
+                                         orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(1), new TriangleInfo[] {tri1, tri2, tri3, tri4});
+                                 } else if (tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3].equals(tri3.getVertices()[tri3.rightAngleVertexIndex]) && 
+                                            tri2.getVertices()[tri2.rightAngleVertexIndex].equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 2)% 3]) &&
+                                            tri2.getVertices()[tri2.rightAngleVertexIndex].add(tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3].subtract(tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3], null), null).equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 1)% 3])) {
+                                         orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(2), new TriangleInfo[] {tri1, tri2, tri3, tri4});
+                                 } else if (tri2.getVertices()[tri2.rightAngleVertexIndex].equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 1)% 3]) && 
+                                            tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3].equals(tri3.getVertices()[tri3.rightAngleVertexIndex]) &&
+                                            tri2.getVertices()[tri2.rightAngleVertexIndex].add(tri2.getVertices()[(tri2.rightAngleVertexIndex + 1)% 3].subtract(tri2.getVertices()[(tri2.rightAngleVertexIndex + 2)% 3], null), null).equals(tri3.getVertices()[(tri3.rightAngleVertexIndex + 2)% 3])) {
+                                         orientationAndTriQuartet = new AbstractMap.SimpleImmutableEntry<>(Integer.valueOf(3), new TriangleInfo[] {tri1, tri2, tri3, tri4});
+                                 } else {
+                                     orientationAndTriQuartet = null;
+                                 }
                              } else {
                                  orientationAndTriQuartet = null;
                              }
