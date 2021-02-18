@@ -21,12 +21,13 @@ import java.nio.FloatBuffer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -213,11 +214,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 return new AbstractMap.SimpleImmutableEntry<>(plane, info);
             }).collect(Collectors.groupingBy(AbstractMap.SimpleImmutableEntry::getKey, 
                        Collectors.mapping(AbstractMap.SimpleImmutableEntry::getValue, Collectors.toList())));
-            System.out.println("Number of planes: " + mapOfTrianglesByPlanes.size());
+            System.out.println("[2] Number of planes: " + mapOfTrianglesByPlanes.size());
             mapOfTrianglesByPlanes.entrySet().stream().forEach(System.out::println);
-            System.out.println("Number of triangles: " + mapOfTrianglesByPlanes.values().stream().mapToInt(List::size).sum());
+            System.out.println("[2] Number of triangles: " + mapOfTrianglesByPlanes.values().stream().mapToInt(List::size).sum());
             // third step: retains only triangles by pairs which could be used to create rectangles
-            final Map<Plane, List<TriangleInfo[]>> mapOfRightTrianglesWithSameHypotenusesByPairs = mapOfTrianglesByPlanes.entrySet().stream().map((final Entry<Plane, List<TriangleInfo>> entry) -> {
+            final Map<Plane, List<TriangleInfo[]>> mapOfRightTrianglesWithSameHypotenusesByPairs = mapOfTrianglesByPlanes.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo>> entry) -> {
                 final List<TriangleInfo> rightTriangles = entry.getValue();
                 final int triCount = rightTriangles.size();
                 // for each RightTriangleInfo instance
@@ -253,14 +254,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             })
                     .filter((final AbstractMap.SimpleImmutableEntry<Plane, List<TriangleInfo[]>> entry) -> !entry.getValue().isEmpty())
                     .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
-            System.out.println("Number of planes: " + mapOfRightTrianglesWithSameHypotenusesByPairs.size());
+            System.out.println("[3] Number of planes: " + mapOfRightTrianglesWithSameHypotenusesByPairs.size());
             mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet().stream()
                 .map((final Map.Entry<Plane, List<TriangleInfo[]>> entry) -> entry.getKey() + "=" + entry.getValue().stream().flatMap(Arrays::stream).collect(Collectors.toList()))
                 .forEach(System.out::println);
-            System.out.println("Number of triangles: " + mapOfRightTrianglesWithSameHypotenusesByPairs.values().stream().flatMap(List::stream).flatMap(Arrays::stream).count());
+            System.out.println("[3] Number of triangles: " + mapOfRightTrianglesWithSameHypotenusesByPairs.values().stream().flatMap(List::stream).flatMap(Arrays::stream).count());
             // fourth step: creates lists containing all adjacent rectangles in the same planes
             // for each plane of the map
-            final Map<Plane, List<Map.Entry<Integer, TriangleInfo[]>>> mapOfRightTrianglesWithSameHypotenusesByQuartets = mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet().stream().map((final Entry<Plane, List<TriangleInfo[]>> entry) -> {
+            final Map<Plane, List<Map.Entry<Integer, TriangleInfo[]>>> mapOfRightTrianglesWithSameHypotenusesByQuartets = mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[]>> entry) -> {
                 final List<TriangleInfo[]> rightTrianglePairList = entry.getValue();
                 final int triPairCount = rightTrianglePairList.size();
                 return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), IntStream.range(0, triPairCount)
@@ -306,16 +307,119 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             })
                     .filter((final AbstractMap.SimpleImmutableEntry<Plane, List<Map.Entry<Integer, TriangleInfo[]>>> entry) -> !entry.getValue().isEmpty())
                     .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
-            System.out.println("Number of planes: " + mapOfRightTrianglesWithSameHypotenusesByQuartets.size());
+            System.out.println("[4] Number of planes: " + mapOfRightTrianglesWithSameHypotenusesByQuartets.size());
             mapOfRightTrianglesWithSameHypotenusesByQuartets.entrySet().stream()
                 .map((final Map.Entry<Plane, List<Map.Entry<Integer, TriangleInfo[]>>> entry) -> entry.getKey() + "=" + entry.getValue().stream().map(Map.Entry::getValue).flatMap(Arrays::stream).collect(Collectors.toList()))
                 .forEach(System.out::println);
-            System.out.println("Number of triangles: " + mapOfRightTrianglesWithSameHypotenusesByQuartets.values().stream().flatMap(List::stream).map(Map.Entry::getValue).flatMap(Arrays::stream).distinct().count());
+            System.out.println("[4] Number of triangles: " + mapOfRightTrianglesWithSameHypotenusesByQuartets.values().stream().flatMap(List::stream).map(Map.Entry::getValue).flatMap(Arrays::stream).distinct().count());
+            // fifth step: creates lists of adjacent rectangles in the same planes usable to make bigger rectangles
+            final Map<Plane, List<TriangleInfo[][][]>> mapOfAdjacentRightTriangles = mapOfRightTrianglesWithSameHypotenusesByQuartets.entrySet().stream().map((final Map.Entry<Plane, List<Map.Entry<Integer, TriangleInfo[]>>> entry) -> {
+                final List<List<Map.Entry<Integer, TriangleInfo[]>>> rightTrianglesWithSameHypotenusesByQuartetList = new ArrayList<>();
+                // splits the list of quartets into lists of adjacent quartets
+                entry.getValue().stream().forEachOrdered((final Map.Entry<Integer, TriangleInfo[]> orientationAndTriQuartet) -> rightTrianglesWithSameHypotenusesByQuartetList.stream()
+                       .filter((final List<Map.Entry<Integer, TriangleInfo[]>> adjacentTriQuartetList) -> 
+                                  adjacentTriQuartetList.stream()
+                                      .map(Map.Entry::getValue)
+                                      .flatMap(Arrays::stream)
+                                      .anyMatch((final TriangleInfo quartetMember) -> Arrays.stream(orientationAndTriQuartet.getValue()).anyMatch(quartetMember::equals)))
+                       .findFirst()
+                       .orElseGet(() -> {
+                           final List<Map.Entry<Integer, TriangleInfo[]>> quartetList = new ArrayList<>();
+                           rightTrianglesWithSameHypotenusesByQuartetList.add(quartetList);
+                           return quartetList;
+                           }).add(orientationAndTriQuartet));
+                // converts each sublist into a 3D array
+                return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), rightTrianglesWithSameHypotenusesByQuartetList.stream().map((final List<Map.Entry<Integer, TriangleInfo[]>> adjacentTriQuartetList) -> {
+                    // computes the length of the largest path in the same direction
+                    final long maxDirection = adjacentTriQuartetList.stream()
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                            .values()
+                            .stream()
+                            .mapToLong(Long::longValue)
+                            .max()
+                            .getAsLong();
+                    // computes the size
+                    final int size = (2 * (int) maxDirection) + 1;
+                    final TriangleInfo[][][] triPairArray = new TriangleInfo[size][size][2];
+                    final List<Map.Entry<Integer, TriangleInfo[]>> adjacentTriQuartetListToTreat = new ArrayList<>(adjacentTriQuartetList);
+                    Map.Entry<Integer, TriangleInfo[]> adjacentEntry = null;
+                    for (int x, y;!adjacentTriQuartetListToTreat.isEmpty();) {
+                        if (adjacentEntry == null) {
+                            adjacentEntry = adjacentTriQuartetListToTreat.remove(0);
+                            x = (int) maxDirection;
+                            y = (int) maxDirection;
+                        } else {
+                            // finds a quartet whose two first triangles are already in the array
+                            final Map.Entry<Map.Entry<Integer, TriangleInfo[]>, int[]> adjacentEntryWithLocation = adjacentTriQuartetListToTreat.stream()
+                                .map((final Map.Entry<Integer, TriangleInfo[]> currentAdjacentEntry) -> new AbstractMap.SimpleImmutableEntry<>(currentAdjacentEntry, IntStream.range(0, size)
+                                        .mapToObj((final int currentX) -> IntStream.range(0, size)
+                                                .mapToObj((final int currentY) -> new int[]{currentX, currentY}))
+                                        .flatMap(Stream::sequential)
+                                        .filter((final int[] xy) -> triPairArray[xy[0]][xy[1]] != null)
+                                        .filter((final int[] xy) -> Objects.equals(triPairArray[xy[0]][xy[1]][0], currentAdjacentEntry.getValue()[0]) && Objects.equals(triPairArray[xy[0]][xy[1]][1], currentAdjacentEntry.getValue()[1]))
+                                        .findFirst()
+                                        .orElse(new int[] {-1, -1})  ))
+                                .filter((final Map.Entry<Map.Entry<Integer, TriangleInfo[]>, int[]> currentEntryWithLocation) -> currentEntryWithLocation.getValue()[0] != -1 && currentEntryWithLocation.getValue()[1] != -1)
+                                .findFirst()
+                                .orElse(null);
+                            if (adjacentEntryWithLocation == null) {
+                                x = -1;
+                                y = -1;
+                                adjacentEntry = null;
+                                System.err.println("Failed to treat some quartets: " + adjacentTriQuartetListToTreat);
+                                break;
+                            } else {
+                                x = adjacentEntryWithLocation.getValue()[0];
+                                y = adjacentEntryWithLocation.getValue()[1];
+                                adjacentEntry = adjacentEntryWithLocation.getKey();
+                                adjacentTriQuartetListToTreat.remove(adjacentEntry);
+                            }
+                        }
+                        triPairArray[x][y][0] = adjacentEntry.getValue()[0];
+                        triPairArray[x][y][1] = adjacentEntry.getValue()[1];
+                        // updates x and y depending on the value of the key
+                        switch(adjacentEntry.getKey().intValue()) {
+                            case 0:
+                                y--;
+                                break;
+                            case 1:
+                                x--;
+                                break;
+                            case 2:
+                                y++;
+                                break;
+                            case 3:
+                                x++;
+                                break;
+                        }
+                        triPairArray[x][y][0] = adjacentEntry.getValue()[2];
+                        triPairArray[x][y][1] = adjacentEntry.getValue()[3];
+                    }
+                    return triPairArray;
+                }).collect(Collectors.toList()));
+            }).collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
+            System.out.println("[5.0] Number of planes: " + mapOfAdjacentRightTriangles.size());
+            mapOfAdjacentRightTriangles.entrySet().stream()
+                .map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> entry.getKey() + "=" + entry.getValue().stream().flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
+                .forEach(System.out::println);
+            System.out.println("[5.0] Number of triangles: " + mapOfAdjacentRightTriangles.values().stream().flatMap(List::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
+            // compute the sets of mergeable triangles
+            final Map<Plane, List<Map<Vector2i, TriangleInfo[][][]>>> mapOfMergeableTris = mapOfAdjacentRightTriangles.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), 
+                entry.getValue().stream().map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap).collect(Collectors.toList())))
+                .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));            
+            System.out.println("[5.1] Number of planes: " + mapOfMergeableTris.size());
+            mapOfMergeableTris.entrySet().stream()
+                .map((final Map.Entry<Plane, List<Map<Vector2i, TriangleInfo[][][]>>> entry) -> entry.getKey() + "=" + entry.getValue().stream().map(Map::values).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
+                .forEach(System.out::println);
+            System.out.println("[5.1] Number of triangles: " + mapOfMergeableTris.values().stream().flatMap(List::stream).map(Map::values).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             
+            
+            //TODO remove this block
             HashMap<Plane, ArrayList<ArrayList<TriangleInfo>>> mapOfListsOfTrianglesByPlanes = new HashMap<>();
-            HashMap<TriangleInfo, ArrayList<Entry<TriangleInfo[], int[]>>> commonSidesInfosMap = new HashMap<>();
+            HashMap<TriangleInfo, ArrayList<Map.Entry<TriangleInfo[], int[]>>> commonSidesInfosMap = new HashMap<>();
             TriangleInfo tri3, tri4;
-            for (final Entry<Plane, List<TriangleInfo[]>> entry : mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet()) {
+            for (final Map.Entry<Plane, List<TriangleInfo[]>> entry : mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet()) {
                 List<TriangleInfo[]> rightTrianglesByPairs = entry.getValue();
                 Plane plane = entry.getKey();
                 final int triCount = rightTrianglesByPairs.size();
@@ -369,7 +473,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                         tris[3] = tri4;
                         for (int i = 0, ti0, ti1, ti2, ti3; i < 4
                                 && !oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength; i++) {
-                            Entry<TriangleInfo[], int[]> commonSideInfo = null;
+                            Map.Entry<TriangleInfo[], int[]> commonSideInfo = null;
                             // {0;1}
                             ti0 = i / 2;
                             Vector3[] tv0 = trisVertices[ti0];
@@ -441,7 +545,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                                             (tr1.sideIndexOfHypotenuse + j) % 3,
                                                                             (tr0.sideIndexOfHypotenuse + k) % 3,
                                                                             (tr1.sideIndexOfHypotenuse + 2) % 3 });
-                                                            ArrayList<Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
+                                                            ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
                                                                     .get(tr0);
                                                             if (commonSidesInfosEntriesList == null) {
                                                                 commonSidesInfosEntriesList = new ArrayList<>();
@@ -512,7 +616,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                                             (tr0.sideIndexOfHypotenuse + (k / 2)) % 3,
                                                                             (tr1.sideIndexOfHypotenuse + (k % 2))
                                                                                     % 3 });
-                                                            ArrayList<Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
+                                                            ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
                                                                     .get(tr0);
                                                             if (commonSidesInfosEntriesList == null) {
                                                                 commonSidesInfosEntriesList = new ArrayList<>();
@@ -584,7 +688,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
              */
             HashMap<Plane, ArrayList<ArrayList<TriangleInfo[][][]>>> mapOfListsOfListsOfArraysOfMergeableTris = new HashMap<>();
             // for each plane
-            for (Entry<Plane, ArrayList<ArrayList<TriangleInfo>>> entry : mapOfListsOfTrianglesByPlanes
+            for (Map.Entry<Plane, ArrayList<ArrayList<TriangleInfo>>> entry : mapOfListsOfTrianglesByPlanes
                     .entrySet()) {
                 final Plane plane = entry.getKey();
                 // for each list of adjacent triangles
@@ -607,10 +711,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                         adjacentTrisArraysListsList.add(new ArrayList<>(adjacentTrisArraysMap.values()));
                     }
             }
+            //TODO remove the block above
+            //TODO replace mapOfListsOfListsOfArraysOfMergeableTris by mapOfMergeableTris
+            
             // sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
             HashMap<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps = new HashMap<>();
             // for each plane
-            for (Entry<Plane, ArrayList<ArrayList<TriangleInfo[][][]>>> entry : mapOfListsOfListsOfArraysOfMergeableTris
+            for (Map.Entry<Plane, ArrayList<ArrayList<TriangleInfo[][][]>>> entry : mapOfListsOfListsOfArraysOfMergeableTris
                     .entrySet()) {
                 final Plane plane = entry.getKey();
                 final HashMap<TriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosMaps = new HashMap<>();
@@ -823,10 +930,10 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             // seventh step: removes the triangles which are no more in the geometry of the mesh
             final ArrayList<Integer> verticesIndicesToRemove = new ArrayList<>();
             // for each plane
-            for (Entry<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry : mapOfPreviousAndNextAdjacentTrisMaps
+            for (Map.Entry<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry : mapOfPreviousAndNextAdjacentTrisMaps
                     .entrySet()) {
                 // for each couple of old pairs and the new pairs (with some information)
-                for (Entry<TriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosEntry : mapOfPreviousAndNextAdjacentTrisMapsEntry
+                for (Map.Entry<TriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosEntry : mapOfPreviousAndNextAdjacentTrisMapsEntry
                         .getValue().entrySet()) {
                     final TriangleInfo[][][] previousAdjacentTrisArray = previousAdjacentTrisAndNextQuadInfosEntry
                             .getKey();
@@ -927,7 +1034,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
      * @return
      */
     static TriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(final ArrayList<TriangleInfo> trisList,
-            final HashMap<TriangleInfo, ArrayList<Entry<TriangleInfo[], int[]>>> commonSidesInfosMap) {
+            final HashMap<TriangleInfo, ArrayList<Map.Entry<TriangleInfo[], int[]>>> commonSidesInfosMap) {
         /**
          * computes an overestimated size to be sure not to use an index out of
          * the bounds, uses the list size as all pairs of triangles represent
@@ -953,13 +1060,13 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             final HashMap<TriangleInfo, int[]> arrayMap = new HashMap<>();
             arrayMap.put(trisList.get(0), new int[] { initialIndex, initialIndex });
             arrayMap.put(trisList.get(1), new int[] { initialIndex, initialIndex });
-            final ArrayList<Entry<TriangleInfo[], int[]>> infosQueue = new ArrayList<>();
+            final ArrayList<Map.Entry<TriangleInfo[], int[]>> infosQueue = new ArrayList<>();
             /**
              * reuses the information stored in the previous step, copies them
              * into a list
              */
-            for (ArrayList<Entry<TriangleInfo[], int[]>> commonSidesInfos : commonSidesInfosMap.values()) {
-                for (Entry<TriangleInfo[], int[]> commonSideInfo : commonSidesInfos)
+            for (ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfos : commonSidesInfosMap.values()) {
+                for (Map.Entry<TriangleInfo[], int[]> commonSideInfo : commonSidesInfos)
                     if (trisList.contains(commonSideInfo.getKey()[0]) || trisList.contains(commonSideInfo.getKey()[1]))
                         infosQueue.add(commonSideInfo);
             }
@@ -968,7 +1075,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             while (/* !infosQueue.isEmpty() */arrayMap.size() < trisList.size()) {
                 boolean inserted = false;
                 // gets the information from the list
-                final Entry<TriangleInfo[], int[]> info = infosQueue.get(infosQueueIndex);
+                final Map.Entry<TriangleInfo[], int[]> info = infosQueue.get(infosQueueIndex);
                 final TriangleInfo[] tris = info.getKey();
                 final int[] commonSidesIndices = info.getValue();
                 // if the array already contains the first triangle
