@@ -54,11 +54,11 @@ public class ArrayHelper {
         }
 
         public int getX() {
-            return (x);
+            return x;
         }
 
         public int getY() {
-            return (y);
+            return y;
         }
 
         @Override
@@ -230,7 +230,7 @@ public class ArrayHelper {
             }
             final OccupancyMap copy = new OccupancyMap(arrayMapCopy, smallestRowIndex, biggestRowIndex,
                     smallestColumnIndex, biggestColumnIndex, rowCount, occupiedCellCount);
-            return (copy);
+            return copy;
         }
 
         /**
@@ -242,7 +242,7 @@ public class ArrayHelper {
          * @return <code>true</code> if the column is non null
          */
         public boolean hasNonNullColumn(final int columnIndex) {
-            return (arrayMap[columnIndex] != null);
+            return arrayMap[columnIndex] != null;
         }
 
         /**
@@ -254,7 +254,7 @@ public class ArrayHelper {
          * @return row count of the column
          */
         public int getRowCount(final int columnIndex) {
-            return (arrayMap[columnIndex].length);
+            return arrayMap[columnIndex].length;
         }
 
         /**
@@ -268,7 +268,7 @@ public class ArrayHelper {
          * @return value at the given position
          */
         public boolean getValue(final int columnIndex, final int rowIndex) {
-            return (arrayMap[columnIndex][rowIndex]);
+            return arrayMap[columnIndex][rowIndex];
         }
 
         /**
@@ -315,7 +315,7 @@ public class ArrayHelper {
          *         the array used to compute the array map
          */
         public final int getSmallestRowIndex() {
-            return (smallestRowIndex);
+            return smallestRowIndex;
         }
 
         /**
@@ -326,7 +326,7 @@ public class ArrayHelper {
          *         cell in the array used to compute the array map
          */
         public final int getBiggestRowIndex() {
-            return (biggestRowIndex);
+            return biggestRowIndex;
         }
 
         /**
@@ -337,7 +337,7 @@ public class ArrayHelper {
          *         in the array used to compute the array map
          */
         public final int getSmallestColumnIndex() {
-            return (smallestColumnIndex);
+            return smallestColumnIndex;
         }
 
         /**
@@ -348,7 +348,7 @@ public class ArrayHelper {
          *         in the array used to compute the array map
          */
         public final int getBiggestColumnIndex() {
-            return (biggestColumnIndex);
+            return biggestColumnIndex;
         }
 
         /**
@@ -357,7 +357,7 @@ public class ArrayHelper {
          * @return maximum row count that can be found in the array map
          */
         public final int getRowCount() {
-            return (rowCount);
+            return rowCount;
         }
 
         /**
@@ -366,7 +366,7 @@ public class ArrayHelper {
          * @return column count
          */
         public final int getColumnCount() {
-            return (arrayMap.length);
+            return arrayMap.length;
         }
 
         /**
@@ -377,11 +377,11 @@ public class ArrayHelper {
          *         <code>false</code>
          */
         public final boolean isEmpty() {
-            return (rowCount == 0 || arrayMap.length == 0 || occupiedCellCount == 0);
+            return rowCount == 0 || arrayMap.length == 0 || occupiedCellCount == 0;
         }
 
         public final int getOccupiedCellCount() {
-            return (occupiedCellCount);
+            return occupiedCellCount;
         }
 
         /**
@@ -730,11 +730,11 @@ public class ArrayHelper {
         }
         final OccupancyMap occupancyMap = new OccupancyMap(occupancyMapArray, smallestRowIndex, biggestRowIndex,
                 smallestColumnIndex, biggestColumnIndex, rowCount);
-        return (occupancyMap);
+        return occupancyMap;
     }
 
     public <T> String toString(final java.util.Map<Vector2i, T[][]> fullArraysMap) {
-        return (toString(fullArraysMap, -1, -1));
+        return toString(fullArraysMap, -1, -1);
     }
 
     /**
@@ -858,7 +858,7 @@ public class ArrayHelper {
                     stringNonFullArray[x][y] = emptyCellContent;
                 }
         }
-        return (toString(stringNonFullArray, true, null));
+        return toString(stringNonFullArray, true, null);
     }
 
     /**
@@ -872,7 +872,7 @@ public class ArrayHelper {
      *         insertion order is preserved
      */
     public <T> LinkedHashMap<Vector2i, T[][]> computeFullArraysFromNonFullArray(final T[][] array) {
-        return (computeFullArraysFromNonFullArray(array, (OccupancyCheck<T>) null));
+        return computeFullArraysFromNonFullArray(array, (OccupancyCheck<T>) null);
     }
 
     /**
@@ -894,7 +894,7 @@ public class ArrayHelper {
         // creates an occupancy map that will be updated (instead of modifying
         // the supplied array)
         final OccupancyMap occupancyMapObj = createPackedOccupancyMap(array, occupancyCheck);
-        return (computeFullArraysFromNonFullArray(array, occupancyMapObj));
+        return computeFullArraysFromNonFullArray(array, occupancyMapObj);
     }
 
     /**

@@ -405,474 +405,82 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .forEach(System.out::println);
             System.out.println("[5.0] Number of triangles: " + mapOfAdjacentRightTriangles.values().stream().flatMap(List::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             // compute the sets of mergeable triangles
-            final Map<Plane, List<Map<Vector2i, TriangleInfo[][][]>>> mapOfMergeableTris = mapOfAdjacentRightTriangles.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), 
-                entry.getValue().stream().map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap).collect(Collectors.toList())))
-                .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));            
+            final Map<Plane, List<TriangleInfo[][][]>> mapOfMergeableTris = mapOfAdjacentRightTriangles.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), 
+                entry.getValue().stream().map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap).map(Map::values).flatMap(Collection::stream).collect(Collectors.toList())))
+                .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
             System.out.println("[5.1] Number of planes: " + mapOfMergeableTris.size());
             mapOfMergeableTris.entrySet().stream()
-                .map((final Map.Entry<Plane, List<Map<Vector2i, TriangleInfo[][][]>>> entry) -> entry.getKey() + "=" + entry.getValue().stream().map(Map::values).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
+                .map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> entry.getKey() + "=" + entry.getValue().stream().flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
                 .forEach(System.out::println);
-            System.out.println("[5.1] Number of triangles: " + mapOfMergeableTris.values().stream().flatMap(List::stream).map(Map::values).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
-            
-            
-            //TODO remove this block
-            HashMap<Plane, ArrayList<ArrayList<TriangleInfo>>> mapOfListsOfTrianglesByPlanes = new HashMap<>();
-            HashMap<TriangleInfo, ArrayList<Map.Entry<TriangleInfo[], int[]>>> commonSidesInfosMap = new HashMap<>();
-            TriangleInfo tri3, tri4;
-            for (final Map.Entry<Plane, List<TriangleInfo[]>> entry : mapOfRightTrianglesWithSameHypotenusesByPairs.entrySet()) {
-                List<TriangleInfo[]> rightTrianglesByPairs = entry.getValue();
-                Plane plane = entry.getKey();
-                final int triCount = rightTrianglesByPairs.size();
-                for (int triIndex12 = 0; triIndex12 < triCount - 2; triIndex12++) {
-                    final TriangleInfo tri1 = rightTrianglesByPairs.get(triIndex12)[0];
-                    final TriangleInfo tri2 = rightTrianglesByPairs.get(triIndex12)[1];
-                    ArrayList<ArrayList<TriangleInfo>> listOfListsOfTris = mapOfListsOfTrianglesByPlanes
-                            .get(plane);
-                    ArrayList<TriangleInfo> listOfTris = null;
-                    // if the list of lists for this plane exists
-                    if (listOfListsOfTris != null) {
-                        // checks if tri1 and tri2 are already in a list
-                        for (ArrayList<TriangleInfo> list : listOfListsOfTris)
-                            // only looks for tri1 as tri1 and tri2 should be
-                            // together
-                            if (list.contains(tri1)) {
-                                listOfTris = list;
-                                break;
-                            }
-                    }
-                    final Vector3[] tri1Vertices = tri1.getVertices();
-                    final Vector3[] tri2Vertices = tri2.getVertices();
-                    for (int triIndex34 = triIndex12 + 1; triIndex34 < triCount - 1; triIndex34++) {
-                        tri3 = rightTrianglesByPairs.get(triIndex34)[0];
-                        tri4 = rightTrianglesByPairs.get(triIndex34)[1];
-                        final Vector3[] tri3Vertices = tri3.getVertices();
-                        final Vector3[] tri4Vertices = tri4.getVertices();
-                        Vector3[][] trisVertices = new Vector3[][] { tri1Vertices, tri2Vertices, tri3Vertices, tri4Vertices };
-                        TriangleInfo[] tris = new TriangleInfo[trisVertices.length];
-                        Vector2[][] trisTextureCoords = new Vector2[trisVertices.length][];
-                        boolean oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound = false;
-                        boolean oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength = false;
-                        boolean oneCommonSideCorrectVertexOrder = false;
-                        boolean oneCommonSide = false;
-                        boolean oneCommonVertex = false;
-                        /**
-                         * checks if both rectangles have exactly one common
-                         * side, i.e if one vertex is common to 2 triangles from
-                         * 2 different rectangles but not on any hypotenuse and
-                         * if another vertex is common to 2 triangles from 2
-                         * different rectangles but on the both hypotenuse.
-                         * Then, it checks if the vertex order of the rectangles
-                         * is the same After that, it checks if the orthogonal
-                         * sides adjacent with this common side have the same
-                         * length. Finally, it checks if both rectangles have
-                         * the same texture coordinates.
-                         */
-                        tris[0] = tri1;
-                        tris[1] = tri2;
-                        tris[2] = tri3;
-                        tris[3] = tri4;
-                        for (int i = 0, ti0, ti1, ti2, ti3; i < 4
-                                && !oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength; i++) {
-                            Map.Entry<TriangleInfo[], int[]> commonSideInfo = null;
-                            // {0;1}
-                            ti0 = i / 2;
-                            Vector3[] tv0 = trisVertices[ti0];
-                            TriangleInfo tr0 = tris[ti0];
-                            // {2;3}
-                            ti1 = 2 + (i % 2);
-                            Vector3[] tv1 = trisVertices[ti1];
-                            TriangleInfo tr1 = tris[ti1];
-                            // {1;0}
-                            ti2 = ((i / 2) + 1) % 2;
-                            TriangleInfo tr2 = tris[ti2];
-                            // {3;2}
-                            ti3 = 2 + ((i + 1) % 2);
-                            TriangleInfo tr3 = tris[ti3];
-                            // checks if both rectangles have exactly one common side
-                            for (int j = 0; j < 3 && !oneCommonVertex; j++)
-                                if (tv0[(tr0.sideIndexOfHypotenuse + 2) % 3]
-                                        .equals(tv1[(tr1.sideIndexOfHypotenuse + j) % 3])) {
-                                    oneCommonVertex = true;
-                                    if (j != 2) {
-                                        for (int k = 0; k < 2 && !oneCommonSide; k++)
-                                            if (tv0[(tr0.sideIndexOfHypotenuse + k) % 3]
-                                                    .equals(tv1[(tr1.sideIndexOfHypotenuse + 2) % 3])) {
-                                                oneCommonSide = true;
-                                                // checks if the vertex order is correct
-                                                // FIXME this test seems to be wrong
-                                                oneCommonSideCorrectVertexOrder = /* j != k */true;
-                                                if (oneCommonSideCorrectVertexOrder) {
-                                                    // checks if the orthogonal sides adjacent with this common side have the same length
-                                                    if (tv0[(tr0.sideIndexOfHypotenuse + ((k + 1) % 2)) % 3]
-                                                            .distanceSquared(tv0[(tr0.sideIndexOfHypotenuse + 2)
-                                                                    % 3]) == tv1[(tr1.sideIndexOfHypotenuse
-                                                                            + ((j + 1) % 2)) % 3].distanceSquared(
-                                                                                    tv1[(tr1.sideIndexOfHypotenuse + 2)
-                                                                                            % 3])) {
-                                                        oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength = true;
-                                                        // checks the texture coordinates
-                                                        boolean texCoordsMatch = true;
-                                                        // only considers the first texture index
-                                                        final int textureIndex = 0;
-                                                        // gets all texture coordinates
-                                                        for (int l = 0; l < 4; l++)
-                                                            trisTextureCoords[l] = getPrimitiveTextureCoords(meshData,
-                                                                    tris[l].primitiveIndex, tris[l].sectionIndex,
-                                                                    textureIndex, trisTextureCoords[l]);
-                                                        // checks if both rectangles have the same texture coordinates
-                                                        texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                + 2) % 3]
-                                                                        .equals(trisTextureCoords[ti3][(tr3.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                + 2) % 3]
-                                                                        .equals(trisTextureCoords[ti2][(tr2.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                + ((k + 1) % 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                                + j) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                + ((j + 1) % 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                                + k) % 3]);
-                                                        oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound = texCoordsMatch;
-                                                        if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
-                                                            // stores tr0, tr1, tr2, tr3 and the indices for further uses
-                                                            commonSideInfo = new AbstractMap.SimpleEntry<>(
-                                                                    new TriangleInfo[] { tr0, tr1, tr0, tr1 },
-                                                                    new int[] { (tr0.sideIndexOfHypotenuse + 2) % 3,
-                                                                            (tr1.sideIndexOfHypotenuse + j) % 3,
-                                                                            (tr0.sideIndexOfHypotenuse + k) % 3,
-                                                                            (tr1.sideIndexOfHypotenuse + 2) % 3 });
-                                                            ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
-                                                                    .get(tr0);
-                                                            if (commonSidesInfosEntriesList == null) {
-                                                                commonSidesInfosEntriesList = new ArrayList<>();
-                                                                commonSidesInfosMap.put(tr0,
-                                                                        commonSidesInfosEntriesList);
-                                                            }
-                                                            commonSidesInfosEntriesList.add(commonSideInfo);
-                                                            commonSidesInfosEntriesList = commonSidesInfosMap.get(tr1);
-                                                            if (commonSidesInfosEntriesList == null) {
-                                                                commonSidesInfosEntriesList = new ArrayList<>();
-                                                                commonSidesInfosMap.put(tr1,
-                                                                        commonSidesInfosEntriesList);
-                                                            }
-                                                            commonSidesInfosEntriesList.add(commonSideInfo);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                    } else {
-                                        for (int k = 0; k < 4 && !oneCommonSide; k++)
-                                            if (tv0[(tr0.sideIndexOfHypotenuse + (k / 2)) % 3]
-                                                    .equals(tv1[(tr1.sideIndexOfHypotenuse + (k % 2)) % 3])) {
-                                                oneCommonSide = true;
-                                                // checks if the vertex order is correct
-                                                oneCommonSideCorrectVertexOrder = (k / 2) != (k % 2);
-                                                if (oneCommonSideCorrectVertexOrder) {
-                                                    // checks if the orthogonal sides adjacent with this common side have the same length
-                                                    if (tv0[(tr0.sideIndexOfHypotenuse + (((k / 2) + 1) % 2)) % 3]
-                                                            .distanceSquared(tv0[(tr0.sideIndexOfHypotenuse + 2)
-                                                                    % 3]) == tv1[(tr1.sideIndexOfHypotenuse
-                                                                            + ((k + 1) % 2)) % 3].distanceSquared(
-                                                                                    tv1[(tr1.sideIndexOfHypotenuse + 2)
-                                                                                            % 3])) {
-                                                        oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLength = true;
-                                                        // checks the texture coordinates
-                                                        boolean texCoordsMatch = true;
-                                                        // only considers the first texture index
-                                                        final int textureIndex = 0;
-                                                        // gets all texture coordinates
-                                                        for (int l = 0; l < 4; l++)
-                                                            trisTextureCoords[l] = getPrimitiveTextureCoords(meshData,
-                                                                    tris[l].primitiveIndex, tris[l].sectionIndex,
-                                                                    textureIndex, trisTextureCoords[l]);
-                                                        // checks if both rectangles have the same texture coordinates
-                                                        texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                + (((k / 2) + 1) % 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                + ((k + 1) % 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti1][(tr1.sideIndexOfHypotenuse
-                                                                + (k % 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti2][(tr2.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        texCoordsMatch &= trisTextureCoords[ti0][(tr0.sideIndexOfHypotenuse
-                                                                + (k / 2)) % 3]
-                                                                        .equals(trisTextureCoords[ti3][(tr3.sideIndexOfHypotenuse
-                                                                                + 2) % 3]);
-                                                        oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound = texCoordsMatch;
-                                                        if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
-                                                            // stores tr0, tr1, tr2, tr3 and the indices for further uses
-                                                            commonSideInfo = new AbstractMap.SimpleEntry<>(
-                                                                    new TriangleInfo[] { tr0, tr1, tr0, tr1 },
-                                                                    new int[] { (tr0.sideIndexOfHypotenuse + 2) % 3,
-                                                                            (tr1.sideIndexOfHypotenuse + j) % 3,
-                                                                            (tr0.sideIndexOfHypotenuse + (k / 2)) % 3,
-                                                                            (tr1.sideIndexOfHypotenuse + (k % 2))
-                                                                                    % 3 });
-                                                            ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfosEntriesList = commonSidesInfosMap
-                                                                    .get(tr0);
-                                                            if (commonSidesInfosEntriesList == null) {
-                                                                commonSidesInfosEntriesList = new ArrayList<>();
-                                                                commonSidesInfosMap.put(tr0,
-                                                                        commonSidesInfosEntriesList);
-                                                            }
-                                                            commonSidesInfosEntriesList.add(commonSideInfo);
-                                                            commonSidesInfosEntriesList = commonSidesInfosMap.get(tr1);
-                                                            if (commonSidesInfosEntriesList == null) {
-                                                                commonSidesInfosEntriesList = new ArrayList<>();
-                                                                commonSidesInfosMap.put(tr1,
-                                                                        commonSidesInfosEntriesList);
-                                                            }
-                                                            commonSidesInfosEntriesList.add(commonSideInfo);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                    }
-                                }
-                        }
-                        if (oneCommonSideCorrectVertexOrder2oppositeSidesOfSameLengthAndSameTextureCoordinatesFound) {
-                            ArrayList<TriangleInfo> previousListOfTris = null;
-                            // if the list of lists for this plane does not exist
-                            if (listOfListsOfTris == null) {// creates it and puts it into the map
-                                listOfListsOfTris = new ArrayList<>();
-                                mapOfListsOfTrianglesByPlanes.put(plane, listOfListsOfTris);
-                            } else {// checks if tri3 and tri4 are already in a list
-                                for (ArrayList<TriangleInfo> list : listOfListsOfTris)
-                                    // only looks for tri3 as tri3 and tri4 should be together
-                                    if (list.contains(tri3)) {
-                                        previousListOfTris = list;
-                                        break;
-                                    }
-                            }
-                            // if the new list of triangles has not been created
-                            if (listOfTris == null) {// creates it, fills it with the 4 triangles and adds it into the list of lists
-                                listOfTris = new ArrayList<>();
-                                listOfTris.add(tri1);
-                                listOfTris.add(tri2);
-                                listOfTris.add(tri3);
-                                listOfTris.add(tri4);
-                                listOfListsOfTris.add(listOfTris);
-                            } else {// if tri3 and tri4 are not already in this list, adds them into it
-                                if (previousListOfTris != null && previousListOfTris != listOfTris) {
-                                    listOfTris.add(tri3);
-                                    listOfTris.add(tri4);
-                                }
-                            }
-                            // if tri3 and tri4 are already in another list
-                            if (previousListOfTris != null) {
-                                // removes all elements already added into the new list from the previous list to keep only elements which are not in the new list
-                                previousListOfTris.removeAll(listOfTris);
-                                // adds all elements which are not in the new list into it
-                                listOfTris.addAll(previousListOfTris);
-                            }
-                        }
-                    }
-                }
-            }
-            System.out.println("Number of planes: " + mapOfListsOfTrianglesByPlanes.size());
-            mapOfListsOfTrianglesByPlanes.entrySet().stream()
-                .forEach(System.out::println);
-            System.out.println("Number of triangles: " + mapOfListsOfTrianglesByPlanes.values().stream().flatMap(ArrayList::stream).mapToInt(List::size).sum());
-            // fifth step: creates lists of adjacent rectangles in the same planes usable to make bigger rectangles
-            /**
-             * Each entry handles the triangles of a plane. Each entry contains several lists of groups of adjacent triangles. Each group of
-             * adjacent triangles is a list of arrays of adjacent triangles which could be merged to make bigger rectangles
-             */
-            HashMap<Plane, ArrayList<ArrayList<TriangleInfo[][][]>>> mapOfListsOfListsOfArraysOfMergeableTris = new HashMap<>();
-            // for each plane
-            for (Map.Entry<Plane, ArrayList<ArrayList<TriangleInfo>>> entry : mapOfListsOfTrianglesByPlanes
-                    .entrySet()) {
-                final Plane plane = entry.getKey();
-                // for each list of adjacent triangles
-                for (ArrayList<TriangleInfo> trisList : entry.getValue())
-                    if (!trisList.isEmpty()) {
-                        // builds the 2D array from the list of triangles
-                        final TriangleInfo[][][] adjacentTrisArray = compute2dTrisArrayFromAdjacentTrisList(
-                                trisList, commonSidesInfosMap);
-                        // computes a list of arrays of adjacent triangles which
-                        // could be merged to make bigger rectangles
-                        final java.util.Map<Vector2i, TriangleInfo[][][]> adjacentTrisArraysMap = computeAdjacentMergeableTrisArraysMap(
-                                adjacentTrisArray);
-                        // puts the new list into the map
-                        ArrayList<ArrayList<TriangleInfo[][][]>> adjacentTrisArraysListsList = mapOfListsOfListsOfArraysOfMergeableTris
-                                .get(plane);
-                        if (adjacentTrisArraysListsList == null) {
-                            adjacentTrisArraysListsList = new ArrayList<>();
-                            mapOfListsOfListsOfArraysOfMergeableTris.put(plane, adjacentTrisArraysListsList);
-                        }
-                        adjacentTrisArraysListsList.add(new ArrayList<>(adjacentTrisArraysMap.values()));
-                    }
-            }
-            //TODO remove the block above
-            //TODO replace mapOfListsOfListsOfArraysOfMergeableTris by mapOfMergeableTris
-            
+            System.out.println("[5.1] Number of triangles: " + mapOfMergeableTris.values().stream().flatMap(List::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             // sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
             HashMap<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps = new HashMap<>();
             // for each plane
-            for (Map.Entry<Plane, ArrayList<ArrayList<TriangleInfo[][][]>>> entry : mapOfListsOfListsOfArraysOfMergeableTris
-                    .entrySet()) {
+            for (Map.Entry<Plane, List<TriangleInfo[][][]>> entry : mapOfMergeableTris.entrySet()) {
                 final Plane plane = entry.getKey();
                 final HashMap<TriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosMaps = new HashMap<>();
                 mapOfPreviousAndNextAdjacentTrisMaps.put(plane, previousAdjacentTrisAndNextQuadInfosMaps);
-                // for each list of arrays of adjacent triangles which could be
-                // merged to make bigger rectangles
-                for (ArrayList<TriangleInfo[][][]> adjacentTrisArraysList : entry.getValue())
-                    // for each array of adjacent triangles
-                    for (TriangleInfo[][][] adjacentTrisArray : adjacentTrisArraysList) {
-                        // checks if it contains at least one row and if the first row contains at least one element
-                        if (adjacentTrisArray.length >= 1 && adjacentTrisArray[0] != null
-                                && adjacentTrisArray[0].length >= 1) {
-                            // checks if this array is full and rectangular (i.e all rows contain the same count of elements)
-                            boolean isFull = true;
-                            boolean isRectangular = true;
-                            for (int rowIndex = 0; rowIndex < adjacentTrisArray.length && isRectangular
-                                    && isFull; rowIndex++) {
-                                if (adjacentTrisArray[rowIndex] == null
-                                        || adjacentTrisArray[rowIndex].length != adjacentTrisArray[0].length)
-                                    isRectangular = false;
-                                else
-                                    for (int columnIndex = 0; columnIndex < adjacentTrisArray[rowIndex].length
-                                            && isFull; columnIndex++)
-                                        if (adjacentTrisArray[rowIndex][columnIndex] == null
-                                                || adjacentTrisArray[rowIndex][columnIndex].length != 2)
-                                            isFull = false;
-                            }
-                            // FIXME this test never passes
-                            // checks if this array is full, rectangular and if
-                            // it contains more than one pair of adjacent
+                // for each array of adjacent triangles which could be merged to make bigger rectangles
+                for (final TriangleInfo[][][] adjacentTrisArray : entry.getValue()) {
+                    // checks if it contains at least one row and if the first row contains at least one element
+                    if (adjacentTrisArray.length >= 1 && adjacentTrisArray[0] != null
+                        && adjacentTrisArray[0].length >= 1) {
+                        // checks if this array is full and rectangular (i.e all rows contain the same count of elements)
+                        boolean isFull = true;
+                        boolean isRectangular = true;
+                        for (int rowIndex = 0; rowIndex < adjacentTrisArray.length && isRectangular
+                                && isFull; rowIndex++) {
+                            if (adjacentTrisArray[rowIndex] == null
+                                    || adjacentTrisArray[rowIndex].length != adjacentTrisArray[0].length)
+                                isRectangular = false;
+                            else
+                                for (int columnIndex = 0; columnIndex < adjacentTrisArray[rowIndex].length
+                                        && isFull; columnIndex++)
+                                    if (adjacentTrisArray[rowIndex][columnIndex] == null
+                                            || adjacentTrisArray[rowIndex][columnIndex].length != 2)
+                                        isFull = false;
+                        }
+                        // FIXME this test never passes
+                        // checks if this array is full, rectangular and if
+                        // it contains more than one pair of adjacent
+                        // triangles
+                        if (isRectangular && isFull
+                                && (adjacentTrisArray.length > 1 || adjacentTrisArray[0].length > 1)) {
+                            // as this array is rectangular, it has a consistent row count and column count
+                            final int rowCount = adjacentTrisArray.length;
+                            final int columnCount = adjacentTrisArray[0].length;
+                            // computes the new pair of right adjacent
                             // triangles
-                            if (isRectangular && isFull
-                                    && (adjacentTrisArray.length > 1 || adjacentTrisArray[0].length > 1)) {
-                                // as this array is rectangular, it has a consistent row count and column count
-                                final int rowCount = adjacentTrisArray.length;
-                                final int columnCount = adjacentTrisArray[0].length;
-                                // computes the new pair of right adjacent
-                                // triangles
-                                final TriangleInfo[] mergedAdjacentTris = new TriangleInfo[2];
-                                final Vector3[] mergedAdjacentTrisVertices = new Vector3[4];
-                                final Vector2[] mergedAdjacentTrisTextureCoords = new Vector2[4];
-                                final int[] tmpLocalIndices = new int[4];
-                                final int[] mergedAdjacentTrisVerticesIndices = new int[6];
-                                final Vector3[] testedAdjacentTrisVertices = new Vector3[8];
-                                final Vector2[] testedAdjacentTrisTextureCoords = new Vector2[4];
-                                // for each pair of triangles in a corner of the
-                                // array
-                                for (int rowIndex = 0; rowIndex <= 1; rowIndex++) {
-                                    final int rawRowIndex = rowIndex * (rowCount - 1);
-                                    for (int columnIndex = 0; columnIndex <= 1; columnIndex++) {
-                                        final int rawColumnIndex = columnIndex * (columnCount - 1);
-                                        final TriangleInfo tri1 = adjacentTrisArray[rawRowIndex][rawColumnIndex][0];
-                                        final TriangleInfo tri2 = adjacentTrisArray[rawRowIndex][rawColumnIndex][1];
-                                        final Vector3[] tri1Vertices = tri1.getVertices();
-                                        final Vector3[] tri2Vertices = tri2.getVertices();
-                                        // retrieves the distinct vertices of
-                                        // the current corner
-                                        // both triangles have reverse vertex
-                                        // orders (see the third step)
-                                        testedAdjacentTrisVertices[0] = tri1Vertices[tri1.sideIndexOfHypotenuse];
-                                        testedAdjacentTrisVertices[1] = tri2Vertices[tri2.sideIndexOfHypotenuse];
-                                        testedAdjacentTrisVertices[2] = tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
-                                                % 3];
-                                        testedAdjacentTrisVertices[3] = tri2Vertices[(tri2.sideIndexOfHypotenuse + 2)
-                                                % 3];
-                                        // retrieves the texture coordinates
-                                        final Vector2[] tri1TextureCoords = tri1.getTextureCoords();
-                                        final Vector2[] tri2TextureCoords = tri2.getTextureCoords();
-                                        testedAdjacentTrisTextureCoords[0] = tri1TextureCoords[tri1.sideIndexOfHypotenuse];
-                                        testedAdjacentTrisTextureCoords[1] = tri2TextureCoords[tri2.sideIndexOfHypotenuse];
-                                        testedAdjacentTrisTextureCoords[2] = tri1TextureCoords[(tri1.sideIndexOfHypotenuse
-                                                + 2) % 3];
-                                        testedAdjacentTrisTextureCoords[3] = tri2TextureCoords[(tri2.sideIndexOfHypotenuse
-                                                + 2) % 3];
-                                        // looks for the real vertex of the corner
-                                        boolean cornerVertexFound = false;
-                                        for (int testedVertexIndex = 0; testedVertexIndex < 4
-                                                && !cornerVertexFound; testedVertexIndex++) {
-                                            cornerVertexFound = true;
-                                            for (int testedCloseCell1DIndex = 1; testedCloseCell1DIndex <= 3
-                                                    && cornerVertexFound; testedCloseCell1DIndex++) {
-                                                final int secondaryRawRowIndex = Math.max(0, rawRowIndex
-                                                        + ((rowIndex == 0 ? 1 : -1) * (testedCloseCell1DIndex / 2)))
-                                                        % rowCount;
-                                                final int secondaryRawColumnIndex = Math.max(0, rawColumnIndex
-                                                        + ((columnIndex == 0 ? 1 : -1) * (testedCloseCell1DIndex % 2)))
-                                                        % columnCount;
-                                                tri3 = adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][0];
-                                                tri4 = adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][1];
-                                                final Vector3[] tri3Vertices = tri3.getVertices();
-                                                final Vector3[] tri4Vertices = tri4.getVertices();
-                                                testedAdjacentTrisVertices[4] = tri3Vertices[tri3.sideIndexOfHypotenuse];
-                                                testedAdjacentTrisVertices[5] = tri4Vertices[tri4.sideIndexOfHypotenuse];
-                                                testedAdjacentTrisVertices[6] = tri3Vertices[(tri3.sideIndexOfHypotenuse
-                                                        + 2) % 3];
-                                                testedAdjacentTrisVertices[7] = tri4Vertices[(tri4.sideIndexOfHypotenuse
-                                                        + 2) % 3];
-                                                for (int secondaryTestedVertexIndex = 4; secondaryTestedVertexIndex < 8
-                                                        && cornerVertexFound; secondaryTestedVertexIndex++)
-                                                    cornerVertexFound = !testedAdjacentTrisVertices[testedVertexIndex]
-                                                            .equals(testedAdjacentTrisVertices[secondaryTestedVertexIndex]);
-                                            }
-                                            if (cornerVertexFound) {
-                                                // checks whether this corner is already in use
-                                                boolean cornerAlreadyInUse = false;
-                                                for (int mergedAdjacentTrisVertexIndex = 0; mergedAdjacentTrisVertexIndex < 4
-                                                        && !cornerAlreadyInUse; mergedAdjacentTrisVertexIndex++)
-                                                    if (mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex] != null
-                                                            && mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex]
-                                                                    .equals(testedAdjacentTrisVertices[testedVertexIndex]))
-                                                        cornerAlreadyInUse = true;
-                                                // if this corner is already in
-                                                // use, the search must go on
-                                                if (cornerAlreadyInUse)
-                                                    cornerVertexFound = false;
-                                                else {
-                                                    final int localIndex = (rowIndex / 2) + (columnIndex % 2);
-                                                    // stores the vertex
-                                                    mergedAdjacentTrisVertices[localIndex] = testedAdjacentTrisVertices[testedVertexIndex];
-                                                    // stores its texture
-                                                    // coordinates
-                                                    mergedAdjacentTrisTextureCoords[localIndex] = testedAdjacentTrisTextureCoords[testedVertexIndex];
-                                                    // stores its temporary
-                                                    // index in order to know
-                                                    // from which triangle it
-                                                    // comes and whether it is
-                                                    // on the hypotenuse
-                                                    tmpLocalIndices[localIndex] = testedVertexIndex;
-                                                    // if this vertex is not on
-                                                    // the hypotenuse
-                                                    if (testedVertexIndex / 2 == 1) {
-                                                        // stores its triangle in order to keep the same orientation
-                                                        if (mergedAdjacentTris[0] == null)
-                                                            mergedAdjacentTris[0] = testedVertexIndex == 2 ? tri1
-                                                                    : tri2;
-                                                        else if (mergedAdjacentTris[1] == null)
-                                                            mergedAdjacentTris[1] = testedVertexIndex == 2 ? tri1
-                                                                    : tri2;
-                                                        else
-                                                            System.err.println(
-                                                                    "there are too much vertices not on the hypotenuse");
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!cornerVertexFound)
-                                            System.err.println("missing corner");
+                            final TriangleInfo[] mergedAdjacentTris = new TriangleInfo[2];
+                            final Vector3[] mergedAdjacentTrisVertices = new Vector3[4];
+                            final Vector2[] mergedAdjacentTrisTextureCoords = new Vector2[4];
+                            final int[] tmpLocalIndices = new int[4];
+                            final int[] mergedAdjacentTrisVerticesIndices = new int[6];
+                            final Vector3[] testedAdjacentTrisVertices = new Vector3[8];
+                            final Vector2[] testedAdjacentTrisTextureCoords = new Vector2[4];
+                            // for each pair of triangles in a corner of the array
+                            for (int rowIndex = 0; rowIndex <= 1; rowIndex++) {
+                                final int rawRowIndex = rowIndex * (rowCount - 1);
+                                for (int columnIndex = 0; columnIndex <= 1; columnIndex++) {
+                                    final int rawColumnIndex = columnIndex * (columnCount - 1);
+                                    final TriangleInfo tri1 = adjacentTrisArray[rawRowIndex][rawColumnIndex][0];
+                                    final TriangleInfo tri2 = adjacentTrisArray[rawRowIndex][rawColumnIndex][1];
+                                    if (tri1 == null || tri2 == null) {
+                                        continue;
                                     }
-                                }
-                                // keeps the orientation of the previous triangles
-                                Arrays.fill(mergedAdjacentTrisVerticesIndices, -1);
-                                final TriangleInfo tri1 = mergedAdjacentTris[0];
-                                final TriangleInfo tri2 = mergedAdjacentTris[1];
-                                // FIXME the detection of corners is broken
-                                if (tri1 != null && tri2 != null) {
+                                    final Vector3[] tri1Vertices = tri1.getVertices();
+                                    final Vector3[] tri2Vertices = tri2.getVertices();
+                                    // retrieves the distinct vertices of
+                                    // the current corner
+                                    // both triangles have reverse vertex
+                                    // orders (see the third step)
+                                    testedAdjacentTrisVertices[0] = tri1Vertices[tri1.sideIndexOfHypotenuse];
+                                    testedAdjacentTrisVertices[1] = tri2Vertices[tri2.sideIndexOfHypotenuse];
+                                    testedAdjacentTrisVertices[2] = tri1Vertices[(tri1.sideIndexOfHypotenuse + 2)
+                                            % 3];
+                                    testedAdjacentTrisVertices[3] = tri2Vertices[(tri2.sideIndexOfHypotenuse + 2)
+                                            % 3];
+                                    // retrieves the texture coordinates
                                     final Vector2[] tri1TextureCoords = tri1.getTextureCoords();
                                     final Vector2[] tri2TextureCoords = tri2.getTextureCoords();
                                     testedAdjacentTrisTextureCoords[0] = tri1TextureCoords[tri1.sideIndexOfHypotenuse];
@@ -881,52 +489,149 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                             + 2) % 3];
                                     testedAdjacentTrisTextureCoords[3] = tri2TextureCoords[(tri2.sideIndexOfHypotenuse
                                             + 2) % 3];
-                                    // operates on the vertices not on the hypotenuse first
-                                    for (int localIndex = 0; localIndex < 4; localIndex++) {
-                                        if (mergedAdjacentTrisTextureCoords[localIndex]
-                                                .equals(testedAdjacentTrisTextureCoords[0])) {
-                                            if (mergedAdjacentTrisVerticesIndices[0] == -1)
-                                                mergedAdjacentTrisVerticesIndices[0] = localIndex;
-                                            else if (mergedAdjacentTrisVerticesIndices[4] == -1)
-                                                mergedAdjacentTrisVerticesIndices[4] = localIndex;
-                                            else
-                                                System.err.println(
-                                                        "there are too much vertices with the same texture coordinates");
-                                        } else if (mergedAdjacentTrisTextureCoords[localIndex]
-                                                .equals(testedAdjacentTrisTextureCoords[1])) {
-                                            if (mergedAdjacentTrisVerticesIndices[1] == -1)
-                                                mergedAdjacentTrisVerticesIndices[1] = localIndex;
-                                            else if (mergedAdjacentTrisVerticesIndices[3] == -1)
-                                                mergedAdjacentTrisVerticesIndices[3] = localIndex;
-                                            else
-                                                System.err.println(
-                                                        "there are too much vertices with the same texture coordinates");
+                                    // looks for the real vertex of the corner
+                                    boolean cornerVertexFound = false;
+                                    for (int testedVertexIndex = 0; testedVertexIndex < 4
+                                            && !cornerVertexFound; testedVertexIndex++) {
+                                        cornerVertexFound = true;
+                                        for (int testedCloseCell1DIndex = 1; testedCloseCell1DIndex <= 3
+                                                && cornerVertexFound; testedCloseCell1DIndex++) {
+                                            final int secondaryRawRowIndex = Math.max(0, rawRowIndex
+                                                    + ((rowIndex == 0 ? 1 : -1) * (testedCloseCell1DIndex / 2)))
+                                                    % rowCount;
+                                            final int secondaryRawColumnIndex = Math.max(0, rawColumnIndex
+                                                    + ((columnIndex == 0 ? 1 : -1) * (testedCloseCell1DIndex % 2)))
+                                                    % columnCount;
+                                            final TriangleInfo tri3 = adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][0];
+                                            final TriangleInfo tri4 = adjacentTrisArray[secondaryRawRowIndex][secondaryRawColumnIndex][1];
+                                            final Vector3[] tri3Vertices = tri3.getVertices();
+                                            final Vector3[] tri4Vertices = tri4.getVertices();
+                                            testedAdjacentTrisVertices[4] = tri3Vertices[tri3.sideIndexOfHypotenuse];
+                                            testedAdjacentTrisVertices[5] = tri4Vertices[tri4.sideIndexOfHypotenuse];
+                                            testedAdjacentTrisVertices[6] = tri3Vertices[(tri3.sideIndexOfHypotenuse
+                                                    + 2) % 3];
+                                            testedAdjacentTrisVertices[7] = tri4Vertices[(tri4.sideIndexOfHypotenuse
+                                                    + 2) % 3];
+                                            for (int secondaryTestedVertexIndex = 4; secondaryTestedVertexIndex < 8
+                                                    && cornerVertexFound; secondaryTestedVertexIndex++)
+                                                cornerVertexFound = !testedAdjacentTrisVertices[testedVertexIndex]
+                                                        .equals(testedAdjacentTrisVertices[secondaryTestedVertexIndex]);
                                         }
-                                        if (mergedAdjacentTrisTextureCoords[localIndex]
-                                                .equals(testedAdjacentTrisTextureCoords[2]))
-                                            mergedAdjacentTrisVerticesIndices[2] = localIndex;
-                                        else if (mergedAdjacentTrisTextureCoords[localIndex]
-                                                .equals(testedAdjacentTrisTextureCoords[3]))
-                                            mergedAdjacentTrisVerticesIndices[5] = localIndex;
+                                        if (cornerVertexFound) {
+                                            // checks whether this corner is already in use
+                                            boolean cornerAlreadyInUse = false;
+                                            for (int mergedAdjacentTrisVertexIndex = 0; mergedAdjacentTrisVertexIndex < 4
+                                                    && !cornerAlreadyInUse; mergedAdjacentTrisVertexIndex++)
+                                                if (mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex] != null
+                                                        && mergedAdjacentTrisVertices[mergedAdjacentTrisVertexIndex]
+                                                                .equals(testedAdjacentTrisVertices[testedVertexIndex]))
+                                                    cornerAlreadyInUse = true;
+                                            // if this corner is already in
+                                            // use, the search must go on
+                                            if (cornerAlreadyInUse)
+                                                cornerVertexFound = false;
+                                            else {
+                                                final int localIndex = (rowIndex / 2) + (columnIndex % 2);
+                                                // stores the vertex
+                                                mergedAdjacentTrisVertices[localIndex] = testedAdjacentTrisVertices[testedVertexIndex];
+                                                // stores its texture
+                                                // coordinates
+                                                mergedAdjacentTrisTextureCoords[localIndex] = testedAdjacentTrisTextureCoords[testedVertexIndex];
+                                                // stores its temporary
+                                                // index in order to know
+                                                // from which triangle it
+                                                // comes and whether it is
+                                                // on the hypotenuse
+                                                tmpLocalIndices[localIndex] = testedVertexIndex;
+                                                // if this vertex is not on
+                                                // the hypotenuse
+                                                if (testedVertexIndex / 2 == 1) {
+                                                    // stores its triangle in order to keep the same orientation
+                                                    if (mergedAdjacentTris[0] == null)
+                                                        mergedAdjacentTris[0] = testedVertexIndex == 2 ? tri1
+                                                                : tri2;
+                                                    else if (mergedAdjacentTris[1] == null)
+                                                        mergedAdjacentTris[1] = testedVertexIndex == 2 ? tri1
+                                                                : tri2;
+                                                    else
+                                                        System.err.println(
+                                                                "there are too much vertices not on the hypotenuse");
+                                                }
+                                            }
+                                        }
                                     }
-                                    // updates texture coordinates equal to 1
-                                    final double u = columnCount;
-                                    final double v = rowCount;
-                                    for (int localIndex = 0; localIndex < 4; localIndex++) {
-                                        if (mergedAdjacentTrisTextureCoords[localIndex].getX() == 1)
-                                            mergedAdjacentTrisTextureCoords[localIndex].setX(u);
-                                        if (mergedAdjacentTrisTextureCoords[localIndex].getY() == 1)
-                                            mergedAdjacentTrisTextureCoords[localIndex].setY(v);
-                                    }
-                                    // stores the couple of old pairs and the new pairs (with some information) in order to remove the former and to add the latter
-                                    final NextQuadInfo quadInfo = new NextQuadInfo(mergedAdjacentTrisVertices,
-                                            mergedAdjacentTrisTextureCoords, mergedAdjacentTrisVerticesIndices);
-                                    previousAdjacentTrisAndNextQuadInfosMaps.put(adjacentTrisArray, quadInfo);
+                                    if (!cornerVertexFound)
+                                        System.err.println("missing corner");
                                 }
+                            }
+                            // keeps the orientation of the previous triangles
+                            Arrays.fill(mergedAdjacentTrisVerticesIndices, -1);
+                            final TriangleInfo tri1 = mergedAdjacentTris[0];
+                            final TriangleInfo tri2 = mergedAdjacentTris[1];
+                            // FIXME the detection of corners is broken
+                            if (tri1 != null && tri2 != null) {
+                                final Vector2[] tri1TextureCoords = tri1.getTextureCoords();
+                                final Vector2[] tri2TextureCoords = tri2.getTextureCoords();
+                                testedAdjacentTrisTextureCoords[0] = tri1TextureCoords[tri1.sideIndexOfHypotenuse];
+                                testedAdjacentTrisTextureCoords[1] = tri2TextureCoords[tri2.sideIndexOfHypotenuse];
+                                testedAdjacentTrisTextureCoords[2] = tri1TextureCoords[(tri1.sideIndexOfHypotenuse
+                                        + 2) % 3];
+                                testedAdjacentTrisTextureCoords[3] = tri2TextureCoords[(tri2.sideIndexOfHypotenuse
+                                        + 2) % 3];
+                                // operates on the vertices not on the hypotenuse first
+                                for (int localIndex = 0; localIndex < 4; localIndex++) {
+                                    if (mergedAdjacentTrisTextureCoords[localIndex]
+                                            .equals(testedAdjacentTrisTextureCoords[0])) {
+                                        if (mergedAdjacentTrisVerticesIndices[0] == -1)
+                                            mergedAdjacentTrisVerticesIndices[0] = localIndex;
+                                        else if (mergedAdjacentTrisVerticesIndices[4] == -1)
+                                            mergedAdjacentTrisVerticesIndices[4] = localIndex;
+                                        else
+                                            System.err.println(
+                                                    "there are too much vertices with the same texture coordinates");
+                                    } else if (mergedAdjacentTrisTextureCoords[localIndex]
+                                            .equals(testedAdjacentTrisTextureCoords[1])) {
+                                        if (mergedAdjacentTrisVerticesIndices[1] == -1)
+                                            mergedAdjacentTrisVerticesIndices[1] = localIndex;
+                                        else if (mergedAdjacentTrisVerticesIndices[3] == -1)
+                                            mergedAdjacentTrisVerticesIndices[3] = localIndex;
+                                        else
+                                            System.err.println(
+                                                    "there are too much vertices with the same texture coordinates");
+                                    }
+                                    if (mergedAdjacentTrisTextureCoords[localIndex]
+                                            .equals(testedAdjacentTrisTextureCoords[2]))
+                                        mergedAdjacentTrisVerticesIndices[2] = localIndex;
+                                    else if (mergedAdjacentTrisTextureCoords[localIndex]
+                                            .equals(testedAdjacentTrisTextureCoords[3]))
+                                        mergedAdjacentTrisVerticesIndices[5] = localIndex;
+                                }
+                                // updates texture coordinates equal to 1
+                                final double u = columnCount;
+                                final double v = rowCount;
+                                for (int localIndex = 0; localIndex < 4; localIndex++) {
+                                    if (mergedAdjacentTrisTextureCoords[localIndex].getX() == 1)
+                                        mergedAdjacentTrisTextureCoords[localIndex].setX(u);
+                                    if (mergedAdjacentTrisTextureCoords[localIndex].getY() == 1)
+                                        mergedAdjacentTrisTextureCoords[localIndex].setY(v);
+                                }
+                                // stores the couple of old pairs and the new pairs (with some information) in order to remove the former and to add the latter
+                                final NextQuadInfo quadInfo = new NextQuadInfo(mergedAdjacentTrisVertices,
+                                        mergedAdjacentTrisTextureCoords, mergedAdjacentTrisVerticesIndices);
+                                previousAdjacentTrisAndNextQuadInfosMaps.put(adjacentTrisArray, quadInfo);
                             }
                         }
                     }
+                }
+                if (previousAdjacentTrisAndNextQuadInfosMaps.isEmpty()) {
+                    mapOfPreviousAndNextAdjacentTrisMaps.remove(plane);
+                }
             }
+            System.out.println("[6] Number of planes: " + mapOfPreviousAndNextAdjacentTrisMaps.size());
+            mapOfPreviousAndNextAdjacentTrisMaps.entrySet().stream()
+                .map((final Map.Entry<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> entry) -> entry.getKey() + "=" + entry.getValue().keySet().stream().flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
+                .forEach(System.out::println);
+            System.out.println("[6] Number of triangles: " + mapOfPreviousAndNextAdjacentTrisMaps.values().stream().map(Map::keySet).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             // seventh step: removes the triangles which are no more in the geometry of the mesh
             final ArrayList<Integer> verticesIndicesToRemove = new ArrayList<>();
             // for each plane
@@ -1024,166 +729,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
     }
 
     /**
-     * Computes a 2D array of adjacent triangles in the same plane by using
-     * their relative location in this plane
-     * 
-     * @param trisList
-     *            list of adjacent triangles
-     * @param meshData
-     *            mesh data
-     * @return
-     */
-    static TriangleInfo[][][] compute2dTrisArrayFromAdjacentTrisList(final ArrayList<TriangleInfo> trisList,
-            final HashMap<TriangleInfo, ArrayList<Map.Entry<TriangleInfo[], int[]>>> commonSidesInfosMap) {
-        /**
-         * computes an overestimated size to be sure not to use an index out of
-         * the bounds, uses the list size as all pairs of triangles represent
-         * quads and some room is needed in all directions
-         */
-        final int overestimatedSize = trisList.size();
-        // creates the 2D array
-        final TriangleInfo[][][] adjacentTrisArray = new TriangleInfo[overestimatedSize][overestimatedSize][];
-        // if this array can contain something
-        if (overestimatedSize > 0) {
-            /**
-             * this initial index ensures there is enough room in all directions
-             * for other triangles
-             */
-            final int initialIndex = (overestimatedSize / 2) - 1;
-            adjacentTrisArray[initialIndex][initialIndex] = new TriangleInfo[] { trisList.get(0),
-                    trisList.get(1) };
-            /**
-             * uses the following convention: 0 -> left, 1 -> top, 2 -> right, 3
-             * -> bottom. Checks whether an edge of the pair of triangles is
-             * equal to an edge of adjacentTrisArray[i][j]
-             */
-            final HashMap<TriangleInfo, int[]> arrayMap = new HashMap<>();
-            arrayMap.put(trisList.get(0), new int[] { initialIndex, initialIndex });
-            arrayMap.put(trisList.get(1), new int[] { initialIndex, initialIndex });
-            final ArrayList<Map.Entry<TriangleInfo[], int[]>> infosQueue = new ArrayList<>();
-            /**
-             * reuses the information stored in the previous step, copies them
-             * into a list
-             */
-            for (ArrayList<Map.Entry<TriangleInfo[], int[]>> commonSidesInfos : commonSidesInfosMap.values()) {
-                for (Map.Entry<TriangleInfo[], int[]> commonSideInfo : commonSidesInfos)
-                    if (trisList.contains(commonSideInfo.getKey()[0]) || trisList.contains(commonSideInfo.getKey()[1]))
-                        infosQueue.add(commonSideInfo);
-            }
-            int infosQueueIndex = 0;
-            // loops while this list is not empty
-            while (/* !infosQueue.isEmpty() */arrayMap.size() < trisList.size()) {
-                boolean inserted = false;
-                // gets the information from the list
-                final Map.Entry<TriangleInfo[], int[]> info = infosQueue.get(infosQueueIndex);
-                final TriangleInfo[] tris = info.getKey();
-                final int[] commonSidesIndices = info.getValue();
-                // if the array already contains the first triangle
-                if (arrayMap.containsKey(tris[0])) {// if the array already
-                                                    // contains the second
-                                                    // triangle
-                    if (arrayMap.containsKey(tris[1]))
-                        inserted = true;
-                    else {// retrieves the indices of the triangle in the 2D
-                          // array
-                        final int[] arrayIndices = new int[] { arrayMap.get(tris[0])[0], arrayMap.get(tris[0])[1] };
-                        // finds which sides are common updates the array
-                        final int tri1index = trisList.indexOf(tris[1]);
-                        if (tri1index != -1) {
-                            if (tri1index % 2 == 0) {
-                                if (commonSidesIndices[2] == (tris[0].sideIndexOfHypotenuse + 1) % 3) {// to
-                                                                                                       // right
-                                    arrayIndices[0]++;
-                                } else {// to bottom
-                                    arrayIndices[1]++;
-                                }
-                                adjacentTrisArray[arrayIndices[0]][arrayIndices[1]] = new TriangleInfo[] { tris[1],
-                                        trisList.get(tri1index + 1) };
-                            } else {
-                                if (commonSidesIndices[2] == (tris[0].sideIndexOfHypotenuse + 1) % 3) {// to
-                                                                                                       // left
-                                    arrayIndices[0]--;
-                                } else {// to top
-                                    arrayIndices[1]--;
-                                }
-                                adjacentTrisArray[arrayIndices[0]][arrayIndices[1]] = new TriangleInfo[] {
-                                        trisList.get(tri1index - 1), tris[1] };
-                            }
-                            // updates the map as tris[1] has been found
-                            arrayMap.put(tris[1], arrayIndices);
-                            inserted = true;
-                        }
-                    }
-                } else {// if the array already contains the second triangle
-                    if (arrayMap.containsKey(tris[1])) {
-                        // retrieves the indices of the triangle in the 2D array
-                        final int[] arrayIndices = arrayMap.get(tris[1]);
-                        // finds which sides are common and updates the array
-                        final int tri0index = trisList.indexOf(tris[0]);
-                        if (tri0index != -1) {
-                            if (tri0index % 2 == 0) {
-                                if (commonSidesIndices[2] == (tris[0].sideIndexOfHypotenuse + 1) % 3) {// to
-                                                                                                       // left
-                                    arrayIndices[0]--;
-                                } else {// to top
-                                    arrayIndices[1]--;
-                                }
-                                adjacentTrisArray[arrayIndices[0]][arrayIndices[1]] = new TriangleInfo[] { tris[0],
-                                        trisList.get(tri0index + 1) };
-                            } else {
-                                if (commonSidesIndices[2] == (tris[0].sideIndexOfHypotenuse + 1) % 3) {// to
-                                                                                                       // right
-                                    arrayIndices[0]++;
-                                } else {// to bottom
-                                    arrayIndices[1]++;
-                                }
-                                adjacentTrisArray[arrayIndices[0]][arrayIndices[1]] = new TriangleInfo[] {
-                                        trisList.get(tri0index - 1), tris[0] };
-                            }
-                            // updates the map as tris[0] has been found
-                            arrayMap.put(tris[0], arrayIndices);
-                            inserted = true;
-                        }
-                    } else
-                        inserted = false;
-                }
-                if (inserted) {// removes the information we used
-                    /*
-                     * infosQueue.remove(infosQueueIndex); //resets the index if
-                     * it is out of the bounds
-                     * if(infosQueueIndex==infosQueue.size()) infosQueueIndex=0;
-                     */
-                    final int tri0localIndex = trisList.indexOf(tris[0]);
-                    if (tri0localIndex != -1) {
-                        final int tri2localIndex;
-                        if (tri0localIndex % 2 == 0)
-                            tri2localIndex = tri0localIndex + 1;
-                        else
-                            tri2localIndex = tri0localIndex - 1;
-                        final TriangleInfo tri = trisList.get(tri2localIndex);
-                        if (!arrayMap.containsKey(tri))
-                            arrayMap.put(tri, arrayMap.get(tris[0]));
-                    }
-                    final int tri1localIndex = trisList.indexOf(tris[1]);
-                    if (tri1localIndex != -1) {
-                        final int tri3localIndex;
-                        if (tri1localIndex % 2 == 0)
-                            tri3localIndex = tri1localIndex + 1;
-                        else
-                            tri3localIndex = tri1localIndex - 1;
-                        final TriangleInfo tri = trisList.get(tri3localIndex);
-                        if (!arrayMap.containsKey(tri))
-                            arrayMap.put(tri, arrayMap.get(tris[1]));
-                    }
-                } else {// uses the next index, does not go out of the bounds
-                    infosQueueIndex = (infosQueueIndex + 1) % infosQueue.size();
-                }
-            }
-        }
-        return (adjacentTrisArray);
-    }
-
-    /**
      * Gets the texture coordinates of the primitive.
      * 
      * @param primitiveIndex
@@ -1233,8 +778,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
      *            2D arrays containing adjacent triangles
      * @return map of 2D arrays of adjacent mergeable triangles
      */
-    static java.util.Map<Vector2i, TriangleInfo[][][]> computeAdjacentMergeableTrisArraysMap(
-            final TriangleInfo[][][] adjacentTrisArray) {
-        return (new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray));
+    static Map<Vector2i, TriangleInfo[][][]> computeAdjacentMergeableTrisArraysMap(final TriangleInfo[][][] adjacentTrisArray) {
+        return new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray);
     }
 }
