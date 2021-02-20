@@ -637,13 +637,13 @@ public class ArrayHelper {
                 // looks for the smallest column index
                 searchStopped = false;
                 // for each column, i.e for each abscissa
-                for (int x = 0; x < biggestColumnIndex && !searchStopped; x++)
+                for (int x = 0; x <= biggestColumnIndex && !searchStopped; x++)
                     if (array[x] != null)
                         // for each row, i.e for each ordinate
                         for (int y = 0; y < array[x].length && !searchStopped; y++)
                             if ((occupancyCheck == null && array[x][y] != null)
-                                    || (occupancyCheck != null && occupancyCheck.isOccupied(array[x][y]))) {// correct
-                                                                                                            // value
+                                    || (occupancyCheck != null && occupancyCheck.isOccupied(array[x][y]))) {
+                                // correct value
                                 smallestColumnIndex = x;
                                 // candidates
                                 smallestRowIndex = Math.min(smallestRowIndex, y);
@@ -655,7 +655,7 @@ public class ArrayHelper {
                 searchStopped = false;
                 if (biggestRowIndex < Integer.MAX_VALUE) {
                     // for each column, i.e for each abscissa
-                    for (int x = biggestColumnIndex - 1; x >= smallestColumnIndex && !searchStopped; x--)
+                    for (int x = biggestColumnIndex; x >= smallestColumnIndex && !searchStopped; x--)
                         if (array[x] != null && array[x].length > biggestRowIndex + 1) {
                             // for each row, i.e for each ordinate
                             for (int y = array[x].length - 1; y > biggestRowIndex && !searchStopped; y--)
@@ -670,7 +670,7 @@ public class ArrayHelper {
                 searchStopped = false;
                 if (smallestRowIndex > 0) {
                     // for each column, i.e for each abscissa
-                    for (int x = smallestColumnIndex + 1; x <= biggestColumnIndex && !searchStopped; x++)
+                    for (int x = smallestColumnIndex; x <= biggestColumnIndex && !searchStopped; x++)
                         if (array[x] != null && array[x].length > 0) {
                             // for each row, i.e for each ordinate
                             for (int y = 0; y < smallestRowIndex && !searchStopped; y++)
@@ -684,8 +684,7 @@ public class ArrayHelper {
             }
         }
         final int tmpRowCount = biggestRowIndex >= smallestRowIndex ? biggestRowIndex - smallestRowIndex + 1 : 0;
-        final int tmpColumnCount = biggestColumnIndex >= smallestColumnIndex
-                ? biggestColumnIndex - smallestColumnIndex + 1 : 0;
+        final int tmpColumnCount = biggestColumnIndex >= smallestColumnIndex ? biggestColumnIndex - smallestColumnIndex + 1 : 0;
         final int rowCount = tmpRowCount == 0 || tmpColumnCount == 0 ? 0 : tmpRowCount;
         final int columnCount = tmpRowCount == 0 || tmpColumnCount == 0 ? 0 : tmpColumnCount;
         final boolean[][] occupancyMapArray;
