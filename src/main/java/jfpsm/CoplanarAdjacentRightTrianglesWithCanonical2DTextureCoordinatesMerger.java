@@ -410,7 +410,12 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             System.out.println("[5.0] Number of triangles: " + mapOfAdjacentRightTriangles.values().stream().flatMap(List::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             // compute the sets of mergeable triangles
             final Map<Plane, List<TriangleInfo[][][]>> mapOfMergeableTris = mapOfAdjacentRightTriangles.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), 
-                entry.getValue().stream().map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap).map(Map::values).flatMap(Collection::stream).collect(Collectors.toList())))
+                entry.getValue().stream()
+                    .map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap)
+                    .map(Map::values)
+                    .flatMap(Collection::stream)
+                    .filter((final TriangleInfo[][][] adjacentTriArray) -> adjacentTriArray.length >= 1 && adjacentTriArray[0].length >= 1 && (adjacentTriArray.length >= 2 || adjacentTriArray[0].length >= 2))
+                    .collect(Collectors.toList())))
                 .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
             System.out.println("[5.1] Number of planes: " + mapOfMergeableTris.size());
             mapOfMergeableTris.entrySet().stream()
@@ -418,12 +423,50 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .forEach(System.out::println);
             System.out.println("[5.1] Number of triangles: " + mapOfMergeableTris.values().stream().flatMap(List::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
             // sixth step: creates these bigger rectangles with texture coordinates greater than 1 in order to use texture repeat
-            /*mapOfMergeableTris.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> 
-                entry.getValue().stream().map((final TriangleInfo[][][] adjacentTriArray) -> {
-                //TODO
-                System.out.println(adjacentTriArray);
-                return null;
-            }));*/
+            final Map<Plane, List<TriangleInfo[]>> mergedTriPairListMap = mapOfMergeableTris.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> 
+                new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entry.getValue().stream()
+                    .map((final TriangleInfo[][][] adjacentTriArray) -> {
+                final TriangleInfo[] triPair;
+                // looks for the 6 vertices composing the triangle pair to create
+                if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 1) % 3]) && 
+                                                      !adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 2) % 3]) )) && 
+                    (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 1) % 3]) && 
+                                                         !adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 2) % 3]) ))) {
+                    //adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex]
+                    
+                    //adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getVertices()[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex]
+                    triPair = new TriangleInfo[] {new TriangleInfo(-1, -1, null), new TriangleInfo(-1, -1, null)};//TODO
+                    System.out.println("Corners found");
+                } else if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 1) % 3]) && 
+                                                             !adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 2) % 3]) )) && 
+                           (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 1) % 3]) && 
+                                                                !adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 2) % 3]) ))) {
+                    triPair = new TriangleInfo[] {new TriangleInfo(-1, -1, null), new TriangleInfo(-1, -1, null)};//TODO
+                    System.out.println("Corners found");
+                } else if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][0].getVertices()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3].equals(adjacentTriArray[1][0][0].getVertices()[adjacentTriArray[1][0][0].rightAngleVertexIndex]) )) && 
+                           (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][0].getVertices()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3].equals(adjacentTriArray[0][1][0].getVertices()[adjacentTriArray[0][1][0].rightAngleVertexIndex]) ))) {
+                    triPair = new TriangleInfo[] {new TriangleInfo(-1, -1, null), new TriangleInfo(-1, -1, null)};//TODO
+                    System.out.println("Corners found");
+                } else if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][0].getVertices()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3].equals(adjacentTriArray[1][0][0].getVertices()[adjacentTriArray[1][0][0].rightAngleVertexIndex]) )) && 
+                           (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][0].getVertices()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3].equals(adjacentTriArray[0][1][0].getVertices()[adjacentTriArray[0][1][0].rightAngleVertexIndex]) ))) {
+                    triPair = new TriangleInfo[] {new TriangleInfo(-1, -1, null), new TriangleInfo(-1, -1, null)};//TODO
+                    System.out.println("Corners found");
+                } else {
+                    triPair = null;
+                    System.err.println("Missing corners");
+                }
+                //TODO rather return an entry composed of the triangles to merge and the pair of merged triangles
+                return triPair;
+            }).filter(Objects::nonNull)
+              .collect(Collectors.toList())))
+                    .filter((final AbstractMap.SimpleImmutableEntry<Plane, List<TriangleInfo[]>> entry) -> !entry.getValue().isEmpty())
+                    .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
+            System.out.println("[6] Number of planes: " + mergedTriPairListMap.size());
+            mergedTriPairListMap.entrySet().stream()
+                .map((final Map.Entry<Plane, List<TriangleInfo[]>> entry) -> entry.getKey() + "=" + entry.getValue().stream().filter(Objects::nonNull).flatMap(Arrays::stream).collect(Collectors.toList()))
+                .forEach(System.out::println);
+            System.out.println("[6] Number of triangles: " + mergedTriPairListMap.values().stream().flatMap(List::stream).filter(Objects::nonNull).flatMap(Arrays::stream).count());
+            
             HashMap<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps = new HashMap<>();
             // for each plane
             for (Map.Entry<Plane, List<TriangleInfo[][][]>> entry : mapOfMergeableTris.entrySet()) {
