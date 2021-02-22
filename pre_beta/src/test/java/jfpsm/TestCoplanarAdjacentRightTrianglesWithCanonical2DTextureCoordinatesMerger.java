@@ -92,9 +92,9 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
                     .load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class
                             .getResource("/abin/LID0.abin"));
             final Mesh mesh = (Mesh) ((Node) levelNode.getChild(0)).getChild(1);
-            System.out.println("Input: " + mesh.getMeshData().getVertexCount());
+            System.out.println("Input, vertex count: " + mesh.getMeshData().getVertexCount());
             CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.optimize(mesh);
-            System.out.println("Output: " + mesh.getMeshData().getVertexCount());
+            System.out.println("Output, vertex count: " + mesh.getMeshData().getVertexCount());
         } catch (IOException ioe) {
             throw new RuntimeException("level loading failed", ioe);
         }

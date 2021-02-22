@@ -17,6 +17,7 @@
  */
 package jfpsm;
 
+import java.nio.FloatBuffer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -39,6 +41,7 @@ import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
+import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
 import com.ardor3d.util.geom.BufferUtils;
@@ -167,18 +170,18 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             final boolean previousGeometryWasIndexed = meshData.getIndexBuffer() != null;
             if (previousGeometryWasIndexed) {
                 new GeometryTool(true).convertIndexedGeometryIntoNonIndexedGeometry(meshData);
-                System.out.println("Non indexed input: " + meshData.getVertexCount());
+                System.out.println("Non indexed input, vertex count: " + meshData.getVertexCount());
             }
             // first step: separates right triangles with canonical 2D texture coordinates from the others, loops on all sections of the mesh data
-            final List<TriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = IntStream.range(0, meshData.getSectionCount())
+            final List<TriangleInfo> triangleInfoList = IntStream.range(0, meshData.getSectionCount())
                 // loops on all triangles of each section
                 .mapToObj((final int sectionIndex) -> IntStream.range(0, meshData.getPrimitiveCount(sectionIndex))
                 // checks whether its texture coordinates are canonical, only considers the first texture index
                 .filter((final int trianglePrimitiveIndex) -> hasCanonicalTextureCoords(getPrimitiveTextureCoords(meshData, trianglePrimitiveIndex, sectionIndex, 0, null)))
-                .mapToObj((final int trianglePrimitiveIndex) -> new TriangleInfo(trianglePrimitiveIndex, sectionIndex, meshData))
-                .filter(TriangleInfo::isRightAngled))
+                .mapToObj((final int trianglePrimitiveIndex) -> new TriangleInfo(trianglePrimitiveIndex, sectionIndex, meshData)))
                 .flatMap(Stream::sequential)
                 .collect(Collectors.toList());
+            final List<TriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = triangleInfoList.stream().filter(TriangleInfo::isRightAngled).collect(Collectors.toList());
             rightTrianglesWithCanonical2DTextureCoordinatesInfos.forEach(System.out::println);
             System.out.println("[1] Number of triangles: " + rightTrianglesWithCanonical2DTextureCoordinatesInfos.size());
             // second step: sorts the triangles of the former set by planes (4D: normal + distance to plane)
@@ -555,99 +558,35 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .forEach(System.out::println);
             System.out.println("[6] Number of triangles: " + mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream).count());
             
-            
-            
-            
-            // seventh step: removes the triangles which are no more in the geometry of the mesh
-            /*final ArrayList<Integer> verticesIndicesToRemove = new ArrayList<>();
-            // for each plane
-            for (Map.Entry<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMapsEntry : mapOfPreviousAndNextAdjacentTrisMaps
-                    .entrySet()) {
-                // for each couple of old pairs and the new pairs (with some information)
-                for (Map.Entry<TriangleInfo[][][], NextQuadInfo> previousAdjacentTrisAndNextQuadInfosEntry : mapOfPreviousAndNextAdjacentTrisMapsEntry
-                        .getValue().entrySet()) {
-                    final TriangleInfo[][][] previousAdjacentTrisArray = previousAdjacentTrisAndNextQuadInfosEntry
-                            .getKey();
-                    for (int rowIndex = 0; rowIndex < previousAdjacentTrisArray.length; rowIndex++)
-                        for (int columnIndex = 0; columnIndex < previousAdjacentTrisArray[rowIndex].length; columnIndex++) {
-                            // retrieves the vertices
-                            final TriangleInfo tri1 = previousAdjacentTrisArray[rowIndex][columnIndex][0];
-                            final TriangleInfo tri2 = previousAdjacentTrisArray[rowIndex][columnIndex][1];
-                            final Vector3[] tri1Vertices = tri1.getVertices();
-                            final Vector3[] tri2Vertices = tri2.getVertices();
-                            final int[] tri1Indices = tri1.getIndices();
-                            final int[] tri2Indices = tri2.getIndices();
-                            // does not keep these vertices, mark them as removable
-                            for (int triVertexIndex = 0; triVertexIndex < tri1Vertices.length; triVertexIndex++)
-                                verticesIndicesToRemove.add(Integer.valueOf(tri1Indices[triVertexIndex]));
-                            for (int triVertexIndex = 0; triVertexIndex < tri2Vertices.length; triVertexIndex++)
-                                verticesIndicesToRemove.add(Integer.valueOf(tri2Indices[triVertexIndex]));
-                        }
-                }
-            }
-            // computes the count of added vertices
-            int addedVerticesCount = 0;
-            for (HashMap<TriangleInfo[][][], NextQuadInfo> previousAndNextAdjacentTrisMap : mapOfPreviousAndNextAdjacentTrisMaps
-                    .values()) {
-                // there are (obviously) two triangles by quad and three vertices by triangle
-                addedVerticesCount += previousAndNextAdjacentTrisMap.size() * 6;
-            }
+            // seventh step: rebuild the mesh data
+            // builds a stream supplier providing the triangles to put into the next mesh data
+            final Supplier<Stream<TriangleInfo>> nextTriangleInfoStreamSupplier = () -> Stream.concat(triangleInfoList.stream().filter((final TriangleInfo oldTri) -> mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getKey).flatMap(Arrays::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).noneMatch(oldTri::equals)), 
+                                                                                                      mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream));
             // computes the next vertex count
-            final int nextVertexCount = meshData.getVertexCount() - verticesIndicesToRemove.size() + addedVerticesCount;
+            final int nextVertexCount = 3 * (int) nextTriangleInfoStreamSupplier.get().count();
             // creates the next vertex buffer
             final FloatBuffer nextVertexBuffer = FloatBuffer.allocate(nextVertexCount * 3);
-            // does not copy the vertices marked as removable into the next vertex buffer, copies the others
-            for (int vertexIndex = 0; vertexIndex < meshData.getVertexCount(); vertexIndex++)
-                if (!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex))) {
-                    final int vertexCoordinateIndex = vertexIndex * 3;
-                    final float x = meshData.getVertexBuffer().get(vertexCoordinateIndex);
-                    final float y = meshData.getVertexBuffer().get(vertexCoordinateIndex + 1);
-                    final float z = meshData.getVertexBuffer().get(vertexCoordinateIndex + 2);
-                    nextVertexBuffer.put(x).put(y).put(z);
-                }
-            // does not modify the position so that this vertex buffer is ready for the addition of the new vertices computes the next texture coordinate count
-            final int nextTextureCoordsCount = nextVertexCount;
             // creates the next texture buffer (2D)
-            final FloatBuffer nextTextureBuffer = FloatBuffer.allocate(nextTextureCoordsCount * 2);
-            // does not copy the texture coordinates of vertices marked as
-            // removable into the next vertex buffer, copies the others
-            for (int vertexIndex = 0; vertexIndex < meshData.getVertexCount(); vertexIndex++)
-                if (!verticesIndicesToRemove.contains(Integer.valueOf(vertexIndex))) {
-                    final int textureCoordinateIndex = vertexIndex * 2;
-                    final float fu = meshData.getVertexBuffer().get(textureCoordinateIndex);
-                    final float fv = meshData.getVertexBuffer().get(textureCoordinateIndex + 1);
-                    nextTextureBuffer.put(fu).put(fv);
-                }
-            // does not modify the position so that this texture buffer is ready for the addition of the new texture coordinates
-            // eighth step: adds the new triangles into the geometry of the mesh
-            for (HashMap<TriangleInfo[][][], NextQuadInfo> previousAndNextAdjacentTrisMap : mapOfPreviousAndNextAdjacentTrisMaps
-                    .values())
-                for (NextQuadInfo nextQuadInfo : previousAndNextAdjacentTrisMap.values()) {
-                    // uses the six indices to know which vertices to use in order to build the two triangles
-                    for (int indexIndex = 0; indexIndex < nextQuadInfo.indices.length; indexIndex++) {
-                        final int vertexIndex = nextQuadInfo.indices[indexIndex];
-                        final Vector3 vertex = nextQuadInfo.vertices[vertexIndex];
-                        final Vector2 texCoord = nextQuadInfo.textureCoords[vertexIndex];
-                        final float x = vertex.getXf();
-                        final float y = vertex.getYf();
-                        final float z = vertex.getZf();
-                        final float fu = texCoord.getXf();
-                        final float fv = texCoord.getYf();
-                        nextVertexBuffer.put(x).put(y).put(z);
-                        nextTextureBuffer.put(fu).put(fv);
-                    }
-                }
+            final FloatBuffer nextTextureBuffer = FloatBuffer.allocate(nextVertexCount * 2);
+            nextTriangleInfoStreamSupplier.get().forEachOrdered((final TriangleInfo tri) -> {
+                Arrays.stream(tri.getVertices()).forEachOrdered((final Vector3 vertex) -> IntStream.range(0, 3).mapToDouble(vertex::getValue)
+                        .forEachOrdered((final double vertexCoord) -> nextVertexBuffer.put((float) vertexCoord)));
+                Arrays.stream(tri.getTextureCoords()).forEachOrdered((final Vector2 textureCoords) -> IntStream.range(0, 2).mapToDouble(textureCoords::getValue)
+                        .forEachOrdered((final double textureCoord) -> nextTextureBuffer.put((float) textureCoord)));
+            });
+            final MeshData nextMeshData = new MeshData();
             // finally, rewinds the new vertex buffer and sets it
             nextVertexBuffer.rewind();
-            meshData.setVertexBuffer(nextVertexBuffer);
+            nextMeshData.setVertexBuffer(nextVertexBuffer);
             // does the same for texture coordinates
             nextTextureBuffer.rewind();
-            meshData.setTextureCoords(new FloatBufferData(nextTextureBuffer, 2), 0);*/
+            nextMeshData.setTextureCoords(new FloatBufferData(nextTextureBuffer, 2), 0);
+            // assigns the next mesh data to the mesh
+            mesh.setMeshData(nextMeshData);
             // if the supplied geometry was indexed
             if (previousGeometryWasIndexed) {
                 // converts the new geometry into an indexed geometry uses all conditions with GeometryTool
-                final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal,
-                        MatchCondition.Color);
+                final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs/*, MatchCondition.Normal, MatchCondition.Color*/);
                 // reduces the geometry to avoid duplication of vertices
                 new GeometryTool(true).minimizeVerts(mesh, conditions);
             }
