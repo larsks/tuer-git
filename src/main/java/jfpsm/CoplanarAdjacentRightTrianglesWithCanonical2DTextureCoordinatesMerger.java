@@ -96,6 +96,21 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             }
         }
         
+        TriangleInfo(final int sectionIndex, final Vector3[] vertices, final Vector2[] textureCoords) {
+            super();
+            this.primitiveIndex = -1;
+            this.sectionIndex = sectionIndex;
+            this.vertices = vertices;
+            this.textureCoords = textureCoords;
+            this.indices = null;
+            this.rightAngleVertexIndex = IntStream.range(0, 3)
+                    // computes the dot product of two vectors to check whether there's a right angle at their common vertex
+                    .filter((final int triIndex) -> this.vertices[triIndex].subtract(this.vertices[(triIndex + 1) % 3], null).dot(this.vertices[triIndex].subtract(this.vertices[(triIndex + 2) % 3], null)) == 0.0)
+                    .findFirst()
+                    .orElse(-1);
+            this.sideIndexOfHypotenuse = this.rightAngleVertexIndex == -1 ? -1 : (this.rightAngleVertexIndex + 1) % 3;
+        }
+        
         boolean isRightAngled() {
             return this.rightAngleVertexIndex != -1;
         }
@@ -432,10 +447,44 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                       !adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 2) % 3]) )) && 
                     (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 1) % 3]) && 
                                                          !adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 2) % 3]) ))) {
-                    //adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex]
-                    
-                    //adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getVertices()[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex]
-                    triPair = new TriangleInfo[] {new TriangleInfo(-1, -1, null), new TriangleInfo(-1, -1, null)};//TODO
+                    final Vector3[] tri0Vertices = new Vector3[3];
+                    final Vector2[] tri0TexCoords = new Vector2[3];
+                    tri0Vertices[adjacentTriArray[0][0][0].rightAngleVertexIndex] = adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex];
+                    tri0TexCoords[adjacentTriArray[0][0][0].rightAngleVertexIndex] = adjacentTriArray[0][0][0].getTextureCoords()[adjacentTriArray[0][0][0].rightAngleVertexIndex];
+                    if (adjacentTriArray[0][0][0].getTextureCoords()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3].equals(adjacentTriArray[adjacentTriArray.length - 1][0][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 1) % 3])) {
+                        tri0Vertices[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][0].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 1) % 3];
+                        tri0TexCoords[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 1) % 3];
+                    } else {
+                        tri0Vertices[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][0].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 1) % 3];
+                        tri0TexCoords[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 1) % 3];
+                    }
+                    if (adjacentTriArray[0][0][0].getTextureCoords()[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3].equals(adjacentTriArray[adjacentTriArray.length - 1][0][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 2) % 3])) {
+                        tri0Vertices[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][0].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 2) % 3];
+                        tri0TexCoords[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 2) % 3];
+                    } else {
+                        tri0Vertices[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][0].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 2) % 3];
+                        tri0TexCoords[(adjacentTriArray[0][0][0].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][0].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][0].rightAngleVertexIndex + 2) % 3];
+                    }
+                    final Vector3[] tri1Vertices = new Vector3[3];
+                    final Vector2[] tri1TexCoords = new Vector2[3];
+                    tri1Vertices[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex] = adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getVertices()[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex];
+                    tri1TexCoords[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex] = adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getTextureCoords()[adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex];
+                    if (adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3].equals(adjacentTriArray[adjacentTriArray.length - 1][0][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3])) {
+                        tri1Vertices[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][1].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3];
+                        tri1TexCoords[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3];
+                    } else {
+                        tri1Vertices[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][1].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3];
+                        tri1TexCoords[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 1) % 3];
+                    }
+                    if (adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3].equals(adjacentTriArray[adjacentTriArray.length - 1][0][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3])) {
+                        tri1Vertices[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][1].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3];
+                        tri1TexCoords[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[adjacentTriArray.length - 1][0][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3];
+                    } else {
+                        tri1Vertices[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][1].getVertices()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3];
+                        tri1TexCoords[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3] = adjacentTriArray[0][adjacentTriArray[0].length - 1][1].getTextureCoords()[(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].rightAngleVertexIndex + 2) % 3];
+                    }
+                    //TODO modify the texture coordinates to repeat the textures
+                    triPair = new TriangleInfo[] {new TriangleInfo(adjacentTriArray[0][0][0].sectionIndex, tri0Vertices, tri0TexCoords), new TriangleInfo(adjacentTriArray[adjacentTriArray.length - 1][adjacentTriArray[0].length - 1][1].sectionIndex, tri1Vertices, tri1TexCoords)};
                     System.out.println("Corners found");
                 } else if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 1) % 3]) && 
                                                              !adjacentTriArray[0][0][1].getVertices()[adjacentTriArray[0][0][1].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 2) % 3]) )) && 
@@ -467,6 +516,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .forEach(System.out::println);
             System.out.println("[6] Number of triangles: " + mergedTriPairListMap.values().stream().flatMap(List::stream).filter(Objects::nonNull).flatMap(Arrays::stream).count());
             
+            //TODO remove the block below
             HashMap<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> mapOfPreviousAndNextAdjacentTrisMaps = new HashMap<>();
             // for each plane
             for (Map.Entry<Plane, List<TriangleInfo[][][]>> entry : mapOfMergeableTris.entrySet()) {
@@ -685,6 +735,9 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .map((final Map.Entry<Plane, HashMap<TriangleInfo[][][], NextQuadInfo>> entry) -> entry.getKey() + "=" + entry.getValue().keySet().stream().flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).collect(Collectors.toList()))
                 .forEach(System.out::println);
             System.out.println("[6] Number of triangles: " + mapOfPreviousAndNextAdjacentTrisMaps.values().stream().map(Map::keySet).flatMap(Collection::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull).flatMap(Arrays::stream).filter(Objects::nonNull).count());
+            //TODO remove the block above
+            
+            
             // seventh step: removes the triangles which are no more in the geometry of the mesh
             final ArrayList<Integer> verticesIndicesToRemove = new ArrayList<>();
             // for each plane
