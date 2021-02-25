@@ -35,12 +35,15 @@ import java.util.stream.Stream;
 
 import jfpsm.ArrayHelper.Vector2i;
 
+import com.ardor3d.image.Texture.WrapMode;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
+import com.ardor3d.renderer.state.TextureState;
+import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -603,43 +606,48 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             mergedTriPairListMap.entrySet().stream()
                 .map((final Map.Entry<Plane, List<Map.Entry<TriangleInfo[][][], TriangleInfo[]>>> entry) -> entry.getKey() + "=" + entry.getValue().stream().map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream).collect(Collectors.toList()))
                 .forEach(System.out::println);
-            System.out.println("[6] Number of triangles: " + mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream).count());
-            
-            // seventh step: rebuild the mesh data
-            // builds a stream supplier providing the triangles to put into the next mesh data
-            final Supplier<Stream<TriangleInfo>> nextTriangleInfoStreamSupplier = () -> Stream.concat(triangleInfoList.stream().filter((final TriangleInfo oldTri) -> mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getKey).flatMap(Arrays::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).noneMatch(oldTri::equals)), 
-                                                                                                      mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream));
-            // computes the next vertex count
-            final int nextVertexCount = 3 * (int) nextTriangleInfoStreamSupplier.get().count();
-            // creates the next vertex buffer
-            final FloatBuffer nextVertexBuffer = FloatBuffer.allocate(nextVertexCount * 3);
-            // creates the next texture buffer (2D)
-            final FloatBuffer nextTextureBuffer = FloatBuffer.allocate(nextVertexCount * 2);
-            // creates the next normal buffer
-            final FloatBuffer nextNormalBuffer = meshData.getNormalBuffer() == null ? null : FloatBuffer.allocate(nextVertexCount * 3);
-            nextTriangleInfoStreamSupplier.get().forEachOrdered((final TriangleInfo tri) -> {
-                Arrays.stream(tri.getVertices()).forEachOrdered((final Vector3 vertex) -> IntStream.range(0, 3).mapToDouble(vertex::getValue)
+            System.out.println("[6] Number of triangles: " + mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream).count());            
+            if (!mergedTriPairListMap.isEmpty()) {
+                // seventh step: rebuild the mesh data
+                // builds a stream supplier providing the triangles to put into the next mesh data
+                final Supplier<Stream<TriangleInfo>> nextTriangleInfoStreamSupplier = () -> Stream.concat(triangleInfoList.stream().filter((final TriangleInfo oldTri) -> mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getKey).flatMap(Arrays::stream).flatMap(Arrays::stream).flatMap(Arrays::stream).noneMatch(oldTri::equals)), 
+                                                                                                          mergedTriPairListMap.values().stream().flatMap(List::stream).map(Map.Entry::getValue).filter(Objects::nonNull).flatMap(Arrays::stream));
+                // computes the next vertex count
+                final int nextVertexCount = 3 * (int) nextTriangleInfoStreamSupplier.get().count();
+                // creates the next vertex buffer
+                final FloatBuffer nextVertexBuffer = FloatBuffer.allocate(nextVertexCount * 3);
+                // creates the next texture buffer (2D)
+                final FloatBuffer nextTextureBuffer = FloatBuffer.allocate(nextVertexCount * 2);
+                // creates the next normal buffer
+                final FloatBuffer nextNormalBuffer = meshData.getNormalBuffer() == null ? null : FloatBuffer.allocate(nextVertexCount * 3);
+                nextTriangleInfoStreamSupplier.get().forEachOrdered((final TriangleInfo tri) -> {
+                    Arrays.stream(tri.getVertices()).forEachOrdered((final Vector3 vertex) -> IntStream.range(0, 3).mapToDouble(vertex::getValue)
                         .forEachOrdered((final double vertexCoord) -> nextVertexBuffer.put((float) vertexCoord)));
-                Arrays.stream(tri.getTextureCoords()).forEachOrdered((final Vector2 textureCoords) -> IntStream.range(0, 2).mapToDouble(textureCoords::getValue)
+                    Arrays.stream(tri.getTextureCoords()).forEachOrdered((final Vector2 textureCoords) -> IntStream.range(0, 2).mapToDouble(textureCoords::getValue)
                         .forEachOrdered((final double textureCoord) -> nextTextureBuffer.put((float) textureCoord)));
-                if (nextNormalBuffer != null) {
-                    Arrays.stream(tri.getNormals()).forEachOrdered((final Vector3 normal) -> IntStream.range(0, 3).mapToDouble(normal::getValue)
+                    if (nextNormalBuffer != null) {
+                        Arrays.stream(tri.getNormals()).forEachOrdered((final Vector3 normal) -> IntStream.range(0, 3).mapToDouble(normal::getValue)
                             .forEachOrdered((final double normalCoord) -> nextNormalBuffer.put((float) normalCoord)));
+                    }
+                });
+                final MeshData nextMeshData = new MeshData();
+                // finally, rewinds the new vertex buffer and sets it
+                nextVertexBuffer.rewind();
+                nextMeshData.setVertexBuffer(nextVertexBuffer);
+                // does the same for texture coordinates
+                nextTextureBuffer.rewind();
+                nextMeshData.setTextureCoords(new FloatBufferData(nextTextureBuffer, 2), 0);
+                if (nextNormalBuffer != null) {
+                    nextNormalBuffer.rewind();
+                    nextMeshData.setNormalBuffer(nextNormalBuffer);
                 }
-            });
-            final MeshData nextMeshData = new MeshData();
-            // finally, rewinds the new vertex buffer and sets it
-            nextVertexBuffer.rewind();
-            nextMeshData.setVertexBuffer(nextVertexBuffer);
-            // does the same for texture coordinates
-            nextTextureBuffer.rewind();
-            nextMeshData.setTextureCoords(new FloatBufferData(nextTextureBuffer, 2), 0);
-            if (nextNormalBuffer != null) {
-                nextNormalBuffer.rewind();
-                nextMeshData.setNormalBuffer(nextNormalBuffer);
+                // assigns the next mesh data to the mesh
+                mesh.setMeshData(nextMeshData);
+                // gets the texture state
+                final TextureState textureState = (TextureState) mesh.getLocalRenderState(StateType.Texture);
+                // sets the repeat wrap mode so that the renderer takes into account the texture coordinates beyond 1.0
+                textureState.getTexture().setWrap(WrapMode.Repeat);
             }
-            // assigns the next mesh data to the mesh
-            mesh.setMeshData(nextMeshData);
             // if the supplied geometry was indexed
             if (previousGeometryWasIndexed) {
                 // converts the new geometry into an indexed geometry uses all conditions with GeometryTool
