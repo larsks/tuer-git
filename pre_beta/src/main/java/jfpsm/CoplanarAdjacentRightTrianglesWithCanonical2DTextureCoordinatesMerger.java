@@ -150,18 +150,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             return "TriangleInfo {primitiveIndex: " + primitiveIndex + " sectionIndex: " + sectionIndex + " rightAngleVertexIndex: " + rightAngleVertexIndex + "}";
         }
     }
-
-    /**
-     * Tells whether the passed texture coordinates are canonical (i.e if they're equal to 0 or 1)
-     * 
-     * @param textureCoords texture coordinates
-     * @return <code>true</code> if the passed texture coordinates are canonical, otherwise <code>false</code>
-     */
-    private static boolean hasCanonicalTextureCoords(final Vector2[] textureCoords) {
-        return Arrays.stream(textureCoords)
-                     .flatMapToDouble((final Vector2 textureCoord) -> DoubleStream.of(textureCoord.getX(), textureCoord.getY()))
-                     .allMatch((final double uv) -> uv == 0 || uv == 1);
-    }
     
     /**
      * 
@@ -188,16 +176,22 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             final List<TriangleInfo> triangleInfoList = IntStream.range(0, meshData.getSectionCount())
                 // loops on all triangles of each section
                 .mapToObj((final int sectionIndex) -> IntStream.range(0, meshData.getPrimitiveCount(sectionIndex))
-                // checks whether its texture coordinates are canonical, only considers the first texture index
-                .filter((final int trianglePrimitiveIndex) -> hasCanonicalTextureCoords(getPrimitiveTextureCoords(meshData, trianglePrimitiveIndex, sectionIndex, 0, null)))
                 .mapToObj((final int trianglePrimitiveIndex) -> new TriangleInfo(trianglePrimitiveIndex, sectionIndex, meshData)))
                 .flatMap(Stream::sequential)
                 .collect(Collectors.toList());
             triangleInfoList.forEach(System.out::println);
             System.out.println("[1.0] Number of triangles: " + triangleInfoList.size());
-            final List<TriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = triangleInfoList.stream().filter(TriangleInfo::isRightAngled).collect(Collectors.toList());
+            final List<TriangleInfo> trianglesWithCanonical2DTextureCoordinatesInfos = triangleInfoList.stream()
+                    // checks whether its texture coordinates are canonical, only considers the first texture index
+                    .filter((final TriangleInfo tri) -> Arrays.stream(tri.getTextureCoords())
+                            .flatMapToDouble((final Vector2 textureCoord) -> DoubleStream.of(textureCoord.getX(), textureCoord.getY()))
+                            .allMatch((final double uv) -> uv == 0 || uv == 1))
+                    .collect(Collectors.toList());
+            trianglesWithCanonical2DTextureCoordinatesInfos.forEach(System.out::println);
+            System.out.println("[1.1] Number of triangles: " + trianglesWithCanonical2DTextureCoordinatesInfos.size());
+            final List<TriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = trianglesWithCanonical2DTextureCoordinatesInfos.stream().filter(TriangleInfo::isRightAngled).collect(Collectors.toList());
             rightTrianglesWithCanonical2DTextureCoordinatesInfos.forEach(System.out::println);
-            System.out.println("[1.1] Number of triangles: " + rightTrianglesWithCanonical2DTextureCoordinatesInfos.size());
+            System.out.println("[1.2] Number of triangles: " + rightTrianglesWithCanonical2DTextureCoordinatesInfos.size());
             // second step: sorts the triangles of the former set by planes (4D: normal + distance to plane)
             Map<Plane, List<TriangleInfo>> mapOfTrianglesByPlanes = rightTrianglesWithCanonical2DTextureCoordinatesInfos.stream()
                     .map((final TriangleInfo info) -> {
