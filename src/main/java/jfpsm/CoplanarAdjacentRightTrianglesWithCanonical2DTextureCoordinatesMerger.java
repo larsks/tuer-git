@@ -193,9 +193,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 .mapToObj((final int trianglePrimitiveIndex) -> new TriangleInfo(trianglePrimitiveIndex, sectionIndex, meshData)))
                 .flatMap(Stream::sequential)
                 .collect(Collectors.toList());
+            triangleInfoList.forEach(System.out::println);
+            System.out.println("[1.0] Number of triangles: " + triangleInfoList.size());
             final List<TriangleInfo> rightTrianglesWithCanonical2DTextureCoordinatesInfos = triangleInfoList.stream().filter(TriangleInfo::isRightAngled).collect(Collectors.toList());
             rightTrianglesWithCanonical2DTextureCoordinatesInfos.forEach(System.out::println);
-            System.out.println("[1] Number of triangles: " + rightTrianglesWithCanonical2DTextureCoordinatesInfos.size());
+            System.out.println("[1.1] Number of triangles: " + rightTrianglesWithCanonical2DTextureCoordinatesInfos.size());
             // second step: sorts the triangles of the former set by planes (4D: normal + distance to plane)
             Map<Plane, List<TriangleInfo>> mapOfTrianglesByPlanes = rightTrianglesWithCanonical2DTextureCoordinatesInfos.stream()
                     .map((final TriangleInfo info) -> {
