@@ -166,12 +166,6 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             meshData.getVertexCoords().getValuesPerTuple() == 3 &&
             // if all sections contains triangles
             IntStream.range(0, meshData.getSectionCount()).mapToObj(meshData::getIndexMode).allMatch(IndexMode.Triangles::equals)) {
-            // converts this geometry into non indexed geometry (if necessary) in order to ease further operations
-            final boolean previousGeometryWasIndexed = meshData.getIndexBuffer() != null;
-            if (previousGeometryWasIndexed) {
-                new GeometryTool(true).convertIndexedGeometryIntoNonIndexedGeometry(meshData);
-                System.out.println("Non indexed input, vertex count: " + meshData.getVertexCount());
-            }
             // first step: separates right triangles with canonical 2D texture coordinates from the others, loops on all sections of the mesh data
             final List<TriangleInfo> triangleInfoList = IntStream.range(0, meshData.getSectionCount())
                 // loops on all triangles of each section
@@ -643,13 +637,14 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 final TextureState textureState = (TextureState) mesh.getLocalRenderState(StateType.Texture);
                 // sets the repeat wrap mode so that the renderer takes into account the texture coordinates beyond 1.0
                 textureState.getTexture().setWrap(WrapMode.Repeat);
-            }
-            // if the supplied geometry was indexed
-            if (previousGeometryWasIndexed) {
-                // converts the new geometry into an indexed geometry uses all conditions with GeometryTool
-                final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal/*, MatchCondition.Color*/);
-                // reduces the geometry to avoid duplication of vertices
-                new GeometryTool(true).minimizeVerts(mesh, conditions);
+                // if the supplied geometry was indexed
+                if (meshData.getIndexBuffer() != null) {
+                    // converts the new geometry into an indexed geometry uses
+                    // all conditions with GeometryTool
+                    final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal/* , MatchCondition.Color */);
+                    // reduces the geometry to avoid duplication of vertices
+                    new GeometryTool(true).minimizeVerts(mesh, conditions);
+                }
             }
         }
     }
