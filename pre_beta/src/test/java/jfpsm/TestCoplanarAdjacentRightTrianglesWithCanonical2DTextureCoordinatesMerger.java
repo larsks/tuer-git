@@ -17,8 +17,10 @@
  */
 package jfpsm;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.scenegraph.Mesh;
@@ -26,6 +28,8 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
+
+import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.TriangleInfo;
 
@@ -89,14 +93,15 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
         }
         try {
             final Node levelNode = (Node) new BinaryImporter()
-                    .load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class
-                            .getResource("/abin/LID0.abin"));
+                    .load(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin"));
             final Mesh mesh = (Mesh) ((Node) levelNode.getChild(0)).getChild(1);
             System.out.println("Input, vertex count: " + mesh.getMeshData().getVertexCount());
             CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.optimize(mesh);
             System.out.println("Output, vertex count: " + mesh.getMeshData().getVertexCount());
-        } catch (IOException ioe) {
-            throw new RuntimeException("level loading failed", ioe);
+            final File destFile = new File(Paths.get(TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.class.getResource("/abin/LID0.abin").toURI()).toFile().getParentFile().getParentFile().getParentFile().getParentFile(), "src/main/resources/abin/LID0.abin");
+            new EngineServiceProvider.DirectBinaryExporter().save(levelNode, destFile);
+        } catch (IOException|URISyntaxException e) {
+            throw new RuntimeException("level loading failed", e);
         }
     }
 

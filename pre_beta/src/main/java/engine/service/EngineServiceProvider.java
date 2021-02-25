@@ -66,7 +66,7 @@ import common.ModelFileFormat;
 public class EngineServiceProvider
         implements EngineServiceProviderInterface<Savable, Node, Spatial, Mesh, BoundingBox> {
 
-    private static final class DirectBinaryExporter extends BinaryExporter {
+    public static final class DirectBinaryExporter extends BinaryExporter {
         @Override
         protected BinaryIdContentPair generateIdContentPair(final BinaryClassObject bco) {
             final BinaryIdContentPair pair = new BinaryIdContentPair(_idCount++,
