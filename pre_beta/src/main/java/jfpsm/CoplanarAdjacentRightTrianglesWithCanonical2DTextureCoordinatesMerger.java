@@ -73,6 +73,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
         private final Vector2[] textureCoords;
         
         private final Vector3[] normals;
+        
+        private final boolean hasCanonicalTextureCoordinates;
 
         TriangleInfo(final int primitiveIndex, final int sectionIndex, final MeshData meshData) {
             super();
@@ -82,17 +84,17 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 this.vertices = null;
                 this.textureCoords = null;
                 this.normals = null;
-                this.rightAngleVertexIndex = -1;
             } else {
                 this.vertices = meshData.getPrimitiveVertices(this.primitiveIndex, this.sectionIndex, null);
-                this.textureCoords = getPrimitiveTextureCoords(meshData, this.primitiveIndex, this.sectionIndex, 0, null);
+                if (meshData.getNumberOfUnits() == 0 || meshData.getTextureCoords().isEmpty()) {
+                    this.textureCoords = null;
+                } else {
+                    this.textureCoords = getPrimitiveTextureCoords(meshData, this.primitiveIndex, this.sectionIndex, 0, null);
+                }
                 this.normals = getPrimitiveNormals(meshData, this.primitiveIndex, this.sectionIndex, null);
-                this.rightAngleVertexIndex = IntStream.range(0, 3)
-                        // computes the dot product of two vectors to check whether there's a right angle at their common vertex
-                        .filter((final int triIndex) -> this.vertices[triIndex].subtract(this.vertices[(triIndex + 1) % 3], null).dot(this.vertices[triIndex].subtract(this.vertices[(triIndex + 2) % 3], null)) == 0.0)
-                        .findFirst()
-                        .orElse(-1);
             }
+            this.rightAngleVertexIndex = computeRightAngleVertexIndex();
+            this.hasCanonicalTextureCoordinates = computeHasCanonicalTextureCoordinates();
         }
         
         TriangleInfo(final int sectionIndex, final Vector3[] vertices, final Vector2[] textureCoords, final Vector3[] normals) {
@@ -102,15 +104,30 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             this.vertices = vertices;
             this.textureCoords = textureCoords;
             this.normals = normals;
-            this.rightAngleVertexIndex = IntStream.range(0, 3)
+            this.rightAngleVertexIndex = computeRightAngleVertexIndex();
+            this.hasCanonicalTextureCoordinates = computeHasCanonicalTextureCoordinates();
+        }
+        
+        private final int computeRightAngleVertexIndex() {
+            return this.vertices == null || this.vertices.length < 3 ? -1 : IntStream.range(0, 3)
                     // computes the dot product of two vectors to check whether there's a right angle at their common vertex
                     .filter((final int triIndex) -> this.vertices[triIndex].subtract(this.vertices[(triIndex + 1) % 3], null).dot(this.vertices[triIndex].subtract(this.vertices[(triIndex + 2) % 3], null)) == 0.0)
                     .findFirst()
                     .orElse(-1);
         }
         
+        private final boolean computeHasCanonicalTextureCoordinates() {
+            return textureCoords != null && Arrays.stream(textureCoords)
+                    .flatMapToDouble((final Vector2 textureCoord) -> DoubleStream.of(textureCoord.getX(), textureCoord.getY()))
+                    .allMatch((final double uv) -> uv == 0 || uv == 1) && Arrays.stream(textureCoords).distinct().count() == 3;
+        }
+        
         boolean isRightAngled() {
             return this.rightAngleVertexIndex != -1;
+        }
+        
+        boolean hasCanonicalTextureCoordinates() {
+            return hasCanonicalTextureCoordinates;
         }
         
         Vector3[] getVertices() {
@@ -176,10 +193,8 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             triangleInfoList.forEach(System.out::println);
             System.out.println("[1.0] Number of triangles: " + triangleInfoList.size());
             final List<TriangleInfo> trianglesWithCanonical2DTextureCoordinatesInfos = triangleInfoList.stream()
-                    // checks whether its texture coordinates are canonical, only considers the first texture index
-                    .filter((final TriangleInfo tri) -> Arrays.stream(tri.getTextureCoords())
-                            .flatMapToDouble((final Vector2 textureCoord) -> DoubleStream.of(textureCoord.getX(), textureCoord.getY()))
-                            .allMatch((final double uv) -> uv == 0 || uv == 1))
+                    // checks whether its texture coordinates are canonical
+                    .filter(TriangleInfo::hasCanonicalTextureCoordinates)
                     .collect(Collectors.toList());
             trianglesWithCanonical2DTextureCoordinatesInfos.forEach(System.out::println);
             System.out.println("[1.1] Number of triangles: " + trianglesWithCanonical2DTextureCoordinatesInfos.size());
@@ -415,7 +430,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entry.getValue().stream()
                     .map((final TriangleInfo[][][] adjacentTriArray) -> {
                         final TriangleInfo srcTri0, srcTri1, srcTri2, srcTri3, srcTri4, srcTri5, srcTri6, srcTri7, srcTri8, srcTri9;
-                // looks for the 6 vertices composing the triangle pair to create
+                // looks for the 6 vertices composing the triangle pair to create//FIXME
                 if ((adjacentTriArray.length == 1 || (!adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[1][0][0].getVertices()[(adjacentTriArray[1][0][0].rightAngleVertexIndex + 1) % 3]) && 
                                                       !adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[1][0][1].getVertices()[(adjacentTriArray[1][0][1].rightAngleVertexIndex + 1) % 3]) )) && 
                     (adjacentTriArray[0].length == 1 || (!adjacentTriArray[0][0][0].getVertices()[adjacentTriArray[0][0][0].rightAngleVertexIndex].equals(adjacentTriArray[0][1][0].getVertices()[(adjacentTriArray[0][1][0].rightAngleVertexIndex + 1) % 3]) && 
