@@ -33,15 +33,12 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.ardor3d.image.Texture.WrapMode;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
 import com.ardor3d.math.Vector2;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.math.type.ReadOnlyVector3;
 import com.ardor3d.renderer.IndexMode;
-import com.ardor3d.renderer.state.TextureState;
-import com.ardor3d.renderer.state.RenderState.StateType;
 import com.ardor3d.scenegraph.FloatBufferData;
 import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.MeshData;
@@ -645,15 +642,11 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                 }
                 // assigns the next mesh data to the mesh
                 mesh.setMeshData(nextMeshData);
-                // gets the texture state
-                final TextureState textureState = (TextureState) mesh.getLocalRenderState(StateType.Texture);
-                // sets the repeat wrap mode so that the renderer takes into account the texture coordinates beyond 1.0
-                textureState.getTexture().setWrap(WrapMode.Repeat);
                 // if the supplied geometry was indexed
                 if (meshData.getIndexBuffer() != null) {
                     // converts the new geometry into an indexed geometry uses
                     // all conditions with GeometryTool
-                    final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal/* , MatchCondition.Color */);
+                    final EnumSet<MatchCondition> conditions = EnumSet.of(MatchCondition.UVs, MatchCondition.Normal);
                     // reduces the geometry to avoid duplication of vertices
                     new GeometryTool(true).minimizeVerts(mesh, conditions);
                 }
