@@ -279,7 +279,6 @@ public class DeallocationHelper {
      *            fully recomputed at runtime which is slower but safer),
      *            otherwise <code>false</code>
      */
-    @SuppressWarnings("cast")
     public DeallocationHelper(final boolean ignoreClassesAndFieldsHints) {
         super();
         final List<Buffer> buffersToDelete = new ArrayList<>();

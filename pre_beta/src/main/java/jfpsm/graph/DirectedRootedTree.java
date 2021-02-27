@@ -129,7 +129,6 @@ public class DirectedRootedTree<V, E> extends DirectedAcyclicGraph<V, E> {
         if (success) {
             edges.put(edge, newVertices);
 
-            @SuppressWarnings("null")
             V source = newVertices.getFirst();
             V dest = newVertices.getSecond();
 

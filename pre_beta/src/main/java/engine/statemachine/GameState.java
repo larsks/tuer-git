@@ -255,10 +255,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
 
         @Override
         public void draw(final Renderer renderer) {
-            /**
-             * Ardor3D doesn't put nodes without render delegate into render
-             * queues by default, it must be done here
-             */
+            // Ardor3D doesn't put nodes without render delegate into render queues by default, it must be done here
             final boolean queued;
             if (!renderer.isProcessingQueue())
                 queued = renderer.checkAndAdd(this);
@@ -452,7 +449,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         getRoot().setRenderState(wireframeState);
     }
 
-    @SuppressWarnings("cast")
     private final Node createCrosshairNode() {
         final Node crosshairNode = new Node("crosshair");
         final Mesh crosshairMesh = new Mesh();
@@ -488,7 +484,6 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
         return (crosshairNode);
     }
 
-    @SuppressWarnings("cast")
     private final void updateCrosshairNode() {
         final Node crosshairNode = (Node) playerNode.getChild("crosshair");
         if (crosshairNode != null) {
@@ -553,7 +548,7 @@ public final class GameState extends ScenegraphStateWithCustomCameraParameters {
 
             // private long previouslyMeasuredElapsedTime=-1;
 
-            @SuppressWarnings({ "unchecked", "cast" })
+            @SuppressWarnings("unchecked")
             @Override
             public void update(double timeSinceLastCall, Spatial caller) {
                 // updates the timer
