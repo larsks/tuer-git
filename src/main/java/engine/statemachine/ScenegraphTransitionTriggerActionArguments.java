@@ -45,7 +45,6 @@ public class ScenegraphTransitionTriggerActionArguments extends Arguments {
      * @param tag
      *            hint used during the transition
      */
-    @SuppressWarnings("cast")
     public ScenegraphTransitionTriggerActionArguments(final String tag) {
         super(new String[] { null, null }, tag, (Object) new GameStatistics[1], (Object) new List[1],
                 (Object) new Vector3[2]);
