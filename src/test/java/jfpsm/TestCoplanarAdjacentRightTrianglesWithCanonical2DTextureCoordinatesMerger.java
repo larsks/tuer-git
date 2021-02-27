@@ -76,8 +76,7 @@ public class TestCoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinates
 
         };
         System.out.println(arrayHelper.toString(adjacentTrisArray, false, trisOccupancyCheck));
-        java.util.Map<Vector2i, TriangleInfo[][][]> adjacentTrisArraysMap = CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger
-                .computeAdjacentMergeableTrisArraysMap(adjacentTrisArray);
+        java.util.Map<Vector2i, TriangleInfo[][][]> adjacentTrisArraysMap = new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray);
         System.out.println("Output:");
         System.out.println(arrayHelper.toString(adjacentTrisArraysMap));
     }
