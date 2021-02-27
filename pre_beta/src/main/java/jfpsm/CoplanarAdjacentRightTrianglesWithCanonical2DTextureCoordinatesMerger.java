@@ -33,8 +33,6 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import jfpsm.ArrayHelper.Vector2i;
-
 import com.ardor3d.image.Texture.WrapMode;
 import com.ardor3d.math.Plane;
 import com.ardor3d.math.Triangle;
@@ -438,7 +436,7 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             // compute the sets of mergeable triangles
             final Map<Plane, List<TriangleInfo[][][]>> mapOfMergeableTris = mapOfAdjacentRightTriangles.entrySet().stream().map((final Map.Entry<Plane, List<TriangleInfo[][][]>> entry) -> new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), 
                 entry.getValue().stream()
-                    .map(CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger::computeAdjacentMergeableTrisArraysMap)
+                    .map((final TriangleInfo[][][] adjacentTriArray) -> new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTriArray))
                     .map(Map::values)
                     .flatMap(Collection::stream)
                     .filter((final TriangleInfo[][][] adjacentTriArray) -> adjacentTriArray.length >= 1 && adjacentTriArray[0].length >= 1 && (adjacentTriArray.length >= 2 || adjacentTriArray[0].length >= 2))
@@ -727,17 +725,5 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
             }
         }
         return result;
-    }
-    
-    /**
-     * Computes a list of arrays of adjacent triangles which could be merged to
-     * make bigger rectangles
-     * 
-     * @param adjacentTrisArray
-     *            2D arrays containing adjacent triangles
-     * @return map of 2D arrays of adjacent mergeable triangles
-     */
-    static Map<Vector2i, TriangleInfo[][][]> computeAdjacentMergeableTrisArraysMap(final TriangleInfo[][][] adjacentTrisArray) {
-        return new ArrayHelper().computeFullArraysFromNonFullArray(adjacentTrisArray);
     }
 }
