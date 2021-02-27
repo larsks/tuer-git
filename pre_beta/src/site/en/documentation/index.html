@@ -59,29 +59,24 @@ Summary:
 <ul>
 <li>Java Development Kit 14 or higher: <a href="https://adoptopenjdk.net">here</a>, <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">here</a> or in the official repository of your GNU Linux distribution</li>
 <li>Eclipse 4.15.0 (optional but recommended): <a href="http://www.eclipse.org/downloads/">here</a></li>
-<li>Subversion (SVN)
-<ul>
-<li>Command line users: <a href="http://subversion.tigris.org/">here</a></li>
-<li>Eclipse users: <a href="http://subclipse.tigris.org/">here</a></li>
-</ul>
-</li>
+<li>Git</li>
 <li>ANT: <a href="http://ant.apache.org/">here</a> (already supported and bundled with major IDEs like Eclipse and Netbeans)</li>
 </ul>
 <h2><a id="sourcecoderepositories" href="./#sourcecoderepositories">Source code repositories</a></h2>
-<p>These are the URLs of the SVN repositories for all versions:</p>
+<p>These are the URIs of the Git repositories for all versions:</p>
 <ul>
     <li>read only access
         <ul>
-            <li><a href="http://svn.code.sf.net/p/tuer/code/alpha/">http://svn.code.sf.net/p/tuer/code/alpha/</a> (abandoned alpha version that uses my own engine)</li>
-            <li><a href="http://svn.code.sf.net/p/tuer/code/tuer/">http://svn.code.sf.net/p/tuer/code/tuer/</a> (abandoned pre-beta version that uses JMonkeyEngine 2.0)</li>
-            <li><a href="http://svn.code.sf.net/p/tuer/code/pre_beta/">http://svn.code.sf.net/p/tuer/code/pre_beta/</a> (current pre-beta version that uses JogAmp's Ardor3D Continuation)</li>
+            <li><a href="https://git.code.sf.net/p/tuer/git/alpha/">https://git.code.sf.net/p/tuer/git/alpha/</a> (abandoned alpha version that uses my own engine)</li>
+            <li><a href="https://git.code.sf.net/p/tuer/git/tuer/">https://git.code.sf.net/p/tuer/git/tuer/</a> (abandoned pre-beta version that uses JMonkeyEngine 2.0)</li>
+            <li><a href="https://git.code.sf.net/p/tuer/git/pre_beta/">https://git.code.sf.net/p/tuer/git/pre_beta/</a> (current pre-beta version that uses JogAmp's Ardor3D Continuation)</li>
         </ul>
     </li>
     <li>read/write access (reserved to the contributors of the project)
         <ul>
-            <li><a href="https://svn.code.sf.net/p/tuer/code/alpha/">https://svn.code.sf.net/p/tuer/code/alpha/</a> (abandoned alpha version that uses my own engine)</li>
-            <li><a href="https://svn.code.sf.net/p/tuer/code/tuer/">https://svn.code.sf.net/p/tuer/code/tuer/</a> (abandoned pre-beta version that uses JMonkeyEngine 2.0)</li>
-            <li><a href="https://svn.code.sf.net/p/tuer/code/pre_beta/">https://svn.code.sf.net/p/tuer/code/pre_beta/</a> (current pre-beta version that uses JogAmp's Ardor3D Continuation)</li>
+            <li><a href="https://gouessej@git.code.sf.net/p/tuer/git/alpha/">https://gouessej@git.code.sf.net/p/tuer/git/alpha/</a> (abandoned alpha version that uses my own engine)</li>
+            <li><a href="https://gouessej@git.code.sf.net/p/tuer/git/tuer/">https://gouessej@git.code.sf.net/p/tuer/git/tuer/</a> (abandoned pre-beta version that uses JMonkeyEngine 2.0)</li>
+            <li><a href="https://gouessej@git.code.sf.net/p/tuer/git/pre_beta/">https://gouessej@git.code.sf.net/p/tuer/git/pre_beta/</a> (current pre-beta version that uses JogAmp's Ardor3D Continuation)</li>
         </ul>
     </li>
 </ul>
@@ -91,7 +86,7 @@ Summary:
 <ul>
 <li>In <b>command line</b>, follow these steps:
 <ul>
-<li>enter this to get the source code: svn checkout URL_of_the_SVN_repository</li>
+<li>enter this to get the source code: git clone URI_of_the_Git_repository</li>
 <li>enter this to build the project: ant build</li>
 <li>enter this to run the game: ant run-game</li>
 </ul>
@@ -99,15 +94,18 @@ Summary:
 <li>In <b>Eclipse</b> (version 4.15.0 or higher), with Subclipse (version 1.6.0 or higher), follow these steps:
 <ul>
 <li>Right click in the package area</li>
-<li>Select "New" -> "Other..."</li>
-<li>Expand the "SVN" directory</li>
-<li>Select "Checkout Projects from SVN"</li>
+<li>Select "Import projects..."</li>
+<li>Expand the "Git" directory</li>
+<li>Select "Projects from Git (with smart import)"</li>
 <li>Click on "Next"</li>
-<li>Select "Create a new repository location"</li>
+<li>Select "Clone URI"</li>
 <li>Click on "Next"</li>
-<li>Enter the URL of the SVN repository in the "URL" text field</li>
+<li>Enter the URI of the Git repository in the "URI" text field</li>
 <li>Click on "Next"</li>
-<li>Select the topmost folder</li>
+<li>Select the branch named "master"</li>
+<li>Click on "Next"</li>
+<li>Choose a destination folder</li>
+<li>Click on "Next"</li>
 <li>Click on "Finish"</li>
 <li>Follow these steps to build the project with Ant within Eclipse:
 <ul>
@@ -122,7 +120,7 @@ Summary:
 <li>In <b>Netbeans</b> (version 11.0 or higher), follow these steps:
 <ul>
 <li>Go to the "Team" menu -> "Subversion" -> "Checkout..."</li>
-<li>Enter the URL of the SVN repository as "Repository URL"</li>
+<li>Enter the URL of the Git repository as "Repository URL"</li>
 <li>Click on "Next"</li>
 <li>Click on "Finish"</li>
 <li>Wait for a while</li>
@@ -172,9 +170,9 @@ from the source code if your computer does not have enough RAM. Use the VM argum
 <p>It's a cross-platform packager, i.e it's able both to run under several operating systems and to generate native bundles for an operating system different from the one it's being executed.</p>
 <p>N.B: JNDT supports Java 9 and higher.</p>
 <h2><a id="sourcecode" href="./#sourcecode">Source code</a></h2>
-<p>The source code of JNDT is in a single Ant library file <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/src/main/xml/jndt/antlib.xml">here</a>.</p>
+<p>The source code of JNDT is in a single Ant library file <a href="https://sourceforge.net/p/tuer/git/ci/master/tree/pre_beta/src/main/xml/jndt/antlib.xml">here</a>.</p>
 <h2><a id="setup" href="./#setup">Setup</a></h2>
-<p>The dependencies of JNDT are <a href="http://svn.code.sf.net/p/tuer/code/pre_beta/lib/ant/">here</a>, you must copy them into a directory and set the value of the Ant property "jndtlibdir" to this path ("lib/ant" in the example below):</p>
+<p>The dependencies of JNDT are <a href="https://sourceforge.net/p/tuer/git/ci/master/tree/pre_beta/lib/ant/">here</a>, you must copy them into a directory and set the value of the Ant property "jndtlibdir" to this path ("lib/ant" in the example below):</p>
 <pre>&lt;property name="jndt-version" value="0.0.0"/&gt;
 &lt;property name="jndt-release" value="0"/&gt;
 &lt;property name="jndt-jar-filename" value="jndt-${jndt-version}-${jndt-release}.jar"/&gt;
