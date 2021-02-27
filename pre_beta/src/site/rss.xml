@@ -3,7 +3,7 @@
   <channel>
     <atom:link href="https://tuer.sourceforge.io/rss.xml" rel="self" type="application/rss+xml" />
     <title>TUER RSS Feed</title>
-    <link>http://tuer.sourceforge.net</link>
+    <link>https://tuer.sourceforge.io</link>
     <pubDate>Wed, 17 Sep 2008 10:25:00 GMT</pubDate>
     <language>en-us</language>
     <webMaster>gouessej@orange.fr (Julien Gouesse)</webMaster>
@@ -49,6 +49,12 @@
        <link>http://tuer.sourceforge.net</link>
        <pubDate>Mon, 30 Nov 2015 23:15:00 GMT</pubDate>
        <description>This updated version drops PackR support, is more simple to use and fully documented in English and French.</description>
+    </item>
+    <item>
+       <title>The pre-beta version of TUER has just been updated</title>
+       <link>https://tuer.sourceforge.io</link>
+       <pubDate>Sat, 27 Feb 2021 14:00:00 GMT</pubDate>
+       <description>The source code has been moved from Subversion to Git.</description>
     </item>
   </channel>
 </rss>
