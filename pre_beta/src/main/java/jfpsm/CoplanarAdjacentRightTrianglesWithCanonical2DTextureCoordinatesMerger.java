@@ -578,6 +578,16 @@ public class CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerg
                                                              adjacentTriArray[firstHypotenuseMergeCandidateInfo[0]][firstHypotenuseMergeCandidateInfo[1]][firstHypotenuseMergeCandidateInfo[2]].getNormals()[firstHypotenuseMergeCandidateInfo[3]]};
                             }
                         }
+                        // performs some sanity checks
+                        if (Stream.concat(Arrays.stream(tri0Vertices), Arrays.stream(tri1Vertices)).distinct().count() != 4) {
+                            System.err.println("malformed vertices: " + Arrays.toString(tri0Vertices) + " " + Arrays.toString(tri1Vertices));
+                        }
+                        if (Stream.concat(Arrays.stream(tri0TexCoords), Arrays.stream(tri1TexCoords)).distinct().count() != 4) {
+                            System.err.println("malformed texture coordinates: " + Arrays.toString(tri0TexCoords) + " " + Arrays.toString(tri1TexCoords));
+                        }
+                        if (!Arrays.equals(tri0Normals, tri1Normals)) {
+                            System.err.println("inconsistent normals: " + tri0Normals + " " + tri1Normals);
+                        }
                         // modifies the texture coordinates to repeat the textures
                         IntStream.range(0, 3)
                             .mapToObj((final int texCoordIndex) -> Stream.of(tri0TexCoords[texCoordIndex], tri1TexCoords[texCoordIndex]))
