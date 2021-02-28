@@ -23,8 +23,8 @@ import java.util.Map.Entry;
 
 import com.ardor3d.bounding.BoundingBox;
 
-import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
+import jfpsm.service.EngineServiceProvider;
 
 /**
  * Helper to compute the bounding volumes

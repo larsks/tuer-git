@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package engine.service;
+package jfpsm.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,7 +52,7 @@ import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.URLResourceSource;
 
-import common.ModelFileFormat;
+import jfpsm.ModelFileFormat;
 
 /**
  * service provider of the engine, this part is dependent on the underneath 3D

@@ -36,10 +36,10 @@ import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.export.Savable;
 
-import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CuboidParameters.Orientation;
 import jfpsm.CuboidParameters.Side;
+import jfpsm.service.EngineServiceProvider;
 
 /**
  * Game files generator, communicates with the 3D engine.

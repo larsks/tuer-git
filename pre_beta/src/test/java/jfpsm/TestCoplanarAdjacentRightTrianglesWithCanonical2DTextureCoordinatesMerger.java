@@ -30,9 +30,9 @@ import com.ardor3d.util.export.binary.BinaryImporter;
 import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardor3d.util.resource.SimpleResourceLocator;
 
-import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CoplanarAdjacentRightTrianglesWithCanonical2DTextureCoordinatesMerger.TriangleInfo;
+import jfpsm.service.EngineServiceProvider;
 
 /**
  * Test of a mesh optimizer focused on coplanar adjacent right triangles whose
