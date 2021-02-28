@@ -30,7 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.imageio.ImageIO;
-import common.EngineServiceProviderInterface;
+
+import com.ardor3d.bounding.BoundingBox;
+import com.ardor3d.scenegraph.Mesh;
+import com.ardor3d.scenegraph.Node;
+import com.ardor3d.util.export.Savable;
+
+import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
 import jfpsm.CuboidParameters.Orientation;
 import jfpsm.CuboidParameters.Side;
@@ -41,21 +47,14 @@ import jfpsm.CuboidParameters.Side;
  * @author Julien Gouesse
  *
  */
-@SuppressWarnings({ "unchecked", "rawtypes" }) // FIXME ensure type safety
-                                               // instead of suppressing these
-                                               // warnings, capture several
-                                               // parameterized types
 public class GameFilesGenerator {
-
-    private final EngineServiceProviderInterface seeker;
 
     /**
      * 
      * @param seeker
      */
-    public GameFilesGenerator(final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
+    public GameFilesGenerator() {
         super();
-        this.seeker = seeker;
     }
 
     private final Entry<ArrayList<AbsoluteVolumeParameters[][]>, RegularGrid> createVolumeParametersAndGridFromLevel(
@@ -149,10 +148,11 @@ public class GameFilesGenerator {
             System.out.println("[INFO] JFPSM attempts to create a level node...");
             final String levelNodeName = "LID" + levelIndex;
             // creates one node per level
-            final Object levelNode = seeker.createNode(levelNodeName);
+            final Node levelNode = EngineServiceProvider.getInstance().createNode(levelNodeName);
             String floorNodeName, meshName, tilePath;
             File tileFile;
-            Object volumeElementMesh, floorNode;
+            Mesh volumeElementMesh;
+            Node floorNode;
             HashMap<Integer, ArrayList<float[]>> volumeParamLocationTable = new HashMap<>();
             HashMap<Integer, ArrayList<Buffer>> volumeParamTable = new HashMap<>();
             HashMap<Integer, String> tileNameTable = new HashMap<>();
@@ -243,7 +243,7 @@ public class GameFilesGenerator {
                         }
                 // create one node per floor (array)
                 floorNodeName = levelNodeName + "NID" + j;
-                floorNode = seeker.createNode(floorNodeName);
+                floorNode = EngineServiceProvider.getInstance().createNode(floorNodeName);
                 meshIndex = 0;
                 // use the geometries passed as arguments to build the mesh data
                 for (Entry<Integer, ArrayList<float[]>> entry : volumeParamLocationTable.entrySet()) {
@@ -436,7 +436,7 @@ public class GameFilesGenerator {
                     // creates a mesh for this floor and for the volume
                     // parameter currently in use
                     meshName = floorNodeName + "CID" + meshIndex;
-                    volumeElementMesh = seeker.createMeshFromBuffers(meshName, totalVertexBuffer, totalIndexBuffer,
+                    volumeElementMesh = EngineServiceProvider.getInstance().createMeshFromBuffers(meshName, totalVertexBuffer, totalIndexBuffer,
                             totalNormalBuffer, totalTexCoordBuffer);
                     tilePath = destFile.getParent() + System.getProperty("file.separator") + tileNameTable.get(key)
                             + ".png";
@@ -454,22 +454,22 @@ public class GameFilesGenerator {
                             ImageIO.write(tile.getTexture(), "png", tileFile);
                             break;
                         }
-                    seeker.attachTextureToSpatial(volumeElementMesh, tileFile.toURI().toURL());
+                    EngineServiceProvider.getInstance().attachTextureToSpatial(volumeElementMesh, tileFile.toURI().toURL());
                     // this file is now useless, delete it
                     tileFile.delete();
                     // attaches the newly created mesh to its floor
-                    seeker.attachChildToNode(floorNode, volumeElementMesh);
+                    EngineServiceProvider.getInstance().attachChildToNode(floorNode, volumeElementMesh);
                     meshIndex++;
                 }
                 // attaches the floor to its level
-                seeker.attachChildToNode(levelNode, floorNode);
+                EngineServiceProvider.getInstance().attachChildToNode(levelNode, floorNode);
                 // looks at the next floor
                 j++;
             }
             System.out.println("[INFO] level node successfully created");
             System.out.println("[INFO] JFPSM attempts to write the level into the file " + destFile.getName());
             // writes the level into a file
-            success = seeker.writeSavableInstanceIntoFile(levelNode, destFile);
+            success = EngineServiceProvider.getInstance().writeSavableInstanceIntoFile(levelNode, destFile);
             if (success) {
                 System.out.println("[INFO] Export into the file " + destFile.getName() + " successful");
                 // System.out.println("[INFO] Elapsed time:
@@ -479,7 +479,7 @@ public class GameFilesGenerator {
             System.out.println("[INFO] JFPSM attempts to write the bounding boxes of the level into the file "
                     + destCollisionFile.getName());
             // computes the bounding boxes
-            final List<Object> boundingBoxList = new ArrayList<>();
+            final List<Savable> boundingBoxList = new ArrayList<>();
             int validFloorIndex = 0;
             for (final AbsoluteVolumeParameters[][] floorVolumeElements : volumeElementsList)
                 if (floorVolumeElements != null) {
@@ -505,9 +505,8 @@ public class GameFilesGenerator {
                                                 && cuboidParam.getOrientation(Side.FRONT) == Orientation.OUTWARDS
                                                 && cuboidParam.getOrientation(Side.BACK) == Orientation.OUTWARDS
                                                 && cuboidParam.getOrientation(Side.LEFT) == Orientation.OUTWARDS
-                                                && cuboidParam.getOrientation(Side.RIGHT) == Orientation.OUTWARDS) {// marks
-                                                                                                                    // this
-                                                                                                                    // cell
+                                                && cuboidParam.getOrientation(Side.RIGHT) == Orientation.OUTWARDS) {
+                                            // marks this cell
                                             collisionMap[x][z] = Boolean.TRUE;
                                         }
                                     }
@@ -515,14 +514,14 @@ public class GameFilesGenerator {
                         }
                     final java.util.Map<Vector2i, Boolean[][]> fullArrayMap = new ArrayHelper()
                             .computeFullArraysFromNonFullArray(collisionMap);
-                    final List<?> floorBoundingBoxList = new VolumeHelper(seeker)
+                    final List<BoundingBox> floorBoundingBoxList = new VolumeHelper()
                             .computeBoundingBoxListFromFullArrayMap(fullArrayMap, validFloorIndex, validFloorIndex + 1,
                                     false, false);
                     boundingBoxList.addAll(floorBoundingBoxList);
                     validFloorIndex++;
                 }
             // writes the bounding boxes of the level into the collision file
-            success = seeker.writeSavableInstancesListIntoFile(boundingBoxList, destCollisionFile);
+            success = EngineServiceProvider.getInstance().writeSavableInstancesListIntoFile(boundingBoxList, destCollisionFile);
             if (success) {
                 System.out.println("[INFO] Export into the file " + destCollisionFile.getName() + " successful");
                 System.out
@@ -572,13 +571,8 @@ public class GameFilesGenerator {
         // aligns each line of verticesIndicesOfAdjacentMergeableFaces on a 1D
         // array
         for (int faceIndex = 0; faceIndex < verticesIndicesOfAdjacentMergeableFaces.length; faceIndex++)
-            if (verticesIndicesOfAdjacentMergeableFaces[faceIndex] != null) {// computes
-                                                                             // the
-                                                                             // count
-                                                                             // of
-                                                                             // indices
-                                                                             // per
-                                                                             // face
+            if (verticesIndicesOfAdjacentMergeableFaces[faceIndex] != null) {
+                // computes the count of indices per face
                 indicesPerFaceCount = 0;
                 for (int triangleIndex = 0; triangleIndex < verticesIndicesOfAdjacentMergeableFaces[faceIndex].length; triangleIndex++)
                     if (verticesIndicesOfAdjacentMergeableFaces[faceIndex][triangleIndex] != null)

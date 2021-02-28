@@ -33,7 +33,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import common.EngineServiceProviderInterface;
 
 /**
  * Panel that allows to manipulate the entities in a tree containing their
@@ -52,8 +51,6 @@ public abstract class EntityManager extends JPanel {
 
     protected final MainWindow mainWindow;
 
-    protected final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker;
-
     protected final ProgressDialog progressDialog;
 
     protected final JTree tree;
@@ -70,11 +67,9 @@ public abstract class EntityManager extends JPanel {
 
     protected final JMenuItem deleteMenuItem;
 
-    public EntityManager(final MainWindow mainWindow, final DefaultTreeModel treeModel,
-            final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
+    public EntityManager(final MainWindow mainWindow, final DefaultTreeModel treeModel) {
         super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.seeker = seeker;
         this.mainWindow = mainWindow;
         this.progressDialog = new ProgressDialog(mainWindow.getApplicativeFrame(), "Work in progress...");
         this.quitEnabled = true;
@@ -210,9 +205,5 @@ public abstract class EntityManager extends JPanel {
         // prevents the user from collapsing the root
         if (event.getPath().getLastPathComponent() == tree.getModel().getRoot())
             throw new ExpandVetoException(event);
-    }
-
-    public EngineServiceProviderInterface getSeeker() {
-        return (seeker);
     }
 }

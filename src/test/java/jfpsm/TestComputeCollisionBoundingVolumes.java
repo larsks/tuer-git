@@ -19,16 +19,16 @@ package jfpsm;
 
 import java.net.URL;
 import java.util.List;
-import java.util.ServiceLoader;
 import jfpsm.ArrayHelper.OccupancyMap;
 import jfpsm.ArrayHelper.Vector2i;
+
+import com.ardor3d.bounding.BoundingBox;
 import com.ardor3d.image.Image;
 import com.ardor3d.image.util.ImageLoaderUtil;
 import com.ardor3d.image.util.ImageUtils;
 import com.ardor3d.image.util.jogl.JoglImageLoader;
 import com.ardor3d.math.ColorRGBA;
 import com.ardor3d.util.resource.URLResourceSource;
-import common.EngineServiceProviderInterface;
 
 public class TestComputeCollisionBoundingVolumes {
 
@@ -99,9 +99,7 @@ public class TestComputeCollisionBoundingVolumes {
         System.out.println("End. Duration: " + durationInMilliseconds + " ms");
 
         // computes the bounding boxes
-        final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker = ServiceLoader
-                .load(EngineServiceProviderInterface.class).iterator().next();
-        List<?> boundingBoxList = new VolumeHelper(seeker).computeBoundingBoxListFromFullArrayMap(fullArrayMap, 0, 1,
+        List<BoundingBox> boundingBoxList = new VolumeHelper().computeBoundingBoxListFromFullArrayMap(fullArrayMap, 0, 1,
                 false, false);
         System.out.println("Bounding boxes: " + boundingBoxList.size());
     }
