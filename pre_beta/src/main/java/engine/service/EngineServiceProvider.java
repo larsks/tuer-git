@@ -52,7 +52,6 @@ import com.ardor3d.util.export.binary.BinaryOutputCapsule;
 import com.ardor3d.util.geom.GeometryTool;
 import com.ardor3d.util.resource.URLResourceSource;
 
-import common.EngineServiceProviderInterface;
 import common.ModelFileFormat;
 
 /**
@@ -63,8 +62,15 @@ import common.ModelFileFormat;
  * @author Julien Gouesse
  *
  */
-public class EngineServiceProvider
-        implements EngineServiceProviderInterface<Savable, Node, Spatial, Mesh, BoundingBox> {
+public class EngineServiceProvider {
+    
+    private static class LazyHolder {
+        static final EngineServiceProvider INSTANCE = new EngineServiceProvider();
+    }
+    
+    public static EngineServiceProvider getInstance() {
+        return LazyHolder.INSTANCE;
+    }
 
     public static final class DirectBinaryExporter extends BinaryExporter {
         @Override
@@ -95,13 +101,12 @@ public class EngineServiceProvider
 
     private final BinaryExporter binaryExporter;
 
-    public EngineServiceProvider() {
+    private EngineServiceProvider() {
         super();
         this.binaryExporter = new DirectBinaryExporter();
         JoglImageLoader.registerLoader();
     }
 
-    @Override
     public boolean writeSavableInstanceIntoFile(final Savable savable, final File file) {
         boolean success = true;
         try {
@@ -110,10 +115,9 @@ public class EngineServiceProvider
             success = false;
             ioe.printStackTrace();
         }
-        return (success);
+        return success;
     }
 
-    @Override
     public boolean writeSavableInstancesListIntoFile(final List<Savable> savablesList, final File file) {
         boolean success = true;
         try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -130,20 +134,17 @@ public class EngineServiceProvider
             success = false;
             t.printStackTrace();
         }
-        return (success);
+        return success;
     }
 
-    @Override
     public void attachChildToNode(final Node parent, final Spatial child) {
         parent.attachChild(child);
     }
 
-    @Override
     public Node createNode(final String name) {
-        return (new Node(name));
+        return new Node(name);
     }
 
-    @Override
     public Mesh createMeshFromBuffers(final String name, final FloatBuffer vertexBuffer, final IntBuffer indexBuffer,
             final FloatBuffer normalBuffer, final FloatBuffer texCoordBuffer) {
         MeshData meshData = new MeshData();
@@ -156,7 +157,6 @@ public class EngineServiceProvider
         return (mesh);
     }
 
-    @Override
     public void attachTextureToSpatial(final Spatial spatial, final URL url) {
         TextureState ts = new TextureState();
         ts.setEnabled(true);
@@ -164,13 +164,11 @@ public class EngineServiceProvider
         spatial.setRenderState(ts);
     }
 
-    @Override
     public BoundingBox createBoundingBox(final double xCenter, final double yCenter, final double zCenter,
             final double xExtent, final double yExtent, final double zExtent) {
         return (new BoundingBox(new Vector3(xCenter, yCenter, zCenter), xExtent, yExtent, zExtent));
     }
 
-    @Override
     public boolean isLoadable(final ModelFileFormat inputModelFileFormat) {
         switch (inputModelFileFormat) {
         case ARDOR3D_BINARY:
@@ -190,7 +188,6 @@ public class EngineServiceProvider
         }
     }
 
-    @Override
     public boolean isSavable(final ModelFileFormat outputModelFileFormat) {
         switch (outputModelFileFormat) {
         case ARDOR3D_BINARY:
@@ -202,7 +199,6 @@ public class EngineServiceProvider
         }
     }
 
-    @Override
     public Spatial load(final File inputModelFile, final ModelFileFormat inputModelFileFormat)
             throws IOException, UnsupportedOperationException {
         final Spatial convertible;
@@ -236,7 +232,6 @@ public class EngineServiceProvider
         return (convertible);
     }
 
-    @Override
     public void save(final File outputModelFile, final ModelFileFormat outputModelFileFormat,
             final File secondaryOutputModelFile, final Spatial convertible)
             throws IOException, UnsupportedOperationException {

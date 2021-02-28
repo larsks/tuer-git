@@ -20,7 +20,10 @@ package jfpsm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import common.EngineServiceProviderInterface;
+
+import com.ardor3d.bounding.BoundingBox;
+
+import engine.service.EngineServiceProvider;
 import jfpsm.ArrayHelper.Vector2i;
 
 /**
@@ -31,11 +34,8 @@ import jfpsm.ArrayHelper.Vector2i;
  */
 public class VolumeHelper {
 
-    private final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker;
-
-    public VolumeHelper(final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
+    public VolumeHelper() {
         super();
-        this.seeker = seeker;
     }
 
     /**
@@ -55,10 +55,10 @@ public class VolumeHelper {
      *            layer has to be computed, otherwise <code>false</code>
      * @return list of 3D bounding boxes
      */
-    public <T> List<Object> computeBoundingBoxListFromFullArrayMap(final java.util.Map<Vector2i, T[][]> fullArrayMap,
+    public <T> List<BoundingBox> computeBoundingBoxListFromFullArrayMap(final java.util.Map<Vector2i, T[][]> fullArrayMap,
             final double z0, final double z1, final boolean generateFloorBoundingBox,
             final boolean generateCeilingBoundingBox) {
-        final List<Object> boundingBoxList = new ArrayList<>();
+        final List<BoundingBox> boundingBoxList = new ArrayList<>();
         final Vector2i zero = new Vector2i(0, 0);
         int smallestRowIndex = Integer.MAX_VALUE;
         int biggestRowIndex = Integer.MIN_VALUE;
@@ -100,7 +100,7 @@ public class VolumeHelper {
                     final double yCenter = (y0 + y1) / 2.0;
                     final double zCenter = (z0 + z1) / 2.0;
                     // bounding box
-                    final Object boundingBox = seeker.createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
+                    final BoundingBox boundingBox = EngineServiceProvider.getInstance().createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
                             zExtent);
                     // adds the bounding box into the list
                     boundingBoxList.add(boundingBox);
@@ -120,7 +120,7 @@ public class VolumeHelper {
                 final double xCenter = (x2 + x3) / 2.0;
                 final double yCenter = (y2 + y3) / 2.0;
                 final double zCenter = (z2 + z3) / 2.0;
-                final Object boundingBox = seeker.createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
+                final BoundingBox boundingBox = EngineServiceProvider.getInstance().createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
                         zExtent);
                 boundingBoxList.add(boundingBox);
             }
@@ -132,11 +132,11 @@ public class VolumeHelper {
                 final double xCenter = (x2 + x3) / 2.0;
                 final double yCenter = (y2 + y3) / 2.0;
                 final double zCenter = (z2 + z3) / 2.0;
-                final Object boundingBox = seeker.createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
+                final BoundingBox boundingBox = EngineServiceProvider.getInstance().createBoundingBox(xCenter, yCenter, zCenter, xExtent, yExtent,
                         zExtent);
                 boundingBoxList.add(boundingBox);
             }
         }
-        return (boundingBoxList);
+        return boundingBoxList;
     }
 }

@@ -24,9 +24,14 @@ package common;
  *
  */
 public enum ModelFileFormat {
-    ARDOR3D_BINARY("Ardor3D Binary", "abin", null), ARDOR3D_XML("Ardor3D XML", "axml", null), COLLADA("Collada", "dae",
-            null), MD2("MD2", "md2", null), MD3("MD3", "md3", null), PLY("PLY", "ply",
-                    null), STL("STL", "stl", null), WAVEFRONT_OBJ("WaveFront OBJ", "obj", "mtl");
+    ARDOR3D_BINARY("Ardor3D Binary", "abin", null), 
+    ARDOR3D_XML("Ardor3D XML", "axml", null), 
+    COLLADA("Collada", "dae", null), 
+    MD2("MD2", "md2", null), 
+    MD3("MD3", "md3", null), 
+    PLY("PLY", "ply", null), 
+    STL("STL", "stl", null), 
+    WAVEFRONT_OBJ("WaveFront OBJ", "obj", "mtl");
 
     private final String description;
 
@@ -41,20 +46,20 @@ public enum ModelFileFormat {
     }
 
     public final String getDescription() {
-        return (description);
+        return description;
     }
 
     public final String getExtension() {
-        return (extension);
+        return extension;
     }
 
     public final String getSecondaryExtension() {
-        return (secondaryExtension);
+        return secondaryExtension;
     }
 
     @Override
     public final String toString() {
-        return (getDescription());
+        return getDescription();
     }
 
     public static ModelFileFormat get(final String filePath) {
@@ -70,6 +75,6 @@ public enum ModelFileFormat {
                     }
             }
         }
-        return (modelFileFormat);
+        return modelFileFormat;
     }
 }

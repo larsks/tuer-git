@@ -244,7 +244,7 @@
 	<!-- Create JARs                                                       -->
 	<!-- ================================================================= -->
 	<target name="create-jars">
-		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,common/*.class,engine/service/EngineServiceProvider*.class,engine/service/I3DServiceProvider.class" compress="false">
+		<jar destfile="${destdir}/${editor-jar-filename}" basedir="${bindir}" includes="jfpsm/*.class,jfpsm/**/*.class,common/*.class,engine/service/EngineServiceProvider*.class" compress="false">
 			<!-- Fat JAR -->
 			<!-- JogAmp: Gluegen, JOAL, JOCL and JOGL -->
 			<zipfileset src="lib/jogamp/jogamp-fat.jar" includes="**/*.class,**/*.png,**/*.glsl,**/*.vp,**/*.fp,**/*.bvp,**/*.bfp,**/*.so,**/*.jnilib,**/*.dylib,**/*.dll,**/*.bin,**/*.defl" />
@@ -265,7 +265,6 @@
 			<include name="**/NOTICE.txt" />
 			<include name="**/README.txt" />
 			<include name="**/branding.properties" />
-			<include name="**/META-INF/services/*" />
 			<manifest>
 				<attribute name="Application-Name" value="${editor-long-name}" />
 				<attribute name="Main-Class" value="${editor-main-class}" />

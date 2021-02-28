@@ -48,7 +48,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import common.EngineServiceProviderInterface;
 
 /**
  * Panel that allows to manipulate the projects in a tree containing their
@@ -78,9 +77,9 @@ public final class ProjectManager extends EntityManager {
      * @param seeker
      *            3D service seeker used during the creation of the game files
      */
-    public ProjectManager(final MainWindow mainWindow, final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
-        super(mainWindow, new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))), seeker);
-        this.gameFilesGenerator = new GameFilesGenerator(seeker);
+    public ProjectManager(final MainWindow mainWindow) {
+        super(mainWindow, new DefaultTreeModel(new DefaultMutableTreeNode(new ProjectSet("Project Set"))));
+        this.gameFilesGenerator = new GameFilesGenerator();
         // fills the popup menu
         final JMenuItem renameMenuItem = new JMenuItem("Rename");
         final JMenuItem importMenuItem = new JMenuItem("Import");

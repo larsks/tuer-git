@@ -43,7 +43,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.ardor3d.scenegraph.Spatial;
+
 import common.ModelFileFormat;
+import engine.service.EngineServiceProvider;
 
 /**
  * Graphical user interface of the model converter
@@ -79,7 +83,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer {
         super(modelConverter, toolManager);
         final ArrayList<String> convertibleFileFormatsExtensions = new ArrayList<>();
         for (ModelFileFormat modelFileFormat : ModelFileFormat.values())
-            if (toolManager.getSeeker().isLoadable(modelFileFormat))
+            if (EngineServiceProvider.getInstance().isLoadable(modelFileFormat))
                 convertibleFileFormatsExtensions.add(modelFileFormat.getExtension());
         convertibleModelFileNameExtensionFilter = new FileNameExtensionFilter("Convertible models",
                 convertibleFileFormatsExtensions.toArray(new String[convertibleFileFormatsExtensions.size()]));
@@ -137,7 +141,7 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
         final ArrayList<ModelFileFormat> writableModelFileFormatsList = new ArrayList<>();
         for (ModelFileFormat modelFileFormat : ModelFileFormat.values())
-            if (toolManager.getSeeker().isSavable(modelFileFormat))
+            if (EngineServiceProvider.getInstance().isSavable(modelFileFormat))
                 writableModelFileFormatsList.add(modelFileFormat);
         convertedModelFormatCombobox = new JComboBox<>(
                 writableModelFileFormatsList.toArray(new ModelFileFormat[writableModelFileFormatsList.size()]));
@@ -362,10 +366,10 @@ public class ModelConverterViewer extends JFPSMToolUserObjectViewer {
         @Override
         protected Object doInBackground() throws Exception {
             try {
-                final Object convertible = toolManager.getSeeker().load(inputModelFile, inputModelFileFormat);
+                final Spatial convertible = EngineServiceProvider.getInstance().load(inputModelFile, inputModelFileFormat);
                 publish("Loading successful");
                 // FIXME call dialog.setValue(50) on the EDT
-                toolManager.getSeeker().save(outputModelFile, outputModelFileFormat, secondaryOutputModelFile,
+                EngineServiceProvider.getInstance().save(outputModelFile, outputModelFileFormat, secondaryOutputModelFile,
                         convertible);
                 publish("Conversion successful");
                 // FIXME call dialog.setValue(100) on the EDT

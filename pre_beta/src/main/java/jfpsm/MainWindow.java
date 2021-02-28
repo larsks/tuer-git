@@ -30,7 +30,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -39,8 +38,6 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-
-import common.EngineServiceProviderInterface;
 
 /**
  * main class of the application, it handles several components: the project
@@ -140,10 +137,10 @@ public final class MainWindow {
      * builds the weakest part of the application (some exceptions may be
      * thrown)
      */
-    public final void run(final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker) {
-        toolManager = new ToolManager(this, seeker);
+    public final void run() {
+        toolManager = new ToolManager(this);
         // builds the projects manager
-        projectManager = new ProjectManager(this, seeker);
+        projectManager = new ProjectManager(this);
         // builds the viewer
         entityViewer = new EntityViewer(projectManager, toolManager);
         JSplitPane leftSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, toolManager, projectManager);
@@ -224,11 +221,8 @@ public final class MainWindow {
         // goes wrong later
         MainWindow mainWindow = new MainWindow(new JFrame());
         // runs the application
-        // TODO supports several implementations
-        final EngineServiceProviderInterface<?, ?, ?, ?, ?> seeker = ServiceLoader
-                .load(EngineServiceProviderInterface.class).iterator().next();
         try {
-            mainWindow.run(seeker);
+            mainWindow.run();
         } catch (Throwable throwable) {// displays a popup to tell the user
                                        // something goes wrong
             mainWindow.displayErrorMessage(throwable, true);
