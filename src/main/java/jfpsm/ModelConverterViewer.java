@@ -46,8 +46,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.ardor3d.scenegraph.Spatial;
 
-import common.ModelFileFormat;
-import engine.service.EngineServiceProvider;
+import jfpsm.service.EngineServiceProvider;
 
 /**
  * Graphical user interface of the model converter
